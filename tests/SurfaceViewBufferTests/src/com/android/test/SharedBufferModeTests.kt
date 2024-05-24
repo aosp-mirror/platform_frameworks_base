@@ -17,7 +17,7 @@ package com.android.test
 
 import android.graphics.Color
 import android.graphics.Rect
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
+import android.tools.flicker.subject.layers.LayersTraceSubject
 import junit.framework.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith

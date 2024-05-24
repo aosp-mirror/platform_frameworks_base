@@ -180,7 +180,10 @@ static void AddAttributeFormatDoc(AnnotationProcessor* processor, Attribute* att
            << "<td>" << std::hex << symbol.value << std::dec << "</td>"
            << "<td>" << util::TrimWhitespace(symbol.symbol.GetComment())
            << "</td></tr>";
-      processor->AppendComment(line.str());
+      // add_api_annotations is false since we don't want any annotations
+      // (e.g., "@deprecated")/ found in the enum/flag values to be propagated
+      // up to the attribute.
+      processor->AppendComment(line.str(), /*add_api_annotations=*/false);
     }
     processor->AppendComment("</table>");
   }

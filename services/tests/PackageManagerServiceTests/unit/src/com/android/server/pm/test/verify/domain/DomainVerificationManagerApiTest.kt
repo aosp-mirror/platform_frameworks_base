@@ -18,6 +18,10 @@ package com.android.server.pm.test.verify.domain
 
 import android.content.Context
 import android.content.Intent
+import android.content.UriRelativeFilter
+import android.content.UriRelativeFilterGroup
+import android.content.UriRelativeFilterGroupParcel
+import android.content.pm.Flags
 import android.content.pm.PackageManager
 import android.content.pm.verify.domain.DomainOwner
 import android.content.pm.verify.domain.DomainVerificationInfo
@@ -25,8 +29,10 @@ import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.verify.domain.DomainVerificationUserState
 import android.content.pm.verify.domain.IDomainVerificationManager
 import android.os.Build
-import android.os.PatternMatcher
+import android.os.Bundle
+import android.os.PatternMatcher.PATTERN_LITERAL
 import android.os.Process
+import android.platform.test.annotations.RequiresFlagsEnabled
 import android.util.ArraySet
 import android.util.SparseArray
 import com.android.internal.pm.parsing.pkg.AndroidPackageInternal
@@ -66,6 +72,63 @@ class DomainVerificationManagerApiTest {
         private val DOMAIN_2 = "two.$DOMAIN_BASE"
         private val DOMAIN_3 = "three.$DOMAIN_BASE"
         private val DOMAIN_4 = "four.$DOMAIN_BASE"
+    }
+
+    @RequiresFlagsEnabled(Flags.FLAG_RELATIVE_REFERENCE_INTENT_FILTERS)
+    @Test
+    fun updateUriRelativeFilterGroups() {
+        val pkgWithDomains = mockPkgState(PKG_ONE, UUID_ONE, listOf(DOMAIN_1, DOMAIN_2))
+        val service = makeService(pkgWithDomains).apply {
+            addPackages(pkgWithDomains)
+        }
+
+        val bundle = service.getUriRelativeFilterGroups(PKG_ONE, listOf(DOMAIN_1, DOMAIN_2))
+        assertThat(bundle.keySet()).containsExactlyElementsIn(listOf(DOMAIN_1, DOMAIN_2))
+        assertThat(bundle.getParcelableArrayList(DOMAIN_1, UriRelativeFilterGroup::class.java))
+            .isEmpty()
+        assertThat(bundle.getParcelableArrayList(DOMAIN_2, UriRelativeFilterGroup::class.java))
+            .isEmpty()
+
+        val pathGroup = UriRelativeFilterGroup(UriRelativeFilterGroup.ACTION_ALLOW)
+        pathGroup.addUriRelativeFilter(
+            UriRelativeFilter(UriRelativeFilter.PATH, PATTERN_LITERAL, "path")
+        )
+        val queryGroup = UriRelativeFilterGroup(UriRelativeFilterGroup.ACTION_BLOCK)
+        queryGroup.addUriRelativeFilter(
+            UriRelativeFilter(UriRelativeFilter.QUERY, PATTERN_LITERAL, "query")
+        )
+        val fragmentGroup = UriRelativeFilterGroup(UriRelativeFilterGroup.ACTION_ALLOW)
+        fragmentGroup.addUriRelativeFilter(
+            UriRelativeFilter(UriRelativeFilter.FRAGMENT, PATTERN_LITERAL, "fragment")
+        )
+
+        assertGroups(service, arrayListOf(pathGroup))
+        assertGroups(service, arrayListOf(queryGroup, pathGroup))
+        assertGroups(service, arrayListOf(queryGroup, fragmentGroup, pathGroup))
+    }
+
+    private fun assertGroups(
+        service: DomainVerificationService,
+        groups: List<UriRelativeFilterGroup>
+    ) {
+        val bundle = Bundle()
+        bundle.putParcelableList(DOMAIN_1, UriRelativeFilterGroup.groupsToParcels(groups))
+        service.setUriRelativeFilterGroups(PKG_ONE, bundle)
+        val fetchedBundle = service.getUriRelativeFilterGroups(PKG_ONE, listOf(DOMAIN_1))
+        assertThat(fetchedBundle.keySet()).containsExactlyElementsIn(bundle.keySet())
+        assertThat(
+            UriRelativeFilterGroup.parcelsToGroups(
+                fetchedBundle.getParcelableArrayList(
+                    DOMAIN_1,
+                    UriRelativeFilterGroupParcel::class.java)
+            )
+        ).containsExactlyElementsIn(
+            UriRelativeFilterGroup.parcelsToGroups(
+                bundle.getParcelableArrayList(
+                    DOMAIN_1,
+                    UriRelativeFilterGroupParcel::class.java)
+            )
+        ).inOrder()
     }
 
     @Test
@@ -484,6 +547,7 @@ class DomainVerificationManagerApiTest {
         DomainVerificationService(mockThrowOnUnmocked {
             // Assume the test has every permission necessary
             whenever(enforcePermission(anyString(), anyInt(), anyInt(), anyString()))
+            whenever(enforceCallingOrSelfPermission(anyString(), anyString()))
             whenever(checkPermission(anyString(), anyInt(), anyInt())) {
                 PackageManager.PERMISSION_GRANTED
             }
@@ -539,7 +603,7 @@ class DomainVerificationManagerApiTest {
                                     addCategory(Intent.CATEGORY_DEFAULT)
                                     addDataScheme("http")
                                     addDataScheme("https")
-                                    addDataPath("/sub", PatternMatcher.PATTERN_LITERAL)
+                                    addDataPath("/sub", PATTERN_LITERAL)
                                     addDataAuthority(it, null)
                                 }
                             }
@@ -566,7 +630,7 @@ class DomainVerificationManagerApiTest {
     }
 
     private fun DomainVerificationService.addPackages(vararg pkgStates: PackageStateInternal) =
-        pkgStates.forEach(::addPackage)
+        pkgStates.forEach {pkg: PackageStateInternal -> addPackage(pkg, null)}
 
     private fun makeManager(service: DomainVerificationService, userId: Int) =
         DomainVerificationManager(

@@ -16,11 +16,15 @@
 
 package com.android.systemui.qs.tiles.impl.custom.data.repository
 
+import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo
 import android.graphics.drawable.Icon
 import android.os.UserHandle
 import android.service.quicksettings.Tile
+import android.service.quicksettings.TileService
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.qs.external.CustomTileStatePersister
+import com.android.systemui.qs.external.PackageManagerAdapter
 import com.android.systemui.qs.external.TileServiceKey
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.impl.custom.commons.copy
@@ -63,6 +67,12 @@ interface CustomTileRepository {
      */
     fun getTile(user: UserHandle): Tile?
 
+    /** @see [com.android.systemui.qs.external.TileLifecycleManager.isActiveTile] */
+    suspend fun isTileActive(): Boolean
+
+    /** @see [com.android.systemui.qs.external.TileLifecycleManager.isToggleableTile] */
+    suspend fun isTileToggleable(): Boolean
+
     /**
      * Updates tile with the non-null values from [newTile]. Overwrites the current cache when
      * [user] differs from the cached one. [isPersistable] tile will be persisted to be possibly
@@ -92,6 +102,7 @@ class CustomTileRepositoryImpl
 constructor(
     private val tileSpec: TileSpec.CustomTileSpec,
     private val customTileStatePersister: CustomTileStatePersister,
+    private val packageManagerAdapter: PackageManagerAdapter,
     @Background private val backgroundContext: CoroutineContext,
 ) : CustomTileRepository {
 
@@ -149,6 +160,34 @@ constructor(
         }
     }
 
+    override suspend fun isTileActive(): Boolean =
+        withContext(backgroundContext) {
+            try {
+                val info: ServiceInfo =
+                    packageManagerAdapter.getServiceInfo(
+                        tileSpec.componentName,
+                        META_DATA_QUERY_FLAGS
+                    )
+                info.metaData?.getBoolean(TileService.META_DATA_ACTIVE_TILE, false) == true
+            } catch (e: PackageManager.NameNotFoundException) {
+                false
+            }
+        }
+
+    override suspend fun isTileToggleable(): Boolean =
+        withContext(backgroundContext) {
+            try {
+                val info: ServiceInfo =
+                    packageManagerAdapter.getServiceInfo(
+                        tileSpec.componentName,
+                        META_DATA_QUERY_FLAGS
+                    )
+                info.metaData?.getBoolean(TileService.META_DATA_TOGGLEABLE_TILE, false) == true
+            } catch (e: PackageManager.NameNotFoundException) {
+                false
+            }
+        }
+
     private suspend fun updateTile(
         user: UserHandle,
         isPersistable: Boolean,
@@ -193,4 +232,12 @@ constructor(
     private fun UserHandle.getKey() = TileServiceKey(tileSpec.componentName, this.identifier)
 
     private data class TileWithUser(val user: UserHandle, val tile: Tile)
+
+    private companion object {
+        const val META_DATA_QUERY_FLAGS =
+            (PackageManager.GET_META_DATA or
+                PackageManager.MATCH_UNINSTALLED_PACKAGES or
+                PackageManager.MATCH_DIRECT_BOOT_UNAWARE or
+                PackageManager.MATCH_DIRECT_BOOT_AWARE)
+    }
 }

@@ -32,7 +32,7 @@ import static android.app.servertransaction.TransactionExecutorHelper.shouldExcl
 import static android.app.servertransaction.TransactionExecutorHelper.tId;
 import static android.app.servertransaction.TransactionExecutorHelper.transactionToString;
 
-import static com.android.window.flags.Flags.syncWindowConfigUpdateFlag;
+import static com.android.window.flags.Flags.bundleClientTransactionFlag;
 
 import android.annotation.NonNull;
 import android.app.ActivityThread.ActivityClientRecord;
@@ -40,7 +40,8 @@ import android.app.ClientTransactionHandler;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.IBinder;
-import android.os.Process;
+import android.os.Trace;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Slog;
@@ -62,8 +63,11 @@ public class TransactionExecutor {
     private final PendingTransactionActions mPendingActions = new PendingTransactionActions();
     private final TransactionExecutorHelper mHelper = new TransactionExecutorHelper();
 
-    /** Keeps track of display ids whose Configuration got updated within a transaction. */
-    private final ArraySet<Integer> mConfigUpdatedDisplayIds = new ArraySet<>();
+    /**
+     * Keeps track of the Context whose Configuration got updated within a transaction, mapping to
+     * the config before the transaction.
+     */
+    private final ArrayMap<Context, Configuration> mContextToPreChangedConfigMap = new ArrayMap<>();
 
     /** Initialize an instance with transaction handler, that will execute all requested actions. */
     public TransactionExecutor(@NonNull ClientTransactionHandler clientTransactionHandler) {
@@ -83,24 +87,52 @@ public class TransactionExecutor {
             Slog.d(TAG, transactionToString(transaction, mTransactionHandler));
         }
 
-        if (transaction.getTransactionItems() != null) {
-            executeTransactionItems(transaction);
-        } else {
-            // TODO(b/260873529): cleanup after launch.
-            executeCallbacks(transaction);
-            executeLifecycleState(transaction);
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "clientTransactionExecuted");
+        try {
+            if (transaction.getTransactionItems() != null) {
+                executeTransactionItems(transaction);
+            } else {
+                // TODO(b/260873529): cleanup after launch.
+                executeCallbacks(transaction);
+                executeLifecycleState(transaction);
+            }
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to execute the transaction: "
+                    + transactionToString(transaction, mTransactionHandler));
+            throw e;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
 
-        if (!mConfigUpdatedDisplayIds.isEmpty()) {
+        if (!mContextToPreChangedConfigMap.isEmpty()) {
             // Whether this transaction should trigger DisplayListener#onDisplayChanged.
-            final ClientTransactionListenerController controller =
-                    ClientTransactionListenerController.getInstance();
-            final int displayCount = mConfigUpdatedDisplayIds.size();
-            for (int i = 0; i < displayCount; i++) {
-                final int displayId = mConfigUpdatedDisplayIds.valueAt(i);
-                controller.onDisplayChanged(displayId);
+            try {
+                // Calculate display ids that have config changed.
+                final ArraySet<Integer> configUpdatedDisplayIds = new ArraySet<>();
+                final int contextCount = mContextToPreChangedConfigMap.size();
+                for (int i = 0; i < contextCount; i++) {
+                    final Context context = mContextToPreChangedConfigMap.keyAt(i);
+                    final Configuration preTransactionConfig =
+                            mContextToPreChangedConfigMap.valueAt(i);
+                    final Configuration postTransactionConfig = context.getResources()
+                            .getConfiguration();
+                    if (!areConfigurationsEqualForDisplay(
+                            postTransactionConfig, preTransactionConfig)) {
+                        configUpdatedDisplayIds.add(context.getDisplayId());
+                    }
+                }
+
+                // Dispatch the display changed callbacks.
+                final ClientTransactionListenerController controller =
+                        ClientTransactionListenerController.getInstance();
+                final int displayCount = configUpdatedDisplayIds.size();
+                for (int i = 0; i < displayCount; i++) {
+                    final int displayId = configUpdatedDisplayIds.valueAt(i);
+                    controller.onDisplayChanged(displayId);
+                }
+            } finally {
+                mContextToPreChangedConfigMap.clear();
             }
-            mConfigUpdatedDisplayIds.clear();
         }
 
         mPendingActions.clear();
@@ -182,25 +214,21 @@ public class TransactionExecutor {
             }
         }
 
-        // Can't read flag from isolated process.
-        final boolean isSyncWindowConfigUpdateFlagEnabled = !Process.isIsolated()
-                && syncWindowConfigUpdateFlag();
-        final Context configUpdatedContext = isSyncWindowConfigUpdateFlagEnabled
+        final boolean shouldTrackConfigUpdatedContext =
+                // No configuration change for local transaction.
+                !mTransactionHandler.isExecutingLocalTransaction()
+                        && bundleClientTransactionFlag();
+        final Context configUpdatedContext = shouldTrackConfigUpdatedContext
                 ? item.getContextToUpdate(mTransactionHandler)
                 : null;
-        final Configuration preExecutedConfig = configUpdatedContext != null
-                ? new Configuration(configUpdatedContext.getResources().getConfiguration())
-                : null;
+        if (configUpdatedContext != null
+                && !mContextToPreChangedConfigMap.containsKey(configUpdatedContext)) {
+            // Keep track of the first pre-executed config of each changed Context.
+            mContextToPreChangedConfigMap.put(configUpdatedContext,
+                    new Configuration(configUpdatedContext.getResources().getConfiguration()));
+        }
 
         item.execute(mTransactionHandler, mPendingActions);
-
-        if (configUpdatedContext != null) {
-            final Configuration postExecutedConfig = configUpdatedContext.getResources()
-                    .getConfiguration();
-            if (!areConfigurationsEqualForDisplay(postExecutedConfig, preExecutedConfig)) {
-                mConfigUpdatedDisplayIds.add(configUpdatedContext.getDisplayId());
-            }
-        }
 
         item.postExecute(mTransactionHandler, mPendingActions);
         if (r == null) {
@@ -297,7 +325,7 @@ public class TransactionExecutor {
                     break;
                 case ON_START:
                     mTransactionHandler.handleStartActivity(r, mPendingActions,
-                            null /* activityOptions */);
+                            null /* sceneTransitionInfo */);
                     break;
                 case ON_RESUME:
                     mTransactionHandler.handleResumeActivity(r, false /* finalStateRequest */,

@@ -23,16 +23,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
 import com.android.systemui.Dumpable
-import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.StatusBarState.SHADE
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.util.ViewController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.PrintWriter
 
@@ -49,9 +48,10 @@ import java.io.PrintWriter
 abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
     view: T,
     protected val statusBarStateController: StatusBarStateController,
-    protected val primaryBouncerInteractor: PrimaryBouncerInteractor,
+    protected val shadeInteractor: ShadeInteractor,
     protected val dialogManager: SystemUIDialogManager,
-    private val dumpManager: DumpManager
+    private val dumpManager: DumpManager,
+    private val udfpsOverlayInteractor: UdfpsOverlayInteractor,
 ) : ViewController<T>(view), Dumpable {
 
     protected abstract val tag: String
@@ -94,20 +94,18 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
             // can make the view not visible; and we still want to listen for events
             // that may make the view visible again.
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                listenForBouncerExpansion(this)
+                listenForShadeExpansion(this)
             }
         }
     }
 
     @VisibleForTesting
-    open suspend fun listenForBouncerExpansion(scope: CoroutineScope): Job {
+    suspend fun listenForShadeExpansion(scope: CoroutineScope): Job {
         return scope.launch {
-            primaryBouncerInteractor.bouncerExpansion.map { 1f - it }.collect { expansion: Float ->
-                if (statusBarStateController.state != SHADE) {
-                    notificationShadeVisible = expansion > 0f
-                    view.onExpansionChanged(expansion)
-                    updatePauseAuth()
-                }
+            shadeInteractor.anyExpansion.collect { expansion ->
+                notificationShadeVisible = expansion > 0f
+                view.onExpansionChanged(expansion)
+                updatePauseAuth()
             }
         }
     }
@@ -134,11 +132,13 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
     override fun onViewAttached() {
         dialogManager.registerListener(dialogListener)
         dumpManager.registerDumpable(dumpTag, this)
+        udfpsOverlayInteractor.setHandleTouches(shouldHandle = !shouldPauseAuth())
     }
 
     override fun onViewDetached() {
         dialogManager.unregisterListener(dialogListener)
         dumpManager.unregisterDumpable(dumpTag)
+        udfpsOverlayInteractor.setHandleTouches(shouldHandle = !shouldPauseAuth())
     }
 
     /**
@@ -169,6 +169,7 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
     fun updatePauseAuth() {
         if (view.setPauseAuth(shouldPauseAuth())) {
             view.postInvalidate()
+            udfpsOverlayInteractor.setHandleTouches(shouldHandle = !shouldPauseAuth())
         }
     }
 

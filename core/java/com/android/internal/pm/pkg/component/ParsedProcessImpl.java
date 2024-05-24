@@ -54,6 +54,8 @@ public class ParsedProcessImpl implements ParsedProcess, Parcelable {
     @ApplicationInfo.NativeHeapZeroInitialized
     private int nativeHeapZeroInitialized = ApplicationInfo.ZEROINIT_DEFAULT;
 
+    private boolean useEmbeddedDex;
+
     public ParsedProcessImpl() {
     }
 
@@ -65,6 +67,7 @@ public class ParsedProcessImpl implements ParsedProcess, Parcelable {
         gwpAsanMode = other.getGwpAsanMode();
         memtagMode = other.getMemtagMode();
         nativeHeapZeroInitialized = other.getNativeHeapZeroInitialized();
+        useEmbeddedDex = other.isUseEmbeddedDex();
     }
 
     public void addStateFrom(@NonNull ParsedProcess other) {
@@ -72,6 +75,7 @@ public class ParsedProcessImpl implements ParsedProcess, Parcelable {
         gwpAsanMode = other.getGwpAsanMode();
         memtagMode = other.getMemtagMode();
         nativeHeapZeroInitialized = other.getNativeHeapZeroInitialized();
+        useEmbeddedDex = other.isUseEmbeddedDex();
 
         final ArrayMap<String, String> oacn = other.getAppClassNamesByPackage();
         for (int i = 0; i < oacn.size(); i++) {
@@ -115,7 +119,8 @@ public class ParsedProcessImpl implements ParsedProcess, Parcelable {
             @NonNull Set<String> deniedPermissions,
             @ApplicationInfo.GwpAsanMode int gwpAsanMode,
             @ApplicationInfo.MemtagMode int memtagMode,
-            @ApplicationInfo.NativeHeapZeroInitialized int nativeHeapZeroInitialized) {
+            @ApplicationInfo.NativeHeapZeroInitialized int nativeHeapZeroInitialized,
+            boolean useEmbeddedDex) {
         this.name = name;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, name);
@@ -134,6 +139,7 @@ public class ParsedProcessImpl implements ParsedProcess, Parcelable {
         this.nativeHeapZeroInitialized = nativeHeapZeroInitialized;
         com.android.internal.util.AnnotationValidations.validate(
                 ApplicationInfo.NativeHeapZeroInitialized.class, null, nativeHeapZeroInitialized);
+        this.useEmbeddedDex = useEmbeddedDex;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -169,6 +175,11 @@ public class ParsedProcessImpl implements ParsedProcess, Parcelable {
     @DataClass.Generated.Member
     public @ApplicationInfo.NativeHeapZeroInitialized int getNativeHeapZeroInitialized() {
         return nativeHeapZeroInitialized;
+    }
+
+    @DataClass.Generated.Member
+    public boolean isUseEmbeddedDex() {
+        return useEmbeddedDex;
     }
 
     @DataClass.Generated.Member
@@ -223,6 +234,12 @@ public class ParsedProcessImpl implements ParsedProcess, Parcelable {
     }
 
     @DataClass.Generated.Member
+    public @NonNull ParsedProcessImpl setUseEmbeddedDex( boolean value) {
+        useEmbeddedDex = value;
+        return this;
+    }
+
+    @DataClass.Generated.Member
     static Parcelling<Set<String>> sParcellingForDeniedPermissions =
             Parcelling.Cache.get(
                     Parcelling.BuiltIn.ForInternedStringSet.class);
@@ -239,6 +256,9 @@ public class ParsedProcessImpl implements ParsedProcess, Parcelable {
         // You can override field parcelling by defining methods like:
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
+        byte flg = 0;
+        if (useEmbeddedDex) flg |= 0x40;
+        dest.writeByte(flg);
         dest.writeString(name);
         dest.writeMap(appClassNamesByPackage);
         sParcellingForDeniedPermissions.parcel(deniedPermissions, dest, flags);
@@ -258,6 +278,8 @@ public class ParsedProcessImpl implements ParsedProcess, Parcelable {
         // You can override field unparcelling by defining methods like:
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
+        byte flg = in.readByte();
+        boolean _useEmbeddedDex = (flg & 0x40) != 0;
         String _name = in.readString();
         ArrayMap<String,String> _appClassNamesByPackage = new ArrayMap();
         in.readMap(_appClassNamesByPackage, String.class.getClassLoader());
@@ -284,6 +306,7 @@ public class ParsedProcessImpl implements ParsedProcess, Parcelable {
         this.nativeHeapZeroInitialized = _nativeHeapZeroInitialized;
         com.android.internal.util.AnnotationValidations.validate(
                 ApplicationInfo.NativeHeapZeroInitialized.class, null, nativeHeapZeroInitialized);
+        this.useEmbeddedDex = _useEmbeddedDex;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -303,10 +326,10 @@ public class ParsedProcessImpl implements ParsedProcess, Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1701445656489L,
+            time = 1706177189475L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/com/android/internal/pm/pkg/component/ParsedProcessImpl.java",
-            inputSignatures = "private @android.annotation.NonNull java.lang.String name\nprivate @android.annotation.NonNull android.util.ArrayMap<java.lang.String,java.lang.String> appClassNamesByPackage\nprivate @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedStringSet.class) java.util.Set<java.lang.String> deniedPermissions\nprivate @android.content.pm.ApplicationInfo.GwpAsanMode int gwpAsanMode\nprivate @android.content.pm.ApplicationInfo.MemtagMode int memtagMode\nprivate @android.content.pm.ApplicationInfo.NativeHeapZeroInitialized int nativeHeapZeroInitialized\npublic  void addStateFrom(com.android.internal.pm.pkg.component.ParsedProcess)\npublic  void putAppClassNameForPackage(java.lang.String,java.lang.String)\nclass ParsedProcessImpl extends java.lang.Object implements [com.android.internal.pm.pkg.component.ParsedProcess, android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genParcelable=true, genAidl=false, genBuilder=false)")
+            inputSignatures = "private @android.annotation.NonNull java.lang.String name\nprivate @android.annotation.NonNull android.util.ArrayMap<java.lang.String,java.lang.String> appClassNamesByPackage\nprivate @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedStringSet.class) java.util.Set<java.lang.String> deniedPermissions\nprivate @android.content.pm.ApplicationInfo.GwpAsanMode int gwpAsanMode\nprivate @android.content.pm.ApplicationInfo.MemtagMode int memtagMode\nprivate @android.content.pm.ApplicationInfo.NativeHeapZeroInitialized int nativeHeapZeroInitialized\nprivate  boolean useEmbeddedDex\npublic  void addStateFrom(com.android.internal.pm.pkg.component.ParsedProcess)\npublic  void putAppClassNameForPackage(java.lang.String,java.lang.String)\nclass ParsedProcessImpl extends java.lang.Object implements [com.android.internal.pm.pkg.component.ParsedProcess, android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genParcelable=true, genAidl=false, genBuilder=false)")
     @Deprecated
     private void __metadata() {}
 

@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.pipeline.domain.interactor
 
+import android.platform.test.annotations.EnabledOnRavenwood
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -25,6 +26,7 @@ import com.android.systemui.qs.pipeline.data.repository.FakeAutoAddRepository
 import com.android.systemui.qs.pipeline.domain.autoaddable.FakeAutoAddable
 import com.android.systemui.qs.pipeline.domain.model.AutoAddTracking
 import com.android.systemui.qs.pipeline.domain.model.AutoAddable
+import com.android.systemui.qs.pipeline.domain.model.TileModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
 import com.android.systemui.util.mockito.any
@@ -46,6 +48,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class AutoAddInteractorTest : SysuiTestCase() {
@@ -63,6 +66,7 @@ class AutoAddInteractorTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         whenever(currentTilesInteractor.userId).thenReturn(MutableStateFlow(USER))
+        whenever(currentTilesInteractor.currentTiles).thenReturn(MutableStateFlow(emptyList()))
     }
 
     @Test
@@ -197,6 +201,45 @@ class AutoAddInteractorTest : SysuiTestCase() {
 
             verify(currentTilesInteractor, never()).removeTiles(any())
             assertThat(autoAddedTiles).doesNotContain(SPEC)
+        }
+
+    @Test
+    fun autoAddable_trackIfNotAdded_currentTile_markedAsAdded() =
+        testScope.runTest {
+            val fakeTile = FakeQSTile(USER).apply { tileSpec = SPEC.spec }
+            val fakeCurrentTileModel = TileModel(SPEC, fakeTile)
+            whenever(currentTilesInteractor.currentTiles)
+                .thenReturn(MutableStateFlow(listOf(fakeCurrentTileModel)))
+
+            val autoAddedTiles by collectLastValue(autoAddRepository.autoAddedTiles(USER))
+            val fakeAutoAddable = FakeAutoAddable(SPEC, AutoAddTracking.IfNotAdded(SPEC))
+
+            underTest = createInteractor(setOf(fakeAutoAddable))
+            runCurrent()
+
+            assertThat(autoAddedTiles).contains(SPEC)
+        }
+
+    @Test
+    fun autoAddable_trackIfNotAdded_tileAddedToCurrentTiles_markedAsAdded() =
+        testScope.runTest {
+            val fakeTile = FakeQSTile(USER).apply { tileSpec = SPEC.spec }
+            val fakeCurrentTileModel = TileModel(SPEC, fakeTile)
+            val currentTilesFlow = MutableStateFlow(emptyList<TileModel>())
+
+            whenever(currentTilesInteractor.currentTiles).thenReturn(currentTilesFlow)
+
+            val autoAddedTiles by collectLastValue(autoAddRepository.autoAddedTiles(USER))
+            val fakeAutoAddable = FakeAutoAddable(SPEC, AutoAddTracking.IfNotAdded(SPEC))
+
+            underTest = createInteractor(setOf(fakeAutoAddable))
+            runCurrent()
+
+            assertThat(autoAddedTiles).doesNotContain(SPEC)
+
+            currentTilesFlow.value = listOf(fakeCurrentTileModel)
+
+            assertThat(autoAddedTiles).contains(SPEC)
         }
 
     private fun createInteractor(autoAddables: Set<AutoAddable>): AutoAddInteractor {

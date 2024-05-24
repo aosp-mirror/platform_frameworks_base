@@ -16,6 +16,7 @@
 
 package com.android.server.vibrator;
 
+import static android.os.VibrationAttributes.USAGE_RINGTONE;
 import static android.os.VibrationEffect.VibrationParameter.targetAmplitude;
 import static android.os.VibrationEffect.VibrationParameter.targetFrequency;
 
@@ -54,12 +55,16 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.test.TestLooper;
+import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
@@ -81,6 +86,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
@@ -95,6 +101,9 @@ public class VibrationThreadTest {
     private static final int TEST_RAMP_STEP_DURATION = 5;
 
     @Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Mock private PackageManagerInternal mPackageManagerInternalMock;
     @Mock private VibrationThread.VibratorManagerHooks mManagerHooks;
@@ -104,6 +113,7 @@ public class VibrationThreadTest {
 
     private final Map<Integer, FakeVibratorControllerProvider> mVibratorProviders = new HashMap<>();
     private VibrationSettings mVibrationSettings;
+    private VibrationScaler mVibrationScaler;
     private TestLooper mTestLooper;
     private TestLooperAutoDispatcher mCustomTestLooperDispatcher;
     private VibrationThread mThread;
@@ -132,6 +142,7 @@ public class VibrationThreadTest {
         Context context = InstrumentationRegistry.getContext();
         mVibrationSettings = new VibrationSettings(context, new Handler(mTestLooper.getLooper()),
                 mVibrationConfigMock);
+        mVibrationScaler = new VibrationScaler(context, mVibrationSettings);
 
         mockVibrators(VIBRATOR_ID);
 
@@ -227,6 +238,45 @@ public class VibrationThreadTest {
         assertEquals(Arrays.asList(expectedOneShot(15)),
                 mVibratorProviders.get(VIBRATOR_ID).getEffectSegments(vibrationId));
         assertEquals(expectedAmplitudes(1, 2, 3),
+                mVibratorProviders.get(VIBRATOR_ID).getAmplitudes());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
+    public void vibrate_singleWaveformWithAdaptiveHapticsScaling_scalesAmplitudesProperly() {
+        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                new long[]{5, 5, 5}, new int[]{1, 1, 1}, -1);
+        CompletableFuture<Void> mRequestVibrationParamsFuture = CompletableFuture.runAsync(() -> {
+            mVibrationScaler.updateAdaptiveHapticsScale(USAGE_RINGTONE, 0.5f);
+        });
+        long vibrationId = startThreadAndDispatcher(effect, mRequestVibrationParamsFuture,
+                USAGE_RINGTONE);
+        waitForCompletion();
+
+        assertEquals(Arrays.asList(expectedOneShot(15)),
+                mVibratorProviders.get(VIBRATOR_ID).getEffectSegments(vibrationId));
+        List<Float> amplitudes = mVibratorProviders.get(VIBRATOR_ID).getAmplitudes();
+        for (int i = 0; i < amplitudes.size(); i++) {
+            assertTrue(amplitudes.get(i) < 1 / 255f);
+        }
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
+    public void vibrate_withVibrationParamsRequestStalling_timeoutRequestAndApplyNoScaling() {
+        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                new long[]{5, 5, 5}, new int[]{1, 1, 1}, -1);
+
+        CompletableFuture<Void> neverCompletingFuture = new CompletableFuture<>();
+        long vibrationId = startThreadAndDispatcher(effect, neverCompletingFuture, USAGE_RINGTONE);
+        waitForCompletion();
+
+        assertEquals(Arrays.asList(expectedOneShot(15)),
+                mVibratorProviders.get(VIBRATOR_ID).getEffectSegments(vibrationId));
+        assertEquals(expectedAmplitudes(1, 1, 1),
                 mVibratorProviders.get(VIBRATOR_ID).getAmplitudes());
     }
 
@@ -1610,10 +1660,26 @@ public class VibrationThreadTest {
     }
 
     private long startThreadAndDispatcher(HalVibration vib) {
+        return startThreadAndDispatcher(vib, /* requestVibrationParamsFuture= */ null);
+    }
+
+    private long startThreadAndDispatcher(VibrationEffect effect,
+            CompletableFuture<Void> requestVibrationParamsFuture, int usage) {
+        VibrationAttributes attrs = new VibrationAttributes.Builder()
+                .setUsage(usage)
+                .build();
+        HalVibration vib = new HalVibration(mVibrationToken,
+                CombinedVibration.createParallel(effect),
+                new Vibration.CallerInfo(attrs, UID, DEVICE_ID, PACKAGE_NAME, "reason"));
+        return startThreadAndDispatcher(vib, requestVibrationParamsFuture);
+    }
+
+    private long startThreadAndDispatcher(HalVibration vib,
+            CompletableFuture<Void> requestVibrationParamsFuture) {
         mControllers = createVibratorControllers();
         DeviceAdapter deviceAdapter = new DeviceAdapter(mVibrationSettings, mControllers);
-        mVibrationConductor =
-                new VibrationStepConductor(vib, mVibrationSettings, deviceAdapter, mManagerHooks);
+        mVibrationConductor = new VibrationStepConductor(vib, mVibrationSettings, deviceAdapter,
+                mVibrationScaler, requestVibrationParamsFuture, mManagerHooks);
         assertTrue(mThread.runVibrationOnVibrationThread(mVibrationConductor));
         return mVibrationConductor.getVibration().id;
     }

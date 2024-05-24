@@ -15,7 +15,7 @@
   ~
   -->
 
-<FrameLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:sysui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/alternate_bouncer"
@@ -32,4 +32,24 @@
         android:importantForAccessibility="no"
         sysui:ignoreRightInset="true"
     />
-</FrameLayout>
+    <!-- Keyguard messages -->
+    <LinearLayout
+        android:id="@+id/alternate_bouncer_message_area_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/status_bar_height"
+        android:layout_gravity="top|center_horizontal"
+        android:gravity="center_horizontal">
+        <com.android.keyguard.AuthKeyguardMessageArea
+            android:id="@+id/alternate_bouncer_message_area"
+            style="@style/Keyguard.TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/keyguard_lock_padding"
+            android:gravity="center"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:focusable="true"/>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

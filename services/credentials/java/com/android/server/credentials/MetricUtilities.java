@@ -426,7 +426,11 @@ public class MetricUtilities {
                     /* per_classtype_counts */
                     initialPhaseMetric.getUniqueRequestCounts(),
                     /* origin_specified */
-                    initialPhaseMetric.isOriginSpecified()
+                    initialPhaseMetric.isOriginSpecified(),
+                    /* autofill_session_id */
+                    initialPhaseMetric.getAutofillSessionId(),
+                    /* autofill_request_id */
+                    initialPhaseMetric.getAutofillRequestId()
             );
         } catch (Exception e) {
             Slog.w(TAG, "Unexpected error during initial metric emit: " + e);
@@ -527,7 +531,7 @@ public class MetricUtilities {
             int index = 0;
             for (CandidateBrowsingPhaseMetric metric : browsingPhaseMetrics) {
                 browsedClickedEntries[index] = metric.getEntryEnum();
-                browsedProviderUid[index] = metric.getProviderUid();
+                browsedProviderUid[index] = DEFAULT_INT_32;
                 index++;
             }
             FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_FINALNOUID_REPORTED,

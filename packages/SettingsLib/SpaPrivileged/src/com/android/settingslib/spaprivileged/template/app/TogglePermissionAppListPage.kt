@@ -150,15 +150,13 @@ internal class TogglePermissionInternalAppListModel<T : AppRecord>(
 
     @Composable
     fun getSummary(record: T): () -> String {
-        val restrictions = remember(record.app.userId,
-                record.app.uid, record.app.packageName) {
+        val restrictions = remember(record.app.userId, record.app.packageName) {
             Restrictions(
                 userId = record.app.userId,
                 keys = listModel.switchRestrictionKeys,
                 enhancedConfirmation = listModel.enhancedConfirmationKey?.let {
                     EnhancedConfirmation(
                         key = it,
-                        uid = record.app.uid,
                         packageName = record.app.packageName)
                 })
         }

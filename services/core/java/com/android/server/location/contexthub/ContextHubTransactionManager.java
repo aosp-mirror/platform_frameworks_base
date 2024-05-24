@@ -19,6 +19,7 @@ package com.android.server.location.contexthub;
 import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.IContextHubTransactionCallback;
 import android.hardware.location.NanoAppBinary;
+import android.hardware.location.NanoAppMessage;
 import android.hardware.location.NanoAppState;
 import android.os.RemoteException;
 import android.util.Log;
@@ -74,6 +75,11 @@ import java.util.concurrent.atomic.AtomicInteger;
      * The next available transaction ID
      */
     private final AtomicInteger mNextAvailableId = new AtomicInteger();
+
+    /**
+     * The next available message sequence number
+     */
+    private final AtomicInteger mNextAvailableMessageSequenceNumber = new AtomicInteger();
 
     /*
      * An executor and the future object for scheduling timeout timers
@@ -309,6 +315,47 @@ import java.util.concurrent.atomic.AtomicInteger;
     }
 
     /**
+     * Creates a transaction to send a reliable message.
+     *
+     * @param hostEndpointId      The ID of the host endpoint sending the message.
+     * @param contextHubId        The ID of the hub to send the message to.
+     * @param message             The message to send.
+     * @param transactionCallback The callback of the transactions.
+     * @param packageName         The host package associated with this transaction.
+     * @return The generated transaction.
+     */
+    /* package */ ContextHubServiceTransaction createMessageTransaction(
+            short hostEndpointId, int contextHubId, NanoAppMessage message,
+            IContextHubTransactionCallback transactionCallback, String packageName) {
+        return new ContextHubServiceTransaction(mNextAvailableId.getAndIncrement(),
+                ContextHubTransaction.TYPE_RELIABLE_MESSAGE, packageName,
+                mNextAvailableMessageSequenceNumber.getAndIncrement()) {
+            @Override
+            /* package */ int onTransact() {
+                try {
+                    message.setIsReliable(/* isReliable= */ true);
+                    message.setMessageSequenceNumber(getMessageSequenceNumber());
+
+                    return mContextHubProxy.sendMessageToContextHub(hostEndpointId, contextHubId,
+                            message);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException while trying to send a reliable message", e);
+                    return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+                }
+            }
+
+            @Override
+            /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
+                try {
+                    transactionCallback.onTransactionComplete(result);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException while calling client onTransactionComplete", e);
+                }
+            }
+        };
+    }
+
+    /**
      * Creates a transaction for querying for a list of nanoapps.
      *
      * @param contextHubId       the ID of the hub to query
@@ -389,6 +436,30 @@ import java.util.concurrent.atomic.AtomicInteger;
         if (transaction.getTransactionId() != transactionId) {
             Log.w(TAG, "Received unexpected transaction response (expected ID = "
                     + transaction.getTransactionId() + ", received ID = " + transactionId + ")");
+            return;
+        }
+
+        transaction.onTransactionComplete(success ? ContextHubTransaction.RESULT_SUCCESS :
+                        ContextHubTransaction.RESULT_FAILED_AT_HUB);
+        removeTransactionAndStartNext();
+    }
+
+    /* package */
+    synchronized void onMessageDeliveryResponse(int messageSequenceNumber, boolean success) {
+        ContextHubServiceTransaction transaction = mTransactionQueue.peek();
+        if (transaction == null) {
+            Log.w(TAG, "Received unexpected transaction response (no transaction pending)");
+            return;
+        }
+
+        Integer transactionMessageSequenceNumber = transaction.getMessageSequenceNumber();
+        if (transaction.getTransactionType() != ContextHubTransaction.TYPE_RELIABLE_MESSAGE
+                || transactionMessageSequenceNumber == null
+                || transactionMessageSequenceNumber != messageSequenceNumber) {
+            Log.w(TAG, "Received unexpected message transaction response (expected message "
+                    + "sequence number = "
+                    + transaction.getMessageSequenceNumber()
+                    + ", received messageSequenceNumber = " + messageSequenceNumber + ")");
             return;
         }
 
@@ -481,10 +552,10 @@ import java.util.concurrent.atomic.AtomicInteger;
                     }
                 };
 
-                long timeoutSeconds = transaction.getTimeout(TimeUnit.SECONDS);
+                long timeoutMs = transaction.getTimeout(TimeUnit.MILLISECONDS);
                 try {
-                    mTimeoutFuture = mTimeoutExecutor.schedule(onTimeoutFunc, timeoutSeconds,
-                        TimeUnit.SECONDS);
+                    mTimeoutFuture = mTimeoutExecutor.schedule(
+                            onTimeoutFunc, timeoutMs, TimeUnit.MILLISECONDS);
                 } catch (Exception e) {
                     Log.e(TAG, "Error when schedule a timer", e);
                 }

@@ -75,7 +75,7 @@ public class TaskContainerTest {
         final Configuration configuration = new Configuration();
 
         assertEquals(WINDOWING_MODE_MULTI_WINDOW,
-                taskContainer.getWindowingModeForSplitTaskFragment(splitBounds));
+                taskContainer.getWindowingModeForTaskFragment(splitBounds));
 
         configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(configuration,
@@ -83,7 +83,7 @@ public class TaskContainerTest {
                 null /* decorSurface */));
 
         assertEquals(WINDOWING_MODE_MULTI_WINDOW,
-                taskContainer.getWindowingModeForSplitTaskFragment(splitBounds));
+                taskContainer.getWindowingModeForTaskFragment(splitBounds));
 
         configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
         taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(configuration,
@@ -91,12 +91,12 @@ public class TaskContainerTest {
                 null /* decorSurface */));
 
         assertEquals(WINDOWING_MODE_FREEFORM,
-                taskContainer.getWindowingModeForSplitTaskFragment(splitBounds));
+                taskContainer.getWindowingModeForTaskFragment(splitBounds));
 
         // Empty bounds means the split pair are stacked, so it should be UNDEFINED which will then
         // inherit the Task windowing mode
         assertEquals(WINDOWING_MODE_UNDEFINED,
-                taskContainer.getWindowingModeForSplitTaskFragment(new Rect()));
+                taskContainer.getWindowingModeForTaskFragment(new Rect()));
     }
 
     @Test

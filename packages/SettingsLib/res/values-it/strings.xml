@@ -154,6 +154,7 @@
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"Sistema di imaging"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Cuffie"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Periferica di immissione"</string>
+    <string name="bluetooth_talkback_hearing_aids" msgid="3983279945542595479">"Apparecchi acustici"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi non attivo."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Rete Wi-Fi scollegata."</string>
@@ -455,6 +456,8 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"La correzione del colore può essere utile quando vuoi:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Vedere i colori con più precisione&lt;/li&gt; &lt;li&gt;&amp;nbsp;Rimuovere i colori per mettere meglio a fuoco&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Valore sostituito da <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - Ricarica in sospeso per proteggere la batteria"</string>
+    <string name="power_incompatible_charging_settings_home_page" msgid="1322050766135126880">"<xliff:g id="LEVEL">%1$s</xliff:g> - Controlla l\'accessorio di ricarica"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Tempo rimanente: <xliff:g id="TIME_REMAINING">%1$s</xliff:g> circa"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"Tempo rimanente: <xliff:g id="TIME_REMAINING">%1$s</xliff:g> circa (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"Tempo rimanente in base al tuo utilizzo: <xliff:g id="TIME_REMAINING">%1$s</xliff:g> circa"</string>
@@ -475,7 +478,7 @@
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> alla ricarica completa"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> alla ricarica completa"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Ricarica ottimizzata"</string>
-    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - Ricarica ottimizzata"</string>
+    <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> ‑ In carica"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Sconosciuta"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"In carica"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Ricarica veloce"</string>
@@ -483,9 +486,10 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"In carica, wireless"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"In carica"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Non in carica"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Dispositivo connesso, non in carica"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Connesso, ma non in carica"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Carica"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Batteria completamente carica"</string>
+    <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Ricarica in sospeso"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Gestita dall\'amministratore"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Gestita tramite impostazioni con restrizioni"</string>
     <string name="disabled" msgid="8017887509554714950">"Disattivato"</string>
@@ -527,7 +531,7 @@
     <string name="next" msgid="2699398661093607009">"Avanti"</string>
     <string name="back" msgid="5554327870352703710">"Indietro"</string>
     <string name="save" msgid="3745809743277153149">"Salva"</string>
-    <string name="okay" msgid="949938843324579502">"OK"</string>
+    <string name="okay" msgid="949938843324579502">"Ok"</string>
     <string name="done" msgid="381184316122520313">"Fine"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Sveglie e promemoria"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Consenti l\'impostazione di sveglie e promemoria"</string>
@@ -547,9 +551,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Chiedi ogni volta"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Fino alla disattivazione"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Adesso"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Questo smartphone"</string>
-    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Questo tablet"</string>
-    <!-- no translation found for media_transfer_this_device_name (8899776297775466649) -->
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Questo smartphone"</string>
+    <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Questo tablet"</string>
+    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Base con altoparlante"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo esterno"</string>
@@ -615,6 +619,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Creazione nuovo utente non riuscita"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Impossibile creare un nuovo ospite"</string>
     <string name="user_nickname" msgid="262624187455825083">"Nickname"</string>
+    <string name="edit_user_info_message" msgid="5199468585059260053">"Il tuo nome e la tua foto saranno visibili a chiunque usi questo dispositivo."</string>
     <string name="user_add_user" msgid="7876449291500212468">"Aggiungi utente"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Aggiungi ospite"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Rimuovi ospite"</string>

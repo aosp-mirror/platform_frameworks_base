@@ -31,6 +31,8 @@ import android.view.View
 import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO
 import android.view.accessibility.AccessibilityManager
 import android.widget.Button
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
@@ -39,6 +41,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieCompositionFactory
+import com.android.systemui.Flags.constraintBp
 import com.android.systemui.biometrics.AuthPanelController
 import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
@@ -68,15 +71,22 @@ object BiometricViewBinder {
     @SuppressLint("ClickableViewAccessibility")
     @JvmStatic
     fun bind(
-        view: BiometricPromptLayout,
+        view: View,
         viewModel: PromptViewModel,
-        panelViewController: AuthPanelController,
+        panelViewController: AuthPanelController?,
         jankListener: BiometricJankListener,
         backgroundView: View,
         legacyCallback: Spaghetti.Callback,
         applicationScope: CoroutineScope,
         vibratorHelper: VibratorHelper,
     ): Spaghetti {
+        /**
+         * View is only set visible in BiometricViewSizeBinder once PromptSize is determined that
+         * accounts for iconView size, to prevent prompt resizing being visible to the user.
+         *
+         * TODO(b/288175072): May be able to remove this once constraint layout is implemented
+         */
+        view.visibility = View.INVISIBLE
         val accessibilityManager = view.context.getSystemService(AccessibilityManager::class.java)!!
 
         val textColorError =
@@ -84,11 +94,19 @@ object BiometricViewBinder {
         val textColorHint =
             view.resources.getColor(R.color.biometric_dialog_gray, view.context.theme)
 
+        val logoView = view.requireViewById<ImageView>(R.id.logo)
+        val logoDescriptionView = view.requireViewById<TextView>(R.id.logo_description)
         val titleView = view.requireViewById<TextView>(R.id.title)
         val subtitleView = view.requireViewById<TextView>(R.id.subtitle)
         val descriptionView = view.requireViewById<TextView>(R.id.description)
+        val customizedViewContainer =
+            view.requireViewById<LinearLayout>(R.id.customized_view_container)
 
         // set selected to enable marquee unless a screen reader is enabled
+        logoView.isSelected =
+            !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
+        logoDescriptionView.isSelected =
+            !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
         titleView.isSelected =
             !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
         subtitleView.isSelected =
@@ -98,12 +116,12 @@ object BiometricViewBinder {
         val iconOverlayView = view.requireViewById<LottieAnimationView>(R.id.biometric_icon_overlay)
         val iconView = view.requireViewById<LottieAnimationView>(R.id.biometric_icon)
 
-        PromptIconViewBinder.bind(
-            iconView,
-            iconOverlayView,
-            view.getUpdatedFingerprintAffordanceSize(),
-            viewModel.iconViewModel
-        )
+        val iconSizeOverride =
+            if (constraintBp()) {
+                null
+            } else {
+                (view as BiometricPromptLayout).updatedFingerprintAffordanceSize
+            }
 
         val indicatorMessageView = view.requireViewById<TextView>(R.id.indicator)
 
@@ -131,6 +149,7 @@ object BiometricViewBinder {
         view.repeatWhenAttached {
             // these do not change and need to be set before any size transitions
             val modalities = viewModel.modalities.first()
+
             if (modalities.hasFingerprint) {
                 /**
                  * Load the given [rawResources] immediately so they are cached for use in the
@@ -142,9 +161,16 @@ object BiometricViewBinder {
                 }
             }
 
+            logoView.setImageDrawable(viewModel.logo.first())
+            logoDescriptionView.text = viewModel.logoDescription.first()
             titleView.text = viewModel.title.first()
-            descriptionView.text = viewModel.description.first()
             subtitleView.text = viewModel.subtitle.first()
+            descriptionView.text = viewModel.description.first()
+            BiometricCustomizedViewBinder.bind(
+                customizedViewContainer,
+                view.requireViewById(R.id.space_above_content),
+                viewModel
+            )
 
             // set button listeners
             negativeButton.setOnClickListener { legacyCallback.onButtonNegative() }
@@ -168,15 +194,21 @@ object BiometricViewBinder {
                     viewModel = viewModel,
                     viewsToHideWhenSmall =
                         listOf(
+                            logoView,
+                            logoDescriptionView,
                             titleView,
                             subtitleView,
                             descriptionView,
+                            customizedViewContainer,
                         ),
                     viewsToFadeInOnSizeChange =
                         listOf(
+                            logoView,
+                            logoDescriptionView,
                             titleView,
                             subtitleView,
                             descriptionView,
+                            customizedViewContainer,
                             indicatorMessageView,
                             negativeButton,
                             cancelButton,
@@ -187,6 +219,19 @@ object BiometricViewBinder {
                     panelViewController = panelViewController,
                     jankListener = jankListener,
                 )
+            }
+
+            lifecycleScope.launch {
+                viewModel.showBpWithoutIconForCredential.collect {
+                    if (!it) {
+                        PromptIconViewBinder.bind(
+                            iconView,
+                            iconOverlayView,
+                            iconSizeOverride,
+                            viewModel,
+                        )
+                    }
+                }
             }
 
             // TODO(b/251476085): migrate legacy icon controllers and remove
@@ -394,9 +439,20 @@ object BiometricViewBinder {
 
                 // Play haptics
                 launch {
-                    viewModel.hapticsToPlay.collect { hapticFeedbackConstant ->
-                        if (hapticFeedbackConstant != HapticFeedbackConstants.NO_HAPTICS) {
-                            vibratorHelper.performHapticFeedback(view, hapticFeedbackConstant)
+                    viewModel.hapticsToPlay.collect { haptics ->
+                        if (haptics.hapticFeedbackConstant != HapticFeedbackConstants.NO_HAPTICS) {
+                            if (haptics.flag != null) {
+                                vibratorHelper.performHapticFeedback(
+                                    view,
+                                    haptics.hapticFeedbackConstant,
+                                    haptics.flag,
+                                )
+                            } else {
+                                vibratorHelper.performHapticFeedback(
+                                    view,
+                                    haptics.hapticFeedbackConstant,
+                                )
+                            }
                             viewModel.clearHaptics()
                         }
                     }
@@ -595,6 +651,8 @@ class Spaghetti(
     }
 
     fun isCoex() = modalities.hasFaceAndFingerprint
+
+    fun isFaceOnly() = modalities.hasFaceOnly
 
     fun asView() = view
 }

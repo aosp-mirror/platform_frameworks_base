@@ -610,6 +610,9 @@ message GlobalSettingsProto {
     // ringer mode.
     optional SettingProto mode_ringer = 75 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
+    // This is an optional feature where ringer mode affects alarm stream as well
+    optional SettingProto mute_alarm_stream_with_ringer_mode = 160 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     reserved 147; // Used to be apply_ramping_ringer
 
     message MultiSim {
@@ -720,6 +723,7 @@ message GlobalSettingsProto {
         // encoded as a key=value list separated by commas.
         optional SettingProto smart_suggestions_in_notifications_flags = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto bubbles = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto disable_screen_share_protections_for_apps_and_notifications = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Notification notification = 82;
 
@@ -1086,5 +1090,5 @@ message GlobalSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 160;
+    // Next tag = 161;
 }

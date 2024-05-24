@@ -16,19 +16,20 @@
 
 package com.android.server.soundtrigger;
 
+import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.ConfidenceLevel;
 import android.hardware.soundtrigger.SoundTrigger.Keyphrase;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionEvent;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionEvent;
-import android.hardware.soundtrigger.SoundTrigger;
 import android.media.AudioFormat;
+import android.os.Binder;
 import android.os.Parcel;
 import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.os.Binder;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.SmallTest;
 
 import java.util.Arrays;
 import java.util.Locale;

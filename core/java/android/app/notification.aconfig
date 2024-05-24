@@ -37,3 +37,34 @@ flag {
   description: "Guards the security fix that ensures all URIs in intents and Person.java are valid"
   bug: "281044385"
 }
+
+flag {
+  name: "keyguard_private_notifications"
+  namespace: "systemui"
+  description: "Fixes the behavior of KeyguardManager#setPrivateNotificationsAllowed()"
+  bug: "309920145"
+}
+
+flag {
+  name: "category_voicemail"
+  namespace: "wear_sysui"
+  description: "Adds a new voicemail category for notifications"
+  bug: "322806700"
+}
+
+flag {
+  name: "notification_channel_vibration_effect_api"
+  namespace: "systemui"
+  description: "This flag enables the API to allow setting VibrationEffect for NotificationChannels"
+  bug: "241732519"
+}
+
+flag {
+  name: "evenly_divided_call_style_action_layout"
+  namespace: "systemui"
+  description: "Evenly divides horizontal space for action buttons in CallStyle notifications."
+  bug: "268733030"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

@@ -38,25 +38,30 @@ constructor(
         user: UserHandle,
         triggers: Flow<DataUpdateTrigger>
     ): Flow<FlashlightTileModel> = conflatedCallbackFlow {
-        val initialValue = flashlightController.isEnabled
-        trySend(FlashlightTileModel(initialValue))
-
         val callback =
             object : FlashlightController.FlashlightListener {
                 override fun onFlashlightChanged(enabled: Boolean) {
-                    trySend(FlashlightTileModel(enabled))
+                    trySend(FlashlightTileModel.FlashlightAvailable(enabled))
                 }
                 override fun onFlashlightError() {
-                    trySend(FlashlightTileModel(false))
+                    trySend(FlashlightTileModel.FlashlightAvailable(false))
                 }
                 override fun onFlashlightAvailabilityChanged(available: Boolean) {
-                    trySend(FlashlightTileModel(flashlightController.isEnabled))
+                    trySend(
+                        if (available)
+                            FlashlightTileModel.FlashlightAvailable(flashlightController.isEnabled)
+                        else FlashlightTileModel.FlashlightTemporarilyUnavailable
+                    )
                 }
             }
         flashlightController.addCallback(callback)
         awaitClose { flashlightController.removeCallback(callback) }
     }
 
+    /**
+     * Used to determine if the tile should be displayed. Not to be confused with the availability
+     * in the data model above. This flow signals whether the tile should be shown or hidden.
+     */
     override fun availability(user: UserHandle): Flow<Boolean> =
         flowOf(flashlightController.hasFlashlight())
 }

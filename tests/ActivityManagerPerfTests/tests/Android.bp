@@ -30,6 +30,12 @@ android_test {
         "ActivityManagerPerfTestsUtils",
         "collector-device-lib-platform",
     ],
+    data: [
+        ":ActivityManagerPerfTestsTestApp",
+        ":ActivityManagerPerfTestsStubApp1",
+        ":ActivityManagerPerfTestsStubApp2",
+        ":ActivityManagerPerfTestsStubApp3",
+    ],
     platform_apis: true,
     min_sdk_version: "25",
     // For android.permission.FORCE_STOP_PACKAGES permission

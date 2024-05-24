@@ -113,14 +113,16 @@ public class BiometricFrameworkStatsLogger {
 
     /** {@see FrameworkStatsLog.BIOMETRIC_ENROLLED}. */
     public void enroll(int statsModality, int statsAction, int statsClient,
-            int targetUserId, long latency, boolean enrollSuccessful, float ambientLightLux) {
+            int targetUserId, long latency, boolean enrollSuccessful, float ambientLightLux,
+            int source) {
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ENROLLED,
                 statsModality,
                 targetUserId,
                 sanitizeLatency(latency),
                 enrollSuccessful,
                 -1, /* sensorId */
-                ambientLightLux);
+                ambientLightLux,
+                source);
     }
 
     /** {@see FrameworkStatsLog.BIOMETRIC_ERROR_OCCURRED}. */
@@ -237,6 +239,12 @@ public class BiometricFrameworkStatsLogger {
                 statsModality,
                 BiometricsProtoEnums.ISSUE_UNKNOWN_TEMPLATE_ENROLLED_FRAMEWORK,
                 -1 /* sensorId */);
+    }
+
+    /** {@see FrameworkStatsLog.BIOMETRIC_FRR_NOTIFICATION}. */
+    public void logFrameworkNotification(int action, int modality) {
+        FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_FRR_NOTIFICATION,
+                action, modality);
     }
 
     private long sanitizeLatency(long latency) {

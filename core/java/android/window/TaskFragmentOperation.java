@@ -120,6 +120,21 @@ public final class TaskFragmentOperation implements Parcelable {
      */
     public static final int OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE = 15;
 
+    /**
+     * Applies dimming on the parent Task which could cross two TaskFragments.
+     */
+    public static final int OP_TYPE_SET_DIM_ON_TASK = 16;
+
+    /**
+     * Sets this TaskFragment to move to bottom of the Task if any of the activities below it is
+     * launched in a mode requiring clear top.
+     *
+     * This is only allowed for system organizers. See
+     * {@link com.android.server.wm.TaskFragmentOrganizerController#registerOrganizer(
+     * ITaskFragmentOrganizer, boolean)}
+     */
+    public static final int OP_TYPE_SET_MOVE_TO_BOTTOM_IF_CLEAR_WHEN_LAUNCH = 17;
+
     @IntDef(prefix = { "OP_TYPE_" }, value = {
             OP_TYPE_UNKNOWN,
             OP_TYPE_CREATE_TASK_FRAGMENT,
@@ -138,6 +153,8 @@ public final class TaskFragmentOperation implements Parcelable {
             OP_TYPE_REORDER_TO_TOP_OF_TASK,
             OP_TYPE_CREATE_TASK_FRAGMENT_DECOR_SURFACE,
             OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE,
+            OP_TYPE_SET_DIM_ON_TASK,
+            OP_TYPE_SET_MOVE_TO_BOTTOM_IF_CLEAR_WHEN_LAUNCH,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface OperationType {}
@@ -165,12 +182,16 @@ public final class TaskFragmentOperation implements Parcelable {
 
     private final boolean mIsolatedNav;
 
+    private final boolean mDimOnTask;
+
+    private final boolean mMoveToBottomIfClearWhenLaunch;
+
     private TaskFragmentOperation(@OperationType int opType,
             @Nullable TaskFragmentCreationParams taskFragmentCreationParams,
             @Nullable IBinder activityToken, @Nullable Intent activityIntent,
             @Nullable Bundle bundle, @Nullable IBinder secondaryFragmentToken,
             @Nullable TaskFragmentAnimationParams animationParams,
-            boolean isolatedNav) {
+            boolean isolatedNav, boolean dimOnTask, boolean moveToBottomIfClearWhenLaunch) {
         mOpType = opType;
         mTaskFragmentCreationParams = taskFragmentCreationParams;
         mActivityToken = activityToken;
@@ -179,6 +200,8 @@ public final class TaskFragmentOperation implements Parcelable {
         mSecondaryFragmentToken = secondaryFragmentToken;
         mAnimationParams = animationParams;
         mIsolatedNav = isolatedNav;
+        mDimOnTask = dimOnTask;
+        mMoveToBottomIfClearWhenLaunch = moveToBottomIfClearWhenLaunch;
     }
 
     private TaskFragmentOperation(Parcel in) {
@@ -190,6 +213,8 @@ public final class TaskFragmentOperation implements Parcelable {
         mSecondaryFragmentToken = in.readStrongBinder();
         mAnimationParams = in.readTypedObject(TaskFragmentAnimationParams.CREATOR);
         mIsolatedNav = in.readBoolean();
+        mDimOnTask = in.readBoolean();
+        mMoveToBottomIfClearWhenLaunch = in.readBoolean();
     }
 
     @Override
@@ -202,6 +227,8 @@ public final class TaskFragmentOperation implements Parcelable {
         dest.writeStrongBinder(mSecondaryFragmentToken);
         dest.writeTypedObject(mAnimationParams, flags);
         dest.writeBoolean(mIsolatedNav);
+        dest.writeBoolean(mDimOnTask);
+        dest.writeBoolean(mMoveToBottomIfClearWhenLaunch);
     }
 
     @NonNull
@@ -282,6 +309,21 @@ public final class TaskFragmentOperation implements Parcelable {
         return mIsolatedNav;
     }
 
+    /**
+     * Returns whether the dim layer should apply on the parent Task.
+     */
+    public boolean isDimOnTask() {
+        return mDimOnTask;
+    }
+
+    /**
+     * Returns whether the TaskFragment should move to bottom of task when any activity below it
+     * is launched in clear top mode.
+     */
+    public boolean isMoveToBottomIfClearWhenLaunch() {
+        return mMoveToBottomIfClearWhenLaunch;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
@@ -305,6 +347,8 @@ public final class TaskFragmentOperation implements Parcelable {
             sb.append(", animationParams=").append(mAnimationParams);
         }
         sb.append(", isolatedNav=").append(mIsolatedNav);
+        sb.append(", dimOnTask=").append(mDimOnTask);
+        sb.append(", moveToBottomIfClearWhenLaunch=").append(mMoveToBottomIfClearWhenLaunch);
 
         sb.append('}');
         return sb.toString();
@@ -313,7 +357,8 @@ public final class TaskFragmentOperation implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mOpType, mTaskFragmentCreationParams, mActivityToken, mActivityIntent,
-                mBundle, mSecondaryFragmentToken, mAnimationParams, mIsolatedNav);
+                mBundle, mSecondaryFragmentToken, mAnimationParams, mIsolatedNav, mDimOnTask,
+                mMoveToBottomIfClearWhenLaunch);
     }
 
     @Override
@@ -329,7 +374,9 @@ public final class TaskFragmentOperation implements Parcelable {
                 && Objects.equals(mBundle, other.mBundle)
                 && Objects.equals(mSecondaryFragmentToken, other.mSecondaryFragmentToken)
                 && Objects.equals(mAnimationParams, other.mAnimationParams)
-                && mIsolatedNav == other.mIsolatedNav;
+                && mIsolatedNav == other.mIsolatedNav
+                && mDimOnTask == other.mDimOnTask
+                && mMoveToBottomIfClearWhenLaunch == other.mMoveToBottomIfClearWhenLaunch;
     }
 
     @Override
@@ -362,6 +409,10 @@ public final class TaskFragmentOperation implements Parcelable {
         private TaskFragmentAnimationParams mAnimationParams;
 
         private boolean mIsolatedNav;
+
+        private boolean mDimOnTask;
+
+        private boolean mMoveToBottomIfClearWhenLaunch;
 
         /**
          * @param opType the {@link OperationType} of this {@link TaskFragmentOperation}.
@@ -435,13 +486,32 @@ public final class TaskFragmentOperation implements Parcelable {
         }
 
         /**
+         * Sets the dimming to apply on the parent Task if any.
+         */
+        @NonNull
+        public Builder setDimOnTask(boolean dimOnTask) {
+            mDimOnTask = dimOnTask;
+            return this;
+        }
+
+        /**
+         * Sets whether the TaskFragment should move to bottom of task when any activity below it
+         * is launched in clear top mode.
+         */
+        @NonNull
+        public Builder setMoveToBottomIfClearWhenLaunch(boolean moveToBottomIfClearWhenLaunch) {
+            mMoveToBottomIfClearWhenLaunch = moveToBottomIfClearWhenLaunch;
+            return this;
+        }
+
+        /**
          * Constructs the {@link TaskFragmentOperation}.
          */
         @NonNull
         public TaskFragmentOperation build() {
             return new TaskFragmentOperation(mOpType, mTaskFragmentCreationParams, mActivityToken,
                     mActivityIntent, mBundle, mSecondaryFragmentToken, mAnimationParams,
-                    mIsolatedNav);
+                    mIsolatedNav, mDimOnTask, mMoveToBottomIfClearWhenLaunch);
         }
     }
 }

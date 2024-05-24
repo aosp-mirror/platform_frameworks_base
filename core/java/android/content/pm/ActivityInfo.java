@@ -16,13 +16,13 @@
 
 package android.content.pm;
 
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.Activity;
-import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledSince;
@@ -36,12 +36,12 @@ import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Printer;
 import android.window.OnBackInvokedCallback;
 
 import com.android.internal.util.Parcelling;
+import com.android.window.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -237,6 +237,110 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      */
     @Nullable
     public String requiredDisplayCategory;
+
+    /**
+     * Constant corresponding to {@code none} in the
+     * {@link android.R.attr#requireContentUriPermissionFromCaller} attribute.
+     * @hide
+     */
+    public static final int CONTENT_URI_PERMISSION_NONE = 0;
+
+    /**
+     * Constant corresponding to {@code read} in the
+     * {@link android.R.attr#requireContentUriPermissionFromCaller} attribute.
+     * @hide
+     */
+    public static final int CONTENT_URI_PERMISSION_READ = 1;
+
+    /**
+     * Constant corresponding to {@code write} in the
+     * {@link android.R.attr#requireContentUriPermissionFromCaller} attribute.
+     * @hide
+     */
+    public static final int CONTENT_URI_PERMISSION_WRITE = 2;
+
+    /**
+     * Constant corresponding to {@code readOrWrite} in the
+     * {@link android.R.attr#requireContentUriPermissionFromCaller} attribute.
+     * @hide
+     */
+    public static final int CONTENT_URI_PERMISSION_READ_OR_WRITE = 3;
+
+    /**
+     * Constant corresponding to {@code readAndWrite} in the
+     * {@link android.R.attr#requireContentUriPermissionFromCaller} attribute.
+     * @hide
+     */
+    public static final int CONTENT_URI_PERMISSION_READ_AND_WRITE = 4;
+
+    /** @hide */
+    @SuppressWarnings("SwitchIntDef")
+    public static boolean isRequiredContentUriPermissionRead(
+            @RequiredContentUriPermission int permission) {
+        return switch (permission) {
+            case CONTENT_URI_PERMISSION_READ_AND_WRITE, CONTENT_URI_PERMISSION_READ_OR_WRITE,
+                    CONTENT_URI_PERMISSION_READ -> true;
+            default -> false;
+        };
+    }
+
+    /** @hide */
+    @SuppressWarnings("SwitchIntDef")
+    public static boolean isRequiredContentUriPermissionWrite(
+            @RequiredContentUriPermission int permission) {
+        return switch (permission) {
+            case CONTENT_URI_PERMISSION_READ_AND_WRITE, CONTENT_URI_PERMISSION_READ_OR_WRITE,
+                    CONTENT_URI_PERMISSION_WRITE -> true;
+            default -> false;
+        };
+    }
+
+    /** @hide */
+    @IntDef(prefix = "CONTENT_URI_PERMISSION_", value = {
+            CONTENT_URI_PERMISSION_NONE,
+            CONTENT_URI_PERMISSION_READ,
+            CONTENT_URI_PERMISSION_WRITE,
+            CONTENT_URI_PERMISSION_READ_OR_WRITE,
+            CONTENT_URI_PERMISSION_READ_AND_WRITE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RequiredContentUriPermission {
+    }
+
+    private String requiredContentUriPermissionToFullString(
+            @RequiredContentUriPermission int permission) {
+        return switch (permission) {
+            case CONTENT_URI_PERMISSION_NONE -> "CONTENT_URI_PERMISSION_NONE";
+            case CONTENT_URI_PERMISSION_READ -> "CONTENT_URI_PERMISSION_READ";
+            case CONTENT_URI_PERMISSION_WRITE -> "CONTENT_URI_PERMISSION_WRITE";
+            case CONTENT_URI_PERMISSION_READ_OR_WRITE -> "CONTENT_URI_PERMISSION_READ_OR_WRITE";
+            case CONTENT_URI_PERMISSION_READ_AND_WRITE -> "CONTENT_URI_PERMISSION_READ_AND_WRITE";
+            default -> "unknown=" + permission;
+        };
+    }
+
+    /** @hide */
+    public static String requiredContentUriPermissionToShortString(
+            @RequiredContentUriPermission int permission) {
+        return switch (permission) {
+            case CONTENT_URI_PERMISSION_NONE -> "none";
+            case CONTENT_URI_PERMISSION_READ -> "read";
+            case CONTENT_URI_PERMISSION_WRITE -> "write";
+            case CONTENT_URI_PERMISSION_READ_OR_WRITE -> "read or write";
+            case CONTENT_URI_PERMISSION_READ_AND_WRITE -> "read and write";
+            default -> "unknown=" + permission;
+        };
+    }
+
+    /**
+     * Specifies permissions necessary to launch this activity via
+     * {@link android.content.Context#startActivity} when passing content URIs. The default value is
+     * {@code none}, meaning no specific permissions are required. Setting this attribute restricts
+     * activity invocation based on the invoker's permissions.
+     * @hide
+     */
+    @RequiredContentUriPermission
+    public int requireContentUriPermissionFromCaller;
 
     /**
      * Activity can not be resized and always occupies the fullscreen area with all windows fully
@@ -1099,6 +1203,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Overridable
     @Disabled
+    @TestApi
+    @FlaggedApi(Flags.FLAG_APP_COMPAT_PROPERTIES_API)
     public static final long OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED =
             273509367L; // buganizer id
 
@@ -1393,6 +1499,18 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public static final long OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION = 255940284L;
 
     /**
+     * Enables {@link #SCREEN_ORIENTATION_USER} which overrides any orientation requested
+     * by the activity. Fixed orientation apps can be overridden to fullscreen on large
+     * screen devices with ignoreOrientationRequest enabled with this override.
+     *
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_ANY_ORIENTATION_TO_USER = 310816437L;
+
+    /**
      * Compares activity window layout min width/height with require space for multi window to
      * determine if it can be put into multi window mode.
      */
@@ -1576,6 +1694,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         mMinAspectRatio = orig.mMinAspectRatio;
         supportsSizeChanges = orig.supportsSizeChanges;
         requiredDisplayCategory = orig.requiredDisplayCategory;
+        requireContentUriPermissionFromCaller = orig.requireContentUriPermissionFromCaller;
     }
 
     /**
@@ -1774,8 +1893,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @hide
      */
     public boolean isChangeEnabled(long changeId) {
-        return CompatChanges.isChangeEnabled(changeId, applicationInfo.packageName,
-                UserHandle.getUserHandleForUid(applicationInfo.uid));
+        return applicationInfo.isChangeEnabled(changeId);
     }
 
     /** @hide */
@@ -1933,6 +2051,11 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         if (requiredDisplayCategory != null) {
             pw.println(prefix + "requiredDisplayCategory=" + requiredDisplayCategory);
         }
+        if ((dumpFlags & DUMP_FLAG_DETAILS) != 0) {
+            pw.println(prefix + "requireContentUriPermissionFromCaller="
+                    + requiredContentUriPermissionToFullString(
+                            requireContentUriPermissionFromCaller));
+        }
         super.dumpBack(pw, prefix, dumpFlags);
     }
 
@@ -1980,6 +2103,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         dest.writeBoolean(supportsSizeChanges);
         sForStringSet.parcel(mKnownActivityEmbeddingCerts, dest, flags);
         dest.writeString8(requiredDisplayCategory);
+        dest.writeInt(requireContentUriPermissionFromCaller);
     }
 
     /**
@@ -2106,6 +2230,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             mKnownActivityEmbeddingCerts = null;
         }
         requiredDisplayCategory = source.readString8();
+        requireContentUriPermissionFromCaller = source.readInt();
     }
 
     /**

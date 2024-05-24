@@ -17,10 +17,10 @@
 package com.android.server.wm.flicker.service.quickswitch.scenarios
 
 import android.app.Instrumentation
-import android.tools.common.NavBar
-import android.tools.common.Rotation
-import android.tools.device.flicker.rules.ChangeDisplayOrientationRule
-import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.NavBar
+import android.tools.Rotation
+import android.tools.flicker.rules.ChangeDisplayOrientationRule
+import android.tools.traces.parsers.WindowManagerStateHelper
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper

@@ -537,8 +537,8 @@ public abstract class ActivityManagerInternal {
 
     /**
      * Returns whether the given user requires credential entry at this time. This is used to
-     * intercept activity launches for locked work apps due to work challenge being triggered or
-     * when the profile user is yet to be unlocked.
+     * intercept activity launches for apps corresponding to locked profiles due to separate
+     * challenge being triggered or when the profile user is yet to be unlocked.
      */
     public abstract boolean shouldConfirmCredentials(@UserIdInt int userId);
 
@@ -1164,6 +1164,30 @@ public abstract class ActivityManagerInternal {
      */
     public abstract void logFgsApiEnd(int apiType, int uid, int pid);
 
+    /**
+     * Checks whether an app will be able to start a foreground service or not.
+     *
+     * @param pid The process id belonging to the app to be checked.
+     * @param uid The UID of the app to be checked.
+     * @param packageName The package name of the app to be checked.
+     * @return whether the app will be able to start a foreground service or not.
+     */
+    public abstract boolean canStartForegroundService(
+            int pid, int uid, @NonNull String packageName);
+
+    /**
+     * Returns {@code true} if a foreground service started by an uid is allowed to have
+     * while-in-use permissions.
+     *
+     * @param pid The process id belonging to the app to be checked.
+     * @param uid The UID of the app to be checked.
+     * @param packageName The package name of the app to be checked.
+     * @return whether the foreground service is allowed to have while-in-use permissions.
+     * @hide
+     */
+    public abstract boolean canAllowWhileInUsePermissionInFgs(
+            int pid, int uid, @NonNull String packageName);
+
      /**
      * Temporarily allow foreground service started by an uid to have while-in-use permission
      * for durationMs.
@@ -1234,4 +1258,11 @@ public abstract class ActivityManagerInternal {
      */
     public abstract boolean clearApplicationUserData(String packageName, boolean keepState,
             boolean isRestore, IPackageDataObserver observer, int userId);
+
+    /**
+     * Returns current state of {@link com.android.systemui.theme.ThemeOverlayController} color
+     * palette readiness.
+     * @hide
+     */
+    public abstract boolean isThemeOverlayReady(int userId);
 }

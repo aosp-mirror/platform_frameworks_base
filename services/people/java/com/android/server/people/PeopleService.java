@@ -38,6 +38,7 @@ import android.content.pm.ShortcutInfo;
 import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -473,6 +474,10 @@ public class PeopleService extends SystemService {
         public void restore(@UserIdInt int userId, @NonNull byte[] payload) {
             getDataManager().restore(userId, payload);
         }
+
+        @Override
+        public void requestServiceFeatures(AppPredictionSessionId sessionId,
+                IRemoteCallback callback) {}
 
         @VisibleForTesting
         SessionInfo getSessionInfo(AppPredictionSessionId sessionId) {

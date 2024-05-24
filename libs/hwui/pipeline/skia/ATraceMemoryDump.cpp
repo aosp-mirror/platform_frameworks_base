@@ -20,6 +20,8 @@
 
 #include <cstring>
 
+#include "GrDirectContext.h"
+
 namespace android {
 namespace uirenderer {
 namespace skiapipeline {
@@ -114,8 +116,16 @@ void ATraceMemoryDump::startFrame() {
 
 /**
  * logTraces reads from mCurrentValues and logs the counters with ATRACE.
+ *
+ * gpuMemoryIsAlreadyInDump must be true if GrDirectContext::dumpMemoryStatistics(...) was called
+ * with this tracer, false otherwise. Leaving this false allows this function to quickly query total
+ * and purgable GPU memory without the caller having to spend time in
+ * GrDirectContext::dumpMemoryStatistics(...) first, which iterates over every resource in the GPU
+ * cache. This can save significant time, but buckets all GPU memory into a single "misc" track,
+ * which may be a loss of granularity depending on the GPU backend and the categories defined in
+ * sResourceMap.
  */
-void ATraceMemoryDump::logTraces() {
+void ATraceMemoryDump::logTraces(bool gpuMemoryIsAlreadyInDump, GrDirectContext* grContext) {
     // Accumulate data from last dumpName
     recordAndResetCountersIfNeeded("");
     uint64_t hwui_all_frame_memory = 0;
@@ -126,6 +136,20 @@ void ATraceMemoryDump::logTraces() {
             ATRACE_INT64((std::string("Purgeable ") + it.first).c_str(), it.second.purgeableMemory);
         }
     }
+
+    if (!gpuMemoryIsAlreadyInDump && grContext) {
+        // Total GPU memory
+        int gpuResourceCount;
+        size_t gpuResourceBytes;
+        grContext->getResourceCacheUsage(&gpuResourceCount, &gpuResourceBytes);
+        hwui_all_frame_memory += (uint64_t)gpuResourceBytes;
+        ATRACE_INT64("HWUI Misc Memory", gpuResourceBytes);
+
+        // Purgable subset of GPU memory
+        size_t purgeableGpuResourceBytes = grContext->getResourceCachePurgeableBytes();
+        ATRACE_INT64("Purgeable HWUI Misc Memory", purgeableGpuResourceBytes);
+    }
+
     ATRACE_INT64("HWUI All Memory", hwui_all_frame_memory);
 }
 

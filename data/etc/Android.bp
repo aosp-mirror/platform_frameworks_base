@@ -66,6 +66,12 @@ prebuilt_etc {
     src: "preinstalled-packages-strict-signature.xml",
 }
 
+prebuilt_etc {
+    name: "enhanced-confirmation.xml",
+    sub_dir: "sysconfig",
+    src: "enhanced-confirmation.xml",
+}
+
 // Privapp permission whitelist files
 
 prebuilt_etc {
@@ -192,4 +198,9 @@ prebuilt_etc {
 filegroup {
     name: "services.core.protolog.json",
     srcs: ["services.core.protolog.json"],
+}
+
+filegroup {
+    name: "file-core.protolog.pb",
+    srcs: ["core.protolog.pb"],
 }

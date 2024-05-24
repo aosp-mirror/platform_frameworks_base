@@ -16,6 +16,7 @@
 
 package com.android.systemui.media.dialog
 
+import com.android.settingslib.flags.Flags.legacyLeAudioSharing
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -44,6 +45,7 @@ class MediaOutputDialogReceiver @Inject constructor(
                 mediaOutputDialogFactory.createDialogForSystemRouting()
             }
             MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG -> {
+                if (!legacyLeAudioSharing()) return
                 val packageName: String? =
                     intent.getStringExtra(MediaOutputConstants.EXTRA_PACKAGE_NAME)
                 launchMediaOutputBroadcastDialogIfPossible(packageName)

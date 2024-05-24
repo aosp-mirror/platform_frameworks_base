@@ -34,13 +34,15 @@
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"วิทยาการเข้ารหัสคีย์สาธารณะ"</string>
     <string name="public_key_cryptography_detail" msgid="6937631710280562213">"พาสคีย์ใช้คู่คีย์การเข้ารหัสตามมาตรฐานของ FIDO Alliance (เช่น Google, Apple, Microsoft และอื่นๆ) และ W3C คู่คีย์สาธารณะและคีย์ส่วนตัวจะสร้างขึ้นสำหรับแอปหรือเว็บไซต์ ซึ่งต่างจากชื่อผู้ใช้และชุดอักขระที่ใช้เป็นรหัสผ่าน โดยระบบจะจัดเก็บคีย์ส่วนตัวไว้อย่างปลอดภัยในอุปกรณ์หรือเครื่องมือจัดการรหัสผ่านและใช้คีย์ดังกล่าวเพื่อยืนยันตัวตน ส่วนคีย์สาธารณะจะแชร์กับเซิร์ฟเวอร์ของแอปหรือเว็บไซต์ คุณลงทะเบียนและลงชื่อเข้าใช้ได้ทันทีด้วยคีย์ที่สอดคล้องกัน"</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"ความปลอดภัยของบัญชีที่เพิ่มมากขึ้น"</string>
-    <string name="improved_account_security_detail" msgid="9123750251551844860">"คีย์ที่สร้างขึ้นแต่ละคีย์จะลิงก์กับแอปหรือเว็บไซต์ที่ใช้งานคีย์ดังกล่าวเท่านั้น ดังนั้นจึงไม่มีการลงชื่อเข้าใช้แอปเว็บไซต์ที่เป็นการฉ้อโกงโดยไม่ตั้งใจเกิดขึ้น นอกจากนี้ เซิร์ฟเวอร์จะบันทึกเฉพาะคีย์สาธารณะ จึงทำให้แฮ็กได้ยากขึ้น"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"คีย์ที่สร้างขึ้นแต่ละคีย์จะลิงก์กับแอปหรือเว็บไซต์ที่ใช้งานคีย์ดังกล่าวเท่านั้น ดังนั้นจึงไม่มีการลงชื่อเข้าใช้แอปหรือเว็บไซต์ที่เป็นการฉ้อโกงโดยไม่ตั้งใจเกิดขึ้น นอกจากนี้ เซิร์ฟเวอร์จะบันทึกเฉพาะคีย์สาธารณะ จึงทำให้แฮ็กได้ยากขึ้น"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"การเปลี่ยนผ่านอย่างราบรื่น"</string>
     <string name="seamless_transition_detail" msgid="4475509237171739843">"ในขณะที่เราก้าวไปสู่อนาคตที่ไม่ต้องใช้รหัสผ่านนั้น รหัสผ่านจะยังคงใช้ได้อยู่ควบคู่ไปกับการเปลี่ยนไปใช้พาสคีย์"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"เลือกว่าต้องการบันทึก<xliff:g id="CREATETYPES">%1$s</xliff:g>ไว้ที่ใด"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"เลือกเครื่องมือจัดการรหัสผ่านเพื่อบันทึกข้อมูลและลงชื่อเข้าใช้เร็วขึ้นในครั้งถัดไป"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"สร้างพาสคีย์สำหรับ <xliff:g id="APPNAME">%1$s</xliff:g> ไหม"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"บันทึกรหัสผ่านสำหรับ <xliff:g id="APPNAME">%1$s</xliff:g> ไหม"</string>
+    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
+    <skip />
+    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
+    <skip />
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"บันทึกข้อมูลการลงชื่อเข้าใช้สำหรับ <xliff:g id="APPNAME">%1$s</xliff:g> ไหม"</string>
     <string name="passkey" msgid="632353688396759522">"พาสคีย์"</string>
     <string name="password" msgid="6738570945182936667">"รหัสผ่าน"</string>
@@ -92,4 +94,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"จากอุปกรณ์อื่น"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"ใช้อุปกรณ์อื่น"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"ยกเลิกคำขอแล้วโดย <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"ตัวเลือกการลงชื่อเข้าใช้"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"เพิ่มเติม"</string>
 </resources>

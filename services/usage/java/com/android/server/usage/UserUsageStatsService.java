@@ -536,13 +536,14 @@ class UserUsageStatsService {
     }
 
     UsageEvents queryEvents(final long beginTime, final long endTime, int flags,
-            int[] eventTypeFilter) {
+            int[] eventTypeFilter, ArraySet<String> pkgNameFilter) {
         if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
             return null;
         }
 
         // Ensure valid event type filter.
         final boolean isQueryForAllEvents = ArrayUtils.isEmpty(eventTypeFilter);
+        final boolean isQueryForAllPackages = pkgNameFilter == null || pkgNameFilter.isEmpty();
         final boolean[] queryEventFilter = new boolean[Event.MAX_EVENT_TYPE + 1];
         if (!isQueryForAllEvents) {
             for (int eventType : eventTypeFilter) {
@@ -589,6 +590,11 @@ class UserUsageStatsService {
                             if ((flags & OBFUSCATE_INSTANT_APPS) == OBFUSCATE_INSTANT_APPS) {
                                 event = event.getObfuscatedIfInstantApp();
                             }
+
+                            if (!isQueryForAllPackages && !pkgNameFilter.contains(event.mPackage)) {
+                                continue;
+                            }
+
                             if (event.mPackage != null) {
                                 names.add(event.mPackage);
                             }

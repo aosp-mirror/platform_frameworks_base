@@ -32,10 +32,6 @@ import org.junit.runner.RunWith
 class ComposeInitializerTest : SysuiTestCase() {
     @Test
     fun testCanAddComposeViewInInitializedWindow() {
-        if (!ComposeFacade.isComposeAvailable()) {
-            return
-        }
-
         val root = TestWindowRoot(context)
         try {
             runOnMainThreadAndWaitForIdleSync { ViewUtils.attachView(root) }
@@ -55,12 +51,12 @@ class ComposeInitializerTest : SysuiTestCase() {
     class TestWindowRoot(context: Context) : FrameLayout(context) {
         override fun onAttachedToWindow() {
             super.onAttachedToWindow()
-            ComposeFacade.composeInitializer().onAttachedToWindow(this)
+            ComposeInitializer.onAttachedToWindow(this)
         }
 
         override fun onDetachedFromWindow() {
             super.onDetachedFromWindow()
-            ComposeFacade.composeInitializer().onDetachedFromWindow(this)
+            ComposeInitializer.onDetachedFromWindow(this)
         }
     }
 }

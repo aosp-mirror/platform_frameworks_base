@@ -23,12 +23,14 @@ import android.annotation.Nullable;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.app.ResultInfo;
+import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Trace;
 import android.util.MergedConfiguration;
 import android.util.Slog;
+import android.window.ActivityWindowInfo;
 
 import com.android.internal.content.ReferrerIntent;
 
@@ -49,6 +51,7 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
     private int mConfigChanges;
     private MergedConfiguration mConfig;
     private boolean mPreserveWindow;
+    private ActivityWindowInfo mActivityWindowInfo;
 
     /**
      * A record that was properly configured for relaunch. Execution will be cancelled if not
@@ -63,7 +66,7 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
             CompatibilityInfo.applyOverrideScaleIfNeeded(mConfig);
         }
         mActivityClientRecord = client.prepareRelaunchActivity(getActivityToken(), mPendingResults,
-                mPendingNewIntents, mConfigChanges, mConfig, mPreserveWindow);
+                mPendingNewIntents, mConfigChanges, mConfig, mPreserveWindow, mActivityWindowInfo);
     }
 
     @Override
@@ -85,6 +88,12 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
         client.reportRelaunch(r);
     }
 
+    @Nullable
+    @Override
+    public Context getContextToUpdate(@NonNull ClientTransactionHandler client) {
+        return client.getActivity(getActivityToken());
+    }
+
     // ObjectPoolItem implementation
 
     private ActivityRelaunchItem() {}
@@ -94,7 +103,8 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
     public static ActivityRelaunchItem obtain(@NonNull IBinder activityToken,
             @Nullable List<ResultInfo> pendingResults,
             @Nullable List<ReferrerIntent> pendingNewIntents, int configChanges,
-            @NonNull MergedConfiguration config, boolean preserveWindow) {
+            @NonNull MergedConfiguration config, boolean preserveWindow,
+            @NonNull ActivityWindowInfo activityWindowInfo) {
         ActivityRelaunchItem instance = ObjectPool.obtain(ActivityRelaunchItem.class);
         if (instance == null) {
             instance = new ActivityRelaunchItem();
@@ -106,6 +116,7 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
         instance.mConfigChanges = configChanges;
         instance.mConfig = new MergedConfiguration(config);
         instance.mPreserveWindow = preserveWindow;
+        instance.mActivityWindowInfo = new ActivityWindowInfo(activityWindowInfo);
 
         return instance;
     }
@@ -119,6 +130,7 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
         mConfig = null;
         mPreserveWindow = false;
         mActivityClientRecord = null;
+        mActivityWindowInfo = null;
         ObjectPool.recycle(this);
     }
 
@@ -134,6 +146,7 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
         dest.writeInt(mConfigChanges);
         dest.writeTypedObject(mConfig, flags);
         dest.writeBoolean(mPreserveWindow);
+        dest.writeTypedObject(mActivityWindowInfo, flags);
     }
 
     /** Read from Parcel. */
@@ -144,6 +157,7 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
         mConfigChanges = in.readInt();
         mConfig = in.readTypedObject(MergedConfiguration.CREATOR);
         mPreserveWindow = in.readBoolean();
+        mActivityWindowInfo = in.readTypedObject(ActivityWindowInfo.CREATOR);
     }
 
     public static final @NonNull Creator<ActivityRelaunchItem> CREATOR =
@@ -169,7 +183,8 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
         return Objects.equals(mPendingResults, other.mPendingResults)
                 && Objects.equals(mPendingNewIntents, other.mPendingNewIntents)
                 && mConfigChanges == other.mConfigChanges && Objects.equals(mConfig, other.mConfig)
-                && mPreserveWindow == other.mPreserveWindow;
+                && mPreserveWindow == other.mPreserveWindow
+                && Objects.equals(mActivityWindowInfo, other.mActivityWindowInfo);
     }
 
     @Override
@@ -181,6 +196,7 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
         result = 31 * result + mConfigChanges;
         result = 31 * result + Objects.hashCode(mConfig);
         result = 31 * result + (mPreserveWindow ? 1 : 0);
+        result = 31 * result + Objects.hashCode(mActivityWindowInfo);
         return result;
     }
 
@@ -191,6 +207,7 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
                 + ",pendingNewIntents=" + mPendingNewIntents
                 + ",configChanges="  + mConfigChanges
                 + ",config=" + mConfig
-                + ",preserveWindow" + mPreserveWindow + "}";
+                + ",preserveWindow=" + mPreserveWindow
+                + ",activityWindowInfo=" + mActivityWindowInfo + "}";
     }
 }

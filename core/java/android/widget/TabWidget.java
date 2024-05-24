@@ -16,7 +16,11 @@
 
 package android.widget;
 
+import static android.view.flags.Flags.enableArrowIconOnHoverWhenClickable;
+import static android.view.flags.Flags.FLAG_ENABLE_ARROW_ICON_ON_HOVER_WHEN_CLICKABLE;
+
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -517,6 +521,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         }
     }
 
+    @FlaggedApi(FLAG_ENABLE_ARROW_ICON_ON_HOVER_WHEN_CLICKABLE)
     @Override
     public void addView(View child) {
         if (child.getLayoutParams() == null) {
@@ -530,7 +535,11 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         child.setFocusable(true);
         child.setClickable(true);
 
-        if (child.getPointerIcon() == null) {
+        // By default the pointer icon is an arrow. More specifically, when the pointer icon is set
+        // to null, it will be an arrow. Therefore, we don't need to change the icon when
+        // enableArrowIconOnHoverWhenClickable() and the pointer icon is a null. We only need to do
+        // that when we want the hand icon for hover.
+        if (!enableArrowIconOnHoverWhenClickable() && child.getPointerIcon() == null) {
             child.setPointerIcon(PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_HAND));
         }
 

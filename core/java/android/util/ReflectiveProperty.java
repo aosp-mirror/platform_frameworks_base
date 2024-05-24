@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
  * Internal class to automatically generate a Property for a given class/name pair, given the
  * specification of {@link Property#of(java.lang.Class, java.lang.Class, java.lang.String)}
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 class ReflectiveProperty<T, V> extends Property<T, V> {
 
     private static final String PREFIX_GET = "get";

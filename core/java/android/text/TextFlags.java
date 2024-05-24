@@ -59,6 +59,7 @@ public final class TextFlags {
             Flags.FLAG_PHRASE_STRICT_FALLBACK,
             Flags.FLAG_USE_BOUNDS_FOR_WIDTH,
             Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE,
+            Flags.FLAG_ICU_BIDI_MIGRATION,
     };
 
     /**
@@ -71,6 +72,7 @@ public final class TextFlags {
             Flags.phraseStrictFallback(),
             Flags.useBoundsForWidth(),
             Flags.fixLineHeightForLocale(),
+            Flags.icuBidiMigration(),
     };
 
     /**

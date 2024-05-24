@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> after <xliff:g id="TIME_DELAY">{2}</xliff:g> seconds"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Not forwarded"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Not forwarded"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Mobile network security"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Review settings"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Device identifier accessed"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"A network on the <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> connection recorded your device\'s unique identifier (IMSI) <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> times in the period between <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> and <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Encrypted connection to <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"You\'re now connected to a more secure mobile network."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Non-encrypted connection to <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"You\'re connected to a non-encrypted mobile network. Your calls, messages and data are vulnerable to interception."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Mobile security settings"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Learn more"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Feature code complete."</string>
     <string name="fcError" msgid="5325116502080221346">"Connection problem or invalid feature code."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -370,6 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Allows the app to bind to the cell broadcast module in order to forward cell broadcast messages as they are received. Cell broadcast alerts are delivered in some locations to warn you of emergency situations. Malicious apps may interfere with the performance or operation of your device when an emergency cell broadcast is received."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Manage ongoing calls"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Allows an app to see details about ongoing calls on your device and to control these calls."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Access last known cell identity."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Allows an app access to the last known cell identity provided by telephony."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"read mobile broadcast messages"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Allows the app to read mobile broadcast messages received by your device. Cell broadcast alerts are delivered in some locations to warn you of emergency situations. Malicious apps may interfere with the performance or operation of your device when an emergency mobile broadcast is received."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"read subscribed feeds"</string>
@@ -434,6 +446,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Allows the app to make use of foreground services with the type \'systemExempted\'"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"run foreground service with the type \'fileManagement\'"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Allows the app to make use of foreground services with the type \'fileManagement\'"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"run foreground service with the type \'mediaProcessing\'"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Allows the app to make use of foreground services with the type \'mediaProcessing\'"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"run foreground service with the type \'specialUse\'"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Allows the app to make use of foreground services with the type \'specialUse\'"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"measure app storage space"</string>
@@ -539,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Allows the app to use the phone\'s infrared transmitter."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"set wallpaper"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Allows the app to set the system wallpaper."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Access hidden profiles"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Allows the app to access hidden profiles."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"adjust your wallpaper size"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Allows the app to set the system wallpaper size hints."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"set time zone"</string>
@@ -632,7 +648,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Use screen lock"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Enter your screen lock to continue"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Press firmly on the sensor"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Can’t recognise fingerprint. Try again."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Fingerprint not recognised. Try again."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Clean fingerprint sensor and try again"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Clean sensor and try again"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Press firmly on the sensor"</string>
@@ -650,18 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Fingerprint authenticated"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Face authenticated"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Face authenticated. Please press confirm"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Fingerprint hardware not available."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Fingerprint hardware not available"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Can’t set up fingerprint"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Fingerprint setup timed out. Try again."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Fingerprint operation cancelled."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Fingerprint operation cancelled by user."</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Fingerprint operation cancelled"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Fingerprint operation cancelled by user"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Too many attempts. Use screen lock instead."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Too many attempts. Use screen lock instead."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Can’t process fingerprint. Try again."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"No fingerprints enrolled."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"This device does not have a fingerprint sensor."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensor temporarily disabled."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Can’t use fingerprint sensor. Visit a repair provider"</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"No fingerprints enrolled"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"This device does not have a fingerprint sensor"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Sensor temporarily disabled"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Can\'t use fingerprint sensor. Visit a repair provider."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Power button pressed"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Finger <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Use fingerprint"</string>
@@ -696,7 +712,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Can’t see your face. Hold your phone at eye level."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Too much motion. Hold phone steady."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Please re-enroll your face."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Can’t recognise face. Try again."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Face not recognised. Try again."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Change the position of your head slightly"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Look more directly at your phone"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Look more directly at your phone"</string>
@@ -807,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Allows the app to sample sensor data at a rate greater than 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"update app without user action"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Allows the holder to update the app that it previously installed without user action"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"update the verification states of E2EE contact keys that are owned by other apps"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Allows the app to update the verification states of E2EE contact keys that are owned by other apps"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Set password rules"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Control the length and the characters allowed in screen lock passwords and PINs."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitor screen unlock attempts"</string>
@@ -1906,6 +1924,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Event"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Sleeping"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Managed by <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"On"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Off"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> is muting some sounds"</string>
@@ -1925,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Verified"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Expand"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Collapse"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Collapsed"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Expanded"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"toggle expansion"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB Peripheral Port"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1965,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Unpause work apps?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Unpause"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Emergency"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Set a screen lock"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Set screen lock"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"To use your private space, set a screen lock on this device"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"App is not available"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> is not available right now."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> unavailable"</string>
@@ -2341,8 +2365,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Can\'t mirror to display"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Please use a different cable and try again"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Your device is too warm and can\'t mirror to the display until it cools down"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Cable may not support displays"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Your USB-C cable may not connect to displays properly"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen is on"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> is using both displays to show content"</string>
@@ -2366,4 +2388,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Work 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Communal"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Auto-connected to satellite"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"You can send and receive messages without a mobile or Wi-Fi network"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Open Messages"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"How it works"</string>
 </resources>

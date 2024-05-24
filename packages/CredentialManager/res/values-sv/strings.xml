@@ -39,8 +39,10 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Medan vi beger oss mot en lösenordslös framtid kommer lösenord fortfarande att vara tillgängliga utöver nycklar."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Välj var du vill spara <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Välj en lösenordshanterare för att spara dina uppgifter och logga in snabbare nästa gång"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Vill du skapa en nyckel för <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Vill du spara lösenordet för <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
+    <skip />
+    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
+    <skip />
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Vill du spara inloggningsuppgifterna för <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"nyckel"</string>
     <string name="password" msgid="6738570945182936667">"lösenord"</string>
@@ -92,4 +94,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Via en annan enhet"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Använd en annan enhet"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"Begäran avbruten av <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Inloggningsalternativ"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"Mer"</string>
 </resources>

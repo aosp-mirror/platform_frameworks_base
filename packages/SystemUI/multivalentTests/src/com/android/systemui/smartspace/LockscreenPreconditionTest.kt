@@ -37,6 +37,7 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
+@android.platform.test.annotations.EnabledOnRavenwood
 class LockscreenPreconditionTest : SysuiTestCase() {
     @Mock
     private lateinit var deviceProvisionedController: DeviceProvisionedController

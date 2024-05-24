@@ -31,6 +31,12 @@ license {
     ],
 }
 
+cc_aconfig_library {
+    name: "backup_flags_cc_lib",
+    host_supported: true,
+    aconfig_declarations: "backup_flags",
+}
+
 cc_defaults {
     name: "libandroidfw_defaults",
     cpp_std: "gnu++2b",
@@ -115,7 +121,10 @@ cc_library {
                 "libutils",
                 "libz",
             ],
-            static_libs: ["libziparchive_for_incfs"],
+            static_libs: [
+                "libziparchive_for_incfs",
+                "backup_flags_cc_lib",
+            ],
             static: {
                 enabled: false,
             },

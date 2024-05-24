@@ -20,6 +20,8 @@ import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
+import android.annotation.TestApi;
 import android.app.Flags;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -32,6 +34,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -41,12 +44,132 @@ import java.util.Objects;
  * a device is in Do Not Disturb mode.
  */
 public final class ZenPolicy implements Parcelable {
-    private ArrayList<Integer> mPriorityCategories;
-    private ArrayList<Integer> mVisualEffects;
+
+    /**
+     * Enum for the user-modifiable fields in this object.
+     * @hide
+     */
+    @IntDef(flag = true, prefix = { "FIELD_" }, value = {
+            FIELD_MESSAGES,
+            FIELD_CALLS,
+            FIELD_CONVERSATIONS,
+            FIELD_ALLOW_CHANNELS,
+            FIELD_PRIORITY_CATEGORY_REMINDERS,
+            FIELD_PRIORITY_CATEGORY_EVENTS,
+            FIELD_PRIORITY_CATEGORY_REPEAT_CALLERS,
+            FIELD_PRIORITY_CATEGORY_ALARMS,
+            FIELD_PRIORITY_CATEGORY_MEDIA,
+            FIELD_PRIORITY_CATEGORY_SYSTEM,
+            FIELD_VISUAL_EFFECT_FULL_SCREEN_INTENT,
+            FIELD_VISUAL_EFFECT_LIGHTS,
+            FIELD_VISUAL_EFFECT_PEEK,
+            FIELD_VISUAL_EFFECT_STATUS_BAR,
+            FIELD_VISUAL_EFFECT_BADGE,
+            FIELD_VISUAL_EFFECT_AMBIENT,
+            FIELD_VISUAL_EFFECT_NOTIFICATION_LIST,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ModifiableField {}
+
+    /**
+     * Covers modifications to MESSAGE_SENDERS and PRIORITY_CATEGORY_MESSAGES, which are set at
+     * the same time.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_MESSAGES = 1 << 0;
+    /**
+     * Covers modifications to CALL_SENDERS and PRIORITY_CATEGORY_CALLS, which are set at
+     * the same time.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_CALLS = 1 << 1;
+    /**
+     * Covers modifications to CONVERSATION_SENDERS and PRIORITY_CATEGORY_CONVERSATIONS, which are
+     * set at the same time.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_CONVERSATIONS = 1 << 2;
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_ALLOW_CHANNELS = 1 << 3;
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_PRIORITY_CATEGORY_REMINDERS = 1 << 4;
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_PRIORITY_CATEGORY_EVENTS = 1 << 5;
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_PRIORITY_CATEGORY_REPEAT_CALLERS = 1 << 6;
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_PRIORITY_CATEGORY_ALARMS = 1 << 7;
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_PRIORITY_CATEGORY_MEDIA = 1 << 8;
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_PRIORITY_CATEGORY_SYSTEM = 1 << 9;
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_VISUAL_EFFECT_FULL_SCREEN_INTENT = 1 << 10;
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_VISUAL_EFFECT_LIGHTS = 1 << 11;
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_VISUAL_EFFECT_PEEK = 1 << 12;
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_VISUAL_EFFECT_STATUS_BAR = 1 << 13;
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_VISUAL_EFFECT_BADGE = 1 << 14;
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_VISUAL_EFFECT_AMBIENT = 1 << 15;
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_VISUAL_EFFECT_NOTIFICATION_LIST = 1 << 16;
+
+    private List<Integer> mPriorityCategories;
+    private List<Integer> mVisualEffects;
     private @PeopleType int mPriorityMessages = PEOPLE_TYPE_UNSET;
     private @PeopleType int mPriorityCalls = PEOPLE_TYPE_UNSET;
     private @ConversationSenders int mConversationSenders = CONVERSATION_SENDERS_UNSET;
-    private @ChannelType int mAllowChannels = CHANNEL_TYPE_UNSET;
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    private @ChannelType int mAllowChannels = CHANNEL_POLICY_UNSET;
 
     /** @hide */
     @IntDef(prefix = { "PRIORITY_CATEGORY_" }, value = {
@@ -215,35 +338,34 @@ public final class ZenPolicy implements Parcelable {
      */
     public static final int STATE_DISALLOW = 2;
 
-    /** @hide */
-    @IntDef(prefix = { "CHANNEL_TYPE_" }, value = {
-            CHANNEL_TYPE_UNSET,
-            CHANNEL_TYPE_PRIORITY,
-            CHANNEL_TYPE_NONE,
+    @IntDef(prefix = { "CHANNEL_POLICY_" }, value = {
+            CHANNEL_POLICY_UNSET,
+            CHANNEL_POLICY_PRIORITY,
+            CHANNEL_POLICY_NONE,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface ChannelType {}
+    private @interface ChannelType {}
 
     /**
      * Indicates no explicit setting for which channels may bypass DND when this policy is active.
-     * Defaults to {@link #CHANNEL_TYPE_PRIORITY}.
+     * Defaults to {@link #CHANNEL_POLICY_PRIORITY}.
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
-    public static final int CHANNEL_TYPE_UNSET = 0;
+    private static final int CHANNEL_POLICY_UNSET = 0;
 
     /**
      * Indicates that channels marked as {@link NotificationChannel#canBypassDnd()} can bypass DND
      * when this policy is active.
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
-    public static final int CHANNEL_TYPE_PRIORITY = 1;
+    private static final int CHANNEL_POLICY_PRIORITY = 1;
 
     /**
      * Indicates that no channels can bypass DND when this policy is active, even those marked as
      * {@link NotificationChannel#canBypassDnd()}.
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
-    public static final int CHANNEL_TYPE_NONE = 2;
+    private static final int CHANNEL_POLICY_NONE = 2;
 
     /** @hide */
     public ZenPolicy() {
@@ -251,12 +373,25 @@ public final class ZenPolicy implements Parcelable {
         mVisualEffects = new ArrayList<>(Collections.nCopies(NUM_VISUAL_EFFECTS, 0));
     }
 
+    /** @hide */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public ZenPolicy(List<Integer> priorityCategories, List<Integer> visualEffects,
+                     @PeopleType int priorityMessages, @PeopleType int priorityCalls,
+                     @ConversationSenders int conversationSenders, @ChannelType int allowChannels) {
+        mPriorityCategories = priorityCategories;
+        mVisualEffects = visualEffects;
+        mPriorityMessages = priorityMessages;
+        mPriorityCalls = priorityCalls;
+        mConversationSenders = conversationSenders;
+        mAllowChannels = allowChannels;
+    }
+
     /**
      * Conversation type that can bypass DND.
      * @return {@link #CONVERSATION_SENDERS_UNSET}, {@link #CONVERSATION_SENDERS_ANYONE},
      * {@link #CONVERSATION_SENDERS_IMPORTANT}, {@link #CONVERSATION_SENDERS_NONE}.
      */
-    public @PeopleType int getPriorityConversationSenders() {
+    public @ConversationSenders int getPriorityConversationSenders() {
         return mConversationSenders;
     }
 
@@ -429,16 +564,21 @@ public final class ZenPolicy implements Parcelable {
     }
 
     /**
-     * Which types of {@link NotificationChannel channels} this policy allows to bypass DND. When
-     * this value is {@link #CHANNEL_TYPE_PRIORITY priority} channels, any channel with
-     * canBypassDnd() may bypass DND; when it is {@link #CHANNEL_TYPE_NONE none}, even channels
-     * with canBypassDnd() will be intercepted.
-     * @return {@link #CHANNEL_TYPE_UNSET}, {@link #CHANNEL_TYPE_PRIORITY}, or
-     *   {@link #CHANNEL_TYPE_NONE}
+     * Whether this policy allows {@link NotificationChannel channels} marked as
+     * {@link NotificationChannel#canBypassDnd()} to bypass DND. If {@link #STATE_ALLOW}, these
+     * channels may bypass; if {@link #STATE_DISALLOW}, then even notifications from channels
+     * with {@link NotificationChannel#canBypassDnd()} will be intercepted.
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
-    public @ChannelType int getAllowedChannels() {
-        return mAllowChannels;
+    public @State int getPriorityChannelsAllowed() {
+        switch (mAllowChannels) {
+            case CHANNEL_POLICY_PRIORITY:
+                return STATE_ALLOW;
+            case CHANNEL_POLICY_NONE:
+                return STATE_DISALLOW;
+            default:
+                return STATE_UNSET;
+        }
     }
 
     /**
@@ -482,7 +622,9 @@ public final class ZenPolicy implements Parcelable {
         /**
          * @hide
          */
-        public Builder(ZenPolicy policy) {
+        @SuppressLint("UnflaggedApi")
+        @TestApi
+        public Builder(@Nullable ZenPolicy policy) {
             if (policy != null) {
                 mZenPolicy = policy.copy();
             } else {
@@ -494,7 +636,14 @@ public final class ZenPolicy implements Parcelable {
          * Builds the current ZenPolicy.
          */
         public @NonNull ZenPolicy build() {
-            return mZenPolicy.copy();
+            if (Flags.modesApi()) {
+                return new ZenPolicy(new ArrayList<>(mZenPolicy.mPriorityCategories),
+                        new ArrayList<>(mZenPolicy.mVisualEffects),
+                        mZenPolicy.mPriorityMessages, mZenPolicy.mPriorityCalls,
+                        mZenPolicy.mConversationSenders, mZenPolicy.mAllowChannels);
+            } else {
+                return mZenPolicy.copy();
+            }
         }
 
         /**
@@ -846,8 +995,8 @@ public final class ZenPolicy implements Parcelable {
          * Set whether priority channels are permitted to break through DND.
          */
         @FlaggedApi(Flags.FLAG_MODES_API)
-        public @NonNull Builder allowChannels(@ChannelType int channelType) {
-            mZenPolicy.mAllowChannels = channelType;
+        public @NonNull Builder allowPriorityChannels(boolean allow) {
+            mZenPolicy.mAllowChannels = allow ? CHANNEL_POLICY_PRIORITY : CHANNEL_POLICY_NONE;
             return this;
         }
     }
@@ -861,39 +1010,48 @@ public final class ZenPolicy implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeList(mPriorityCategories);
         dest.writeList(mVisualEffects);
-        dest.writeInt(mPriorityCalls);
         dest.writeInt(mPriorityMessages);
+        dest.writeInt(mPriorityCalls);
         dest.writeInt(mConversationSenders);
         if (Flags.modesApi()) {
             dest.writeInt(mAllowChannels);
         }
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<ZenPolicy> CREATOR =
-            new Parcelable.Creator<ZenPolicy>() {
-        @Override
-        public ZenPolicy createFromParcel(Parcel source) {
-            ZenPolicy policy = new ZenPolicy();
-            policy.mPriorityCategories = trimList(
-                    source.readArrayList(Integer.class.getClassLoader(), java.lang.Integer.class),
-                    NUM_PRIORITY_CATEGORIES);
-            policy.mVisualEffects = trimList(
-                    source.readArrayList(Integer.class.getClassLoader(), java.lang.Integer.class),
-                    NUM_VISUAL_EFFECTS);
-            policy.mPriorityCalls = source.readInt();
-            policy.mPriorityMessages = source.readInt();
-            policy.mConversationSenders = source.readInt();
-            if (Flags.modesApi()) {
-                policy.mAllowChannels = source.readInt();
-            }
-            return policy;
-        }
+    public static final @NonNull Creator<ZenPolicy> CREATOR =
+            new Creator<ZenPolicy>() {
+                @Override
+                public ZenPolicy createFromParcel(Parcel source) {
+                    ZenPolicy policy;
+                    if (Flags.modesApi()) {
+                        policy = new ZenPolicy(
+                                trimList(source.readArrayList(Integer.class.getClassLoader(),
+                                        Integer.class), NUM_PRIORITY_CATEGORIES),
+                                trimList(source.readArrayList(Integer.class.getClassLoader(),
+                                        Integer.class), NUM_VISUAL_EFFECTS),
+                                source.readInt(), source.readInt(), source.readInt(),
+                                source.readInt()
+                        );
+                    } else {
+                        policy = new ZenPolicy();
+                        policy.mPriorityCategories =
+                                trimList(source.readArrayList(Integer.class.getClassLoader(),
+                                        Integer.class), NUM_PRIORITY_CATEGORIES);
+                        policy.mVisualEffects =
+                                trimList(source.readArrayList(Integer.class.getClassLoader(),
+                                        Integer.class), NUM_VISUAL_EFFECTS);
+                        policy.mPriorityMessages = source.readInt();
+                        policy.mPriorityCalls = source.readInt();
+                        policy.mConversationSenders = source.readInt();
+                    }
+                    return policy;
+                }
 
-        @Override
-        public ZenPolicy[] newArray(int size) {
-            return new ZenPolicy[size];
-        }
-    };
+                @Override
+                public ZenPolicy[] newArray(int size) {
+                    return new ZenPolicy[size];
+                }
+            };
 
     @Override
     public String toString() {
@@ -909,6 +1067,63 @@ public final class ZenPolicy implements Parcelable {
             sb.append(", allowChannels=").append(channelTypeToString(mAllowChannels));
         }
         return sb.append('}').toString();
+    }
+
+    /** @hide */
+    public static String fieldsToString(@ModifiableField int bitmask) {
+        ArrayList<String> modified = new ArrayList<>();
+        if ((bitmask & FIELD_MESSAGES) != 0) {
+            modified.add("FIELD_MESSAGES");
+        }
+        if ((bitmask & FIELD_CALLS) != 0) {
+            modified.add("FIELD_CALLS");
+        }
+        if ((bitmask & FIELD_CONVERSATIONS) != 0) {
+            modified.add("FIELD_CONVERSATIONS");
+        }
+        if ((bitmask & FIELD_ALLOW_CHANNELS) != 0) {
+            modified.add("FIELD_ALLOW_CHANNELS");
+        }
+        if ((bitmask & FIELD_PRIORITY_CATEGORY_REMINDERS) != 0) {
+            modified.add("FIELD_PRIORITY_CATEGORY_REMINDERS");
+        }
+        if ((bitmask & FIELD_PRIORITY_CATEGORY_EVENTS) != 0) {
+            modified.add("FIELD_PRIORITY_CATEGORY_EVENTS");
+        }
+        if ((bitmask & FIELD_PRIORITY_CATEGORY_REPEAT_CALLERS) != 0) {
+            modified.add("FIELD_PRIORITY_CATEGORY_REPEAT_CALLERS");
+        }
+        if ((bitmask & FIELD_PRIORITY_CATEGORY_ALARMS) != 0) {
+            modified.add("FIELD_PRIORITY_CATEGORY_ALARMS");
+        }
+        if ((bitmask & FIELD_PRIORITY_CATEGORY_MEDIA) != 0) {
+            modified.add("FIELD_PRIORITY_CATEGORY_MEDIA");
+        }
+        if ((bitmask & FIELD_PRIORITY_CATEGORY_SYSTEM) != 0) {
+            modified.add("FIELD_PRIORITY_CATEGORY_SYSTEM");
+        }
+        if ((bitmask & FIELD_VISUAL_EFFECT_FULL_SCREEN_INTENT) != 0) {
+            modified.add("FIELD_VISUAL_EFFECT_FULL_SCREEN_INTENT");
+        }
+        if ((bitmask & FIELD_VISUAL_EFFECT_LIGHTS) != 0) {
+            modified.add("FIELD_VISUAL_EFFECT_LIGHTS");
+        }
+        if ((bitmask & FIELD_VISUAL_EFFECT_PEEK) != 0) {
+            modified.add("FIELD_VISUAL_EFFECT_PEEK");
+        }
+        if ((bitmask & FIELD_VISUAL_EFFECT_STATUS_BAR) != 0) {
+            modified.add("FIELD_VISUAL_EFFECT_STATUS_BAR");
+        }
+        if ((bitmask & FIELD_VISUAL_EFFECT_BADGE) != 0) {
+            modified.add("FIELD_VISUAL_EFFECT_BADGE");
+        }
+        if ((bitmask & FIELD_VISUAL_EFFECT_AMBIENT) != 0) {
+            modified.add("FIELD_VISUAL_EFFECT_AMBIENT");
+        }
+        if ((bitmask & FIELD_VISUAL_EFFECT_NOTIFICATION_LIST) != 0) {
+            modified.add("FIELD_VISUAL_EFFECT_NOTIFICATION_LIST");
+        }
+        return "{" + String.join(",", modified) + "}";
     }
 
     // Returns a list containing the first maxLength elements of the input list if the list is
@@ -1044,11 +1259,11 @@ public final class ZenPolicy implements Parcelable {
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static String channelTypeToString(@ChannelType int channelType) {
         switch (channelType) {
-            case CHANNEL_TYPE_UNSET:
+            case CHANNEL_POLICY_UNSET:
                 return "unset";
-            case CHANNEL_TYPE_PRIORITY:
+            case CHANNEL_POLICY_PRIORITY:
                 return "priority";
-            case CHANNEL_TYPE_NONE:
+            case CHANNEL_POLICY_NONE:
                 return "none";
         }
         return "invalidChannelType{" + channelType + "}";
@@ -1081,7 +1296,7 @@ public final class ZenPolicy implements Parcelable {
                 mConversationSenders);
     }
 
-    private @ZenPolicy.State int getZenPolicyPriorityCategoryState(@PriorityCategory int
+    private @State int getZenPolicyPriorityCategoryState(@PriorityCategory int
             category) {
         switch (category) {
             case PRIORITY_CATEGORY_REMINDERS:
@@ -1106,7 +1321,7 @@ public final class ZenPolicy implements Parcelable {
         return -1;
     }
 
-    private @ZenPolicy.State int getZenPolicyVisualEffectState(@VisualEffect int effect) {
+    private @State int getZenPolicyVisualEffectState(@VisualEffect int effect) {
         switch (effect) {
             case VISUAL_EFFECT_FULL_SCREEN_INTENT:
                 return getVisualEffectFullScreenIntent();
@@ -1127,11 +1342,11 @@ public final class ZenPolicy implements Parcelable {
     }
 
     /** @hide */
-    public boolean isCategoryAllowed(@PriorityCategory int category, boolean defaultVal) {
-        switch (getZenPolicyPriorityCategoryState(category)) {
-            case ZenPolicy.STATE_ALLOW:
+    public static boolean stateToBoolean(@State int state, boolean defaultVal) {
+        switch (state) {
+            case STATE_ALLOW:
                 return true;
-            case ZenPolicy.STATE_DISALLOW:
+            case STATE_DISALLOW:
                 return false;
             default:
                 return defaultVal;
@@ -1139,15 +1354,13 @@ public final class ZenPolicy implements Parcelable {
     }
 
     /** @hide */
+    public boolean isCategoryAllowed(@PriorityCategory int category, boolean defaultVal) {
+        return stateToBoolean(getZenPolicyPriorityCategoryState(category), defaultVal);
+    }
+
+    /** @hide */
     public boolean isVisualEffectAllowed(@VisualEffect int effect, boolean defaultVal) {
-        switch (getZenPolicyVisualEffectState(effect)) {
-            case ZenPolicy.STATE_ALLOW:
-                return true;
-            case ZenPolicy.STATE_DISALLOW:
-                return false;
-            default:
-                return defaultVal;
-        }
+        return stateToBoolean(getZenPolicyVisualEffectState(effect), defaultVal);
     }
 
     /**
@@ -1201,11 +1414,59 @@ public final class ZenPolicy implements Parcelable {
         // apply allowed channels
         if (Flags.modesApi()) {
             // if no channels are allowed, can't newly allow them
-            if (mAllowChannels != CHANNEL_TYPE_NONE
-                    && policyToApply.mAllowChannels != CHANNEL_TYPE_UNSET) {
+            if (mAllowChannels != CHANNEL_POLICY_NONE
+                    && policyToApply.mAllowChannels != CHANNEL_POLICY_UNSET) {
                 mAllowChannels = policyToApply.mAllowChannels;
             }
         }
+    }
+
+    /**
+     * Overwrites any policy values in this ZenPolicy with set values from newPolicy and
+     * returns a copy of the resulting ZenPolicy.
+     * Unlike apply(), values set in newPolicy will always be kept over pre-existing
+     * fields. Any values in newPolicy that are not set keep their currently set values.
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public @NonNull ZenPolicy overwrittenWith(@Nullable ZenPolicy newPolicy) {
+        ZenPolicy result = this.copy();
+
+        if (newPolicy == null) {
+            return result;
+        }
+
+        // set priority categories
+        for (int category = 0; category < mPriorityCategories.size(); category++) {
+            @State int newState = newPolicy.mPriorityCategories.get(category);
+            if (newState != STATE_UNSET) {
+                result.mPriorityCategories.set(category, newState);
+
+                if (category == PRIORITY_CATEGORY_MESSAGES) {
+                    result.mPriorityMessages = newPolicy.mPriorityMessages;
+                } else if (category == PRIORITY_CATEGORY_CALLS) {
+                    result.mPriorityCalls = newPolicy.mPriorityCalls;
+                } else if (category == PRIORITY_CATEGORY_CONVERSATIONS) {
+                    result.mConversationSenders = newPolicy.mConversationSenders;
+                }
+            }
+        }
+
+        // set visual effects
+        for (int visualEffect = 0; visualEffect < mVisualEffects.size(); visualEffect++) {
+            if (newPolicy.mVisualEffects.get(visualEffect) != STATE_UNSET) {
+                result.mVisualEffects.set(visualEffect, newPolicy.mVisualEffects.get(visualEffect));
+            }
+        }
+
+        // set allowed channels
+        if (newPolicy.mAllowChannels != CHANNEL_POLICY_UNSET) {
+            result.mAllowChannels = newPolicy.mAllowChannels;
+        }
+
+        return result;
     }
 
     /**
@@ -1268,7 +1529,7 @@ public final class ZenPolicy implements Parcelable {
         proto.write(DNDPolicyProto.ALLOW_CONVERSATIONS_FROM, getPriorityConversationSenders());
 
         if (Flags.modesApi()) {
-            proto.write(DNDPolicyProto.ALLOW_CHANNELS, getAllowedChannels());
+            proto.write(DNDPolicyProto.ALLOW_CHANNELS, getPriorityChannelsAllowed());
         }
 
         proto.flush();

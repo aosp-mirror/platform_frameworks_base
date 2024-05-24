@@ -145,6 +145,25 @@ public class BackupManagerMonitor {
    */
   public static final String EXTRA_LOG_OPERATION_TYPE = "android.app.backup.extra.OPERATION_TYPE";
 
+  /**
+   * List of system components that do not support restore in a  V-> U OS downgrade, even if
+   * restoreAnyVersion is set to true.
+   * Read from Settings.Secure.V_TO_U_RESTORE_DENYLIST
+   *
+   * @hide
+   */
+  public static final String EXTRA_LOG_V_TO_U_DENYLIST = "android.app.backup.extra.V_TO_U_DENYLIST";
+
+  /**
+   * List of system components that support restore in a  V-> U OS downgrade, even if
+   * restoreAnyVersion is set to false.
+   * Read from Settings.Secure.V_TO_U_RESTORE_ALLOWLIST
+   *
+   * @hide
+   */
+  public static final String EXTRA_LOG_V_TO_U_ALLOWLIST =
+          "android.app.backup.extra.V_TO_U_ALLOWLIST";
+
   // TODO complete this list with all log messages. And document properly.
   public static final int LOG_EVENT_ID_FULL_BACKUP_CANCEL = 4;
   public static final int LOG_EVENT_ID_ILLEGAL_KEY = 5;
@@ -241,6 +260,15 @@ public class BackupManagerMonitor {
   /** Agent error during {@link PerformUnifiedRestoreTask#restoreFinished()}
    @hide */
   public static final int LOG_EVENT_ID_AGENT_FAILURE = 69;
+  /** V to U restore attempt, pkg is eligible
+   @hide */
+  public static final int LOG_EVENT_ID_V_TO_U_RESTORE_PKG_ELIGIBLE = 70;
+  /** V to U restore attempt, pkg is not eligible
+   @hide */
+  public static final int LOG_EVENT_ID_V_TO_U_RESTORE_PKG_NOT_ELIGIBLE = 71;
+  /** V to U restore attempt, allowlist and denlist are set
+   @hide */
+  public static final int LOG_EVENT_ID_V_TO_U_RESTORE_SET_LIST = 72;
 
   /**
    * This method will be called each time something important happens on BackupManager.

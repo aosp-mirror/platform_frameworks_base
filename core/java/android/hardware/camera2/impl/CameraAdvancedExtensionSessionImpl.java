@@ -66,6 +66,8 @@ import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
 
+import com.android.internal.camera.flags.Flags;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -102,6 +104,8 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
 
     private boolean mInitialized;
     private boolean mSessionClosed;
+    private int mExtensionType;
+
 
     private final Context mContext;
 
@@ -205,7 +209,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         CameraAdvancedExtensionSessionImpl ret = new CameraAdvancedExtensionSessionImpl(ctx,
                 extender, cameraDevice, characteristicsMapNative, repeatingRequestSurface,
                 burstCaptureSurface, postviewSurface, config.getStateCallback(),
-                config.getExecutor(), sessionId, token);
+                config.getExecutor(), sessionId, token, config.getExtension());
 
         ret.mStatsAggregator.setClientName(ctx.getOpPackageName());
         ret.mStatsAggregator.setExtensionType(config.getExtension());
@@ -223,7 +227,8 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             @Nullable Surface postviewSurface,
             @NonNull StateCallback callback, @NonNull Executor executor,
             int sessionId,
-            @NonNull IBinder token) {
+            @NonNull IBinder token,
+            int extension) {
         mContext = ctx;
         mAdvancedExtender = extender;
         mCameraDevice = cameraDevice;
@@ -242,6 +247,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         mSessionId = sessionId;
         mToken = token;
         mInterfaceLock = cameraDevice.mInterfaceLock;
+        mExtensionType = extension;
 
         mStatsAggregator = new ExtensionSessionStatsAggregator(mCameraDevice.getId(),
                 /*isAdvanced=*/true);
@@ -583,9 +589,9 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             if (mToken != null) {
                 if (mInitialized || (mCaptureSession != null)) {
                     notifyClose = true;
-                    CameraExtensionCharacteristics.releaseSession();
+                    CameraExtensionCharacteristics.releaseSession(mExtensionType);
                 }
-                CameraExtensionCharacteristics.unregisterClient(mContext, mToken);
+                CameraExtensionCharacteristics.unregisterClient(mContext, mToken, mExtensionType);
             }
             mInitialized = false;
             mToken = null;
@@ -654,7 +660,8 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             }
 
             try {
-                CameraExtensionCharacteristics.initializeSession(mInitializeHandler);
+                CameraExtensionCharacteristics.initializeSession(
+                        mInitializeHandler, mExtensionType);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to initialize session! Extension service does"
                         + " not respond!");
@@ -770,6 +777,22 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                                 CameraAdvancedExtensionSessionImpl.this, mClientRequest));
             } finally {
                 Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
+        public void onCaptureProcessFailed(int captureSequenceId, int captureFailureReason) {
+            if (Flags.concertMode()) {
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    mClientExecutor.execute(
+                            () -> mClientCallbacks.onCaptureFailed(
+                                     CameraAdvancedExtensionSessionImpl.this, mClientRequest,
+                                    captureFailureReason
+                            ));
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             }
         }
 
@@ -1182,7 +1205,8 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                     return null;
                 }
                 ImageReader reader = ImageReader.newInstance(output.size.width,
-                        output.size.height, output.imageFormat, output.capacity);
+                        output.size.height, output.imageFormat, output.capacity,
+                        output.usage);
                 mReaderMap.put(output.outputId.id, reader);
                 return reader.getSurface();
             case CameraOutputConfig.TYPE_MULTIRES_IMAGEREADER:

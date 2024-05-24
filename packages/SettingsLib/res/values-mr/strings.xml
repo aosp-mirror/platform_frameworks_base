@@ -52,7 +52,7 @@
     <string name="wifi_remembered" msgid="3266709779723179188">"सेव्ह केले"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"डिस्कनेक्ट केले"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"अक्षम"</string>
-    <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP कॉंफिगरेशन अयशस्वी"</string>
+    <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP कॉन्फिगरेशन अयशस्वी"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"प्रमाणीकरण समस्या"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"कनेक्ट करू शकत नाही"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\'शी कनेक्‍ट करू शकत नाही"</string>
@@ -154,6 +154,7 @@
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"इमेज"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"हेडफोन"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"इनपुट परिधीय"</string>
+    <string name="bluetooth_talkback_hearing_aids" msgid="3983279945542595479">"श्रवणयंत्रे"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"ब्लूटूथ"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"वाय-फाय बंद."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"वाय-फाय डिस्कनेक्ट झाले."</string>
@@ -455,6 +456,8 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"तुम्हाला पुढील गोष्टी करायच्या असतील, तेव्हा रंग सुधारणेची मदत होऊ शकते:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;रंग आणखी अचूकपणे पाहण्यासाठी&lt;/li&gt; &lt;li&gt;&amp;nbsp;तुम्हाला लक्ष केंद्रित करण्यात मदत करण्याकरिता रंग काढून टाकण्यासाठी&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> द्वारे अधिलिखित"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - बॅटरीचे संरक्षण करण्यासाठी चार्जिंग थांबवले आहे"</string>
+    <string name="power_incompatible_charging_settings_home_page" msgid="1322050766135126880">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्जिंगसंबंधित ॲक्सेसरी तपासा"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"अंदाजे <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाकी आहे"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"अंदाजे <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाकी आहे (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"तुमच्‍या वापरावर आधारित अंदाजे <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाकी आहे"</string>
@@ -475,7 +478,7 @@
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"पूर्ण चार्ज होण्यासाठी <xliff:g id="TIME">%1$s</xliff:g> शिल्लक आहेत"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - पूर्ण चार्ज होण्यासाठी <xliff:g id="TIME">%2$s</xliff:g> शिल्लक आहे"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्जिंग ऑप्टिमाइझ केले"</string>
-    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्जिंग ऑप्टिमाइझ केले"</string>
+    <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> ‑ चार्ज होत आहे"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज होत आहे"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"वेगाने चार्ज होत आहे"</string>
@@ -483,9 +486,10 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"वायरलेसने चार्ज होत आहे"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"चार्ज होत आहे"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"चार्ज होत नाही"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"कनेक्ट केले, चार्ज होत नाही"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"कनेक्ट केलेले आहे, पण चार्ज होत नाही"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"चार्ज झाली"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"पूर्ण चार्ज झाली"</string>
+    <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"चार्जिंग थांबवले आहे"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"प्रशासकाने नियंत्रित केलेले"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"प्रतिबंधित केलेल्या सेटिंग द्वारे नियंत्रित"</string>
     <string name="disabled" msgid="8017887509554714950">"अक्षम"</string>
@@ -547,9 +551,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"प्रत्येक वेळी विचारा"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"तुम्ही बंद करेपर्यंत"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"आत्ताच"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"हा फोन"</string>
-    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"हा टॅबलेट"</string>
-    <!-- no translation found for media_transfer_this_device_name (8899776297775466649) -->
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"हा फोन"</string>
+    <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"हा टॅबलेट"</string>
+    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"डॉक स्पीकर"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"बाह्य डिव्हाइस"</string>
@@ -615,6 +619,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"नवीन वापरकर्ता तयार करता आला नाही"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"नवीन अतिथी तयार करता आला नाही"</string>
     <string name="user_nickname" msgid="262624187455825083">"टोपणनाव"</string>
+    <string name="edit_user_info_message" msgid="5199468585059260053">"हे डिव्हाइस वापरणाऱ्या कोणत्याही व्यक्तीला तुमचे नाव आणि फोटो दिसेल."</string>
     <string name="user_add_user" msgid="7876449291500212468">"वापरकर्ता जोडा"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"अतिथी जोडा"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"अतिथी काढून टाका"</string>

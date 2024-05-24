@@ -58,9 +58,14 @@ public final class BrightnessReasonTest {
 
     @Test
     public void setModifierDoesntSetIfModifierIsBeyondExtremes() {
-        int extremeModifier = 0x16;
+        int extremeModifier = 0x40; // equal to BrightnessReason.MODIFIER_MASK * 2
+
+        // reset modifier
+        mBrightnessReason.setModifier(0);
+
+        // test extreme
         mBrightnessReason.setModifier(extremeModifier);
-        assertEquals(mBrightnessReason.getModifier(), BrightnessReason.MODIFIER_LOW_POWER);
+        assertEquals(0, mBrightnessReason.getModifier());
     }
 
     @Test

@@ -17,6 +17,7 @@
 
 package com.android.compose
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
@@ -24,8 +25,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.compose.theme.LocalAndroidColorScheme
@@ -89,6 +95,29 @@ fun PlatformTextButton(
     )
 }
 
+@Composable
+fun PlatformIconButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    colors: IconButtonColors = iconButtonColors(),
+    @DrawableRes iconResource: Int,
+    contentDescription: String?,
+) {
+    IconButton(
+        modifier = modifier,
+        onClick = onClick,
+        enabled = enabled,
+        colors = colors,
+    ) {
+        Icon(
+            painter = painterResource(id = iconResource),
+            contentDescription = contentDescription,
+            tint = colors.contentColor,
+        )
+    }
+}
+
 private val DefaultPlatformButtonVerticalPadding = 6.dp
 private val ButtonPaddings = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
 
@@ -104,6 +133,13 @@ private fun filledButtonColors(): ButtonColors {
 @Composable
 private fun outlineButtonColors(): ButtonColors {
     return ButtonDefaults.outlinedButtonColors(
+        contentColor = LocalAndroidColorScheme.current.onSurface,
+    )
+}
+
+@Composable
+private fun iconButtonColors(): IconButtonColors {
+    return IconButtonDefaults.filledIconButtonColors(
         contentColor = LocalAndroidColorScheme.current.onSurface,
     )
 }

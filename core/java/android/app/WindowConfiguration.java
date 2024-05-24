@@ -27,6 +27,7 @@ import static android.view.Surface.rotationToString;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Configuration;
@@ -326,7 +327,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     }
 
     /**
-     * Sets the apparent display cutout.
+     * Sets the display rotation.
      * @hide
      */
     public void setDisplayRotation(@Surface.Rotation int rotation) {
@@ -386,9 +387,9 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     }
 
     /**
-     * @see #setDisplayRotation
-     * @hide
+     * Gets the display rotation.
      */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
     public @Surface.Rotation int getDisplayRotation() {
         return mDisplayRotation;
     }

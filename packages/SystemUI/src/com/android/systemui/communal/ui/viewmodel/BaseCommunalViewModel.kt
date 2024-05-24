@@ -16,31 +16,36 @@
 
 package com.android.systemui.communal.ui.viewmodel
 
-import android.os.PowerManager
-import android.os.SystemClock
-import android.view.MotionEvent
+import android.content.ComponentName
+import android.os.UserHandle
+import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
-import com.android.systemui.communal.shared.model.CommunalSceneKey
-import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
-import com.android.systemui.media.controls.ui.MediaHost
-import com.android.systemui.shade.ShadeViewController
-import javax.inject.Provider
+import com.android.systemui.communal.widgets.WidgetConfigurator
+import com.android.systemui.media.controls.ui.view.MediaHost
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOf
 
 /** The base view model for the communal hub. */
 abstract class BaseCommunalViewModel(
     private val communalInteractor: CommunalInteractor,
-    private val shadeViewController: Provider<ShadeViewController>,
-    private val powerManager: PowerManager,
     val mediaHost: MediaHost,
 ) {
-    val isKeyguardVisible: Flow<Boolean> = communalInteractor.isKeyguardVisible
+    val currentScene: Flow<SceneKey> = communalInteractor.desiredScene
 
-    val currentScene: StateFlow<CommunalSceneKey> = communalInteractor.desiredScene
+    /** Whether widgets are currently being re-ordered. */
+    open val reorderingWidgets: StateFlow<Boolean> = MutableStateFlow(false)
 
-    fun onSceneChanged(scene: CommunalSceneKey) {
+    private val _selectedKey: MutableStateFlow<String?> = MutableStateFlow(null)
+
+    /** The key of the currently selected item, or null if no item selected. */
+    val selectedKey: StateFlow<String?>
+        get() = _selectedKey
+
+    fun onSceneChanged(scene: SceneKey) {
         communalInteractor.onSceneChanged(scene)
     }
 
@@ -49,28 +54,20 @@ abstract class BaseCommunalViewModel(
      *
      * Note that you must call is with `null` when the UI is done or risk a memory leak.
      */
-    fun setTransitionState(transitionState: Flow<ObservableCommunalTransitionState>?) {
+    fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
         communalInteractor.setTransitionState(transitionState)
     }
 
-    // TODO(b/308813166): remove once CommunalContainer is moved lower in z-order and doesn't block
-    //  touches anymore.
-    /** Called when a touch is received outside the edge swipe area when hub mode is closed. */
-    fun onOuterTouch(motionEvent: MotionEvent) {
-        // Forward the touch to the shade so that basic gestures like swipe up/down for
-        // shade/bouncer work.
-        shadeViewController.get().handleExternalTouch(motionEvent)
-    }
-
-    // TODO(b/308813166): remove once CommunalContainer is moved lower in z-order and doesn't block
-    //  touches anymore.
-    /** Called to refresh the screen timeout when a user touch is received. */
-    fun onUserActivity() {
-        powerManager.userActivity(
-            SystemClock.uptimeMillis(),
-            PowerManager.USER_ACTIVITY_EVENT_TOUCH,
-            0
-        )
+    /**
+     * Called when a widget is added via drag and drop from the widget picker into the communal hub.
+     */
+    open fun onAddWidget(
+        componentName: ComponentName,
+        user: UserHandle,
+        priority: Int,
+        configurator: WidgetConfigurator? = null
+    ) {
+        communalInteractor.addWidget(componentName, user, priority, configurator)
     }
 
     /** A list of all the communal content to be displayed in the communal hub. */
@@ -79,12 +76,41 @@ abstract class BaseCommunalViewModel(
     /** Whether in edit mode for the communal hub. */
     open val isEditMode = false
 
+    /** Whether the popup message triggered by dismissing the CTA tile is showing. */
+    open val isPopupOnDismissCtaShowing: Flow<Boolean> = flowOf(false)
+
+    /** Hide the popup message triggered by dismissing the CTA tile. */
+    open fun onHidePopupAfterDismissCta() {}
+
     /** Called as the UI requests deleting a widget. */
     open fun onDeleteWidget(id: Int) {}
 
-    /** Called as the UI requests reordering widgets. */
-    open fun onReorderWidgets(ids: List<Int>) {}
+    /**
+     * Called as the UI requests reordering widgets.
+     *
+     * @param widgetIdToPriorityMap mapping of the widget ids to its priority. When re-ordering to
+     *   add a new item in the middle, provide the priorities of existing widgets as if the new item
+     *   existed, and then, call [onAddWidget] to add the new item at intended order.
+     */
+    open fun onReorderWidgets(widgetIdToPriorityMap: Map<Int, Int>) {}
 
-    /** Called as the UI requests opening the widget editor. */
-    open fun onOpenWidgetEditor() {}
+    /** Called as the UI requests opening the widget editor with an optional preselected widget. */
+    open fun onOpenWidgetEditor(preselectedKey: String? = null) {}
+
+    /** Called as the UI requests to dismiss the CTA tile. */
+    open fun onDismissCtaTile() {}
+
+    /** Called as the user starts dragging a widget to reorder. */
+    open fun onReorderWidgetStart() {}
+
+    /** Called as the user finishes dragging a widget to reorder. */
+    open fun onReorderWidgetEnd() {}
+
+    /** Called as the user cancels dragging a widget to reorder. */
+    open fun onReorderWidgetCancel() {}
+
+    /** Set the key of the currently selected item */
+    fun setSelectedKey(key: String?) {
+        _selectedKey.value = key
+    }
 }

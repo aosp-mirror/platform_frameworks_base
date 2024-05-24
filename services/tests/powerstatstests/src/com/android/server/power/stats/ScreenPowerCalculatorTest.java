@@ -25,6 +25,7 @@ import android.app.ActivityManager;
 import android.os.BatteryConsumer;
 import android.os.Process;
 import android.os.UidBatteryConsumer;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.view.Display;
 
 import androidx.test.filters.SmallTest;
@@ -38,14 +39,18 @@ import org.junit.runner.RunWith;
 @SmallTest
 @SuppressWarnings("GuardedBy")
 public class ScreenPowerCalculatorTest {
+    @Rule(order = 0)
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
+
     private static final double PRECISION = 0.00001;
     private static final int APP_UID1 = Process.FIRST_APPLICATION_UID + 42;
     private static final int APP_UID2 = Process.FIRST_APPLICATION_UID + 43;
     private static final long MINUTE_IN_MS = 60 * 1000;
     private static final long MINUTE_IN_US = 60 * 1000 * 1000;
-    private static final long HOUR_IN_MS = 60 * MINUTE_IN_MS;
 
-    @Rule
+    @Rule(order = 1)
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
             .setAveragePowerForOrdinal(POWER_GROUP_DISPLAY_SCREEN_ON, 0, 36.0)
             .setAveragePowerForOrdinal(POWER_GROUP_DISPLAY_SCREEN_FULL, 0, 48.0)

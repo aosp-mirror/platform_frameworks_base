@@ -59,6 +59,10 @@ class TalkbackShortcutController {
         final Set<ComponentName> enabledServices =
                 AccessibilityUtils.getEnabledServicesFromSettings(mContext, userId);
         ComponentName componentName = getTalkbackComponent();
+        if (componentName == null) {
+            return false;
+        }
+
         boolean isTalkbackAlreadyEnabled = enabledServices.contains(componentName);
 
         if (isTalkBackShortcutGestureEnabled()) {
@@ -67,7 +71,7 @@ class TalkbackShortcutController {
                     isTalkbackAlreadyEnabled);
 
             // log stem triple press telemetry if it's a talkback enabled event.
-            if (componentName != null && isTalkbackAlreadyEnabled) {
+            if (isTalkbackAlreadyEnabled) {
                 logStemTriplePressAccessibilityTelemetry(componentName);
             }
         }

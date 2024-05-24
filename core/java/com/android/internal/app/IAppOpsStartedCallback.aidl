@@ -18,6 +18,6 @@ package com.android.internal.app;
 
 // Iterface to observe op starts
 oneway interface IAppOpsStartedCallback {
-    void opStarted(int op, int uid, String packageName, String attributionTag, int flags, int mode,
-    int startedType, int attributionFlags, int attributionChainId);
+    void opStarted(int op, int uid, String packageName, String attributionTag, int virtualDeviceId,
+     int flags, int mode, int startedType, int attributionFlags, int attributionChainId);
 }

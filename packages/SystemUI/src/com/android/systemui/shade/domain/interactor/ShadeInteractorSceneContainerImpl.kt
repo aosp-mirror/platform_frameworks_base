@@ -16,11 +16,12 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -45,9 +46,9 @@ constructor(
     sceneInteractor: SceneInteractor,
     sharedNotificationContainerInteractor: SharedNotificationContainerInteractor,
 ) : BaseShadeInteractor {
-    override val shadeExpansion: Flow<Float> = sceneBasedExpansion(sceneInteractor, SceneKey.Shade)
+    override val shadeExpansion: Flow<Float> = sceneBasedExpansion(sceneInteractor, Scenes.Shade)
 
-    private val sceneBasedQsExpansion = sceneBasedExpansion(sceneInteractor, SceneKey.QuickSettings)
+    private val sceneBasedQsExpansion = sceneBasedExpansion(sceneInteractor, Scenes.QuickSettings)
 
     override val qsExpansion: StateFlow<Float> =
         combine(
@@ -75,7 +76,7 @@ constructor(
                 when (state) {
                     is ObservableTransitionState.Idle -> false
                     is ObservableTransitionState.Transition ->
-                        state.toScene == SceneKey.QuickSettings && state.fromScene != SceneKey.Shade
+                        state.toScene == Scenes.QuickSettings && state.fromScene != Scenes.Shade
                 }
             }
             .distinctUntilChanged()
@@ -84,7 +85,7 @@ constructor(
         sceneInteractor.transitionState
             .map { state ->
                 when (state) {
-                    is ObservableTransitionState.Idle -> state.scene == SceneKey.QuickSettings
+                    is ObservableTransitionState.Idle -> state.scene == Scenes.QuickSettings
                     is ObservableTransitionState.Transition -> false
                 }
             }
@@ -100,16 +101,16 @@ constructor(
             .stateIn(scope, SharingStarted.Eagerly, false)
 
     override val isUserInteractingWithShade: Flow<Boolean> =
-        sceneBasedInteracting(sceneInteractor, SceneKey.Shade)
+        sceneBasedInteracting(sceneInteractor, Scenes.Shade)
 
     override val isUserInteractingWithQs: Flow<Boolean> =
-        sceneBasedInteracting(sceneInteractor, SceneKey.QuickSettings)
+        sceneBasedInteracting(sceneInteractor, Scenes.QuickSettings)
 
     /**
      * Returns a flow that uses scene transition progress to and from a scene that is pulled down
      * from the top of the screen to a 0-1 expansion amount float.
      */
-    internal fun sceneBasedExpansion(sceneInteractor: SceneInteractor, sceneKey: SceneKey) =
+    fun sceneBasedExpansion(sceneInteractor: SceneInteractor, sceneKey: SceneKey) =
         sceneInteractor.transitionState
             .flatMapLatest { state ->
                 when (state) {
@@ -135,7 +136,7 @@ constructor(
      * Returns a flow that uses scene transition data to determine whether the user is interacting
      * with a scene that is pulled down from the top of the screen.
      */
-    internal fun sceneBasedInteracting(sceneInteractor: SceneInteractor, sceneKey: SceneKey) =
+    fun sceneBasedInteracting(sceneInteractor: SceneInteractor, sceneKey: SceneKey) =
         sceneInteractor.transitionState
             .map { state ->
                 when (state) {

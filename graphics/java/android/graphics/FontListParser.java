@@ -16,10 +16,6 @@
 
 package android.graphics;
 
-import static android.graphics.fonts.FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_NONE;
-import static android.graphics.fonts.FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ITAL;
-import static android.graphics.fonts.FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ONLY;
-import static android.graphics.fonts.FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_TWO_FONTS_WGHT;
 import static android.text.FontConfig.NamedFamilyList;
 
 import android.annotation.NonNull;
@@ -32,7 +28,6 @@ import android.os.Build;
 import android.os.LocaleList;
 import android.text.FontConfig;
 import android.util.ArraySet;
-import android.util.Log;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -65,6 +60,7 @@ public class FontListParser {
     private static final String VARIANT_ELEGANT = "elegant";
 
     // XML constants for Font.
+    public static final String ATTR_SUPPORTED_AXES = "supportedAxes";
     public static final String ATTR_INDEX = "index";
     public static final String ATTR_WEIGHT = "weight";
     public static final String ATTR_POSTSCRIPT_NAME = "postScriptName";
@@ -77,6 +73,10 @@ public class FontListParser {
     // XML constants for FontVariationAxis.
     public static final String ATTR_TAG = "tag";
     public static final String ATTR_STYLEVALUE = "stylevalue";
+
+    // The tag string for variable font type resolution.
+    private static final String TAG_WGHT = "wght";
+    private static final String TAG_ITAL = "ital";
 
     /* Parse fallback list (no names) */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -263,7 +263,6 @@ public class FontListParser {
         final String lang = parser.getAttributeValue("", "lang");
         final String variant = parser.getAttributeValue(null, "variant");
         final String ignore = parser.getAttributeValue(null, "ignore");
-        final String varFamilyTypeStr = parser.getAttributeValue(null, "varFamilyType");
         final List<FontConfig.Font> fonts = new ArrayList<>();
         while (keepReading(parser)) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
@@ -286,45 +285,12 @@ public class FontListParser {
                 intVariant = FontConfig.FontFamily.VARIANT_ELEGANT;
             }
         }
-        int varFamilyType = VARIABLE_FONT_FAMILY_TYPE_NONE;
-        if (varFamilyTypeStr != null) {
-            varFamilyType = Integer.parseInt(varFamilyTypeStr);
-            if (varFamilyType <= -1 || varFamilyType > 3) {
-                Log.e(TAG, "Error: unexpected varFamilyType value: " + varFamilyTypeStr);
-                varFamilyType = VARIABLE_FONT_FAMILY_TYPE_NONE;
-            }
-
-            // validation but don't read font content for performance reasons.
-            switch (varFamilyType) {
-                case VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ONLY:
-                    if (fonts.size() != 1) {
-                        Log.e(TAG, "Error: Single font support wght axis, but two or more fonts are"
-                                + " included in the font family.");
-                        varFamilyType = VARIABLE_FONT_FAMILY_TYPE_NONE;
-                    }
-                    break;
-                case VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ITAL:
-                    if (fonts.size() != 1) {
-                        Log.e(TAG, "Error: Single font support both ital and wght axes, but two or"
-                                + " more fonts are included in the font family.");
-                        varFamilyType = VARIABLE_FONT_FAMILY_TYPE_NONE;
-                    }
-                    break;
-                case VARIABLE_FONT_FAMILY_TYPE_TWO_FONTS_WGHT:
-                    if (fonts.size() != 2) {
-                        Log.e(TAG, "Error: two fonts that support wght axis, but one or three or"
-                                + " more fonts are included in the font family.");
-                        varFamilyType = VARIABLE_FONT_FAMILY_TYPE_NONE;
-                    }
-            }
-        }
 
         boolean skip = (ignore != null && (ignore.equals("true") || ignore.equals("1")));
         if (skip || fonts.isEmpty()) {
             return null;
         }
-        return new FontConfig.FontFamily(fonts, LocaleList.forLanguageTags(lang), intVariant,
-                varFamilyType);
+        return new FontConfig.FontFamily(fonts, LocaleList.forLanguageTags(lang), intVariant);
     }
 
     private static void throwIfAttributeExists(String attrName, XmlPullParser parser) {
@@ -407,6 +373,7 @@ public class FontListParser {
         boolean isItalic = STYLE_ITALIC.equals(parser.getAttributeValue(null, ATTR_STYLE));
         String fallbackFor = parser.getAttributeValue(null, ATTR_FALLBACK_FOR);
         String postScriptName = parser.getAttributeValue(null, ATTR_POSTSCRIPT_NAME);
+        final String supportedAxes = parser.getAttributeValue(null, ATTR_SUPPORTED_AXES);
         StringBuilder filename = new StringBuilder();
         while (keepReading(parser)) {
             if (parser.getEventType() == XmlPullParser.TEXT) {
@@ -421,6 +388,18 @@ public class FontListParser {
             }
         }
         String sanitizedName = FILENAME_WHITESPACE_PATTERN.matcher(filename).replaceAll("");
+
+        int varTypeAxes = 0;
+        if (supportedAxes != null) {
+            for (String tag : supportedAxes.split(",")) {
+                String strippedTag = tag.strip();
+                if (strippedTag.equals(TAG_WGHT)) {
+                    varTypeAxes |= FontConfig.Font.VAR_TYPE_AXES_WGHT;
+                } else if (strippedTag.equals(TAG_ITAL)) {
+                    varTypeAxes |= FontConfig.Font.VAR_TYPE_AXES_ITAL;
+                }
+            }
+        }
 
         if (postScriptName == null) {
             // If post script name was not provided, assume the file name is same to PostScript
@@ -462,7 +441,8 @@ public class FontListParser {
                 ),
                 index,
                 varSettings,
-                fallbackFor);
+                fallbackFor,
+                varTypeAxes);
     }
 
     private static String findUpdatedFontFile(String psName,

@@ -22,7 +22,6 @@ import static android.net.wifi.WifiManager.WIFI_STATE_DISABLED;
 import static android.net.wifi.WifiManager.WIFI_STATE_ENABLED;
 
 import android.annotation.AnyThread;
-import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -34,6 +33,7 @@ import android.os.Process;
 import android.util.Log;
 
 import androidx.annotation.GuardedBy;
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.annotation.WorkerThread;
 

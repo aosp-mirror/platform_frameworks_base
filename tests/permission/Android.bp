@@ -20,6 +20,7 @@ android_test {
         "androidx.test.runner",
         "junit",
         "platform-test-annotations",
+        "androidx.test.rules",
     ],
     platform_apis: true,
     test_suites: ["device-tests"],

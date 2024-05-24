@@ -17,6 +17,7 @@
 package com.android.systemui.media.controls.util
 
 import com.android.systemui.Flags
+import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
 
 /** Helper for reading or using the media_in_scene_container flag state. */
@@ -24,6 +25,10 @@ import com.android.systemui.flags.RefactorFlagUtils
 object MediaInSceneContainerFlag {
     /** The aconfig flag name */
     const val FLAG_NAME = Flags.FLAG_MEDIA_IN_SCENE_CONTAINER
+
+    /** A token used for dependency declaration */
+    val token: FlagToken
+        get() = FlagToken(FLAG_NAME, isEnabled)
 
     /** Is the flag enabled? */
     @JvmStatic

@@ -801,6 +801,20 @@ public class AuthControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOnBiometricPromptDismissedCallback_hideAuthenticationDialog() {
+        // GIVEN a callback is registered
+        AuthController.Callback callback = mock(AuthController.Callback.class);
+        mAuthController.addCallback(callback);
+
+        // WHEN dialog is shown and then dismissed
+        showDialog(new int[]{1} /* sensorIds */, false /* credentialAllowed */);
+        mAuthController.hideAuthenticationDialog(mAuthController.mCurrentDialog.getRequestId());
+
+        // THEN callback should be received
+        verify(callback).onBiometricPromptDismissed();
+    }
+
+    @Test
     public void testSubscribesToLogContext() {
         mAuthController.setBiometricContextListener(mContextListener);
         verify(mLogContextInteractor).addBiometricContextListener(same(mContextListener));
@@ -923,14 +937,14 @@ public class AuthControllerTest extends SysuiTestCase {
         doReturn(500).when(mResources)
                 .getDimensionPixelSize(eq(com.android.systemui.res.R.dimen
                         .physical_fingerprint_sensor_center_screen_location_y));
-        mAuthController.onConfigurationChanged(null /* newConfig */);
+        mAuthController.onConfigChanged(null /* newConfig */);
 
         final Point firstFpLocation = mAuthController.getFingerprintSensorLocation();
 
         doReturn(1000).when(mResources)
                 .getDimensionPixelSize(eq(com.android.systemui.res.R.dimen
                         .physical_fingerprint_sensor_center_screen_location_y));
-        mAuthController.onConfigurationChanged(null /* newConfig */);
+        mAuthController.onConfigChanged(null /* newConfig */);
 
         assertNotSame(firstFpLocation, mAuthController.getFingerprintSensorLocation());
     }

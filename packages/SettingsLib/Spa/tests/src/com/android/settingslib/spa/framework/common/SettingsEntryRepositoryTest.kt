@@ -22,6 +22,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spa.framework.util.genEntryId
 import com.android.settingslib.spa.framework.util.genPageId
 import com.android.settingslib.spa.tests.testutils.SpaEnvironmentForTest
+import com.android.settingslib.spa.tests.testutils.SppDialog
 import com.android.settingslib.spa.tests.testutils.SppHome
 import com.android.settingslib.spa.tests.testutils.SppLayer1
 import com.android.settingslib.spa.tests.testutils.SppLayer2
@@ -39,26 +40,21 @@ class SettingsEntryRepositoryTest {
     @Test
     fun testGetPageWithEntry() {
         val pageWithEntry = entryRepository.getAllPageWithEntry()
-        assertThat(pageWithEntry.size).isEqualTo(3)
-        assertThat(
-            entryRepository.getPageWithEntry(genPageId("SppHome"))
-                ?.entries?.size
-        ).isEqualTo(1)
-        assertThat(
-            entryRepository.getPageWithEntry(genPageId("SppLayer1"))
-                ?.entries?.size
-        ).isEqualTo(3)
-        assertThat(
-            entryRepository.getPageWithEntry(genPageId("SppLayer2"))
-                ?.entries?.size
-        ).isEqualTo(2)
+
+        assertThat(pageWithEntry).hasSize(4)
+        assertThat(entryRepository.getPageWithEntry(genPageId("SppHome"))?.entries)
+            .hasSize(2)
+        assertThat(entryRepository.getPageWithEntry(genPageId("SppLayer1"))?.entries)
+            .hasSize(3)
+        assertThat(entryRepository.getPageWithEntry(genPageId("SppLayer2"))?.entries)
+            .hasSize(2)
         assertThat(entryRepository.getPageWithEntry(genPageId("SppWithParam"))).isNull()
     }
 
     @Test
     fun testGetEntry() {
         val entry = entryRepository.getAllEntries()
-        assertThat(entry.size).isEqualTo(7)
+        assertThat(entry).hasSize(8)
         assertThat(
             entryRepository.getEntry(
                 genEntryId(
@@ -86,6 +82,16 @@ class SettingsEntryRepositoryTest {
                     SppLayer2.createSettingsPage(),
                     SppLayer1.createSettingsPage(),
                     SppLayer2.createSettingsPage(),
+                )
+            )
+        ).isNotNull()
+        assertThat(
+            entryRepository.getEntry(
+                genEntryId(
+                    "INJECT",
+                    SppDialog.createSettingsPage(),
+                    SppHome.createSettingsPage(),
+                    SppDialog.createSettingsPage(),
                 )
             )
         ).isNotNull()

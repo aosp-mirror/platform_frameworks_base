@@ -1,9 +1,9 @@
 package com.android.settingslib;
 
 import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_USER_LABEL;
+import static android.webkit.Flags.updateServiceV2;
 
 import android.annotation.ColorInt;
-import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
@@ -23,10 +23,10 @@ import android.graphics.ColorFilter;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.Drawable;
-import android.hardware.usb.flags.Flags;
 import android.hardware.usb.UsbManager;
 import android.hardware.usb.UsbPort;
 import android.hardware.usb.UsbPortStatus;
+import android.hardware.usb.flags.Flags;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.net.NetworkCapabilities;
@@ -35,18 +35,25 @@ import android.net.vcn.VcnTransportInfo;
 import android.net.wifi.WifiInfo;
 import android.os.BatteryManager;
 import android.os.Build;
+import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.print.PrintManager;
 import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.webkit.IWebViewUpdateService;
+import android.webkit.WebViewFactory;
+import android.webkit.WebViewProviderInfo;
+import android.webkit.WebViewUpdateManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
@@ -61,21 +68,35 @@ import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.settingslib.utils.BuildCompatUtils;
 
 import java.text.NumberFormat;
+import java.time.Duration;
 import java.util.List;
 
 public class Utils {
 
-    @VisibleForTesting
-    static final String STORAGE_MANAGER_ENABLED_PROPERTY =
-            "ro.storage_manager.enabled";
+    private static final String TAG = "Utils";
 
     public static final String INCOMPATIBLE_CHARGER_WARNING_DISABLED =
             "incompatible_charger_warning_disabled";
+    public static final String WIRELESS_CHARGING_NOTIFICATION_TIMESTAMP =
+            "wireless_charging_notification_timestamp";
+
+    @VisibleForTesting
+    static final String STORAGE_MANAGER_ENABLED_PROPERTY = "ro.storage_manager.enabled";
+
+    @VisibleForTesting static final long WIRELESS_CHARGING_DEFAULT_TIMESTAMP = -1L;
+
+    @VisibleForTesting
+    static final long WIRELESS_CHARGING_NOTIFICATION_THRESHOLD_MILLIS =
+            Duration.ofDays(30).toMillis();
+
+    @VisibleForTesting
+    static final String WIRELESS_CHARGING_WARNING_ENABLED = "wireless_charging_warning_enabled";
 
     private static Signature[] sSystemSignature;
     private static String sPermissionControllerPackageName;
     private static String sServicesSystemSharedLibPackageName;
     private static String sSharedSystemSharedLibPackageName;
+    private static String sDefaultWebViewPackageName;
 
     static final int[] WIFI_PIE = {
         com.android.internal.R.drawable.ic_wifi_signal_0,
@@ -93,19 +114,19 @@ public class Utils {
         R.drawable.ic_show_x_wifi_signal_4
     };
 
-    public static void updateLocationEnabled(Context context, boolean enabled, int userId,
-            int source) {
+    /** Update the location enable state. */
+    public static void updateLocationEnabled(
+            @NonNull Context context, boolean enabled, int userId, int source) {
         Settings.Secure.putIntForUser(
-                context.getContentResolver(), Settings.Secure.LOCATION_CHANGER, source,
-                userId);
+                context.getContentResolver(), Settings.Secure.LOCATION_CHANGER, source, userId);
 
         LocationManager locationManager = context.getSystemService(LocationManager.class);
         locationManager.setLocationEnabledForUser(enabled, UserHandle.of(userId));
     }
 
     /**
-     * Return string resource that best describes combination of tethering
-     * options available on this device.
+     * Return string resource that best describes combination of tethering options available on this
+     * device.
      */
     public static int getTetheringLabel(TetheringManager tm) {
         String[] usbRegexs = tm.getTetherableUsbRegexs();
@@ -133,14 +154,12 @@ public class Utils {
         }
     }
 
-    /**
-     * Returns a label for the user, in the form of "User: user name" or "Work profile".
-     */
+    /** Returns a label for the user, in the form of "User: user name" or "Work profile". */
     public static String getUserLabel(Context context, UserInfo info) {
         String name = info != null ? info.name : null;
         if (info.isManagedProfile()) {
             // We use predefined values for managed profiles
-            return  BuildCompatUtils.isAtLeastT()
+            return BuildCompatUtils.isAtLeastT()
                     ? getUpdatableManagedUserTitle(context)
                     : context.getString(R.string.managed_user_title);
         } else if (info.isGuest()) {
@@ -156,14 +175,14 @@ public class Utils {
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private static String getUpdatableManagedUserTitle(Context context) {
-        return context.getSystemService(DevicePolicyManager.class).getResources().getString(
-                WORK_PROFILE_USER_LABEL,
-                () -> context.getString(R.string.managed_user_title));
+        return context.getSystemService(DevicePolicyManager.class)
+                .getResources()
+                .getString(
+                        WORK_PROFILE_USER_LABEL,
+                        () -> context.getString(R.string.managed_user_title));
     }
 
-    /**
-     * Returns a circular icon for a user.
-     */
+    /** Returns a circular icon for a user. */
     public static Drawable getUserIcon(Context context, UserManager um, UserInfo user) {
         final int iconSize = UserIconDrawable.getDefaultSize(context);
         if (user.isManagedProfile()) {
@@ -177,12 +196,14 @@ public class Utils {
                 return new UserIconDrawable(iconSize).setIcon(icon).bake();
             }
         }
-        return new UserIconDrawable(iconSize).setIconDrawable(
-                UserIcons.getDefaultUserIcon(context.getResources(), user.id, /* light= */ false))
+        return new UserIconDrawable(iconSize)
+                .setIconDrawable(
+                        UserIcons.getDefaultUserIcon(
+                                context.getResources(), user.id, /* light= */ false))
                 .bake();
     }
 
-    /** Formats a double from 0.0..100.0 with an option to round **/
+    /** Formats a double from 0.0..100.0 with an option to round */
     public static String formatPercentage(double percentage, boolean round) {
         final int localPercentage = round ? Math.round((float) percentage) : (int) percentage;
         return formatPercentage(localPercentage);
@@ -214,23 +235,27 @@ public class Utils {
      *
      * @param context the context
      * @param batteryChangedIntent battery broadcast intent received from {@link
-     *                             Intent.ACTION_BATTERY_CHANGED}.
+     *     Intent.ACTION_BATTERY_CHANGED}.
      * @param compactStatus to present compact battery charging string if {@code true}
      * @return battery status string
      */
-    public static String getBatteryStatus(Context context, Intent batteryChangedIntent,
-            boolean compactStatus) {
-        final int status = batteryChangedIntent.getIntExtra(BatteryManager.EXTRA_STATUS,
-                BatteryManager.BATTERY_STATUS_UNKNOWN);
+    @NonNull
+    public static String getBatteryStatus(
+            @NonNull Context context, @NonNull Intent batteryChangedIntent, boolean compactStatus) {
+        final int status =
+                batteryChangedIntent.getIntExtra(
+                        BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_UNKNOWN);
         final Resources res = context.getResources();
 
         String statusString = res.getString(R.string.battery_info_status_unknown);
         final BatteryStatus batteryStatus = new BatteryStatus(batteryChangedIntent);
 
         if (batteryStatus.isCharged()) {
-            statusString = res.getString(compactStatus
-                    ? R.string.battery_info_status_full_charged
-                    : R.string.battery_info_status_full);
+            statusString =
+                    res.getString(
+                            compactStatus
+                                    ? R.string.battery_info_status_full_charged
+                                    : R.string.battery_info_status_full);
         } else {
             if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
                 if (compactStatus) {
@@ -238,12 +263,12 @@ public class Utils {
                 } else if (batteryStatus.isPluggedInWired()) {
                     switch (batteryStatus.getChargingSpeed(context)) {
                         case BatteryStatus.CHARGING_FAST:
-                            statusString = res.getString(
-                                    R.string.battery_info_status_charging_fast);
+                            statusString =
+                                    res.getString(R.string.battery_info_status_charging_fast);
                             break;
                         case BatteryStatus.CHARGING_SLOWLY:
-                            statusString = res.getString(
-                                    R.string.battery_info_status_charging_slow);
+                            statusString =
+                                    res.getString(R.string.battery_info_status_charging_slow);
                             break;
                         default:
                             statusString = res.getString(R.string.battery_info_status_charging);
@@ -303,7 +328,7 @@ public class Utils {
 
     @ColorInt
     public static int applyAlphaAttr(Context context, int attr, int inputColor) {
-        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        TypedArray ta = context.obtainStyledAttributes(new int[] {attr});
         float alpha = ta.getFloat(0, 0);
         ta.recycle();
         return applyAlpha(alpha, inputColor);
@@ -312,7 +337,10 @@ public class Utils {
     @ColorInt
     public static int applyAlpha(float alpha, int inputColor) {
         alpha *= Color.alpha(inputColor);
-        return Color.argb((int) (alpha), Color.red(inputColor), Color.green(inputColor),
+        return Color.argb(
+                (int) (alpha),
+                Color.red(inputColor),
+                Color.green(inputColor),
                 Color.blue(inputColor));
     }
 
@@ -321,19 +349,17 @@ public class Utils {
         return getColorAttrDefaultColor(context, attr, 0);
     }
 
-    /**
-     * Get color styled attribute {@code attr}, default to {@code defValue} if not found.
-     */
+    /** Get color styled attribute {@code attr}, default to {@code defValue} if not found. */
     @ColorInt
     public static int getColorAttrDefaultColor(Context context, int attr, @ColorInt int defValue) {
-        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        TypedArray ta = context.obtainStyledAttributes(new int[] {attr});
         @ColorInt int colorAccent = ta.getColor(0, defValue);
         ta.recycle();
         return colorAccent;
     }
 
     public static ColorStateList getColorAttr(Context context, int attr) {
-        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        TypedArray ta = context.obtainStyledAttributes(new int[] {attr});
         ColorStateList stateList = null;
         try {
             stateList = ta.getColorStateList(0);
@@ -348,35 +374,38 @@ public class Utils {
     }
 
     public static int getThemeAttr(Context context, int attr, int defaultValue) {
-        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        TypedArray ta = context.obtainStyledAttributes(new int[] {attr});
         int theme = ta.getResourceId(0, defaultValue);
         ta.recycle();
         return theme;
     }
 
     public static Drawable getDrawable(Context context, int attr) {
-        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        TypedArray ta = context.obtainStyledAttributes(new int[] {attr});
         Drawable drawable = ta.getDrawable(0);
         ta.recycle();
         return drawable;
     }
 
     /**
-    * Create a color matrix suitable for a ColorMatrixColorFilter that modifies only the color but
-    * preserves the alpha for a given drawable
-    * @param color
-    * @return a color matrix that uses the source alpha and given color
-    */
+     * Create a color matrix suitable for a ColorMatrixColorFilter that modifies only the color but
+     * preserves the alpha for a given drawable
+     *
+     * @return a color matrix that uses the source alpha and given color
+     */
     public static ColorMatrix getAlphaInvariantColorMatrixForColor(@ColorInt int color) {
         int r = Color.red(color);
         int g = Color.green(color);
         int b = Color.blue(color);
 
-        ColorMatrix cm = new ColorMatrix(new float[] {
-                0, 0, 0, 0, r,
-                0, 0, 0, 0, g,
-                0, 0, 0, 0, b,
-                0, 0, 0, 1, 0 });
+        ColorMatrix cm =
+                new ColorMatrix(
+                        new float[] {
+                            0, 0, 0, 0, r,
+                            0, 0, 0, 0, g,
+                            0, 0, 0, 0, b,
+                            0, 0, 0, 1, 0
+                        });
 
         return cm;
     }
@@ -385,7 +414,7 @@ public class Utils {
      * Create a ColorMatrixColorFilter to tint a drawable but retain its alpha characteristics
      *
      * @return a ColorMatrixColorFilter which changes the color of the output but is invariant on
-     * the source alpha
+     *     the source alpha
      */
     public static ColorFilter getAlphaInvariantColorFilterForColor(@ColorInt int color) {
         return new ColorMatrixColorFilter(getAlphaInvariantColorMatrixForColor(color));
@@ -394,16 +423,17 @@ public class Utils {
     /**
      * Determine whether a package is a "system package", in which case certain things (like
      * disabling notifications or disabling the package altogether) should be disallowed.
-     * <p>
-     * Note: This function is just for UI treatment, and should not be used for security purposes.
      *
-     * @deprecated Use {@link ApplicationInfo#isSignedWithPlatformKey()} and
-     * {@link #isEssentialPackage} instead.
+     * <p>Note: This function is just for UI treatment, and should not be used for security
+     * purposes.
+     *
+     * @deprecated Use {@link ApplicationInfo#isSignedWithPlatformKey()} and {@link
+     *     #isEssentialPackage} instead.
      */
     @Deprecated
     public static boolean isSystemPackage(Resources resources, PackageManager pm, PackageInfo pkg) {
         if (sSystemSignature == null) {
-            sSystemSignature = new Signature[]{getSystemSignature(pm)};
+            sSystemSignature = new Signature[] {getSystemSignature(pm)};
         }
         return (sSystemSignature[0] != null && sSystemSignature[0].equals(getFirstSignature(pkg)))
                 || isEssentialPackage(resources, pm, pkg.packageName);
@@ -427,8 +457,8 @@ public class Utils {
 
     /**
      * Determine whether a package is a "essential package".
-     * <p>
-     * In which case certain things (like disabling the package) should be disallowed.
+     *
+     * <p>In which case certain things (like disabling the package) should be disallowed.
      */
     public static boolean isEssentialPackage(
             Resources resources, PackageManager pm, String packageName) {
@@ -445,6 +475,7 @@ public class Utils {
                 || packageName.equals(sServicesSystemSharedLibPackageName)
                 || packageName.equals(sSharedSystemSharedLibPackageName)
                 || packageName.equals(PrintManager.PRINT_SPOOLER_PACKAGE_NAME)
+                || (updateServiceV2() && packageName.equals(getDefaultWebViewPackageName()))
                 || isDeviceProvisioningPackage(resources, packageName);
     }
 
@@ -453,9 +484,40 @@ public class Utils {
      * returns {@code false}.
      */
     public static boolean isDeviceProvisioningPackage(Resources resources, String packageName) {
-        String deviceProvisioningPackage = resources.getString(
-                com.android.internal.R.string.config_deviceProvisioningPackage);
+        String deviceProvisioningPackage =
+                resources.getString(com.android.internal.R.string.config_deviceProvisioningPackage);
         return deviceProvisioningPackage != null && deviceProvisioningPackage.equals(packageName);
+    }
+
+    /** Fetch the package name of the default WebView provider. */
+    @Nullable
+    private static String getDefaultWebViewPackageName() {
+        if (sDefaultWebViewPackageName != null) {
+            return sDefaultWebViewPackageName;
+        }
+
+        WebViewProviderInfo provider = null;
+
+        if (android.webkit.Flags.updateServiceIpcWrapper()) {
+            WebViewUpdateManager manager = WebViewUpdateManager.getInstance();
+            if (manager != null) {
+                provider = manager.getDefaultWebViewPackage();
+            }
+        } else {
+            try {
+                IWebViewUpdateService service = WebViewFactory.getUpdateService();
+                if (service != null) {
+                    provider = service.getDefaultWebViewPackage();
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException when trying to fetch default WebView package Name", e);
+            }
+        }
+
+        if (provider != null) {
+            sDefaultWebViewPackageName = provider.packageName;
+        }
+        return sDefaultWebViewPackageName;
     }
 
     /**
@@ -471,8 +533,8 @@ public class Utils {
     /**
      * Returns the Wifi icon resource for a given RSSI level.
      *
-     * @param showX True if a connected Wi-Fi network has the problem which should show Pie+x
-     *              signal icon to users.
+     * @param showX True if a connected Wi-Fi network has the problem which should show Pie+x signal
+     *     icon to users.
      * @param level The number of bars to show (0-4)
      * @throws IllegalArgumentException if an invalid RSSI level is given.
      */
@@ -488,10 +550,7 @@ public class Utils {
         try {
             defaultDays =
                     resources.getInteger(
-                            com.android
-                                    .internal
-                                    .R
-                                    .integer
+                            com.android.internal.R.integer
                                     .config_storageManagerDaystoRetainDefault);
         } catch (Resources.NotFoundException e) {
             // We are likely in a test environment.
@@ -503,7 +562,7 @@ public class Utils {
         return !context.getSystemService(TelephonyManager.class).isDataCapable();
     }
 
-    /** Returns if the automatic storage management feature is turned on or not. **/
+    /** Returns if the automatic storage management feature is turned on or not. */
     public static boolean isStorageManagerEnabled(Context context) {
         boolean isDefaultOn;
         try {
@@ -511,15 +570,14 @@ public class Utils {
         } catch (Resources.NotFoundException e) {
             isDefaultOn = false;
         }
-        return Settings.Secure.getInt(context.getContentResolver(),
-                Settings.Secure.AUTOMATIC_STORAGE_MANAGER_ENABLED,
-                isDefaultOn ? 1 : 0)
+        return Settings.Secure.getInt(
+                        context.getContentResolver(),
+                        Settings.Secure.AUTOMATIC_STORAGE_MANAGER_ENABLED,
+                        isDefaultOn ? 1 : 0)
                 != 0;
     }
 
-    /**
-     * get that {@link AudioManager#getMode()} is in ringing/call/communication(VoIP) status.
-     */
+    /** get that {@link AudioManager#getMode()} is in ringing/call/communication(VoIP) status. */
     public static boolean isAudioModeOngoingCall(Context context) {
         final AudioManager audioManager = context.getSystemService(AudioManager.class);
         final int audioMode = audioManager.getMode();
@@ -529,8 +587,8 @@ public class Utils {
     }
 
     /**
-     * Return the service state is in-service or not.
-     * To make behavior consistent with SystemUI and Settings/AboutPhone/SIM status UI
+     * Return the service state is in-service or not. To make behavior consistent with SystemUI and
+     * Settings/AboutPhone/SIM status UI
      *
      * @param serviceState Service state. {@link ServiceState}
      */
@@ -549,13 +607,12 @@ public class Utils {
     }
 
     /**
-     * Return the combined service state.
-     * To make behavior consistent with SystemUI and Settings/AboutPhone/SIM status UI.
+     * Return the combined service state. To make behavior consistent with SystemUI and
+     * Settings/AboutPhone/SIM status UI.
      *
-     * This method returns a single service state int if either the voice reg state is
-     * {@link ServiceState#STATE_IN_SERVICE} or if data network is registered via a
-     * WWAN transport type. We consider the combined service state of an IWLAN network
-     * to be OOS.
+     * <p>This method returns a single service state int if either the voice reg state is {@link
+     * ServiceState#STATE_IN_SERVICE} or if data network is registered via a WWAN transport type. We
+     * consider the combined service state of an IWLAN network to be OOS.
      *
      * @param serviceState Service state. {@link ServiceState}
      */
@@ -586,9 +643,10 @@ public class Utils {
     // on either a WLAN or WWAN network. Since we want to exclude the WLAN network, we can
     // query the WWAN network directly and check for its registration state
     private static boolean isDataRegInWwanAndInService(ServiceState serviceState) {
-        final NetworkRegistrationInfo networkRegWwan = serviceState.getNetworkRegistrationInfo(
-                NetworkRegistrationInfo.DOMAIN_PS,
-                AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+        final NetworkRegistrationInfo networkRegWwan =
+                serviceState.getNetworkRegistrationInfo(
+                        NetworkRegistrationInfo.DOMAIN_PS,
+                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
 
         if (networkRegWwan == null) {
             return false;
@@ -601,8 +659,8 @@ public class Utils {
     public static Drawable getBadgedIcon(Context context, Drawable icon, UserHandle user) {
         int userType = UserIconInfo.TYPE_MAIN;
         try {
-            UserInfo ui = context.getSystemService(UserManager.class).getUserInfo(
-                    user.getIdentifier());
+            UserInfo ui =
+                    context.getSystemService(UserManager.class).getUserInfo(user.getIdentifier());
             if (ui != null) {
                 if (ui.isCloneProfile()) {
                     userType = UserIconInfo.TYPE_CLONED;
@@ -618,15 +676,16 @@ public class Utils {
         try (IconFactory iconFactory = IconFactory.obtain(context)) {
             return iconFactory
                     .createBadgedIconBitmap(
-                            icon,
-                            new IconOptions().setUser(new UserIconInfo(user, userType)))
+                            icon, new IconOptions().setUser(new UserIconInfo(user, userType)))
                     .newIcon(context);
         }
     }
 
     /** Get the {@link Drawable} that represents the app icon */
     public static Drawable getBadgedIcon(Context context, ApplicationInfo appInfo) {
-        return getBadgedIcon(context, appInfo.loadUnbadgedIcon(context.getPackageManager()),
+        return getBadgedIcon(
+                context,
+                appInfo.loadUnbadgedIcon(context.getPackageManager()),
                 UserHandle.getUserHandleForUid(appInfo.uid));
     }
 
@@ -637,10 +696,11 @@ public class Utils {
      * @param source bitmap to apply round corner.
      * @param cornerRadius corner radius value.
      */
-    public static Bitmap convertCornerRadiusBitmap(@NonNull Context context,
-            @NonNull Bitmap source, @NonNull float cornerRadius) {
-        final Bitmap roundedBitmap = Bitmap.createBitmap(source.getWidth(), source.getHeight(),
-                Bitmap.Config.ARGB_8888);
+    @NonNull
+    public static Bitmap convertCornerRadiusBitmap(
+            @NonNull Context context, @NonNull Bitmap source, @NonNull float cornerRadius) {
+        final Bitmap roundedBitmap =
+                Bitmap.createBitmap(source.getWidth(), source.getHeight(), Bitmap.Config.ARGB_8888);
         final RoundedBitmapDrawable drawable =
                 RoundedBitmapDrawableFactory.create(context.getResources(), source);
         drawable.setAntiAlias(true);
@@ -654,9 +714,6 @@ public class Utils {
     /**
      * Returns the WifiInfo for the underlying WiFi network of the VCN network, returns null if the
      * input NetworkCapabilities is not for a VCN network with underlying WiFi network.
-     *
-     * TODO(b/238425913): Move this method to be inside systemui not settingslib once we've migrated
-     *   off of {@link WifiStatusTracker} and {@link NetworkControllerImpl}.
      *
      * @param networkCapabilities NetworkCapabilities of the network.
      */
@@ -676,8 +733,9 @@ public class Utils {
         // Avoid the caller doesn't have permission to read the "Settings.Secure" data.
         try {
             // Whether the incompatible charger warning is disabled or not
-            if (Settings.Secure.getInt(context.getContentResolver(),
-                    INCOMPATIBLE_CHARGER_WARNING_DISABLED, 0) == 1) {
+            if (Settings.Secure.getInt(
+                            context.getContentResolver(), INCOMPATIBLE_CHARGER_WARNING_DISABLED, 0)
+                    == 1) {
                 Log.d(tag, "containsIncompatibleChargers: disabled");
                 return false;
             }
@@ -686,8 +744,7 @@ public class Utils {
             return false;
         }
 
-        final List<UsbPort> usbPortList =
-                context.getSystemService(UsbManager.class).getPorts();
+        final List<UsbPort> usbPortList = context.getSystemService(UsbManager.class).getPorts();
         if (usbPortList == null || usbPortList.isEmpty()) {
             return false;
         }
@@ -728,4 +785,85 @@ public class Utils {
         return false;
     }
 
+    /** Whether to show the wireless charging notification. */
+    public static boolean shouldShowWirelessChargingNotification(
+            @NonNull Context context, @NonNull String tag) {
+        try {
+            return shouldShowWirelessChargingNotificationInternal(context, tag);
+        } catch (Exception e) {
+            Log.e(tag, "shouldShowWirelessChargingNotification()", e);
+            return false;
+        }
+    }
+
+    /** Stores the timestamp of the wireless charging notification. */
+    public static void updateWirelessChargingNotificationTimestamp(
+            @NonNull Context context, long timestamp, @NonNull String tag) {
+        try {
+            Secure.putLong(
+                    context.getContentResolver(),
+                    WIRELESS_CHARGING_NOTIFICATION_TIMESTAMP,
+                    timestamp);
+        } catch (Exception e) {
+            Log.e(tag, "setWirelessChargingNotificationTimestamp()", e);
+        }
+    }
+
+    /** Whether to show the wireless charging warning in Settings. */
+    public static boolean shouldShowWirelessChargingWarningTip(
+            @NonNull Context context, @NonNull String tag) {
+        try {
+            return Secure.getInt(context.getContentResolver(), WIRELESS_CHARGING_WARNING_ENABLED, 0)
+                    == 1;
+        } catch (Exception e) {
+            Log.e(tag, "shouldShowWirelessChargingWarningTip()", e);
+        }
+        return false;
+    }
+
+    /** Stores the state of whether the wireless charging warning in Settings is enabled. */
+    public static void updateWirelessChargingWarningEnabled(
+            @NonNull Context context, boolean enabled, @NonNull String tag) {
+        try {
+            Secure.putInt(
+                    context.getContentResolver(),
+                    WIRELESS_CHARGING_WARNING_ENABLED,
+                    enabled ? 1 : 0);
+        } catch (Exception e) {
+            Log.e(tag, "setWirelessChargingWarningEnabled()", e);
+        }
+    }
+
+    private static boolean shouldShowWirelessChargingNotificationInternal(
+            @NonNull Context context, @NonNull String tag) {
+        final long lastNotificationTimeMillis =
+                Secure.getLong(
+                        context.getContentResolver(),
+                        WIRELESS_CHARGING_NOTIFICATION_TIMESTAMP,
+                        WIRELESS_CHARGING_DEFAULT_TIMESTAMP);
+        if (isWirelessChargingNotificationDisabled(lastNotificationTimeMillis)) {
+            return false;
+        }
+        if (isInitialWirelessChargingNotification(lastNotificationTimeMillis)) {
+            updateWirelessChargingNotificationTimestamp(context, System.currentTimeMillis(), tag);
+            updateWirelessChargingWarningEnabled(context, /* enabled= */ true, tag);
+            return true;
+        }
+        final long durationMillis = System.currentTimeMillis() - lastNotificationTimeMillis;
+        final boolean show = durationMillis > WIRELESS_CHARGING_NOTIFICATION_THRESHOLD_MILLIS;
+        Log.d(tag, "shouldShowWirelessChargingNotification = " + show);
+        if (show) {
+            updateWirelessChargingNotificationTimestamp(context, System.currentTimeMillis(), tag);
+            updateWirelessChargingWarningEnabled(context, /* enabled= */ true, tag);
+        }
+        return show;
+    }
+
+    private static boolean isWirelessChargingNotificationDisabled(long lastNotificationTimeMillis) {
+        return lastNotificationTimeMillis == Long.MIN_VALUE;
+    }
+
+    private static boolean isInitialWirelessChargingNotification(long lastNotificationTimeMillis) {
+        return lastNotificationTimeMillis == WIRELESS_CHARGING_DEFAULT_TIMESTAMP;
+    }
 }

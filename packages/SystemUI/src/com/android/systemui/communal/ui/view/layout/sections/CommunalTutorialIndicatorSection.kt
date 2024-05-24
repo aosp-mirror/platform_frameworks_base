@@ -47,7 +47,7 @@ constructor(
     private var communalTutorialIndicatorHandle: DisposableHandle? = null
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!communalInteractor.isCommunalEnabled) {
+        if (!communalInteractor.isCommunalEnabled.value) {
             return
         }
         val padding =
@@ -79,7 +79,7 @@ constructor(
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (!communalInteractor.isCommunalEnabled) {
+        if (!communalInteractor.isCommunalEnabled.value) {
             return
         }
         communalTutorialIndicatorHandle =
@@ -90,7 +90,7 @@ constructor(
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!communalInteractor.isCommunalEnabled) {
+        if (!communalInteractor.isCommunalEnabled.value) {
             return
         }
         val tutorialIndicatorId = R.id.communal_tutorial_indicator
@@ -120,6 +120,7 @@ constructor(
                 ConstraintSet.PARENT_ID,
                 ConstraintSet.BOTTOM
             )
+            setVisibility(tutorialIndicatorId, View.GONE)
         }
     }
 

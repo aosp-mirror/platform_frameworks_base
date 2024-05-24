@@ -22,7 +22,6 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
-import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger
 import com.android.systemui.statusbar.pipeline.mobile.ui.VerboseMobileViewLogger
@@ -31,6 +30,8 @@ import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -58,9 +59,8 @@ constructor(
     private val flags: FeatureFlagsClassic,
     @Application private val scope: CoroutineScope,
 ) {
-    @VisibleForTesting val mobileIconSubIdCache = mutableMapOf<Int, MobileIconViewModel>()
     @VisibleForTesting
-    val mobileIconInteractorSubIdCache = mutableMapOf<Int, MobileIconInteractor>()
+    val reuseCache = mutableMapOf<Int, Pair<MobileIconViewModel, CoroutineScope>>()
 
     val subscriptionIdsFlow: StateFlow<List<Int>> =
         interactor.filteredSubscriptions
@@ -109,24 +109,37 @@ constructor(
     }
 
     private fun commonViewModelForSub(subId: Int): MobileIconViewModelCommon {
-        return mobileIconSubIdCache[subId]
-            ?: MobileIconViewModel(
-                    subId,
-                    interactor.getMobileConnectionInteractorForSubId(subId),
-                    airplaneModeInteractor,
-                    constants,
-                    flags,
-                    scope,
-                )
-                .also { mobileIconSubIdCache[subId] = it }
+        return reuseCache.getOrPut(subId) { createViewModel(subId) }.first
     }
 
-    private fun invalidateCaches(subIds: List<Int>) {
-        val subIdsToRemove = mobileIconSubIdCache.keys.filter { !subIds.contains(it) }
-        subIdsToRemove.forEach { mobileIconSubIdCache.remove(it) }
+    private fun createViewModel(subId: Int): Pair<MobileIconViewModel, CoroutineScope> {
+        // Create a child scope so we can cancel it
+        val vmScope = scope.createChildScope()
+        val vm =
+            MobileIconViewModel(
+                subId,
+                interactor.getMobileConnectionInteractorForSubId(subId),
+                airplaneModeInteractor,
+                constants,
+                flags,
+                vmScope,
+            )
 
-        mobileIconInteractorSubIdCache.keys
+        return Pair(vm, vmScope)
+    }
+
+    private fun CoroutineScope.createChildScope() =
+        CoroutineScope(coroutineContext + Job(coroutineContext[Job]))
+
+    private fun invalidateCaches(subIds: List<Int>) {
+        reuseCache.keys
             .filter { !subIds.contains(it) }
-            .forEach { subId -> mobileIconInteractorSubIdCache.remove(subId) }
+            .forEach { id ->
+                reuseCache
+                    .remove(id)
+                    // Cancel the view model's scope after removing it
+                    ?.second
+                    ?.cancel()
+            }
     }
 }

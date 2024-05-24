@@ -27,6 +27,7 @@ import android.hardware.input.InputSensorInfo;
 import android.os.BatteryConsumer;
 import android.os.Process;
 import android.os.UidBatteryConsumer;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -40,6 +41,11 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class SensorPowerCalculatorTest {
+    @Rule(order = 0)
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
+
     private static final double PRECISION = 0.00001;
 
     private static final int SENSOR_HANDLE_1 = 1;
@@ -47,7 +53,7 @@ public class SensorPowerCalculatorTest {
 
     private static final int APP_UID = Process.FIRST_APPLICATION_UID + 42;
 
-    @Rule
+    @Rule(order = 1)
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule();
 
     @Test
@@ -60,10 +66,12 @@ public class SensorPowerCalculatorTest {
                 .thenReturn(List.of(sensor1, sensor2));
 
         final BatteryStatsImpl stats = mStatsRule.getBatteryStats();
-        stats.noteStartSensorLocked(APP_UID, SENSOR_HANDLE_1, 1000, 1000);
-        stats.noteStopSensorLocked(APP_UID, SENSOR_HANDLE_1, 2000, 2000);
-        stats.noteStartSensorLocked(APP_UID, SENSOR_HANDLE_2, 3000, 3000);
-        stats.noteStopSensorLocked(APP_UID, SENSOR_HANDLE_2, 5000, 5000);
+        synchronized (stats) {
+            stats.noteStartSensorLocked(APP_UID, SENSOR_HANDLE_1, 1000, 1000);
+            stats.noteStopSensorLocked(APP_UID, SENSOR_HANDLE_1, 2000, 2000);
+            stats.noteStartSensorLocked(APP_UID, SENSOR_HANDLE_2, 3000, 3000);
+            stats.noteStopSensorLocked(APP_UID, SENSOR_HANDLE_2, 5000, 5000);
+        }
 
         SensorPowerCalculator calculator = new SensorPowerCalculator(sensorManager);
 
@@ -84,11 +92,20 @@ public class SensorPowerCalculatorTest {
                 .isWithin(PRECISION).of(0.5);
     }
 
-    private Sensor createSensor(int handle, int type, double power) {
-        return new Sensor(new InputSensorInfo("name", "vendor", 0 /* version */,
-                handle, type, 100.0f /*maxRange */, 0.02f /* resolution */,
-                (float) power, 1000 /* minDelay */, 0 /* fifoReservedEventCount */,
-                0 /* fifoMaxEventCount */, "" /* stringType */, "" /* requiredPermission */,
-                0 /* maxDelay */, 0 /* flags */, 0 /* id */));
+    private Sensor createSensor(int handle, int type, float power) {
+        if (RavenwoodRule.isUnderRavenwood()) {
+            Sensor sensor = mock(Sensor.class);
+
+            when(sensor.getHandle()).thenReturn(handle);
+            when(sensor.getType()).thenReturn(type);
+            when(sensor.getPower()).thenReturn(power);
+            return sensor;
+        } else {
+            return new Sensor(new InputSensorInfo("name", "vendor", 0 /* version */,
+                    handle, type, 100.0f /*maxRange */, 0.02f /* resolution */,
+                    (float) power, 1000 /* minDelay */, 0 /* fifoReservedEventCount */,
+                    0 /* fifoMaxEventCount */, "" /* stringType */, "" /* requiredPermission */,
+                    0 /* maxDelay */, 0 /* flags */, 0 /* id */));
+        }
     }
 }

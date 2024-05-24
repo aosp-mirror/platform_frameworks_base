@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.os.Handler
-import android.platform.test.annotations.RequiresFlagsEnabled
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -30,6 +29,8 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
@@ -58,18 +59,18 @@ import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RequiresFlagsEnabled(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
 @SmallTest
 @RunWith(JUnit4::class)
 class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
     @JvmField @Rule var mockitoRule: MockitoRule = MockitoJUnit.rule()
 
-    @Mock private lateinit var faceAuthInteractor: KeyguardFaceAuthInteractor
+    @Mock private lateinit var faceAuthInteractor: DeviceEntryFaceAuthInteractor
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
 
     private val bouncerRepository = FakeKeyguardBouncerRepository()
     private val biometricSettingsRepository = FakeBiometricSettingsRepository()
+    private val deviceEntryFingerprintAuthRepository = FakeDeviceEntryFingerprintAuthRepository()
 
     private lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
     private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
@@ -80,6 +81,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
 
     @Before
     fun setup() {
+        mSetFlagsRule.enableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
         primaryBouncerInteractor =
             PrimaryBouncerInteractor(
                 bouncerRepository,
@@ -110,8 +112,9 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
             )
         underTest =
             DeviceEntrySideFpsOverlayInteractor(
+                testScope.backgroundScope,
                 mContext,
-                FakeDeviceEntryFingerprintAuthRepository(),
+                deviceEntryFingerprintAuthRepository,
                 primaryBouncerInteractor,
                 alternateBouncerInteractor,
                 keyguardUpdateMonitor
@@ -213,6 +216,30 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
 
             bouncerRepository.setAlternateVisible(false)
             assertThat(showIndicatorForDeviceEntry).isEqualTo(false)
+        }
+
+    @Test
+    fun ignoresDuplicateRequestsToShowIndicatorForDeviceEntry() =
+        testScope.runTest {
+            val showIndicatorForDeviceEntry by collectValues(underTest.showIndicatorForDeviceEntry)
+            runCurrent()
+
+            // Request to show indicator for primary bouncer showing
+            updatePrimaryBouncer(
+                isShowing = true,
+                isAnimatingAway = false,
+                fpsDetectionRunning = true,
+                isUnlockingWithFpAllowed = true
+            )
+
+            // Another request to show indicator for deviceEntryFingerprintAuthRepository update
+            deviceEntryFingerprintAuthRepository.setShouldUpdateIndicatorVisibility(true)
+
+            // Request to show indicator for alternate bouncer showing
+            bouncerRepository.setAlternateVisible(true)
+
+            // Ensure only one show request is sent
+            assertThat(showIndicatorForDeviceEntry).containsExactly(false, true)
         }
 
     private fun updatePrimaryBouncer(

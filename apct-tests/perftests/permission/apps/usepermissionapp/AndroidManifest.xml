@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android.perftests.appenumeration">
+
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
+    <uses-permission android:name="android.permission.RECORD_BACKGROUND_AUDIO" />
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.BACKGROUND_CAMERA" />
+    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
+    <uses-permission android:name="android.permission.BODY_SENSORS" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER_HINTS" />
+
+    <queries>
+        <package android:name="android.perftests.appenumeration0" />
+        <package android:name="android.perftests.appenumeration1" />
+        <package android:name="android.perftests.appenumeration2" />
+        <package android:name="android.perftests.appenumeration3" />
+        <package android:name="android.perftests.appenumeration4" />
+        <package android:name="android.perftests.appenumeration5" />
+        <package android:name="android.perftests.appenumeration6" />
+        <package android:name="android.perftests.appenumeration7" />
+        <package android:name="android.perftests.appenumeration8" />
+        <package android:name="android.perftests.appenumeration9" />
+        <package android:name="android.perftests.appenumeration10" />
+        <package android:name="android.perftests.appenumeration11" />
+        <package android:name="android.perftests.appenumeration12" />
+        <package android:name="android.perftests.appenumeration13" />
+        <package android:name="android.perftests.appenumeration14" />
+        <package android:name="android.perftests.appenumeration15" />
+        <package android:name="android.perftests.appenumeration16" />
+        <package android:name="android.perftests.appenumeration17" />
+        <package android:name="android.perftests.appenumeration18" />
+        <package android:name="android.perftests.appenumeration19" />
+        <package android:name="android.perftests.appenumeration20" />
+        <package android:name="android.perftests.appenumeration21" />
+        <package android:name="android.perftests.appenumeration22" />
+        <package android:name="android.perftests.appenumeration23" />
+        <package android:name="android.perftests.appenumeration24" />
+        <package android:name="android.perftests.appenumeration25" />
+        <package android:name="android.perftests.appenumeration26" />
+        <package android:name="android.perftests.appenumeration27" />
+        <package android:name="android.perftests.appenumeration28" />
+        <package android:name="android.perftests.appenumeration29" />
+    </queries>
+
+    <application android:hasCode="false" >
+        <activity android:name="android.perftests.utils.PerfTestActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.perftests.permission.PERFTEST" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

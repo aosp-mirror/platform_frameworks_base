@@ -11,7 +11,7 @@ import android.view.View
 import androidx.annotation.WorkerThread
 import com.android.internal.R
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.appops.AppOpsController
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.flags.FeatureFlags
@@ -175,7 +175,7 @@ class HeaderPrivacyIconsController @Inject constructor(
             startSafetyCenter.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             uiExecutor.execute {
                 activityStarter.startActivity(startSafetyCenter, true,
-                    ActivityLaunchAnimator.Controller.fromView(privacyChip))
+                    ActivityTransitionAnimator.Controller.fromView(privacyChip))
             }
         }
     }

@@ -37,7 +37,8 @@ class FakeConfigurationRepository @Inject constructor() : ConfigurationRepositor
         MutableSharedFlow<Unit>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     override val onConfigurationChange: Flow<Unit> = _onConfigurationChange.asSharedFlow()
 
-    private val _configurationChangeValues = MutableSharedFlow<Configuration>()
+    private val _configurationChangeValues =
+        MutableSharedFlow<Configuration>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     override val configurationValues: Flow<Configuration> =
         _configurationChangeValues.asSharedFlow()
 

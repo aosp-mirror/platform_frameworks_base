@@ -17,11 +17,11 @@
 package com.android.internal.os;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Xml;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 
@@ -49,20 +49,27 @@ public class MonotonicClock {
 
     private final AtomicFile mFile;
     private final Clock mClock;
-    private long mTimeshift;
+    private final long mTimeshift;
 
     public static final long UNDEFINED = -1;
 
     public MonotonicClock(File file) {
-        mFile = new AtomicFile(file);
-        mClock = Clock.SYSTEM_CLOCK;
-        read();
+        this (file, Clock.SYSTEM_CLOCK.elapsedRealtime(), Clock.SYSTEM_CLOCK);
     }
 
     public MonotonicClock(long monotonicTime, @NonNull Clock clock) {
+        this(null, monotonicTime, clock);
+    }
+
+    public MonotonicClock(@Nullable File file, long monotonicTime, @NonNull Clock clock) {
         mClock = clock;
-        mFile = null;
-        mTimeshift = monotonicTime - mClock.elapsedRealtime();
+        if (file != null) {
+            mFile = new AtomicFile(file);
+            mTimeshift = read(monotonicTime - mClock.elapsedRealtime());
+        } else {
+            mFile = null;
+            mTimeshift = monotonicTime - mClock.elapsedRealtime();
+        }
     }
 
     /**
@@ -81,15 +88,16 @@ public class MonotonicClock {
         return mTimeshift + elapsedRealtimeMs;
     }
 
-    private void read() {
+    private long read(long defaultTimeshift) {
         if (!mFile.exists()) {
-            return;
+            return defaultTimeshift;
         }
 
         try {
-            readXml(new ByteArrayInputStream(mFile.readFully()), Xml.newBinaryPullParser());
+            return readXml(new ByteArrayInputStream(mFile.readFully()), Xml.newBinaryPullParser());
         } catch (IOException e) {
             Log.e(TAG, "Cannot load monotonic clock from " + mFile.getBaseFile(), e);
+            return defaultTimeshift;
         }
     }
 
@@ -102,18 +110,21 @@ public class MonotonicClock {
             return;
         }
 
-        try (FileOutputStream out = mFile.startWrite()) {
+        FileOutputStream out = null;
+        try  {
+            out = mFile.startWrite();
             writeXml(out, Xml.newBinarySerializer());
+            mFile.finishWrite(out);
         } catch (IOException e) {
             Log.e(TAG, "Cannot write monotonic clock to " + mFile.getBaseFile(), e);
+            mFile.failWrite(out);
         }
     }
 
     /**
      * Parses an XML file containing the persistent state of the monotonic clock.
      */
-    @VisibleForTesting
-    public void readXml(InputStream inputStream, TypedXmlPullParser parser) throws IOException {
+    private long readXml(InputStream inputStream, TypedXmlPullParser parser) throws IOException {
         long savedTimeshift = 0;
         try {
             parser.setInput(inputStream, StandardCharsets.UTF_8.name());
@@ -128,14 +139,13 @@ public class MonotonicClock {
         } catch (XmlPullParserException e) {
             throw new IOException(e);
         }
-        mTimeshift = savedTimeshift - mClock.elapsedRealtime();
+        return savedTimeshift - mClock.elapsedRealtime();
     }
 
     /**
      * Creates an XML file containing the persistent state of the monotonic clock.
      */
-    @VisibleForTesting
-    public void writeXml(OutputStream out, TypedXmlSerializer serializer) throws IOException {
+    private void writeXml(OutputStream out, TypedXmlSerializer serializer) throws IOException {
         serializer.setOutput(out, StandardCharsets.UTF_8.name());
         serializer.startDocument(null, true);
         serializer.startTag(null, XML_TAG_MONOTONIC_TIME);

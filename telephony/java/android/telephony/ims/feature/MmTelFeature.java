@@ -17,6 +17,7 @@
 package android.telephony.ims.feature;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -59,6 +60,7 @@ import com.android.ims.internal.IImsEcbm;
 import com.android.ims.internal.IImsMultiEndpoint;
 import com.android.ims.internal.IImsUt;
 import com.android.internal.telephony.util.TelephonyUtils;
+import com.android.server.telecom.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -513,7 +515,8 @@ public class MmTelFeature extends ImsFeature {
                         CAPABILITY_TYPE_VIDEO,
                         CAPABILITY_TYPE_UT,
                         CAPABILITY_TYPE_SMS,
-                        CAPABILITY_TYPE_CALL_COMPOSER
+                        CAPABILITY_TYPE_CALL_COMPOSER,
+                        CAPABILITY_TYPE_CALL_COMPOSER_BUSINESS_ONLY
                 })
         @Retention(RetentionPolicy.SOURCE)
         public @interface MmTelCapability {}
@@ -546,15 +549,29 @@ public class MmTelFeature extends ImsFeature {
         public static final int CAPABILITY_TYPE_SMS = 1 << 3;
 
         /**
-         * This MmTelFeature supports Call Composer (section 2.4 of RC.20)
+         * This MmTelFeature supports Call Composer (section 2.4 of RC.20). This is the superset
+         * Call Composer, meaning that all subset types of Call Composers must be enabled when this
+         * capability is enabled
          */
         public static final int CAPABILITY_TYPE_CALL_COMPOSER = 1 << 4;
+
+
+        /**
+         * This MmTelFeature supports Business-only Call Composer. This is a subset of
+         * {@code CAPABILITY_TYPE_CALL_COMPOSER} that only supports business related
+         * information for calling (e.g. information to signal if the call is a business call) in
+         * the SIP header.  When enabling {@code CAPABILITY_TYPE_CALL_COMPOSER}, the
+         * {@code CAPABILITY_TYPE_CALL_COMPOSER_BUSINESS_ONLY} capability must also be enabled.
+         */
+        @FlaggedApi(Flags.FLAG_BUSINESS_CALL_COMPOSER)
+        public static final int CAPABILITY_TYPE_CALL_COMPOSER_BUSINESS_ONLY = 1 << 5;
 
         /**
          * This is used to check the upper range of MmTel capability
          * @hide
          */
-        public static final int CAPABILITY_TYPE_MAX = CAPABILITY_TYPE_CALL_COMPOSER + 1;
+        public static final int CAPABILITY_TYPE_MAX =
+                CAPABILITY_TYPE_CALL_COMPOSER_BUSINESS_ONLY + 1;
 
         /**
          * @hide
@@ -601,6 +618,8 @@ public class MmTelFeature extends ImsFeature {
             builder.append(isCapable(CAPABILITY_TYPE_SMS));
             builder.append(" CALL_COMPOSER: ");
             builder.append(isCapable(CAPABILITY_TYPE_CALL_COMPOSER));
+            builder.append(" BUSINESS_COMPOSER_ONLY: ");
+            builder.append(isCapable(CAPABILITY_TYPE_CALL_COMPOSER_BUSINESS_ONLY));
             builder.append("]");
             return builder.toString();
         }

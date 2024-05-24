@@ -19,15 +19,15 @@ package com.android.systemui.user.ui.dialog
 import android.app.Dialog
 import android.content.DialogInterface
 import com.android.systemui.animation.DialogCuj
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.qs.user.UserSwitchDialogController.DialogShower
 
 /** Extracted from [UserSwitchDialogController] */
 class DialogShowerImpl(
     private val animateFrom: Dialog,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
 ) : DialogInterface by animateFrom, DialogShower {
     override fun showDialog(dialog: Dialog, cuj: DialogCuj) {
-        dialogLaunchAnimator.showFromDialog(dialog, animateFrom = animateFrom, cuj)
+        dialogTransitionAnimator.showFromDialog(dialog, animateFrom = animateFrom, cuj)
     }
 }

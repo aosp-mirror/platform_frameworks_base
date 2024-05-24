@@ -17,5 +17,19 @@
 package com.android.systemui.util.time
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.currentTime
 
-var Kosmos.fakeSystemClock by Kosmos.Fixture { FakeSystemClock() }
+@OptIn(ExperimentalCoroutinesApi::class)
+val Kosmos.systemClock by
+    Kosmos.Fixture<SystemClock> {
+        mock {
+            whenever(elapsedRealtime()).thenAnswer { testScope.currentTime }
+            whenever(uptimeMillis()).thenAnswer { testScope.currentTime }
+        }
+    }
+
+val Kosmos.fakeSystemClock by Kosmos.Fixture { FakeSystemClock() }

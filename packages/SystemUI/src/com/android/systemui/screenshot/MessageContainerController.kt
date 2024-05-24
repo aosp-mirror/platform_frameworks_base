@@ -11,8 +11,6 @@ import android.view.ViewTreeObserver
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.constraintlayout.widget.Guideline
 import com.android.systemui.res.R
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import javax.inject.Inject
 
 /**
@@ -23,7 +21,6 @@ class MessageContainerController
 constructor(
     private val workProfileMessageController: WorkProfileMessageController,
     private val screenshotDetectionController: ScreenshotDetectionController,
-    private val featureFlags: FeatureFlags,
 ) {
     private lateinit var container: ViewGroup
     private lateinit var guideline: Guideline
@@ -63,10 +60,8 @@ constructor(
 
     fun onScreenshotTaken(screenshot: ScreenshotData) {
         val workProfileData = workProfileMessageController.onScreenshotTaken(screenshot.userHandle)
-        var notifiedApps: List<CharSequence> = listOf()
-        if (featureFlags.isEnabled(Flags.SCREENSHOT_DETECTION)) {
-            notifiedApps = screenshotDetectionController.maybeNotifyOfScreenshot(screenshot)
-        }
+        var notifiedApps: List<CharSequence> =
+            screenshotDetectionController.maybeNotifyOfScreenshot(screenshot)
 
         // If work profile first run needs to show, bias towards that, otherwise show screenshot
         // detection notification if needed.

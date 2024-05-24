@@ -9,7 +9,7 @@ package {
 
 // Visibility only for ravenwood prototype uses.
 genrule_defaults {
-    name: "hoststubgen-for-prototype-only-genrule",
+    name: "ravenwood-internal-only-visibility-genrule",
     visibility: [
         ":__subpackages__",
         "//frameworks/base",
@@ -19,7 +19,7 @@ genrule_defaults {
 
 // Visibility only for ravenwood prototype uses.
 java_defaults {
-    name: "hoststubgen-for-prototype-only-java",
+    name: "ravenwood-internal-only-visibility-java",
     visibility: [
         ":__subpackages__",
         "//frameworks/base",
@@ -29,7 +29,7 @@ java_defaults {
 
 // Visibility only for ravenwood prototype uses.
 filegroup_defaults {
-    name: "hoststubgen-for-prototype-only-filegroup",
+    name: "ravenwood-internal-only-visibility-filegroup",
     visibility: [
         ":__subpackages__",
         "//frameworks/base",
@@ -41,7 +41,7 @@ filegroup_defaults {
 // This is only for the prototype. The productionized version is "ravenwood-annotations".
 java_library {
     name: "hoststubgen-annotations",
-    defaults: ["hoststubgen-for-prototype-only-java"],
+    defaults: ["ravenwood-internal-only-visibility-java"],
     srcs: [
         "annotations-src/**/*.java",
     ],
@@ -54,6 +54,7 @@ java_library {
 // This library is _not_ specific to Android APIs.
 java_library_host {
     name: "hoststubgen-helper-runtime",
+    defaults: ["ravenwood-internal-only-visibility-java"],
     srcs: [
         "helper-runtime-src/**/*.java",
     ],
@@ -64,11 +65,11 @@ java_library_host {
         "guava",
     ],
     jarjar_rules: "jarjar-rules.txt",
-    visibility: ["//visibility:public"],
 }
 
 java_library {
     name: "hoststubgen-helper-runtime.ravenwood",
+    defaults: ["ravenwood-internal-only-visibility-java"],
     srcs: [
         "helper-runtime-src/**/*.java",
     ],
@@ -79,7 +80,6 @@ java_library {
         "guava",
     ],
     jarjar_rules: "jarjar-rules.txt",
-    visibility: ["//visibility:public"],
 }
 
 // Host-side stub generator tool.
@@ -115,7 +115,7 @@ java_test_host {
 // This is only for the prototype. The productionized version is "ravenwood-standard-options".
 filegroup {
     name: "hoststubgen-standard-options",
-    defaults: ["hoststubgen-for-prototype-only-filegroup"],
+    defaults: ["ravenwood-internal-only-visibility-filegroup"],
     srcs: [
         "hoststubgen-standard-options.txt",
     ],
@@ -150,243 +150,5 @@ genrule_defaults {
         // Following files are created just as FYI.
         "hoststubgen_keep_all.txt",
         "hoststubgen_dump.txt",
-    ],
-}
-
-// Generate the stub/impl from framework-all, with hidden APIs.
-java_genrule_host {
-    name: "framework-all-hidden-api-host",
-    defaults: ["hoststubgen-command-defaults"],
-    cmd: hoststubgen_common_options +
-        "--in-jar $(location :framework-all) " +
-        "--policy-override-file $(location framework-policy-override.txt) ",
-    srcs: [
-        ":framework-all",
-        "framework-policy-override.txt",
-    ],
-    visibility: ["//visibility:private"],
-}
-
-// Extract the stub jar from "framework-all-host" for subsequent build rules.
-// This is only for the prototype. Do not use it in "productionized" build rules.
-java_genrule_host {
-    name: "framework-all-hidden-api-host-stub",
-    defaults: ["hoststubgen-for-prototype-only-genrule"],
-    cmd: "cp $(in) $(out)",
-    srcs: [
-        ":framework-all-hidden-api-host{host_stub.jar}",
-    ],
-    out: [
-        "host_stub.jar",
-    ],
-}
-
-// Extract the impl jar from "framework-all-host" for subsequent build rules.
-// This is only for the prototype. Do not use it in "productionized" build rules.
-java_genrule_host {
-    name: "framework-all-hidden-api-host-impl",
-    defaults: ["hoststubgen-for-prototype-only-genrule"],
-    cmd: "cp $(in) $(out)",
-    srcs: [
-        ":framework-all-hidden-api-host{host_impl.jar}",
-    ],
-    out: [
-        "host_impl.jar",
-    ],
-}
-
-// Generate the stub/impl from framework-all, with only public/system/test APIs, without
-// hidden APIs.
-// This is only for the prototype. Do not use it in "productionized" build rules.
-java_genrule_host {
-    name: "framework-all-test-api-host",
-    defaults: ["hoststubgen-command-defaults"],
-    cmd: hoststubgen_common_options +
-        "--intersect-stub-jar $(location :android_test_stubs_current{.jar}) " +
-        "--in-jar $(location :framework-all) " +
-        "--policy-override-file $(location framework-policy-override.txt) ",
-    srcs: [
-        ":framework-all",
-        ":android_test_stubs_current{.jar}",
-        "framework-policy-override.txt",
-    ],
-    visibility: ["//visibility:private"],
-}
-
-// Extract the stub jar from "framework-all-test-api-host" for subsequent build rules.
-// This is only for the prototype. Do not use it in "productionized" build rules.
-java_genrule_host {
-    name: "framework-all-test-api-host-stub",
-    defaults: ["hoststubgen-for-prototype-only-genrule"],
-    cmd: "cp $(in) $(out)",
-    srcs: [
-        ":framework-all-test-api-host{host_stub.jar}",
-    ],
-    out: [
-        "host_stub.jar",
-    ],
-}
-
-// Extract the impl jar from "framework-all-test-api-host" for subsequent build rules.
-// This is only for the prototype. Do not use it in "productionized" build rules.
-java_genrule_host {
-    name: "framework-all-test-api-host-impl",
-    defaults: ["hoststubgen-for-prototype-only-genrule"],
-    cmd: "cp $(in) $(out)",
-    srcs: [
-        ":framework-all-test-api-host{host_impl.jar}",
-    ],
-    out: [
-        "host_impl.jar",
-    ],
-}
-
-// This library contains helper classes to build hostside tests/targets.
-// This essentially contains dependencies from tests that we can't actually use the real ones.
-// For example, the actual AndroidTestCase and AndroidJUnit4 don't run on the host side (yet),
-// so we pup "fake" implementations here.
-// Ideally this library should be empty.
-java_library_host {
-    name: "hoststubgen-helper-framework-buildtime",
-    defaults: ["hoststubgen-for-prototype-only-java"],
-    srcs: [
-        "helper-framework-buildtime-src/**/*.java",
-    ],
-    libs: [
-        // We need it to pull in some of the framework classes used in this library,
-        // such as Context.java.
-        "framework-all-hidden-api-host-impl",
-        "junit",
-    ],
-}
-
-// This module contains "fake" libcore/dalvik classes, framework native substitution, etc,
-// that are needed at runtime.
-java_library_host {
-    name: "hoststubgen-helper-framework-runtime",
-    defaults: ["hoststubgen-for-prototype-only-java"],
-    srcs: [
-        "helper-framework-runtime-src/**/*.java",
-    ],
-    libs: [
-        "hoststubgen-helper-runtime",
-        "framework-all-hidden-api-host-impl",
-    ],
-}
-
-java_library_host {
-    name: "hoststubgen-helper-libcore-runtime",
-    defaults: ["hoststubgen-for-prototype-only-java"],
-    srcs: [
-        "helper-framework-runtime-src/libcore-fake/**/*.java",
-    ],
-}
-
-java_host_for_device {
-    name: "hoststubgen-helper-libcore-runtime.ravenwood",
-    defaults: ["hoststubgen-for-prototype-only-java"],
-    libs: [
-        "hoststubgen-helper-libcore-runtime",
-    ],
-}
-
-java_library {
-    name: "hoststubgen-helper-framework-runtime.ravenwood",
-    defaults: ["hoststubgen-for-prototype-only-java"],
-    srcs: [
-        "helper-framework-runtime-src/framework/**/*.java",
-    ],
-    libs: [
-        "hoststubgen-helper-runtime.ravenwood",
-        "framework-minus-apex.ravenwood",
-    ],
-    static_libs: [
-        "core-xml-for-device",
-        "hoststubgen-helper-libcore-runtime.ravenwood",
-    ],
-}
-
-// Defaults for host side test modules.
-// We need two rules for each test.
-// 1. A "-test-lib" jar, which compiles the test against the stub jar.
-//    This one is only used by the second rule, so it should be "private.
-// 2. A "-test" jar, which includes 1 + the runtime (impl) jars.
-
-// This and next ones are for tests using framework-app, with hidden APIs.
-java_defaults {
-    name: "hosttest-with-framework-all-hidden-api-test-lib-defaults",
-    installable: false,
-    libs: [
-        "framework-all-hidden-api-host-stub",
-    ],
-    static_libs: [
-        "hoststubgen-helper-framework-buildtime",
-        "framework-annotations-lib",
-    ],
-    visibility: ["//visibility:private"],
-}
-
-// Default rules to include `libandroid_runtime`. For now, it's empty, but we'll use it
-// once we start using JNI.
-java_defaults {
-    name: "hosttest-with-libandroid_runtime",
-    jni_libs: [
-        // "libandroid_runtime",
-
-        // TODO: Figure out how to build them automatically.
-        // Following ones are depended by libandroid_runtime.
-        // Without listing them here, not only we won't get them under
-        // $ANDROID_HOST_OUT/testcases/*/lib64, but also not under
-        // $ANDROID_HOST_OUT/lib64, so we'd fail to load them at runtime.
-        // ($ANDROID_HOST_OUT/lib/ gets all of them though.)
-        // "libcutils",
-        // "libharfbuzz_ng",
-        // "libminikin",
-        // "libz",
-        // "libbinder",
-        // "libhidlbase",
-        // "libvintf",
-        // "libicu",
-        // "libutils",
-        // "libtinyxml2",
-    ],
-}
-
-java_defaults {
-    name: "hosttest-with-framework-all-hidden-api-test-defaults",
-    defaults: ["hosttest-with-libandroid_runtime"],
-    installable: false,
-    test_config: "AndroidTest-host.xml",
-    static_libs: [
-        "hoststubgen-helper-runtime",
-        "hoststubgen-helper-framework-runtime",
-        "framework-all-hidden-api-host-impl",
-    ],
-}
-
-// This and next ones are for tests using framework-app, with public/system/test APIs,
-// without hidden APIs.
-java_defaults {
-    name: "hosttest-with-framework-all-test-api-test-lib-defaults",
-    installable: false,
-    libs: [
-        "framework-all-test-api-host-stub",
-    ],
-    static_libs: [
-        "hoststubgen-helper-framework-buildtime",
-        "framework-annotations-lib",
-    ],
-    visibility: ["//visibility:private"],
-}
-
-java_defaults {
-    name: "hosttest-with-framework-all-test-api-test-defaults",
-    defaults: ["hosttest-with-libandroid_runtime"],
-    installable: false,
-    test_config: "AndroidTest-host.xml",
-    static_libs: [
-        "hoststubgen-helper-runtime",
-        "hoststubgen-helper-framework-runtime",
-        "framework-all-test-api-host-impl",
     ],
 }

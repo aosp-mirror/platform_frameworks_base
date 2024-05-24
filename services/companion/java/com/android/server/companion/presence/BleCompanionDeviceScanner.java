@@ -34,7 +34,7 @@ import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_MATCH_LOST;
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_POWER;
 
 import static com.android.server.companion.presence.CompanionDevicePresenceMonitor.DEBUG;
-import static com.android.server.companion.presence.Utils.btDeviceToString;
+import static com.android.server.companion.utils.Utils.btDeviceToString;
 
 import static java.util.Objects.requireNonNull;
 
@@ -168,7 +168,7 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
     void startScan() {
         enforceInitialized();
 
-        if (DEBUG) Log.i(TAG, "startScan()");
+        Slog.i(TAG, "startBleScan()");
         // This method should not be called if scan is already in progress.
         if (mScanning) {
             Slog.w(TAG, "Scan is already in progress.");
@@ -228,7 +228,7 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
     void stopScanIfNeeded() {
         enforceInitialized();
 
-        if (DEBUG) Log.i(TAG, "stopScan()");
+        Slog.i(TAG, "stopBleScan()");
         if (!mScanning) {
             if (DEBUG) Log.d(TAG, "  > not scanning.");
             return;

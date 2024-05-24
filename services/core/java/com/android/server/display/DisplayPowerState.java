@@ -26,9 +26,12 @@ import android.util.Slog;
 import android.view.Choreographer;
 import android.view.Display;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BackgroundThread;
 import com.android.server.display.utils.DebugUtils;
 
 import java.io.PrintWriter;
+import java.util.concurrent.Executor;
 
 /**
  * Controls the display power state.
@@ -75,10 +78,19 @@ final class DisplayPowerState {
 
     private Runnable mCleanListener;
 
+    private Executor mAsyncDestroyExecutor;
+
     private volatile boolean mStopped;
 
     DisplayPowerState(
             DisplayBlanker blanker, ColorFade colorFade, int displayId, int displayState) {
+        this(blanker, colorFade, displayId, displayState, BackgroundThread.getExecutor());
+    }
+
+    @VisibleForTesting
+    DisplayPowerState(
+            DisplayBlanker blanker, ColorFade colorFade, int displayId, int displayState,
+            Executor asyncDestroyExecutor) {
         mHandler = new Handler(true /*async*/);
         mChoreographer = Choreographer.getInstance();
         mBlanker = blanker;
@@ -86,6 +98,7 @@ final class DisplayPowerState {
         mPhotonicModulator = new PhotonicModulator();
         mPhotonicModulator.start();
         mDisplayId = displayId;
+        mAsyncDestroyExecutor = asyncDestroyExecutor;
 
         // At boot time, we don't know the screen's brightness,
         // so prepare to set it to a known state when the state is next applied.
@@ -320,8 +333,10 @@ final class DisplayPowerState {
     public void stop() {
         mStopped = true;
         mPhotonicModulator.interrupt();
+        mColorFadePrepared = false;
+        mColorFadeReady = true;
         if (mColorFade != null) {
-            mColorFade.destroy();
+            mAsyncDestroyExecutor.execute(mColorFade::destroy);
         }
         mCleanListener = null;
         mHandler.removeCallbacksAndMessages(null);
@@ -406,7 +421,8 @@ final class DisplayPowerState {
         }
     };
 
-    private final Runnable mColorFadeDrawRunnable = new Runnable() {
+    @VisibleForTesting
+    final Runnable mColorFadeDrawRunnable = new Runnable() {
         @Override
         public void run() {
             mColorFadeDrawPending = false;

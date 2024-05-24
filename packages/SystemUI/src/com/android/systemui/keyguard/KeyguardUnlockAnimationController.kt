@@ -419,7 +419,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
      */
     fun canPerformInWindowLauncherAnimations(): Boolean {
         // TODO(b/278086361): Refactor in-window animations.
-        return !featureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR) &&
+        return !KeyguardWmStateRefactor.isEnabled &&
                 isSupportedLauncherUnderneath() &&
                 // If the launcher is underneath, but we're about to launch an activity, don't do
                 // the animations since they won't be visible.
@@ -866,7 +866,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
         }
 
         surfaceBehindRemoteAnimationTargets?.forEach { surfaceBehindRemoteAnimationTarget ->
-            if (!featureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+            if (!KeyguardWmStateRefactor.isEnabled) {
                 val surfaceHeight: Int =
                         surfaceBehindRemoteAnimationTarget.screenSpaceBounds.height()
 
@@ -1005,7 +1005,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
         if (keyguardStateController.isShowing) {
             // Hide the keyguard, with no fade out since we animated it away during the unlock.
 
-            if (!featureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+            if (!KeyguardWmStateRefactor.isEnabled) {
                 keyguardViewController.hide(
                         surfaceBehindRemoteAnimationStartTime,
                         0 /* fadeOutDuration */

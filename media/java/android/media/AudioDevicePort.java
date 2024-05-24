@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 
+import com.android.aconfig.annotations.VisibleForTesting;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,6 +39,26 @@ import java.util.List;
  */
 
 public class AudioDevicePort extends AudioPort {
+
+    /** @hide */
+    // TODO: b/316864909 - Remove this method once there's a way to fake audio device ports further
+    // down the stack.
+    @VisibleForTesting
+    public static AudioDevicePort createForTesting(
+            int type, @NonNull String name, @NonNull String address) {
+        return new AudioDevicePort(
+                new AudioHandle(/* id= */ 0),
+                name,
+                /* samplingRates= */ null,
+                /* channelMasks= */ null,
+                /* channelIndexMasks= */ null,
+                /* formats= */ null,
+                /* gains= */ null,
+                type,
+                address,
+                /* encapsulationModes= */ null,
+                /* encapsulationMetadataTypes= */ null);
+    }
 
     private final int mType;
     private final String mAddress;

@@ -112,7 +112,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
     private final UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
 
     @Rule
-    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
+    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule(this);
 
     @Before
     public void setUp() throws Exception {

@@ -24,8 +24,11 @@ import android.companion.IOnTransportsChangedListener;
 import android.companion.ISystemDataTransferCallback;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
+import android.companion.ObservingDevicePresenceRequest;
 import android.companion.datatransfer.PermissionSyncRequest;
 import android.content.ComponentName;
+import android.os.ParcelUuid;
+
 
 /**
  * Interface for communication with the core companion device manager service.
@@ -132,4 +135,10 @@ interface ICompanionDeviceManager {
     byte[] getBackupPayload(int userId);
 
     void applyRestoredPayload(in byte[] payload, int userId);
+
+    @EnforcePermission("REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE")
+    void startObservingDevicePresence(in ObservingDevicePresenceRequest request, in String packageName, int userId);
+
+    @EnforcePermission("REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE")
+    void stopObservingDevicePresence(in ObservingDevicePresenceRequest request, in String packageName, int userId);
 }

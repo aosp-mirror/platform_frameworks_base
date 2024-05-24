@@ -21,8 +21,10 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -35,18 +37,24 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.AndroidTestingRunner;
 import android.view.SurfaceControl;
+import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import android.view.animation.AccelerateInterpolator;
+import android.window.InputTransferToken;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.AnimatorTestRule;
 import com.android.systemui.model.SysUiState;
@@ -64,15 +72,19 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 @LargeTest
 @RunWith(AndroidTestingRunner.class)
-@FlakyTest(bugId = 308501761)
 public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
 
     @Rule
-    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
+    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule(this);
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
     private static final float DEFAULT_SCALE = 4.0f;
     private static final float DEFAULT_CENTER_X = 400.0f;
     private static final float DEFAULT_CENTER_Y = 500.0f;
@@ -109,6 +121,13 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
 
     private TestableWindowManager mWindowManager;
     private ValueAnimator mValueAnimator;
+    // This list contains all SurfaceControlViewHosts created during a given test. If the
+    // magnification window is recreated during a test, the list will contain more than a single
+    // element.
+    private List<SurfaceControlViewHost> mSurfaceControlViewHosts = new ArrayList<>();
+    // The most recently created SurfaceControlViewHost.
+    private SurfaceControlViewHost mSurfaceControlViewHost;
+    private SurfaceControl.Transaction mTransaction;
 
     @Before
     public void setUp() throws Exception {
@@ -125,10 +144,28 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         mValueAnimator = newValueAnimator();
         mWindowMagnificationAnimationController = new WindowMagnificationAnimationController(
                 mContext, mValueAnimator);
-        mController = new SpyWindowMagnificationController(mContext, mHandler,
+
+        Supplier<SurfaceControlViewHost> scvhSupplier = () -> {
+            mSurfaceControlViewHost = spy(new SurfaceControlViewHost(
+                    mContext, mContext.getDisplay(), new InputTransferToken(),
+                    "WindowMagnification"));
+            mSurfaceControlViewHosts.add(mSurfaceControlViewHost);
+            return mSurfaceControlViewHost;
+        };
+
+        mTransaction = spy(new SurfaceControl.Transaction());
+        mController = new SpyWindowMagnificationController(
+                mContext,
+                mHandler,
                 mWindowMagnificationAnimationController,
-                mSfVsyncFrameProvider, null, new SurfaceControl.Transaction(),
-                mWindowMagnifierCallback, mSysUiState, mSecureSettings);
+                /* mirrorWindowControl= */ null,
+                mTransaction,
+                mWindowMagnifierCallback,
+                mSysUiState,
+                mSecureSettings,
+                scvhSupplier,
+                mSfVsyncFrameProvider);
+
         mSpyController = mController.getSpyController();
     }
 
@@ -237,8 +274,52 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         verifyFinalSpec(DEFAULT_SCALE, DEFAULT_CENTER_X, DEFAULT_CENTER_Y);
     }
 
+    @RequiresFlagsEnabled(Flags.FLAG_CREATE_WINDOWLESS_WINDOW_MAGNIFIER)
     @Test
-    public void enableWindowMagnificationWithScaleOne_enabled_AnimationAndInvokeCallback()
+    public void
+            enableWindowMagnificationScaleOne_enabledAndWindowlessFlagOn_AnimationAndCallbackTrue()
+            throws RemoteException {
+        enableWindowMagnificationWithoutAnimation();
+
+        // Wait for Rects updated.
+        waitForIdleSync();
+        View mirrorView = mSurfaceControlViewHost.getView();
+        final float targetScale = 1.0f;
+        // Move the magnifier to the top left corner, within the boundary
+        final float targetCenterX = mirrorView.getWidth() / 2.0f;
+        final float targetCenterY = mirrorView.getHeight() / 2.0f;
+
+        Mockito.reset(mSpyController);
+        getInstrumentation().runOnMainSync(() -> {
+            mWindowMagnificationAnimationController.enableWindowMagnification(targetScale,
+                    targetCenterX, targetCenterY, mAnimationCallback);
+            mCurrentScale.set(mController.getScale());
+            mCurrentCenterX.set(mController.getCenterX());
+            mCurrentCenterY.set(mController.getCenterY());
+            advanceTimeBy(mWaitAnimationDuration);
+        });
+
+        verify(mSpyController, atLeast(2)).enableWindowMagnificationInternal(
+                mScaleCaptor.capture(),
+                mCenterXCaptor.capture(), mCenterYCaptor.capture(),
+                mOffsetXCaptor.capture(), mOffsetYCaptor.capture());
+        verifyStartValue(mScaleCaptor, mCurrentScale.get());
+        verifyStartValue(mCenterXCaptor, mCurrentCenterX.get());
+        verifyStartValue(mCenterYCaptor, mCurrentCenterY.get());
+        verifyStartValue(mOffsetXCaptor, 0f);
+        verifyStartValue(mOffsetYCaptor, 0f);
+
+        verifyFinalSpec(targetScale, targetCenterX, targetCenterY);
+
+        verify(mAnimationCallback).onResult(true);
+        assertEquals(WindowMagnificationAnimationController.STATE_ENABLED,
+                mWindowMagnificationAnimationController.getState());
+    }
+
+    @RequiresFlagsDisabled(Flags.FLAG_CREATE_WINDOWLESS_WINDOW_MAGNIFIER)
+    @Test
+    public void
+            enableWindowMagnificationScaleOne_enabledAndWindowlessFlagOff_AnimationAndCallbackTrue()
             throws RemoteException {
         enableWindowMagnificationWithoutAnimation();
 
@@ -477,8 +558,46 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         verify(mAnimationCallback2).onResult(true);
     }
 
+    @RequiresFlagsEnabled(Flags.FLAG_CREATE_WINDOWLESS_WINDOW_MAGNIFIER)
     @Test
-    public void enableWindowMagnificationWithOffset_expectedValues() {
+    public void enableWindowMagnificationWithOffset_windowlessFlagOn_expectedValues() {
+        final float offsetRatio = -0.1f;
+        final Rect windowBounds = new Rect(mWindowManager.getCurrentWindowMetrics().getBounds());
+
+        Mockito.reset(mSpyController);
+        getInstrumentation().runOnMainSync(() -> {
+            mWindowMagnificationAnimationController.enableWindowMagnification(DEFAULT_SCALE,
+                    windowBounds.exactCenterX(), windowBounds.exactCenterY(),
+                    offsetRatio, offsetRatio, mAnimationCallback);
+            advanceTimeBy(mWaitAnimationDuration);
+        });
+        // Wait for Rects update
+        waitForIdleSync();
+
+        final int mirrorSurfaceMargin = mContext.getResources().getDimensionPixelSize(
+                R.dimen.magnification_mirror_surface_margin);
+        final int defaultMagnificationWindowSize =
+                mController.getMagnificationWindowSizeFromIndex(
+                        WindowMagnificationSettings.MagnificationSize.MEDIUM);
+        final int defaultMagnificationFrameSize =
+                defaultMagnificationWindowSize - 2 * mirrorSurfaceMargin;
+        final int expectedOffset = (int) (defaultMagnificationFrameSize / 2 * offsetRatio);
+
+        final float expectedX = (int) (windowBounds.exactCenterX() + expectedOffset
+                - defaultMagnificationWindowSize / 2);
+        final float expectedY = (int) (windowBounds.exactCenterY() + expectedOffset
+                - defaultMagnificationWindowSize / 2);
+
+        // This is called 4 times when (1) first creating WindowlessMirrorWindow (2) SurfaceView is
+        // created and we place the mirrored content as a child of the SurfaceView
+        // (3) the animation starts (4) the animation updates
+        verify(mTransaction, times(4))
+                .setPosition(any(SurfaceControl.class), eq(expectedX), eq(expectedY));
+    }
+
+    @RequiresFlagsDisabled(Flags.FLAG_CREATE_WINDOWLESS_WINDOW_MAGNIFIER)
+    @Test
+    public void enableWindowMagnificationWithOffset_windowlessFlagOff_expectedValues() {
         final float offsetRatio = -0.1f;
         final Rect windowBounds = new Rect(mWindowManager.getCurrentWindowMetrics().getBounds());
 
@@ -642,11 +761,10 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
     @Test
     public void deleteWindowMagnification_enabling_expectedValuesAndInvokeCallback()
             throws RemoteException {
-
         enableWindowMagnificationAndWaitAnimating(mWaitPartialAnimationDuration,
                 mAnimationCallback);
 
-        Mockito.reset(mSpyController);
+        resetMockObjects();
         getInstrumentation().runOnMainSync(() -> {
             mWindowMagnificationAnimationController.deleteWindowMagnification(
                     mAnimationCallback2);
@@ -660,6 +778,11 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
             mValueAnimator.end();
         });
 
+        // wait for animation returns
+        waitForIdleSync();
+
+        // {@link ValueAnimator.AnimatorUpdateListener#onAnimationUpdate(ValueAnimator)} will only
+        // be triggered once in {@link ValueAnimator#end()}
         verify(mSpyController).enableWindowMagnificationInternal(
                 mScaleCaptor.capture(),
                 mCenterXCaptor.capture(), mCenterYCaptor.capture(),
@@ -719,7 +842,11 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         deleteWindowMagnificationAndWaitAnimating(mWaitPartialAnimationDuration,
                 mAnimationCallback);
 
-        deleteWindowMagnificationAndWaitAnimating(0, null);
+        // Verifying that WindowMagnificationController#deleteWindowMagnification is never called
+        // in previous steps
+        verify(mSpyController, never()).deleteWindowMagnification();
+
+        deleteWindowMagnificationWithoutAnimation();
 
         verify(mSpyController).deleteWindowMagnification();
         verifyFinalSpec(Float.NaN, Float.NaN, Float.NaN);
@@ -812,6 +939,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
             mWindowMagnificationAnimationController.enableWindowMagnification(
                     targetScale, targetCenterX, targetCenterY, null);
         });
+        // wait for animation returns
+        waitForIdleSync();
     }
 
     private void enableWindowMagnificationAndWaitAnimating(long duration,
@@ -831,12 +960,16 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
                     targetScale, targetCenterX, targetCenterY, callback);
             advanceTimeBy(duration);
         });
+        // wait for animation returns
+        waitForIdleSync();
     }
 
     private void deleteWindowMagnificationWithoutAnimation() {
         getInstrumentation().runOnMainSync(() -> {
             mWindowMagnificationAnimationController.deleteWindowMagnification(null);
         });
+        // wait for animation returns
+        waitForIdleSync();
     }
 
     private void deleteWindowMagnificationAndWaitAnimating(long duration,
@@ -845,6 +978,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
             mWindowMagnificationAnimationController.deleteWindowMagnification(callback);
             advanceTimeBy(duration);
         });
+        // wait for animation returns
+        waitForIdleSync();
     }
 
     private void verifyStartValue(ArgumentCaptor<Float> captor, float startValue) {
@@ -862,23 +997,28 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
     private static class SpyWindowMagnificationController extends WindowMagnificationController {
         private WindowMagnificationController mSpyController;
 
-        SpyWindowMagnificationController(Context context, Handler handler,
+        SpyWindowMagnificationController(Context context,
+                Handler handler,
                 WindowMagnificationAnimationController animationController,
-                SfVsyncFrameCallbackProvider sfVsyncFrameProvider,
-                MirrorWindowControl mirrorWindowControl, SurfaceControl.Transaction transaction,
-                WindowMagnifierCallback callback, SysUiState sysUiState,
-                SecureSettings secureSettings) {
+                MirrorWindowControl mirrorWindowControl,
+                SurfaceControl.Transaction transaction,
+                WindowMagnifierCallback callback,
+                SysUiState sysUiState,
+                SecureSettings secureSettings,
+                Supplier<SurfaceControlViewHost> scvhSupplier,
+                SfVsyncFrameCallbackProvider sfVsyncFrameProvider) {
             super(
                     context,
                     handler,
                     animationController,
-                    sfVsyncFrameProvider,
                     mirrorWindowControl,
                     transaction,
                     callback,
                     sysUiState,
-                    WindowManagerGlobal::getWindowSession,
-                    secureSettings);
+                    secureSettings,
+                    scvhSupplier,
+                    sfVsyncFrameProvider,
+                    WindowManagerGlobal::getWindowSession);
             mSpyController = Mockito.mock(WindowMagnificationController.class);
         }
 

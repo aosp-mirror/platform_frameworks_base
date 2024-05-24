@@ -15,6 +15,17 @@
  */
 package com.android.server.pm;
 
+import static android.content.UriRelativeFilter.PATH;
+import static android.content.UriRelativeFilter.QUERY;
+import static android.content.UriRelativeFilter.FRAGMENT;
+import static android.content.UriRelativeFilterGroup.ACTION_ALLOW;
+import static android.content.UriRelativeFilterGroup.ACTION_BLOCK;
+import static android.os.PatternMatcher.PATTERN_ADVANCED_GLOB;
+import static android.os.PatternMatcher.PATTERN_LITERAL;
+import static android.os.PatternMatcher.PATTERN_PREFIX;
+import static android.os.PatternMatcher.PATTERN_SIMPLE_GLOB;
+import static android.os.PatternMatcher.PATTERN_SUFFIX;
+
 import static com.android.internal.pm.permission.CompatibilityPermissionInfo.COMPAT_PERMS;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -36,11 +47,15 @@ import static java.util.stream.Collectors.toList;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.IntentFilter;
+import android.content.UriRelativeFilter;
+import android.content.UriRelativeFilterGroup;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
+import android.content.pm.Flags;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.Property;
 import android.content.pm.ServiceInfo;
@@ -50,6 +65,9 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.ArraySet;
 
 import androidx.annotation.Nullable;
@@ -58,6 +76,8 @@ import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.pm.parsing.PackageParser2;
+import com.android.internal.pm.parsing.PackageParserException;
 import com.android.internal.pm.parsing.pkg.PackageImpl;
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.pm.permission.CompatibilityPermissionInfo;
@@ -84,7 +104,7 @@ import com.android.internal.pm.pkg.parsing.ParsingPackage;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.parsing.PackageInfoUtils;
-import com.android.server.pm.parsing.PackageParser2;
+import com.android.server.pm.parsing.PackageParserUtils;
 import com.android.server.pm.parsing.TestPackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -104,6 +124,7 @@ import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -121,6 +142,9 @@ public class PackageParserTest {
     @Rule
     public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+
     private File mTmpDir;
     private static final File FRAMEWORK = new File("/system/framework/framework-res.apk");
     private static final String TEST_APP1_APK = "PackageParserTestApp1.apk";
@@ -129,6 +153,7 @@ public class PackageParserTest {
     private static final String TEST_APP4_APK = "PackageParserTestApp4.apk";
     private static final String TEST_APP5_APK = "PackageParserTestApp5.apk";
     private static final String TEST_APP6_APK = "PackageParserTestApp6.apk";
+    private static final String TEST_APP7_APK = "PackageParserTestApp7.apk";
     private static final String PACKAGE_NAME = "com.android.servicestests.apps.packageparserapp";
 
     @Before
@@ -185,7 +210,7 @@ public class PackageParserTest {
 
     @Test
     public void test_serializePackage() throws Exception {
-        try (PackageParser2 pp = PackageParser2.forParsingFileWithDefaults()) {
+        try (PackageParser2 pp = PackageParserUtils.forParsingFileWithDefaults()) {
             AndroidPackage pkg = pp.parsePackage(FRAMEWORK, 0 /* parseFlags */,
                     true /* useCaches */).hideAsFinal();
 
@@ -363,7 +388,7 @@ public class PackageParserTest {
                     actualDisplayCategory = activity.getRequiredDisplayCategory();
                 }
             }
-        } catch (PackageManagerException e) {
+        } catch (PackageParserException e) {
             assertThat(e.getMessage()).contains(
                     "requiredDisplayCategory attribute can only consist"
                             + " of alphanumeric characters, '_', and '.'");
@@ -371,6 +396,87 @@ public class PackageParserTest {
             testFile.delete();
         }
         assertNotEquals("$automotive", actualDisplayCategory);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_RELATIVE_REFERENCE_INTENT_FILTERS)
+    public void testParseUriRelativeFilterGroups() throws Exception {
+        final File testFile = extractFile(TEST_APP7_APK);
+        try {
+            final ParsedPackage pkg = new TestPackageParser2().parsePackage(testFile, 0, false);
+            final List<ParsedActivity> activities = pkg.getActivities();
+            final List<ParsedIntentInfo> intents = activities.get(0).getIntents();
+            final IntentFilter intentFilter = intents.get(0).getIntentFilter();
+            assertEquals(7, intentFilter.countUriRelativeFilterGroups());
+
+            UriRelativeFilterGroup group = intentFilter.getUriRelativeFilterGroup(0);
+            Collection<UriRelativeFilter> filters = group.getUriRelativeFilters();
+            assertEquals(ACTION_BLOCK, group.getAction());
+            assertEquals(3, filters.size());
+            assertTrue(filters.contains(new UriRelativeFilter(PATH, PATTERN_PREFIX, "/gizmos")));
+            assertTrue(filters.contains(new UriRelativeFilter(QUERY, PATTERN_SIMPLE_GLOB,
+                    ".*query=string.*")));
+            assertTrue(filters.contains(new UriRelativeFilter(FRAGMENT, PATTERN_LITERAL,
+                    "fragment")));
+
+            group = intentFilter.getUriRelativeFilterGroup(1);
+            filters = group.getUriRelativeFilters();
+            assertEquals(ACTION_ALLOW, group.getAction());
+            assertEquals(2, filters.size());
+            assertTrue(filters.contains(new UriRelativeFilter(QUERY, PATTERN_LITERAL,
+                    "query=string")));
+            assertTrue(filters.contains(new UriRelativeFilter(FRAGMENT, PATTERN_SUFFIX,
+                    "fragment")));
+
+            group = intentFilter.getUriRelativeFilterGroup(2);
+            filters = group.getUriRelativeFilters();
+            assertEquals(ACTION_ALLOW, group.getAction());
+            assertTrue(filters.contains(new UriRelativeFilter(PATH, PATTERN_LITERAL, "/gizmos")));
+            assertTrue(filters.contains(new UriRelativeFilter(QUERY, PATTERN_LITERAL,
+                    ".*query=string.*")));
+            assertTrue(filters.contains(new UriRelativeFilter(FRAGMENT, PATTERN_LITERAL,
+                    "fragment")));
+
+            group = intentFilter.getUriRelativeFilterGroup(3);
+            filters = group.getUriRelativeFilters();
+            assertEquals(ACTION_ALLOW, group.getAction());
+            assertTrue(filters.contains(new UriRelativeFilter(PATH, PATTERN_PREFIX, "/gizmos")));
+            assertTrue(filters.contains(new UriRelativeFilter(QUERY, PATTERN_PREFIX,
+                    ".*query=string.*")));
+            assertTrue(filters.contains(new UriRelativeFilter(FRAGMENT, PATTERN_PREFIX,
+                    "fragment")));
+
+            group = intentFilter.getUriRelativeFilterGroup(4);
+            filters = group.getUriRelativeFilters();
+            assertEquals(ACTION_ALLOW, group.getAction());
+            assertTrue(filters.contains(new UriRelativeFilter(PATH, PATTERN_SIMPLE_GLOB,
+                    "/gizmos")));
+            assertTrue(filters.contains(new UriRelativeFilter(QUERY, PATTERN_SIMPLE_GLOB,
+                    ".*query=string.*")));
+            assertTrue(filters.contains(new UriRelativeFilter(FRAGMENT, PATTERN_SIMPLE_GLOB,
+                    "fragment")));
+
+            group = intentFilter.getUriRelativeFilterGroup(5);
+            filters = group.getUriRelativeFilters();
+            assertEquals(ACTION_ALLOW, group.getAction());
+            assertTrue(filters.contains(new UriRelativeFilter(PATH, PATTERN_ADVANCED_GLOB,
+                    "/gizmos")));
+            assertTrue(filters.contains(new UriRelativeFilter(QUERY, PATTERN_ADVANCED_GLOB,
+                    ".*query=string.*")));
+            assertTrue(filters.contains(new UriRelativeFilter(FRAGMENT, PATTERN_ADVANCED_GLOB,
+                    "fragment")));
+
+            group = intentFilter.getUriRelativeFilterGroup(6);
+            filters = group.getUriRelativeFilters();
+            assertEquals(ACTION_ALLOW, group.getAction());
+            assertTrue(filters.contains(new UriRelativeFilter(PATH, PATTERN_SUFFIX, "/gizmos")));
+            assertTrue(filters.contains(new UriRelativeFilter(QUERY, PATTERN_SUFFIX,
+                    ".*query=string.*")));
+            assertTrue(filters.contains(new UriRelativeFilter(FRAGMENT, PATTERN_SUFFIX,
+                    "fragment")));
+        } finally {
+            testFile.delete();
+        }
     }
 
     private static final int PROPERTY_TYPE_BOOLEAN = 1;

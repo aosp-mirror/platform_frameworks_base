@@ -27,6 +27,7 @@ import android.os.StrictMode;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ExponentiallyBucketedHistogram;
 
 import java.util.LinkedList;
@@ -114,6 +115,36 @@ public class QueuedWork {
     }
 
     /**
+     * Tear down the handler.
+     */
+    @VisibleForTesting
+    public static void resetHandler() {
+        synchronized (sLock) {
+            if (sHandler == null) {
+                return;
+            }
+            sHandler.getLooper().quitSafely();
+            sHandler = null;
+        }
+    }
+
+    /**
+     * Remove all Messages from the Handler with the given code.
+     *
+     * This method intentionally avoids creating the Handler if it doesn't
+     * already exist.
+     */
+    private static void handlerRemoveMessages(int what) {
+        synchronized (sLock) {
+            if (sHandler == null) {
+                // Nothing to remove
+                return;
+            }
+            getHandler().removeMessages(what);
+        }
+    }
+
+    /**
      * Add a finisher-runnable to wait for {@link #queue asynchronously processed work}.
      *
      * Used by SharedPreferences$Editor#startCommit().
@@ -156,17 +187,13 @@ public class QueuedWork {
         long startTime = System.currentTimeMillis();
         boolean hadMessages = false;
 
-        Handler handler = getHandler();
-
         synchronized (sLock) {
-            if (handler.hasMessages(QueuedWorkHandler.MSG_RUN)) {
-                // Delayed work will be processed at processPendingWork() below
-                handler.removeMessages(QueuedWorkHandler.MSG_RUN);
-
-                if (DEBUG) {
-                    hadMessages = true;
-                    Log.d(LOG_TAG, "waiting");
-                }
+            if (DEBUG) {
+                hadMessages = getHandler().hasMessages(QueuedWorkHandler.MSG_RUN);
+            }
+            handlerRemoveMessages(QueuedWorkHandler.MSG_RUN);
+            if (DEBUG && hadMessages) {
+                Log.d(LOG_TAG, "waiting");
             }
 
             // We should not delay any work as this might delay the finishers
@@ -257,7 +284,7 @@ public class QueuedWork {
                 sWork = new LinkedList<>();
 
                 // Remove all msg-s as all work will be processed now
-                getHandler().removeMessages(QueuedWorkHandler.MSG_RUN);
+                handlerRemoveMessages(QueuedWorkHandler.MSG_RUN);
             }
 
             if (work.size() > 0) {

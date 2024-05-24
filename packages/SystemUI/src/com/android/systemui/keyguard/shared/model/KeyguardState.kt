@@ -62,6 +62,12 @@ enum class KeyguardState {
      * unlocked if SWIPE security method is used, or if face lockscreen bypass is false.
      */
     LOCKSCREEN,
+    /**
+     * Device is locked or on dream and user has swiped from the right edge to enter the glanceable
+     * hub UI. From this state, the user can swipe from the left edge to go back to the lock screen
+     * or dream, as well as swipe down for the notifications and up for the bouncer.
+     */
+    GLANCEABLE_HUB,
     /*
      * Keyguard is no longer visible. In most cases the user has just authenticated and keyguard
      * is being removed, but there are other cases where the user is swiping away keyguard, such as
@@ -80,6 +86,11 @@ enum class KeyguardState {
             return state != GONE
         }
 
+        /** Whether either of the bouncers are visible when we're FINISHED in the given state. */
+        fun isBouncerState(state: KeyguardState): Boolean {
+            return state == PRIMARY_BOUNCER || state == ALTERNATE_BOUNCER
+        }
+
         /**
          * Whether the device is awake ([PowerInteractor.isAwake]) when we're FINISHED in the given
          * keyguard state.
@@ -90,6 +101,7 @@ enum class KeyguardState {
                 DOZING -> false
                 DREAMING -> false
                 DREAMING_LOCKSCREEN_HOSTED -> false
+                GLANCEABLE_HUB -> true
                 AOD -> false
                 ALTERNATE_BOUNCER -> true
                 PRIMARY_BOUNCER -> true

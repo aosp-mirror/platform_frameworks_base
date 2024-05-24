@@ -34,6 +34,7 @@ import java.util.ArrayList;
  * @hide
  */
 @TestApi
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class EncodedBuffer {
     private static final String TAG = "EncodedBuffer";
 

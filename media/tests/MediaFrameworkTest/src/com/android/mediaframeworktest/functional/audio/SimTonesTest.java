@@ -17,12 +17,13 @@
 package com.android.mediaframeworktest.functional.audio;
 
 // import android.content.Resources;
-import com.android.mediaframeworktest.MediaFrameworkTest;
-import com.android.mediaframeworktest.functional.TonesAutoTest;
-
 import android.content.Context;
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
+
+import androidx.test.filters.LargeTest;
+
+import com.android.mediaframeworktest.MediaFrameworkTest;
+import com.android.mediaframeworktest.functional.TonesAutoTest;
 
 /**
  * Junit / Instrumentation test case for the SIM tone generator

@@ -29,7 +29,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlInfo
@@ -348,7 +348,7 @@ class DeviceControlsTileTest : SysuiTestCase() {
         verify(activityStarter).startActivity(
                 intentCaptor.capture(),
                 eq(true) /* dismissShade */,
-                nullable(ActivityLaunchAnimator.Controller::class.java),
+                nullable(ActivityTransitionAnimator.Controller::class.java),
                 eq(true) /* showOverLockscreenWhenLocked */)
         assertThat(intentCaptor.value.component?.className).isEqualTo(CONTROLS_ACTIVITY_CLASS_NAME)
     }
@@ -379,7 +379,7 @@ class DeviceControlsTileTest : SysuiTestCase() {
         verify(activityStarter).startActivity(
                 intentCaptor.capture(),
                 anyBoolean() /* dismissShade */,
-                nullable(ActivityLaunchAnimator.Controller::class.java),
+                nullable(ActivityTransitionAnimator.Controller::class.java),
                 eq(false) /* showOverLockscreenWhenLocked */)
         assertThat(intentCaptor.value.component?.className).isEqualTo(CONTROLS_ACTIVITY_CLASS_NAME)
     }

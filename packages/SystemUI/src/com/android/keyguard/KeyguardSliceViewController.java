@@ -20,6 +20,7 @@ import static android.app.slice.Slice.HINT_LIST_ITEM;
 
 import android.app.PendingIntent;
 import android.net.Uri;
+import android.os.Handler;
 import android.os.Trace;
 import android.provider.Settings;
 import android.util.Log;
@@ -39,6 +40,9 @@ import androidx.slice.widget.SliceLiveData;
 
 import com.android.keyguard.dagger.KeyguardStatusViewScope;
 import com.android.systemui.Dumpable;
+import com.android.systemui.Flags;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.plugins.ActivityStarter;
@@ -60,6 +64,8 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
         Dumpable {
     private static final String TAG = "KeyguardSliceViewCtrl";
 
+    private final Handler mHandler;
+    private final Handler mBgHandler;
     private final ActivityStarter mActivityStarter;
     private final ConfigurationController mConfigurationController;
     private final TunerService mTunerService;
@@ -105,6 +111,8 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
 
     @Inject
     public KeyguardSliceViewController(
+            @Main Handler handler,
+            @Background Handler bgHandler,
             KeyguardSliceView keyguardSliceView,
             ActivityStarter activityStarter,
             ConfigurationController configurationController,
@@ -112,6 +120,8 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
             DumpManager dumpManager,
             DisplayTracker displayTracker) {
         super(keyguardSliceView);
+        mHandler = handler;
+        mBgHandler = bgHandler;
         mActivityStarter = activityStarter;
         mConfigurationController = configurationController;
         mTunerService = tunerService;
@@ -182,24 +192,34 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
      * Update contents of the view.
      */
     public void refresh() {
-        Slice slice;
+
         Trace.beginSection("KeyguardSliceViewController#refresh");
-        // We can optimize performance and avoid binder calls when we know that we're bound
-        // to a Slice on the same process.
-        if (KeyguardSliceProvider.KEYGUARD_SLICE_URI.equals(mKeyguardSliceUri.toString())) {
-            KeyguardSliceProvider instance = KeyguardSliceProvider.getAttachedInstance();
-            if (instance != null) {
-                slice = instance.onBindSlice(mKeyguardSliceUri);
+        try {
+            Slice slice;
+            if (KeyguardSliceProvider.KEYGUARD_SLICE_URI.equals(mKeyguardSliceUri.toString())) {
+                KeyguardSliceProvider instance = KeyguardSliceProvider.getAttachedInstance();
+                if (instance != null) {
+                    if (Flags.sliceManagerBinderCallBackground()) {
+                        mBgHandler.post(() -> {
+                            Slice _slice = instance.onBindSlice(mKeyguardSliceUri);
+                            mHandler.post(() -> mObserver.onChanged(_slice));
+                        });
+                        return;
+                    }
+                    slice = instance.onBindSlice(mKeyguardSliceUri);
+                } else {
+                    Log.w(TAG, "Keyguard slice not bound yet?");
+                    slice = null;
+                }
             } else {
-                Log.w(TAG, "Keyguard slice not bound yet?");
-                slice = null;
+                // TODO: Make SliceViewManager injectable
+                slice = SliceViewManager.getInstance(mView.getContext()).bindSlice(
+                        mKeyguardSliceUri);
             }
-        } else {
-            // TODO: Make SliceViewManager injectable
-            slice = SliceViewManager.getInstance(mView.getContext()).bindSlice(mKeyguardSliceUri);
+            mObserver.onChanged(slice);
+        } finally {
+            Trace.endSection();
         }
-        mObserver.onChanged(slice);
-        Trace.endSection();
     }
 
     void showSlice(Slice slice) {

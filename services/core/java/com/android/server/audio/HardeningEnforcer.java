@@ -18,13 +18,21 @@ package com.android.server.audio;
 import static android.media.audio.Flags.autoPublicVolumeApiHardening;
 
 import android.Manifest;
+import android.annotation.NonNull;
+import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.os.Binder;
 import android.os.UserHandle;
 import android.text.TextUtils;
-import android.util.Log;
+import android.util.Slog;
+
+import com.android.server.utils.EventLogger;
+
+import java.io.PrintWriter;
 
 /**
  * Class to encapsulate all audio API hardening operations
@@ -32,9 +40,18 @@ import android.util.Log;
 public class HardeningEnforcer {
 
     private static final String TAG = "AS.HardeningEnforcer";
+    private static final boolean DEBUG = false;
+    private static final int LOG_NB_EVENTS = 20;
 
     final Context mContext;
+    final AppOpsManager mAppOps;
     final boolean mIsAutomotive;
+
+    final ActivityManager mActivityManager;
+    final PackageManager mPackageManager;
+
+    final EventLogger mEventLogger = new EventLogger(LOG_NB_EVENTS,
+            "Hardening enforcement");
 
     /**
      * Matches calls from {@link AudioManager#setStreamVolume(int, int, int)}
@@ -56,10 +73,24 @@ public class HardeningEnforcer {
      * Matches calls from {@link AudioManager#setRingerMode(int)}
      */
     public static final int METHOD_AUDIO_MANAGER_SET_RINGER_MODE = 200;
+    /**
+     * Matches calls from {@link AudioManager#requestAudioFocus(AudioFocusRequest)}
+     * and legacy variants
+     */
+    public static final int METHOD_AUDIO_MANAGER_REQUEST_AUDIO_FOCUS = 300;
 
-    public HardeningEnforcer(Context ctxt, boolean isAutomotive) {
+    public HardeningEnforcer(Context ctxt, boolean isAutomotive, AppOpsManager appOps,
+            PackageManager pm) {
         mContext = ctxt;
         mIsAutomotive = isAutomotive;
+        mAppOps = appOps;
+        mActivityManager = ctxt.getSystemService(ActivityManager.class);
+        mPackageManager = pm;
+    }
+
+    protected void dump(PrintWriter pw) {
+        // log
+        mEventLogger.dump(pw);
     }
 
     /**
@@ -84,7 +115,7 @@ public class HardeningEnforcer {
             }
             // TODO metrics?
             // TODO log for audio dumpsys?
-            Log.e(TAG, "Preventing volume method " + volumeMethod + " for "
+            Slog.e(TAG, "Preventing volume method " + volumeMethod + " for "
                     + getPackNameForUid(Binder.getCallingUid()));
             return true;
         }
@@ -92,10 +123,40 @@ public class HardeningEnforcer {
         return false;
     }
 
+    /**
+     * Checks whether the call in the current thread should be allowed or blocked
+     * @param focusMethod name of the method to check, for logging purposes
+     * @param clientId id of the requester
+     * @param durationHint focus type being requested
+     * @return false if the method call is allowed, true if it should be a no-op
+     */
+    protected boolean blockFocusMethod(int callingUid, int focusMethod, @NonNull String clientId,
+            int durationHint, @NonNull String packageName) {
+        if (packageName.isEmpty()) {
+            packageName = getPackNameForUid(callingUid);
+        }
+
+        if (checkAppOp(AppOpsManager.OP_TAKE_AUDIO_FOCUS, callingUid, packageName)) {
+            if (DEBUG) {
+                Slog.i(TAG, "blockFocusMethod pack:" + packageName + " NOT blocking");
+            }
+            return false;
+        }
+
+        String errorMssg = "Focus request DENIED for uid:" + callingUid
+                + " clientId:" + clientId + " req:" + durationHint
+                + " procState:" + mActivityManager.getUidProcessState(callingUid);
+
+        // TODO metrics
+        mEventLogger.enqueueAndSlog(errorMssg, EventLogger.Event.ALOGI, TAG);
+
+        return true;
+    }
+
     private String getPackNameForUid(int uid) {
         final long token = Binder.clearCallingIdentity();
         try {
-            final String[] names = mContext.getPackageManager().getPackagesForUid(uid);
+            final String[] names = mPackageManager.getPackagesForUid(uid);
             if (names == null
                     || names.length == 0
                     || TextUtils.isEmpty(names[0])) {
@@ -105,5 +166,19 @@ public class HardeningEnforcer {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+    }
+
+    /**
+     * Checks the given op without throwing
+     * @param op the appOp code
+     * @param uid the calling uid
+     * @param packageName the package name of the caller
+     * @return return false if the operation is not allowed
+     */
+    private boolean checkAppOp(int op, int uid, @NonNull String packageName) {
+        if (mAppOps.checkOpNoThrow(op, uid, packageName) != AppOpsManager.MODE_ALLOWED) {
+            return false;
+        }
+        return true;
     }
 }

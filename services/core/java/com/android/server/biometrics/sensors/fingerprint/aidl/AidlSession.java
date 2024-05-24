@@ -20,7 +20,7 @@ import android.annotation.NonNull;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 
-import com.android.server.biometrics.sensors.fingerprint.hidl.AidlToHidlAdapter;
+import com.android.server.biometrics.sensors.fingerprint.hidl.HidlToAidlSessionAdapter;
 
 import java.util.function.Supplier;
 
@@ -45,24 +45,22 @@ public class AidlSession {
 
     public AidlSession(@NonNull Supplier<IBiometricsFingerprint> session,
             int userId, AidlResponseHandler aidlResponseHandler) {
-        mSession = new AidlToHidlAdapter(session, userId, aidlResponseHandler);
+        mSession = new HidlToAidlSessionAdapter(session, userId, aidlResponseHandler);
         mHalInterfaceVersion = 0;
         mUserId = userId;
         mAidlResponseHandler = aidlResponseHandler;
     }
 
-    /** The underlying {@link ISession}. */
     @NonNull public ISession getSession() {
         return mSession;
     }
 
-    /** The user id associated with the session. */
     public int getUserId() {
         return mUserId;
     }
 
     /** The HAL callback, which should only be used in tests {@See BiometricTestSessionImpl}. */
-    AidlResponseHandler getHalSessionCallback() {
+    public AidlResponseHandler getHalSessionCallback() {
         return mAidlResponseHandler;
     }
 

@@ -20,15 +20,15 @@ import android.app.Instrumentation
 import android.content.Intent
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
-import android.tools.common.datatypes.Rect
-import android.tools.common.datatypes.Region
-import android.tools.common.traces.ConditionsFactory
-import android.tools.common.traces.component.IComponentMatcher
+import android.tools.datatypes.Rect
+import android.tools.datatypes.Region
 import android.tools.device.apphelpers.StandardAppHelper
-import android.tools.device.helpers.FIND_TIMEOUT
-import android.tools.device.helpers.SYSTEMUI_PACKAGE
-import android.tools.device.traces.parsers.WindowManagerStateHelper
-import android.tools.device.traces.parsers.toFlickerComponent
+import android.tools.helpers.FIND_TIMEOUT
+import android.tools.helpers.SYSTEMUI_PACKAGE
+import android.tools.traces.ConditionsFactory
+import android.tools.traces.component.IComponentMatcher
+import android.tools.traces.parsers.WindowManagerStateHelper
+import android.tools.traces.parsers.toFlickerComponent
 import android.util.Log
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
@@ -296,6 +296,10 @@ open class PipAppHelper(instrumentation: Instrumentation) :
         clickObject(MEDIA_SESSION_START_RADIO_BUTTON_ID)
     }
 
+    fun setSourceRectHint() {
+        clickObject(SOURCE_RECT_HINT)
+    }
+
     fun checkWithCustomActionsCheckbox() =
         uiDevice
             .findObject(By.res(packageName, WITH_CUSTOM_ACTIONS_BUTTON_ID))
@@ -338,6 +342,14 @@ open class PipAppHelper(instrumentation: Instrumentation) :
 
         // Wait for animation to complete.
         wmHelper.StateSyncBuilder().withPipGone().withHomeActivityVisible().waitForAndVerify()
+    }
+
+    open fun tapPipToShowMenu(wmHelper: WindowManagerStateHelper) {
+        val windowRect = getWindowRect(wmHelper)
+        uiDevice.click(windowRect.centerX(), windowRect.centerY())
+        // search and interact with the dismiss button
+        val dismissSelector = By.res(SYSTEMUI_PACKAGE, "dismiss")
+        uiDevice.wait(Until.hasObject(dismissSelector), FIND_TIMEOUT)
     }
 
     /** Close the pip window by pressing the expand button */
@@ -436,6 +448,7 @@ open class PipAppHelper(instrumentation: Instrumentation) :
         private const val MEDIA_SESSION_START_RADIO_BUTTON_ID = "media_session_start"
         private const val ENTER_PIP_ON_USER_LEAVE_HINT = "enter_pip_on_leave_manual"
         private const val ENTER_PIP_AUTOENTER = "enter_pip_on_leave_autoenter"
+        private const val SOURCE_RECT_HINT = "set_source_rect_hint"
         // minimum number of steps to take, when animating gestures, needs to be 2
         // so that there is at least a single intermediate layer that flicker tests can check
         private const val MIN_STEPS_TO_ANIMATE = 2

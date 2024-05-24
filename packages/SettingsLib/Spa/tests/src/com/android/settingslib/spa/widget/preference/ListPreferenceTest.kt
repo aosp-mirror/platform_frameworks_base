@@ -123,6 +123,26 @@ class ListPreferenceTest {
     }
 
     @Test
+    fun click_optionsNotEmptyAndItemHasSummary_itemShowSummary() {
+        composeTestRule.setContent {
+            ListPreference(remember {
+                object : ListPreferenceModel {
+                    override val title = TITLE
+                    override val options =
+                        listOf(ListPreferenceOption(id = 1, text = "A", summary = "A_Summary"))
+                    override val selectedId = mutableIntStateOf(1)
+                    override val onIdSelected: (Int) -> Unit = {}
+                }
+            })
+        }
+
+        composeTestRule.onNodeWithText(TITLE).performClick()
+
+        composeTestRule.onDialogText(TITLE).assertIsDisplayed()
+        composeTestRule.onNodeWithText("A_Summary").assertIsDisplayed()
+    }
+
+    @Test
     fun select() {
         val selectedId = mutableIntStateOf(1)
         composeTestRule.setContent {

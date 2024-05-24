@@ -75,34 +75,12 @@ public final class ImeTrackerService extends IImeTracker.Stub {
 
     @NonNull
     @Override
-    public ImeTracker.Token onRequestShow(@NonNull String tag, int uid,
-            @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason) {
+    public ImeTracker.Token onStart(@NonNull String tag, int uid, @ImeTracker.Type int type,
+            @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason, boolean fromUser) {
         final var binder = new Binder();
         final var token = new ImeTracker.Token(binder, tag);
-        final var entry = new History.Entry(tag, uid, ImeTracker.TYPE_SHOW, ImeTracker.STATUS_RUN,
-                origin, reason);
-        synchronized (mLock) {
-            mHistory.addEntry(binder, entry);
-
-            // Register a delayed task to handle the case where the new entry times out.
-            mHandler.postDelayed(() -> {
-                synchronized (mLock) {
-                    mHistory.setFinished(token, ImeTracker.STATUS_TIMEOUT,
-                            ImeTracker.PHASE_NOT_SET);
-                }
-            }, TIMEOUT_MS);
-        }
-        return token;
-    }
-
-    @NonNull
-    @Override
-    public ImeTracker.Token onRequestHide(@NonNull String tag, int uid,
-            @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason) {
-        final var binder = new Binder();
-        final var token = new ImeTracker.Token(binder, tag);
-        final var entry = new History.Entry(tag, uid, ImeTracker.TYPE_HIDE, ImeTracker.STATUS_RUN,
-                origin, reason);
+        final var entry = new History.Entry(tag, uid, type, ImeTracker.STATUS_RUN, origin, reason,
+                fromUser);
         synchronized (mLock) {
             mHistory.addEntry(binder, entry);
 
@@ -158,7 +136,7 @@ public final class ImeTrackerService extends IImeTracker.Stub {
     /**
      * Updates the IME request tracking token with new information available in IMMS.
      *
-     * @param statsToken the token corresponding to the current IME request.
+     * @param statsToken the token tracking the current IME request.
      * @param requestWindowName the name of the window that created the IME request.
      */
     public void onImmsUpdate(@NonNull ImeTracker.Token statsToken,
@@ -223,7 +201,7 @@ public final class ImeTrackerService extends IImeTracker.Stub {
          * Sets the live entry corresponding to the tracking token, if it exists, as finished,
          * and uploads the data for metrics.
          *
-         * @param statsToken the token corresponding to the current IME request.
+         * @param statsToken the token tracking the current IME request.
          * @param status the finish status of the IME request.
          * @param phase the phase the IME request finished at, if it exists
          *              (or {@link ImeTracker#PHASE_NOT_SET} otherwise).
@@ -269,7 +247,7 @@ public final class ImeTrackerService extends IImeTracker.Stub {
             // Log newly finished entry.
             FrameworkStatsLog.write(FrameworkStatsLog.IME_REQUEST_FINISHED, entry.mUid,
                     entry.mDuration, entry.mType, entry.mStatus, entry.mReason,
-                    entry.mOrigin, entry.mPhase);
+                    entry.mOrigin, entry.mPhase, entry.mFromUser);
         }
 
         /** Dumps the contents of the circular buffer. */
@@ -353,6 +331,9 @@ public final class ImeTrackerService extends IImeTracker.Stub {
             @ImeTracker.Phase
             private int mPhase = ImeTracker.PHASE_NOT_SET;
 
+            /** Whether this request was created directly from a user interaction. */
+            private final boolean mFromUser;
+
             /**
              * Name of the window that created the IME request.
              *
@@ -363,13 +344,14 @@ public final class ImeTrackerService extends IImeTracker.Stub {
 
             private Entry(@NonNull String tag, int uid, @ImeTracker.Type int type,
                     @ImeTracker.Status int status, @ImeTracker.Origin int origin,
-                    @SoftInputShowHideReason int reason) {
+                    @SoftInputShowHideReason int reason, boolean fromUser) {
                 mTag = tag;
                 mUid = uid;
                 mType = type;
                 mStatus = status;
                 mOrigin = origin;
                 mReason = reason;
+                mFromUser = fromUser;
             }
         }
     }

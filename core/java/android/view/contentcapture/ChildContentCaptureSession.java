@@ -17,9 +17,15 @@ package android.view.contentcapture;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.graphics.Insets;
+import android.graphics.Rect;
+import android.os.IBinder;
+import android.util.SparseArray;
 import android.view.autofill.AutofillId;
 import android.view.contentcapture.ViewNode.ViewStructureImpl;
+
+import java.util.ArrayList;
 
 /**
  * A session that is explicitly created by the app (and hence is a descendant of
@@ -40,17 +46,30 @@ final class ChildContentCaptureSession extends ContentCaptureSession {
     }
 
     @Override
-    MainContentCaptureSession getMainCaptureSession() {
-        if (mParent instanceof MainContentCaptureSession) {
-            return (MainContentCaptureSession) mParent;
-        }
+    ContentCaptureSession getMainCaptureSession() {
         return mParent.getMainCaptureSession();
+    }
+
+    @Override
+    void start(@NonNull IBinder token, @NonNull IBinder shareableActivityToken,
+            @NonNull ComponentName component, int flags) {
+        getMainCaptureSession().start(token, shareableActivityToken, component, flags);
+    }
+
+    @Override
+    boolean isDisabled() {
+        return getMainCaptureSession().isDisabled();
+    }
+
+    @Override
+    boolean setDisabled(boolean disabled) {
+        return getMainCaptureSession().setDisabled(disabled);
     }
 
     @Override
     ContentCaptureSession newChild(@NonNull ContentCaptureContext clientContext) {
         final ContentCaptureSession child = new ChildContentCaptureSession(this, clientContext);
-        getMainCaptureSession().notifyChildSessionStarted(mId, child.mId, clientContext);
+        internalNotifyChildSessionStarted(mId, child.mId, clientContext);
         return child;
     }
 
@@ -61,51 +80,80 @@ final class ChildContentCaptureSession extends ContentCaptureSession {
 
     @Override
     public void updateContentCaptureContext(@Nullable ContentCaptureContext context) {
-        getMainCaptureSession().notifyContextUpdated(mId, context);
+        internalNotifyContextUpdated(mId, context);
     }
 
     @Override
     void onDestroy() {
-        getMainCaptureSession().notifyChildSessionFinished(mParent.mId, mId);
+        internalNotifyChildSessionFinished(mParent.mId, mId);
     }
 
     @Override
-    void internalNotifyViewAppeared(@NonNull ViewStructureImpl node) {
-        getMainCaptureSession().notifyViewAppeared(mId, node);
+    void internalNotifyChildSessionStarted(int parentSessionId, int childSessionId,
+            @NonNull ContentCaptureContext clientContext) {
+        getMainCaptureSession()
+                .internalNotifyChildSessionStarted(parentSessionId, childSessionId, clientContext);
     }
 
     @Override
-    void internalNotifyViewDisappeared(@NonNull AutofillId id) {
-        getMainCaptureSession().notifyViewDisappeared(mId, id);
+    void internalNotifyChildSessionFinished(int parentSessionId, int childSessionId) {
+        getMainCaptureSession().internalNotifyChildSessionFinished(parentSessionId, childSessionId);
     }
 
     @Override
-    void internalNotifyViewTextChanged(@NonNull AutofillId id, @Nullable CharSequence text) {
-        getMainCaptureSession().notifyViewTextChanged(mId, id, text);
+    void internalNotifyContextUpdated(int sessionId, @Nullable ContentCaptureContext context) {
+        getMainCaptureSession().internalNotifyContextUpdated(sessionId, context);
     }
 
     @Override
-    void internalNotifyViewInsetsChanged(@NonNull Insets viewInsets) {
-        getMainCaptureSession().notifyViewInsetsChanged(mId, viewInsets);
+    void internalNotifyViewAppeared(int sessionId, @NonNull ViewStructureImpl node) {
+        getMainCaptureSession().internalNotifyViewAppeared(sessionId, node);
     }
 
     @Override
-    public void internalNotifyViewTreeEvent(boolean started) {
-        getMainCaptureSession().notifyViewTreeEvent(mId, started);
+    void internalNotifyViewDisappeared(int sessionId, @NonNull AutofillId id) {
+        getMainCaptureSession().internalNotifyViewDisappeared(sessionId, id);
+    }
+
+    @Override
+    void internalNotifyViewTextChanged(
+            int sessionId, @NonNull AutofillId id, @Nullable CharSequence text) {
+        getMainCaptureSession().internalNotifyViewTextChanged(sessionId, id, text);
+    }
+
+    @Override
+    void internalNotifyViewInsetsChanged(int sessionId, @NonNull Insets viewInsets) {
+        getMainCaptureSession().internalNotifyViewInsetsChanged(mId, viewInsets);
+    }
+
+    @Override
+    public void internalNotifyViewTreeEvent(int sessionId, boolean started) {
+        getMainCaptureSession().internalNotifyViewTreeEvent(sessionId, started);
     }
 
     @Override
     void internalNotifySessionResumed() {
-        getMainCaptureSession().notifySessionResumed();
+        getMainCaptureSession().internalNotifySessionResumed();
     }
 
     @Override
     void internalNotifySessionPaused() {
-        getMainCaptureSession().notifySessionPaused();
+        getMainCaptureSession().internalNotifySessionPaused();
     }
 
     @Override
     boolean isContentCaptureEnabled() {
         return getMainCaptureSession().isContentCaptureEnabled();
+    }
+
+    @Override
+    public void notifyWindowBoundsChanged(int sessionId, @NonNull Rect bounds) {
+        getMainCaptureSession().notifyWindowBoundsChanged(sessionId, bounds);
+    }
+
+    @Override
+    public void notifyContentCaptureEvents(
+            @NonNull SparseArray<ArrayList<Object>> contentCaptureEvents) {
+        getMainCaptureSession().notifyContentCaptureEvents(contentCaptureEvents);
     }
 }

@@ -18,7 +18,6 @@ package android.service.voice;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -49,7 +48,6 @@ import android.os.ServiceManager;
 import android.os.SharedMemory;
 import android.os.SystemProperties;
 import android.provider.Settings;
-import android.service.voice.flags.Flags;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -444,20 +442,6 @@ public class VoiceInteractionService extends Service {
         }
     }
 
-    /** Reset hotword training data egressed count.
-     *  @hide */
-    @TestApi
-    @FlaggedApi(Flags.FLAG_ALLOW_TRAINING_DATA_EGRESS_FROM_HDS)
-    @RequiresPermission(Manifest.permission.RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT)
-    public final void resetHotwordTrainingDataEgressCountForTest() {
-        Log.i(TAG, "Resetting hotword training data egress count for test.");
-        try {
-            mSystemService.resetHotwordTrainingDataEgressCountForTest();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
     /**
      * Creates an {@link AlwaysOnHotwordDetector} for the given keyphrase and locale.
      * This instance must be retained and used by the client.
@@ -535,7 +519,7 @@ public class VoiceInteractionService extends Service {
             @NonNull String keyphrase, @SuppressLint("UseIcu") @NonNull Locale locale,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AlwaysOnHotwordDetector.Callback callback) {
-        // TODO(b/269080850): Resolve AndroidFrameworkRequiresPermission lint warning
+        // TODO (b/269080850): Resolve AndroidFrameworkRequiresPermission lint warning
 
         Objects.requireNonNull(keyphrase);
         Objects.requireNonNull(locale);
@@ -561,10 +545,6 @@ public class VoiceInteractionService extends Service {
             @NonNull SoundTrigger.ModuleProperties moduleProperties,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AlwaysOnHotwordDetector.Callback callback) {
-        // TODO(b/305787465): Remove the MANAGE_HOTWORD_DETECTION permission enforcement on the
-        // {@link #createAlwaysOnHotwordDetectorForTest(String, Locale,
-        // SoundTrigger.ModuleProperties, AlwaysOnHotwordDetector.Callback)} and replace with the
-        // permission RECEIVE_SANDBOX_TRIGGER_AUDIO when it is fully launched.
 
         Objects.requireNonNull(keyphrase);
         Objects.requireNonNull(locale);
@@ -631,11 +611,6 @@ public class VoiceInteractionService extends Service {
             @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory,
             @SuppressLint("MissingNullability") AlwaysOnHotwordDetector.Callback callback) {
-        // TODO(b/305787465): Remove the MANAGE_HOTWORD_DETECTION permission enforcement on the
-        // {@link #createAlwaysOnHotwordDetector(String, Locale, PersistableBundle, SharedMemory,
-        // AlwaysOnHotwordDetector.Callback)} and replace with the permission
-        // RECEIVE_SANDBOX_TRIGGER_AUDIO when it is fully launched.
-
         return createAlwaysOnHotwordDetectorInternal(keyphrase, locale,
                 /* supportHotwordDetectionService= */ true, options, sharedMemory,
                 /* modulProperties */ null, /* executor= */ null, callback);
@@ -687,11 +662,7 @@ public class VoiceInteractionService extends Service {
             @Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AlwaysOnHotwordDetector.Callback callback) {
-        // TODO(b/269080850): Resolve AndroidFrameworkRequiresPermission lint warning
-        // TODO(b/305787465): Remove the MANAGE_HOTWORD_DETECTION permission enforcement on the
-        // {@link #createAlwaysOnHotwordDetector(String, Locale, PersistableBundle, SharedMemory,
-        // Executor, AlwaysOnHotwordDetector.Callback)} and replace with the permission
-        // RECEIVE_SANDBOX_TRIGGER_AUDIO when it is fully launched.
+        // TODO (b/269080850): Resolve AndroidFrameworkRequiresPermission lint warning
 
         Objects.requireNonNull(keyphrase);
         Objects.requireNonNull(locale);
@@ -718,10 +689,6 @@ public class VoiceInteractionService extends Service {
             @NonNull SoundTrigger.ModuleProperties moduleProperties,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AlwaysOnHotwordDetector.Callback callback) {
-        // TODO(b/305787465): Remove the MANAGE_HOTWORD_DETECTION permission enforcement on the
-        // {@link #createAlwaysOnHotwordDetectorForTest(String, Locale, PersistableBundle,
-        // SharedMemory, SoundTrigger.ModuleProperties, Executor, AlwaysOnHotwordDetector.Callback)}
-        // and replace with the permission RECEIVE_SANDBOX_TRIGGER_AUDIO when it is fully launched.
 
         Objects.requireNonNull(keyphrase);
         Objects.requireNonNull(locale);
@@ -1021,36 +988,6 @@ public class VoiceInteractionService extends Service {
             }
             mActiveVisualQueryDetector = visualQueryDetector;
             return visualQueryDetector;
-        }
-    }
-
-    /**
-     * Allow/disallow receiving training data from trusted process.
-     *
-     * <p> This method can be called by a preinstalled assistant to receive/stop receiving
-     * training data via {@link HotwordDetector.Callback#onTrainingData(HotwordTrainingData)}.
-     * These training data events are produced during sandboxed detection (in trusted process).
-     *
-     * @param allowed whether to allow/disallow receiving training data produced during
-     *                sandboxed detection (from trusted process).
-     * @throws SecurityException if caller is not a preinstalled assistant or if caller is not the
-     * active assistant.
-     *
-     * @hide
-     */
-    //TODO(b/315053245): Add mitigations to make API no-op once user has modified setting.
-    @SystemApi
-    @FlaggedApi(Flags.FLAG_ALLOW_TRAINING_DATA_EGRESS_FROM_HDS)
-    @RequiresPermission(Manifest.permission.MANAGE_HOTWORD_DETECTION)
-    public void setShouldReceiveSandboxedTrainingData(boolean allowed) {
-        Log.i(TAG, "setShouldReceiveSandboxedTrainingData to " + allowed);
-        if (mSystemService == null) {
-            throw new IllegalStateException("Not available until onReady() is called");
-        }
-        try {
-            mSystemService.setShouldReceiveSandboxedTrainingData(allowed);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
         }
     }
 

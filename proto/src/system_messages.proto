@@ -408,5 +408,9 @@ message SystemMessage {
     // Notify the user about external display events related to screenshot.
     // Package: com.android.systemui
     NOTE_GLOBAL_SCREENSHOT_EXTERNAL_DISPLAY = 1008;
+
+    // Notify the user that accessibility floating menu is hidden.
+    // Package: com.android.systemui
+    NOTE_A11Y_FLOATING_MENU_HIDDEN = 1009;
   }
 }

@@ -19,13 +19,13 @@ package com.android.systemui.util.service.dagger;
 
 import android.content.res.Resources;
 
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Main;
-
-import javax.inject.Named;
+import com.android.systemui.res.R;
 
 import dagger.Module;
 import dagger.Provides;
+
+import javax.inject.Named;
 
 /**
  * Module containing components and parameters for
@@ -41,6 +41,7 @@ public class ObservableServiceModule {
     public static final String MIN_CONNECTION_DURATION_MS = "min_connection_duration_ms";
     public static final String SERVICE_CONNECTION = "service_connection";
     public static final String OBSERVER = "observer";
+    public static final String DUMPSYS_NAME = "dumpsys_name";
 
     @Provides
     @Named(MAX_RECONNECT_ATTEMPTS)

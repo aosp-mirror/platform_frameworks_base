@@ -16,7 +16,10 @@
 
 package com.android.systemui.statusbar.notification.interruption
 
+import android.app.Notification
 import android.app.Notification.BubbleMetadata
+import android.app.Notification.CATEGORY_EVENT
+import android.app.Notification.CATEGORY_REMINDER
 import android.app.Notification.VISIBILITY_PRIVATE
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_HIGH
@@ -223,4 +226,72 @@ class AlertKeyguardVisibilitySuppressor(
 ) : VisualInterruptionFilter(types = setOf(PEEK, PULSE, BUBBLE), reason = "hidden on keyguard") {
     override fun shouldSuppress(entry: NotificationEntry) =
         keyguardNotificationVisibilityProvider.shouldHideNotification(entry)
+}
+
+
+class AvalancheSuppressor(
+    private val avalancheProvider: AvalancheProvider,
+    private val systemClock: SystemClock,
+) : VisualInterruptionFilter(
+        types = setOf(PEEK, PULSE),
+        reason = "avalanche",
+    ) {
+    val TAG = "AvalancheSuppressor"
+
+    override var reason: String = "avalanche"
+        protected set
+
+    enum class State {
+        ALLOW_CONVERSATION_AFTER_AVALANCHE,
+        ALLOW_HIGH_PRIORITY_CONVERSATION_ANY_TIME,
+        ALLOW_CALLSTYLE,
+        ALLOW_CATEGORY_REMINDER,
+        ALLOW_CATEGORY_EVENT,
+        ALLOW_FSI_WITH_PERMISSION_ON,
+        ALLOW_COLORIZED,
+        SUPPRESS
+    }
+
+    override fun shouldSuppress(entry: NotificationEntry): Boolean {
+        val timeSinceAvalanche = systemClock.currentTimeMillis() - avalancheProvider.startTime
+        val isActive = timeSinceAvalanche < avalancheProvider.timeoutMs
+        val state = calculateState(entry)
+        val suppress = isActive && state == State.SUPPRESS
+        reason = "avalanche suppress=$suppress isActive=$isActive state=$state"
+        return suppress
+    }
+
+    private fun calculateState(entry: NotificationEntry): State  {
+        if (
+            entry.ranking.isConversation &&
+                entry.sbn.notification.`when` > avalancheProvider.startTime
+        ) {
+            return State.ALLOW_CONVERSATION_AFTER_AVALANCHE
+        }
+
+        if (entry.channel?.isImportantConversation == true) {
+            return State.ALLOW_HIGH_PRIORITY_CONVERSATION_ANY_TIME
+        }
+
+        if (entry.sbn.notification.isStyle(Notification.CallStyle::class.java)) {
+            return State.ALLOW_CALLSTYLE
+        }
+
+        if (entry.sbn.notification.category == CATEGORY_REMINDER) {
+            return State.ALLOW_CATEGORY_REMINDER
+        }
+
+        if (entry.sbn.notification.category == CATEGORY_EVENT) {
+            return State.ALLOW_CATEGORY_EVENT
+        }
+
+        if (entry.sbn.notification.fullScreenIntent != null) {
+            return State.ALLOW_FSI_WITH_PERMISSION_ON
+        }
+
+        if (entry.sbn.notification.isColorized) {
+            return State.ALLOW_COLORIZED
+        }
+        return State.SUPPRESS
+    }
 }

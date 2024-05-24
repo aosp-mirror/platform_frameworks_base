@@ -1130,6 +1130,7 @@ public class WifiNl80211ManagerTest {
         capaExpected.setChannelWidthSupported(ScanResult.CHANNEL_WIDTH_80MHZ_PLUS_MHZ, false);
         capaExpected.setMaxNumberTxSpatialStreams(2);
         capaExpected.setMaxNumberRxSpatialStreams(1);
+        capaExpected.setMaxNumberAkms(2);
 
         when(mWificond.getDeviceWiphyCapabilities(TEST_INTERFACE_NAME))
                 .thenReturn(capaExpected);

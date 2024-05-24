@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"மூடு"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"விரி"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"அமைப்புகள்"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"திரைப் பிரிப்பு பயன்முறைக்குச் செல்"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"மெனு"</string>
     <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"பிக்ச்சர்-இன்-பிக்ச்சர் மெனு"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> தற்போது பிக்ச்சர்-இன்-பிக்ச்சரில் உள்ளது"</string>

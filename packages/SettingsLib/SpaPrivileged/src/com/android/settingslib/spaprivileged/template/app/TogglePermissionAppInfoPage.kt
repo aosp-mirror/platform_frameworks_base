@@ -159,9 +159,9 @@ internal fun <T : AppRecord> TogglePermissionAppListModel<T>.TogglePermissionApp
             keys = switchRestrictionKeys,
             enhancedConfirmation = enhancedConfirmationKey?.let { EnhancedConfirmation(
                 key = it,
-                uid = checkNotNull(applicationInfo).uid,
                 packageName = packageName) })
         RestrictedSwitchPreference(switchModel, restrictions, restrictionsProviderFactory)
+        InfoPageAdditionalContent(record, isAllowed)
     }
 }
 

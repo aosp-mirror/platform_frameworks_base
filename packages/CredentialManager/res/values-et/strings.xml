@@ -39,8 +39,10 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Liikudes paroolivaba tuleviku poole, jäävad paroolid pääsuvõtmete kõrval siiski kättesaadavaks."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Valige, kuhu soovite oma <xliff:g id="CREATETYPES">%1$s</xliff:g> salvestada"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Valige paroolihaldur, et salvestada oma teave ja järgmisel korral kiiremini sisse logida"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Kas luua rakenduse <xliff:g id="APPNAME">%1$s</xliff:g> jaoks pääsuvõti?"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Kas salvestada rakenduse <xliff:g id="APPNAME">%1$s</xliff:g> jaoks parool?"</string>
+    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
+    <skip />
+    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
+    <skip />
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Kas salvestada rakenduse <xliff:g id="APPNAME">%1$s</xliff:g> jaoks sisselogimisandmed?"</string>
     <string name="passkey" msgid="632353688396759522">"pääsuvõti"</string>
     <string name="password" msgid="6738570945182936667">"parool"</string>
@@ -92,4 +94,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Muus seadmes"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Kasuta teist seadet"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"Rakendus <xliff:g id="APP_NAME">%1$s</xliff:g> tühistas taotluse"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Sisselogimise valikud"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"Rohkem"</string>
 </resources>

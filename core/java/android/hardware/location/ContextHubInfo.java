@@ -15,9 +15,11 @@
  */
 package android.hardware.location;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.chre.flags.Flags;
 import android.hardware.contexthub.V1_0.ContextHub;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -41,6 +43,7 @@ public class ContextHubInfo implements Parcelable {
     private float mSleepPowerDrawMw;
     private float mPeakPowerDrawMw;
     private int mMaxPacketLengthBytes;
+    private boolean mSupportsReliableMessages;
     private byte mChreApiMajorVersion;
     private byte mChreApiMinorVersion;
     private short mChrePatchVersion;
@@ -71,6 +74,7 @@ public class ContextHubInfo implements Parcelable {
         mSleepPowerDrawMw = contextHub.sleepPowerDrawMw;
         mPeakPowerDrawMw = contextHub.peakPowerDrawMw;
         mMaxPacketLengthBytes = contextHub.maxSupportedMsgLen;
+        mSupportsReliableMessages = false;
         mChrePlatformId = contextHub.chrePlatformId;
         mChreApiMajorVersion = contextHub.chreApiMajorVersion;
         mChreApiMinorVersion = contextHub.chreApiMinorVersion;
@@ -94,6 +98,8 @@ public class ContextHubInfo implements Parcelable {
         mSleepPowerDrawMw = 0;
         mPeakPowerDrawMw = 0;
         mMaxPacketLengthBytes = contextHub.maxSupportedMessageLengthBytes;
+        mSupportsReliableMessages = Flags.reliableMessageImplementation()
+                && contextHub.supportsReliableMessages;
         mChrePlatformId = contextHub.chrePlatformId;
         mChreApiMajorVersion = contextHub.chreApiMajorVersion;
         mChreApiMinorVersion = contextHub.chreApiMinorVersion;
@@ -104,13 +110,22 @@ public class ContextHubInfo implements Parcelable {
     }
 
     /**
-     * returns the maximum number of bytes that can be sent per message to the hub
+     * Returns the maximum number of bytes for a message to the hub.
      *
-     * @return int - maximum bytes that can be transmitted in a
-     *         single packet
+     * @return int - maximum bytes that can be transmitted in a single packet.
      */
     public int getMaxPacketLengthBytes() {
         return mMaxPacketLengthBytes;
+    }
+
+    /**
+     * Returns whether reliable messages are supported
+     *
+     * @return whether reliable messages are supported.
+     */
+    @FlaggedApi(Flags.FLAG_RELIABLE_MESSAGE)
+    public boolean supportsReliableMessages() {
+        return mSupportsReliableMessages;
     }
 
     /**
@@ -164,7 +179,10 @@ public class ContextHubInfo implements Parcelable {
      * @return int - platform version number
      */
     public int getStaticSwVersion() {
-        return (mChreApiMajorVersion << 24) | (mChreApiMinorVersion << 16) | (mChrePatchVersion);
+        // Version parts are all unsigned values.
+        return (Byte.toUnsignedInt(mChreApiMajorVersion) << 24)
+                | (Byte.toUnsignedInt(mChreApiMinorVersion) << 16)
+                | (Short.toUnsignedInt(mChrePatchVersion));
     }
 
     /**
@@ -284,12 +302,14 @@ public class ContextHubInfo implements Parcelable {
         retVal += ", Toolchain version: 0x" + Integer.toHexString(mToolchainVersion);
         retVal += "\n\tPlatformVersion : 0x" + Integer.toHexString(mPlatformVersion);
         retVal += ", SwVersion : "
-                + mChreApiMajorVersion + "." + mChreApiMinorVersion + "." + mChrePatchVersion;
+                + Byte.toUnsignedInt(mChreApiMajorVersion) + "." + Byte.toUnsignedInt(
+                mChreApiMinorVersion) + "." + Short.toUnsignedInt(mChrePatchVersion);
         retVal += ", CHRE platform ID: 0x" + Long.toHexString(mChrePlatformId);
         retVal += "\n\tPeakMips : " + mPeakMips;
         retVal += ", StoppedPowerDraw : " + mStoppedPowerDrawMw + " mW";
         retVal += ", PeakPowerDraw : " + mPeakPowerDrawMw + " mW";
         retVal += ", MaxPacketLength : " + mMaxPacketLengthBytes + " Bytes";
+        retVal += ", SupportsReliableMessage : " + mSupportsReliableMessages;
 
         return retVal;
     }
@@ -316,6 +336,8 @@ public class ContextHubInfo implements Parcelable {
         proto.write(ContextHubInfoProto.SLEEP_POWER_DRAW_MW, mSleepPowerDrawMw);
         proto.write(ContextHubInfoProto.PEAK_POWER_DRAW_MW, mPeakPowerDrawMw);
         proto.write(ContextHubInfoProto.MAX_PACKET_LENGTH_BYTES, mMaxPacketLengthBytes);
+        proto.write(ContextHubInfoProto.SUPPORTS_RELIABLE_MESSAGES,
+                mSupportsReliableMessages);
     }
 
     @Override
@@ -339,6 +361,8 @@ public class ContextHubInfo implements Parcelable {
                     && (other.getSleepPowerDrawMw() == mSleepPowerDrawMw)
                     && (other.getPeakPowerDrawMw() == mPeakPowerDrawMw)
                     && (other.getMaxPacketLengthBytes() == mMaxPacketLengthBytes)
+                    && (!Flags.reliableMessage()
+                            || (other.supportsReliableMessages() == mSupportsReliableMessages))
                     && Arrays.equals(other.getSupportedSensors(), mSupportedSensors)
                     && Arrays.equals(other.getMemoryRegions(), mMemoryRegions);
         }
@@ -367,6 +391,7 @@ public class ContextHubInfo implements Parcelable {
         mSupportedSensors = new int[numSupportedSensors];
         in.readIntArray(mSupportedSensors);
         mMemoryRegions = in.createTypedArray(MemoryRegion.CREATOR);
+        mSupportsReliableMessages = in.readBoolean();
     }
 
     public int describeContents() {
@@ -393,6 +418,7 @@ public class ContextHubInfo implements Parcelable {
         out.writeInt(mSupportedSensors.length);
         out.writeIntArray(mSupportedSensors);
         out.writeTypedArray(mMemoryRegions, flags);
+        out.writeBoolean(mSupportsReliableMessages);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<ContextHubInfo> CREATOR

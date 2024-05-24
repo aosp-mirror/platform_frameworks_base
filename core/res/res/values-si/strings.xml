@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: තත්පර <xliff:g id="TIME_DELAY">{2}</xliff:g> ට පසුව <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ඉදිරියට නොයවන ලදි"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ඉදිරියට නොයවන ලදි"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"සෙලියුලර් ජාල ආරක්ෂාව"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"සැකසීම් සමාලෝචනය කරන්න"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"උපාංග හැඳුනුම්කාරකයට ප්‍රවේශ විය"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> සම්බන්ධතාවය මත ජාලයක් <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> සහ <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> අතර කාලසීමාව තුළ වාර <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g>ක් ඔබේ උපාංගයේ අනන්‍ය හැඳුනුම්කාරකය (IMSI) වාර්තා කර ඇත."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> වෙත සංකේතනය කළ සම්බන්ධතාවය"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"ඔබ දැන් වඩාත් සුරක්ෂිත සෙලියුලර් ජාලයකට සම්බන්ධ වී ඇත."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> වෙත සංකේතනය නොකළ සම්බන්ධතාවය"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"ඔබ සංකේතනය නොකළ සෙලියුලර් ජාලයකට සම්බන්ධ වී ඇත. ඔබේ ඇමතුම්, පණිවිඩ, සහ දත්ත බාධා කිරීම් වලට ගොදුරු විය හැක."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"සෙලියුලර් ආරක්ෂක සැකසීම්"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"තව දැන ගන්න"</string>
     <string name="fcComplete" msgid="1080909484660507044">"අංග කේතය සම්පූර්ණයි."</string>
     <string name="fcError" msgid="5325116502080221346">"සම්බන්ධතා ගැටළුවක් හෝ අවලංගු විශේෂාංග කේතයකි."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"හරි"</string>
@@ -370,6 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"සෙල් විකාශන පණිවිඩ ලැබුණු විට ඒවා යොමු කිරීම සඳහා සෙල් විකාශන මොඩියුලයට බැඳීමට යෙදුමට ඉඩ දෙයි. හදිසි අවස්ථා පිළිබඳව ඔබට අනතුරු ඇඟවීම සඳහා සෙල් විකාශන ඇඟවීම් සමහර ස්ථානවල ලබා දෙනු ලැබේ. හදිසි සෙල් විකාශනයක් ලැබෙන අවස්ථාවකදී, අනිෂ්ට යෙදුම්වලින් ඔබගේ උපාංග කාර්ය සාධනයට හෝ මෙහෙයුමට බාධා සිදු විය හැකිය."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"සිදු වෙමින් පවතින ඇමතුම් කළමනාකරණය කරන්න"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"ඔබගේ උපාංගයේ සිදු වෙමින් පවතින ඇමතුම් පිළිබඳ විස්තර බැලීමට සහ මෙම ඇමතුම් පාලනය කිරීමට යෙදුමකට ඉඩ දෙයි."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"අවසන් වරට දන්නා කොටු අනන්‍යතාවට ප්‍රවේශ වන්න."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"දුරකථන මඟින් සපයන ලද අවසන් වරට දන්නා කොටුවේ අනන්‍යතාවට ප්‍රවේශ වීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"සෙල් ප්‍රචාරණ පණිවිඩ කියවීම"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"ඔබගේ උපාංගයට ලැබුණු සෙල් විකාශන පණිවිඩ කියවීමට යෙදුමට අවසර දෙන්න. ඔබට හදිසි අවස්ථාවන් පිළිබඳ අනතුරු ඇඟවීමට සෙල් විකාශන පණිවිඩ ඇතැම් ස්ථානවල සිට යවනු ලබයි. හදිසි සෙල් විකාශන ලැබෙන අවස්ථාවකදී, අනිෂ්ට යෙදුම් මඟින් ඔබගේ උපාංගයට කාර්ය සාධනයට හෝ ක්‍රියකරණයට බාධා සිදුවිය හැක."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"දායක වූ සංග්‍රහ කියවීම"</string>
@@ -434,6 +446,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"\"systemExempted\" වර්ගය සමග පෙරබිම් සේවා භාවිතා කිරීමට යෙදුමට ඉඩ දෙයි"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"\"fileManagement\" වර්ගය සමග පෙරබිම් සේවාව ධාවනය කරන්න"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"\"fileManagement\" වර්ගය සමග පෙරබිම් සේවා භාවිතා කිරීමට යෙදුමට ඉඩ දෙයි"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"\"mediaProcessing\" වර්ගය සමග පෙරබිම් සේවාව ධාවනය කරන්න"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"\"mediaProcessing\" වර්ගය සමග පෙරබිම් සේවා භාවිතා කිරීමට යෙදුමට ඉඩ දෙයි"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"\"specialUse\" වර්ගය සමග පෙරබිම් සේවාව ධාවනය කරන්න"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"\"specialUse\" වර්ගය සමග පෙරබිම් සේවා භාවිතා කිරීමට යෙදුමට ඉඩ දෙයි"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"යෙදුම් ආචයනයේ ඉඩ ප්‍රමාණය මැනීම"</string>
@@ -539,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"දුරකථනයේ අධෝරක්ත සම්ප්‍රේෂකය භාවිතයට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"වෝල්පේපරය සැකසීම"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"පද්ධති බිතුපත සැකසීමට යෙදුමට අවසර දෙන්න."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"සැඟවුණු පැතිකඩ වෙත ප්‍රවේශ වන්න"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"සැඟවුණු පැතිකඩ වෙත ප්‍රවේශ වීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"ඔබගේ බිතුපතේ ප්‍රමාණය සැකසීම"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"පද්ධති බිතුපතේ ප්‍රමාණ ඉඟි සකස් කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"වේලා කලාපය සැකසීම"</string>
@@ -632,7 +648,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"තිර අගුල භාවිත කරන්න"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"ඉදිරියට යාමට ඔබගේ තිර අගුල ඇතුළත් කරන්න"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"සංවේදකය මත තදින් ඔබන්න"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"ඇඟිලි සලකුණ හඳුනා ගත නොහැක. නැවත උත්සාහ කරන්න."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"ඇඟිලි සලකුණ හඳුනා නොගැනිණි. නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ඇඟිලි සලකුණු සංවේදකය පිරිසිදු කර නැවත උත්සාහ කරන්න"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"සංවේදකය පිරිසිදු කර නැවත උත්සාහ කරන්න"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"සංවේදකය මත තදින් ඔබන්න"</string>
@@ -650,18 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ඇඟිලි සලකුණ සත්‍යාපනය කරන ලදී"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"මුහුණ සත්‍යාපනය කරන ලදී"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"මුහුණ සත්‍යාපනය කරන ලදී, කරුණාකර තහවුරු කරන්න ඔබන්න"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ඇඟිලි සලකුණු දෘඪාංගය ලද නොහැකිය."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"ඇඟිලි සලකුණු දෘඪාංගය ලද නොහැක"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ඇඟිලි සලකුණ පිහිටුවිය නොහැකිය"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"ඇඟිලි සලකුණු පිහිටුවීම කාලය නිමා විය. නැවත උත්සාහ කරන්න."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"ඇඟිලි සලකුණු මෙහෙයුම අවලංගු කරන ලදී."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"පරිශීලක විසින් ඇඟිලි සලකුණු මෙහෙයුම අවසන් කරන ලදී."</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"ඇඟිලි සලකුණු මෙහෙයුම අවලංගු කරන ලදි"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"පරිශීලක විසින් ඇඟිලි සලකුණු මෙහෙයුම අවසන් කරන ලදි"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"උත්සාහ ගණන ඉතා වැඩියි. ඒ වෙනුවට තිර අගුල භාවිත කරන්න."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"උත්සාහ ගණන ඉතා වැඩියි. ඒ වෙනුවට තිර අගුල භාවිත කරන්න."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"ඇඟිලි සලකුණ සැකසීමට නොහැක. නැවත උත්සාහ කරන්න."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ඇඟිලි සලකුණු ඇතුළත් කර නොමැත."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"මෙම උපාංගයේ ඇඟිලි සලකුණු සංවේදකයක් නොමැත."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"සංවේදකය තාවකාලිකව අබල කර ඇත."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"ඇඟිලි සලකුණු සංවේදකය භාවිත කළ නොහැකිය. අළුත්වැඩියා සැපයුම්කරුවෙකු බලන්න"</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"ඇඟිලි සලකුණු ඇතුළත් කර නොමැත"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"මෙම උපාංගයේ ඇඟිලි සලකුණු සංවේදකයක් නොමැත"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"සංවේදකය තාවකාලිකව අබල කර ඇත"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"ඇඟිලි සලකුණු සංවේදකය භාවිත කළ නොහැක. අලුත්වැඩියා සැපයුම්කරුවෙකු වෙත පැමිණෙන්න."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"බල බොත්තම ඔබා ඇත"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ඇඟිලි <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ඇඟිලි සලකුණ භාවිත කරන්න"</string>
@@ -696,7 +712,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"ඔබගේ මුහුණ දැකිය නොහැකිය. ඔබගේ දුරකථනය ඇස් මට්ටමින් අල්ලා ගන්න."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"චලනය ඉතා වැඩියි. දුරකථනය ස්ථිරව අල්ලා සිටින්න."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"ඔබේ මුහුණ යළි ලියාපදිංචි කරන්න."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"මුහුණ හඳුනා ගත නොහැකිය. නැවත උත්සාහ කරන්න."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"මුහුණ හඳුනා නොගැනිණි. නැවත උත්සාහ කරන්න."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"ඔබගේ හිසෙහි පිහිටීම මදක් වෙනස් කරන්න"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"ඔබගේ දුරකථනය දෙස වඩාත් ඍජුව බලන්න"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"ඔබගේ දුරකථනය දෙස වඩාත් ඍජුව බලන්න"</string>
@@ -807,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz ට වඩා වැඩි වේගයකින් සංවේදක දත්ත නියැදි කිරීමට යෙදුමට ඉඩ දෙයි"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"යෙදුම පරිශීලක ක්‍රියාවෙන් තොරව යාවත්කාලීන කරන්න"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"පරිශීලක ක්‍රියාවෙන් තොරව කලින් ස්ථාපිත යෙදුම යාවත්කාලීන කිරීමට දරන්නාට ඉඩ දෙයි"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"වෙනත් යෙදුම් සතු E2EE සම්බන්ධතා යතුරුවල සත්‍යාපන තත්ත්වයන් යාවත්කාලීන කරන්න"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"වෙනත් යෙදුම් සතු E2EE සම්බන්ධතා යතුරුවල සත්‍යාපන තත්ත්වයන් යාවත්කාලීන කිරීමට යෙදුමට ඉඩ දෙයි"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"මුරපද නීති සකස් කිරීම"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"තිර අගුලු මුරපද සහ PIN තුළ ඉඩ දෙන දිග සහ අනුලකුණු පාලනය කිරීම."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"තිරය අගුළු ඇරීමේ උත්සාහයන් නිරීක්ෂණය කරන්න"</string>
@@ -1906,6 +1924,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"සති අන්තය"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"සිදුවීම"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"නිදා ගනිමින්"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> විසින් කළමනාකරණය කරයි"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ක්‍රියාත්මකයි"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ක්‍රියාවිරහිතයි"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> සමහර ශබ්ද නිහඬ කරමින්"</string>
@@ -1925,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"සත්‍යාපිතයි"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"දිග හරින්න"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"හකුළන්න"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"හකුළන ලදි"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"දිග හරින ලදි"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"පුළුල් කිරීම ටොගල කරන්න"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB පර්යන්ත තොට"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1965,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"කාර්ය යෙදුම් විරාම නොකරන්න ද?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"විරාම නොකරන්න"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"හදිසි අවස්ථාව"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"තිර අගුලක් සකසන්න"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"තිර අගුල සකසන්න"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"ඔබේ රහසිගත අවකාශය භාවිතා කිරීමට, මෙම උපාංගයේ තිර අගුලක් සකසන්න"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"යෙදුම ලබා ගත නොහැකිය"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> මේ දැන් ලබා ගත නොහැකිය."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> නොතිබේ"</string>
@@ -2341,8 +2365,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"සංදර්ශකයට දර්පණය කළ නොහැක"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"වෙනස් කේබලයක් භාවිතා කර නැවත උත්සාහ කරන්න"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"ඔබේ උපාංගය ඉතා උණුසුම් වන අතර එය සිසිල් වන තෙක් සංදර්ශකය වෙත පිළිබිඹු කළ නොහැක"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"කේබලය සංදර්ශක වෙත සහාය නොදැක්විය හැක"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"ඔබේ USB-C කේබලයට සංදර්ශකවලට නිසි ලෙස සම්බන්ධ නොවිය හැක"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen සක්‍රීයයි"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"අන්තර්ගතය පෙන්වීමට <xliff:g id="APP_NAME">%1$s</xliff:g> සංදර්ශන දෙකම භාවිත කරයි"</string>
@@ -2366,4 +2388,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"කාර්යාලය 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"පරීක්ෂණය"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"වාර්ගික"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"චන්ද්‍රිකාවට ස්වයංක්‍රීයව සම්බන්ධ වේ"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"ඔබට ජංගම හෝ Wi-Fi ජාලයක් නොමැතිව පණිවිඩ යැවීමට සහ ලැබීමට හැක"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages විවෘත කරන්න"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"එය ක්‍රියා කරන ආකාරය"</string>
 </resources>

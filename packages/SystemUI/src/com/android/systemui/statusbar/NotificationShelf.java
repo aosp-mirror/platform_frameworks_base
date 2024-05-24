@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import static com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress;
+import static com.android.systemui.util.ColorUtilKt.hexColorString;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -42,6 +43,7 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.flags.RefactorFlag;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
+import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
@@ -187,8 +189,8 @@ public class NotificationShelf extends ActivatableNotificationView {
 
     @Override
     public String toString() {
-        return "NotificationShelf"
-                + "(hideBackground=" + mHideBackground
+        return super.toString()
+                + " (hideBackground=" + mHideBackground
                 + " notGoneIndex=" + mNotGoneIndex
                 + " hasItemsInStableShelf=" + mHasItemsInStableShelf
                 + " interactive=" + mInteractive
@@ -366,6 +368,17 @@ public class NotificationShelf extends ActivatableNotificationView {
 
         return isXInView(localX, slop, left, right)
                 && isYInView(localY, slop, top, bottom);
+    }
+
+    @Override
+    public void updateBackgroundColors() {
+        super.updateBackgroundColors();
+        ColorUpdateLogger colorUpdateLogger = ColorUpdateLogger.getInstance();
+        if (colorUpdateLogger != null) {
+            colorUpdateLogger.logEvent("Shelf.updateBackgroundColors()",
+                    "normalBgColor=" + hexColorString(getNormalBgColor())
+                            + " background=" + mBackgroundNormal.toDumpString());
+        }
     }
 
     /**
@@ -766,7 +779,6 @@ public class NotificationShelf extends ActivatableNotificationView {
             }
 
         } else if (viewEnd >= shelfClipStart
-                && view.isInShelf()
                 && (mAmbientState.isShadeExpanded()
                 || (!view.isPinned() && !view.isHeadsUpAnimatingAway()))) {
 

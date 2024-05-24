@@ -18,7 +18,6 @@ package com.android.settingslib.spa.widget.preference
 
 import androidx.compose.foundation.clickable
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.android.settingslib.spa.framework.common.EntryMacro
@@ -107,14 +106,9 @@ fun Preference(
 ) {
     val onClickWithLog = wrapOnClickWithLog(model.onClick)
     val enabled = model.enabled()
-    val modifier = remember(enabled) {
-        if (onClickWithLog != null) {
-            Modifier.clickable(
-                enabled = enabled,
-                onClick = onClickWithLog
-            )
-        } else Modifier
-    }
+    val modifier = if (onClickWithLog != null) {
+        Modifier.clickable(enabled = enabled, onClick = onClickWithLog)
+    } else Modifier
     EntryHighlight {
         BasePreference(
             title = model.title,

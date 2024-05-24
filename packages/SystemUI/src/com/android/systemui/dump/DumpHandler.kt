@@ -222,13 +222,18 @@ constructor(
             val buffers = dumpManager.getLogBuffers()
             val tableBuffers = dumpManager.getTableLogBuffers()
 
-            targets.forEach { target ->
-                findTargetInCollection(target, dumpables, buffers, tableBuffers)?.dump(pw, args)
-            }
+            val matches =
+                if (args.matchAll) {
+                    findAllMatchesInCollection(targets, dumpables, buffers, tableBuffers)
+                } else {
+                    findBestMatchesInCollection(targets, dumpables, buffers, tableBuffers)
+                }
+            matches.forEach { it.dump(pw, args) }
         } else {
             if (args.listOnly) {
                 val dumpables = dumpManager.getDumpables()
                 val buffers = dumpManager.getLogBuffers()
+                val tableBuffers = dumpManager.getTableLogBuffers()
 
                 pw.println("Dumpables:")
                 listTargetNames(dumpables, pw)
@@ -236,18 +241,23 @@ constructor(
 
                 pw.println("Buffers:")
                 listTargetNames(buffers, pw)
+                pw.println()
+
+                pw.println("TableBuffers:")
+                listTargetNames(tableBuffers, pw)
             } else {
                 pw.println("Nothing to dump :(")
             }
         }
     }
 
+    /** Finds the best match for a particular target */
     private fun findTargetInCollection(
         target: String,
         dumpables: Collection<DumpableEntry>,
         logBuffers: Collection<LogBufferEntry>,
         tableBuffers: Collection<TableLogBufferEntry>,
-    ) =
+    ): DumpsysEntry? =
         sequence {
                 findBestTargetMatch(dumpables, target)?.let { yield(it) }
                 findBestTargetMatch(logBuffers, target)?.let { yield(it) }
@@ -255,6 +265,31 @@ constructor(
             }
             .sortedBy { it.name }
             .minByOrNull { it.name.length }
+
+    /** Finds the best match for each target, if any, in the order of the targets */
+    private fun findBestMatchesInCollection(
+        targets: List<String>,
+        dumpables: Collection<DumpableEntry>,
+        logBuffers: Collection<LogBufferEntry>,
+        tableBuffers: Collection<TableLogBufferEntry>,
+    ): List<DumpsysEntry> =
+        targets.mapNotNull { target ->
+            findTargetInCollection(target, dumpables, logBuffers, tableBuffers)
+        }
+
+    /** Finds all matches for any target, returning in the --list order. */
+    private fun findAllMatchesInCollection(
+        targets: List<String>,
+        dumpables: Collection<DumpableEntry>,
+        logBuffers: Collection<LogBufferEntry>,
+        tableBuffers: Collection<TableLogBufferEntry>,
+    ): List<DumpsysEntry> =
+        sequence {
+                yieldAll(dumpables.filter { it.matchesAny(targets) })
+                yieldAll(logBuffers.filter { it.matchesAny(targets) })
+                yieldAll(tableBuffers.filter { it.matchesAny(targets) })
+            }
+            .sortedBy { it.name }.toList()
 
     private fun dumpConfig(pw: PrintWriter) {
         config.dump(pw, arrayOf())
@@ -270,6 +305,11 @@ constructor(
         pw.println("$ <invocation> NotifLog")
         pw.println("$ <invocation> StatusBar FalsingManager BootCompleteCacheImpl")
         pw.println("etc.")
+        pw.println()
+
+        pw.println("Print all matches, instead of the best match:")
+        pw.println("$ <invocation> --all <targets>")
+        pw.println("$ <invocation> --all Log")
         pw.println()
 
         pw.println("Special commands:")
@@ -325,9 +365,10 @@ constructor(
                     "--help" -> {
                         pArgs.command = "help"
                     }
-                    // This flag is passed as part of the proto dump in Bug reports, we can ignore
-                    // it because this is our default behavior.
-                    "-a" -> {}
+                    "-a",
+                    "--all" -> {
+                        pArgs.matchAll = true
+                    }
                     else -> {
                         throw ArgParseException("Unknown flag: $arg")
                     }
@@ -386,15 +427,19 @@ constructor(
         const val DUMPSYS_DUMPABLE_DIVIDER =
             "----------------------------------------------------------------------------"
 
+        private fun DumpsysEntry.matches(target: String) = name.endsWith(target)
+        private fun DumpsysEntry.matchesAny(targets: Collection<String>) =
+            targets.any { matches(it) }
+
         private fun findBestTargetMatch(c: Collection<DumpsysEntry>, target: String) =
-            c.asSequence().filter { it.name.endsWith(target) }.minByOrNull { it.name.length }
+            c.asSequence().filter { it.matches(target) }.minByOrNull { it.name.length }
 
         private fun findBestProtoTargetMatch(
             c: Collection<DumpableEntry>,
             target: String
         ): ProtoDumpable? =
             c.asSequence()
-                .filter { it.name.endsWith(target) }
+                .filter { it.matches(target) }
                 .filter { it.dumpable is ProtoDumpable }
                 .minByOrNull { it.name.length }
                 ?.dumpable as? ProtoDumpable
@@ -440,40 +485,34 @@ constructor(
         }
 
         /**
-         * Utility to write a [DumpableEntry] to the given [PrintWriter] in a
-         * dumpsys-appropriate format.
+         * Utility to write a [DumpableEntry] to the given [PrintWriter] in a dumpsys-appropriate
+         * format.
          */
         private fun dumpDumpable(
-                entry: DumpableEntry,
-                pw: PrintWriter,
-                args: Array<String> = arrayOf(),
-        ) = pw.wrapSection(entry) {
-            entry.dumpable.dump(pw, args)
-        }
+            entry: DumpableEntry,
+            pw: PrintWriter,
+            args: Array<String> = arrayOf(),
+        ) = pw.wrapSection(entry) { entry.dumpable.dump(pw, args) }
 
         /**
-         * Utility to write a [LogBufferEntry] to the given [PrintWriter] in a
-         * dumpsys-appropriate format.
+         * Utility to write a [LogBufferEntry] to the given [PrintWriter] in a dumpsys-appropriate
+         * format.
          */
         private fun dumpBuffer(
-                entry: LogBufferEntry,
-                pw: PrintWriter,
-                tailLength: Int = 0,
-        ) = pw.wrapSection(entry) {
-            entry.buffer.dump(pw, tailLength)
-        }
+            entry: LogBufferEntry,
+            pw: PrintWriter,
+            tailLength: Int = 0,
+        ) = pw.wrapSection(entry) { entry.buffer.dump(pw, tailLength) }
 
         /**
          * Utility to write a [TableLogBufferEntry] to the given [PrintWriter] in a
          * dumpsys-appropriate format.
          */
         private fun dumpTableBuffer(
-                entry: TableLogBufferEntry,
-                pw: PrintWriter,
-                args: Array<String> = arrayOf(),
-        ) = pw.wrapSection(entry) {
-            entry.table.dump(pw, args)
-        }
+            entry: TableLogBufferEntry,
+            pw: PrintWriter,
+            args: Array<String> = arrayOf(),
+        ) = pw.wrapSection(entry) { entry.table.dump(pw, args) }
 
         /**
          * Zero-arg utility to write a [DumpsysEntry] to the given [PrintWriter] in a
@@ -513,6 +552,7 @@ private class ParsedArgs(val rawArgs: Array<String>, val nonFlagArgs: List<Strin
     var tailLength: Int = 0
     var command: String? = null
     var listOnly = false
+    var matchAll = false
     var proto = false
 }
 

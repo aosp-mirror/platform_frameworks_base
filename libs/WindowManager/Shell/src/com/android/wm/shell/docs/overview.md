@@ -19,25 +19,24 @@ Currently, the WMShell library is used to drive the windowing experience on hand
 
 ## Where does the code live
 
-The core WMShell library code is currently located in the [frameworks/base/libs/WindowManager/Shell](frameworks/base/libs/WindowManager/Shell)
+The core WMShell library code is currently located in the [frameworks/base/libs/WindowManager/Shell](/libs/WindowManager/Shell)
 directory and is included as a part dependency of the host SystemUI apk.
 
 ## How do I build the Shell library
 
-The library can be built directly by running (using [go/makepush](http://go/makepush)):
+The library can be built directly by running:
 ```shell
-mp :WindowManager-Shell
+m WindowManager-Shell
 ```
 But this is mainly useful for inspecting the contents of the library or verifying it builds. The
-various targets can be found in the Shell library's [Android.bp](frameworks/base/libs/WindowManager/Shell/Android.bp)
+various targets can be found in the Shell library's [Android.bp](/libs/WindowManager/Shell/Android.bp)
 file.
 
 Normally, you would build it as a part of the host SystemUI, for example via commandline:
 ```shell
 # Phone SystemUI variant
-mp sysuig
-# Building Shell & SysUI changes along w/ framework changes
-mp core services sysuig
+m SystemUI
+adevice update
 ```
 
 Or preferably, if you are making WMShell/SysUI only changes (no other framework changes), then

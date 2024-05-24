@@ -8,10 +8,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.complication.ComplicationHostViewController
-import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel
+import com.android.systemui.dreams.ui.viewmodel.DreamOverlayViewModel
 import com.android.systemui.log.core.FakeLogBuffer
 import com.android.systemui.statusbar.BlurUtils
-import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -46,8 +45,7 @@ class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
     @Mock private lateinit var hostViewController: ComplicationHostViewController
     @Mock private lateinit var statusBarViewController: DreamOverlayStatusBarViewController
     @Mock private lateinit var stateController: DreamOverlayStateController
-    @Mock private lateinit var configController: ConfigurationController
-    @Mock private lateinit var transitionViewModel: DreamingToLockscreenTransitionViewModel
+    @Mock private lateinit var transitionViewModel: DreamOverlayViewModel
     private val logBuffer = FakeLogBuffer.Factory.create()
     private lateinit var controller: DreamOverlayAnimationsController
 
@@ -62,7 +60,6 @@ class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
                 stateController,
                 DREAM_BLUR_RADIUS,
                 transitionViewModel,
-                configController,
                 DREAM_IN_BLUR_ANIMATION_DURATION,
                 DREAM_IN_COMPLICATIONS_ANIMATION_DURATION,
                 DREAM_IN_TRANSLATION_Y_DISTANCE,

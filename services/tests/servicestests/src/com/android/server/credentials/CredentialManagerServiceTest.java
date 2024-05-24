@@ -22,6 +22,7 @@ import android.content.Context;
 import android.os.UserHandle;
 import android.provider.Settings;
 
+import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -40,15 +41,23 @@ import java.util.Set;
 public final class CredentialManagerServiceTest {
 
     Context mContext = null;
+    MockSettingsWrapper mSettingsWrapper = null;
 
     @Before
     public void setUp() throws CertificateException {
         mContext = ApplicationProvider.getApplicationContext();
+        mSettingsWrapper = new MockSettingsWrapper(mContext);
     }
 
     @Test
     public void getStoredProviders_emptyValue_success() {
         Set<String> providers = CredentialManagerService.getStoredProviders("", "");
+        assertThat(providers.size()).isEqualTo(0);
+    }
+
+    @Test
+    public void getStoredProviders_nullValue_success() {
+        Set<String> providers = CredentialManagerService.getStoredProviders(null, null);
         assertThat(providers.size()).isEqualTo(0);
     }
 
@@ -75,7 +84,8 @@ public final class CredentialManagerServiceTest {
                 Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
                 "com.example.test/com.example.test.TestActivity");
 
-        CredentialManagerService.updateProvidersWhenPackageRemoved(mContext, "com.example.test");
+        CredentialManagerService.updateProvidersWhenPackageRemoved(
+                mSettingsWrapper, "com.example.test");
 
         assertThat(getSettingsKey(Settings.Secure.AUTOFILL_SERVICE)).isEqualTo("");
         assertThat(getSettingsKey(Settings.Secure.CREDENTIAL_SERVICE))
@@ -95,7 +105,8 @@ public final class CredentialManagerServiceTest {
         setSettingsKey(Settings.Secure.CREDENTIAL_SERVICE, testCredentialValue);
         setSettingsKey(Settings.Secure.CREDENTIAL_SERVICE_PRIMARY, testCredentialPrimaryValue);
 
-        CredentialManagerService.updateProvidersWhenPackageRemoved(mContext, "com.example.test3");
+        CredentialManagerService.updateProvidersWhenPackageRemoved(
+                mSettingsWrapper, "com.example.test3");
 
         // Since the provider removed was not a primary provider then we should do nothing.
         assertThat(getSettingsKey(Settings.Secure.AUTOFILL_SERVICE))
@@ -119,7 +130,8 @@ public final class CredentialManagerServiceTest {
                 Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
                 "com.example.test/com.example.test.TestActivity");
 
-        CredentialManagerService.updateProvidersWhenPackageRemoved(mContext, "com.example.test");
+        CredentialManagerService.updateProvidersWhenPackageRemoved(
+                mSettingsWrapper, "com.example.test");
 
         assertThat(getSettingsKey(Settings.Secure.AUTOFILL_SERVICE)).isEqualTo("");
         assertThat(getSettingsKey(Settings.Secure.CREDENTIAL_SERVICE))
@@ -138,7 +150,8 @@ public final class CredentialManagerServiceTest {
         setSettingsKey(Settings.Secure.CREDENTIAL_SERVICE, testCredentialValue);
         setSettingsKey(Settings.Secure.CREDENTIAL_SERVICE_PRIMARY, testCredentialPrimaryValue);
 
-        CredentialManagerService.updateProvidersWhenPackageRemoved(mContext, "com.example.test3");
+        CredentialManagerService.updateProvidersWhenPackageRemoved(
+                mSettingsWrapper, "com.example.test3");
 
         // Since the provider removed was not a primary provider then we should do nothing.
         assertCredentialPropertyEquals(
@@ -170,12 +183,36 @@ public final class CredentialManagerServiceTest {
         assertThat(actualValueSet).isEqualTo(newValueSet);
     }
 
-    private void setSettingsKey(String key, String value) {
-        assertThat(Settings.Secure.putString(mContext.getContentResolver(), key, value)).isTrue();
+    private void setSettingsKey(String name, String value) {
+        assertThat(
+                        mSettingsWrapper.putStringForUser(
+                                name, value, UserHandle.myUserId(), true))
+                .isTrue();
     }
 
-    private String getSettingsKey(String key) {
-        return Settings.Secure.getStringForUser(
-                mContext.getContentResolver(), key, UserHandle.myUserId());
+    private String getSettingsKey(String name) {
+        return mSettingsWrapper.getStringForUser(name, UserHandle.myUserId());
+    }
+
+    private static final class MockSettingsWrapper
+            extends CredentialManagerService.SettingsWrapper {
+
+        MockSettingsWrapper(@NonNull Context context) {
+            super(context);
+        }
+
+        /** Updates the string value of a system setting */
+        @Override
+        public boolean putStringForUser(
+                String name,
+                String value,
+                int userHandle,
+                boolean overrideableByRestore) {
+            // This will ensure that when the settings putStringForUser method is called by
+            // CredentialManagerService that the overrideableByRestore bit is true.
+            assertThat(overrideableByRestore).isTrue();
+
+            return Settings.Secure.putStringForUser(getContentResolver(), name, value, userHandle);
+        }
     }
 }

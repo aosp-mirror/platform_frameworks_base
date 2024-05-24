@@ -32,6 +32,7 @@ import android.app.UserSwitchObserver;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
 import android.content.ContentResolver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
@@ -62,7 +63,6 @@ import android.os.Build;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -134,9 +134,11 @@ public class BiometricService extends SystemService {
     // The current authentication session, null if idle/done.
     @VisibleForTesting
     AuthSession mAuthSession;
-    private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private final Handler mHandler;
 
     private final BiometricCameraManager mBiometricCameraManager;
+
+    private final BiometricNotificationLogger mBiometricNotificationLogger;
 
     /**
      * Tracks authenticatorId invalidation. For more details, see
@@ -1081,6 +1083,10 @@ public class BiometricService extends SystemService {
             return new BiometricCameraManagerImpl(context.getSystemService(CameraManager.class),
                     context.getSystemService(SensorPrivacyManager.class));
         }
+
+        public BiometricNotificationLogger getNotificationLogger() {
+            return new BiometricNotificationLogger();
+        }
     }
 
     /**
@@ -1093,14 +1099,16 @@ public class BiometricService extends SystemService {
      * @param context The system server context.
      */
     public BiometricService(Context context) {
-        this(context, new Injector());
+        this(context, new Injector(), BiometricHandlerProvider.getInstance());
     }
 
     @VisibleForTesting
-    BiometricService(Context context, Injector injector) {
+    BiometricService(Context context, Injector injector,
+            BiometricHandlerProvider biometricHandlerProvider) {
         super(context);
 
         mInjector = injector;
+        mHandler = biometricHandlerProvider.getBiometricCallbackHandler();
         mDevicePolicyManager = mInjector.getDevicePolicyManager(context);
         mImpl = new BiometricServiceWrapper();
         mEnabledOnKeyguardCallbacks = new ArrayList<>();
@@ -1112,6 +1120,7 @@ public class BiometricService extends SystemService {
         mBiometricCameraManager = injector.getBiometricCameraManager(context);
         mKeyStoreAuthorization = injector.getKeyStoreAuthorization();
         mGateKeeper = injector.getGateKeeperService();
+        mBiometricNotificationLogger = injector.getNotificationLogger();
 
         try {
             injector.getActivityManagerService().registerUserSwitchObserver(
@@ -1135,6 +1144,20 @@ public class BiometricService extends SystemService {
         mInjector.publishBinderService(this, mImpl);
         mBiometricStrengthController = mInjector.getBiometricStrengthController(this);
         mBiometricStrengthController.startListening();
+
+        mHandler.post(new Runnable(){
+            @Override
+            public void run() {
+                try {
+                    mBiometricNotificationLogger.registerAsSystemService(getContext(),
+                            new ComponentName(getContext(), BiometricNotificationLogger.class),
+                            UserHandle.USER_ALL);
+                } catch (RemoteException e) {
+                    // Intra-process call, should never happen.
+                }
+            }
+
+        });
     }
 
     private boolean isStrongBiometric(int id) {
@@ -1486,4 +1509,5 @@ public class BiometricService extends SystemService {
         pw.println("CurrentSession: " + mAuthSession);
         pw.println();
     }
+
 }

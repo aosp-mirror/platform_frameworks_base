@@ -75,6 +75,7 @@ public class FollowerBrightnessStrategy implements DisplayBrightnessStrategy {
     /**
      * Dumps the state of this class.
      */
+    @Override
     public void dump(PrintWriter writer) {
         writer.println("FollowerBrightnessStrategy:");
         writer.println("  mDisplayId=" + mDisplayId);

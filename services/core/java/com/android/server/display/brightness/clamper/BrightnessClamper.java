@@ -30,6 +30,7 @@ import java.io.PrintWriter;
 abstract class BrightnessClamper<T> {
 
     protected float mBrightnessCap = PowerManager.BRIGHTNESS_MAX;
+
     protected boolean mIsActive = false;
 
     @NonNull
@@ -74,7 +75,6 @@ abstract class BrightnessClamper<T> {
     protected enum Type {
         THERMAL,
         POWER,
-        BEDTIME_MODE,
-        LUX,
+        WEAR_BEDTIME_MODE,
     }
 }

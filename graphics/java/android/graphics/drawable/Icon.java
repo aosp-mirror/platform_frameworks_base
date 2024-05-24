@@ -154,6 +154,12 @@ public final class Icon implements Parcelable {
     // TYPE_DATA: data offset
     private int             mInt2;
 
+    // TYPE_RESOURCE: use the monochrome drawable from an AdaptiveIconDrawable
+    private boolean mUseMonochrome = false;
+
+    // TYPE_RESOURCE: wrap the monochrome drawable in an InsetDrawable with the specified inset
+    private float mInsetScale = 0.0f;
+
     /**
      * Gets the type of the icon provided.
      * <p>
@@ -368,7 +374,31 @@ public final class Icon implements Parcelable {
             result.setTintList(mTintList);
             result.setTintBlendMode(mBlendMode);
         }
+
+        if (mUseMonochrome) {
+            return crateMonochromeDrawable(result, mInsetScale);
+        }
+
         return result;
+    }
+
+    /**
+     * Gets the monochrome drawable from an {@link AdaptiveIconDrawable}.
+     *
+     * @param drawable An {@link AdaptiveIconDrawable}
+     * @return Adjusted (wrapped in {@link InsetDrawable}) monochrome drawable
+     *  from an {@link AdaptiveIconDrawable}.
+     * Or the original drawable if no monochrome layer exists.
+     */
+    private static Drawable crateMonochromeDrawable(Drawable drawable, float inset) {
+        if (drawable instanceof AdaptiveIconDrawable) {
+            Drawable monochromeDrawable = ((AdaptiveIconDrawable) drawable).getMonochrome();
+            // wrap with negative inset => scale icon (inspired from BaseIconFactory)
+            if (monochromeDrawable != null) {
+                return new InsetDrawable(monochromeDrawable, inset);
+            }
+        }
+        return drawable;
     }
 
     /**
@@ -693,7 +723,9 @@ public final class Icon implements Parcelable {
                         && Arrays.equals(getDataBytes(), otherIcon.getDataBytes());
             case TYPE_RESOURCE:
                 return getResId() == otherIcon.getResId()
-                        && Objects.equals(getResPackage(), otherIcon.getResPackage());
+                        && Objects.equals(getResPackage(), otherIcon.getResPackage())
+                        && mUseMonochrome == otherIcon.mUseMonochrome
+                        && mInsetScale == otherIcon.mInsetScale;
             case TYPE_URI:
             case TYPE_URI_ADAPTIVE_BITMAP:
                 return Objects.equals(getUriString(), otherIcon.getUriString());
@@ -743,6 +775,26 @@ public final class Icon implements Parcelable {
         }
         final Icon rep = new Icon(TYPE_RESOURCE);
         rep.mInt1 = resId;
+        rep.mString1 = resPackage;
+        return rep;
+    }
+
+    /**
+     * Create an Icon pointing to a drawable resource.
+     * @param resPackage Name of the package containing the resource in question
+     * @param resId ID of the drawable resource
+     * @param useMonochrome if this icon should use the monochrome res from the adaptive drawable
+     * @hide
+     */
+    public static @NonNull Icon createWithResourceAdaptiveDrawable(@NonNull String resPackage,
+            @DrawableRes int resId, boolean useMonochrome, float inset) {
+        if (resPackage == null) {
+            throw new IllegalArgumentException("Resource package name must not be null.");
+        }
+        final Icon rep = new Icon(TYPE_RESOURCE);
+        rep.mInt1 = resId;
+        rep.mUseMonochrome = useMonochrome;
+        rep.mInsetScale = inset;
         rep.mString1 = resPackage;
         return rep;
     }
@@ -986,6 +1038,8 @@ public final class Icon implements Parcelable {
                 final int resId = in.readInt();
                 mString1 = pkg;
                 mInt1 = resId;
+                mUseMonochrome = in.readBoolean();
+                mInsetScale = in.readFloat();
                 break;
             case TYPE_DATA:
                 final int len = in.readInt();
@@ -1027,6 +1081,8 @@ public final class Icon implements Parcelable {
             case TYPE_RESOURCE:
                 dest.writeString(getResPackage());
                 dest.writeInt(getResId());
+                dest.writeBoolean(mUseMonochrome);
+                dest.writeFloat(mInsetScale);
                 break;
             case TYPE_DATA:
                 dest.writeInt(getDataLength());

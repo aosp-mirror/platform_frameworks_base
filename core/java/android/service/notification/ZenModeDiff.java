@@ -30,6 +30,11 @@ import java.util.Set;
 /**
  * ZenModeDiff is a utility class meant to encapsulate the diff between ZenModeConfigs and their
  * subcomponents (automatic and manual ZenRules).
+ *
+ * <p>Note that this class is intended to detect <em>meaningful</em> differences, so objects that
+ * are not identical (as per their {@code equals()} implementation) can still produce an empty diff
+ * if only "metadata" fields are updated.
+ *
  * @hide
  */
 public class ZenModeDiff {

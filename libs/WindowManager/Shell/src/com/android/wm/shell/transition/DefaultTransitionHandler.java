@@ -109,8 +109,8 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.sysui.ShellInit;
-import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -470,10 +470,12 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 }
 
                 final float cornerRadius;
-                if (a.hasRoundedCorners() && isTask) {
-                    // hasRoundedCorners is currently only enabled for tasks
+                if (a.hasRoundedCorners()) {
+                    final int displayId = isTask ? change.getTaskInfo().displayId
+                            : info.getRoot(TransitionUtil.rootIndexFor(change, info))
+                                    .getDisplayId();
                     final Context displayContext =
-                            mDisplayController.getDisplayContext(change.getTaskInfo().displayId);
+                            mDisplayController.getDisplayContext(displayId);
                     cornerRadius = displayContext == null ? 0
                             : ScreenDecorationsUtils.getWindowCornerRadius(displayContext);
                 } else {

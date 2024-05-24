@@ -17,22 +17,28 @@
 package com.android.systemui.communal.domain.interactor
 
 import android.provider.Settings
-import com.android.systemui.communal.data.repository.CommunalRepository
 import com.android.systemui.communal.data.repository.CommunalTutorialRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.log.dagger.CommunalTableLog
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logDiffsForTable
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.launch
 
 /** Encapsulates business-logic related to communal tutorial state. */
@@ -44,18 +50,32 @@ constructor(
     @Application private val scope: CoroutineScope,
     private val communalTutorialRepository: CommunalTutorialRepository,
     keyguardInteractor: KeyguardInteractor,
-    private val communalRepository: CommunalRepository,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
+    communalInteractor: CommunalInteractor,
+    @CommunalTableLog tableLogBuffer: TableLogBuffer,
 ) {
     /** An observable for whether the tutorial is available. */
-    val isTutorialAvailable: Flow<Boolean> =
+    val isTutorialAvailable: StateFlow<Boolean> =
         combine(
+                communalInteractor.isCommunalAvailable,
                 keyguardInteractor.isKeyguardVisible,
                 communalTutorialRepository.tutorialSettingState,
-            ) { isKeyguardVisible, tutorialSettingState ->
-                isKeyguardVisible &&
+            ) { isCommunalAvailable, isKeyguardVisible, tutorialSettingState ->
+                isCommunalAvailable &&
+                    isKeyguardVisible &&
                     tutorialSettingState != Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED
             }
-            .distinctUntilChanged()
+            .logDiffsForTable(
+                tableLogBuffer = tableLogBuffer,
+                columnPrefix = "",
+                columnName = "isTutorialAvailable",
+                initialValue = false,
+            )
+            .stateIn(
+                scope = scope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
 
     /**
      * A flow of the new tutorial state after transitioning. The new state will be calculated based
@@ -70,7 +90,7 @@ constructor(
                 if (tutorialSettingState == Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED) {
                     return@flatMapLatest flowOf(null)
                 }
-                communalRepository.isCommunalHubShowing.map { isCommunalShowing ->
+                communalInteractor.isCommunalShowing.map { isCommunalShowing ->
                     nextStateAfterTransition(
                         tutorialSettingState,
                         isCommunalShowing,
@@ -90,20 +110,24 @@ constructor(
         return null
     }
 
-    private var job: Job? = null
     private fun listenForTransitionToUpdateTutorialState() {
-        if (!communalRepository.isCommunalEnabled) {
-            return
-        }
-        job =
-            scope.launch {
-                tutorialStateToUpdate.collect {
-                    communalTutorialRepository.setTutorialState(it)
-                    if (it == Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED) {
-                        job?.cancel()
+        scope.launch {
+            communalSettingsInteractor.isCommunalEnabled
+                .flatMapLatest { enabled ->
+                    if (!enabled) {
+                        emptyFlow()
+                    } else {
+                        tutorialStateToUpdate
                     }
                 }
-            }
+                .transformWhile { tutorialState ->
+                    emit(tutorialState)
+                    tutorialState != Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED
+                }
+                .collect { tutorialState ->
+                    communalTutorialRepository.setTutorialState(tutorialState)
+                }
+        }
     }
 
     init {

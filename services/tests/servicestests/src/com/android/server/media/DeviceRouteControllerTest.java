@@ -70,7 +70,6 @@ public class DeviceRouteControllerTest {
                 DeviceRouteController.createInstance(
                         mContext, Looper.getMainLooper(), mOnDeviceRouteChangedListener);
 
-        Truth.assertThat(deviceRouteController)
-                .isInstanceOf(AudioPoliciesDeviceRouteController.class);
+        Truth.assertThat(deviceRouteController).isInstanceOf(AudioManagerRouteController.class);
     }
 }

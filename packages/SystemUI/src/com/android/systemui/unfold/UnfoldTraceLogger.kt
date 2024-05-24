@@ -22,8 +22,8 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.unfold.data.repository.FoldStateRepository
 import com.android.systemui.unfold.system.DeviceStateRepository
-import com.android.systemui.unfold.updates.FoldStateRepository
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope

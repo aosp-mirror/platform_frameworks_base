@@ -20,6 +20,7 @@ package com.android.systemui.statusbar.notification
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.coroutines.collectLastValue
@@ -27,11 +28,9 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
-import com.android.systemui.scene.shared.flag.sceneContainerFlags
-import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
+import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationStackAppearanceViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.testKosmos
@@ -50,16 +49,17 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
 
     private val kosmos =
         testKosmos().apply {
-            sceneContainerFlags = FakeSceneContainerFlags(enabled = true)
+            fakeSceneContainerFlags.enabled = true
             fakeFeatureFlagsClassic.apply {
                 set(Flags.FULL_SCREEN_USER_SWITCHER, false)
                 set(Flags.NSSL_DEBUG_LINES, false)
             }
         }
     private val testScope = kosmos.testScope
-    private val placeholderViewModel = kosmos.notificationsPlaceholderViewModel
-    private val appearanceViewModel = kosmos.notificationStackAppearanceViewModel
-    private val sceneInteractor = kosmos.sceneInteractor
+    private val placeholderViewModel by lazy { kosmos.notificationsPlaceholderViewModel }
+    private val appearanceViewModel by lazy { kosmos.notificationStackAppearanceViewModel }
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
+    private val fakeSceneDataSource by lazy { kosmos.fakeSceneDataSource }
 
     @Test
     fun updateBounds() =
@@ -88,22 +88,23 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
         }
 
     @Test
-    fun updateShadeExpansion() =
+    fun shadeExpansion_goneToShade() =
         testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(scene = Scenes.Gone)
+                )
+            sceneInteractor.setTransitionState(transitionState)
             val expandFraction by collectLastValue(appearanceViewModel.expandFraction)
             assertThat(expandFraction).isEqualTo(0f)
 
-            val transitionState =
-                MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Idle(scene = SceneKey.Lockscreen)
-                )
-            sceneInteractor.setTransitionState(transitionState)
-            sceneInteractor.changeScene(SceneModel(SceneKey.Shade), "reason")
+            fakeSceneDataSource.pause()
+            sceneInteractor.changeScene(Scenes.Shade, "reason")
             val transitionProgress = MutableStateFlow(0f)
             transitionState.value =
                 ObservableTransitionState.Transition(
-                    fromScene = SceneKey.Lockscreen,
-                    toScene = SceneKey.Shade,
+                    fromScene = Scenes.Gone,
+                    toScene = Scenes.Shade,
                     progress = transitionProgress,
                     isInitiatedByUserInput = false,
                     isUserInputOngoing = flowOf(false),
@@ -116,7 +117,53 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
                 assertThat(expandFraction).isWithin(0.01f).of(progress)
             }
 
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Shade), "reason")
+            fakeSceneDataSource.unpause(expectedScene = Scenes.Shade)
             assertThat(expandFraction).isWithin(0.01f).of(1f)
+        }
+
+    @Test
+    fun shadeExpansion_idleOnLockscreen() =
+        testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(scene = Scenes.Lockscreen)
+                )
+            sceneInteractor.setTransitionState(transitionState)
+            val expandFraction by collectLastValue(appearanceViewModel.expandFraction)
+            assertThat(expandFraction).isEqualTo(1f)
+        }
+
+    @Test
+    fun shadeExpansion_shadeToQs() =
+        testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(scene = Scenes.Shade)
+                )
+            sceneInteractor.setTransitionState(transitionState)
+            val expandFraction by collectLastValue(appearanceViewModel.expandFraction)
+            assertThat(expandFraction).isEqualTo(1f)
+
+            fakeSceneDataSource.pause()
+            sceneInteractor.changeScene(Scenes.QuickSettings, "reason")
+            val transitionProgress = MutableStateFlow(0f)
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Shade,
+                    toScene = Scenes.QuickSettings,
+                    progress = transitionProgress,
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                )
+            val steps = 10
+            repeat(steps) { repetition ->
+                val progress = (1f / steps) * (repetition + 1)
+                transitionProgress.value = progress
+                runCurrent()
+                assertThat(expandFraction).isEqualTo(1f)
+            }
+
+            fakeSceneDataSource.unpause(expectedScene = Scenes.QuickSettings)
+            assertThat(expandFraction).isEqualTo(1f)
         }
 }

@@ -154,6 +154,7 @@
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"இமேஜிங்"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"ஹெட்ஃபோன்"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"இன்புட் பெரிபெரல்"</string>
+    <string name="bluetooth_talkback_hearing_aids" msgid="3983279945542595479">"செவித்துணைக் கருவிகள்"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"புளூடூத்"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"வைஃபை முடக்கப்பட்டது."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"வைஃபை துண்டிக்கப்பட்டது."</string>
@@ -178,7 +179,7 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"பயனர்: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"சில இயல்புநிலைகள் அமைக்கப்பட்டன"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"இயல்புநிலைகள் எதுவும் அமைக்கப்படவில்லை"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"உரை வடிவத்திலிருந்து பேச்சுக்கான அமைப்பு"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"\'எழுத்திலிருந்து பேச்சு\' அமைப்புகள்"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"உரையிலிருந்து பேச்சாக மாற்றுதல்"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"பேச்சு வீதம்"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"பேசப்படும் உரையின் வேகம்"</string>
@@ -455,6 +456,8 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"நீங்கள் இவற்றைச் செய்ய விரும்பும்போது கலர் கரெக்‌ஷன் உதவும்:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;வண்ணங்களை மிகத் துல்லியமாகப் பார்த்தல்&lt;/li&gt; &lt;li&gt;&amp;nbsp;கவனம் செலுத்துவதற்கு உதவ வண்ணங்களை அகற்றுதல்&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> மூலம் மேலெழுதப்பட்டது"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - பேட்டரியைப் பாதுகாப்பதற்காகச் சார்ஜிங் இடைநிறுத்தப்பட்டுள்ளது"</string>
+    <string name="power_incompatible_charging_settings_home_page" msgid="1322050766135126880">"<xliff:g id="LEVEL">%1$s</xliff:g> - சார்ஜிங் துணைக்கருவியைச் சரிபாருங்கள்"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"கிட்டத்தட்ட <xliff:g id="TIME_REMAINING">%1$s</xliff:g> மீதமுள்ளது"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"கிட்டத்தட்ட <xliff:g id="TIME_REMAINING">%1$s</xliff:g> மீதமுள்ளது (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"உபயோகத்தின் அடிப்படையில் கிட்டத்தட்ட <xliff:g id="TIME_REMAINING">%1$s</xliff:g> மீதமுள்ளது"</string>
@@ -475,7 +478,7 @@
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"முழுவதும் சார்ஜாக <xliff:g id="TIME">%1$s</xliff:g> ஆகும்"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - முழுவதும் சார்ஜாக <xliff:g id="TIME">%2$s</xliff:g> ஆகும்"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - சார்ஜிங் மேம்படுத்தப்பட்டது"</string>
-    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - சார்ஜிங் மேம்படுத்தப்பட்டது"</string>
+    <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> ‑ சார்ஜாகிறது"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"அறியப்படாத"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"சார்ஜ் ஆகிறது"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"வேகமாக சார்ஜாகிறது"</string>
@@ -483,9 +486,10 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"வயரின்றி சார்ஜாகிறது"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"சார்ஜாகிறது"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"சார்ஜ் செய்யப்படவில்லை"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"இணைக்கப்பட்டுள்ளது, சார்ஜாகவில்லை"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"இணைக்கப்பட்டது. ஆனால் சார்ஜ் ஆகவில்லை"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"சார்ஜாகிவிட்டது"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"முழுவதும் சார்ஜாகிவிட்டது"</string>
+    <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"சார்ஜிங் இடைநிறுத்தப்பட்டுள்ளது"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"நிர்வாகி கட்டுப்படுத்துகிறார்"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"வரையறுக்கப்பட்ட அமைப்பால் கட்டுப்படுத்தப்படுகிறது"</string>
     <string name="disabled" msgid="8017887509554714950">"முடக்கப்பட்டது"</string>
@@ -547,9 +551,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"ஒவ்வொரு முறையும் கேள்"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"ஆஃப் செய்யும் வரை"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"சற்றுமுன்"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"இந்த மொபைல்"</string>
-    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"இந்த டேப்லெட்"</string>
-    <!-- no translation found for media_transfer_this_device_name (8899776297775466649) -->
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"இந்த மொபைல்"</string>
+    <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"இந்த டேப்லெட்"</string>
+    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"டாக் ஸ்பீக்கர்"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"வெளிப்புறச் சாதனம்"</string>
@@ -615,6 +619,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"புதிய பயனரை உருவாக்க முடியவில்லை"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"புதிய விருந்தினரை உருவாக்க முடியவில்லை"</string>
     <string name="user_nickname" msgid="262624187455825083">"புனைப்பெயர்"</string>
+    <string name="edit_user_info_message" msgid="5199468585059260053">"இந்தச் சாதனத்தைப் பயன்படுத்தும் அனைவருக்கும் உங்கள் பெயரும் படமும் காட்டப்படும்."</string>
     <string name="user_add_user" msgid="7876449291500212468">"பயனரைச் சேர்"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"கெஸ்ட்டைச் சேர்"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"கெஸ்ட்டை அகற்று"</string>

@@ -14,9 +14,14 @@ class FakeCredentialInteractor : CredentialInteractor {
     /** Sets return value for [getCredentialOwnerOrSelfId]. */
     var credentialOwnerId: Int? = null
 
+    /** Sets return value for [getParentProfileIdOrSelfId]. */
+    var userIdForPasswordEntry: Int? = null
+
     override fun isStealthModeActive(userId: Int): Boolean = stealthMode
 
     override fun getCredentialOwnerOrSelfId(userId: Int): Int = credentialOwnerId ?: userId
+
+    override fun getParentProfileIdOrSelfId(userId: Int): Int = userIdForPasswordEntry ?: userId
 
     override fun verifyCredential(
         request: BiometricPromptRequest.Credential,

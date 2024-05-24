@@ -23,8 +23,8 @@ import android.view.Surface.ROTATION_0
 import android.view.Surface.ROTATION_90
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.common.domain.interactor.ConfigurationInteractorImpl
 import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryImpl
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.power.domain.interactor.PowerInteractor
@@ -81,7 +81,7 @@ open class HideNotificationsInteractorTest : SysuiTestCase() {
             testScope.backgroundScope,
             mock()
         )
-    private val configurationInteractor = ConfigurationInteractorImpl(configurationRepository)
+    private val configurationInteractor = ConfigurationInteractor(configurationRepository)
 
     private lateinit var configuration: Configuration
     private lateinit var underTest: HideNotificationsInteractor

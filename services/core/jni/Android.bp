@@ -34,6 +34,7 @@ cc_library_static {
         "tvinput/BufferProducerThread.cpp",
         "tvinput/JTvInputHal.cpp",
         "tvinput/TvInputHal_hidl.cpp",
+        "com_android_server_accessibility_BrailleDisplayConnection.cpp",
         "com_android_server_adb_AdbDebuggingManager.cpp",
         "com_android_server_am_BatteryStatsService.cpp",
         "com_android_server_biometrics_SurfaceToNativeHandleConverter.cpp",
@@ -79,6 +80,7 @@ cc_library_static {
         ":lib_cachedAppOptimizer_native",
         ":lib_gameManagerService_native",
         ":lib_oomConnection_native",
+        ":lib_anrTimer_native",
     ],
 
     include_dirs: [
@@ -245,4 +247,11 @@ filegroup {
 filegroup {
     name: "lib_oomConnection_native",
     srcs: ["com_android_server_am_OomConnection.cpp"],
+}
+
+filegroup {
+    name: "lib_anrTimer_native",
+    srcs: [
+        "com_android_server_utils_AnrTimer.cpp",
+    ],
 }

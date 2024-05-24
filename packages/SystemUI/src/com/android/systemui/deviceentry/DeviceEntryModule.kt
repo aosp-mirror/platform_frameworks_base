@@ -1,6 +1,7 @@
 package com.android.systemui.deviceentry
 
 import com.android.systemui.deviceentry.data.repository.DeviceEntryRepositoryModule
+import com.android.systemui.deviceentry.data.repository.FaceWakeUpTriggersConfigModule
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import dagger.Module
 import dagger.multibindings.Multibinds
@@ -9,6 +10,7 @@ import dagger.multibindings.Multibinds
     includes =
         [
             DeviceEntryRepositoryModule::class,
+            FaceWakeUpTriggersConfigModule::class,
         ],
 )
 abstract class DeviceEntryModule {

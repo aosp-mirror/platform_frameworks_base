@@ -183,6 +183,13 @@ public class UserManagerServiceTest {
     }
 
     @Test
+    public void testIsUserInitialized_NonExistentUserReturnsFalse() {
+        int nonExistentUserId = UserHandle.USER_NULL;
+        assertThat(mUserManagerService.isUserInitialized(nonExistentUserId))
+                .isFalse();
+    }
+
+    @Test
     public void testSetUserRestrictionWithIncorrectID() throws Exception {
         int incorrectId = 1;
         while (mUserManagerService.userExists(incorrectId)) {

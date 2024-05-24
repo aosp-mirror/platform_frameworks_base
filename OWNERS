@@ -42,3 +42,5 @@ per-file *Ravenwood* = file:ravenwood/OWNERS
 per-file PERFORMANCE_OWNERS = file:/PERFORMANCE_OWNERS
 
 per-file PACKAGE_MANAGER_OWNERS = file:/PACKAGE_MANAGER_OWNERS
+
+per-file WEAR_OWNERS = file:/WEAR_OWNERS

@@ -30,17 +30,13 @@ import com.android.systemui.biometrics.AuthController
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.ui.SwipeUpAnywhereGestureHandler
-import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryBackgroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryForegroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
-import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.VibratorHelper
-import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -76,6 +72,7 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
             FakeFeatureFlagsClassic().apply { set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false) }
         underTest =
             DefaultDeviceEntrySection(
+                TestScope().backgroundScope,
                 keyguardUpdateMonitor,
                 authController,
                 windowManager,
@@ -87,11 +84,6 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
                 { mock(DeviceEntryForegroundViewModel::class.java) },
                 { mock(DeviceEntryBackgroundViewModel::class.java) },
                 { falsingManager },
-                { mock(AlternateBouncerViewModel::class.java) },
-                { mock(NotificationShadeWindowController::class.java) },
-                TestScope().backgroundScope,
-                { mock(SwipeUpAnywhereGestureHandler::class.java) },
-                { mock(TapGestureDetector::class.java) },
                 { mock(VibratorHelper::class.java) },
             )
     }
@@ -176,22 +168,5 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
         assertThat(constraint.layout.startToStart).isEqualTo(ConstraintSet.PARENT_ID)
         assertThat(constraint.layout.topMargin).isEqualTo(5)
         assertThat(constraint.layout.startMargin).isEqualTo(4)
-    }
-
-    @Test
-    fun deviceEntryIconViewIsAboveAlternateBouncerView() {
-        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-
-        val constraintLayout = ConstraintLayout(context, null)
-        underTest.addViews(constraintLayout)
-        assertThat(constraintLayout.childCount).isGreaterThan(0)
-        val deviceEntryIconView = constraintLayout.getViewById(R.id.device_entry_icon_view)
-        val alternateBouncerView = constraintLayout.getViewById(R.id.alternate_bouncer)
-        assertThat(deviceEntryIconView).isNotNull()
-        assertThat(alternateBouncerView).isNotNull()
-
-        // device entry icon is above the alternate bouncer
-        assertThat(constraintLayout.indexOfChild(deviceEntryIconView))
-            .isGreaterThan(constraintLayout.indexOfChild(alternateBouncerView))
     }
 }

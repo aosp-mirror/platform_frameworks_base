@@ -136,6 +136,7 @@ struct FilterClientCallbackImpl : public FilterClientCallback {
 private:
     jweak mFilterObj;
     sp<FilterClient> mFilterClient;
+    android::Mutex mLock;
     jclass mEventClass;
     jclass mSectionEventClass;
     jclass mMediaEventClass;

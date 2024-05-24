@@ -77,6 +77,8 @@ public:
     static SkRect* jrect_to_rect(JNIEnv*, jobject jrect, SkRect*);
     static void rect_to_jrectf(const SkRect&, JNIEnv*, jobject jrectf);
 
+    static void set_cluster_count_to_run_info(JNIEnv* env, jobject runInfo, jint clusterCount);
+
     static void set_jpoint(JNIEnv*, jobject jrect, int x, int y);
 
     static SkIPoint* jpoint_to_ipoint(JNIEnv*, jobject jpoint, SkIPoint* point);

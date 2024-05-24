@@ -16,6 +16,8 @@
 
 package android.app.admin;
 
+import static android.app.admin.flags.Flags.devicePolicySizeTrackingEnabled;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
@@ -30,6 +32,9 @@ public final class BundlePolicyValue extends PolicyValue<Bundle> {
 
     public BundlePolicyValue(Bundle value) {
         super(value);
+        if (devicePolicySizeTrackingEnabled()) {
+            PolicySizeVerifier.enforceMaxParcelableFieldsLength(value);
+        }
     }
 
     private BundlePolicyValue(Parcel source) {

@@ -370,6 +370,7 @@ static jboolean vibratorGetInfo(JNIEnv* env, jclass /* clazz */, jlong ptr,
         return JNI_FALSE;
     }
     vibrator::Info info = wrapper->getVibratorInfo();
+    info.logFailures();
 
     if (info.capabilities.isOk()) {
         env->CallObjectMethod(vibratorInfoBuilder, sVibratorInfoBuilderClassInfo.setCapabilities,
@@ -443,7 +444,7 @@ static jboolean vibratorGetInfo(JNIEnv* env, jclass /* clazz */, jlong ptr,
     env->CallObjectMethod(vibratorInfoBuilder, sVibratorInfoBuilderClassInfo.setFrequencyProfile,
                           frequencyProfile);
 
-    return info.isFailedLogged("vibratorGetInfo") ? JNI_FALSE : JNI_TRUE;
+    return info.shouldRetry() ? JNI_FALSE : JNI_TRUE;
 }
 
 static const JNINativeMethod method_table[] = {

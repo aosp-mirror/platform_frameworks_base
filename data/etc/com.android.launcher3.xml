@@ -26,5 +26,6 @@
         <permission name="android.permission.STATUS_BAR"/>
         <permission name="android.permission.STOP_APP_SWITCHES"/>
         <permission name="android.permission.ACCESS_SHORTCUTS"/>
+        <permission name="android.permission.ACCESS_HIDDEN_PROFILES_FULL"/>
     </privapp-permissions>
 </permissions>

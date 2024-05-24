@@ -16,22 +16,38 @@
 
 package com.android.systemui.bouncer.ui.viewmodel
 
+import android.content.pm.UserInfo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.shared.model.AuthenticationLockoutModel
+import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
+import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
+import com.android.systemui.inputmethod.data.model.InputMethodModel
+import com.android.systemui.inputmethod.data.repository.fakeInputMethodRepository
+import com.android.systemui.inputmethod.domain.interactor.inputMethodInteractor
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
-import com.android.systemui.scene.SceneTestUtils
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.testKosmos
+import com.android.systemui.user.data.model.SelectedUserModel
+import com.android.systemui.user.data.model.SelectionStatus
+import com.android.systemui.user.data.repository.fakeUserRepository
+import com.android.systemui.user.domain.interactor.selectedUserInteractor
 import com.google.common.truth.Truth.assertThat
+import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -43,30 +59,23 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class PasswordBouncerViewModelTest : SysuiTestCase() {
 
-    private val utils = SceneTestUtils(this)
-    private val testScope = utils.testScope
-    private val authenticationRepository = utils.authenticationRepository
-    private val authenticationInteractor =
-        utils.authenticationInteractor(
-            repository = authenticationRepository,
-        )
-    private val sceneInteractor = utils.sceneInteractor()
-    private val bouncerInteractor =
-        utils.bouncerInteractor(
-            authenticationInteractor = authenticationInteractor,
-        )
-    private val bouncerViewModel =
-        utils.bouncerViewModel(
-            bouncerInteractor = bouncerInteractor,
-            authenticationInteractor = authenticationInteractor,
-            actionButtonInteractor = utils.bouncerActionButtonInteractor(),
-        )
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
+    private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
+    private val selectedUserInteractor by lazy { kosmos.selectedUserInteractor }
+    private val inputMethodInteractor by lazy { kosmos.inputMethodInteractor }
+    private val bouncerViewModel by lazy { kosmos.bouncerViewModel }
+    private val isInputEnabled = MutableStateFlow(true)
 
     private val underTest =
         PasswordBouncerViewModel(
             viewModelScope = testScope.backgroundScope,
+            isInputEnabled = isInputEnabled.asStateFlow(),
             interactor = bouncerInteractor,
-            isInputEnabled = MutableStateFlow(true).asStateFlow(),
+            inputMethodInteractor = inputMethodInteractor,
+            selectedUserInteractor = selectedUserInteractor,
         )
 
     @Before
@@ -78,14 +87,14 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onShown() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
             val message by collectLastValue(bouncerViewModel.message)
             val password by collectLastValue(underTest.password)
             lockDeviceAndOpenPasswordBouncer()
 
             assertThat(message?.text).isEqualTo(ENTER_YOUR_PASSWORD)
             assertThat(password).isEmpty()
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
             assertThat(underTest.authenticationMethod).isEqualTo(AuthenticationMethodModel.Password)
         }
 
@@ -108,7 +117,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onPasswordInputChanged() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
             val message by collectLastValue(bouncerViewModel.message)
             val password by collectLastValue(underTest.password)
             lockDeviceAndOpenPasswordBouncer()
@@ -117,14 +126,13 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
 
             assertThat(message?.text).isEmpty()
             assertThat(password).isEqualTo("password")
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
         }
 
     @Test
     fun onAuthenticateKeyPressed_whenCorrect() =
         testScope.runTest {
-            val authResult by
-                collectLastValue(authenticationInteractor.authenticationChallengeResult)
+            val authResult by collectLastValue(authenticationInteractor.onAuthenticationResult)
             lockDeviceAndOpenPasswordBouncer()
 
             underTest.onPasswordInputChanged("password")
@@ -152,11 +160,11 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val message by collectLastValue(bouncerViewModel.message)
             val password by collectLastValue(underTest.password)
-            utils.authenticationRepository.setAuthenticationMethod(
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password
             )
-            utils.deviceEntryRepository.setUnlocked(false)
-            switchToScene(SceneKey.Bouncer)
+            kosmos.fakeDeviceEntryRepository.setUnlocked(false)
+            switchToScene(Scenes.Bouncer)
 
             // No input entered.
 
@@ -169,8 +177,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onAuthenticateKeyPressed_correctAfterWrong() =
         testScope.runTest {
-            val authResult by
-                collectLastValue(authenticationInteractor.authenticationChallengeResult)
+            val authResult by collectLastValue(authenticationInteractor.onAuthenticationResult)
             val message by collectLastValue(bouncerViewModel.message)
             val password by collectLastValue(underTest.password)
             lockDeviceAndOpenPasswordBouncer()
@@ -194,7 +201,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onShown_againAfterSceneChange_resetsPassword() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
             val password by collectLastValue(underTest.password)
             lockDeviceAndOpenPasswordBouncer()
 
@@ -203,56 +210,24 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             assertThat(password).isEqualTo("password")
 
             // The user doesn't confirm the password, but navigates back to the lockscreen instead.
-            switchToScene(SceneKey.Lockscreen)
+            switchToScene(Scenes.Lockscreen)
 
             // The user navigates to the bouncer again.
-            switchToScene(SceneKey.Bouncer)
+            switchToScene(Scenes.Bouncer)
 
             // Ensure the previously-entered password is not shown.
             assertThat(password).isEmpty()
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
         }
 
     @Test
-    fun onImeVisibilityChanged_false_doesNothing() =
+    fun onImeDismissed() =
         testScope.runTest {
             val events by collectValues(bouncerInteractor.onImeHiddenByUser)
             assertThat(events).isEmpty()
 
-            underTest.onImeVisibilityChanged(isVisible = false)
-            assertThat(events).isEmpty()
-        }
-
-    @Test
-    fun onImeVisibilityChanged_falseAfterTrue_emitsOnImeHiddenByUserEvent() =
-        testScope.runTest {
-            val events by collectValues(bouncerInteractor.onImeHiddenByUser)
-            assertThat(events).isEmpty()
-
-            underTest.onImeVisibilityChanged(isVisible = true)
-            assertThat(events).isEmpty()
-
-            underTest.onImeVisibilityChanged(isVisible = false)
+            underTest.onImeDismissed()
             assertThat(events).hasSize(1)
-
-            underTest.onImeVisibilityChanged(isVisible = true)
-            assertThat(events).hasSize(1)
-
-            underTest.onImeVisibilityChanged(isVisible = false)
-            assertThat(events).hasSize(2)
-        }
-
-    @Test
-    fun onImeVisibilityChanged_falseAfterTrue_whileLockedOut_doesNothing() =
-        testScope.runTest {
-            val events by collectValues(bouncerInteractor.onImeHiddenByUser)
-            assertThat(events).isEmpty()
-            underTest.onImeVisibilityChanged(isVisible = true)
-            setLockout(true)
-
-            underTest.onImeVisibilityChanged(isVisible = false)
-
-            assertThat(events).isEmpty()
         }
 
     @Test
@@ -308,23 +283,70 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             assertThat(isTextFieldFocusRequested).isTrue()
         }
 
+    @Test
+    fun isImeSwitcherButtonVisible() =
+        testScope.runTest {
+            val selectedUserId by collectLastValue(selectedUserInteractor.selectedUser)
+            selectUser(USER_INFOS.first())
+
+            enableInputMethodsForUser(checkNotNull(selectedUserId))
+
+            // Assert initial value, before the UI subscribes.
+            assertThat(underTest.isImeSwitcherButtonVisible.value).isFalse()
+
+            // Subscription starts; verify a fresh value is fetched.
+            val isImeSwitcherButtonVisible by collectLastValue(underTest.isImeSwitcherButtonVisible)
+            assertThat(isImeSwitcherButtonVisible).isTrue()
+
+            // Change the user, verify a fresh value is fetched.
+            selectUser(USER_INFOS.last())
+
+            assertThat(
+                    inputMethodInteractor.hasMultipleEnabledImesOrSubtypes(
+                        checkNotNull(selectedUserId)
+                    )
+                )
+                .isFalse()
+            assertThat(isImeSwitcherButtonVisible).isFalse()
+
+            // Enable IMEs and add another subscriber; verify a fresh value is fetched.
+            enableInputMethodsForUser(checkNotNull(selectedUserId))
+            val collector2 by collectLastValue(underTest.isImeSwitcherButtonVisible)
+            assertThat(collector2).isTrue()
+        }
+
+    @Test
+    fun onImeSwitcherButtonClicked() =
+        testScope.runTest {
+            val displayId = 7
+            assertThat(kosmos.fakeInputMethodRepository.inputMethodPickerShownDisplayId)
+                .isNotEqualTo(displayId)
+
+            underTest.onImeSwitcherButtonClicked(displayId)
+            runCurrent()
+
+            assertThat(kosmos.fakeInputMethodRepository.inputMethodPickerShownDisplayId)
+                .isEqualTo(displayId)
+        }
+
     private fun TestScope.switchToScene(toScene: SceneKey) {
-        val currentScene by collectLastValue(sceneInteractor.desiredScene)
-        val bouncerShown = currentScene?.key != SceneKey.Bouncer && toScene == SceneKey.Bouncer
-        val bouncerHidden = currentScene?.key == SceneKey.Bouncer && toScene != SceneKey.Bouncer
-        sceneInteractor.changeScene(SceneModel(toScene), "reason")
-        sceneInteractor.onSceneChanged(SceneModel(toScene), "reason")
+        val currentScene by collectLastValue(sceneInteractor.currentScene)
+        val bouncerShown = currentScene != Scenes.Bouncer && toScene == Scenes.Bouncer
+        val bouncerHidden = currentScene == Scenes.Bouncer && toScene != Scenes.Bouncer
+        sceneInteractor.changeScene(toScene, "reason")
         if (bouncerShown) underTest.onShown()
         if (bouncerHidden) underTest.onHidden()
         runCurrent()
 
-        assertThat(currentScene).isEqualTo(SceneModel(toScene))
+        assertThat(currentScene).isEqualTo(toScene)
     }
 
     private fun TestScope.lockDeviceAndOpenPasswordBouncer() {
-        utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Password)
-        utils.deviceEntryRepository.setUnlocked(false)
-        switchToScene(SceneKey.Bouncer)
+        kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+            AuthenticationMethodModel.Password
+        )
+        kosmos.fakeDeviceEntryRepository.setUnlocked(false)
+        switchToScene(Scenes.Bouncer)
     }
 
     private suspend fun TestScope.setLockout(
@@ -333,25 +355,58 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     ) {
         if (isLockedOut) {
             repeat(failedAttemptCount) {
-                authenticationRepository.reportAuthenticationAttempt(false)
+                kosmos.fakeAuthenticationRepository.reportAuthenticationAttempt(false)
             }
-            val remainingTimeSeconds = 30
-            authenticationRepository.setLockoutDuration(remainingTimeSeconds * 1000)
-            authenticationRepository.lockout.value =
-                AuthenticationLockoutModel(
-                    failedAttemptCount = failedAttemptCount,
-                    remainingSeconds = remainingTimeSeconds,
-                )
+            kosmos.fakeAuthenticationRepository.reportLockoutStarted(
+                30.seconds.inWholeMilliseconds.toInt()
+            )
         } else {
-            authenticationRepository.reportAuthenticationAttempt(true)
-            authenticationRepository.lockout.value = null
+            kosmos.fakeAuthenticationRepository.reportAuthenticationAttempt(true)
         }
+        isInputEnabled.value = !isLockedOut
 
         runCurrent()
+    }
+
+    private fun TestScope.selectUser(userInfo: UserInfo) {
+        kosmos.fakeUserRepository.selectedUser.value =
+            SelectedUserModel(
+                userInfo = userInfo,
+                selectionStatus = SelectionStatus.SELECTION_COMPLETE
+            )
+        advanceTimeBy(PasswordBouncerViewModel.DELAY_TO_FETCH_IMES)
+    }
+
+    private suspend fun enableInputMethodsForUser(userId: Int) {
+        kosmos.fakeInputMethodRepository.setEnabledInputMethods(
+            userId,
+            createInputMethodWithSubtypes(auxiliarySubtypes = 0, nonAuxiliarySubtypes = 0),
+            createInputMethodWithSubtypes(auxiliarySubtypes = 0, nonAuxiliarySubtypes = 1),
+        )
+        assertThat(inputMethodInteractor.hasMultipleEnabledImesOrSubtypes(userId)).isTrue()
+    }
+
+    private fun createInputMethodWithSubtypes(
+        auxiliarySubtypes: Int,
+        nonAuxiliarySubtypes: Int,
+    ): InputMethodModel {
+        return InputMethodModel(
+            imeId = UUID.randomUUID().toString(),
+            subtypes =
+                List(auxiliarySubtypes + nonAuxiliarySubtypes) {
+                    InputMethodModel.Subtype(subtypeId = it, isAuxiliary = it < auxiliarySubtypes)
+                }
+        )
     }
 
     companion object {
         private const val ENTER_YOUR_PASSWORD = "Enter your password"
         private const val WRONG_PASSWORD = "Wrong password"
+
+        private val USER_INFOS =
+            listOf(
+                UserInfo(100, "First user", 0),
+                UserInfo(101, "Second user", 0),
+            )
     }
 }

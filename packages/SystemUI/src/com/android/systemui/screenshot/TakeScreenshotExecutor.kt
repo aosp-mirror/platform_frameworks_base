@@ -5,7 +5,7 @@ import android.os.Trace
 import android.util.Log
 import android.view.Display
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
-import com.android.app.tracing.TraceUtils.Companion.launch
+import com.android.app.tracing.coroutines.launch
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.util.ScreenshotRequest
 import com.android.systemui.dagger.SysUISingleton

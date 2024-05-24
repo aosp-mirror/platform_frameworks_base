@@ -28,6 +28,8 @@ import java.util.ArrayList;
  * of a system service's dumpsys output.
  * @hide
  */
+// Exported to Mainline modules; cannot use annotations
+// @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class LocalLog {
     private final String mTag;
     private final int mMaxLines = 20;

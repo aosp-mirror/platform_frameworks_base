@@ -18,13 +18,13 @@ package com.android.server.wm.flicker.rotation
 
 import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
-import android.tools.common.ScenarioBuilder
-import android.tools.common.ScenarioImpl
-import android.tools.common.traces.component.ComponentNameMatcher
-import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.LegacyFlickerTest
-import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.ScenarioBuilder
+import android.tools.ScenarioImpl
+import android.tools.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.traces.component.ComponentNameMatcher
 import android.view.WindowManager
 import com.android.server.wm.flicker.helpers.SeamlessRotationAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions

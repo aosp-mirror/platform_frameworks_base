@@ -22,7 +22,6 @@ import android.hardware.devicestate.DeviceStateManager
 import android.os.Trace
 import android.util.Log
 import com.android.internal.util.LatencyTracker
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.UiBackground
 import com.android.systemui.keyguard.ScreenLifecycle
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
@@ -42,7 +41,7 @@ import javax.inject.Inject
  * For now, the focus is on the time the inner display is visible, but in the future, it is easily
  * possible to monitor the time to go from the inner screen to the outer.
  */
-@SysUISingleton
+@SysUIUnfoldScope
 class UnfoldLatencyTracker
 @Inject
 constructor(

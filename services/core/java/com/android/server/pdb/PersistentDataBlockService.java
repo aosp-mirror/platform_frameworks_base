@@ -18,16 +18,31 @@ package com.android.server.pdb;
 
 import static com.android.internal.util.Preconditions.checkArgument;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.SYNC;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.nio.file.StandardOpenOption.WRITE;
+
 import android.Manifest;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
+import android.os.ShellCommand;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
+import android.security.Flags;
 import android.service.persistentdata.IPersistentDataBlockService;
 import android.service.persistentdata.PersistentDataBlockManager;
 import android.text.TextUtils;
@@ -56,10 +71,10 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.HexFormat;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -85,9 +100,14 @@ import java.util.concurrent.TimeUnit;
  * | --------------------------------------------|
  * | FRP data block length (4 bytes)             |
  * | --------------------------------------------|
- * | FRP data (variable length)                  |
+ * | FRP data (variable length; 100KB max)    |
  * | --------------------------------------------|
  * | ...                                         |
+ * | Empty space.                                |
+ * | ...                                         |
+ * | --------------------------------------------|
+ * | FRP secret magic (8 bytes)                  |
+ * | FRP secret (32 bytes)                       |
  * | --------------------------------------------|
  * | Test mode data block (10000 bytes)          |
  * | --------------------------------------------|
@@ -123,14 +143,24 @@ public class PersistentDataBlockService extends SystemService {
     // Magic number to mark block device as adhering to the format consumed by this service
     private static final int PARTITION_TYPE_MARKER = 0x19901873;
     /** Size of the block reserved for FRP credential, including 4 bytes for the size header. */
-    private static final int FRP_CREDENTIAL_RESERVED_SIZE = 1000;
+    @VisibleForTesting
+    static final int FRP_CREDENTIAL_RESERVED_SIZE = 1000;
     /** Maximum size of the FRP credential handle that can be stored. */
     @VisibleForTesting
     static final int MAX_FRP_CREDENTIAL_HANDLE_SIZE = FRP_CREDENTIAL_RESERVED_SIZE - 4;
+    /** Size of the FRP mode deactivation secret, in bytes */
+    @VisibleForTesting
+    static final int FRP_SECRET_SIZE = 32;
+    /** Magic value to identify the FRP secret is present. */
+    @VisibleForTesting
+    static final byte[] FRP_SECRET_MAGIC = {(byte) 0xda, (byte) 0xc2, (byte) 0xfc,
+            (byte) 0xcd, (byte) 0xb9, 0x1b, 0x09, (byte) 0x88};
+
     /**
      * Size of the block reserved for Test Harness Mode data, including 4 bytes for the size header.
      */
-    private static final int TEST_MODE_RESERVED_SIZE = 10000;
+    @VisibleForTesting
+    static final int TEST_MODE_RESERVED_SIZE = 10000;
     /** Maximum size of the Test Harness Mode data that can be stored. */
     @VisibleForTesting
     static final int MAX_TEST_MODE_DATA_SIZE = TEST_MODE_RESERVED_SIZE - 4;
@@ -145,14 +175,41 @@ public class PersistentDataBlockService extends SystemService {
     private static final String FLASH_LOCK_LOCKED = "1";
     private static final String FLASH_LOCK_UNLOCKED = "0";
 
+    /**
+     * Path to FRP secret stored on /data.  This file enables automatic deactivation of FRP mode if
+     * it contains the current FRP secret.  When /data is wiped in an untrusted reset this file is
+     * destroyed, blocking automatic deactivation.
+     */
+    private static final String FRP_SECRET_FILE = "/data/system/frp_secret";
+
+    /**
+     * Path to temp file used when changing the FRP secret.
+     */
+    private static final String FRP_SECRET_TMP_FILE = "/data/system/frp_secret_tmp";
+
+    public static final String BOOTLOADER_LOCK_STATE = "ro.boot.vbmeta.device_state";
+    public static final String VERIFIED_BOOT_STATE = "ro.boot.verifiedbootstate";
+    public static final int INIT_WAIT_TIMEOUT = 10;
+
     private final Context mContext;
     private final String mDataBlockFile;
     private final boolean mIsFileBacked;
     private final Object mLock = new Object();
     private final CountDownLatch mInitDoneSignal = new CountDownLatch(1);
+    private final String mFrpSecretFile;
+    private final String mFrpSecretTmpFile;
 
     private int mAllowedUid = -1;
     private long mBlockDeviceSize = -1; // Load lazily
+
+    private final boolean mFrpEnforced;
+
+    /**
+     * FRP active state.  When true (the default) we may have had an untrusted factory reset. In
+     * that case we block any updates of the persistent data block.  To exit active state, it's
+     * necessary for some caller to provide the FRP secret.
+     */
+    private boolean mFrpActive = false;
 
     @GuardedBy("mLock")
     private boolean mIsWritable = true;
@@ -160,6 +217,10 @@ public class PersistentDataBlockService extends SystemService {
     public PersistentDataBlockService(Context context) {
         super(context);
         mContext = context;
+        mFrpEnforced = Flags.frpEnforcement();
+        mFrpActive = mFrpEnforced;
+        mFrpSecretFile = FRP_SECRET_FILE;
+        mFrpSecretTmpFile = FRP_SECRET_TMP_FILE;
         if (SystemProperties.getBoolean(GSI_RUNNING_PROP, false)) {
             mIsFileBacked = true;
             mDataBlockFile = GSI_SANDBOX;
@@ -171,12 +232,17 @@ public class PersistentDataBlockService extends SystemService {
 
     @VisibleForTesting
     PersistentDataBlockService(Context context, boolean isFileBacked, String dataBlockFile,
-            long blockDeviceSize) {
+            long blockDeviceSize, boolean frpEnabled, String frpSecretFile,
+            String frpSecretTmpFile) {
         super(context);
         mContext = context;
         mIsFileBacked = isFileBacked;
         mDataBlockFile = dataBlockFile;
         mBlockDeviceSize = blockDeviceSize;
+        mFrpEnforced = frpEnabled;
+        mFrpActive = mFrpEnforced;
+        mFrpSecretFile = frpSecretFile;
+        mFrpSecretTmpFile = frpSecretTmpFile;
     }
 
     private int getAllowedUid() {
@@ -206,29 +272,51 @@ public class PersistentDataBlockService extends SystemService {
         // Do init on a separate thread, will join in PHASE_ACTIVITY_MANAGER_READY
         SystemServerInitThreadPool.submit(() -> {
             enforceChecksumValidity();
-            formatIfOemUnlockEnabled();
+            if (mFrpEnforced) {
+                automaticallyDeactivateFrpIfPossible();
+                setOemUnlockEnabledProperty(doGetOemUnlockEnabled());
+                // Set the SECURE_FRP_MODE flag, for backward compatibility with clients who use it.
+                // They should switch to calling #isFrpActive().
+                Settings.Global.putInt(mContext.getContentResolver(),
+                        Settings.Global.SECURE_FRP_MODE, mFrpActive ? 1 : 0);
+            } else {
+                formatIfOemUnlockEnabled();
+            }
             publishBinderService(Context.PERSISTENT_DATA_BLOCK_SERVICE, mService);
-            mInitDoneSignal.countDown();
+            signalInitDone();
         }, TAG + ".onStart");
+    }
+
+    @VisibleForTesting
+    void signalInitDone() {
+        mInitDoneSignal.countDown();
+    }
+
+    private void setOemUnlockEnabledProperty(boolean oemUnlockEnabled) {
+        setProperty(OEM_UNLOCK_PROP, oemUnlockEnabled ? "1" : "0");
     }
 
     @Override
     public void onBootPhase(int phase) {
         // Wait for initialization in onStart to finish
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
-            try {
-                if (!mInitDoneSignal.await(10, TimeUnit.SECONDS)) {
-                    throw new IllegalStateException("Service " + TAG + " init timeout");
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new IllegalStateException("Service " + TAG + " init interrupted", e);
-            }
+            waitForInitDoneSignal();
             // The user responsible for FRP should exist by now.
             mAllowedUid = getAllowedUid();
             LocalServices.addService(PersistentDataBlockManagerInternal.class, mInternalService);
         }
         super.onBootPhase(phase);
+    }
+
+    private void waitForInitDoneSignal() {
+        try {
+            if (!mInitDoneSignal.await(INIT_WAIT_TIMEOUT, TimeUnit.SECONDS)) {
+                throw new IllegalStateException("Service " + TAG + " init timeout");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Service " + TAG + " init interrupted", e);
+        }
     }
 
     @VisibleForTesting
@@ -243,8 +331,7 @@ public class PersistentDataBlockService extends SystemService {
                 formatPartitionLocked(true);
             }
         }
-
-        setProperty(OEM_UNLOCK_PROP, enabled ? "1" : "0");
+        setOemUnlockEnabledProperty(enabled);
     }
 
     private void enforceOemUnlockReadPermission() {
@@ -263,9 +350,18 @@ public class PersistentDataBlockService extends SystemService {
                 "Can't modify OEM unlock state");
     }
 
+    private void enforceConfigureFrpPermission() {
+        if (mFrpEnforced && mContext.checkCallingOrSelfPermission(
+                Manifest.permission.CONFIGURE_FACTORY_RESET_PROTECTION)
+                == PackageManager.PERMISSION_DENIED) {
+            throw new SecurityException(("Can't configure Factory Reset Protection. Requires "
+                    + "CONFIGURE_FACTORY_RESET_PROTECTION"));
+        }
+    }
+
     private void enforceUid(int callingUid) {
-        if (callingUid != mAllowedUid) {
-            throw new SecurityException("uid " + callingUid + " not allowed to access PST");
+        if (callingUid != mAllowedUid && callingUid != UserHandle.AID_ROOT) {
+            throw new SecurityException("uid " + callingUid + " not allowed to access PDB");
         }
     }
 
@@ -299,7 +395,8 @@ public class PersistentDataBlockService extends SystemService {
         return totalDataSize;
     }
 
-    private long getBlockDeviceSize() {
+    @VisibleForTesting
+    long getBlockDeviceSize() {
         synchronized (mLock) {
             if (mBlockDeviceSize == -1) {
                 if (mIsFileBacked) {
@@ -315,12 +412,24 @@ public class PersistentDataBlockService extends SystemService {
 
     @VisibleForTesting
     int getMaximumFrpDataSize() {
-        return (int) (getTestHarnessModeDataOffset() - DIGEST_SIZE_BYTES - HEADER_SIZE);
+        long frpSecretSize = mFrpEnforced ? FRP_SECRET_MAGIC.length + FRP_SECRET_SIZE : 0;
+        return (int) (getTestHarnessModeDataOffset() - DIGEST_SIZE_BYTES - HEADER_SIZE
+                - frpSecretSize);
     }
 
     @VisibleForTesting
     long getFrpCredentialDataOffset() {
         return getOemUnlockDataOffset() - FRP_CREDENTIAL_RESERVED_SIZE;
+    }
+
+    @VisibleForTesting
+    long getFrpSecretMagicOffset() {
+        return getFrpSecretDataOffset() - FRP_SECRET_MAGIC.length;
+    }
+
+    @VisibleForTesting
+    long getFrpSecretDataOffset() {
+        return getTestHarnessModeDataOffset() - FRP_SECRET_SIZE;
     }
 
     @VisibleForTesting
@@ -349,6 +458,11 @@ public class PersistentDataBlockService extends SystemService {
     }
 
     private FileChannel getBlockOutputChannel() throws IOException {
+        enforceFactoryResetProtectionInactive();
+        return getBlockOutputChannelIgnoringFrp();
+    }
+
+    private FileChannel getBlockOutputChannelIgnoringFrp() throws FileNotFoundException {
         return new RandomAccessFile(mDataBlockFile, "rw").getChannel();
     }
 
@@ -416,7 +530,7 @@ public class PersistentDataBlockService extends SystemService {
     @VisibleForTesting
     void formatPartitionLocked(boolean setOemUnlockEnabled) {
 
-        try (FileChannel channel = getBlockOutputChannel()) {
+        try (FileChannel channel = getBlockOutputChannelIgnoringFrp()) {
             // Format the data selectively.
             //
             // 1. write header, set length = 0
@@ -431,21 +545,39 @@ public class PersistentDataBlockService extends SystemService {
 
             // 2. corrupt the legacy FRP data explicitly
             int payload_size = (int) getBlockDeviceSize() - header_size;
-            buf = ByteBuffer.allocate(payload_size
-                          - TEST_MODE_RESERVED_SIZE - FRP_CREDENTIAL_RESERVED_SIZE - 1);
+            if (mFrpEnforced) {
+                buf = ByteBuffer.allocate(payload_size - TEST_MODE_RESERVED_SIZE
+                        - FRP_SECRET_MAGIC.length - FRP_SECRET_SIZE - FRP_CREDENTIAL_RESERVED_SIZE
+                        - 1);
+            } else {
+                buf = ByteBuffer.allocate(payload_size - TEST_MODE_RESERVED_SIZE
+                        - FRP_CREDENTIAL_RESERVED_SIZE - 1);
+            }
             channel.write(buf);
             channel.force(true);
 
-            // 3. skip the test mode data and leave it unformat
+            // 3. Write the default FRP secret (all zeros).
+            if (mFrpEnforced) {
+                Slog.i(TAG, "Writing FRP secret magic");
+                channel.write(ByteBuffer.wrap(FRP_SECRET_MAGIC));
+
+                Slog.i(TAG, "Writing default FRP secret");
+                channel.write(ByteBuffer.allocate(FRP_SECRET_SIZE));
+                channel.force(true);
+
+                mFrpActive = false;
+            }
+
+            // 4. skip the test mode data and leave it unformatted.
             //    This is for a feature that enables testing.
             channel.position(channel.position() + TEST_MODE_RESERVED_SIZE);
 
-            // 4. wipe the FRP_CREDENTIAL explicitly
+            // 5. wipe the FRP_CREDENTIAL explicitly
             buf = ByteBuffer.allocate(FRP_CREDENTIAL_RESERVED_SIZE);
             channel.write(buf);
             channel.force(true);
 
-            // 5. set unlock = 0 because it's a formatPartitionLocked
+            // 6. set unlock = 0 because it's a formatPartitionLocked
             buf = ByteBuffer.allocate(FRP_CREDENTIAL_RESERVED_SIZE);
             buf.put((byte)0);
             buf.flip();
@@ -460,10 +592,200 @@ public class PersistentDataBlockService extends SystemService {
         computeAndWriteDigestLocked();
     }
 
+    /**
+     * Try to deactivate FRP by presenting an FRP secret from the data partition, or the default
+     * secret if the secret(s) on the data partition are not present or don't work.
+     */
+    @VisibleForTesting
+    boolean automaticallyDeactivateFrpIfPossible() {
+        synchronized (mLock) {
+            if (deactivateFrpWithFileSecret(mFrpSecretFile)) {
+                return true;
+            }
+
+            Slog.w(TAG, "Failed to deactivate with primary secret file, trying backup.");
+            if (deactivateFrpWithFileSecret(mFrpSecretTmpFile)) {
+                // The backup file has the FRP secret, make it the primary file.
+                moveFrpTempFileToPrimary();
+                return true;
+            }
+
+            Slog.w(TAG, "Failed to deactivate with backup secret file, trying default secret.");
+            if (deactivateFrp(new byte[FRP_SECRET_SIZE])) {
+                return true;
+            }
+
+            // We could not deactivate FRP.  It's possible that we have hit an obscure corner case,
+            // a device that once ran a version of Android that set the FRP magic and a secret,
+            // then downgraded to a version that did not know about FRP, wiping the FRP secrets
+            // files, then upgraded to a version (the current one) that does know about FRP,
+            // potentially leaving the user unable to deactivate FRP because all copies of the
+            // secret are gone.
+            //
+            // To handle this case, we check to see if we have recently upgraded from a pre-V
+            // version.  If so, we deactivate FRP and set the secret to the default value.
+            if (isUpgradingFromPreVRelease()) {
+                Slog.w(TAG, "Upgrading from Android 14 or lower, defaulting FRP secret");
+                writeFrpMagicAndDefaultSecret();
+                mFrpActive = false;
+                return true;
+            }
+
+            Slog.e(TAG, "Did not find valid FRP secret, FRP remains active.");
+            return false;
+        }
+    }
+
+    private boolean deactivateFrpWithFileSecret(String frpSecretFile) {
+        try {
+            return deactivateFrp(Files.readAllBytes(Paths.get(frpSecretFile)));
+        } catch (IOException e) {
+            Slog.i(TAG, "Failed to read FRP secret file: " + frpSecretFile + " "
+                    + e.getClass().getSimpleName());
+            return false;
+        }
+    }
+
+    private void moveFrpTempFileToPrimary() {
+        try {
+            Files.move(Paths.get(mFrpSecretTmpFile), Paths.get(mFrpSecretFile), REPLACE_EXISTING);
+        } catch (IOException e) {
+            Slog.e(TAG, "Error moving FRP backup file to primary (ignored)", e);
+        }
+    }
+
+    @VisibleForTesting
+    boolean isFrpActive() {
+        synchronized (mLock) {
+            // mFrpActive is initialized and automatic deactivation done (if possible) before the
+            // service is published, so there's no chance that callers could ask for the state
+            // before it has settled.
+            return mFrpActive;
+        }
+    }
+
+    /**
+     * Write the provided secret to the FRP secret file in /data and to the persistent data block
+     * partition.
+     *
+     * Writing is a three-step process, to ensure that we can recover from a crash at any point.
+     */
+    private boolean updateFrpSecret(byte[] secret) {
+        // 1.  Write the new secret to a temporary file, and sync the write.
+        try {
+            Files.write(
+                    Paths.get(mFrpSecretTmpFile), secret, WRITE, CREATE, TRUNCATE_EXISTING, SYNC);
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to write FRP secret file", e);
+            return false;
+        }
+
+        // 2.  Write the new secret to /persist, and sync the write.
+        if (!mInternalService.writeDataBuffer(getFrpSecretDataOffset(), ByteBuffer.wrap(secret))) {
+            return false;
+        }
+
+        // 3.  Move the temporary file to the primary file location.  Syncing doesn't matter
+        //     here.  In the event this update doesn't complete it will get done by
+        //     #automaticallyDeactivateFrpIfPossible() during the next boot.
+        moveFrpTempFileToPrimary();
+        return true;
+    }
+
+    /**
+     * Only for testing, activate FRP.
+     */
+    @VisibleForTesting
+    void activateFrp() {
+        synchronized (mLock) {
+            mFrpActive = true;
+        }
+    }
+
+    private boolean hasFrpSecretMagic() {
+        final byte[] frpMagic =
+                readDataBlock(getFrpSecretMagicOffset(), FRP_SECRET_MAGIC.length);
+        if (frpMagic == null) {
+            // Transient read error on the partition?
+            Slog.e(TAG, "Failed to read FRP magic region.");
+            return false;
+        }
+        return Arrays.equals(frpMagic, FRP_SECRET_MAGIC);
+    }
+
+    private byte[] getFrpSecret() {
+        return readDataBlock(getFrpSecretDataOffset(), FRP_SECRET_SIZE);
+    }
+
+    private boolean deactivateFrp(byte[] secret) {
+        if (secret == null || secret.length != FRP_SECRET_SIZE) {
+            Slog.w(TAG, "Attempted to deactivate FRP with a null or incorrectly-sized secret");
+            return false;
+        }
+
+        synchronized (mLock) {
+            if (!hasFrpSecretMagic()) {
+                Slog.i(TAG, "No FRP secret magic, system must have been upgraded.");
+                writeFrpMagicAndDefaultSecret();
+            }
+        }
+
+        final byte[] partitionSecret = getFrpSecret();
+        if (partitionSecret == null || partitionSecret.length != FRP_SECRET_SIZE) {
+            Slog.e(TAG, "Failed to read FRP secret from persistent data partition");
+            return false;
+        }
+
+        // MessageDigest.isEqual is constant-time, to protect secret deduction by timing attack.
+        if (MessageDigest.isEqual(secret, partitionSecret)) {
+            mFrpActive = false;
+            Slog.i(TAG, "FRP secret matched, FRP deactivated.");
+            return true;
+        } else {
+            Slog.e(TAG,
+                    "FRP deactivation failed with secret " + HexFormat.of().formatHex(secret));
+            return false;
+        }
+    }
+
+    private void writeFrpMagicAndDefaultSecret() {
+        try (FileChannel channel = getBlockOutputChannelIgnoringFrp()) {
+            synchronized (mLock) {
+                Slog.i(TAG, "Writing default FRP secret");
+                channel.position(getFrpSecretDataOffset());
+                channel.write(ByteBuffer.allocate(FRP_SECRET_SIZE));
+                channel.force(true);
+
+                Slog.i(TAG, "Writing FRP secret magic");
+                channel.position(getFrpSecretMagicOffset());
+                channel.write(ByteBuffer.wrap(FRP_SECRET_MAGIC));
+                channel.force(true);
+
+                mFrpActive = false;
+            }
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to write FRP magic and default secret", e);
+        }
+        computeAndWriteDigestLocked();
+    }
+
+    @VisibleForTesting
+    byte[] readDataBlock(long offset, int length) {
+        try (DataInputStream inputStream =
+                     new DataInputStream(new FileInputStream(new File(mDataBlockFile)))) {
+            synchronized (mLock) {
+                inputStream.skip(offset);
+                byte[] bytes = new byte[length];
+                inputStream.readFully(bytes);
+                return bytes;
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("persistent partition not readable", e);
+        }
+    }
+
     private void doSetOemUnlockEnabledLocked(boolean enabled) {
-
         try (FileChannel channel = getBlockOutputChannel()) {
-
             channel.position(getBlockDeviceSize() - 1);
 
             ByteBuffer data = ByteBuffer.allocate(1);
@@ -475,7 +797,7 @@ public class PersistentDataBlockService extends SystemService {
             Slog.e(TAG, "unable to access persistent partition", e);
             return;
         } finally {
-            setProperty(OEM_UNLOCK_PROP, enabled ? "1" : "0");
+            setOemUnlockEnabledProperty(enabled);
         }
     }
 
@@ -507,8 +829,10 @@ public class PersistentDataBlockService extends SystemService {
     }
 
     private long doGetMaximumDataBlockSize() {
-        long actualSize = getBlockDeviceSize() - HEADER_SIZE - DIGEST_SIZE_BYTES
-                - TEST_MODE_RESERVED_SIZE - FRP_CREDENTIAL_RESERVED_SIZE - 1;
+        final long frpSecretSize =
+                mFrpEnforced ? (FRP_SECRET_MAGIC.length + FRP_SECRET_SIZE) : 0;
+        final long actualSize = getBlockDeviceSize() - HEADER_SIZE - DIGEST_SIZE_BYTES
+                - TEST_MODE_RESERVED_SIZE - frpSecretSize - FRP_CREDENTIAL_RESERVED_SIZE - 1;
         return actualSize <= MAX_DATA_BLOCK_SIZE ? actualSize : MAX_DATA_BLOCK_SIZE;
     }
 
@@ -526,6 +850,140 @@ public class PersistentDataBlockService extends SystemService {
     }
 
     private final IBinder mService = new IPersistentDataBlockService.Stub() {
+        private int printFrpStatus(PrintWriter pw, boolean printSecrets) {
+            enforceUid(Binder.getCallingUid());
+
+            pw.println("FRP state");
+            pw.println("=========");
+            pw.println("Enforcement enabled: " + mFrpEnforced);
+            pw.println("FRP state: " + mFrpActive);
+            printFrpDataFilesContents(pw, printSecrets);
+            printFrpSecret(pw, printSecrets);
+            pw.println("OEM unlock state: " + getOemUnlockEnabled());
+            pw.println("Bootloader lock state: " + getFlashLockState());
+            pw.println("Verified boot state: " + getVerifiedBootState());
+            pw.println("Has FRP credential handle: " + hasFrpCredentialHandle());
+            pw.println("FRP challenge block size: " + getDataBlockSize());
+            return 1;
+        }
+
+        private void printFrpSecret(PrintWriter pw, boolean printSecret) {
+            if (hasFrpSecretMagic()) {
+                if (printSecret) {
+                    pw.println("FRP secret in PDB: " + HexFormat.of().formatHex(
+                            readDataBlock(getFrpSecretDataOffset(), FRP_SECRET_SIZE)));
+                } else {
+                    pw.println("FRP secret present but omitted.");
+                }
+            } else {
+                pw.println("FRP magic not found");
+            }
+        }
+
+        private void printFrpDataFilesContents(PrintWriter pw, boolean printSecrets) {
+            printFrpDataFileContents(pw, mFrpSecretFile, printSecrets);
+            printFrpDataFileContents(pw, mFrpSecretTmpFile, printSecrets);
+        }
+
+        private void printFrpDataFileContents(
+                PrintWriter pw, String frpSecretFile, boolean printSecret) {
+            if (Files.exists(Paths.get(frpSecretFile))) {
+                if (printSecret) {
+                    try {
+                        pw.println("FRP secret in " + frpSecretFile + ": " + HexFormat.of()
+                                .formatHex(Files.readAllBytes(Paths.get(frpSecretFile))));
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Failed to read " + frpSecretFile, e);
+                    }
+                } else {
+                    pw.println(
+                            "FRP secret file " + frpSecretFile + " exists, contents omitted.");
+                }
+            }
+        }
+
+        @Override
+        public void onShellCommand(@Nullable FileDescriptor in, @Nullable FileDescriptor out,
+                @Nullable FileDescriptor err,
+                @NonNull String[] args, @Nullable ShellCallback callback,
+                @NonNull ResultReceiver resultReceiver) throws RemoteException {
+            if (!mFrpEnforced) {
+                super.onShellCommand(in, out, err, args, callback, resultReceiver);
+                return;
+            }
+            new ShellCommand(){
+                @Override
+                public int onCommand(final String cmd) {
+                    if (cmd == null) {
+                        return handleDefaultCommands(cmd);
+                    }
+
+                    final PrintWriter pw = getOutPrintWriter();
+                    return switch (cmd) {
+                        case "status" -> printFrpStatus(pw, /* printSecrets */ !mFrpActive);
+                        case "activate" -> {
+                            activateFrp();
+                            yield printFrpStatus(pw, /* printSecrets */ !mFrpActive);
+                        }
+
+                        case "deactivate" -> {
+                            byte[] secret = hashSecretString(getNextArg());
+                            pw.println("Attempting to deactivate with: " + HexFormat.of().formatHex(
+                                    secret));
+                            pw.println("Deactivation "
+                                    + (deactivateFrp(secret) ? "succeeded" : "failed"));
+                            yield printFrpStatus(pw, /* printSecrets */ !mFrpActive);
+                        }
+
+                        case "auto_deactivate" -> {
+                            boolean result = automaticallyDeactivateFrpIfPossible();
+                            pw.println(
+                                    "Automatic deactivation " + (result ? "succeeded" : "failed"));
+                            yield printFrpStatus(pw, /* printSecrets */ !mFrpActive);
+                        }
+
+                        case "set_secret" -> {
+                            byte[] secret = new byte[FRP_SECRET_SIZE];
+                            String secretString = getNextArg();
+                            if (!secretString.equals("default")) {
+                                secret = hashSecretString(secretString);
+                            }
+                            pw.println("Setting FRP secret to: " + HexFormat.of()
+                                    .formatHex(secret) + " length: " + secret.length);
+                            setFactoryResetProtectionSecret(secret);
+                            yield printFrpStatus(pw, /* printSecrets */ !mFrpActive);
+                        }
+
+                        default -> handleDefaultCommands(cmd);
+                    };
+                }
+
+                @Override
+                public void onHelp() {
+                    final PrintWriter pw = getOutPrintWriter();
+                    pw.println("Commands");
+                    pw.println("status: Print the FRP state and associated information.");
+                    pw.println("activate:  Put FRP into \"active\" mode.");
+                    pw.println("deactivate <secret>:  Deactivate with a hash of 'secret'.");
+                    pw.println("auto_deactivate: Deactivate with the stored secret or the default");
+                    pw.println("set_secret <secret>:  Set the stored secret to a hash of `secret`");
+                }
+
+                private static byte[] hashSecretString(String secretInput) {
+                    try {
+                        // SHA-256 produces 32-byte outputs, same as the FRP secret size, so it's
+                        // a convenient way to "normalize" the length of whatever the user provided.
+                        // Also, hashing makes it difficult for an attacker to set the secret to a
+                        // known value that was randomly generated.
+                        MessageDigest md = MessageDigest.getInstance("SHA-256");
+                        return md.digest(secretInput.getBytes());
+                    } catch (NoSuchAlgorithmException e) {
+                        Slog.e(TAG, "Can't happen", e);
+                        return new byte[FRP_SECRET_SIZE];
+                    }
+                }
+            }.exec(this, in, out, err, args, callback, resultReceiver);
+        }
 
         /**
          * Write the data to the persistent data block.
@@ -545,7 +1003,7 @@ public class PersistentDataBlockService extends SystemService {
             }
 
             ByteBuffer headerAndData = ByteBuffer.allocate(
-                                           data.length + HEADER_SIZE + DIGEST_SIZE_BYTES);
+                    data.length + HEADER_SIZE + DIGEST_SIZE_BYTES);
             headerAndData.put(new byte[DIGEST_SIZE_BYTES]);
             headerAndData.putInt(PARTITION_TYPE_MARKER);
             headerAndData.putInt(data.length);
@@ -619,6 +1077,7 @@ public class PersistentDataBlockService extends SystemService {
 
         @Override
         public void wipe() {
+            enforceFactoryResetProtectionInactive();
             enforceOemUnlockWritePermission();
 
             synchronized (mLock) {
@@ -626,7 +1085,7 @@ public class PersistentDataBlockService extends SystemService {
                 if (mIsFileBacked) {
                     try {
                         Files.write(Paths.get(mDataBlockFile), new byte[MAX_DATA_BLOCK_SIZE],
-                                StandardOpenOption.TRUNCATE_EXISTING);
+                                TRUNCATE_EXISTING);
                         ret = 0;
                     } catch (IOException e) {
                         ret = -1;
@@ -685,6 +1144,10 @@ public class PersistentDataBlockService extends SystemService {
             }
         }
 
+        private static String getVerifiedBootState() {
+            return SystemProperties.get(VERIFIED_BOOT_STATE);
+        }
+
         @Override
         public int getDataBlockSize() {
             enforcePersistentDataBlockAccess();
@@ -716,6 +1179,18 @@ public class PersistentDataBlockService extends SystemService {
             }
         }
 
+        private void enforceConfigureFrpPermissionOrPersistentDataBlockAccess() {
+            if (!mFrpEnforced) {
+                enforcePersistentDataBlockAccess();
+            } else {
+                if (mContext.checkCallingOrSelfPermission(
+                        Manifest.permission.CONFIGURE_FACTORY_RESET_PROTECTION)
+                        == PackageManager.PERMISSION_DENIED) {
+                    enforcePersistentDataBlockAccess();
+                }
+            }
+        }
+
         @Override
         public long getMaximumDataBlockSize() {
             enforceUid(Binder.getCallingUid());
@@ -724,7 +1199,7 @@ public class PersistentDataBlockService extends SystemService {
 
         @Override
         public boolean hasFrpCredentialHandle() {
-            enforcePersistentDataBlockAccess();
+            enforceConfigureFrpPermissionOrPersistentDataBlockAccess();
             try {
                 return mInternalService.getFrpCredentialHandle() != null;
             } catch (IllegalStateException e) {
@@ -751,8 +1226,52 @@ public class PersistentDataBlockService extends SystemService {
             synchronized (mLock) {
                 pw.println("mIsWritable: " + mIsWritable);
             }
+            printFrpStatus(pw, /* printSecrets */ false);
+        }
+
+        @Override
+        public boolean isFactoryResetProtectionActive() {
+            return isFrpActive();
+        }
+
+        @Override
+        public boolean deactivateFactoryResetProtection(byte[] secret) {
+            enforceConfigureFrpPermission();
+            return deactivateFrp(secret);
+        }
+
+        @Override
+        public boolean setFactoryResetProtectionSecret(byte[] secret) {
+            enforceConfigureFrpPermission();
+            enforceUid(Binder.getCallingUid());
+            if (secret == null || secret.length != FRP_SECRET_SIZE) {
+                throw new IllegalArgumentException(
+                        "Invalid FRP secret: " + HexFormat.of().formatHex(secret));
+            }
+            enforceFactoryResetProtectionInactive();
+            return updateFrpSecret(secret);
         }
     };
+
+    private void enforceFactoryResetProtectionInactive() {
+        if (mFrpEnforced && isFrpActive()) {
+            Slog.w(TAG, "Attempt to update PDB was blocked because FRP is active.");
+            throw new SecurityException("FRP is active");
+        }
+    }
+
+    @VisibleForTesting
+    boolean isUpgradingFromPreVRelease() {
+        PackageManagerInternal packageManagerInternal =
+                LocalServices.getService(PackageManagerInternal.class);
+        if (packageManagerInternal == null) {
+            Slog.e(TAG, "Unable to retrieve PackageManagerInternal");
+            return false;
+        }
+
+        return packageManagerInternal
+                .isUpgradingFromLowerThan(Build.VERSION_CODES.VANILLA_ICE_CREAM);
+    }
 
     private InternalService mInternalService = new InternalService();
 
@@ -792,6 +1311,14 @@ public class PersistentDataBlockService extends SystemService {
             return mAllowedUid;
         }
 
+        @Override
+        public boolean deactivateFactoryResetProtectionWithoutSecret() {
+            synchronized (mLock) {
+                mFrpActive = false;
+            }
+            return true;
+        }
+
         private void writeInternal(byte[] data, long offset, int dataLength) {
             checkArgument(data == null || data.length > 0, "data must be null or non-empty");
             checkArgument(
@@ -808,10 +1335,10 @@ public class PersistentDataBlockService extends SystemService {
             writeDataBuffer(offset, dataBuffer);
         }
 
-        private void writeDataBuffer(long offset, ByteBuffer dataBuffer) {
+        private boolean writeDataBuffer(long offset, ByteBuffer dataBuffer) {
             synchronized (mLock) {
                 if (!mIsWritable) {
-                    return;
+                    return false;
                 }
                 try (FileChannel channel = getBlockOutputChannel()) {
                     channel.position(offset);
@@ -819,10 +1346,10 @@ public class PersistentDataBlockService extends SystemService {
                     channel.force(true);
                 } catch (IOException e) {
                     Slog.e(TAG, "unable to access persistent partition", e);
-                    return;
+                    return false;
                 }
 
-                computeAndWriteDigestLocked();
+                return computeAndWriteDigestLocked();
             }
         }
 
@@ -864,5 +1391,5 @@ public class PersistentDataBlockService extends SystemService {
                 computeAndWriteDigestLocked();
             }
         }
-    };
+    }
 }

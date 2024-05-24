@@ -19,6 +19,8 @@ package android.hardware.biometrics;
 import android.annotation.IntDef;
 import android.app.KeyguardManager;
 import android.hardware.biometrics.BiometricManager.Authenticators;
+import android.hardware.face.FaceEnrollOptions;
+import android.hardware.face.FaceEnrollOptions.EnrollReason;
 import android.hardware.face.FaceManager;
 
 import java.lang.annotation.Retention;
@@ -432,4 +434,22 @@ public interface BiometricFaceConstants {
      * vendor code.
      */
     int FACE_ACQUIRED_VENDOR_BASE = 1000;
+
+
+    /**
+     * Converts FaceEnrollOptions.reason into BiometricsProtoEnums.enrollReason
+     */
+    public static int reasonToMetric(@EnrollReason int reason) {
+        switch (reason) {
+            case FaceEnrollOptions.ENROLL_REASON_RE_ENROLL_NOTIFICATION:
+                return BiometricsProtoEnums.ENROLLMENT_SOURCE_FRR_NOTIFICATION;
+            case FaceEnrollOptions.ENROLL_REASON_SETTINGS:
+                return BiometricsProtoEnums.ENROLLMENT_SOURCE_SETTINGS;
+            case FaceEnrollOptions.ENROLL_REASON_SUW:
+                return BiometricsProtoEnums.ENROLLMENT_SOURCE_SUW;
+            default:
+                return BiometricsProtoEnums.ENROLLMENT_SOURCE_UNKNOWN;
+        }
+
+    }
 }

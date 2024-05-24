@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Mikrofonas"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Skambučių žurnalai"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Įrenginiai netoliese"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Keisti medijos išvestį"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Nuotraukos ir medija"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Pranešimai"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"Pranešimai"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Programos"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Srautinis perdavimas"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Gali atlikti ir tvarkyti telefono skambučius"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Gali skaityti ir rašyti telefono skambučių žurnalą"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"Gali siųsti ir peržiūrėti SMS pranešimus"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Gali pasiekti jūsų kontaktus"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Gali pasiekti jūsų kalendorių"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"Gali įrašyti garsą"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Gali rasti apytikslę netoliese esančių įrenginių poziciją, aptikti juos ir prisijungti prie jų"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Galima skaityti visus pranešimus, įskaitant tokią informaciją kaip kontaktai, pranešimai ir nuotraukos"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Skambinti ir tvarkyti telefonų skambučius"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"Skaityti ir rašyti telefono skambučių žurnalą"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"Siųsti ir peržiūrėti SMS pranešimus"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"Pasiekti kontaktus"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"Pasiekti kalendorių"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Įrašyti garsą"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Rasti apytikslę netoliese esančių įrenginių poziciją, aptikti juos ir prisijungti prie jų"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Skaityti visus pranešimus, įskaitant tokią informaciją kaip kontaktai, pranešimai ir nuotraukos"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• Skaityti visus pranešimus, įskaitant tokią informaciją kaip kontaktai, pranešimai ir nuotraukos&lt;br/&gt;• Siųsti pranešimus&lt;br/&gt;&lt;br/&gt;Galite bet kada tvarkyti šios programos leidimą skaityti ir siųsti pranešimus skiltyje „Nustatymai“ &gt; „Pranešimai“."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Telefono programų perdavimas srautu"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Srautu perduokite programas ir kitas sistemos funkcijas iš telefono"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Pasiekti pasiekiamų įrenginių sąrašą ir valdyti, kuris leidžia garso arba vaizdo įrašo srautą arba perduoda įrašą iš kitų programų"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"telefone"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"planšetiniame kompiuteryje"</string>
 </resources>

@@ -154,6 +154,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : <xliff:g id="DIALING_NUMBER">{1}</xliff:g> au bout de <xliff:g id="TIME_DELAY">{2}</xliff:g> secondes"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : non transféré"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : non transféré"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Sécurité du réseau cellulaire"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Vérifiez les paramètres"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Accès à l\'identifiant de l\'appareil"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Un réseau doté de la connexion <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> a enregistré l\'identifiant unique (IMSI) de votre appareil <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> fois entre les périodes suivantes : <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> et <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Connexion chiffrée à <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Vous êtes maintenant connecté à un réseau cellulaire plus sécuritaire."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Connexion non chiffrée à <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Vous êtes connecté à un réseau cellulaire non chiffré. Vos appels, vos données et vos messages risquent d\'être interceptés."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Paramètres de sécurité du réseau cellulaire"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"En savoir plus"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Code de service terminé"</string>
     <string name="fcError" msgid="5325116502080221346">"Problème de connexion ou code de service non valide"</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -371,6 +381,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Permet à l\'application d\'établir un lien avec le module de diffusion cellulaire afin de transférer les messages de diffusion cellulaire à mesure de leur réception. Dans certaines régions, des alertes de diffusion cellulaire sont envoyées afin de vous avertir de situations d\'urgence. Des applications malveillantes peuvent interférer avec les performances ou le fonctionnement de votre appareil lors de la réception d\'une alerte d\'urgence par diffusion cellulaire."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Gérer les appels en cours"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Autorise une application à afficher les renseignements concernant les appels en cours sur votre appareil et à les gérer."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Accéder à la dernière identité cellulaire connue."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Autorise une application à accéder à la dernière identité cellulaire connue fournie par la téléphonie."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"lire les messages de diffusion cellulaire"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Permet à l\'application de lire les messages de diffusion cellulaire que votre appareil reçoit. Dans certaines zones géographiques, des alertes vous sont envoyées afin de vous prévenir en cas de situation d\'urgence. Des applications malveillantes peuvent venir perturber les performances ou le fonctionnement de votre appareil lors de la réception d\'un message de diffusion cellulaire."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"lire les flux auxquels vous êtes abonné"</string>
@@ -435,6 +447,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Autoriser l\'application à utiliser les services d\'avant-plan avec le type « système exempté »"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"exécuter le service d\'avant-plan avec le type « fileManagement »"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Autorise l\'application à utiliser les services d\'avant-plan avec le type « fileManagement »"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"exécuter le service de premier plan avec le type « mediaProcessing »"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Autorise l\'application à utiliser les services de premier plan avec le type « mediaProcessing »"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"exécuter le service d\'avant-plan avec le type « usage spécial »"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Autoriser l\'application à utiliser les services d\'avant-plan avec le type « usage spécial »"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"évaluer l\'espace de stockage de l\'application"</string>
@@ -540,6 +554,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Permet à l\'application d\'utiliser l\'émetteur infrarouge du téléphone."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"définir le fond d\'écran"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Permet à l\'application de définir le fond d\'écran du système."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Accéder aux profils masqués"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Autorise l\'application à accéder aux profils masqués"</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"modifier la taille du fond d\'écran"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Permet à l\'application de définir les bulles d\'aide concernant la taille du fond d\'écran du système."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"définir le fuseau horaire"</string>
@@ -633,7 +649,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Utiliser le verrouillage de l\'écran"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Entrez votre verrouillage d\'écran pour continuer"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Appuyez fermement sur le capteur"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Empreinte digitale non reconnue. Réessayez."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Empreinte digitale non reconnue. Réessayez."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Nettoyez le capteur d\'empreintes digitales et réessayez"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Nettoyez le capteur et réessayez"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Appuyez fermement sur le capteur"</string>
@@ -651,18 +667,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Empreinte digitale authentifiée"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Visage authentifié"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Visage authentifié, veuillez appuyer sur le bouton Confirmer"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Lecteur d\'empreintes digitales indisponible."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Lecteur d\'empreintes digitales non accessible"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Impossible de configurer l\'empreinte digitale"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Délai dépassé pour configurer l\'empreinte digitale. Réessayez."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Opération d\'empreinte digitale numérique annulée."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"L\'opération d\'empreinte digitale a été annulée par l\'utilisateur."</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Opération d\'empreinte digitale annulée"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Opération d\'authentification par empreinte digitale annulée par l\'utilisateur"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Trop de tentatives. Utilisez plutôt le verrouillage de l\'écran."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Trop de tentatives. Utilisez plutôt le verrouillage de l\'écran."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Empreinte digitale non traitable. Réessayez."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Aucune empreinte digitale enregistrée."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Cet appareil ne possède pas de capteur d\'empreintes digitales."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Le capteur a été désactivé temporairement."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Impossible d\'utiliser le capteur d\'empreintes digitales. Consultez un fournisseur de services de réparation"</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Aucune empreinte digitale enregistrée"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Cet appareil ne possède pas de capteur d\'empreintes digitales"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Capteur désactivé temporairement"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Impossible d\'utiliser le capteur d\'empreintes digitales. Visitez un fournisseur de services de réparation."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Vous avez appuyé sur l\'interrupteur"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Doigt <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Utiliser l\'empreinte digitale"</string>
@@ -697,7 +713,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Visage non détecté. Tenez votre téléphone à hauteur des yeux."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Trop de mouvement. Tenez le téléphone immobile."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Veuillez inscrire votre visage à nouveau."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Visage non reconnu. Réessayez."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Visage non reconnu. Réessayez."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Modifiez légèrement la position de votre tête"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Regardez droit dans le téléphone"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Regardez droit dans le téléphone"</string>
@@ -808,6 +824,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Permet à l’application d’échantillonner les données des capteurs à une fréquence supérieure à 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"Mettre à jour l\'application sans intervention de l\'utilisateur"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Permet à une application précédemment installée de se mettre à jour sans intervention de l\'utilisateur"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"mettre à jour les états des vérifications des clés de contact chiffrées de bout en bout qui appartiennent à d\'autres applications"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Autorise l\'application à mettre à jour les états des vérifications des clés de contact chiffrées de bout en bout qui appartiennent à d\'autres applications"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Définir les règles du mot de passe"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Gérer le nombre et le type de caractères autorisés dans les mots de passe et les NIP de verrouillage de l\'écran."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Gérer les tentatives de déverrouillage de l\'écran"</string>
@@ -1907,6 +1925,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fin de semaine"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Événement"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Sommeil"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Géré par <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Activé"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Désactivé"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> désactive certains sons"</string>
@@ -1926,6 +1945,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Vérifié"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Développer"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Réduire"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Réduit"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Développé"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"activer/désactiver le développement"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Port USB de l\'appareil Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1966,6 +1987,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Réactiver les applis pros?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Réactiver"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Urgence"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Config. Verrouillage d\'écran"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Config. Verrouillage d\'écran"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Config. VÉ pour util. Esp. pr."</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"L\'application n\'est pas accessible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> n\'est pas accessible pour le moment."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> non accessible"</string>
@@ -2342,8 +2366,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Impossible de dupliquer l\'écran"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Utilisez un câble différent et réessayez"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Votre appareil est trop chaud et doit refroidir pour pouvoir dupliquer l\'écran"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Le câble peut ne pas être compatible avec les écrans"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Votre câble USB-C peut ne pas se connecter correctement aux écrans"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen activé"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> utilise les deux écrans pour afficher le contenu"</string>
@@ -2367,4 +2389,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Professionnel 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Commun"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Connecté au satellite automatiquement"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Vous pouvez envoyer et recevoir des messages sans avoir recours à un appareil mobile ou à un réseau Wi-Fi"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Ouvrir Messages"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Fonctionnement"</string>
 </resources>

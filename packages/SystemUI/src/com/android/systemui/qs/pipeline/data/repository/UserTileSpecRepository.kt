@@ -50,9 +50,8 @@ constructor(
     private val defaultTiles: List<TileSpec>
         get() = defaultTilesRepository.defaultTiles
 
-    private val changeEvents = MutableSharedFlow<ChangeAction>(
-        extraBufferCapacity = CHANGES_BUFFER_SIZE
-    )
+    private val changeEvents =
+        MutableSharedFlow<ChangeAction>(extraBufferCapacity = CHANGES_BUFFER_SIZE)
 
     private lateinit var _tiles: StateFlow<List<TileSpec>>
 
@@ -163,6 +162,10 @@ constructor(
         changeEvents.emit(RestoreTiles(restoreData, currentAutoAdded))
     }
 
+    suspend fun prependDefault() {
+        changeEvents.emit(PrependDefault(defaultTiles))
+    }
+
     sealed interface ChangeAction {
         fun apply(currentTiles: List<TileSpec>): List<TileSpec>
     }
@@ -196,6 +199,12 @@ constructor(
         override fun apply(currentTiles: List<TileSpec>): List<TileSpec> {
             val new = newTiles.filter { it !is TileSpec.Invalid }
             return if (new.isNotEmpty()) new else currentTiles
+        }
+    }
+
+    private data class PrependDefault(val defaultTiles: List<TileSpec>) : ChangeAction {
+        override fun apply(currentTiles: List<TileSpec>): List<TileSpec> {
+            return defaultTiles + currentTiles
         }
     }
 

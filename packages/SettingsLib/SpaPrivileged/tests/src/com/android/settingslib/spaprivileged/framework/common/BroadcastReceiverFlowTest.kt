@@ -43,7 +43,7 @@ class BroadcastReceiverFlowTest {
 
     private val context = mock<Context> {
         on {
-            registerReceiver(any(), eq(INTENT_FILTER), eq(Context.RECEIVER_NOT_EXPORTED))
+            registerReceiver(any(), eq(INTENT_FILTER), eq(Context.RECEIVER_VISIBLE_TO_INSTANT_APPS))
         } doAnswer {
             registeredBroadcastReceiver = it.arguments[0] as BroadcastReceiver
             null

@@ -133,7 +133,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
     static final int BOUNCER_DISMISS_EXTENDED_ACCESS = 3;
     // Bouncer is dismissed due to sim card unlock code entered.
     static final int BOUNCER_DISMISS_SIM = 4;
-
+    // Bouncer dismissed after being allowed to dismiss by forceDismissiblekeyguard
+    static final int BOUNCER_DISMISSIBLE_KEYGUARD = 5;
     private static final String TAG = "KeyguardSecurityView";
 
     // Make the view move slower than the finger, as if the spring were applying force.

@@ -22,6 +22,7 @@ import static com.android.internal.os.TimeoutRecord.TimeoutKind;
 import static com.android.internal.util.FrameworkStatsLog.ANRLATENCY_REPORTED__ANR_TYPE__BROADCAST_OF_INTENT;
 import static com.android.internal.util.FrameworkStatsLog.ANRLATENCY_REPORTED__ANR_TYPE__CONTENT_PROVIDER_NOT_RESPONDING;
 import static com.android.internal.util.FrameworkStatsLog.ANRLATENCY_REPORTED__ANR_TYPE__EXECUTING_SERVICE;
+import static com.android.internal.util.FrameworkStatsLog.ANRLATENCY_REPORTED__ANR_TYPE__FGS_TIMEOUT;
 import static com.android.internal.util.FrameworkStatsLog.ANRLATENCY_REPORTED__ANR_TYPE__INPUT_DISPATCHING_TIMEOUT;
 import static com.android.internal.util.FrameworkStatsLog.ANRLATENCY_REPORTED__ANR_TYPE__INPUT_DISPATCHING_TIMEOUT_NO_FOCUSED_WINDOW;
 import static com.android.internal.util.FrameworkStatsLog.ANRLATENCY_REPORTED__ANR_TYPE__JOB_SERVICE;
@@ -548,6 +549,8 @@ public class AnrLatencyTracker implements AutoCloseable {
                 return ANRLATENCY_REPORTED__ANR_TYPE__SHORT_FGS_TIMEOUT;
             case TimeoutKind.JOB_SERVICE:
                 return ANRLATENCY_REPORTED__ANR_TYPE__JOB_SERVICE;
+            case TimeoutKind.FGS_TIMEOUT:
+                return ANRLATENCY_REPORTED__ANR_TYPE__FGS_TIMEOUT;
             default:
                 return ANRLATENCY_REPORTED__ANR_TYPE__UNKNOWN_ANR_TYPE;
         }

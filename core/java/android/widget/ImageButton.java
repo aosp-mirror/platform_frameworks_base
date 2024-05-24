@@ -16,6 +16,10 @@
 
 package android.widget;
 
+import static android.view.flags.Flags.enableArrowIconOnHoverWhenClickable;
+import static android.view.flags.Flags.FLAG_ENABLE_ARROW_ICON_ON_HOVER_WHEN_CLICKABLE;
+
+import android.annotation.FlaggedApi;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.InputDevice;
@@ -98,11 +102,16 @@ public class ImageButton extends ImageView {
         return ImageButton.class.getName();
     }
 
+    @FlaggedApi(FLAG_ENABLE_ARROW_ICON_ON_HOVER_WHEN_CLICKABLE)
     @Override
     public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
         if (getPointerIcon() == null && isClickable() && isEnabled()
                 && event.isFromSource(InputDevice.SOURCE_MOUSE)) {
-            return PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_HAND);
+
+            int pointerIcon = enableArrowIconOnHoverWhenClickable()
+                    ? PointerIcon.TYPE_ARROW
+                    : PointerIcon.TYPE_HAND;
+            return PointerIcon.getSystemIcon(getContext(), pointerIcon);
         }
         return super.onResolvePointerIcon(event, pointerIndex);
     }

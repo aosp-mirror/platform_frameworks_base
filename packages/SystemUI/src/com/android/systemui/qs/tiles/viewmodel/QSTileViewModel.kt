@@ -22,8 +22,8 @@ import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Represents tiles behaviour logic. This ViewModel is a connection between tile view and data
- * layers. All direct inheritors must be added to the [QSTileViewModelInterfaceComplianceTest] class
- * to pass compliance tests.
+ * layers. All direct inheritors must be added to the
+ * [com.android.systemui.qs.tiles.viewmodel.QSTileViewModelTest] class to pass interface tests.
  *
  * All methods of this view model should be considered running on the main thread. This means no
  * synchronous long running operations are permitted in any method.
@@ -45,7 +45,10 @@ interface QSTileViewModel {
      */
     fun onUserChanged(user: UserHandle)
 
-    /** Triggers the emission of the new [QSTileState] in a [state]. */
+    /**
+     * Triggers the emission of the new [QSTileState] in a [state]. The new value can still be
+     * skipped if there is no change.
+     */
     fun forceUpdate()
 
     /** Notifies underlying logic about user input. */

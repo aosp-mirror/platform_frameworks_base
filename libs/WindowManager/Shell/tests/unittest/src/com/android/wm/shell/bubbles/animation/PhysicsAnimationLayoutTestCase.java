@@ -164,11 +164,17 @@ public class PhysicsAnimationLayoutTestCase extends ShellTestCase {
 
         @Override
         public void cancelAllAnimations() {
+            if (mLayout.getChildCount() == 0) {
+                return;
+            }
             mMainThreadHandler.post(super::cancelAllAnimations);
         }
 
         @Override
         public void cancelAnimationsOnView(View view) {
+            if (mLayout.getChildCount() == 0) {
+                return;
+            }
             mMainThreadHandler.post(() -> super.cancelAnimationsOnView(view));
         }
 
@@ -221,6 +227,9 @@ public class PhysicsAnimationLayoutTestCase extends ShellTestCase {
 
             @Override
             protected void startPathAnimation() {
+                if (mLayout.getChildCount() == 0) {
+                    return;
+                }
                 mMainThreadHandler.post(super::startPathAnimation);
             }
         }
@@ -321,5 +330,10 @@ public class PhysicsAnimationLayoutTestCase extends ShellTestCase {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    /** Waits for the main thread to finish processing all pending runnables. */
+    public void waitForMainThread() {
+        runOnMainThreadAndBlock(() -> {});
     }
 }

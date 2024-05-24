@@ -510,16 +510,18 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         }
     }
 
-    /** Updates divide position and split bounds base on the ratio within root bounds. */
+    /**
+     * Updates divide position and split bounds base on the ratio within root bounds. Falls back
+     * to middle position if the provided SnapTarget is not supported.
+     */
     public void setDivideRatio(@PersistentSnapPosition int snapPosition) {
         final DividerSnapAlgorithm.SnapTarget snapTarget = mDividerSnapAlgorithm.findSnapTarget(
                 snapPosition);
 
-        if (snapTarget == null) {
-            throw new IllegalArgumentException("No SnapTarget for position " + snapPosition);
-        }
-
-        setDividePosition(snapTarget.position, false /* applyLayoutChange */);
+        setDividePosition(snapTarget != null
+                ? snapTarget.position
+                : mDividerSnapAlgorithm.getMiddleTarget().position,
+                false /* applyLayoutChange */);
     }
 
     /** Resets divider position. */

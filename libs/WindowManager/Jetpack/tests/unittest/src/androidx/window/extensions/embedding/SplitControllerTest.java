@@ -354,7 +354,7 @@ public class SplitControllerTest {
         bundle.putBinder(ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN,
                 container.getTaskFragmentToken());
         monitor.mCurrentIntent = intent;
-        doReturn(container).when(mSplitController).getContainer(any());
+        doReturn(container).when(mSplitController).getContainer(any(IBinder.class));
 
         monitor.onStartActivityResult(START_CANCELED, bundle);
         assertNull(container.getPendingAppearedIntent());
@@ -590,7 +590,7 @@ public class SplitControllerTest {
 
         assertFalse(result);
         verify(mSplitController, never()).newContainer(any(), any(), any(), anyInt(), any(),
-                anyString());
+                anyString(), any());
     }
 
     @Test
@@ -753,7 +753,7 @@ public class SplitControllerTest {
 
         assertTrue(result);
         verify(mSplitController, never()).newContainer(any(), any(), any(), anyInt(), any(),
-                anyString());
+                anyString(), any());
         verify(mSplitController, never()).registerSplit(any(), any(), any(), any(), any(), any());
     }
 
@@ -796,7 +796,7 @@ public class SplitControllerTest {
 
         assertTrue(result);
         verify(mSplitController, never()).newContainer(any(), any(), any(), anyInt(), any(),
-                anyString());
+                anyString(), any());
         verify(mSplitController, never()).registerSplit(any(), any(), any(), any(), any(), any());
     }
 
@@ -1437,7 +1437,7 @@ public class SplitControllerTest {
     @Test
     public void testUpdateSplitAttributes_nullParams_throwException() {
         assertThrows(NullPointerException.class,
-                () -> mSplitController.updateSplitAttributes(null, SPLIT_ATTRIBUTES));
+                () -> mSplitController.updateSplitAttributes((IBinder) null, SPLIT_ATTRIBUTES));
 
         final SplitContainer splitContainer = mock(SplitContainer.class);
         final IBinder token = new Binder();
@@ -1642,7 +1642,7 @@ public class SplitControllerTest {
         // We need to set those in case we are not respecting clear top.
         // TODO(b/231845476) we should always respect clearTop.
         final int windowingMode = mSplitController.getTaskContainer(primaryContainer.getTaskId())
-                .getWindowingModeForSplitTaskFragment(TASK_BOUNDS);
+                .getWindowingModeForTaskFragment(TASK_BOUNDS);
         primaryContainer.setLastRequestedWindowingMode(windowingMode);
         secondaryContainer.setLastRequestedWindowingMode(windowingMode);
         primaryContainer.setLastRequestedBounds(getSplitBounds(true /* isPrimary */));

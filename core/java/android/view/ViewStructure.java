@@ -16,13 +16,20 @@
 
 package android.view;
 
+import static android.service.autofill.Flags.FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.credentials.GetCredentialException;
+import android.credentials.GetCredentialRequest;
+import android.credentials.GetCredentialResponse;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.LocaleList;
+import android.os.OutcomeReceiver;
 import android.util.Pair;
 import android.view.View.AutofillImportance;
 import android.view.autofill.AutofillId;
@@ -347,6 +354,37 @@ public abstract class ViewStructure {
     public abstract ViewStructure asyncNewChild(int index);
 
     /**
+     * Gets the {@link GetCredentialRequest} associated with this node.
+     *
+     * <p> If null, no request is associated with this node, and hence no
+     * {@link android.credentials.CredentialManager} request will be fired when this
+     * node is focused.
+     * <p> For details on how a request and callback can be set, see
+     * {@link ViewStructure#setCredentialManagerRequest(GetCredentialRequest, OutcomeReceiver)}
+     */
+    @Nullable
+    @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
+    public GetCredentialRequest getCredentialManagerRequest() {
+        return null;
+    }
+
+    /**
+     * Gets the {@code callback} associated with this node.
+     *
+     * <p> If null, no callback or request is associated with this node, and hence no
+     * {@link android.credentials.CredentialManager} request will be fired when this
+     * node is focused.
+     * <p> For details on how a request and callback can be set, see
+     * {@link ViewStructure#setCredentialManagerRequest(GetCredentialRequest, OutcomeReceiver)}
+     */
+    @Nullable
+    @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
+    public OutcomeReceiver<
+            GetCredentialResponse, GetCredentialException> getCredentialManagerCallback() {
+        return null;
+    }
+
+    /**
      * Gets the {@link AutofillId} associated with this node.
      */
     @Nullable
@@ -507,6 +545,24 @@ public abstract class ViewStructure {
      * @param htmlInfo HTML properties.
      */
     public abstract void setHtmlInfo(@NonNull HtmlInfo htmlInfo);
+
+    /**
+     * Sets a credential request to be fired to {@link android.credentials.CredentialManager}
+     * when this node is focused
+     *
+     * @param request the request to be fired
+     * @param callback the callback where the response or exception, is returned
+     */
+    @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
+    public void setCredentialManagerRequest(@NonNull GetCredentialRequest request,
+            @NonNull OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {}
+
+    /**
+     * Clears the credential request previously set through
+     * {@link ViewStructure#setCredentialManagerRequest(GetCredentialRequest, OutcomeReceiver)}
+     */
+    @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
+    public void clearCredentialManagerRequest() {}
 
     /**
      * Simplified representation of the HTML properties of a node that represents an HTML element.

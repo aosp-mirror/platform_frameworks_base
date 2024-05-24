@@ -18,6 +18,7 @@ package android.hardware.face;
 
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_UNABLE_TO_PROCESS;
+import static android.hardware.biometrics.Flags.FLAG_FACE_BACKGROUND_AUTHENTICATION;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -35,12 +36,15 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
+import android.hardware.biometrics.BiometricPrompt;
 import android.os.CancellationSignal;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 
 import com.android.internal.R;
 
@@ -58,6 +62,7 @@ import org.mockito.junit.MockitoRule;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 @Presubmit
 @RunWith(MockitoJUnitRunner.class)
@@ -78,6 +83,8 @@ public class FaceManagerTest {
     @Mock
     private FaceManager.AuthenticationCallback mAuthCallback;
     @Mock
+    private BiometricPrompt.AuthenticationCallback mBioAuthCallback;
+    @Mock
     private FaceManager.EnrollmentCallback mEnrollmentCallback;
     @Mock
     private FaceManager.FaceDetectionCallback mFaceDetectionCallback;
@@ -91,13 +98,16 @@ public class FaceManagerTest {
     private TestLooper mLooper;
     private Handler mHandler;
     private FaceManager mFaceManager;
+    private Executor mExecutor;
 
     @Before
     public void setUp() throws Exception {
         mLooper = new TestLooper();
         mHandler = new Handler(mLooper.getLooper());
+        mExecutor = new HandlerExecutor(mHandler);
 
         when(mContext.getMainLooper()).thenReturn(mLooper.getLooper());
+        when(mContext.getMainExecutor()).thenReturn(mExecutor);
         when(mContext.getOpPackageName()).thenReturn(PACKAGE_NAME);
         when(mContext.getAttributionTag()).thenReturn(ATTRIBUTION_TAG);
         when(mContext.getApplicationInfo()).thenReturn(new ApplicationInfo());
@@ -159,6 +169,19 @@ public class FaceManagerTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(FLAG_FACE_BACKGROUND_AUTHENTICATION)
+    public void authenticateInBackground_errorWhenUnavailable() throws Exception {
+        when(mService.authenticateInBackground(any(), anyLong(), any(), any()))
+                .thenThrow(new RemoteException());
+
+        mFaceManager.authenticateInBackground(mExecutor, null, new CancellationSignal(),
+                mBioAuthCallback);
+        mLooper.dispatchAll();
+
+        verify(mBioAuthCallback).onAuthenticationError(eq(FACE_ERROR_HW_UNAVAILABLE), any());
+    }
+
+    @Test
     public void enrollment_errorWhenFaceEnrollmentExists() throws RemoteException {
         when(mResources.getInteger(R.integer.config_faceMaxTemplatesPerUser)).thenReturn(1);
         when(mService.getEnrolledFaces(anyInt(), anyInt(), anyString()))
@@ -171,13 +194,13 @@ public class FaceManagerTest {
                 new CancellationSignal(), mEnrollmentCallback, null /* disabledFeatures */);
 
         verify(mService).enroll(eq(USER_ID), any(), any(), any(), anyString(), any(), any(),
-                anyBoolean());
+                anyBoolean(), any());
 
         mFaceManager.enroll(USER_ID, new byte[]{},
                 new CancellationSignal(), mEnrollmentCallback, null /* disabledFeatures */);
 
         verify(mService, atMost(1 /* maxNumberOfInvocations */)).enroll(eq(USER_ID), any(), any(),
-                any(), anyString(), any(), any(), anyBoolean());
+                any(), anyString(), any(), any(), anyBoolean(), any());
         verify(mEnrollmentCallback).onEnrollmentError(eq(FACE_ERROR_HW_UNAVAILABLE), anyString());
     }
 
@@ -190,7 +213,7 @@ public class FaceManagerTest {
         verify(mEnrollmentCallback).onEnrollmentError(eq(FACE_ERROR_UNABLE_TO_PROCESS),
                 anyString());
         verify(mService, never()).enroll(eq(USER_ID), any(), any(),
-                any(), anyString(), any(), any(), anyBoolean());
+                any(), anyString(), any(), any(), anyBoolean(), any());
     }
 
     @Test

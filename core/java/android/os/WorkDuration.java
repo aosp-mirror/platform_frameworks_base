@@ -26,7 +26,7 @@ import java.util.Objects;
  * in each component, see
  * {@link PerformanceHintManager.Session#reportActualWorkDuration(WorkDuration)}.
  *
- * All timings should be in {@link SystemClock#elapsedRealtimeNanos()}.
+ * All timings should be in {@link SystemClock#uptimeNanos()} and measured in wall time.
  */
 @FlaggedApi(Flags.FLAG_ADPF_GPU_REPORT_ACTUAL_WORK_DURATION)
 public final class WorkDuration implements Parcelable {
@@ -50,17 +50,9 @@ public final class WorkDuration implements Parcelable {
 
     public WorkDuration() {}
 
-    public WorkDuration(long workPeriodStartTimestampNanos,
-                      long actualTotalDurationNanos,
-                      long actualCpuDurationNanos,
-                      long actualGpuDurationNanos) {
-        mWorkPeriodStartTimestampNanos = workPeriodStartTimestampNanos;
-        mActualTotalDurationNanos = actualTotalDurationNanos;
-        mActualCpuDurationNanos = actualCpuDurationNanos;
-        mActualGpuDurationNanos = actualGpuDurationNanos;
-    }
-
     /**
+     * Constructor for testing.
+     *
      * @hide
      */
     public WorkDuration(long workPeriodStartTimestampNanos,
@@ -86,12 +78,12 @@ public final class WorkDuration implements Parcelable {
     /**
      * Sets the work period start timestamp in nanoseconds.
      *
-     * All timings should be in {@link SystemClock#elapsedRealtimeNanos()}.
+     * All timings should be in {@link SystemClock#uptimeNanos()}.
      */
     public void setWorkPeriodStartTimestampNanos(long workPeriodStartTimestampNanos) {
         if (workPeriodStartTimestampNanos <= 0) {
             throw new IllegalArgumentException(
-                "the work period start timestamp should be positive.");
+                "the work period start timestamp should be greater than zero.");
         }
         mWorkPeriodStartTimestampNanos = workPeriodStartTimestampNanos;
     }
@@ -99,11 +91,12 @@ public final class WorkDuration implements Parcelable {
     /**
      * Sets the actual total duration in nanoseconds.
      *
-     * All timings should be in {@link SystemClock#elapsedRealtimeNanos()}.
+     * All timings should be in {@link SystemClock#uptimeNanos()}.
      */
     public void setActualTotalDurationNanos(long actualTotalDurationNanos) {
         if (actualTotalDurationNanos <= 0) {
-            throw new IllegalArgumentException("the actual total duration should be positive.");
+            throw new IllegalArgumentException(
+                "the actual total duration should be greater than zero.");
         }
         mActualTotalDurationNanos = actualTotalDurationNanos;
     }
@@ -111,11 +104,12 @@ public final class WorkDuration implements Parcelable {
     /**
      * Sets the actual CPU duration in nanoseconds.
      *
-     * All timings should be in {@link SystemClock#elapsedRealtimeNanos()}.
+     * All timings should be in {@link SystemClock#uptimeNanos()}.
      */
     public void setActualCpuDurationNanos(long actualCpuDurationNanos) {
-        if (actualCpuDurationNanos <= 0) {
-            throw new IllegalArgumentException("the actual CPU duration should be positive.");
+        if (actualCpuDurationNanos < 0) {
+            throw new IllegalArgumentException(
+                "the actual CPU duration should be greater than or equal to zero.");
         }
         mActualCpuDurationNanos = actualCpuDurationNanos;
     }
@@ -123,11 +117,12 @@ public final class WorkDuration implements Parcelable {
     /**
      * Sets the actual GPU duration in nanoseconds.
      *
-     * All timings should be in {@link SystemClock#elapsedRealtimeNanos()}.
+     * All timings should be in {@link SystemClock#uptimeNanos()}.
      */
     public void setActualGpuDurationNanos(long actualGpuDurationNanos) {
         if (actualGpuDurationNanos < 0) {
-            throw new IllegalArgumentException("the actual GPU duration should be non negative.");
+            throw new IllegalArgumentException(
+                "the actual GPU duration should be greater than or equal to zero.");
         }
         mActualGpuDurationNanos = actualGpuDurationNanos;
     }
@@ -135,7 +130,7 @@ public final class WorkDuration implements Parcelable {
     /**
      * Returns the work period start timestamp based in nanoseconds.
      *
-     * All timings should be in {@link SystemClock#elapsedRealtimeNanos()}.
+     * All timings should be in {@link SystemClock#uptimeNanos()}.
      */
     public long getWorkPeriodStartTimestampNanos() {
         return mWorkPeriodStartTimestampNanos;
@@ -144,7 +139,7 @@ public final class WorkDuration implements Parcelable {
     /**
      * Returns the actual total duration in nanoseconds.
      *
-     * All timings should be in {@link SystemClock#elapsedRealtimeNanos()}.
+     * All timings should be in {@link SystemClock#uptimeNanos()}.
      */
     public long getActualTotalDurationNanos() {
         return mActualTotalDurationNanos;
@@ -153,7 +148,7 @@ public final class WorkDuration implements Parcelable {
     /**
      * Returns the actual CPU duration in nanoseconds.
      *
-     * All timings should be in {@link SystemClock#elapsedRealtimeNanos()}.
+     * All timings should be in {@link SystemClock#uptimeNanos()}.
      */
     public long getActualCpuDurationNanos() {
         return mActualCpuDurationNanos;
@@ -162,7 +157,7 @@ public final class WorkDuration implements Parcelable {
     /**
      * Returns the actual GPU duration in nanoseconds.
      *
-     * All timings should be in {@link SystemClock#elapsedRealtimeNanos()}.
+     * All timings should be in {@link SystemClock#uptimeNanos()}.
      */
     public long getActualGpuDurationNanos() {
         return mActualGpuDurationNanos;

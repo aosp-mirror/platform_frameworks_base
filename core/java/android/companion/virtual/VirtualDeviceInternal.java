@@ -16,6 +16,9 @@
 
 package android.companion.virtual;
 
+import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -26,6 +29,7 @@ import android.companion.virtual.audio.VirtualAudioDevice;
 import android.companion.virtual.camera.VirtualCamera;
 import android.companion.virtual.camera.VirtualCameraConfig;
 import android.companion.virtual.sensor.VirtualSensor;
+import android.companion.virtualdevice.flags.Flags;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -42,6 +46,8 @@ import android.hardware.input.VirtualMouse;
 import android.hardware.input.VirtualMouseConfig;
 import android.hardware.input.VirtualNavigationTouchpad;
 import android.hardware.input.VirtualNavigationTouchpadConfig;
+import android.hardware.input.VirtualStylus;
+import android.hardware.input.VirtualStylusConfig;
 import android.hardware.input.VirtualTouchscreen;
 import android.hardware.input.VirtualTouchscreenConfig;
 import android.media.AudioManager;
@@ -316,6 +322,19 @@ public class VirtualDeviceInternal {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    @NonNull
+    VirtualStylus createVirtualStylus(@NonNull VirtualStylusConfig config) {
+        try {
+            final IBinder token = new Binder(
+                    "android.hardware.input.VirtualStylus:" + config.getInputDeviceName());
+            mVirtualDevice.createVirtualStylus(config, token);
+            return new VirtualStylus(config, mVirtualDevice, token);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     @NonNull
     VirtualNavigationTouchpad createVirtualNavigationTouchpad(
             @NonNull VirtualNavigationTouchpadConfig config) {
@@ -336,8 +355,20 @@ public class VirtualDeviceInternal {
             @Nullable Executor executor,
             @Nullable VirtualAudioDevice.AudioConfigurationChangeCallback callback) {
         if (mVirtualAudioDevice == null) {
-            mVirtualAudioDevice = new VirtualAudioDevice(mContext, mVirtualDevice, display,
-                    executor, callback, () -> mVirtualAudioDevice = null);
+            try {
+                Context context = mContext;
+                if (Flags.deviceAwareRecordAudioPermission()) {
+                    // When using a default policy for audio device-aware RECORD_AUDIO permission
+                    // should not take effect, thus register policies with the default context.
+                    if (mVirtualDevice.getDevicePolicy(POLICY_TYPE_AUDIO) == DEVICE_POLICY_CUSTOM) {
+                        context = mContext.createDeviceContext(getDeviceId());
+                    }
+                }
+                mVirtualAudioDevice = new VirtualAudioDevice(context, mVirtualDevice, display,
+                        executor, callback, () -> mVirtualAudioDevice = null);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
         return mVirtualAudioDevice;
     }

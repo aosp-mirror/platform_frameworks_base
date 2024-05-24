@@ -25,6 +25,7 @@ import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseContro
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseController.Companion.AnimationState.EASE_OUT
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseController.Companion.AnimationState.MAIN
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseController.Companion.AnimationState.NOT_PLAYING
+import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseShader.Companion.Type.SIMPLEX_NOISE
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -47,7 +48,7 @@ class TurbulenceNoiseControllerTest : SysuiTestCase() {
         assertThat(turbulenceNoiseController.state).isEqualTo(NOT_PLAYING)
 
         fakeExecutor.execute {
-            turbulenceNoiseController.play(config)
+            turbulenceNoiseController.play(SIMPLEX_NOISE, config)
 
             assertThat(turbulenceNoiseController.state).isEqualTo(EASE_IN)
 
@@ -75,7 +76,7 @@ class TurbulenceNoiseControllerTest : SysuiTestCase() {
 
         fakeExecutor.execute {
             // Request another animation
-            turbulenceNoiseController.play(config)
+            turbulenceNoiseController.play(SIMPLEX_NOISE, config)
 
             assertThat(turbulenceNoiseController.state).isEqualTo(MAIN)
         }
@@ -89,7 +90,7 @@ class TurbulenceNoiseControllerTest : SysuiTestCase() {
             TurbulenceNoiseController(turbulenceNoiseView).also { it.state = MAIN }
 
         fakeExecutor.execute {
-            turbulenceNoiseController.play(config)
+            turbulenceNoiseController.play(SIMPLEX_NOISE, config)
 
             fakeSystemClock.advanceTime(config.maxDuration.toLong() / 2)
 
@@ -107,7 +108,7 @@ class TurbulenceNoiseControllerTest : SysuiTestCase() {
             TurbulenceNoiseController(turbulenceNoiseView).also { it.state = EASE_IN }
 
         fakeExecutor.execute {
-            turbulenceNoiseController.play(config)
+            turbulenceNoiseController.play(SIMPLEX_NOISE, config)
 
             fakeSystemClock.advanceTime(config.maxDuration.toLong() / 2)
 
@@ -128,7 +129,7 @@ class TurbulenceNoiseControllerTest : SysuiTestCase() {
         assertThat(turbulenceNoiseView.noiseConfig).isNull()
 
         fakeExecutor.execute {
-            turbulenceNoiseController.play(config)
+            turbulenceNoiseController.play(SIMPLEX_NOISE, config)
 
             assertThat(turbulenceNoiseController.state).isEqualTo(EASE_IN)
             assertThat(turbulenceNoiseView.visibility).isEqualTo(VISIBLE)
@@ -156,13 +157,37 @@ class TurbulenceNoiseControllerTest : SysuiTestCase() {
         val turbulenceNoiseController = TurbulenceNoiseController(turbulenceNoiseView)
 
         fakeExecutor.execute {
-            turbulenceNoiseController.play(config)
+            turbulenceNoiseController.play(SIMPLEX_NOISE, config)
 
             turbulenceNoiseController.updateNoiseColor(expectedColor)
 
             fakeSystemClock.advanceTime(config.maxDuration.toLong())
 
             assertThat(config.color).isEqualTo(expectedColor)
+        }
+    }
+
+    @Test
+    fun play_initializesShader() {
+        val expectedNoiseOffset = floatArrayOf(0.1f, 0.2f, 0.3f)
+        val config =
+            TurbulenceNoiseAnimationConfig(
+                noiseOffsetX = expectedNoiseOffset[0],
+                noiseOffsetY = expectedNoiseOffset[1],
+                noiseOffsetZ = expectedNoiseOffset[2]
+            )
+        val turbulenceNoiseView = TurbulenceNoiseView(context, null)
+        val turbulenceNoiseController = TurbulenceNoiseController(turbulenceNoiseView)
+
+        fakeExecutor.execute {
+            turbulenceNoiseController.play(SIMPLEX_NOISE, config)
+
+            assertThat(turbulenceNoiseView.noiseConfig).isNotNull()
+            val shader = turbulenceNoiseView.turbulenceNoiseShader!!
+            assertThat(shader).isNotNull()
+            assertThat(shader.noiseOffsetX).isEqualTo(expectedNoiseOffset[0])
+            assertThat(shader.noiseOffsetY).isEqualTo(expectedNoiseOffset[1])
+            assertThat(shader.noiseOffsetZ).isEqualTo(expectedNoiseOffset[2])
         }
     }
 }

@@ -15,10 +15,12 @@
 package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.plugins.DarkIconDispatcher.getTint;
+import static com.android.settingslib.flags.Flags.newStatusBarIcons;
 
 import android.animation.ArgbEvaluator;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.util.ArrayMap;
 import android.widget.ImageView;
@@ -66,10 +68,16 @@ public class DarkIconDispatcherImpl implements SysuiDarkIconDispatcher,
             Context context,
             LightBarTransitionsController.Factory lightBarTransitionsControllerFactory,
             DumpManager dumpManager) {
-        mDarkModeIconColorSingleTone = context.getColor(
-                com.android.settingslib.R.color.dark_mode_icon_color_single_tone);
-        mLightModeIconColorSingleTone = context.getColor(
-                com.android.settingslib.R.color.light_mode_icon_color_single_tone);
+
+        if (newStatusBarIcons()) {
+            mDarkModeIconColorSingleTone = Color.BLACK;
+            mLightModeIconColorSingleTone = Color.WHITE;
+        } else {
+            mDarkModeIconColorSingleTone = context.getColor(
+                    com.android.settingslib.R.color.dark_mode_icon_color_single_tone);
+            mLightModeIconColorSingleTone = context.getColor(
+                    com.android.settingslib.R.color.light_mode_icon_color_single_tone);
+        }
 
         mTransitionsController = lightBarTransitionsControllerFactory.create(this);
 

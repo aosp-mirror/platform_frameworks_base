@@ -78,8 +78,8 @@ import com.android.settingslib.media.InfoMediaManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.utils.ThreadUtils;
-import com.android.systemui.animation.ActivityLaunchAnimator;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
@@ -125,7 +125,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private final MediaSessionManager mMediaSessionManager;
     private final LocalBluetoothManager mLocalBluetoothManager;
     private final ActivityStarter mActivityStarter;
-    private final DialogLaunchAnimator mDialogLaunchAnimator;
+    private final DialogTransitionAnimator mDialogTransitionAnimator;
     private final CommonNotifCollection mNotifCollection;
     protected final Object mMediaDevicesLock = new Object();
     @VisibleForTesting
@@ -175,7 +175,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             MediaSessionManager mediaSessionManager, LocalBluetoothManager
             lbm, ActivityStarter starter,
             CommonNotifCollection notifCollection,
-            DialogLaunchAnimator dialogLaunchAnimator,
+            DialogTransitionAnimator dialogTransitionAnimator,
             NearbyMediaDevicesManager nearbyMediaDevicesManager,
             AudioManager audioManager,
             PowerExemptionManager powerExemptionManager,
@@ -196,7 +196,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         InfoMediaManager imm = InfoMediaManager.createInstance(mContext, packageName, null, lbm);
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
-        mDialogLaunchAnimator = dialogLaunchAnimator;
+        mDialogTransitionAnimator = dialogTransitionAnimator;
         mNearbyMediaDevicesManager = nearbyMediaDevicesManager;
         mColorItemContent = Utils.getColorStateListDefaultColor(mContext,
                 R.color.media_dialog_item_main_content);
@@ -400,8 +400,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     void tryToLaunchInAppRoutingIntent(String routeId, View view) {
         ComponentName componentName = mLocalMediaManager.getLinkedItemComponentName();
         if (componentName != null) {
-            ActivityLaunchAnimator.Controller controller =
-                    mDialogLaunchAnimator.createActivityLaunchController(view);
+            ActivityTransitionAnimator.Controller controller =
+                    mDialogTransitionAnimator.createActivityTransitionController(view);
             Intent launchIntent = new Intent(ACTION_TRANSFER_MEDIA);
             launchIntent.setComponent(componentName);
             launchIntent.putExtra(EXTRA_ROUTE_ID, routeId);
@@ -412,8 +412,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     void tryToLaunchMediaApplication(View view) {
-        ActivityLaunchAnimator.Controller controller =
-                mDialogLaunchAnimator.createActivityLaunchController(view);
+        ActivityTransitionAnimator.Controller controller =
+                mDialogTransitionAnimator.createActivityTransitionController(view);
         Intent launchIntent = getAppLaunchIntent();
         if (launchIntent != null) {
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -881,8 +881,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     void launchBluetoothPairing(View view) {
-        ActivityLaunchAnimator.Controller controller =
-                mDialogLaunchAnimator.createActivityLaunchController(view);
+        ActivityTransitionAnimator.Controller controller =
+                mDialogTransitionAnimator.createActivityTransitionController(view);
 
         if (controller == null || (mKeyGuardManager != null
                 && mKeyGuardManager.isKeyguardLocked())) {
@@ -936,7 +936,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     void launchMediaOutputBroadcastDialog(View mediaOutputDialog, BroadcastSender broadcastSender) {
         MediaOutputController controller = new MediaOutputController(mContext, mPackageName,
                 mMediaSessionManager, mLocalBluetoothManager, mActivityStarter,
-                mNotifCollection, mDialogLaunchAnimator, mNearbyMediaDevicesManager,
+                mNotifCollection, mDialogTransitionAnimator, mNearbyMediaDevicesManager,
                 mAudioManager, mPowerExemptionManager, mKeyGuardManager, mFeatureFlags,
                 mUserTracker);
         MediaOutputBroadcastDialog dialog = new MediaOutputBroadcastDialog(mContext, true,

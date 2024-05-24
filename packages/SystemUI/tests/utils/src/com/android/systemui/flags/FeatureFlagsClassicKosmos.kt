@@ -30,7 +30,14 @@ var Kosmos.featureFlagsClassic: FeatureFlagsClassic by Kosmos.Fixture { fakeFeat
  * Fixture supplying a shared [FakeFeatureFlagsClassic] instance. Can be accessed in tests in order
  * to override flag values.
  */
-val Kosmos.fakeFeatureFlagsClassic by Kosmos.Fixture { FakeFeatureFlagsClassic() }
+val Kosmos.fakeFeatureFlagsClassic by
+    Kosmos.Fixture {
+        FakeFeatureFlagsClassic().apply {
+            set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+            set(Flags.NSSL_DEBUG_LINES, false)
+            set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, false)
+        }
+    }
 
 /**
  * Fixture supplying a real [FeatureFlagsClassicRelease] instance, for use by tests that want to

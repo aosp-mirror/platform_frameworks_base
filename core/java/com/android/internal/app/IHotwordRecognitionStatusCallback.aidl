@@ -20,7 +20,6 @@ import android.hardware.soundtrigger.SoundTrigger;
 import android.service.voice.HotwordDetectedResult;
 import android.service.voice.HotwordDetectionServiceFailure;
 import android.service.voice.HotwordRejectedResult;
-import android.service.voice.HotwordTrainingData;
 import android.service.voice.SoundTriggerFailure;
 import android.service.voice.VisualQueryDetectionServiceFailure;
 import com.android.internal.infra.AndroidFuture;
@@ -41,6 +40,13 @@ oneway interface IHotwordRecognitionStatusCallback {
             in SoundTrigger.KeyphraseRecognitionEvent recognitionEvent,
             in HotwordDetectedResult result);
 
+    /**
+     * Called when the keyphrase is detected from audio coming from an external source.
+     *
+     * @param result Successful detection result payload.
+     */
+    void onKeyphraseDetectedFromExternalSource(in HotwordDetectedResult result);
+
    /**
      * Called when a generic sound trigger event is witnessed.
      *
@@ -58,12 +64,6 @@ oneway interface IHotwordRecognitionStatusCallback {
      *         {@link HotwordDetectionService}.
      */
     void onRejected(in HotwordRejectedResult result);
-
-    /**
-     * Called by {@link HotwordDetectionService} to egress training data to the
-     * {@link HotwordDetector}.
-     */
-    void onTrainingData(in HotwordTrainingData data);
 
     /**
      * Called when the detection fails due to an error occurs in the

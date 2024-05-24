@@ -25,6 +25,8 @@ import com.android.systemui.qs.pipeline.data.repository.DefaultTilesQSHostReposi
 import com.android.systemui.qs.pipeline.data.repository.DefaultTilesRepository
 import com.android.systemui.qs.pipeline.data.repository.InstalledTilesComponentRepository
 import com.android.systemui.qs.pipeline.data.repository.InstalledTilesComponentRepositoryImpl
+import com.android.systemui.qs.pipeline.data.repository.MinimumTilesRepository
+import com.android.systemui.qs.pipeline.data.repository.MinimumTilesResourceRepository
 import com.android.systemui.qs.pipeline.data.repository.QSSettingsRestoredBroadcastRepository
 import com.android.systemui.qs.pipeline.data.repository.QSSettingsRestoredRepository
 import com.android.systemui.qs.pipeline.data.repository.TileSpecRepository
@@ -80,6 +82,11 @@ abstract class QSPipelineModule {
     abstract fun provideQSSettingsRestoredRepository(
         impl: QSSettingsRestoredBroadcastRepository
     ): QSSettingsRestoredRepository
+
+    @Binds
+    abstract fun provideMinimumTilesRepository(
+        impl: MinimumTilesResourceRepository
+    ): MinimumTilesRepository
 
     companion object {
         /**

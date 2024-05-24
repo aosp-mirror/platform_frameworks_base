@@ -18,31 +18,36 @@
 <!-- Check box that is displayed in the activity resolver UI for the user
      to make their selection the preferred activity. -->
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:theme="?android:attr/alertDialogTheme"
-    android:orientation="vertical"
-    android:paddingTop="8dp"
-    android:paddingStart="?android:attr/dialogPreferredPadding"
-    android:paddingEnd="?android:attr/dialogPreferredPadding"
-    android:clipToPadding="false">
+    android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/message"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@android:style/TextAppearance.Material.Subhead" />
+  <LinearLayout
+      xmlns:android="http://schemas.android.com/apk/res/android"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:theme="?android:attr/alertDialogTheme"
+      android:orientation="vertical"
+      android:paddingTop="8dp"
+      android:paddingStart="?android:attr/dialogPreferredPadding"
+      android:paddingEnd="?android:attr/dialogPreferredPadding"
+      android:clipToPadding="false">
 
-    <CheckBox
-        android:id="@+id/keepData"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="-8dp"
-        android:paddingLeft="8sp"
-        android:visibility="gone"
-        style="@android:style/TextAppearance.Material.Subhead" />
+      <TextView
+          android:id="@+id/message"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          style="@android:style/TextAppearance.Material.Subhead" />
 
-</LinearLayout>
+      <CheckBox
+          android:id="@+id/keepData"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="8dp"
+          android:layout_marginStart="-8dp"
+          android:paddingLeft="8sp"
+          android:visibility="gone"
+          style="@android:style/TextAppearance.Material.Subhead" />
+
+  </LinearLayout>
+</ScrollView>

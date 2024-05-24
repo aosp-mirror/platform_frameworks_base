@@ -18,9 +18,13 @@ package com.android.internal.pm.pkg.component;
 
 import static com.android.internal.pm.pkg.parsing.ParsingUtils.ANDROID_RES_NAMESPACE;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.UriRelativeFilter;
+import android.content.UriRelativeFilterGroup;
+import android.content.pm.Flags;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
@@ -132,6 +136,11 @@ public class ParsedIntentInfoUtils {
                 case "data":
                     result = parseData(intentInfo, res, parser, allowGlobs, input);
                     break;
+                case "uri-relative-filter-group":
+                    if (Flags.relativeReferenceIntentFilters()) {
+                        result = parseRelRefGroup(intentInfo, pkg, res, parser, allowGlobs, input);
+                        break;
+                    }
                 default:
                     result = ParsingUtils.unknownTag("<intent-filter>", pkg, parser, input);
                     break;
@@ -160,6 +169,197 @@ public class ParsedIntentInfoUtils {
         }
 
         return input.success(intentInfo);
+    }
+
+    @NonNull
+    @FlaggedApi(Flags.FLAG_RELATIVE_REFERENCE_INTENT_FILTERS)
+    private static ParseResult<ParsedIntentInfo> parseRelRefGroup(ParsedIntentInfo intentInfo,
+            ParsingPackage pkg, Resources res, XmlResourceParser parser, boolean allowGlobs,
+            ParseInput input) throws XmlPullParserException, IOException {
+        IntentFilter intentFilter = intentInfo.getIntentFilter();
+        TypedArray sa = res.obtainAttributes(parser,
+                R.styleable.AndroidManifestUriRelativeFilterGroup);
+        UriRelativeFilterGroup group;
+        try {
+            int action = UriRelativeFilterGroup.ACTION_ALLOW;
+            if (!sa.getBoolean(R.styleable.AndroidManifestUriRelativeFilterGroup_allow, true)) {
+                action = UriRelativeFilterGroup.ACTION_BLOCK;
+            }
+            group = new UriRelativeFilterGroup(action);
+        } finally {
+            sa.recycle();
+        }
+        final int depth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG
+                || parser.getDepth() > depth)) {
+            if (type != XmlPullParser.START_TAG) {
+                continue;
+            }
+
+            final ParseResult result;
+            String nodeName = parser.getName();
+            switch (nodeName) {
+                case "data":
+                    result = parseRelRefGroupData(group, res, parser, allowGlobs, input);
+                    break;
+                default:
+                    result = ParsingUtils.unknownTag("<uri-relative-filter-group>",
+                            pkg, parser, input);
+                    break;
+            }
+
+            if (result.isError()) {
+                return input.error(result);
+            }
+        }
+
+        if (group.getUriRelativeFilters().size() > 0) {
+            intentFilter.addUriRelativeFilterGroup(group);
+        }
+        return input.success(null);
+    }
+
+    @NonNull
+    @FlaggedApi(Flags.FLAG_RELATIVE_REFERENCE_INTENT_FILTERS)
+    private static ParseResult<ParsedIntentInfo> parseRelRefGroupData(UriRelativeFilterGroup group,
+            Resources res, XmlResourceParser parser, boolean allowGlobs, ParseInput input) {
+        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestData);
+        try {
+            String str = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestData_path, 0);
+            if (str != null) {
+                group.addUriRelativeFilter(new UriRelativeFilter(UriRelativeFilter.PATH,
+                        PatternMatcher.PATTERN_LITERAL, str));
+            }
+
+            str = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestData_pathPrefix, 0);
+            if (str != null) {
+                group.addUriRelativeFilter(new UriRelativeFilter(UriRelativeFilter.PATH,
+                        PatternMatcher.PATTERN_PREFIX, str));
+            }
+
+            str = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestData_pathPattern, 0);
+            if (str != null) {
+                if (!allowGlobs) {
+                    return input.error(
+                            "pathPattern not allowed here; path must be literal");
+                }
+                group.addUriRelativeFilter(new UriRelativeFilter(UriRelativeFilter.PATH,
+                        PatternMatcher.PATTERN_SIMPLE_GLOB, str));
+            }
+
+            str = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestData_pathAdvancedPattern, 0);
+            if (str != null) {
+                if (!allowGlobs) {
+                    return input.error(
+                            "pathAdvancedPattern not allowed here; path must be literal");
+                }
+                group.addUriRelativeFilter(new UriRelativeFilter(UriRelativeFilter.PATH,
+                        PatternMatcher.PATTERN_ADVANCED_GLOB, str));
+            }
+
+            str = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestData_pathSuffix, 0);
+            if (str != null) {
+                group.addUriRelativeFilter(new UriRelativeFilter(UriRelativeFilter.PATH,
+                        PatternMatcher.PATTERN_SUFFIX, str));
+            }
+
+            str = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestData_fragment, 0);
+            if (str != null) {
+                group.addUriRelativeFilter(new UriRelativeFilter(UriRelativeFilter.FRAGMENT,
+                        PatternMatcher.PATTERN_LITERAL, str));
+            }
+
+            str = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestData_fragmentPrefix, 0);
+            if (str != null) {
+                group.addUriRelativeFilter(new UriRelativeFilter(UriRelativeFilter.FRAGMENT,
+                        PatternMatcher.PATTERN_PREFIX, str));
+            }
+
+            str = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestData_fragmentPattern, 0);
+            if (str != null) {
+                if (!allowGlobs) {
+                    return input.error(
+                            "fragmentPattern not allowed here; fragment must be literal");
+                }
+                group.addUriRelativeFilter(new UriRelativeFilter(UriRelativeFilter.FRAGMENT,
+                        PatternMatcher.PATTERN_SIMPLE_GLOB, str));
+            }
+
+            str = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestData_fragmentAdvancedPattern, 0);
+            if (str != null) {
+                if (!allowGlobs) {
+                    return input.error(
+                            "fragmentAdvancedPattern not allowed here; fragment must be literal");
+                }
+                group.addUriRelativeFilter(new UriRelativeFilter(UriRelativeFilter.FRAGMENT,
+                        PatternMatcher.PATTERN_ADVANCED_GLOB, str));
+            }
+
+            str = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestData_fragmentSuffix, 0);
+            if (str != null) {
+                group.addUriRelativeFilter(new UriRelativeFilter(UriRelativeFilter.FRAGMENT,
+                        PatternMatcher.PATTERN_SUFFIX, str));
+            }
+
+            str = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestData_query, 0);
+            if (str != null) {
+                group.addUriRelativeFilter(new UriRelativeFilter(UriRelativeFilter.QUERY,
+                        PatternMatcher.PATTERN_LITERAL, str));
+            }
+
+            str = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestData_queryPrefix, 0);
+            if (str != null) {
+                group.addUriRelativeFilter(new UriRelativeFilter(UriRelativeFilter.QUERY,
+                        PatternMatcher.PATTERN_PREFIX, str));
+            }
+
+            str = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestData_queryPattern, 0);
+            if (str != null) {
+                if (!allowGlobs) {
+                    return input.error(
+                            "queryPattern not allowed here; query must be literal");
+                }
+                group.addUriRelativeFilter(new UriRelativeFilter(UriRelativeFilter.QUERY,
+                        PatternMatcher.PATTERN_SIMPLE_GLOB, str));
+            }
+
+            str = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestData_queryAdvancedPattern, 0);
+            if (str != null) {
+                if (!allowGlobs) {
+                    return input.error(
+                            "queryAdvancedPattern not allowed here; query must be literal");
+                }
+                group.addUriRelativeFilter(new UriRelativeFilter(UriRelativeFilter.QUERY,
+                        PatternMatcher.PATTERN_ADVANCED_GLOB, str));
+            }
+
+            str = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestData_querySuffix, 0);
+            if (str != null) {
+                group.addUriRelativeFilter(new UriRelativeFilter(UriRelativeFilter.QUERY,
+                        PatternMatcher.PATTERN_SUFFIX, str));
+            }
+
+            return input.success(null);
+        } finally {
+            sa.recycle();
+        }
     }
 
     @NonNull

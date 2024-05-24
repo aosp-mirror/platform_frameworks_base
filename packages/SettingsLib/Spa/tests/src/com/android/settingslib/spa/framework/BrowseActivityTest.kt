@@ -18,6 +18,7 @@ package com.android.settingslib.spa.framework
 
 import android.content.Context
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
@@ -29,12 +30,14 @@ import com.android.settingslib.spa.framework.common.LogEvent
 import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.common.createSettingsPage
+import com.android.settingslib.spa.tests.testutils.SppDialog
 import com.android.settingslib.spa.tests.testutils.SpaEnvironmentForTest
 import com.android.settingslib.spa.tests.testutils.SpaLoggerForTest
 import com.android.settingslib.spa.tests.testutils.SppDisabled
 import com.android.settingslib.spa.tests.testutils.SppHome
 import com.android.settingslib.spa.testutils.waitUntil
-import com.google.common.truth.Truth
+import com.android.settingslib.spa.testutils.waitUntilExists
+import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -106,11 +109,31 @@ class BrowseActivityTest {
         composeTestRule.onNodeWithText(sppDisabled.getTitle(null)).assertDoesNotExist()
         spaLogger.verifyPageEvent(pageDisabled.id, 0, 0)
     }
+
+    @Test
+    fun browseContent_dialog() {
+        val spaEnvironment = SpaEnvironmentForTest(
+            context = context,
+            rootPages = listOf(SppHome.createSettingsPage()),
+            logger = spaLogger,
+        )
+        SpaEnvironmentFactory.reset(spaEnvironment)
+        val sppRepository by spaEnvironment.pageProviderRepository
+
+        composeTestRule.setContent {
+            BrowseContent(
+                sppRepository = sppRepository,
+                isPageEnabled = SettingsPage::isEnabled,
+                initialIntent = null,
+            )
+        }
+        composeTestRule.onNodeWithText(SppDialog.name).performClick()
+
+        composeTestRule.waitUntilExists(hasText(SppDialog.CONTENT))
+    }
 }
 
 private fun SpaLoggerForTest.verifyPageEvent(id: String, entryCount: Int, leaveCount: Int) {
-    Truth.assertThat(getEventCount(id, LogEvent.PAGE_ENTER, LogCategory.FRAMEWORK))
-        .isEqualTo(entryCount)
-    Truth.assertThat(getEventCount(id, LogEvent.PAGE_LEAVE, LogCategory.FRAMEWORK))
-        .isEqualTo(leaveCount)
+    assertThat(getEventCount(id, LogEvent.PAGE_ENTER, LogCategory.FRAMEWORK)).isEqualTo(entryCount)
+    assertThat(getEventCount(id, LogEvent.PAGE_LEAVE, LogCategory.FRAMEWORK)).isEqualTo(leaveCount)
 }

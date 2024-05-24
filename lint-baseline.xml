@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<issues format="6" by="lint 7.1.0-dev" type="baseline" client="" dependencies="true" name="" variant="all" version="7.1.0-dev">
+<issues format="6" by="lint 8.4.0-alpha01" type="baseline" client="" dependencies="true" name="" variant="all" version="8.4.0-alpha01">
 
     <issue
         id="NonUserGetterCalled"
@@ -433,7 +433,7 @@
     <issue
         id="NonUserGetterCalled"
         message="`android.provider.Settings.System#getInt()` called from system process. Please call `android.provider.Settings.System#getIntForUser()` instead. "
-        errorLine1="        boolean cap = System.getInt(resolver, System.TEXT_AUTO_CAPS, 1) > 0;"
+        errorLine1="        boolean cap = System.getInt(resolver, System.TEXT_AUTO_CAPS, 1) &gt; 0;"
         errorLine2="                             ~~~~~~">
         <location
             file="frameworks/base/core/java/android/text/method/TextKeyListener.java"
@@ -444,7 +444,7 @@
     <issue
         id="NonUserGetterCalled"
         message="`android.provider.Settings.System#getInt()` called from system process. Please call `android.provider.Settings.System#getIntForUser()` instead. "
-        errorLine1="        boolean text = System.getInt(resolver, System.TEXT_AUTO_REPLACE, 1) > 0;"
+        errorLine1="        boolean text = System.getInt(resolver, System.TEXT_AUTO_REPLACE, 1) &gt; 0;"
         errorLine2="                              ~~~~~~">
         <location
             file="frameworks/base/core/java/android/text/method/TextKeyListener.java"
@@ -455,7 +455,7 @@
     <issue
         id="NonUserGetterCalled"
         message="`android.provider.Settings.System#getInt()` called from system process. Please call `android.provider.Settings.System#getIntForUser()` instead. "
-        errorLine1="        boolean period = System.getInt(resolver, System.TEXT_AUTO_PUNCTUATE, 1) > 0;"
+        errorLine1="        boolean period = System.getInt(resolver, System.TEXT_AUTO_PUNCTUATE, 1) &gt; 0;"
         errorLine2="                                ~~~~~~">
         <location
             file="frameworks/base/core/java/android/text/method/TextKeyListener.java"
@@ -466,7 +466,7 @@
     <issue
         id="NonUserGetterCalled"
         message="`android.provider.Settings.System#getInt()` called from system process. Please call `android.provider.Settings.System#getIntForUser()` instead. "
-        errorLine1="        boolean pw = System.getInt(resolver, System.TEXT_SHOW_PASSWORD, 1) > 0;"
+        errorLine1="        boolean pw = System.getInt(resolver, System.TEXT_SHOW_PASSWORD, 1) &gt; 0;"
         errorLine2="                            ~~~~~~">
         <location
             file="frameworks/base/core/java/android/text/method/TextKeyListener.java"

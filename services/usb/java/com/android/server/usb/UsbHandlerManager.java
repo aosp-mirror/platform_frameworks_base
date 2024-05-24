@@ -37,7 +37,7 @@ import java.util.ArrayList;
  *
  * @hide
  */
-class UsbHandlerManager {
+public class UsbHandlerManager {
     private static final String LOG_TAG = UsbHandlerManager.class.getSimpleName();
 
     private final Context mContext;

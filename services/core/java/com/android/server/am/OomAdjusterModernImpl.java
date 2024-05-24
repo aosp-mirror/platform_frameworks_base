@@ -331,9 +331,9 @@ public class OomAdjusterModernImpl extends OomAdjuster {
                 if (mLastNode[prevSlot] == node) {
                     mLastNode[prevSlot] = node.mPrev;
                 }
-                node.unlink();
             }
-            mProcessRecordNodes[newSlot].append(node);
+            // node will be firstly unlinked in the append.
+            append(node, newSlot);
         }
 
         void moveAllNodesTo(int fromSlot, int toSlot) {
@@ -389,7 +389,11 @@ public class OomAdjusterModernImpl extends OomAdjuster {
         }
 
         void append(@NonNull ProcessRecord app, int targetSlot) {
-            final ProcessRecordNode node = app.mLinkedNodes[mType];
+            append(app.mLinkedNodes[mType], targetSlot);
+        }
+
+        void append(@NonNull ProcessRecordNode node, int targetSlot) {
+            node.unlink();
             mProcessRecordNodes[targetSlot].append(node);
         }
 
@@ -452,6 +456,9 @@ public class OomAdjusterModernImpl extends OomAdjuster {
 
             @VisibleForTesting
             void reset() {
+                if (HEAD.mNext != TAIL) {
+                    HEAD.mNext.mPrev = TAIL.mPrev.mNext = null;
+                }
                 HEAD.mNext = TAIL;
                 TAIL.mPrev = HEAD;
             }
@@ -554,20 +561,6 @@ public class OomAdjusterModernImpl extends OomAdjuster {
     void resetInternal() {
         mProcessRecordProcStateNodes.reset();
         mProcessRecordAdjNodes.reset();
-    }
-
-    @GuardedBy("mService")
-    @Override
-    void onProcessBeginLocked(@NonNull ProcessRecord app) {
-        // Check one type should be good enough.
-        if (app.mLinkedNodes[ProcessRecordNode.NODE_TYPE_PROC_STATE] == null) {
-            for (int i = 0; i < app.mLinkedNodes.length; i++) {
-                app.mLinkedNodes[i] = new ProcessRecordNode(app);
-            }
-        }
-        if (!app.mLinkedNodes[ProcessRecordNode.NODE_TYPE_PROC_STATE].isLinked()) {
-            linkProcessRecordToList(app);
-        }
     }
 
     @GuardedBy("mService")
@@ -729,26 +722,9 @@ public class OomAdjusterModernImpl extends OomAdjuster {
         performNewUpdateOomAdjLSP(oomAdjReason, topApp, targetProcesses, activeUids,
                 fullUpdate, now, UNKNOWN_ADJ);
 
-        if (fullUpdate) {
-            assignCachedAdjIfNecessary(mProcessList.getLruProcessesLOSP());
-            postUpdateOomAdjInnerLSP(oomAdjReason, activeUids, now, nowElapsed, oldTime);
-        } else {
-            activeProcesses.clear();
-            activeProcesses.addAll(targetProcesses);
-            assignCachedAdjIfNecessary(activeProcesses);
-
-            for (int  i = activeUids.size() - 1; i >= 0; i--) {
-                final UidRecord uidRec = activeUids.valueAt(i);
-                uidRec.forEachProcess(this::updateAppUidRecIfNecessaryLSP);
-            }
-            updateUidsLSP(activeUids, nowElapsed);
-
-            for (int i = 0, size = targetProcesses.size(); i < size; i++) {
-                applyOomAdjLSP(targetProcesses.valueAt(i), false, now, nowElapsed, oomAdjReason);
-            }
-
-            activeProcesses.clear();
-        }
+        // TODO: b/319163103 - optimize cache adj assignment to not require the whole lru list.
+        assignCachedAdjIfNecessary(mProcessList.getLruProcessesLOSP());
+        postUpdateOomAdjInnerLSP(oomAdjReason, activeUids, now, nowElapsed, oldTime);
         targetProcesses.clear();
 
         if (startProfiling) {
@@ -1014,13 +990,13 @@ public class OomAdjusterModernImpl extends OomAdjuster {
                             && service.mState.getMaxAdj() < FOREGROUND_APP_ADJ)
                     || (service.mState.getCurAdj() <= FOREGROUND_APP_ADJ
                             && service.mState.getCurrentSchedulingGroup() > SCHED_GROUP_BACKGROUND
-                            && service.mState.getCurProcState() <= PROCESS_STATE_TOP)) {
+                            && service.mState.getCurProcState() <= PROCESS_STATE_TOP)
+                    || (service.isSdkSandbox && cr.binding.attributedClient != null)) {
                 continue;
             }
 
-
             computeServiceHostOomAdjLSP(cr, service, app, now, topApp, fullUpdate, false, false,
-                    oomAdjReason, cachedAdj, false);
+                    oomAdjReason, cachedAdj, false, false);
         }
 
         for (int i = psr.numberOfSdkSandboxConnections() - 1; i >= 0; i--) {
@@ -1036,7 +1012,7 @@ public class OomAdjusterModernImpl extends OomAdjuster {
             }
 
             computeServiceHostOomAdjLSP(cr, service, app, now, topApp, fullUpdate, false, false,
-                    oomAdjReason, cachedAdj, false);
+                    oomAdjReason, cachedAdj, false, false);
         }
 
         final ProcessProviderRecord ppr = app.mProviders;
@@ -1053,7 +1029,7 @@ public class OomAdjusterModernImpl extends OomAdjuster {
             }
 
             computeProviderHostOomAdjLSP(cpc, provider, app, now, topApp, fullUpdate, false, false,
-                    oomAdjReason, cachedAdj, false);
+                    oomAdjReason, cachedAdj, false, false);
         }
     }
 }

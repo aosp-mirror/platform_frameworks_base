@@ -36,6 +36,7 @@ import com.android.server.companion.AssociationStore;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -125,12 +126,12 @@ public class CompanionTransportManager {
      * Send a message to remote devices through the transports
      */
     public void sendMessage(int message, byte[] data, int[] associationIds) {
-        Slog.i(TAG, "Sending message 0x" + Integer.toHexString(message)
+        Slog.d(TAG, "Sending message 0x" + Integer.toHexString(message)
                 + " data length " + data.length);
         synchronized (mTransports) {
             for (int i = 0; i < associationIds.length; i++) {
                 if (mTransports.contains(associationIds[i])) {
-                    mTransports.get(associationIds[i]).requestForResponse(message, data);
+                    mTransports.get(associationIds[i]).sendMessage(message, data);
                 }
             }
         }
@@ -220,7 +221,26 @@ public class CompanionTransportManager {
             if (transport == null) {
                 return CompletableFuture.failedFuture(new IOException("Missing transport"));
             }
-            return transport.requestForResponse(MESSAGE_REQUEST_PERMISSION_RESTORE, data);
+            return transport.sendMessage(MESSAGE_REQUEST_PERMISSION_RESTORE, data);
+        }
+    }
+
+    /**
+     * Dumps current list of active transports.
+     */
+    public void dump(@NonNull PrintWriter out) {
+        synchronized (mTransports) {
+            out.append("System Data Transports: ");
+            if (mTransports.size() == 0) {
+                out.append("<empty>\n");
+            } else {
+                out.append("\n");
+                for (int i = 0; i < mTransports.size(); i++) {
+                    final int associationId = mTransports.keyAt(i);
+                    final Transport transport = mTransports.get(associationId);
+                    out.append("  ").append(transport.toString()).append('\n');
+                }
+            }
         }
     }
 
@@ -274,9 +294,7 @@ public class CompanionTransportManager {
     }
 
     private boolean isSecureTransportEnabled() {
-        boolean enabled = !Build.IS_DEBUGGABLE || mSecureTransportEnabled;
-
-        return enabled;
+        return mSecureTransportEnabled;
     }
 
     private void addMessageListenersToTransport(Transport transport) {

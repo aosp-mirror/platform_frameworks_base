@@ -16,20 +16,29 @@
 
 package com.android.server.pm;
 
+import static android.Manifest.permission.GET_BACKGROUND_INSTALLED_PACKAGES;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
+import android.app.Flags;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
+import android.companion.virtual.VirtualDeviceManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IBackgroundInstallControlService;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
@@ -38,6 +47,7 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArrayMap;
 import android.util.SparseSetArray;
@@ -55,8 +65,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -69,28 +81,49 @@ public class BackgroundInstallControlService extends SystemService {
     private static final String DISK_FILE_NAME = "states";
     private static final String DISK_DIR_NAME = "bic";
 
-    private static final int MAX_FOREGROUND_TIME_FRAMES_SIZE = 10;
+    private static final String ENFORCE_PERMISSION_ERROR_MSG =
+            "User is not permitted to call service: ";
 
+    private static final int MAX_FOREGROUND_TIME_FRAMES_SIZE = 10;
     private static final int MSG_USAGE_EVENT_RECEIVED = 0;
     private static final int MSG_PACKAGE_ADDED = 1;
     private static final int MSG_PACKAGE_REMOVED = 2;
 
-    private final Context mContext;
     private final BinderService mBinderService;
     private final PackageManager mPackageManager;
+    // TODO migrate all internal PackageManager calls to PackageManagerInternal where possible.
+    // b/310983905
     private final PackageManagerInternal mPackageManagerInternal;
-    private final UsageStatsManagerInternal mUsageStatsManagerInternal;
     private final PermissionManagerServiceInternal mPermissionManager;
     private final Handler mHandler;
     private final File mDiskFile;
+    private final Context mContext;
 
+    private final BackgroundInstallControlCallbackHelper mCallbackHelper;
 
     private SparseSetArray<String> mBackgroundInstalledPackages = null;
 
     // User ID -> package name -> set of foreground time frame
-    private final SparseArrayMap<String,
-            TreeSet<ForegroundTimeFrame>> mInstallerForegroundTimeFrames =
-            new SparseArrayMap<>();
+    private final SparseArrayMap<String, TreeSet<ForegroundTimeFrame>>
+            mInstallerForegroundTimeFrames = new SparseArrayMap<>();
+
+    @VisibleForTesting
+    protected final PackageManagerInternal.PackageListObserver mPackageObserver =
+            new PackageManagerInternal.PackageListObserver() {
+                @Override
+                public void onPackageAdded(String packageName, int uid) {
+                    final int userId = UserHandle.getUserId(uid);
+                    mHandler.obtainMessage(MSG_PACKAGE_ADDED, userId, 0, packageName)
+                            .sendToTarget();
+                }
+
+                @Override
+                public void onPackageRemoved(String packageName, int uid) {
+                    final int userId = UserHandle.getUserId(uid);
+                    mHandler.obtainMessage(MSG_PACKAGE_REMOVED, userId, 0, packageName)
+                            .sendToTarget();
+                }
+            };
 
     public BackgroundInstallControlService(@NonNull Context context) {
         this(new InjectorImpl(context));
@@ -99,20 +132,19 @@ public class BackgroundInstallControlService extends SystemService {
     @VisibleForTesting
     BackgroundInstallControlService(@NonNull Injector injector) {
         super(injector.getContext());
-        mContext = injector.getContext();
         mPackageManager = injector.getPackageManager();
         mPackageManagerInternal = injector.getPackageManagerInternal();
         mPermissionManager = injector.getPermissionManager();
         mHandler = new EventHandler(injector.getLooper(), this);
         mDiskFile = injector.getDiskFile();
-        mUsageStatsManagerInternal = injector.getUsageStatsManagerInternal();
-        mUsageStatsManagerInternal.registerListener(
+        mContext = injector.getContext();
+        mCallbackHelper = injector.getBackgroundInstallControlCallbackHelper();
+        UsageStatsManagerInternal usageStatsManagerInternal =
+                injector.getUsageStatsManagerInternal();
+        usageStatsManagerInternal.registerListener(
                 (userId, event) ->
-                        mHandler.obtainMessage(MSG_USAGE_EVENT_RECEIVED,
-                                userId,
-                                0,
-                                event).sendToTarget()
-        );
+                        mHandler.obtainMessage(MSG_USAGE_EVENT_RECEIVED, userId, 0, event)
+                                .sendToTarget());
         mBinderService = new BinderService(this);
     }
 
@@ -126,12 +158,17 @@ public class BackgroundInstallControlService extends SystemService {
         @Override
         public ParceledListSlice<PackageInfo> getBackgroundInstalledPackages(
                 @PackageManager.PackageInfoFlagsBits long flags, int userId) {
+            if (Flags.bicClient()) {
+                mService.enforceCallerPermissions();
+            }
             if (!Build.IS_DEBUGGABLE) {
                 return mService.getBackgroundInstalledPackages(flags, userId);
             }
             // The debug.transparency.bg-install-apps (only works for debuggable builds)
             // is used to set mock list of background installed apps for testing.
             // The list of apps' names is delimited by ",".
+            // TODO: Remove after migrating test to new background install method using
+            // {@link BackgroundInstallControlCallbackHelperTest}.installPackage b/310983905
             String propertyString = SystemProperties.get("debug.transparency.bg-install-apps");
             if (TextUtils.isEmpty(propertyString)) {
                 return mService.getBackgroundInstalledPackages(flags, userId);
@@ -139,25 +176,46 @@ public class BackgroundInstallControlService extends SystemService {
                 return mService.getMockBackgroundInstalledPackages(propertyString);
             }
         }
+
+        @Override
+        public void registerBackgroundInstallCallback(IRemoteCallback callback) {
+            mService.mCallbackHelper.registerBackgroundInstallCallback(callback);
+        }
+
+        @Override
+        public void unregisterBackgroundInstallCallback(IRemoteCallback callback) {
+            mService.mCallbackHelper.unregisterBackgroundInstallCallback(callback);
+        }
+
+    }
+
+    @RequiresPermission(GET_BACKGROUND_INSTALLED_PACKAGES)
+    void enforceCallerPermissions() throws SecurityException {
+        mContext.enforceCallingOrSelfPermission(GET_BACKGROUND_INSTALLED_PACKAGES,
+                ENFORCE_PERMISSION_ERROR_MSG + GET_BACKGROUND_INSTALLED_PACKAGES);
     }
 
     @VisibleForTesting
     ParceledListSlice<PackageInfo> getBackgroundInstalledPackages(
             @PackageManager.PackageInfoFlagsBits long flags, int userId) {
-        List<PackageInfo> packages = mPackageManager.getInstalledPackagesAsUser(
+        final long token = Binder.clearCallingIdentity();
+        try {
+            List<PackageInfo> packages = mPackageManager.getInstalledPackagesAsUser(
                     PackageManager.PackageInfoFlags.of(flags), userId);
 
-        initBackgroundInstalledPackages();
-
-        ListIterator<PackageInfo> iter = packages.listIterator();
-        while (iter.hasNext()) {
-            String packageName = iter.next().packageName;
-            if (!mBackgroundInstalledPackages.contains(userId, packageName)) {
-                iter.remove();
+            initBackgroundInstalledPackages();
+            ListIterator<PackageInfo> iter = packages.listIterator();
+            while (iter.hasNext()) {
+                String packageName = iter.next().packageName;
+                if (!mBackgroundInstalledPackages.contains(userId, packageName)) {
+                    iter.remove();
+                }
             }
-        }
 
-        return new ParceledListSlice<>(packages);
+            return new ParceledListSlice<>(packages);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /**
@@ -170,8 +228,9 @@ public class BackgroundInstallControlService extends SystemService {
         List<PackageInfo> mockPackages = new ArrayList<>();
         for (String name : mockPackageNames) {
             try {
-                PackageInfo packageInfo = mPackageManager.getPackageInfo(name,
-                        PackageManager.PackageInfoFlags.of(PackageManager.MATCH_ALL));
+                PackageInfo packageInfo =
+                        mPackageManager.getPackageInfo(
+                                name, PackageManager.PackageInfoFlags.of(PackageManager.MATCH_ALL));
                 mockPackages.add(packageInfo);
             } catch (PackageManager.NameNotFoundException e) {
                 Slog.w(TAG, "Package's PackageInfo not found " + name);
@@ -192,18 +251,16 @@ public class BackgroundInstallControlService extends SystemService {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_USAGE_EVENT_RECEIVED: {
-                    mService.handleUsageEvent((UsageEvents.Event) msg.obj, msg.arg1 /* userId */);
+                case MSG_USAGE_EVENT_RECEIVED:
+                    mService.handleUsageEvent(
+                            (UsageEvents.Event) msg.obj, msg.arg1 /* userId */);
                     break;
-                }
-                case MSG_PACKAGE_ADDED: {
+                case MSG_PACKAGE_ADDED:
                     mService.handlePackageAdd((String) msg.obj, msg.arg1 /* userId */);
                     break;
-                }
-                case MSG_PACKAGE_REMOVED: {
+                case MSG_PACKAGE_REMOVED:
                     mService.handlePackageRemove((String) msg.obj, msg.arg1 /* userId */);
                     break;
-                }
                 default:
                     Slog.w(TAG, "Unknown message: " + msg.what);
             }
@@ -213,8 +270,9 @@ public class BackgroundInstallControlService extends SystemService {
     void handlePackageAdd(String packageName, int userId) {
         ApplicationInfo appInfo = null;
         try {
-            appInfo = mPackageManager.getApplicationInfoAsUser(packageName,
-                    PackageManager.ApplicationInfoFlags.of(0), userId);
+            appInfo =
+                    mPackageManager.getApplicationInfoAsUser(
+                            packageName, PackageManager.ApplicationInfoFlags.of(0), userId);
         } catch (PackageManager.NameNotFoundException e) {
             Slog.w(TAG, "Package's appInfo not found " + packageName);
             return;
@@ -222,6 +280,7 @@ public class BackgroundInstallControlService extends SystemService {
 
         String installerPackageName;
         String initiatingPackageName;
+
         try {
             final InstallSourceInfo installInfo = mPackageManager.getInstallSourceInfo(packageName);
             installerPackageName = installInfo.getInstallingPackageName();
@@ -233,15 +292,19 @@ public class BackgroundInstallControlService extends SystemService {
 
         // the installers without INSTALL_PACKAGES perm can't perform
         // the installation in background. So we can just filter out them.
-        if (mPermissionManager.checkPermission(installerPackageName,
-                android.Manifest.permission.INSTALL_PACKAGES, Context.DEVICE_ID_DEFAULT,
-                userId) != PackageManager.PERMISSION_GRANTED) {
+        if (mPermissionManager.checkPermission(
+                installerPackageName,
+                android.Manifest.permission.INSTALL_PACKAGES,
+                VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT,
+                userId)
+                != PERMISSION_GRANTED) {
             return;
         }
 
         // convert up-time to current time.
-        final long installTimestamp = System.currentTimeMillis()
-                - (SystemClock.uptimeMillis() - appInfo.createTimestamp);
+        final long installTimestamp =
+                System.currentTimeMillis() - (SystemClock.uptimeMillis()
+                        - retrieveInstallStartTimestamp(packageName, userId, appInfo));
 
         if (installedByAdb(initiatingPackageName)
                 || wasForegroundInstallation(installerPackageName, userId, installTimestamp)) {
@@ -250,7 +313,37 @@ public class BackgroundInstallControlService extends SystemService {
 
         initBackgroundInstalledPackages();
         mBackgroundInstalledPackages.add(userId, packageName);
+        mCallbackHelper.notifyAllCallbacks(userId, packageName);
         writeBackgroundInstalledPackagesToDisk();
+    }
+
+    private long retrieveInstallStartTimestamp(String packageName,
+                                               int userId, ApplicationInfo appInfo) {
+        long installStartTimestamp = appInfo.createTimestamp;
+
+        try {
+            Optional<PackageInstaller.SessionInfo> latestInstallSession =
+                    getLatestInstallSession(packageName, userId);
+            if (latestInstallSession.isEmpty()) {
+                Slog.w(TAG, "Package's historical install session not found, falling back "
+                        + "to appInfo.createTimestamp: " + packageName);
+            } else {
+                installStartTimestamp = latestInstallSession.get().getCreatedMillis();
+            }
+        } catch (Exception e) {
+            Slog.w(TAG, "Retrieval of install time from historical session failed, falling "
+                    + "back to appInfo.createTimestamp");
+            Slog.w(TAG, Log.getStackTraceString(e));
+        }
+        return installStartTimestamp;
+    }
+
+    private Optional<PackageInstaller.SessionInfo> getLatestInstallSession(
+            String packageName, int userId) {
+        List<PackageInstaller.SessionInfo> historicalSessions =
+                mPackageManagerInternal.getHistoricalSessions(userId).getList();
+        return historicalSessions.stream().filter(s -> packageName.equals(s.getAppPackageName()))
+                .max(Comparator.comparingLong(PackageInstaller.SessionInfo::getCreatedMillis));
     }
 
     // ADB sets installerPackageName to null, this creates a loophole to bypass BIC which will be
@@ -259,8 +352,8 @@ public class BackgroundInstallControlService extends SystemService {
         return PackageManagerServiceUtils.isInstalledByAdb(initiatingPackageName);
     }
 
-    private boolean wasForegroundInstallation(String installerPackageName,
-            int userId, long installTimestamp) {
+    private boolean wasForegroundInstallation(
+            String installerPackageName, int userId, long installTimestamp) {
         TreeSet<BackgroundInstallControlService.ForegroundTimeFrame> foregroundTimeFrames =
                 mInstallerForegroundTimeFrames.get(userId, installerPackageName);
 
@@ -349,12 +442,12 @@ public class BackgroundInstallControlService extends SystemService {
             for (int i = 0; i < mBackgroundInstalledPackages.size(); i++) {
                 int userId = mBackgroundInstalledPackages.keyAt(i);
                 for (String packageName : mBackgroundInstalledPackages.get(userId)) {
-                    long token = protoOutputStream.start(
-                            BackgroundInstalledPackagesProto.BG_INSTALLED_PKG);
+                    long token =
+                            protoOutputStream.start(
+                                    BackgroundInstalledPackagesProto.BG_INSTALLED_PKG);
                     protoOutputStream.write(
                             BackgroundInstalledPackageProto.PACKAGE_NAME, packageName);
-                    protoOutputStream.write(
-                            BackgroundInstalledPackageProto.USER_ID, userId + 1);
+                    protoOutputStream.write(BackgroundInstalledPackageProto.USER_ID, userId + 1);
                     protoOutputStream.end(token);
                 }
             }
@@ -387,23 +480,28 @@ public class BackgroundInstallControlService extends SystemService {
                         != (int) BackgroundInstalledPackagesProto.BG_INSTALLED_PKG) {
                     continue;
                 }
-                long token = protoInputStream.start(
-                        BackgroundInstalledPackagesProto.BG_INSTALLED_PKG);
+                long token =
+                        protoInputStream.start(BackgroundInstalledPackagesProto.BG_INSTALLED_PKG);
                 String packageName = null;
                 int userId = UserHandle.USER_NULL;
                 while (protoInputStream.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
                     switch (protoInputStream.getFieldNumber()) {
                         case (int) BackgroundInstalledPackageProto.PACKAGE_NAME:
-                            packageName = protoInputStream.readString(
-                                    BackgroundInstalledPackageProto.PACKAGE_NAME);
+                            packageName =
+                                    protoInputStream.readString(
+                                            BackgroundInstalledPackageProto.PACKAGE_NAME);
                             break;
                         case (int) BackgroundInstalledPackageProto.USER_ID:
-                            userId = protoInputStream.readInt(
-                                    BackgroundInstalledPackageProto.USER_ID) - 1;
+                            userId =
+                                    protoInputStream.readInt(
+                                            BackgroundInstalledPackageProto.USER_ID)
+                                            - 1;
                             break;
                         default:
-                            Slog.w(TAG, "Undefined field in proto: "
-                                    + protoInputStream.getFieldNumber());
+                            Slog.w(
+                                    TAG,
+                                    "Undefined field in proto: "
+                                            + protoInputStream.getFieldNumber());
                     }
                 }
                 protoInputStream.end(token);
@@ -432,9 +530,12 @@ public class BackgroundInstallControlService extends SystemService {
         if (mInstallerForegroundTimeFrames.contains(userId, pkgName)) {
             return true;
         }
-        return mPermissionManager.checkPermission(pkgName,
-                android.Manifest.permission.INSTALL_PACKAGES, Context.DEVICE_ID_DEFAULT,
-                userId) == PackageManager.PERMISSION_GRANTED;
+        return mPermissionManager.checkPermission(
+                pkgName,
+                android.Manifest.permission.INSTALL_PACKAGES,
+                VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT,
+                userId)
+                == PERMISSION_GRANTED;
     }
 
     @Override
@@ -448,21 +549,7 @@ public class BackgroundInstallControlService extends SystemService {
             publishBinderService(Context.BACKGROUND_INSTALL_CONTROL_SERVICE, mBinderService);
         }
 
-        mPackageManagerInternal.getPackageList(new PackageManagerInternal.PackageListObserver() {
-            @Override
-            public void onPackageAdded(String packageName, int uid) {
-                final int userId = UserHandle.getUserId(uid);
-                mHandler.obtainMessage(MSG_PACKAGE_ADDED,
-                        userId, 0, packageName).sendToTarget();
-            }
-
-            @Override
-            public void onPackageRemoved(String packageName, int uid) {
-                final int userId = UserHandle.getUserId(uid);
-                mHandler.obtainMessage(MSG_PACKAGE_REMOVED,
-                        userId, 0, packageName).sendToTarget();
-            }
-        });
+        mPackageManagerInternal.getPackageList(mPackageObserver);
     }
 
     // The foreground time frame (ForegroundTimeFrame) represents the period
@@ -518,7 +605,7 @@ public class BackgroundInstallControlService extends SystemService {
     }
 
     /**
-     * Dependency injector for {@link #BackgroundInstallControlService)}.
+     * Dependency injector for {@link BackgroundInstallControlService}.
      */
     interface Injector {
         Context getContext();
@@ -534,6 +621,9 @@ public class BackgroundInstallControlService extends SystemService {
         Looper getLooper();
 
         File getDiskFile();
+
+        BackgroundInstallControlCallbackHelper getBackgroundInstallControlCallbackHelper();
+
     }
 
     private static final class InjectorImpl implements Injector {
@@ -570,11 +660,11 @@ public class BackgroundInstallControlService extends SystemService {
 
         @Override
         public Looper getLooper() {
-            ServiceThread serviceThread = new ServiceThread(TAG,
-                    android.os.Process.THREAD_PRIORITY_FOREGROUND, true /* allowIo */);
+            ServiceThread serviceThread =
+                    new ServiceThread(
+                            TAG, android.os.Process.THREAD_PRIORITY_FOREGROUND, true /* allowIo */);
             serviceThread.start();
             return serviceThread.getLooper();
-
         }
 
         @Override
@@ -582,6 +672,11 @@ public class BackgroundInstallControlService extends SystemService {
             File dir = new File(Environment.getDataSystemDirectory(), DISK_DIR_NAME);
             File file = new File(dir, DISK_FILE_NAME);
             return file;
+        }
+
+        @Override
+        public BackgroundInstallControlCallbackHelper getBackgroundInstallControlCallbackHelper() {
+            return new BackgroundInstallControlCallbackHelper();
         }
     }
 }

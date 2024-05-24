@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> წამის შემდეგ"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: არ არის გადამისამართებული"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: არ არის გადამისამართებული"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"ფიჭური ქსელის უსაფრთხოება"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"პარამეტრების მიმოხილვა"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"მოწყობილობის იდენტიფიკატორზე წვდომა მიღებულია"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g>-ზე კავშირის ქსელმა ჩაიწერა მოწყობილობის უნიკალური იდენტიფიკატორი (IMSI) მოცემული პერიოდის განმავლობაში <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g>-ჯერ: <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g>-დან — <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>-მდე."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>-თან დაშიფრული კავშირი"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"უფრო უსაფრთხო ფიჭურ ქსელთან ხართ დაკავშირებული."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>-თან დაუშიფრავი კავშირი."</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"დაუშიფრავ ფიჭურ ქსელთან ხართ დაკავშირებული. თქვენი ზარები, შეტყობინებები და მონაცემები ჩარევების მიმართ მოწყვლადია."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"ფიჭური უსაფრთხოების პარამეტრები"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"შეიტყვეთ მეტი"</string>
     <string name="fcComplete" msgid="1080909484660507044">"ფუნქციის კოდი შესრულდა."</string>
     <string name="fcError" msgid="5325116502080221346">"კავშირის პრობლემაა ან არასწორი ფუნქციური კოდია."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"კარგი"</string>
@@ -370,6 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"საშუალებას აძლევს აპს, დაუკავშირდეს cell broadcast მოდულს იმისთვის, რომ გადაამისამართოს cell broadcast შეტყობინებები მათი მიღებისთანავე. Cell broadcast გაფრთხილებები მიეწოდება ზოგიერთ მდებარეობაზე საგანგებო სიტუაციების შესახებ გაფრთხილების მიზნით. საგანგებო cell broadcast-ის მიღების დროს, მავნე აპებმა შეიძლება ხელი შეუშალონ თქვენი მოწყობილობის ფუნქციონირებას ან ოპერაციებს."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"მიმდინარე ზარების მართვა"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"საშუალებას აძლევს აპს, ნახოს თქვენს მოწყობილობაზე მიმდინარე ზარების დეტალები და აკონტროლოს ეს ზარები."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"ბოლო ცნობილ მობილურის იდენტიფიკატორთან წვდომა"</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"დაუშვით აპის წვდომა ტელეფონიის მიერ ბოლოს დაფიქსირებულ მობილურის საიდენტიფიკაციო ინფორმაციის პროვაიდერთან."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"მასიური დაგზავნის შეტყობინებების წაკითხვა"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"აპს შეეძლება, წაიკითხოს თქვენს მოწყობილობაზე გამოგზავნილი ქსელის სამაუწყებლო შეტყობინებები. სამაუწყებლო გაფრთხილებები მოგეწოდებათ ზოგიერთ ადგილზე ექსტრემალური სიტუაციების შესახებ გასაფრთხილებლად. ქსელის გადაუდებელი შეტყონიბენის მიღების დროს მავნე აპებმა შეიძლება ხელი შეუშალონ თქვენი მოწყობილობის ფუნქციონირებას ან ოპერაციებს."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"გამოწერილი არხების წაკითხვა"</string>
@@ -434,6 +446,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"ნებას რთავს აპს, გამოიყენოს პრიორიტეტული სერვისები ტიპის „გათავისუფლებულისისტემა“ შემთხვევაში"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"პრიორიტეტული სერვისის გაშვება ტიპის „ფაილებისმართვა“ შემთხვევაში"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"საშუალებას აძლევს აპს, გამოიყენოს პრიორიტეტული სერვისები ტიპის „ფაილისმართვა“ შემთხვევაში"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"პრიორიტეტული სერვისის გაშვება „mediaProcessing“ ტიპის შემთხვევაში"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"აპს რთავს ნებას, გამოიყენოს პრიორიტეტული სერვისები „mediaProcessing\" ტიპის შემთხვევაში"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"პრიორიტეტული სერვისის გაშვება ტიპის „სპეციალურიგამოყენება“ შემთხვევაში"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"ნებას რთავს აპს, გამოიყენოს პრიორიტეტული სერვისები ტიპის „სპეციალურიგამოყენება“ შემთხვევაში"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"აპის მეხსიერების სივრცის გაზომვა"</string>
@@ -539,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"რთავს ნებას აპს გამოიყენოს ტელეფონის ინფრაწითელი გადამცემი."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"ფონის დაყენება"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"აპს შეეძლება, დააყენოს სისტემის ფონი."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"დამალულ პროფილებზე წვდომა"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"აპისთვის დამალულ პროფილებზე წვდომის უფლების მიცემა."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"ფონის ზომის შესწორება"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"აპს შეეძლება მინიშნებების დაყენება სისტემის ფონის ზომის მიხედვით."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"დროის სარტყლის დაყენება"</string>
@@ -632,7 +648,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"გამოიყენეთ ეკრანის დაბლოკვა"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"გასაგრძელებლად შედით ეკრანის დაბლოკვაში"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"მაგრად დააჭირეთ სენსორს"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"თითის ანაბეჭდის ამოცნობა ვერ ხერხდება. ცადეთ ხელახლა."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"თითის ანაბეჭდის ამოცნობა ვერ მოხერხდა. ცადეთ ხელახლა."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"გაწმინდეთ თითის ანაბეჭდის სენსორი და ხელახლა ცადეთ"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"გაწმინდეთ სენსორი და ხელახლა ცადეთ"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"მაგრად დააჭირეთ სენსორს"</string>
@@ -650,18 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"თითის ანაბეჭდი ავტორიზებულია"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"სახე ავტორიზებულია"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"სახე ავტორიზებულია, დააჭირეთ დადასტურებას"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"თითის ანაბეჭდის აპარატურა არ არის ხელმისაწვდომი."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"თითის ანაბეჭდის ამომცნობი მოწყობილობა მიუწვდომელია"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"თითის ანაბეჭდის დაყენება ვერ ხერხდება"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"თითის ანაბეჭდის დაყენების დრო ამოიწურა. ცადეთ ხელახლა."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"თითის ანაბეჭდის აღების ოპერაცია გაუქმდა."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"თითის ანაბეჭდის ოპერაცია გააუქმა მომხმარებელმა."</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"თითის ანაბეჭდის ოპერაცია გაუქმდა"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"თითის ანაბეჭდის ოპერაცია გააუქმა მომხმარებელმა"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"მეტისმეტად ბევრი მცდელობა იყო. სანაცვლოდ გამოიყენეთ ეკრანის დაბლოკვა."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"მეტისმეტად ბევრი მცდელობა იყო. სანაცვლოდ გამოიყენეთ ეკრანის დაბლოკვა."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"თითის ანაბეჭდის დამუშავება შეუძლებელია. ცადეთ ხელახლა."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"თითის ანაბეჭდები რეგისტრირებული არ არის."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ამ მოწყობილობას არ აქვს თითის ანაბეჭდის სენსორი."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"სენსორი დროებით გათიშულია."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"თითის ანაბეჭდის სენსორის გამოყენება ვერ ხერხდება. ეწვიეთ შეკეთების სერვისის პროვაიდერს"</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"თითის ანაბეჭდები არ არის რეგისტრირებული"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"ამ მოწყობილობას არ აქვს თითის ანაბეჭდის სენსორი"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"სენსორი დროებით გათიშულია"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"თითის ანაბეჭდის სენსორის გამოყენება შეუძლებელია. ეწვიეთ შეკეთების სერვისის პროვაიდერს."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"ჩართვის ღილაკზე დაეჭირა"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"თითი <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"გამოიყენეთ თითის ანაბეჭდი"</string>
@@ -696,7 +712,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"სახე არ ჩანს. დაიჭირეთ ტელ. თვალის დონეზე."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"მეტისმეტად მოძრაობთ. მყარად დაიჭირეთ ტელეფონი."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"გთხოვთ, ხელახლა დაარეგისტრიროთ თქვენი სახე."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"სახის ამოცნობა ვერ ხერხდება. ცადეთ ხელახლა."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"სახის ამოცნობა ვერ მოხერხდა. ცადეთ ხელახლა."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"ოდნავ შეცვალეთ თავის პოზიცია"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"პირდაპირ უყურეთ ტელეფონს"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"პირდაპირ უყურეთ ტელეფონს"</string>
@@ -807,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"საშუალებას აძლევს აპს, მიიღოს სენსორის მონაცემების ნიმუშები 200 ჰც-ზე მეტი სიხშირით"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"აპის განახლება მომხმარებლის ქმედების გარეშე"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"საშუალებას აძლევს მომხმარებელს, დამოუკიდებლად განაახლოს მანამდე დაინსტალირებული აპი"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"სხვა აპების საკუთრებაში არსებული E2EE საკონტაქტო გასაღებების დადასტურების მდგომარეობების განახლება"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"აპისთვის უფლების მინიჭება განაახლოს სხვა აპების საკუთრებაში არსებული E2EE საკონტაქტო გასაღებების დადასტურების მდგომარეობები"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"პაროლის წესების დაყენება"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"აკონტროლეთ ეკრანის ბლოკირების პაროლებისა და PIN-ების სიმბოლოების სიგრძე."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ეკრანის განბლოკვის მცდელობების მონიტორინგი"</string>
@@ -1906,6 +1924,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"შაბათ-კვირა"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"მოვლენა"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ძილისას"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"მართავს <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ჩართული"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"გამორთული"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ზოგიერთ ხმას ადუმებს"</string>
@@ -1925,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"დადასტურებულია"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"გაშლა"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"ჩაკეცვა"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"ჩაკეცილია"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"გაფართოებულია"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"გაშლის გადართვა"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android-ის პერიფერიული USB პორტი"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1965,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"კვლავ გააქტიურდეს სამსახურის აპები?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"გააქტიურება"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"საგანგებო სიტუაცია"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"ეკრანის დაბლოკვის დაყენება"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"ეკრანის დაბლოკვის დაყენება"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"კერძო სივრცის გამოსაყენებლად დააყენეთ ამ მოწყობილობაზე ეკრანის დაბლოკვა"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"აპი მიუწვდომელია"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ამჟამად მიუწვდომელია."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> მიუწვდომელია"</string>
@@ -2340,9 +2364,7 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"მიკროფონი დაბლოკილია"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"ეკრანზე არეკვლა შეუძლებელია"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"გამოიყენეთ სხვა კაბელი და ცადეთ ხელახლა"</string>
-    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"თქვენი მოწყობილობა ძალიან თბილია და ვერ ასახავს ეკრანზე სანამ არ გაგრილდება"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"კაბელს შეიძლება არ ჰქონდეს ეკრანების მხარდაჭერა"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"თქვენი USB-C კაბელი შეიძლება სათანადოდ არ უკავშირდებოდეს ეკრანებს"</string>
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"თქვენი მოწყობილობა ძალიან თბილია და ეკრანზე არეკვლას ვერ მოახერხებს, სანამ არ გაგრილდება"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"ორმაგი ეკრანი"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ორმაგი ეკრანი ჩართულია"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> იყენებს ორივე ეკრანს შინაარსის საჩვენებლად"</string>
@@ -2366,4 +2388,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"სამსახური 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"სატესტო"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"საერთო"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"სატელიტთან ავტომატურად დაკავშირებულია"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"შეგიძლიათ გაგზავნოთ და მიიღოთ შეტყობინებები მობილური ან Wi-Fi ქსელის გარეშე"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages-ის გახსნა"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"მუშაობის პრინციპი"</string>
 </resources>

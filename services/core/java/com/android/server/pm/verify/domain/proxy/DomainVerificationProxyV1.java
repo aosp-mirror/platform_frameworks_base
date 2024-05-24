@@ -254,6 +254,14 @@ public class DomainVerificationProxyV1 implements DomainVerificationProxy {
             String packageName = verifications.valueAt(index).second;
             AndroidPackage pkg = mConnection.getPackage(packageName);
 
+            if (pkg == null) {
+                if (DEBUG_BROADCASTS) {
+                    Slog.d(TAG,
+                            "Skip sendBroadcasts because null AndroidPackage for " + packageName);
+                }
+                continue;
+            }
+
             String hostsString = buildHostsString(pkg);
 
             Intent intent = new Intent(Intent.ACTION_INTENT_FILTER_NEEDS_VERIFICATION)

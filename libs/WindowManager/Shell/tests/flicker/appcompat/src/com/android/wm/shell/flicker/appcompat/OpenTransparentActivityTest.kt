@@ -17,13 +17,13 @@
 package com.android.wm.shell.flicker.appcompat
 
 import android.platform.test.annotations.Postsubmit
-import android.tools.common.Rotation
-import android.tools.common.flicker.assertions.FlickerTest
-import android.tools.common.traces.component.ComponentNameMatcher
-import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.LegacyFlickerTest
-import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.Rotation
+import android.tools.flicker.assertions.FlickerTest
+import android.tools.traces.component.ComponentNameMatcher
+import android.tools.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import org.junit.Test
 import org.junit.runner.RunWith

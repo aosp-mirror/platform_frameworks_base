@@ -40,12 +40,19 @@ import java.util.concurrent.Executor;
 public class StubTransaction extends SurfaceControl.Transaction {
 
     private HashSet<Runnable> mWindowInfosReportedListeners = new HashSet<>();
+    private HashSet<SurfaceControl.TransactionCommittedListener> mTransactionCommittedListeners =
+            new HashSet<>();
 
     @Override
     public void apply() {
         for (Runnable listener : mWindowInfosReportedListeners) {
             listener.run();
         }
+        for (SurfaceControl.TransactionCommittedListener listener
+                : mTransactionCommittedListeners) {
+            listener.onTransactionCommitted();
+        }
+        mTransactionCommittedListeners.clear();
     }
 
     @Override
@@ -239,6 +246,9 @@ public class StubTransaction extends SurfaceControl.Transaction {
     @Override
     public SurfaceControl.Transaction addTransactionCommittedListener(Executor executor,
             SurfaceControl.TransactionCommittedListener listener) {
+        SurfaceControl.TransactionCommittedListener listenerInner =
+                () -> executor.execute(listener::onTransactionCommitted);
+        mTransactionCommittedListeners.add(listenerInner);
         return this;
     }
 
@@ -318,6 +328,12 @@ public class StubTransaction extends SurfaceControl.Transaction {
     @Override
     public SurfaceControl.Transaction addWindowInfosReportedListener(@NonNull Runnable listener) {
         mWindowInfosReportedListeners.add(listener);
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction setCanOccludePresentation(SurfaceControl sc,
+                boolean canOccludePresentation) {
         return this;
     }
 }

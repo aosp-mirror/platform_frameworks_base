@@ -20,6 +20,7 @@ import android.animation.FloatEvaluator
 import android.animation.IntEvaluator
 import com.android.keyguard.KeyguardViewController
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntrySourceInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -29,12 +30,16 @@ import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.util.kotlin.sample
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -52,15 +57,13 @@ constructor(
     transitionInteractor: KeyguardTransitionInteractor,
     val keyguardInteractor: KeyguardInteractor,
     val viewModel: AodToLockscreenTransitionViewModel,
-    val shadeDependentFlows: ShadeDependentFlows,
     private val sceneContainerFlags: SceneContainerFlags,
     private val keyguardViewController: Lazy<KeyguardViewController>,
     private val deviceEntryInteractor: DeviceEntryInteractor,
+    private val deviceEntrySourceInteractor: DeviceEntrySourceInteractor,
 ) {
     private val intEvaluator = IntEvaluator()
     private val floatEvaluator = FloatEvaluator()
-    private val toAodFromState: Flow<KeyguardState> =
-        transitionInteractor.transitionStepsToState(KeyguardState.AOD).map { it.from }
     private val showingAlternateBouncer: Flow<Boolean> =
         transitionInteractor.startedKeyguardState.map { keyguardState ->
             keyguardState == KeyguardState.ALTERNATE_BOUNCER
@@ -95,13 +98,31 @@ constructor(
                 fullyDozingBurnInProgress,
             )
         }
+
+    private val dozeAmount: Flow<Float> =
+        combine(
+            transitionInteractor.startedKeyguardTransitionStep,
+            merge(
+                transitionInteractor.transitionStepsFromState(KeyguardState.AOD).map {
+                    1f - it.value
+                },
+                transitionInteractor.transitionStepsToState(KeyguardState.AOD).map { it.value }
+            ),
+        ) { startedKeyguardTransitionStep, aodTransitionAmount ->
+            if (
+                startedKeyguardTransitionStep.to == KeyguardState.AOD ||
+                    startedKeyguardTransitionStep.from == KeyguardState.AOD
+            ) {
+                aodTransitionAmount
+            } else {
+                // in case a new transition (ie: to occluded) cancels a transition to or from
+                // aod, then we want to make sure the doze amount is still updated to 0
+                0f
+            }
+        }
     // Burn-in offsets that animate based on the transition amount to AOD
     private val animatedBurnInOffsets: Flow<BurnInOffsets> =
-        combine(
-            nonAnimatedBurnInOffsets,
-            transitionInteractor.transitionStepsToState(KeyguardState.AOD)
-        ) { burnInOffsets, transitionStepsToAod ->
-            val dozeAmount = transitionStepsToAod.value
+        combine(nonAnimatedBurnInOffsets, dozeAmount) { burnInOffsets, dozeAmount ->
             BurnInOffsets(
                 intEvaluator.evaluate(dozeAmount, 0, burnInOffsets.x),
                 intEvaluator.evaluate(dozeAmount, 0, burnInOffsets.y),
@@ -120,22 +141,35 @@ constructor(
     val burnInOffsets: Flow<BurnInOffsets> =
         deviceEntryUdfpsInteractor.isUdfpsEnrolledAndEnabled.flatMapLatest { udfpsEnrolled ->
             if (udfpsEnrolled) {
-                toAodFromState.flatMapLatest { fromState ->
-                    when (fromState) {
-                        KeyguardState.AOD,
-                        KeyguardState.GONE,
-                        KeyguardState.OCCLUDED,
-                        KeyguardState.DREAMING_LOCKSCREEN_HOSTED,
-                        KeyguardState.OFF,
-                        KeyguardState.DOZING,
-                        KeyguardState.DREAMING,
-                        KeyguardState.PRIMARY_BOUNCER -> nonAnimatedBurnInOffsets
-                        KeyguardState.ALTERNATE_BOUNCER -> animatedBurnInOffsets
-                        KeyguardState.LOCKSCREEN ->
-                            shadeDependentFlows.transitionFlow(
-                                flowWhenShadeIsExpanded = nonAnimatedBurnInOffsets,
-                                flowWhenShadeIsNotExpanded = animatedBurnInOffsets,
-                            )
+                combine(
+                    transitionInteractor.startedKeyguardTransitionStep.sample(
+                        shadeInteractor.isAnyFullyExpanded,
+                        ::Pair
+                    ),
+                    animatedBurnInOffsets,
+                    nonAnimatedBurnInOffsets,
+                ) {
+                    (startedTransitionStep, shadeExpanded),
+                    animatedBurnInOffsets,
+                    nonAnimatedBurnInOffsets ->
+                    if (startedTransitionStep.to == KeyguardState.AOD) {
+                        when (startedTransitionStep.from) {
+                            KeyguardState.ALTERNATE_BOUNCER -> animatedBurnInOffsets
+                            KeyguardState.LOCKSCREEN ->
+                                if (shadeExpanded) {
+                                    nonAnimatedBurnInOffsets
+                                } else {
+                                    animatedBurnInOffsets
+                                }
+                            else -> nonAnimatedBurnInOffsets
+                        }
+                    } else if (startedTransitionStep.from == KeyguardState.AOD) {
+                        when (startedTransitionStep.to) {
+                            KeyguardState.LOCKSCREEN -> animatedBurnInOffsets
+                            else -> BurnInOffsets(x = 0, y = 0, progress = 0f)
+                        }
+                    } else {
+                        BurnInOffsets(x = 0, y = 0, progress = 0f)
                     }
                 }
             } else {
@@ -144,21 +178,36 @@ constructor(
                 flowOf(BurnInOffsets(x = 0, y = 0, progress = 0f))
             }
         }
-    val iconType: Flow<DeviceEntryIconView.IconType> =
-        combine(
-            deviceEntryUdfpsInteractor.isListeningForUdfps,
-            deviceEntryInteractor.isUnlocked,
-        ) { isListeningForUdfps, isUnlocked ->
-            if (isUnlocked) {
-                DeviceEntryIconView.IconType.UNLOCK
+
+    private val isUnlocked: Flow<Boolean> =
+        deviceEntryInteractor.isUnlocked.flatMapLatest { isUnlocked ->
+            if (!isUnlocked) {
+                flowOf(false)
             } else {
-                if (isListeningForUdfps) {
-                    DeviceEntryIconView.IconType.FINGERPRINT
-                } else {
-                    DeviceEntryIconView.IconType.LOCK
+                flow {
+                    // delay in case device ends up transitioning away from the lock screen;
+                    // we don't want to animate to the unlocked icon and just let the
+                    // icon fade with the transition to GONE
+                    delay(UNLOCKED_DELAY_MS)
+                    emit(true)
                 }
             }
         }
+
+    val iconType: Flow<DeviceEntryIconView.IconType> =
+        combine(
+            deviceEntryUdfpsInteractor.isListeningForUdfps,
+            keyguardInteractor.isKeyguardDismissible,
+        ) { isListeningForUdfps, isUnlocked ->
+            if (isListeningForUdfps) {
+                DeviceEntryIconView.IconType.FINGERPRINT
+            } else if (isUnlocked) {
+                DeviceEntryIconView.IconType.UNLOCK
+            } else {
+                DeviceEntryIconView.IconType.LOCK
+            }
+        }
+    val isVisible: Flow<Boolean> = deviceEntryViewAlpha.map { it > 0f }.distinctUntilChanged()
     val isLongPressEnabled: Flow<Boolean> =
         combine(
             iconType,
@@ -170,6 +219,7 @@ constructor(
                 DeviceEntryIconView.IconType.FINGERPRINT -> false
             }
         }
+
     val accessibilityDelegateHint: Flow<DeviceEntryIconView.AccessibilityHintType> =
         combine(iconType, isLongPressEnabled) { deviceEntryStatus, longPressEnabled ->
             if (longPressEnabled) {
@@ -179,14 +229,13 @@ constructor(
             }
         }
 
-    fun onLongPress() {
-        // TODO (b/309804148): play auth ripple via an interactor
-
+    suspend fun onLongPress() {
         if (sceneContainerFlags.isEnabled()) {
             deviceEntryInteractor.attemptDeviceEntry()
         } else {
             keyguardViewController.get().showPrimaryBouncer(/* scrim */ true)
         }
+        deviceEntrySourceInteractor.attemptEnterDeviceFromDeviceEntryIcon()
     }
 
     private fun DeviceEntryIconView.IconType.toAccessibilityHintType():
@@ -198,6 +247,10 @@ constructor(
             DeviceEntryIconView.IconType.FINGERPRINT ->
                 DeviceEntryIconView.AccessibilityHintType.NONE
         }
+    }
+
+    companion object {
+        const val UNLOCKED_DELAY_MS = 50L
     }
 }
 

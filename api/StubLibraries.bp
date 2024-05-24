@@ -840,6 +840,10 @@ java_library {
     system_modules: "none",
     static_libs: ["android_stubs_private_hjar"],
     dist: {
+        // Add to private_api_stubs dist target for easier packaging by scripts. This module is
+        // useful for creating a platform SDK, which can be packaged in ANDROID_HOME and used from
+        // Gradle, allowing for development of platform apps that make use of hidden APIs.
+        targets: ["private_api_stubs"],
         dir: "apistubs/android/private",
     },
 }
@@ -857,7 +861,12 @@ java_genrule {
         "done && " +
         "sort -u $(genDir)/framework.aidl.merged > $(out)",
     dist: {
-        targets: ["sdk"],
+        targets: [
+            "sdk",
+            // Add to private_api_stubs dist target for easier packaging by scripts.
+            // See explanation in the "android_stubs_private" module above.
+            "private_api_stubs",
+        ],
         dir: "apistubs/android/private",
     },
 }

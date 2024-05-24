@@ -22,11 +22,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag
-import com.android.systemui.statusbar.notification.row.NotificationRowModule.NOTIF_REMOTEVIEWS_FACTORIES
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import javax.inject.Named
 
 /**
  * Implementation of [NotifLayoutInflaterFactory]. This class uses a set of
@@ -37,8 +35,7 @@ class NotifLayoutInflaterFactory
 constructor(
     @Assisted private val row: ExpandableNotificationRow,
     @Assisted @InflationFlag val layoutType: Int,
-    @Named(NOTIF_REMOTEVIEWS_FACTORIES)
-    private val remoteViewsFactories: Set<@JvmSuppressWildcards NotifRemoteViewsFactory>
+    private val notifRemoteViewsFactoryContainer: NotifRemoteViewsFactoryContainer
 ) : LayoutInflater.Factory2 {
 
     override fun onCreateView(
@@ -49,7 +46,7 @@ constructor(
     ): View? {
         var handledFactory: NotifRemoteViewsFactory? = null
         var result: View? = null
-        for (layoutFactory in remoteViewsFactories) {
+        for (layoutFactory in notifRemoteViewsFactoryContainer.factories) {
             layoutFactory.instantiate(row, layoutType, parent, name, context, attrs)?.run {
                 check(handledFactory == null) {
                     "$layoutFactory tries to produce name:$name with type:$layoutType. " +

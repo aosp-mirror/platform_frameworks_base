@@ -33,6 +33,8 @@ import java.util.Arrays;
  *
  * @hide
  */
+// Exported to Mainline modules; cannot use annotations
+// @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class IndentingPrintWriter extends PrintWriter {
     private final String mSingleIndent;
     private final int mWrapLength;

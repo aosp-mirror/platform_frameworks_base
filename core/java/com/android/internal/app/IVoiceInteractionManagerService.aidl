@@ -35,6 +35,7 @@ import android.service.voice.VisibleActivityInfo;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVoiceActionCheckCallback;
+import com.android.internal.app.IVoiceInteractionAccessibilitySettingsListener;
 import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractionSoundTriggerSession;
@@ -359,12 +360,6 @@ interface IVoiceInteractionManagerService {
             in IHotwordRecognitionStatusCallback callback);
 
     /**
-     * Test API to reset training data egress count for test.
-     */
-    @EnforcePermission("RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT")
-    void resetHotwordTrainingDataEgressCountForTest();
-
-    /**
      * Starts to listen the status of visible activity.
      */
     void startListeningVisibleActivityChanged(in IBinder token);
@@ -390,12 +385,19 @@ interface IVoiceInteractionManagerService {
             int type);
 
     /**
-      * Allows/disallows receiving training data from trusted process.
-      * Caller must be the active assistant and a preinstalled assistant.
-      *
-      * @param allowed whether to allow/disallow receiving training data produced during
-      * sandboxed detection (from trusted process).
-      */
-      @EnforcePermission("MANAGE_HOTWORD_DETECTION")
-      void setShouldReceiveSandboxedTrainingData(boolean allowed);
+     * rely on the system server to get the secure settings
+     */
+    boolean getAccessibilityDetectionEnabled();
+
+    /**
+     * register the listener
+     */
+    oneway void registerAccessibilityDetectionSettingsListener(
+            in IVoiceInteractionAccessibilitySettingsListener listener);
+
+    /**
+     * unregister the listener
+     */
+     oneway void unregisterAccessibilityDetectionSettingsListener(
+            in IVoiceInteractionAccessibilitySettingsListener listener);
 }

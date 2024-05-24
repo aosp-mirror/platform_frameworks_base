@@ -16,8 +16,11 @@
 
 package com.android.systemui.biometrics.data.repository
 
+import android.hardware.biometrics.Flags
 import android.hardware.biometrics.PromptInfo
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.biometrics.Utils
+import com.android.systemui.biometrics.Utils.isDeviceCredentialAllowed
 import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
@@ -55,6 +58,9 @@ interface PromptRepository {
     /** The kind of credential to use (biometric, pin, pattern, etc.). */
     val kind: StateFlow<PromptKind>
 
+    /** The package name that the prompt is called from. */
+    val opPackageName: StateFlow<String?>
+
     /**
      * If explicit confirmation is required.
      *
@@ -62,12 +68,25 @@ interface PromptRepository {
      */
     val isConfirmationRequired: Flow<Boolean>
 
+    /**
+     * If biometric prompt without icon needs to show for displaying content prior to credential
+     * view.
+     */
+    val showBpWithoutIconForCredential: StateFlow<Boolean>
+
+    /**
+     * Update whether biometric prompt without icon needs to show for displaying content prior to
+     * credential view, which should be set before [setPrompt].
+     */
+    fun setShouldShowBpWithoutIconForCredential(promptInfo: PromptInfo)
+
     /** Update the prompt configuration, which should be set before [isShowing]. */
     fun setPrompt(
         promptInfo: PromptInfo,
         userId: Int,
         gatekeeperChallenge: Long?,
         kind: PromptKind,
+        opPackageName: String,
     )
 
     /** Unset the prompt info. */
@@ -108,6 +127,9 @@ constructor(
     private val _kind: MutableStateFlow<PromptKind> = MutableStateFlow(PromptKind.Biometric())
     override val kind = _kind.asStateFlow()
 
+    private val _opPackageName: MutableStateFlow<String?> = MutableStateFlow(null)
+    override val opPackageName = _opPackageName.asStateFlow()
+
     private val _faceSettings =
         _userId.map { id -> faceSettings.forUser(id) }.distinctUntilChanged()
     private val _faceSettingAlwaysRequireConfirmation =
@@ -122,16 +144,31 @@ constructor(
             }
             .distinctUntilChanged()
 
+    private val _showBpWithoutIconForCredential: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    override val showBpWithoutIconForCredential = _showBpWithoutIconForCredential.asStateFlow()
+
+    override fun setShouldShowBpWithoutIconForCredential(promptInfo: PromptInfo) {
+        val hasCredentialViewShown = kind.value !is PromptKind.Biometric
+        val showBpForCredential =
+            Flags.customBiometricPrompt() &&
+                !Utils.isBiometricAllowed(promptInfo) &&
+                isDeviceCredentialAllowed(promptInfo) &&
+                promptInfo.contentView != null
+        _showBpWithoutIconForCredential.value = showBpForCredential && !hasCredentialViewShown
+    }
+
     override fun setPrompt(
         promptInfo: PromptInfo,
         userId: Int,
         gatekeeperChallenge: Long?,
         kind: PromptKind,
+        opPackageName: String,
     ) {
         _kind.value = kind
         _userId.value = userId
         _challenge.value = gatekeeperChallenge
         _promptInfo.value = promptInfo
+        _opPackageName.value = opPackageName
     }
 
     override fun unsetPrompt() {
@@ -139,6 +176,7 @@ constructor(
         _userId.value = null
         _challenge.value = null
         _kind.value = PromptKind.Biometric()
+        _opPackageName.value = null
     }
 
     companion object {

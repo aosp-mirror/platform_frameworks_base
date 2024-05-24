@@ -303,8 +303,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                     mEntry.mRemoteEditImeVisible = editTextRootWindowInsets != null
                             && editTextRootWindowInsets.isVisible(WindowInsets.Type.ime());
                     if (!mEntry.mRemoteEditImeVisible && !mEditText.mShowImeOnInputConnection) {
-                        // Pass null to ensure all inputs are cleared for this entry b/227115380
-                            mController.removeRemoteInput(mEntry, null,
+                            mController.removeRemoteInput(mEntry, mToken,
                                     /* reason= */"RemoteInputView$WindowInsetAnimation#onEnd");
                     }
                 }
@@ -536,6 +535,11 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         if (mEntry.getRow().isChangingPosition() || isTemporarilyDetached()) {
             return;
         }
+        // RemoteInputView can be detached from window before IME close event in some cases like
+        // remote input view removal with notification update. As a result of this, RemoteInputView
+        // will stop ime animation updates, which results in never removing remote input. That's why
+        // we have to set mRemoteEditImeAnimatingAway false on detach to remove remote input.
+        mEntry.mRemoteEditImeAnimatingAway = false;
         mController.removeRemoteInput(mEntry, mToken,
                 /* reason= */"RemoteInputView#onDetachedFromWindow");
         mController.removeSpinning(mEntry.getKey(), mToken);

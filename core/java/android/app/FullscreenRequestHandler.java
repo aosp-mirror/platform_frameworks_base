@@ -16,8 +16,7 @@
 
 package android.app;
 
-import static android.app.Activity.FULLSCREEN_MODE_REQUEST_ENTER;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.Activity.FULLSCREEN_MODE_REQUEST_EXIT;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import android.annotation.IntDef;
@@ -35,18 +34,14 @@ import android.os.OutcomeReceiver;
 public class FullscreenRequestHandler {
     @IntDef(prefix = { "RESULT_" }, value = {
             RESULT_APPROVED,
-            RESULT_FAILED_NOT_IN_FREEFORM,
             RESULT_FAILED_NOT_IN_FULLSCREEN_WITH_HISTORY,
-            RESULT_FAILED_NOT_DEFAULT_FREEFORM,
             RESULT_FAILED_NOT_TOP_FOCUSED
     })
     public @interface RequestResult {}
 
     public static final int RESULT_APPROVED = 0;
-    public static final int RESULT_FAILED_NOT_IN_FREEFORM = 1;
-    public static final int RESULT_FAILED_NOT_IN_FULLSCREEN_WITH_HISTORY = 2;
-    public static final int RESULT_FAILED_NOT_DEFAULT_FREEFORM = 3;
-    public static final int RESULT_FAILED_NOT_TOP_FOCUSED = 4;
+    public static final int RESULT_FAILED_NOT_IN_FULLSCREEN_WITH_HISTORY = 1;
+    public static final int RESULT_FAILED_NOT_TOP_FOCUSED = 2;
 
     public static final String REMOTE_CALLBACK_RESULT_KEY = "result";
 
@@ -85,16 +80,9 @@ public class FullscreenRequestHandler {
             OutcomeReceiver<Void, Throwable> callback, int result) {
         Throwable e = null;
         switch (result) {
-            case RESULT_FAILED_NOT_IN_FREEFORM:
-                e = new IllegalStateException("The window is not a freeform window, the request "
-                        + "to get into fullscreen cannot be approved.");
-                break;
             case RESULT_FAILED_NOT_IN_FULLSCREEN_WITH_HISTORY:
                 e = new IllegalStateException("The window is not in fullscreen by calling the "
                         + "requestFullscreenMode API before, such that cannot be restored.");
-                break;
-            case RESULT_FAILED_NOT_DEFAULT_FREEFORM:
-                e = new IllegalStateException("The window is not launched in freeform by default.");
                 break;
             case RESULT_FAILED_NOT_TOP_FOCUSED:
                 e = new IllegalStateException("The window is not the top focused window.");
@@ -109,11 +97,7 @@ public class FullscreenRequestHandler {
     }
 
     private static int earlyCheckRequestMatchesWindowingMode(int request, int windowingMode) {
-        if (request == FULLSCREEN_MODE_REQUEST_ENTER) {
-            if (windowingMode != WINDOWING_MODE_FREEFORM) {
-                return RESULT_FAILED_NOT_IN_FREEFORM;
-            }
-        } else {
+        if (request == FULLSCREEN_MODE_REQUEST_EXIT) {
             if (windowingMode != WINDOWING_MODE_FULLSCREEN) {
                 return RESULT_FAILED_NOT_IN_FULLSCREEN_WITH_HISTORY;
             }

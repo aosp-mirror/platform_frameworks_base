@@ -34,7 +34,7 @@ import org.junit.runner.RunWith
 @RunWithLooper
 class AnimatorTestRuleIsolationTest : SysuiTestCase() {
 
-    @get:Rule val animatorTestRule = AnimatorTestRule()
+    @get:Rule val animatorTestRule = AnimatorTestRule(this)
 
     @Test
     fun testA() {

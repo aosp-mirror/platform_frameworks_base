@@ -33,8 +33,8 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Oplader"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Oplader hurtigt"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Oplader langsomt"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Opladning er optimeret for at beskytte batteriet"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Problem med opladertilbehør"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Opladningen er sat på pause for at beskytte batteriet"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Tjek opladningstilbehøret"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Netværket er låst"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Intet SIM-kort"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Deaktiveret SIM-kort."</string>

@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"ମାଇକ୍ରୋଫୋନ"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"କଲ ଲଗଗୁଡ଼ିକ"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"ଆଖପାଖର ଡିଭାଇସଗୁଡ଼ିକ"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"ମିଡିଆ ଆଉଟପୁଟ ପରିବର୍ତ୍ତନ କରନ୍ତୁ"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ଫଟୋ ଏବଂ ମିଡିଆ"</string>
-    <string name="permission_notification" msgid="693762568127741203">"ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"ଆପ୍ସ"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"ଷ୍ଟ୍ରିମିଂ"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"ଫୋନ କଲଗୁଡ଼ିକ କରିପାରିବ ଏବଂ ସେଗୁଡ଼ିକୁ ପରିଚାଳନା କରିପାରିବ"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"ଫୋନ କଲ ଲଗକୁ ପଢ଼ିପାରିବ ଏବଂ ଲେଖିପାରିବ"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"SMS ମେସେଜଗୁଡ଼ିକ ପଠାଇପାରିବ ଏବଂ ଦେଖିପାରିବ"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"ଆପଣଙ୍କ କଣ୍ଟାକ୍ଟଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିପାରିବ"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"ଆପଣଙ୍କ କେଲେଣ୍ଡରକୁ ଆକ୍ସେସ କରିପାରିବ"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"ଅଡିଓ ରେକର୍ଡ କରିପାରିବ"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"ଆଖପାଖର ଡିଭାଇସଗୁଡ଼ିକୁ ଖୋଜିପାରିବ, କନେକ୍ଟ କରିପାରିବ ଏବଂ ସେଗୁଡ଼ିକର ଆପେକ୍ଷିକ ଅବସ୍ଥିତିକୁ ନିର୍ଦ୍ଧାରଣ କରିପାରିବ"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"ଯୋଗାଯୋଗ, ମେସେଜ ଏବଂ ଫଟୋଗୁଡ଼ିକ ପରି ସୂଚନା ସମେତ ସମସ୍ତ ବିଜ୍ଞପ୍ତିକୁ ପଢ଼ିପାରିବ"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"ଫୋନ କଲଗୁଡ଼ିକ କରିବା ଏବଂ ସେଗୁଡ଼ିକୁ ପରିଚାଳନା କରିବା"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"ଫୋନ କଲ ଲଗକୁ ପଢ଼ିବା ଏବଂ ଲେଖିବା"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"SMS ମେସେଜ ପଠାଇବା ଏବଂ ଭ୍ୟୁ କରିବା"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"ଆପଣଙ୍କ କଣ୍ଟାକ୍ଟଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିବା"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"ଆପଣଙ୍କ କେଲେଣ୍ଡରକୁ ଆକ୍ସେସ କରିବା"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"ଅଡିଓ ରେକର୍ଡ କରିବା"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"ଆଖପାଖର ଡିଭାଇସଗୁଡ଼ିକୁ ଖୋଜିବା, କନେକ୍ଟ କରିବା ଏବଂ ସେଗୁଡ଼ିକର ଆପେକ୍ଷିକ ଅବସ୍ଥିତିକୁ ନିର୍ଦ୍ଧାରଣ କରିବା"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"କଣ୍ଟାକ୍ଟ, ମେସେଜ ଏବଂ ଫଟୋଗୁଡ଼ିକ ପରି ସୂଚନା ସମେତ ସମସ୍ତ ବିଜ୍ଞପ୍ତିକୁ ପଢ଼ନ୍ତୁ"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• କଣ୍ଟାକ୍ଟ, ମେସେଜ ଏବଂ ଫଟୋ ପରି ସୂଚନା ସମେତ ସମସ୍ତ ବିଜ୍ଞପ୍ତିକୁ ପଢ଼ନ୍ତୁ&lt;br/&gt;• ବିଜ୍ଞପ୍ତି ପଠାନ୍ତୁ&lt;br/&gt;&lt;br/&gt;ଆପଣ ସେଟିଂସ &gt; ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକରେ ଯେ କୌଣସି ସମୟରେ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ପଢିବା ଏବଂ ପଠାଇବା ପାଇଁ ଏହି ଆପର କ୍ଷମତାକୁ ପରିଚାଳନା କରିପାରିବେ।"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"ଆପଣଙ୍କ ଫୋନର ଆପ୍ସକୁ ଷ୍ଟ୍ରିମ କରନ୍ତୁ"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"ଆପଣଙ୍କ ଫୋନରୁ ଆପ୍ସ ଏବଂ ଅନ୍ୟ ସିଷ୍ଟମ ଫିଚରଗୁଡ଼ିକୁ ଷ୍ଟ୍ରିମ କରନ୍ତୁ"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"ଉପଲବ୍ଧ ଡିଭାଇସଗୁଡ଼ିକର ଏକ ତାଲିକାକୁ ଆକ୍ସେସ କରନ୍ତୁ ଏବଂ କେଉଁ ଡିଭାଇସ ଅନ୍ୟ ଆପ୍ସରୁ ଅଡିଓ କିମ୍ୱା ଭିଡିଓ ଷ୍ଟ୍ରିମ ବା କାଷ୍ଟ କରିବ ତାହା ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"ଫୋନ"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"ଟାବଲେଟ"</string>
 </resources>

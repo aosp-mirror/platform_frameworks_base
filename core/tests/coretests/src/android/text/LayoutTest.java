@@ -16,6 +16,11 @@
 
 package android.text;
 
+import static com.android.graphics.hwui.flags.Flags.FLAG_HIGH_CONTRAST_TEXT_SMALL_TEXT_RECT;
+
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -26,11 +31,16 @@ import static org.junit.Assert.fail;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.text.Layout.Alignment;
 import android.text.style.StrikethroughSpan;
 
@@ -38,6 +48,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -49,6 +60,9 @@ import java.util.Locale;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class LayoutTest {
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+
     private static final int LINE_COUNT = 5;
     private static final int LINE_HEIGHT = 12;
     private static final int LINE_DESCENT = 4;
@@ -638,21 +652,267 @@ public class LayoutTest {
         }
     }
 
-    private final class MockCanvas extends Canvas {
+    @Test
+    @RequiresFlagsEnabled(FLAG_HIGH_CONTRAST_TEXT_SMALL_TEXT_RECT)
+    public void highContrastTextEnabled_testDrawSelectionAndHighlight_drawsHighContrastSelectionAndHighlight() {
+        Layout layout = new MockLayout(LAYOUT_TEXT, mTextPaint, mWidth,
+                mAlign, mSpacingMult, mSpacingAdd);
 
-        class DrawCommand {
+        List<Path> highlightPaths = new ArrayList<>();
+        List<Paint> highlightPaints = new ArrayList<>();
+
+        Path selectionPath = new Path();
+        RectF selectionRect = new RectF(0f, 0f, mWidth / 2f, LINE_HEIGHT);
+        selectionPath.addRect(selectionRect, Path.Direction.CW);
+        highlightPaths.add(selectionPath);
+
+        Paint selectionPaint = new Paint();
+        selectionPaint.setColor(Color.CYAN);
+        highlightPaints.add(selectionPaint);
+
+        final int width = 256;
+        final int height = 256;
+        MockCanvas c = new MockCanvas(width, height);
+        c.setHighContrastTextEnabled(true);
+        layout.draw(c, highlightPaths, highlightPaints, selectionPath, selectionPaint,
+                /* cursorOffsetVertical= */ 0);
+        List<MockCanvas.DrawCommand> drawCommands = c.getDrawCommands();
+        var textsDrawn = LINE_COUNT;
+        var highlightsDrawn = 2;
+        assertThat(drawCommands.size()).isEqualTo(textsDrawn + highlightsDrawn);
+
+        var highlightsFound = 0;
+        var curLineIndex = 0;
+        for (int i = 0; i < drawCommands.size(); i++) {
+            MockCanvas.DrawCommand drawCommand = drawCommands.get(i);
+
+            if (drawCommand.path != null) {
+                assertThat(drawCommand.path).isEqualTo(selectionPath);
+                assertThat(drawCommand.paint.getColor()).isEqualTo(Color.YELLOW);
+                assertThat(drawCommand.paint.getBlendMode()).isNotNull();
+                highlightsFound++;
+            } else if (drawCommand.text != null) {
+                int start = layout.getLineStart(curLineIndex);
+                int end = layout.getLineEnd(curLineIndex);
+                assertEquals(LAYOUT_TEXT.toString().substring(start, end), drawCommand.text);
+                curLineIndex++;
+
+                assertWithMessage("highlight is drawn on top of text")
+                        .that(highlightsFound).isEqualTo(0);
+            }
+        }
+
+        assertThat(highlightsFound).isEqualTo(2);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_HIGH_CONTRAST_TEXT_SMALL_TEXT_RECT)
+    public void highContrastTextEnabled_testDrawHighlight_drawsHighContrastHighlight() {
+        Layout layout = new MockLayout(LAYOUT_TEXT, mTextPaint, mWidth,
+                mAlign, mSpacingMult, mSpacingAdd);
+
+        List<Path> highlightPaths = new ArrayList<>();
+        List<Paint> highlightPaints = new ArrayList<>();
+
+        Path selectionPath = new Path();
+        RectF selectionRect = new RectF(0f, 0f, mWidth / 2f, LINE_HEIGHT);
+        selectionPath.addRect(selectionRect, Path.Direction.CW);
+        highlightPaths.add(selectionPath);
+
+        Paint selectionPaint = new Paint();
+        selectionPaint.setColor(Color.CYAN);
+        highlightPaints.add(selectionPaint);
+
+        final int width = 256;
+        final int height = 256;
+        MockCanvas c = new MockCanvas(width, height);
+        c.setHighContrastTextEnabled(true);
+        layout.draw(c, highlightPaths, highlightPaints, /* selectionPath= */ null,
+                /* selectionPaint= */ null, /* cursorOffsetVertical= */ 0);
+        List<MockCanvas.DrawCommand> drawCommands = c.getDrawCommands();
+        var textsDrawn = LINE_COUNT;
+        var highlightsDrawn = 1;
+        assertThat(drawCommands.size()).isEqualTo(textsDrawn + highlightsDrawn);
+
+        var highlightsFound = 0;
+        var curLineIndex = 0;
+        for (int i = 0; i < drawCommands.size(); i++) {
+            MockCanvas.DrawCommand drawCommand = drawCommands.get(i);
+
+            if (drawCommand.path != null) {
+                assertThat(drawCommand.path).isEqualTo(selectionPath);
+                assertThat(drawCommand.paint.getColor()).isEqualTo(Color.YELLOW);
+                assertThat(drawCommand.paint.getBlendMode()).isNotNull();
+                highlightsFound++;
+            } else if (drawCommand.text != null) {
+                int start = layout.getLineStart(curLineIndex);
+                int end = layout.getLineEnd(curLineIndex);
+                assertEquals(LAYOUT_TEXT.toString().substring(start, end), drawCommand.text);
+                curLineIndex++;
+
+                assertWithMessage("highlight is drawn on top of text")
+                        .that(highlightsFound).isEqualTo(0);
+            }
+        }
+
+        assertThat(highlightsFound).isEqualTo(1);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_HIGH_CONTRAST_TEXT_SMALL_TEXT_RECT)
+    public void highContrastTextDisabledByDefault_testDrawHighlight_drawsNormalHighlightBehind() {
+        Layout layout = new MockLayout(LAYOUT_TEXT, mTextPaint, mWidth,
+                mAlign, mSpacingMult, mSpacingAdd);
+
+        List<Path> highlightPaths = new ArrayList<>();
+        List<Paint> highlightPaints = new ArrayList<>();
+
+        Path selectionPath = new Path();
+        RectF selectionRect = new RectF(0f, 0f, mWidth / 2f, LINE_HEIGHT);
+        selectionPath.addRect(selectionRect, Path.Direction.CW);
+        highlightPaths.add(selectionPath);
+
+        Paint selectionPaint = new Paint();
+        selectionPaint.setColor(Color.CYAN);
+        highlightPaints.add(selectionPaint);
+
+        final int width = 256;
+        final int height = 256;
+        MockCanvas c = new MockCanvas(width, height);
+        layout.draw(c, highlightPaths, highlightPaints, /* selectionPath= */ null,
+                /* selectionPaint= */ null, /* cursorOffsetVertical= */ 0);
+        List<MockCanvas.DrawCommand> drawCommands = c.getDrawCommands();
+        var textsDrawn = LINE_COUNT;
+        var highlightsDrawn = 1;
+        assertThat(drawCommands.size()).isEqualTo(textsDrawn + highlightsDrawn);
+
+        var highlightsFound = 0;
+        var curLineIndex = 0;
+        for (int i = 0; i < drawCommands.size(); i++) {
+            MockCanvas.DrawCommand drawCommand = drawCommands.get(i);
+
+            if (drawCommand.path != null) {
+                assertThat(drawCommand.path).isEqualTo(selectionPath);
+                assertThat(drawCommand.paint.getColor()).isEqualTo(Color.CYAN);
+                assertThat(drawCommand.paint.getBlendMode()).isNull();
+                highlightsFound++;
+            } else if (drawCommand.text != null) {
+                int start = layout.getLineStart(curLineIndex);
+                int end = layout.getLineEnd(curLineIndex);
+                assertEquals(LAYOUT_TEXT.toString().substring(start, end), drawCommand.text);
+                curLineIndex++;
+
+                assertWithMessage("highlight is drawn behind text")
+                        .that(highlightsFound).isGreaterThan(0);
+            }
+        }
+
+        assertThat(highlightsFound).isEqualTo(1);
+    }
+
+    @Test
+    @RequiresFlagsDisabled(FLAG_HIGH_CONTRAST_TEXT_SMALL_TEXT_RECT)
+    public void highContrastTextEnabledButFlagOff_testDrawHighlight_drawsNormalHighlightBehind() {
+        Layout layout = new MockLayout(LAYOUT_TEXT, mTextPaint, mWidth,
+                mAlign, mSpacingMult, mSpacingAdd);
+
+        List<Path> highlightPaths = new ArrayList<>();
+        List<Paint> highlightPaints = new ArrayList<>();
+
+        Path selectionPath = new Path();
+        RectF selectionRect = new RectF(0f, 0f, mWidth / 2f, LINE_HEIGHT);
+        selectionPath.addRect(selectionRect, Path.Direction.CW);
+        highlightPaths.add(selectionPath);
+
+        Paint selectionPaint = new Paint();
+        selectionPaint.setColor(Color.CYAN);
+        highlightPaints.add(selectionPaint);
+
+        final int width = 256;
+        final int height = 256;
+        MockCanvas c = new MockCanvas(width, height);
+        c.setHighContrastTextEnabled(true);
+        layout.draw(c, highlightPaths, highlightPaints, /* selectionPath= */ null,
+                /* selectionPaint= */ null, /* cursorOffsetVertical= */ 0);
+        List<MockCanvas.DrawCommand> drawCommands = c.getDrawCommands();
+        var textsDrawn = LINE_COUNT;
+        var highlightsDrawn = 1;
+        assertThat(drawCommands.size()).isEqualTo(textsDrawn + highlightsDrawn);
+
+        var highlightsFound = 0;
+        var curLineIndex = 0;
+        for (int i = 0; i < drawCommands.size(); i++) {
+            MockCanvas.DrawCommand drawCommand = drawCommands.get(i);
+
+            if (drawCommand.path != null) {
+                assertThat(drawCommand.path).isEqualTo(selectionPath);
+                assertThat(drawCommand.paint.getColor()).isEqualTo(Color.CYAN);
+                assertThat(drawCommand.paint.getBlendMode()).isNull();
+                highlightsFound++;
+            } else if (drawCommand.text != null) {
+                int start = layout.getLineStart(curLineIndex);
+                int end = layout.getLineEnd(curLineIndex);
+                assertEquals(LAYOUT_TEXT.toString().substring(start, end), drawCommand.text);
+                curLineIndex++;
+
+                assertWithMessage("highlight is drawn behind text")
+                        .that(highlightsFound).isGreaterThan(0);
+            }
+        }
+
+        assertThat(highlightsFound).isEqualTo(1);
+    }
+
+    @Test
+    public void mockCanvasHighContrastOverridesCorrectly() {
+        var canvas = new MockCanvas(100, 100);
+
+        assertThat(canvas.isHighContrastTextEnabled()).isFalse();
+        canvas.setHighContrastTextEnabled(true);
+        assertThat(canvas.isHighContrastTextEnabled()).isTrue();
+        canvas.setHighContrastTextEnabled(false);
+        assertThat(canvas.isHighContrastTextEnabled()).isFalse();
+    }
+
+    private static final class MockCanvas extends Canvas {
+
+        static class DrawCommand {
             public final String text;
             public final float x;
             public final float y;
+            public final Path path;
+            public final Paint paint;
 
-            DrawCommand(String text, float x, float y) {
+            DrawCommand(String text, float x, float y, Paint paint) {
                 this.text = text;
                 this.x = x;
                 this.y = y;
+                this.paint = paint;
+                path = null;
+            }
+
+            DrawCommand(Path path, Paint paint) {
+                this.path = path;
+                this.paint = paint;
+                y = 0;
+                x = 0;
+                text = null;
             }
         }
 
         List<DrawCommand> mDrawCommands;
+
+        private Boolean mIsHighContrastTextOverride = null;
+
+        public void setHighContrastTextEnabled(boolean enabled) {
+            mIsHighContrastTextOverride = enabled;
+        }
+
+        @Override
+        public boolean isHighContrastTextEnabled() {
+            return mIsHighContrastTextOverride == null ? super.isHighContrastTextEnabled()
+                    : mIsHighContrastTextOverride;
+        }
 
         MockCanvas(int width, int height) {
             super();
@@ -666,7 +926,7 @@ public class LayoutTest {
 
         @Override
         public void drawText(String text, int start, int end, float x, float y, Paint p) {
-            mDrawCommands.add(new DrawCommand(text.substring(start, end), x, y));
+            mDrawCommands.add(new DrawCommand(text.substring(start, end), x, y, p));
         }
 
         @Override
@@ -676,7 +936,7 @@ public class LayoutTest {
 
         @Override
         public void drawText(char[] text, int index, int count, float x, float y, Paint p) {
-            mDrawCommands.add(new DrawCommand(new String(text, index, count), x, y));
+            mDrawCommands.add(new DrawCommand(new String(text, index, count), x, y, p));
         }
 
         @Override
@@ -689,6 +949,11 @@ public class LayoutTest {
         public void drawTextRun(char[] text, int index, int count, int contextIndex,
                 int contextCount, float x, float y, boolean isRtl, Paint paint) {
             drawText(text, index, count, x, y, paint);
+        }
+
+        @Override
+        public void drawPath(Path path, Paint p) {
+            mDrawCommands.add(new DrawCommand(path, p));
         }
 
         List<DrawCommand> getDrawCommands() {

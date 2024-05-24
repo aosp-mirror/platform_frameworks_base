@@ -62,6 +62,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -146,6 +147,15 @@ public class SoundDoseHelper {
     private static final long GLOBAL_TIME_OFFSET_UNINITIALIZED = -1;
 
     private static final int SAFE_MEDIA_VOLUME_UNINITIALIZED = -1;
+
+    // see {@link #recordToPersistedString(SoundDoseRecord)}
+    // this is computed conservatively to accommodate the legacy persisting of SoundDoseRecords in
+    // which we materialized more decimal values.
+    // TODO: adjust value after soaking in
+    private static final int MAX_RECORDS_STRING_LENGTH = 50;
+    private static final int MAX_SETTINGS_LENGTH = 32768;
+    private static final int MAX_NUMBER_OF_CACHED_RECORDS =
+            MAX_SETTINGS_LENGTH / MAX_RECORDS_STRING_LENGTH;
 
     private final EventLogger mLogger = new EventLogger(AudioService.LOG_NB_EVENTS_SOUND_DOSE,
             "CSD updates");
@@ -893,7 +903,7 @@ public class SoundDoseHelper {
             if (AudioService.mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC
                     && safeDevicesContains(device)) {
                 soundDose.updateAttenuation(
-                        AudioSystem.getStreamVolumeDB(AudioSystem.STREAM_MUSIC,
+                        -AudioSystem.getStreamVolumeDB(AudioSystem.STREAM_MUSIC,
                                 (newIndex + 5) / 10,
                                 device), device);
             }
@@ -923,7 +933,7 @@ public class SoundDoseHelper {
         Log.v(TAG, "Initializing sound dose");
 
         try {
-            if (mCachedAudioDeviceCategories.size() > 0) {
+            if (!mCachedAudioDeviceCategories.isEmpty()) {
                 soundDose.initCachedAudioDeviceCategories(mCachedAudioDeviceCategories.toArray(
                         new ISoundDose.AudioDeviceCategory[0]));
                 mCachedAudioDeviceCategories.clear();
@@ -957,6 +967,7 @@ public class SoundDoseHelper {
                         mGlobalTimeOffsetInSecs);
                 if (records != null) {
                     mDoseRecords.addAll(records);
+                    sanitizeDoseRecords_l();
                 }
             }
         }
@@ -1176,15 +1187,33 @@ public class SoundDoseHelper {
                                 && r.duration == record.duration)) {
                     Log.w(TAG, "Could not find cached record to remove: " + record);
                 }
-            } else {
+            } else if (record.value > 0) {
                 mDoseRecords.add(record);
             }
         }
+
+        sanitizeDoseRecords_l();
 
         mAudioHandler.sendMessageAtTime(mAudioHandler.obtainMessage(MSG_PERSIST_CSD_VALUES,
                 /* arg1= */0, /* arg2= */0, /* obj= */null), /* delay= */0);
 
         mLogger.enqueue(SoundDoseEvent.getDoseUpdateEvent(currentCsd, totalDuration));
+    }
+
+    @GuardedBy("mCsdStateLock")
+    private void sanitizeDoseRecords_l() {
+        if (mDoseRecords.size() > MAX_NUMBER_OF_CACHED_RECORDS) {
+            int nrToRemove = mDoseRecords.size() - MAX_NUMBER_OF_CACHED_RECORDS;
+            Log.w(TAG,
+                    "Removing " + nrToRemove + " records from the total of " + mDoseRecords.size());
+            // Remove older elements to fit into persisted settings max length
+            Iterator<SoundDoseRecord> recordIterator = mDoseRecords.iterator();
+            while (recordIterator.hasNext() && nrToRemove > 0) {
+                recordIterator.next();
+                recordIterator.remove();
+                --nrToRemove;
+            }
+        }
     }
 
     @SuppressWarnings("GuardedBy")  // avoid limitation with intra-procedural analysis of lambdas
@@ -1213,8 +1242,8 @@ public class SoundDoseHelper {
             long globalTimeOffsetInSecs) {
         return convertToGlobalTime(record.timestamp, globalTimeOffsetInSecs)
                 + PERSIST_CSD_RECORD_FIELD_SEPARATOR + record.duration
-                + PERSIST_CSD_RECORD_FIELD_SEPARATOR + record.value
-                + PERSIST_CSD_RECORD_FIELD_SEPARATOR + record.averageMel;
+                + PERSIST_CSD_RECORD_FIELD_SEPARATOR + String.format("%.3f", record.value)
+                + PERSIST_CSD_RECORD_FIELD_SEPARATOR + String.format("%.3f", record.averageMel);
     }
 
     private static long convertToGlobalTime(long bootTimeInSecs, long globalTimeOffsetInSecs) {

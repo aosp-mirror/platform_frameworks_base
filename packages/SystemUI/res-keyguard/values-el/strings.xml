@@ -33,8 +33,8 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Φόρτιση"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Γρήγορη φόρτιση"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Αργή φόρτιση"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Η φόρτιση βελτιστοποιήθηκε για την προστασία της μπαταρίας"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Πρόβλημα αξεσουάρ φόρτισης"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Η φόρτιση τέθηκε σε αναμονή για την προστασία της μπαταρίας"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ελέγξτε το αξεσουάρ φόρτισης"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Κλειδωμένο δίκτυο"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Δεν υπάρχει SIM"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Η SIM δεν μπορεί να χρησιμοποιηθεί."</string>

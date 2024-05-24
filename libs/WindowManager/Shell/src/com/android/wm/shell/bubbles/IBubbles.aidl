@@ -17,6 +17,7 @@
 package com.android.wm.shell.bubbles;
 
 import android.content.Intent;
+import android.graphics.Rect;
 import com.android.wm.shell.bubbles.IBubblesListener;
 
 /**
@@ -29,7 +30,7 @@ interface IBubbles {
 
     oneway void unregisterBubbleListener(in IBubblesListener listener) = 2;
 
-    oneway void showBubble(in String key, in int bubbleBarOffsetX, in int bubbleBarOffsetY) = 3;
+    oneway void showBubble(in String key, in Rect bubbleBarBounds) = 3;
 
     oneway void removeBubble(in String key) = 4;
 

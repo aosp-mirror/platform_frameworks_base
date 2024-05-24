@@ -15,9 +15,11 @@
  */
 package android.hardware.location;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.chre.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -39,13 +41,17 @@ public final class NanoAppMessage implements Parcelable {
     private int mMessageType;
     private byte[] mMessageBody;
     private boolean mIsBroadcasted;
+    private boolean mIsReliable;
+    private int mMessageSequenceNumber;
 
-    private NanoAppMessage(
-            long nanoAppId, int messageType, byte[] messageBody, boolean broadcasted) {
+    private NanoAppMessage(long nanoAppId, int messageType, byte[] messageBody,
+            boolean broadcasted, boolean isReliable, int messageSequenceNumber) {
         mNanoAppId = nanoAppId;
         mMessageType = messageType;
         mMessageBody = messageBody;
         mIsBroadcasted = broadcasted;
+        mIsReliable = isReliable;
+        mMessageSequenceNumber = messageSequenceNumber;
     }
 
     /**
@@ -62,10 +68,10 @@ public final class NanoAppMessage implements Parcelable {
      *
      * @return the NanoAppMessage object
      */
-    public static NanoAppMessage createMessageToNanoApp(
-            long targetNanoAppId, int messageType, byte[] messageBody) {
-        return new NanoAppMessage(
-                targetNanoAppId, messageType, messageBody, false /* broadcasted */);
+    public static NanoAppMessage createMessageToNanoApp(long targetNanoAppId, int messageType,
+            byte[] messageBody) {
+        return new NanoAppMessage(targetNanoAppId, messageType, messageBody,
+                false /* broadcasted */, false /* isReliable */, 0 /* messageSequenceNumber */);
     }
 
     /**
@@ -81,9 +87,33 @@ public final class NanoAppMessage implements Parcelable {
      *
      * @return the NanoAppMessage object
      */
-    public static NanoAppMessage createMessageFromNanoApp(
-            long sourceNanoAppId, int messageType, byte[] messageBody, boolean broadcasted) {
-        return new NanoAppMessage(sourceNanoAppId, messageType, messageBody, broadcasted);
+    public static NanoAppMessage createMessageFromNanoApp(long sourceNanoAppId, int messageType,
+            byte[] messageBody, boolean broadcasted) {
+        return new NanoAppMessage(sourceNanoAppId, messageType, messageBody, broadcasted,
+                false /* isReliable */, 0 /* messageSequenceNumber */);
+    }
+
+    /**
+     * Creates a NanoAppMessage object sent from a nanoapp.
+     *
+     * This factory method is intended only to be used by the Context Hub Service when delivering
+     * messages from a nanoapp to clients.
+     *
+     * @param sourceNanoAppId the ID of the nanoapp that the message was sent from
+     * @param messageType the nanoapp-dependent message type
+     * @param messageBody the byte array message contents
+     * @param broadcasted {@code true} if the message was broadcasted, {@code false} otherwise
+     * @param isReliable if the NanoAppMessage is reliable
+     * @param messageSequenceNumber the message sequence number of the NanoAppMessage
+     *
+     * @return the NanoAppMessage object
+     */
+    @FlaggedApi(Flags.FLAG_RELIABLE_MESSAGE)
+    public static @NonNull NanoAppMessage createMessageFromNanoApp(long sourceNanoAppId,
+            int messageType, @NonNull byte[] messageBody, boolean broadcasted, boolean isReliable,
+            int messageSequenceNumber) {
+        return new NanoAppMessage(sourceNanoAppId, messageType, messageBody, broadcasted,
+                isReliable, messageSequenceNumber);
     }
 
     /**
@@ -114,6 +144,40 @@ public final class NanoAppMessage implements Parcelable {
         return mIsBroadcasted;
     }
 
+    /**
+     * Returns if the message is reliable. The default value is {@code false}
+     * @return {@code true} if the message is reliable, {@code false} otherwise
+     */
+    @FlaggedApi(Flags.FLAG_RELIABLE_MESSAGE)
+    public boolean isReliable() {
+        return mIsReliable;
+    }
+
+    /**
+     * Returns the message sequence number. The default value is 0
+     * @return the message sequence number of the message
+     */
+    @FlaggedApi(Flags.FLAG_RELIABLE_MESSAGE)
+    public int getMessageSequenceNumber() {
+        return mMessageSequenceNumber;
+    }
+
+    /**
+     * Sets the isReliable field of the message
+     */
+    @FlaggedApi(Flags.FLAG_RELIABLE_MESSAGE)
+    public void setIsReliable(boolean isReliable) {
+        mIsReliable = isReliable;
+    }
+
+    /**
+     * Sets the message sequence number of the message
+     */
+    @FlaggedApi(Flags.FLAG_RELIABLE_MESSAGE)
+    public void setMessageSequenceNumber(int messageSequenceNumber) {
+        mMessageSequenceNumber = messageSequenceNumber;
+    }
+
     private NanoAppMessage(Parcel in) {
         mNanoAppId = in.readLong();
         mIsBroadcasted = (in.readInt() == 1);
@@ -122,6 +186,9 @@ public final class NanoAppMessage implements Parcelable {
         int msgSize = in.readInt();
         mMessageBody = new byte[msgSize];
         in.readByteArray(mMessageBody);
+
+        mIsReliable = (in.readInt() == 1);
+        mMessageSequenceNumber = in.readInt();
     }
 
     @Override
@@ -137,6 +204,9 @@ public final class NanoAppMessage implements Parcelable {
 
         out.writeInt(mMessageBody.length);
         out.writeByteArray(mMessageBody);
+
+        out.writeInt(mIsReliable ? 1 : 0);
+        out.writeInt(mMessageSequenceNumber);
     }
 
     public static final @NonNull Creator<NanoAppMessage> CREATOR =
@@ -159,7 +229,9 @@ public final class NanoAppMessage implements Parcelable {
 
         String ret = "NanoAppMessage[type = " + mMessageType + ", length = " + mMessageBody.length
                 + " bytes, " + (mIsBroadcasted ? "broadcast" : "unicast") + ", nanoapp = 0x"
-                + Long.toHexString(mNanoAppId) + "](";
+                + Long.toHexString(mNanoAppId) + ", isReliable = "
+                + (mIsReliable ? "true" : "false") + ", messageSequenceNumber = "
+                + mMessageSequenceNumber + "](";
         if (length > 0) {
             ret += "data = 0x";
         }
@@ -190,7 +262,11 @@ public final class NanoAppMessage implements Parcelable {
             isEqual = (other.getNanoAppId() == mNanoAppId)
                     && (other.getMessageType() == mMessageType)
                     && (other.isBroadcastMessage() == mIsBroadcasted)
-                    && Arrays.equals(other.getMessageBody(), mMessageBody);
+                    && Arrays.equals(other.getMessageBody(), mMessageBody)
+                    && (!Flags.reliableMessage()
+                            || (other.isReliable() == mIsReliable))
+                    && (!Flags.reliableMessage()
+                            || (other.getMessageSequenceNumber() == mMessageSequenceNumber));
         }
 
         return isEqual;

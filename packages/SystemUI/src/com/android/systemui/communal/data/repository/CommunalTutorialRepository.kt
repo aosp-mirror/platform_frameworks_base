@@ -16,6 +16,7 @@
 package com.android.systemui.communal.data.repository
 
 import android.provider.Settings
+import android.provider.Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED
 import android.provider.Settings.Secure.HUB_MODE_TUTORIAL_NOT_STARTED
 import android.provider.Settings.Secure.HubModeTutorialState
 import com.android.systemui.dagger.SysUISingleton
@@ -24,7 +25,9 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
-import com.android.systemui.settings.UserTracker
+import com.android.systemui.log.dagger.CommunalTableLog
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
@@ -35,6 +38,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -62,14 +66,20 @@ class CommunalTutorialRepositoryImpl
 constructor(
     @Application private val applicationScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
-    userRepository: UserRepository,
+    private val userRepository: UserRepository,
     private val secureSettings: SecureSettings,
-    private val userTracker: UserTracker,
     @CommunalLog logBuffer: LogBuffer,
+    @CommunalTableLog tableLogBuffer: TableLogBuffer,
 ) : CommunalTutorialRepository {
 
     companion object {
         private const val TAG = "CommunalTutorialRepository"
+
+        const val MIN_TUTORIAL_VERSION = HUB_MODE_TUTORIAL_COMPLETED
+
+        // A version number which ensures that users, regardless of their completion of previous
+        // versions, see the updated tutorial when this number is bumped.
+        const val CURRENT_TUTORIAL_VERSION = MIN_TUTORIAL_VERSION + 1
     }
 
     private data class SettingsState(
@@ -80,7 +90,7 @@ constructor(
 
     private val settingsState: Flow<SettingsState> =
         userRepository.selectedUserInfo
-            .flatMapLatest { observeSettings() }
+            .flatMapLatest { userInfo -> observeSettings(userInfo.id) }
             .shareIn(scope = applicationScope, started = SharingStarted.WhileSubscribed())
 
     /** Emits the state of tutorial state in settings */
@@ -88,34 +98,46 @@ constructor(
         settingsState
             .map { it.hubModeTutorialState }
             .filterNotNull()
+            .logDiffsForTable(
+                tableLogBuffer = tableLogBuffer,
+                columnPrefix = "",
+                columnName = "tutorialSettingState",
+                initialValue = HUB_MODE_TUTORIAL_NOT_STARTED,
+            )
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = HUB_MODE_TUTORIAL_NOT_STARTED
+                initialValue = HUB_MODE_TUTORIAL_NOT_STARTED,
             )
 
-    private fun observeSettings(): Flow<SettingsState> =
+    private fun observeSettings(userId: Int): Flow<SettingsState> =
         secureSettings
             .observerFlow(
-                userId = userTracker.userId,
-                names =
-                    arrayOf(
-                        Settings.Secure.HUB_MODE_TUTORIAL_STATE,
-                    )
+                userId = userId,
+                names = arrayOf(Settings.Secure.HUB_MODE_TUTORIAL_STATE),
             )
             // Force an update
             .onStart { emit(Unit) }
-            .map { readFromSettings() }
+            .map { readFromSettings(userId) }
 
-    private suspend fun readFromSettings(): SettingsState =
+    private suspend fun readFromSettings(userId: Int): SettingsState =
         withContext(backgroundDispatcher) {
-            val userId = userTracker.userId
-            val hubModeTutorialState =
+            var hubModeTutorialState =
                 secureSettings.getIntForUser(
                     Settings.Secure.HUB_MODE_TUTORIAL_STATE,
                     HUB_MODE_TUTORIAL_NOT_STARTED,
                     userId,
                 )
+
+            if (hubModeTutorialState >= CURRENT_TUTORIAL_VERSION) {
+                // Tutorial is considered "completed" if the user has completed the current or a
+                // newer version.
+                hubModeTutorialState = HUB_MODE_TUTORIAL_COMPLETED
+            } else if (hubModeTutorialState >= MIN_TUTORIAL_VERSION) {
+                // Tutorial is considered "not started" if the user completed a version older than
+                // the current.
+                hubModeTutorialState = HUB_MODE_TUTORIAL_NOT_STARTED
+            }
             val settingsState = SettingsState(hubModeTutorialState)
             logger.d({ "Communal tutorial state for user $int1 in settings: $str1" }) {
                 int1 = userId
@@ -127,18 +149,40 @@ constructor(
 
     override suspend fun setTutorialState(state: Int): Unit =
         withContext(backgroundDispatcher) {
-            val userId = userTracker.userId
+            val userId = userRepository.getSelectedUserInfo().id
             if (tutorialSettingState.value == state) {
                 return@withContext
             }
+            val newState =
+                if (state == HUB_MODE_TUTORIAL_COMPLETED) CURRENT_TUTORIAL_VERSION else state
             logger.d({ "Update communal tutorial state to $int1 for user $int2" }) {
-                int1 = state
+                int1 = newState
                 int2 = userId
             }
             secureSettings.putIntForUser(
                 Settings.Secure.HUB_MODE_TUTORIAL_STATE,
-                state,
+                newState,
                 userId,
             )
         }
+}
+
+// TODO(b/320769333): delete me and use the real repo above when tutorial is ready.
+@SysUISingleton
+class CommunalTutorialDisabledRepositoryImpl
+@Inject
+constructor(
+    @Application private val applicationScope: CoroutineScope,
+) : CommunalTutorialRepository {
+    override val tutorialSettingState: StateFlow<Int> =
+        emptyFlow<Int>()
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = HUB_MODE_TUTORIAL_COMPLETED,
+            )
+
+    override suspend fun setTutorialState(state: Int) {
+        // Do nothing
+    }
 }

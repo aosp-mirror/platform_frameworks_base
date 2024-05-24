@@ -29,7 +29,6 @@ import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_TRANSFER;
 
 import android.Manifest;
-import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -38,13 +37,16 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.media.MediaRoute2Info;
 import android.media.RouteListingPreference;
+import android.os.SystemProperties;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
 import com.android.settingslib.media.flags.Flags;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -63,6 +65,17 @@ public class PhoneMediaDevice extends MediaDevice {
 
     private final DeviceIconUtil mDeviceIconUtil;
 
+    /** Returns this device name for media transfer. */
+    public static @NonNull String getMediaTransferThisDeviceName(@NonNull Context context) {
+        if (isTv(context)) {
+            return context.getString(R.string.media_transfer_this_device_name_tv);
+        } else if (isTablet()) {
+            return context.getString(R.string.media_transfer_this_device_name_tablet);
+        } else {
+            return context.getString(R.string.media_transfer_this_device_name);
+        }
+    }
+
     /** Returns the device name for the given {@code routeInfo}. */
     public static String getSystemRouteNameFromType(
             @NonNull Context context, @NonNull MediaRoute2Info routeInfo) {
@@ -80,7 +93,7 @@ public class PhoneMediaDevice extends MediaDevice {
                 name = context.getString(R.string.media_transfer_dock_speaker_device_name);
                 break;
             case TYPE_BUILTIN_SPEAKER:
-                name = context.getString(R.string.media_transfer_this_device_name);
+                name = getMediaTransferThisDeviceName(context);
                 break;
             case TYPE_HDMI:
                 name = context.getString(isTv ? R.string.tv_media_transfer_default :
@@ -117,16 +130,15 @@ public class PhoneMediaDevice extends MediaDevice {
         return name.toString();
     }
 
-    PhoneMediaDevice(Context context, MediaRoute2Info info, String packageName) {
-        this(context, info, packageName, null);
+    PhoneMediaDevice(Context context, MediaRoute2Info info) {
+        this(context, info, null);
     }
 
     PhoneMediaDevice(
             Context context,
             MediaRoute2Info info,
-            String packageName,
             RouteListingPreference.Item item) {
-        super(context, info, packageName, item);
+        super(context, info, item);
         mDeviceIconUtil = new DeviceIconUtil(mContext);
         initDeviceRecord();
     }
@@ -134,6 +146,11 @@ public class PhoneMediaDevice extends MediaDevice {
     static boolean isTv(Context context) {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)
                 && Flags.enableTvMediaOutputDialog();
+    }
+
+    static boolean isTablet() {
+        return Arrays.asList(SystemProperties.get("ro.build.characteristics").split(","))
+                .contains("tablet");
     }
 
     // MediaRoute2Info.getType was made public on API 34, but exists since API 30.
@@ -230,6 +247,17 @@ public class PhoneMediaDevice extends MediaDevice {
     @SuppressWarnings("NewApi")
     @Override
     public String getId() {
+        if (com.android.media.flags.Flags.enableAudioPoliciesDeviceAndBluetoothController()) {
+            // Note: be careful when removing this flag. Instead of just removing it, you might want
+            // to replace it with SDK_INT >= 35. Explanation: The presence of SDK checks in settings
+            // lib suggests that a mainline component may depend on this code. Which means removing
+            // this "if" (and using always the route info id) could mean a regression on mainline
+            // code running on a device that's running API 34 or older. Unfortunately, we cannot
+            // check the API level at the moment of writing this code because the API level has not
+            // been bumped, yet.
+            return mRouteInfo.getId();
+        }
+
         String id;
         switch (mRouteInfo.getType()) {
             case TYPE_WIRED_HEADSET:

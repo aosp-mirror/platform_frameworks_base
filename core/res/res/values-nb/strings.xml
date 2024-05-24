@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> etter <xliff:g id="TIME_DELAY">{2}</xliff:g> sekunder"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ikke viderekoblet"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ikke viderekoblet"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Sikkerhet for mobilnettverk"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Gå gjennom innstillingene"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Enhetsidentifikatoren er brukt"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Et nettverk på <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g>-tilkoblingen har registrert den unike identifikatoren til enheten (IMSI) <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> ganger i perioden mellom <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> og <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Kryptert tilkobling til <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Nå er du koblet til et tryggere mobilnettverk."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Ikke-kryptert tilkobling til <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Du er koblet til et ikke-kryptert mobilnettverk. Anropene, meldingene og dataene dine er sårbare for å bli fanget opp."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Sikkerhetsinnstillinger for mobil"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Finn ut mer"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Funksjonskode utført."</string>
     <string name="fcError" msgid="5325116502080221346">"Tilkoblingsproblem eller ugyldig funksjonskode."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -370,6 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Tillat at denne appen binder seg til modulen for kringkastede meldinger for å videresende kringkastede meldinger når de mottas. Kringkastede varsler leveres noen steder for å advare deg om nødssituasjoner. Skadelige apper kan forstyrre ytelsen eller funksjonen til enheten din når en kringkastet nødmelding mottas."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Administrer pågående anrop"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Gir en app tillatelse til å se informasjon om pågående anrop på enheten og til å kontrollere disse anropene."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Se siste kjente mobilidentitet."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Tillater at en app ser den siste kjente mobilidentiteten som er levert via telefoni."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"lese kringkastede meldinger"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Tillater at appen kan lese kringkastede meldinger enheten din mottar. Kringkastede varsler leveres noen steder for å advare deg om nødssituasjoner. Skadelige apper kan forstyrre ytelsen eller funksjonen til enheten din når en kringkastet nødmelding mottas."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"lese abonnement på nyhetskilder"</string>
@@ -434,6 +446,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Lar appen bruke forgrunnstjenester med typen «systemExempted»"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"kjør forgrunnstjeneste med typen «fileManagement»"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Lar appen bruke forgrunnstjenester med typen «fileManagement»"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"kjør forgrunnstjeneste med typen «mediaProcessing»"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Lar appen bruke forgrunnstjenester med typen «mediaProcessing»"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"kjøre forgrunnstjeneste med typen «specialUse»"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Lar appen bruke forgrunnstjenester med typen «specialUse»"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"måle lagringsplass for apper"</string>
@@ -539,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Gir appen tillatelse til å bruke telefonens infrarøde sender."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"endre bakgrunnsbilde"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Lar appen angi systembakgrunnen."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Bruk skjulte profiler"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Tillater at appen bruker skjulte profiler."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"endre størrelsen på bakgrunnsbildet"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Lar appen angi størrelsestips for systembakgrunnen."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"endre tidssone"</string>
@@ -632,7 +648,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Bruk skjermlås"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Skriv inn skjermlåsen for å fortsette"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Trykk godt på sensoren"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Fingeravtrykket gjenkjennes ikke. Prøv på nytt."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Fingeravtrykket ble ikke gjenkjent. Prøv på nytt."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Rengjør fingeravtrykkssensoren og prøv igjen"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Rengjør sensoren og prøv igjen"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Trykk godt på sensoren"</string>
@@ -650,18 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Fingeravtrykket er godkjent"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Ansiktet er autentisert"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Ansiktet er autentisert. Trykk på Bekreft"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Maskinvare for fingeravtrykk er ikke tilgjengelig."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Maskinvare for fingeravtrykk er ikke tilgjengelig"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Kan ikke konfigurere fingeravtrykk"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Konfigureringen av fingeravtrykk er tidsavbrutt. Prøv på nytt."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Fingeravtrykk-operasjonen ble avbrutt."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Fingeravtrykk-operasjonen ble avbrutt av brukeren."</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Fingeravtrykk-operasjonen ble avbrutt"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Fingeravtrykk-operasjonen ble avbrutt av brukeren"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"For mange forsøk. Bruk skjermlås i stedet."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"For mange forsøk. Bruk skjermlås i stedet."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Kan ikke behandle fingeravtrykket. Prøv på nytt."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Ingen fingeravtrykk er registrert."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Denne enheten har ikke fingeravtrykkssensor."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensoren er midlertidig slått av."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Kan ikke bruke fingeravtrykkssensoren. Gå til en reparasjonsleverandør"</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Ingen fingeravtrykk er registrert"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Denne enheten har ikke fingeravtrykkssensor"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Sensoren er midlertidig slått av"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Kan ikke bruke fingeravtrykkssensoren. Gå til en reparasjonsleverandør."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Av/på-knappen ble trykket"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Finger <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Bruk fingeravtrykk"</string>
@@ -696,7 +712,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Kan ikke se ansiktet ditt. Hold telefonen i øyehøyde."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"For mye bevegelse. Hold telefonen stødig."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Registrer ansiktet ditt på nytt."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Ansiktet gjenkjennes ikke. Prøv på nytt."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Ansiktet ble ikke gjenkjent. Prøv på nytt."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Endre hodeposisjonen litt"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Se mer direkte på telefonen"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Se mer direkte på telefonen"</string>
@@ -807,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Lar appen samle inn sensordata ved en hastighet som er høyere enn 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"oppdatere appen uten brukerhandling"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Lar innehaveren oppdatere appen hen tidligere installerte, uten brukerhandling"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"oppdater bekreftelsesstatusen for E2EE-kontaktnøkler som eies av andre apper"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Tillater at appen oppdaterer bekreftelsesstatus for E2EE-kontaktnøkler som eies av andre apper"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Angi passordregler"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrollerer tillatt lengde og tillatte tegn i passord og PIN-koder for opplåsing av skjermen."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Overvåking av forsøk på å låse opp skjermen"</string>
@@ -1906,6 +1924,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Helg"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Aktivitet"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Sover"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Administreres av <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"På"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Av"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> slår av noen lyder"</string>
@@ -1925,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Bekreftet"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Vis"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Skjul"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Skjult"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Vises"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"slå utvidelse av/på"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Port for USB-tilleggsutstyr for Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1965,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Vil du slå på jobbapper igjen?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Slå på"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Nød"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Angi en skjermlås"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Angi skjermlås"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"For å bruke det private området, angi en skjermlås på enheten"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Appen er ikke tilgjengelig"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> er ikke tilgjengelig for øyeblikket."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> er utilgjengelig"</string>
@@ -2341,8 +2365,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Kan ikke speile til skjermen"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Bruk en annen kabel og prøv igjen"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Enheten er for varm og kan ikke speiles til skjermen før den kjøles ned"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Kabelen støtter kanskje ikke skjermer"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"USB-C-kabelen din kobler seg kanskje ikke til skjermer på riktig måte"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen er på"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> bruker begge skjermene til å vise innhold"</string>
@@ -2366,4 +2388,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Jobb 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Felles"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Automatisk tilkoblet satellitt"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Du kan sende og motta meldinger uten mobil- eller wifi-nettverk"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Åpne Meldinger"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Slik fungerer det"</string>
 </resources>

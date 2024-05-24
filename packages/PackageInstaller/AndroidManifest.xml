@@ -45,11 +45,9 @@
 
         <activity android:name=".v2.ui.InstallLaunch"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:theme="@style/Theme.AlertDialogActivity"
             android:exported="false"/>
 
         <activity android:name=".InstallStart"
-                android:theme="@style/Theme.AlertDialogActivity"
                 android:exported="true"
                 android:excludeFromRecents="true">
             <intent-filter android:priority="1">
@@ -75,22 +73,16 @@
             </intent-filter>
         </activity>
 
-        <!-- NOTE: the workaround to fix the screen flash problem. Remember to check the problem
-            is resolved for new implementation -->
         <activity android:name=".InstallStaging"
-                  android:theme="@style/Theme.AlertDialogActivity.NoDim"
-                  android:exported="false" />
+                android:exported="false" />
 
         <activity android:name=".DeleteStagedFileOnResult"
-            android:theme="@style/Theme.AlertDialogActivity.NoActionBar"
             android:exported="false" />
 
         <activity android:name=".PackageInstallerActivity"
-                  android:theme="@style/Theme.AlertDialogActivity.NoAnimation"
-                  android:exported="false" />
+                android:exported="false" />
 
         <activity android:name=".InstallInstalling"
-                android:theme="@style/Theme.AlertDialogActivity.NoAnimation"
                 android:exported="false" />
 
         <receiver android:name=".common.InstallEventReceiver"
@@ -102,16 +94,13 @@
         </receiver>
 
         <activity android:name=".InstallSuccess"
-                android:theme="@style/Theme.AlertDialogActivity.NoAnimation"
                 android:exported="false" />
 
         <activity android:name=".InstallFailed"
-                android:theme="@style/Theme.AlertDialogActivity.NoAnimation"
                 android:exported="false" />
 
         <activity android:name=".UninstallerActivity"
                 android:configChanges="orientation|keyboardHidden|screenSize"
-                android:theme="@style/Theme.AlertDialogActivity.NoActionBar"
                 android:excludeFromRecents="true"
                 android:noHistory="true"
                 android:exported="true">
@@ -125,7 +114,6 @@
 
         <activity android:name=".v2.ui.UninstallLaunch"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:theme="@style/Theme.AlertDialogActivity.NoActionBar"
             android:excludeFromRecents="true"
             android:noHistory="true"
             android:exported="false">
@@ -148,7 +136,6 @@
         </receiver>
 
         <activity android:name=".UninstallUninstalling"
-            android:theme="@style/Theme.AlertDialogActivity.NoActionBar"
             android:excludeFromRecents="true"
             android:exported="false" />
 
@@ -175,7 +162,6 @@
 
         <activity android:name=".UnarchiveActivity"
                   android:configChanges="orientation|keyboardHidden|screenSize"
-                  android:theme="@style/Theme.AlertDialogActivity.NoActionBar"
                   android:excludeFromRecents="true"
                   android:noHistory="true"
                   android:exported="true">
@@ -187,7 +173,6 @@
 
         <activity android:name=".UnarchiveErrorActivity"
                   android:configChanges="orientation|keyboardHidden|screenSize"
-                  android:theme="@style/Theme.AlertDialogActivity.NoActionBar"
                   android:excludeFromRecents="true"
                   android:noHistory="true"
                   android:exported="true">

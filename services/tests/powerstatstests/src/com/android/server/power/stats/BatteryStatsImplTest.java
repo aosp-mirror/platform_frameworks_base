@@ -31,15 +31,18 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.UidTraffic;
 import android.content.Context;
+import android.hardware.SensorManager;
 import android.os.BatteryConsumer;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
@@ -51,11 +54,11 @@ import android.os.HandlerThread;
 import android.os.Parcel;
 import android.os.WakeLockStats;
 import android.os.WorkSource;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.SparseArray;
 import android.view.Display;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.CpuScalingPolicies;
@@ -68,19 +71,26 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.truth.LongSubject;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.util.List;
 
-@LargeTest
 @RunWith(AndroidJUnit4.class)
 @SuppressWarnings("GuardedBy")
 public class BatteryStatsImplTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
+
     @Mock
     private KernelCpuUidFreqTimeReader mKernelUidCpuFreqTimeReader;
     @Mock
@@ -110,7 +120,7 @@ public class BatteryStatsImplTest {
     private PowerStatsExporter mPowerStatsExporter;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
 
         when(mKernelUidCpuFreqTimeReader.isFastCpuTimesReader()).thenReturn(true);
@@ -128,8 +138,17 @@ public class BatteryStatsImplTest {
                 .setKernelSingleUidTimeReader(mKernelSingleUidTimeReader)
                 .setKernelWakelockReader(mKernelWakelockReader);
 
-        final Context context = InstrumentationRegistry.getContext();
-        File systemDir = context.getCacheDir();
+        File systemDir = Files.createTempDirectory("BatteryStatsHistoryTest").toFile();
+
+        Context context;
+        if (RavenwoodRule.isUnderRavenwood()) {
+            context = mock(Context.class);
+            SensorManager sensorManager = mock(SensorManager.class);
+            when(sensorManager.getSensorList(anyInt())).thenReturn(List.of());
+            when(context.getSystemService(SensorManager.class)).thenReturn(sensorManager);
+        } else {
+            context = InstrumentationRegistry.getContext();
+        }
         mPowerStatsStore = new PowerStatsStore(systemDir, mHandler,
                 new AggregatedPowerStatsConfig());
         mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mPowerStatsExporter,
@@ -559,45 +578,136 @@ public class BatteryStatsImplTest {
 
         // First wakelock, acquired once, not currently held
         mMockClock.realtime = 1000;
-        mBatteryStatsImpl.noteStartWakeLocked(10100, 100, null, "wakeLock1", null,
-                BatteryStats.WAKE_TYPE_PARTIAL, false);
+        mBatteryStatsImpl.noteStartWakeLocked(
+                10100, 100, null, "wakeLock1", null, BatteryStats.WAKE_TYPE_PARTIAL, false);
 
         mMockClock.realtime = 3000;
-        mBatteryStatsImpl.noteStopWakeLocked(10100, 100, null, "wakeLock1", null,
-                BatteryStats.WAKE_TYPE_PARTIAL);
+        mBatteryStatsImpl.noteStopWakeLocked(
+                10100, 100, null, "wakeLock1", null, BatteryStats.WAKE_TYPE_PARTIAL);
 
         // Second wakelock, acquired twice, still held
         mMockClock.realtime = 4000;
-        mBatteryStatsImpl.noteStartWakeLocked(10200, 101, null, "wakeLock2", null,
-                BatteryStats.WAKE_TYPE_PARTIAL, false);
+        mBatteryStatsImpl.noteStartWakeLocked(
+                10200, 101, null, "wakeLock2", null, BatteryStats.WAKE_TYPE_PARTIAL, false);
 
         mMockClock.realtime = 5000;
-        mBatteryStatsImpl.noteStopWakeLocked(10200, 101, null, "wakeLock2", null,
-                BatteryStats.WAKE_TYPE_PARTIAL);
+        mBatteryStatsImpl.noteStopWakeLocked(
+                10200, 101, null, "wakeLock2", null, BatteryStats.WAKE_TYPE_PARTIAL);
 
         mMockClock.realtime = 6000;
-        mBatteryStatsImpl.noteStartWakeLocked(10200, 101, null, "wakeLock2", null,
-                BatteryStats.WAKE_TYPE_PARTIAL, false);
+        mBatteryStatsImpl.noteStartWakeLocked(
+                10200, 101, null, "wakeLock2", null, BatteryStats.WAKE_TYPE_PARTIAL, false);
+
+        // Third and fourth wakelocks, overlapped with each other.
+        mMockClock.realtime = 7000;
+        mBatteryStatsImpl.noteStartWakeLocked(
+                10300, 102, null, "wakeLock3", null, BatteryStats.WAKE_TYPE_PARTIAL, false);
+
+        mMockClock.realtime = 8000;
+        mBatteryStatsImpl.noteStartWakeLocked(
+                10400, 103, null, "wakeLock4", null, BatteryStats.WAKE_TYPE_PARTIAL, false);
 
         mMockClock.realtime = 9000;
+        mBatteryStatsImpl.noteStopWakeLocked(
+                10400, 103, null, "wakeLock4", null, BatteryStats.WAKE_TYPE_PARTIAL);
 
-        List<WakeLockStats.WakeLock> wakeLockStats =
-                mBatteryStatsImpl.getWakeLockStats().getWakeLocks();
-        assertThat(wakeLockStats).hasSize(2);
+        mMockClock.realtime = 10000;
+        mBatteryStatsImpl.noteStartWakeLocked(
+                10400, 104, null, "wakeLock5", null, BatteryStats.WAKE_TYPE_PARTIAL, false);
 
-        WakeLockStats.WakeLock wakeLock1 = wakeLockStats.stream()
-                .filter(wl -> wl.uid == 10100 && wl.name.equals("wakeLock1")).findFirst().get();
+        mMockClock.realtime = 11000;
+        mBatteryStatsImpl.noteStopWakeLocked(
+                10400, 104, null, "wakeLock5", null, BatteryStats.WAKE_TYPE_PARTIAL);
 
-        assertThat(wakeLock1.timesAcquired).isEqualTo(1);
-        assertThat(wakeLock1.timeHeldMs).isEqualTo(0);  // Not currently held
-        assertThat(wakeLock1.totalTimeHeldMs).isEqualTo(2000); // 3000-1000
+        mMockClock.realtime = 12000;
+        mBatteryStatsImpl.noteStopWakeLocked(
+                10300, 102, null, "wakeLock3", null, BatteryStats.WAKE_TYPE_PARTIAL);
 
-        WakeLockStats.WakeLock wakeLock2 = wakeLockStats.stream()
-                .filter(wl -> wl.uid == 10200 && wl.name.equals("wakeLock2")).findFirst().get();
+        mMockClock.realtime = 13000;
 
-        assertThat(wakeLock2.timesAcquired).isEqualTo(2);
-        assertThat(wakeLock2.timeHeldMs).isEqualTo(3000);  // 9000-6000
-        assertThat(wakeLock2.totalTimeHeldMs).isEqualTo(4000); // (5000-4000) + (9000-6000)
+        // Verify un-aggregated wakelocks.
+        WakeLockStats wakeLockStats = mBatteryStatsImpl.getWakeLockStats();
+        List<WakeLockStats.WakeLock> wakeLockList = wakeLockStats.getWakeLocks();
+        assertThat(wakeLockList).hasSize(4);
+
+        WakeLockStats.WakeLock wakeLock1 = getWakeLockFromList(wakeLockList, 10100, "wakeLock1");
+        assertThat(wakeLock1.isAggregated).isFalse();
+        assertThat(wakeLock1.totalWakeLockData.timesAcquired).isEqualTo(1);
+        assertThat(wakeLock1.totalWakeLockData.timeHeldMs).isEqualTo(0); // Not currently held
+        assertThat(wakeLock1.totalWakeLockData.totalTimeHeldMs).isEqualTo(2000); // 3000-1000
+
+        WakeLockStats.WakeLock wakeLock3 = getWakeLockFromList(wakeLockList, 10300, "wakeLock3");
+        assertThat(wakeLock3.isAggregated).isFalse();
+        assertThat(wakeLock3.totalWakeLockData.timesAcquired).isEqualTo(1);
+        assertThat(wakeLock3.totalWakeLockData.timeHeldMs).isEqualTo(0); // Not currently held
+        // (8000-7000)/2 + (9000-8000)/3 + (10000-9000)/2 + (11000-10000)/3 + (12000-11000)/2
+        assertThat(wakeLock3.totalWakeLockData.totalTimeHeldMs).isEqualTo(2166);
+
+        WakeLockStats.WakeLock wakeLock4 = getWakeLockFromList(wakeLockList, 10400, "wakeLock4");
+        assertThat(wakeLock4.isAggregated).isFalse();
+        assertThat(wakeLock4.totalWakeLockData.timesAcquired).isEqualTo(1);
+        assertThat(wakeLock4.totalWakeLockData.timeHeldMs).isEqualTo(0); // Not currently held
+        assertThat(wakeLock4.totalWakeLockData.totalTimeHeldMs).isEqualTo(333); // (9000-8000)/3
+
+        WakeLockStats.WakeLock wakeLock5 = getWakeLockFromList(wakeLockList, 10400, "wakeLock5");
+        assertThat(wakeLock5.isAggregated).isFalse();
+        assertThat(wakeLock5.totalWakeLockData.timesAcquired).isEqualTo(1);
+        assertThat(wakeLock5.totalWakeLockData.timeHeldMs).isEqualTo(0); // Not currently held
+        assertThat(wakeLock5.totalWakeLockData.totalTimeHeldMs).isEqualTo(333); // (11000-10000)/3
+
+        // Verify aggregated wakelocks.
+        List<WakeLockStats.WakeLock> aggregatedWakeLockList =
+                wakeLockStats.getAggregatedWakeLocks();
+        assertThat(aggregatedWakeLockList).hasSize(4);
+
+        WakeLockStats.WakeLock aggregatedWakeLock1 =
+                getAggregatedWakeLockFromList(aggregatedWakeLockList, 10100);
+        assertThat(aggregatedWakeLock1.isAggregated).isTrue();
+        assertThat(aggregatedWakeLock1.totalWakeLockData.timesAcquired).isEqualTo(1);
+        // Not currently held
+        assertThat(aggregatedWakeLock1.totalWakeLockData.timeHeldMs).isEqualTo(0);
+        // 3000-1000
+        assertThat(aggregatedWakeLock1.totalWakeLockData.totalTimeHeldMs).isEqualTo(2000);
+
+        WakeLockStats.WakeLock aggregatedWakeLock2 =
+                getAggregatedWakeLockFromList(aggregatedWakeLockList, 10200);
+        assertThat(aggregatedWakeLock2.isAggregated).isTrue();
+        assertThat(aggregatedWakeLock2.totalWakeLockData.timesAcquired).isEqualTo(2);
+        assertThat(aggregatedWakeLock2.totalWakeLockData.timeHeldMs).isEqualTo(7000); // 13000-6000
+        // (5000-4000) + (13000-6000)
+        assertThat(aggregatedWakeLock2.totalWakeLockData.totalTimeHeldMs)
+                .isEqualTo(8000);
+
+        WakeLockStats.WakeLock aggregatedWakeLock3 =
+                getAggregatedWakeLockFromList(aggregatedWakeLockList, 10300);
+        assertThat(aggregatedWakeLock3.isAggregated).isTrue();
+        assertThat(aggregatedWakeLock3.totalWakeLockData.timesAcquired).isEqualTo(1);
+        // Not currently held
+        assertThat(aggregatedWakeLock3.totalWakeLockData.timeHeldMs).isEqualTo(0);
+        // 12000-7000
+        assertThat(aggregatedWakeLock3.totalWakeLockData.totalTimeHeldMs).isEqualTo(5000);
+
+        WakeLockStats.WakeLock aggregatedWakeLock4 =
+                getAggregatedWakeLockFromList(aggregatedWakeLockList, 10400);
+        assertThat(aggregatedWakeLock4.isAggregated).isTrue();
+        assertThat(aggregatedWakeLock4.totalWakeLockData.timesAcquired).isEqualTo(2);
+        // Not currently held
+        assertThat(aggregatedWakeLock4.totalWakeLockData.timeHeldMs).isEqualTo(0);
+        assertThat(aggregatedWakeLock4.totalWakeLockData.totalTimeHeldMs)
+                .isEqualTo(2000); // (9000-8000) + (11000-10000)
+    }
+
+    private WakeLockStats.WakeLock getAggregatedWakeLockFromList(
+            List<WakeLockStats.WakeLock> wakeLockList, final int uid) {
+        return getWakeLockFromList(wakeLockList, uid, WakeLockStats.WakeLock.NAME_AGGREGATED);
+    }
+
+    private WakeLockStats.WakeLock getWakeLockFromList(
+            List<WakeLockStats.WakeLock> wakeLockList, final int uid, final String name) {
+        return wakeLockList.stream()
+            .filter(wl -> wl.uid == uid && wl.name.equals(name))
+            .findFirst()
+            .get();
     }
 
     @Test
@@ -747,14 +857,22 @@ public class BatteryStatsImplTest {
     }
 
     private UidTraffic createUidTraffic(int appUid, long rxBytes, long txBytes) {
-        final Parcel parcel = Parcel.obtain();
-        parcel.writeInt(appUid); // mAppUid
-        parcel.writeLong(rxBytes); // mRxBytes
-        parcel.writeLong(txBytes); // mTxBytes
-        parcel.setDataPosition(0);
-        UidTraffic uidTraffic = UidTraffic.CREATOR.createFromParcel(parcel);
-        parcel.recycle();
-        return uidTraffic;
+        if (RavenwoodRule.isUnderRavenwood()) {
+            UidTraffic uidTraffic = mock(UidTraffic.class);
+            when(uidTraffic.getUid()).thenReturn(appUid);
+            when(uidTraffic.getRxBytes()).thenReturn(rxBytes);
+            when(uidTraffic.getTxBytes()).thenReturn(txBytes);
+            return uidTraffic;
+        } else {
+            final Parcel parcel = Parcel.obtain();
+            parcel.writeInt(appUid); // mAppUid
+            parcel.writeLong(rxBytes); // mRxBytes
+            parcel.writeLong(txBytes); // mTxBytes
+            parcel.setDataPosition(0);
+            UidTraffic uidTraffic = UidTraffic.CREATOR.createFromParcel(parcel);
+            parcel.recycle();
+            return uidTraffic;
+        }
     }
 
     private BluetoothActivityEnergyInfo createBluetoothActivityEnergyInfo(
@@ -764,21 +882,31 @@ public class BatteryStatsImplTest {
             long controllerIdleTimeMs,
             long controllerEnergyUsed,
             UidTraffic... uidTraffic) {
-        Parcel parcel = Parcel.obtain();
-        parcel.writeLong(timestamp); // mTimestamp
-        parcel.writeInt(
-                BluetoothActivityEnergyInfo.BT_STACK_STATE_STATE_ACTIVE); // mBluetoothStackState
-        parcel.writeLong(controllerTxTimeMs); // mControllerTxTimeMs;
-        parcel.writeLong(controllerRxTimeMs); // mControllerRxTimeMs;
-        parcel.writeLong(controllerIdleTimeMs); // mControllerIdleTimeMs;
-        parcel.writeLong(controllerEnergyUsed); // mControllerEnergyUsed;
-        parcel.writeTypedList(ImmutableList.copyOf(uidTraffic)); // mUidTraffic
-        parcel.setDataPosition(0);
+        if (RavenwoodRule.isUnderRavenwood()) {
+            BluetoothActivityEnergyInfo info = mock(BluetoothActivityEnergyInfo.class);
+            when(info.getTimestampMillis()).thenReturn(timestamp);
+            when(info.getControllerTxTimeMillis()).thenReturn(controllerTxTimeMs);
+            when(info.getControllerRxTimeMillis()).thenReturn(controllerRxTimeMs);
+            when(info.getControllerIdleTimeMillis()).thenReturn(controllerIdleTimeMs);
+            when(info.getControllerEnergyUsed()).thenReturn(controllerEnergyUsed);
+            when(info.getUidTraffic()).thenReturn(ImmutableList.copyOf(uidTraffic));
+            return info;
+        } else {
+            Parcel parcel = Parcel.obtain();
+            parcel.writeLong(timestamp); // mTimestamp
+            parcel.writeInt(BluetoothActivityEnergyInfo.BT_STACK_STATE_STATE_ACTIVE);
+            parcel.writeLong(controllerTxTimeMs); // mControllerTxTimeMs;
+            parcel.writeLong(controllerRxTimeMs); // mControllerRxTimeMs;
+            parcel.writeLong(controllerIdleTimeMs); // mControllerIdleTimeMs;
+            parcel.writeLong(controllerEnergyUsed); // mControllerEnergyUsed;
+            parcel.writeTypedList(ImmutableList.copyOf(uidTraffic)); // mUidTraffic
+            parcel.setDataPosition(0);
 
-        BluetoothActivityEnergyInfo info =
-                BluetoothActivityEnergyInfo.CREATOR.createFromParcel(parcel);
-        parcel.recycle();
-        return info;
+            BluetoothActivityEnergyInfo info =
+                    BluetoothActivityEnergyInfo.CREATOR.createFromParcel(parcel);
+            parcel.recycle();
+            return info;
+        }
     }
 
     @Test

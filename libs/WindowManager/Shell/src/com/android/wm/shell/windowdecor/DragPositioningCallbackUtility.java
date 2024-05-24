@@ -26,9 +26,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.view.SurfaceControl;
-import android.window.WindowContainerTransaction;
 
-import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 
 /**
@@ -130,8 +128,7 @@ public class DragPositioningCallbackUtility {
             Rect taskBoundsAtDragStart, PointF repositionStartPoint, SurfaceControl.Transaction t,
             float x, float y) {
         updateTaskBounds(repositionTaskBounds, taskBoundsAtDragStart, repositionStartPoint, x, y);
-        t.setPosition(decoration.mTaskSurface, repositionTaskBounds.left,
-                repositionTaskBounds.top);
+        t.setPosition(decoration.mTaskSurface, repositionTaskBounds.left, repositionTaskBounds.top);
     }
 
     private static void updateTaskBounds(Rect repositionTaskBounds, Rect taskBoundsAtDragStart,
@@ -162,31 +159,30 @@ public class DragPositioningCallbackUtility {
 
     /**
      * Updates repositionTaskBounds to the final bounds of the task after the drag is finished. If
-     * the bounds are outside of the stable bounds, they are shifted to place task at the top of the
-     * stable bounds.
+     * the bounds are outside of the valid drag area, the task is shifted back onto the edge of the
+     * valid drag area.
      */
-    static void onDragEnd(Rect repositionTaskBounds, Rect taskBoundsAtDragStart, Rect stableBounds,
-            PointF repositionStartPoint, float x, float y)  {
+    static void onDragEnd(Rect repositionTaskBounds, Rect taskBoundsAtDragStart,
+            PointF repositionStartPoint, float x, float y, Rect validDragArea) {
         updateTaskBounds(repositionTaskBounds, taskBoundsAtDragStart, repositionStartPoint,
                 x, y);
-
-        // If task is outside of stable bounds (in the status bar area), shift the task down.
-        if (stableBounds.top > repositionTaskBounds.top) {
-            final int yShift =  stableBounds.top - repositionTaskBounds.top;
-            repositionTaskBounds.offset(0, yShift);
-        }
+        snapTaskBoundsIfNecessary(repositionTaskBounds, validDragArea);
     }
 
-    /**
-     * Apply a bounds change to a task.
-     * @param windowDecoration decor of task we are changing bounds for
-     * @param taskBounds new bounds of this task
-     * @param taskOrganizer applies the provided WindowContainerTransaction
-     */
-    static void applyTaskBoundsChange(WindowContainerTransaction wct,
-            WindowDecoration windowDecoration, Rect taskBounds, ShellTaskOrganizer taskOrganizer) {
-        wct.setBounds(windowDecoration.mTaskInfo.token, taskBounds);
-        taskOrganizer.applyTransaction(wct);
+    private static void snapTaskBoundsIfNecessary(Rect repositionTaskBounds, Rect validDragArea) {
+        // If we were never supplied a valid drag area, do not restrict movement.
+        // Otherwise, we restrict deltas to keep task position inside the Rect.
+        if (validDragArea.width() == 0) return;
+        if (repositionTaskBounds.left < validDragArea.left) {
+            repositionTaskBounds.offset(validDragArea.left - repositionTaskBounds.left, 0);
+        } else if (repositionTaskBounds.left > validDragArea.right) {
+            repositionTaskBounds.offset(validDragArea.right - repositionTaskBounds.left, 0);
+        }
+        if (repositionTaskBounds.top < validDragArea.top) {
+            repositionTaskBounds.offset(0, validDragArea.top - repositionTaskBounds.top);
+        } else if (repositionTaskBounds.top > validDragArea.bottom) {
+            repositionTaskBounds.offset(0, validDragArea.bottom - repositionTaskBounds.top);
+        }
     }
 
     private static float getMinWidth(DisplayController displayController,

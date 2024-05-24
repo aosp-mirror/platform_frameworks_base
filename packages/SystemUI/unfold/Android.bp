@@ -40,7 +40,4 @@ android_library {
     sdk_version: "current",
     min_sdk_version: "current",
     plugins: ["dagger2-compiler"],
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
 }

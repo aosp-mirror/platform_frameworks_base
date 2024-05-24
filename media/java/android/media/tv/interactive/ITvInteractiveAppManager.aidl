@@ -58,6 +58,8 @@ interface ITvInteractiveAppManager {
     void sendAvailableSpeeds(in IBinder sessionToken, in float[] speeds, int userId);
     void sendSigningResult(in IBinder sessionToken, in String signingId, in byte[] result,
             int userId);
+    void sendCertificate(in IBinder sessionToken, in String host, int port,
+            in Bundle certBundle, int userId);
     void sendTvRecordingInfo(in IBinder sessionToken, in TvRecordingInfo recordingInfo, int userId);
     void sendTvRecordingInfoList(in IBinder sessionToken,
             in List<TvRecordingInfo> recordingInfoList, int userId);
@@ -88,6 +90,7 @@ interface ITvInteractiveAppManager {
     void notifyTracksChanged(in IBinder sessionToken, in List<TvTrackInfo> tracks, int userId);
     void notifyVideoAvailable(in IBinder sessionToken, int userId);
     void notifyVideoUnavailable(in IBinder sessionToken, int reason, int userId);
+    void notifyVideoFreezeUpdated(in IBinder sessionToken, boolean isFrozen, int userId);
     void notifyContentAllowed(in IBinder sessionToken, int userId);
     void notifyContentBlocked(in IBinder sessionToken, in String rating, int userId);
     void notifySignalStrength(in IBinder sessionToken, int stength, int userId);
@@ -102,6 +105,8 @@ interface ITvInteractiveAppManager {
             int UserId);
     void notifyAdResponse(in IBinder sessionToken, in AdResponse response, int UserId);
     void notifyAdBufferConsumed(in IBinder sessionToken, in AdBuffer buffer, int userId);
+    void sendSelectedTrackInfo(in IBinder sessionToken, in List<TvTrackInfo> tracks,
+            int userId);
 
     void createMediaView(in IBinder sessionToken, in IBinder windowToken, in Rect frame,
             int userId);

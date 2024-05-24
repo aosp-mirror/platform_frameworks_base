@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Микрофон"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Дуудлагын жагсаалт"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Ойролцоох төхөөрөмжүүд"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Медиа гаралтыг өөрчлөх"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Зураг болон медиа"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Мэдэгдэл"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"Мэдэгдэл"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Аппууд"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Дамжуулах"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Дуудлага хийх, удирдах боломжтой"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Утасны дуудлагын жагсаалтыг уншиж, бичих боломжтой"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"SMS мессеж илгээх, үзэх боломжтой"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Таны харилцагчдад хандах боломжтой"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Таны календарьт хандах боломжтой"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"Аудио бичих боломжтой"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Ойролцоох төхөөрөмжүүдийн харьцангуй байршлыг тодорхойлох, холбох, олох боломжтой"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Харилцагчид, мессеж болон зураг зэрэг мэдээллийг оруулаад бүх мэдэгдлийг унших боломжтой"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Утасны дуудлага хийх болон удирдах"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"Утасны дуудлагын жагсаалтыг унших болон бичих"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"SMS мессеж илгээх болон харах"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"Таны харилцагчдад хандах"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"Таны календарьт хандах"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Аудио бичих"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Ойролцоох төхөөрөмжүүдийн харьцангуй байрлалыг олох, тодорхойлох болон тэдгээрт холбогдох"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Харилцагчид, мессеж болон зургууд зэрэг мэдээллийг оруулаад бүх мэдэгдлийг унших"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• Харилцагчид, мессеж болон зургууд зэрэг мэдээллийг оруулаад бүх мэдэгдлийг унших&lt;br/&gt;• Мэдэгдлүүдийг илгээх&lt;br/&gt;&lt;br/&gt;Та энэ аппын мэдэгдлүүдийг унших болон илгээх чадамжийг Тохиргоо &gt; мэдэгдлүүдэд хүссэн үедээ удирдах боломжтой."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Утасныхаа аппуудыг дамжуулаарай"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Утаснаасаа аппууд болон системийн бусад онцлогийг дамжуулаарай"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Боломжтой төхөөрөмжүүдийн жагсаалтад хандаж, аль нь бусад аппаас аудио эсвэл видео дамжуулах, нэвтрүүлэхийг хянана уу"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"утас"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"таблет"</string>
 </resources>

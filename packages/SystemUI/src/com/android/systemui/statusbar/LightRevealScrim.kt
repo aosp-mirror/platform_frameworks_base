@@ -156,6 +156,54 @@ data class LinearLightRevealEffect(private val isVertical: Boolean) : LightRevea
     }
 }
 
+data class LinearSideLightRevealEffect(private val isVertical: Boolean) : LightRevealEffect {
+
+    override fun setRevealAmountOnScrim(amount: Float, scrim: LightRevealScrim) {
+        scrim.interpolatedRevealAmount = amount
+        scrim.startColorAlpha =
+            getPercentPastThreshold(1 - amount, threshold = 1 - START_COLOR_REVEAL_PERCENTAGE)
+        scrim.revealGradientEndColorAlpha =
+            1f -
+                getPercentPastThreshold(
+                    amount,
+                    threshold = REVEAL_GRADIENT_END_COLOR_ALPHA_START_PERCENTAGE
+                )
+
+        val gradientBoundsAmount = lerp(GRADIENT_START_BOUNDS_PERCENTAGE, 1f, amount)
+        if (isVertical) {
+            scrim.setRevealGradientBounds(
+                left = -(scrim.viewWidth) * gradientBoundsAmount,
+                top = -(scrim.viewHeight) * gradientBoundsAmount,
+                right = (scrim.viewWidth) * gradientBoundsAmount,
+                bottom = (scrim.viewHeight) + (scrim.viewHeight) * gradientBoundsAmount
+            )
+        } else {
+            scrim.setRevealGradientBounds(
+                left = -(scrim.viewWidth) * gradientBoundsAmount,
+                top = -(scrim.viewHeight) * gradientBoundsAmount,
+                right = (scrim.viewWidth) + (scrim.viewWidth) * gradientBoundsAmount,
+                bottom = (scrim.viewHeight) * gradientBoundsAmount
+            )
+        }
+    }
+
+    private companion object {
+        // From which percentage we should start the gradient reveal width
+        // E.g. if 0 - starts with 0px width, 0.6f - starts with 60% width
+        private const val GRADIENT_START_BOUNDS_PERCENTAGE: Float = 1f
+
+        // When to start changing alpha color of the gradient scrim
+        // E.g. if 0.6f - starts fading the gradient away at 60% and becomes completely
+        // transparent at 100%
+        private const val REVEAL_GRADIENT_END_COLOR_ALPHA_START_PERCENTAGE: Float = 1f
+
+        // When to finish displaying start color fill that reveals the content
+        // E.g. if 0.6f - the content won't be visible at 0% and it will gradually
+        // reduce the alpha until 60% (at this point the color fill is invisible)
+        private const val START_COLOR_REVEAL_PERCENTAGE: Float = 1f
+    }
+}
+
 data class CircleReveal(
     /** X-value of the circle center of the reveal. */
     val centerX: Int,
@@ -253,6 +301,8 @@ constructor(
     initialHeight: Int? = null
 ) : View(context, attrs) {
 
+    private val logString = this::class.simpleName!! + "@" + hashCode()
+
     /** Listener that is called if the scrim's opaqueness changes */
     var isScrimOpaqueChangedListener: Consumer<Boolean>? = null
 
@@ -267,13 +317,13 @@ constructor(
             if (field != value) {
                 field = value
                 if (value <= 0.0f || value >= 1.0f) {
-                    scrimLogger?.d(TAG, "revealAmount", "$value on ${logString()}")
+                    scrimLogger?.d(TAG, "revealAmount", "$value on $logString")
                 }
                 revealEffect.setRevealAmountOnScrim(value, this)
                 updateScrimOpaque()
                 Trace.traceCounter(
                     Trace.TRACE_TAG_APP,
-                    "light_reveal_amount",
+                    "light_reveal_amount $logString",
                     (field * 100).toInt()
                 )
                 invalidate()
@@ -290,7 +340,7 @@ constructor(
                 field = value
 
                 revealEffect.setRevealAmountOnScrim(revealAmount, this)
-                scrimLogger?.d(TAG, "revealEffect", "$value on ${logString()}")
+                scrimLogger?.d(TAG, "revealEffect", "$value on $logString")
                 invalidate()
             }
         }
@@ -350,7 +400,7 @@ constructor(
             if (field != value) {
                 field = value
                 isScrimOpaqueChangedListener?.accept(field)
-                scrimLogger?.d(TAG, "isScrimOpaque", "$value on ${logString()}")
+                scrimLogger?.d(TAG, "isScrimOpaque", "$value on $logString")
             }
         }
 
@@ -368,13 +418,13 @@ constructor(
 
     override fun setAlpha(alpha: Float) {
         super.setAlpha(alpha)
-        scrimLogger?.d(TAG, "alpha", "$alpha on ${logString()}")
+        scrimLogger?.d(TAG, "alpha", "$alpha on $logString")
         updateScrimOpaque()
     }
 
     override fun setVisibility(visibility: Int) {
         super.setVisibility(visibility)
-        scrimLogger?.d(TAG, "visibility", "$visibility on ${logString()}")
+        scrimLogger?.d(TAG, "visibility", "$visibility on $logString")
         updateScrimOpaque()
     }
 
@@ -466,9 +516,5 @@ constructor(
                 getColorWithAlpha(revealGradientEndColor, revealGradientEndColorAlpha),
                 PorterDuff.Mode.MULTIPLY
             )
-    }
-
-    private fun logString(): String {
-        return this::class.simpleName!! + "@" + hashCode()
     }
 }

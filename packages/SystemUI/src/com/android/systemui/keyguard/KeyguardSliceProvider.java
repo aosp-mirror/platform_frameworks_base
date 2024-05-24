@@ -397,8 +397,10 @@ public class KeyguardSliceProvider extends SliceProvider implements
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_DATE_CHANGED);
             filter.addAction(Intent.ACTION_LOCALE_CHANGED);
-            getContext().registerReceiver(mIntentReceiver, filter, null /* permission*/,
-                    null /* scheduler */);
+            mBgHandler.post(() -> {
+                getContext().registerReceiver(mIntentReceiver, filter, null /* permission*/,
+                        null /* scheduler */);
+            });
             mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
             mRegistered = true;
         }

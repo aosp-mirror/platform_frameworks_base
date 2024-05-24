@@ -18,6 +18,7 @@ package com.android.systemui.display.ui.viewmodel
 import android.app.Dialog
 import android.content.Context
 import com.android.server.policy.feature.flags.Flags
+import com.android.systemui.CoreStartable
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -26,6 +27,10 @@ import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.PendingDisplay
 import com.android.systemui.display.ui.view.MirroringConfirmationDialog
 import com.android.systemui.statusbar.policy.ConfigurationController
+import dagger.Binds
+import dagger.Module
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -47,12 +52,12 @@ constructor(
     @Application private val scope: CoroutineScope,
     @Background private val bgDispatcher: CoroutineDispatcher,
     private val configurationController: ConfigurationController,
-) {
+) : CoreStartable {
 
     private var dialog: Dialog? = null
 
     /** Starts listening for pending displays. */
-    fun init() {
+    override fun start() {
         val pendingDisplayFlow = connectedDisplayInteractor.pendingDisplay
         val concurrentDisplaysInProgessFlow =
             if (Flags.enableDualDisplayBlocking()) {
@@ -95,5 +100,13 @@ constructor(
     private fun hideDialog() {
         dialog?.hide()
         dialog = null
+    }
+
+    @Module
+    interface StartableModule {
+        @Binds
+        @IntoMap
+        @ClassKey(ConnectingDisplayViewModel::class)
+        fun bindsConnectingDisplayViewModel(impl: ConnectingDisplayViewModel): CoreStartable
     }
 }

@@ -75,6 +75,7 @@ import java.util.regex.Pattern;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
+@android.platform.test.annotations.IgnoreUnderRavenwood
 public class BstatsCpuTimesValidationTest {
     private static final String TAG = BstatsCpuTimesValidationTest.class.getSimpleName();
 

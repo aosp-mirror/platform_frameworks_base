@@ -133,8 +133,6 @@ Landroid/hardware/input/IInputManager$Stub;->asInterface(Landroid/os/IBinder;)La
 Landroid/hardware/location/IContextHubService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/hardware/location/IContextHubService;
 Landroid/hardware/usb/IUsbManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/location/ICountryListener$Stub;-><init>()V
-Landroid/location/IGeocodeProvider$Stub;-><init>()V
-Landroid/location/IGeocodeProvider$Stub;->asInterface(Landroid/os/IBinder;)Landroid/location/IGeocodeProvider;
 Landroid/location/ILocationListener$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/location/ILocationListener$Stub$Proxy;->mRemote:Landroid/os/IBinder;
 Landroid/location/ILocationListener$Stub;-><init>()V

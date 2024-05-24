@@ -51,7 +51,7 @@ import androidx.annotation.WorkerThread;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -65,13 +65,13 @@ import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.DisplayTracker;
 
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import dagger.Lazy;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
+
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CustomTile extends QSTileImpl<State> implements TileChangeListener,
         CustomTileInterface {
@@ -540,9 +540,9 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener,
         } else {
             Log.i(TAG, "The activity is starting");
 
-            ActivityLaunchAnimator.Controller controller =
+            ActivityTransitionAnimator.Controller controller =
                     mViewClicked == null ? null :
-                    ActivityLaunchAnimator.Controller.fromView(
+                    ActivityTransitionAnimator.Controller.fromView(
                             mViewClicked,
                             InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE
                     );

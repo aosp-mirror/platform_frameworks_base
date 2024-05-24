@@ -17,191 +17,280 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshots.Snapshot
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.lerp
-import com.android.compose.ui.util.lerp
+import androidx.compose.ui.util.fastCoerceIn
+import androidx.compose.ui.util.lerp
 
 /**
- * Animate a shared Int value.
+ * A [State] whose [value] is animated.
  *
- * @see SceneScope.animateSharedValueAsState
+ * Important: This animated value should always be ready *after* composition, e.g. during layout,
+ * drawing or inside a LaunchedEffect. If you read [value] during composition, it will probably
+ * throw an exception, for 2 important reasons:
+ * 1. You should never read animated values during composition, because this will probably lead to
+ *    bad performance.
+ * 2. Given that this value depends on the target value in different scenes, its current value
+ *    (depending on the current transition state) can only be computed once the full tree has been
+ *    composed.
+ *
+ * If you don't have the choice and *have to* get the value during composition, for instance because
+ * a Modifier or Composable reading this value does not have a lazy/lambda-based API, then you can
+ * access [unsafeCompositionState] and use a fallback value for the first frame where this animated
+ * value can not be computed yet. Note however that doing so will be bad for performance and might
+ * lead to late-by-one-frame flickers.
+ */
+@Stable
+interface AnimatedState<T> : State<T> {
+    /**
+     * Return a [State] that can be read during composition.
+     *
+     * Important: You should avoid using this as much as possible and instead read [value] during
+     * layout/drawing, otherwise you will probably end up with a few frames that have a value that
+     * is not correctly interpolated.
+     */
+    @Composable fun unsafeCompositionState(initialValue: T): State<T>
+}
+
+/**
+ * Animate a scene Int value.
+ *
+ * @see SceneScope.animateSceneValueAsState
  */
 @Composable
-fun SceneScope.animateSharedIntAsState(
+fun SceneScope.animateSceneIntAsState(
     value: Int,
     key: ValueKey,
-    element: ElementKey?,
     canOverflow: Boolean = true,
-): State<Int> {
-    return animateSharedValueAsState(value, key, element, ::lerp, canOverflow)
+): AnimatedState<Int> {
+    return animateSceneValueAsState(value, key, ::lerp, canOverflow)
 }
 
 /**
- * Animate a shared Int value.
+ * Animate a shared element Int value.
  *
- * @see MovableElementScope.animateSharedValueAsState
+ * @see ElementScope.animateElementValueAsState
  */
 @Composable
-fun MovableElementScope.animateSharedIntAsState(
+fun ElementScope<*>.animateElementIntAsState(
     value: Int,
-    debugName: String,
+    key: ValueKey,
     canOverflow: Boolean = true,
-): State<Int> {
-    return animateSharedValueAsState(value, debugName, ::lerp, canOverflow)
+): AnimatedState<Int> {
+    return animateElementValueAsState(value, key, ::lerp, canOverflow)
 }
 
 /**
- * Animate a shared Float value.
+ * Animate a scene Float value.
  *
- * @see SceneScope.animateSharedValueAsState
+ * @see SceneScope.animateSceneValueAsState
  */
 @Composable
-fun SceneScope.animateSharedFloatAsState(
+fun SceneScope.animateSceneFloatAsState(
     value: Float,
     key: ValueKey,
-    element: ElementKey?,
     canOverflow: Boolean = true,
-): State<Float> {
-    return animateSharedValueAsState(value, key, element, ::lerp, canOverflow)
+): AnimatedState<Float> {
+    return animateSceneValueAsState(value, key, ::lerp, canOverflow)
 }
 
 /**
- * Animate a shared Float value.
+ * Animate a shared element Float value.
  *
- * @see MovableElementScope.animateSharedValueAsState
+ * @see ElementScope.animateElementValueAsState
  */
 @Composable
-fun MovableElementScope.animateSharedFloatAsState(
+fun ElementScope<*>.animateElementFloatAsState(
     value: Float,
-    debugName: String,
+    key: ValueKey,
     canOverflow: Boolean = true,
-): State<Float> {
-    return animateSharedValueAsState(value, debugName, ::lerp, canOverflow)
+): AnimatedState<Float> {
+    return animateElementValueAsState(value, key, ::lerp, canOverflow)
 }
 
 /**
- * Animate a shared Dp value.
+ * Animate a scene Dp value.
  *
- * @see SceneScope.animateSharedValueAsState
+ * @see SceneScope.animateSceneValueAsState
  */
 @Composable
-fun SceneScope.animateSharedDpAsState(
+fun SceneScope.animateSceneDpAsState(
     value: Dp,
     key: ValueKey,
-    element: ElementKey?,
     canOverflow: Boolean = true,
-): State<Dp> {
-    return animateSharedValueAsState(value, key, element, ::lerp, canOverflow)
+): AnimatedState<Dp> {
+    return animateSceneValueAsState(value, key, ::lerp, canOverflow)
 }
 
 /**
- * Animate a shared Dp value.
+ * Animate a shared element Dp value.
  *
- * @see MovableElementScope.animateSharedValueAsState
+ * @see ElementScope.animateElementValueAsState
  */
 @Composable
-fun MovableElementScope.animateSharedDpAsState(
+fun ElementScope<*>.animateElementDpAsState(
     value: Dp,
-    debugName: String,
+    key: ValueKey,
     canOverflow: Boolean = true,
-): State<Dp> {
-    return animateSharedValueAsState(value, debugName, ::lerp, canOverflow)
+): AnimatedState<Dp> {
+    return animateElementValueAsState(value, key, ::lerp, canOverflow)
 }
 
 /**
- * Animate a shared Color value.
+ * Animate a scene Color value.
  *
- * @see SceneScope.animateSharedValueAsState
+ * @see SceneScope.animateSceneValueAsState
  */
 @Composable
-fun SceneScope.animateSharedColorAsState(
+fun SceneScope.animateSceneColorAsState(
     value: Color,
     key: ValueKey,
-    element: ElementKey?,
-): State<Color> {
-    return animateSharedValueAsState(value, key, element, ::lerp, canOverflow = false)
+): AnimatedState<Color> {
+    return animateSceneValueAsState(value, key, ::lerp, canOverflow = false)
 }
 
 /**
- * Animate a shared Color value.
+ * Animate a shared element Color value.
  *
- * @see MovableElementScope.animateSharedValueAsState
+ * @see ElementScope.animateElementValueAsState
  */
 @Composable
-fun MovableElementScope.animateSharedColorAsState(
+fun ElementScope<*>.animateElementColorAsState(
     value: Color,
-    debugName: String,
-): State<Color> {
-    return animateSharedValueAsState(value, debugName, ::lerp, canOverflow = false)
+    key: ValueKey,
+): AnimatedState<Color> {
+    return animateElementValueAsState(value, key, ::lerp, canOverflow = false)
 }
 
 @Composable
 internal fun <T> animateSharedValueAsState(
     layoutImpl: SceneTransitionLayoutImpl,
-    scene: Scene,
-    element: Element?,
+    scene: SceneKey,
+    element: ElementKey?,
     key: ValueKey,
     value: T,
     lerp: (T, T, Float) -> T,
     canOverflow: Boolean,
-): State<T> {
-    val sharedValue =
-        Snapshot.withoutReadObservation {
-            val sharedValues =
-                element?.sceneValues?.getValue(scene.key)?.sharedValues ?: scene.sharedValues
-            sharedValues.getOrPut(key) { Element.SharedValue(key, value) } as Element.SharedValue<T>
-        }
+): AnimatedState<T> {
+    DisposableEffect(layoutImpl, scene, element, key) {
+        // Create the associated maps that hold the current value for each (element, scene) pair.
+        val valueMap = layoutImpl.sharedValues.getOrPut(key) { mutableMapOf() }
+        val sceneToValueMap =
+            valueMap.getOrPut(element) { SnapshotStateMap<SceneKey, Any>() }
+                as SnapshotStateMap<SceneKey, T>
+        sceneToValueMap[scene] = value
 
-    if (value != sharedValue.value) {
-        sharedValue.value = value
+        onDispose {
+            // Remove the value associated to the current scene, and eventually remove the maps if
+            // they are empty.
+            sceneToValueMap.remove(scene)
+
+            if (sceneToValueMap.isEmpty() && valueMap[element] === sceneToValueMap) {
+                valueMap.remove(element)
+
+                if (valueMap.isEmpty() && layoutImpl.sharedValues[key] === valueMap) {
+                    layoutImpl.sharedValues.remove(key)
+                }
+            }
+        }
     }
 
-    return remember(layoutImpl, element, sharedValue, lerp, canOverflow) {
-        derivedStateOf { computeValue(layoutImpl, element, sharedValue, lerp, canOverflow) }
+    // Update the current value. Note that side effects run after disposable effects, so we know
+    // that the associated maps were created at this point.
+    SideEffect { sceneToValueMap<T>(layoutImpl, key, element)[scene] = value }
+
+    return remember(layoutImpl, scene, element, lerp, canOverflow) {
+        object : AnimatedState<T> {
+            override val value: T
+                get() = value(layoutImpl, scene, element, key, lerp, canOverflow)
+
+            @Composable
+            override fun unsafeCompositionState(initialValue: T): State<T> {
+                val state = remember { mutableStateOf(initialValue) }
+
+                val animatedState = this
+                LaunchedEffect(animatedState) {
+                    snapshotFlow { animatedState.value }.collect { state.value = it }
+                }
+
+                return state
+            }
+        }
     }
 }
 
-private fun <T> computeValue(
+private fun <T> sceneToValueMap(
     layoutImpl: SceneTransitionLayoutImpl,
-    element: Element?,
-    sharedValue: Element.SharedValue<T>,
+    key: ValueKey,
+    element: ElementKey?
+): MutableMap<SceneKey, T> {
+    return layoutImpl.sharedValues[key]?.get(element)?.let { it as SnapshotStateMap<SceneKey, T> }
+        ?: error(valueReadTooEarlyMessage(key))
+}
+
+private fun valueReadTooEarlyMessage(key: ValueKey) =
+    "Animated value $key was read before its target values were set. This probably " +
+        "means that you are reading it during composition, which you should not do. See the " +
+        "documentation of AnimatedState for more information."
+
+private fun <T> value(
+    layoutImpl: SceneTransitionLayoutImpl,
+    scene: SceneKey,
+    element: ElementKey?,
+    key: ValueKey,
     lerp: (T, T, Float) -> T,
     canOverflow: Boolean,
 ): T {
-    val transition = layoutImpl.state.currentTransition
-    if (transition == null || !layoutImpl.isTransitionReady(transition)) {
-        return sharedValue.value
-    }
+    return valueOrNull(layoutImpl, scene, element, key, lerp, canOverflow)
+        ?: error(valueReadTooEarlyMessage(key))
+}
 
-    fun sceneValue(scene: SceneKey): Element.SharedValue<T>? {
-        val sharedValues =
-            if (element == null) {
-                layoutImpl.scene(scene).sharedValues
-            } else {
-                element.sceneValues[scene]?.sharedValues
-            }
-                ?: return null
-        val value = sharedValues[sharedValue.key] ?: return null
-        return value as Element.SharedValue<T>
-    }
+private fun <T> valueOrNull(
+    layoutImpl: SceneTransitionLayoutImpl,
+    scene: SceneKey,
+    element: ElementKey?,
+    key: ValueKey,
+    lerp: (T, T, Float) -> T,
+    canOverflow: Boolean,
+): T? {
+    val sceneToValueMap = sceneToValueMap<T>(layoutImpl, key, element)
+    fun sceneValue(scene: SceneKey): T? = sceneToValueMap[scene]
 
-    val fromValue = sceneValue(transition.fromScene)
-    val toValue = sceneValue(transition.toScene)
-    return if (fromValue != null && toValue != null) {
-        val progress =
-            if (canOverflow) transition.progress else transition.progress.coerceIn(0f, 1f)
-        lerp(fromValue.value, toValue.value, progress)
-    } else if (fromValue != null) {
-        fromValue.value
-    } else if (toValue != null) {
-        toValue.value
-    } else {
-        sharedValue.value
+    return when (val transition = layoutImpl.state.transitionState) {
+        is TransitionState.Idle -> sceneValue(transition.currentScene)
+        is TransitionState.Transition -> {
+            // Note: no need to check for transition ready here given that all target values are
+            // defined during composition, we should already have the correct values to interpolate
+            // between here.
+            val fromValue = sceneValue(transition.fromScene)
+            val toValue = sceneValue(transition.toScene)
+            if (fromValue != null && toValue != null) {
+                if (fromValue == toValue) {
+                    // Optimization: avoid reading progress if the values are the same, so we don't
+                    // relayout/redraw for nothing.
+                    fromValue
+                } else {
+                    val progress =
+                        if (canOverflow) transition.progress
+                        else transition.progress.fastCoerceIn(0f, 1f)
+                    lerp(fromValue, toValue, progress)
+                }
+            } else fromValue ?: toValue
+        }
     }
+    // TODO(b/311600838): Remove this. We should not have to fallback to the current scene value,
+    // but we have to because code of removed nodes can still run if they are placed with a graphics
+    // layer.
+    ?: sceneValue(scene)
 }

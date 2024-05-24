@@ -21,6 +21,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.core.LogLevel.VERBOSE
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -37,12 +39,38 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val logger: KeyguardLogger,
     private val powerInteractor: PowerInteractor,
+    private val sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
+    private val shadeInteractor: ShadeInteractor,
 ) {
 
     fun start() {
         scope.launch {
             powerInteractor.detailedWakefulness.collect {
                 logger.log(TAG, VERBOSE, "WakefulnessModel", it)
+            }
+        }
+
+        scope.launch {
+            sharedNotificationContainerViewModel
+                .getMaxNotifications { height, useExtraShelfSpace -> height.toInt() }
+                .collect { logger.log(TAG, VERBOSE, "Notif: max height in px", it) }
+        }
+
+        scope.launch {
+            sharedNotificationContainerViewModel.isOnLockscreen.collect {
+                logger.log(TAG, VERBOSE, "Notif: isOnLockscreen", it)
+            }
+        }
+
+        scope.launch {
+            shadeInteractor.isUserInteracting.collect {
+                logger.log(TAG, VERBOSE, "Shade: isUserInteracting", it)
+            }
+        }
+
+        scope.launch {
+            sharedNotificationContainerViewModel.isOnLockscreenWithoutShade.collect {
+                logger.log(TAG, VERBOSE, "Notif: isOnLockscreenWithoutShade", it)
             }
         }
 
@@ -71,6 +99,18 @@ constructor(
         scope.launch {
             keyguardInteractor.isKeyguardOccluded.collect {
                 logger.log(TAG, VERBOSE, "isOccluded", it)
+            }
+        }
+
+        scope.launch {
+            keyguardInteractor.isKeyguardDismissible.collect {
+                logger.log(TAG, VERBOSE, "isDismissible", it)
+            }
+        }
+
+        scope.launch {
+            keyguardInteractor.isKeyguardShowing.collect {
+                logger.log(TAG, VERBOSE, "isShowing", it)
             }
         }
 

@@ -55,15 +55,15 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.util.settings.SecureSettings;
 
-import java.util.concurrent.Executor;
-
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 
+import java.util.concurrent.Executor;
+
 public class BrightnessController implements ToggleSlider.Listener, MirroredBrightnessController {
     private static final String TAG = "CentralSurfaces.BrightnessController";
-    private static final int SLIDER_ANIMATION_DURATION = 3000;
+    private static final int SLIDER_ANIMATION_DURATION = 1000;
 
     private static final int MSG_UPDATE_SLIDER = 1;
     private static final int MSG_ATTACH_LISTENER = 2;

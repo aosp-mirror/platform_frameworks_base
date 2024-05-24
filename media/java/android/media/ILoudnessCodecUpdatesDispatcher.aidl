@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.media.AudioAttributes;
 import android.os.PersistableBundle;
 
 /**
@@ -26,6 +27,6 @@ import android.os.PersistableBundle;
  */
 oneway interface ILoudnessCodecUpdatesDispatcher {
 
-    void dispatchLoudnessCodecParameterChange(int piid, in PersistableBundle params);
+    void dispatchLoudnessCodecParameterChange(int sessionId, in PersistableBundle params);
 
 }

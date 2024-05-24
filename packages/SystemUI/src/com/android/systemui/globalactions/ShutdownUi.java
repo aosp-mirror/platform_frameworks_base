@@ -22,7 +22,10 @@ import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.app.Dialog;
 import android.content.Context;
+import android.nearby.NearbyManager;
+import android.net.platform.flags.Flags;
 import android.os.PowerManager;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -38,6 +41,8 @@ import com.android.systemui.scrim.ScrimDrawable;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.phone.ScrimController;
 
+import javax.inject.Inject;
+
 /**
  * Provides the UI shown during system shutdown.
  */
@@ -45,9 +50,13 @@ public class ShutdownUi {
 
     private Context mContext;
     private BlurUtils mBlurUtils;
-    public ShutdownUi(Context context, BlurUtils blurUtils) {
+    private NearbyManager mNearbyManager;
+
+    @Inject
+    public ShutdownUi(Context context, BlurUtils blurUtils, NearbyManager nearbyManager) {
         mContext = context;
         mBlurUtils = blurUtils;
+        mNearbyManager = nearbyManager;
     }
 
     /**
@@ -132,11 +141,27 @@ public class ShutdownUi {
     /**
      * Returns the layout resource to use for UI while shutting down.
      * @param isReboot Whether this is a reboot or a shutdown.
-     * @return
      */
-    public int getShutdownDialogContent(boolean isReboot) {
-        return R.layout.shutdown_dialog;
+    @VisibleForTesting int getShutdownDialogContent(boolean isReboot) {
+        if (!Flags.poweredOffFindingPlatform()) {
+            return R.layout.shutdown_dialog;
+        }
+        int finderActive = mNearbyManager.getPoweredOffFindingMode();
+        if (finderActive == NearbyManager.POWERED_OFF_FINDING_MODE_DISABLED
+                || finderActive == NearbyManager.POWERED_OFF_FINDING_MODE_UNSUPPORTED) {
+            // inactive or unsupported, use regular shutdown dialog
+            return R.layout.shutdown_dialog;
+        } else if (finderActive == NearbyManager.POWERED_OFF_FINDING_MODE_ENABLED) {
+            // active, use dialog with finder info if shutting down
+            return isReboot ? R.layout.shutdown_dialog :
+                    com.android.systemui.res.R.layout.shutdown_dialog_finder_active;
+        } else {
+            // that's weird? default to regular dialog
+            Log.w("ShutdownUi", "Unexpected value for finder active: " + finderActive);
+            return R.layout.shutdown_dialog;
+        }
     }
+
 
     @StringRes
     @VisibleForTesting int getRebootMessage(boolean isReboot, @Nullable String reason) {

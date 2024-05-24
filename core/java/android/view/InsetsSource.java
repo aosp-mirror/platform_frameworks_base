@@ -38,6 +38,8 @@ import android.view.WindowInsets.Type.InsetsType;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -46,6 +48,24 @@ import java.util.StringJoiner;
  * @hide
  */
 public class InsetsSource implements Parcelable {
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "SIDE_", value = {
+            SIDE_NONE,
+            SIDE_LEFT,
+            SIDE_TOP,
+            SIDE_RIGHT,
+            SIDE_BOTTOM,
+            SIDE_UNKNOWN
+    })
+    public @interface InternalInsetsSide {}
+
+    static final int SIDE_NONE = 0;
+    static final int SIDE_LEFT = 1;
+    static final int SIDE_TOP = 2;
+    static final int SIDE_RIGHT = 3;
+    static final int SIDE_BOTTOM = 4;
+    static final int SIDE_UNKNOWN = 5;
 
     /** The insets source ID of IME */
     public static final int ID_IME = createId(null, 0, ime());
@@ -87,6 +107,12 @@ public class InsetsSource implements Parcelable {
     })
     public @interface Flags {}
 
+    /**
+     * Used when there are no bounding rects to describe an inset, which is only possible when the
+     * insets itself is {@link Insets#NONE}.
+     */
+    private static final Rect[] NO_BOUNDING_RECTS = new Rect[0];
+
     private @Flags int mFlags;
 
     /**
@@ -99,10 +125,18 @@ public class InsetsSource implements Parcelable {
     /** Frame of the source in screen coordinate space */
     private final Rect mFrame;
     private @Nullable Rect mVisibleFrame;
+    private @Nullable Rect[] mBoundingRects;
 
     private boolean mVisible;
 
+    /**
+     * Used to decide which side of the relative frame should receive insets when the frame fully
+     * covers the relative frame.
+     */
+    private @InternalInsetsSide int mSideHint = SIDE_NONE;
+
     private final Rect mTmpFrame = new Rect();
+    private final Rect mTmpBoundingRect = new Rect();
 
     public InsetsSource(int id, @InsetsType int type) {
         mId = id;
@@ -120,6 +154,10 @@ public class InsetsSource implements Parcelable {
                 ? new Rect(other.mVisibleFrame)
                 : null;
         mFlags = other.mFlags;
+        mSideHint = other.mSideHint;
+        mBoundingRects = other.mBoundingRects != null
+                ? other.mBoundingRects.clone()
+                : null;
     }
 
     public void set(InsetsSource other) {
@@ -129,6 +167,10 @@ public class InsetsSource implements Parcelable {
                 ? new Rect(other.mVisibleFrame)
                 : null;
         mFlags = other.mFlags;
+        mSideHint = other.mSideHint;
+        mBoundingRects = other.mBoundingRects != null
+                ? other.mBoundingRects.clone()
+                : null;
     }
 
     public InsetsSource setFrame(int left, int top, int right, int bottom) {
@@ -161,6 +203,27 @@ public class InsetsSource implements Parcelable {
         return this;
     }
 
+    /**
+     * Updates the side hint which is used to decide which side of the relative frame should receive
+     * insets when the frame fully covers the relative frame.
+     *
+     * @param bounds A rectangle which contains the frame. It will be used to calculate the hint.
+     */
+    public InsetsSource updateSideHint(Rect bounds) {
+        mSideHint = getInsetSide(
+                calculateInsets(bounds, mFrame, true /* ignoreVisibility */));
+        return this;
+    }
+
+    /**
+     * Set the bounding rectangles of this source. They are expected to be relative to the source
+     * frame.
+     */
+    public InsetsSource setBoundingRects(@Nullable Rect[] rects) {
+        mBoundingRects = rects != null ? rects.clone() : null;
+        return this;
+    }
+
     public int getId() {
         return mId;
     }
@@ -187,6 +250,13 @@ public class InsetsSource implements Parcelable {
 
     public boolean hasFlags(int flags) {
         return (mFlags & flags) == flags;
+    }
+
+    /**
+     * Returns the bounding rectangles of this source.
+     */
+    public @Nullable Rect[] getBoundingRects() {
+        return mBoundingRects;
     }
 
     /**
@@ -237,8 +307,21 @@ public class InsetsSource implements Parcelable {
             return Insets.of(0, 0, 0, mTmpFrame.height());
         }
 
-        // Intersecting at top/bottom
-        if (mTmpFrame.width() == relativeFrame.width()) {
+        if (mTmpFrame.equals(relativeFrame)) {
+            // Covering all sides
+            switch (mSideHint) {
+                default:
+                case SIDE_LEFT:
+                    return Insets.of(mTmpFrame.width(), 0, 0, 0);
+                case SIDE_TOP:
+                    return Insets.of(0, mTmpFrame.height(), 0, 0);
+                case SIDE_RIGHT:
+                    return Insets.of(0, 0, mTmpFrame.width(), 0);
+                case SIDE_BOTTOM:
+                    return Insets.of(0, 0, 0, mTmpFrame.height());
+            }
+        } else if (mTmpFrame.width() == relativeFrame.width()) {
+            // Intersecting at top/bottom
             if (mTmpFrame.top == relativeFrame.top) {
                 return Insets.of(0, mTmpFrame.height(), 0, 0);
             } else if (mTmpFrame.bottom == relativeFrame.bottom) {
@@ -250,9 +333,8 @@ public class InsetsSource implements Parcelable {
             if (mTmpFrame.top == 0) {
                 return Insets.of(0, mTmpFrame.height(), 0, 0);
             }
-        }
-        // Intersecting at left/right
-        else if (mTmpFrame.height() == relativeFrame.height()) {
+        } else if (mTmpFrame.height() == relativeFrame.height()) {
+            // Intersecting at left/right
             if (mTmpFrame.left == relativeFrame.left) {
                 return Insets.of(mTmpFrame.width(), 0, 0, 0);
             } else if (mTmpFrame.right == relativeFrame.right) {
@@ -260,6 +342,82 @@ public class InsetsSource implements Parcelable {
             }
         }
         return Insets.NONE;
+    }
+
+    /**
+     * Calculates the bounding rects the source will cause to a client window.
+     */
+    public @NonNull Rect[] calculateBoundingRects(Rect relativeFrame, boolean ignoreVisibility) {
+        if (!ignoreVisibility && !mVisible) {
+            return NO_BOUNDING_RECTS;
+        }
+
+        final Rect frame = getFrame();
+        if (mBoundingRects == null) {
+            // No bounding rects set, make a single bounding rect that covers the intersection of
+            // the |frame| and the |relativeFrame|.
+            return mTmpBoundingRect.setIntersect(frame, relativeFrame)
+                    ? new Rect[]{ new Rect(mTmpBoundingRect) }
+                    : NO_BOUNDING_RECTS;
+
+        }
+
+        // Special treatment for captionBar inset type. During drag-resizing, the |frame| and
+        // |boundingRects| may not get updated as quickly as |relativeFrame|, so just assume the
+        // |frame| will always be either at the top or bottom of |relativeFrame|. This means some
+        // calculations to make |boundingRects| relative to |relativeFrame| can be skipped or
+        // simplified.
+        // TODO(b/254128050): remove special treatment.
+        if (getType() == WindowInsets.Type.captionBar()) {
+            final ArrayList<Rect> validBoundingRects = new ArrayList<>();
+            for (final Rect boundingRect : mBoundingRects) {
+                // Assume that the caption |frame| and |relativeFrame| perfectly align at the top
+                // or bottom, meaning that the provided |boundingRect|, which is relative to the
+                // |frame| either is already relative to |relativeFrame| (for top captionBar()), or
+                // just needs to be made relative to |relativeFrame| for bottom bars.
+                final int frameHeight = frame.height();
+                mTmpBoundingRect.set(boundingRect);
+                if (getId() == ID_IME_CAPTION_BAR) {
+                    mTmpBoundingRect.offset(0, relativeFrame.height() - frameHeight);
+                }
+                validBoundingRects.add(new Rect(mTmpBoundingRect));
+            }
+            return validBoundingRects.toArray(new Rect[validBoundingRects.size()]);
+        }
+
+        // Regular treatment for non-captionBar inset types.
+        final ArrayList<Rect> validBoundingRects = new ArrayList<>();
+        for (final Rect boundingRect : mBoundingRects) {
+            // |boundingRect| was provided relative to |frame|. Make it absolute to be in the same
+            // coordinate system as |frame|.
+            final Rect absBoundingRect = new Rect(
+                    boundingRect.left + frame.left,
+                    boundingRect.top + frame.top,
+                    boundingRect.right + frame.left,
+                    boundingRect.bottom + frame.top
+            );
+            // Now find the intersection of that |absBoundingRect| with |relativeFrame|. In other
+            // words, whichever part of the bounding rect is inside the window frame.
+            if (!mTmpBoundingRect.setIntersect(absBoundingRect, relativeFrame)) {
+                // It's possible for this to be empty if the frame and bounding rects were larger
+                // than the |relativeFrame|, such as when a system window is wider than the app
+                // window width. Just ignore that rect since it will have no effect on the
+                // window insets.
+                continue;
+            }
+            // At this point, |mTmpBoundingRect| is a valid bounding rect located fully inside the
+            // window, convert it to be relative to the window so that apps don't need to know the
+            // location of the window to understand bounding rects.
+            validBoundingRects.add(new Rect(
+                    mTmpBoundingRect.left - relativeFrame.left,
+                    mTmpBoundingRect.top - relativeFrame.top,
+                    mTmpBoundingRect.right - relativeFrame.left,
+                    mTmpBoundingRect.bottom - relativeFrame.top));
+        }
+        if (validBoundingRects.isEmpty()) {
+            return NO_BOUNDING_RECTS;
+        }
+        return validBoundingRects.toArray(new Rect[validBoundingRects.size()]);
     }
 
     /**
@@ -281,6 +439,46 @@ public class InsetsSource implements Parcelable {
         }
         out.setEmpty();
         return false;
+    }
+
+    /**
+     * Retrieves the side for a certain {@code insets}. It is required that only one field l/t/r/b
+     * is set in order that this method returns a meaningful result.
+     */
+    static @InternalInsetsSide int getInsetSide(Insets insets) {
+        if (Insets.NONE.equals(insets)) {
+            return SIDE_NONE;
+        }
+        if (insets.left != 0) {
+            return SIDE_LEFT;
+        }
+        if (insets.top != 0) {
+            return SIDE_TOP;
+        }
+        if (insets.right != 0) {
+            return SIDE_RIGHT;
+        }
+        if (insets.bottom != 0) {
+            return SIDE_BOTTOM;
+        }
+        return SIDE_UNKNOWN;
+    }
+
+    static String sideToString(@InternalInsetsSide int side) {
+        switch (side) {
+            case SIDE_NONE:
+                return "NONE";
+            case SIDE_LEFT:
+                return "LEFT";
+            case SIDE_TOP:
+                return "TOP";
+            case SIDE_RIGHT:
+                return "RIGHT";
+            case SIDE_BOTTOM:
+                return "BOTTOM";
+            default:
+                return "UNKNOWN:" + side;
+        }
     }
 
     /**
@@ -332,7 +530,7 @@ public class InsetsSource implements Parcelable {
     }
 
     public static String flagsToString(@Flags int flags) {
-        final StringJoiner joiner = new StringJoiner(" ");
+        final StringJoiner joiner = new StringJoiner("|");
         if ((flags & FLAG_SUPPRESS_SCRIM) != 0) {
             joiner.add("SUPPRESS_SCRIM");
         }
@@ -353,13 +551,16 @@ public class InsetsSource implements Parcelable {
      */
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        proto.write(TYPE, WindowInsets.Type.toString(mType));
-        proto.write(TYPE_NUMBER, mType);
+        if (!android.os.Flags.androidOsBuildVanillaIceCream()) {
+            // Deprecated since V.
+            proto.write(TYPE, WindowInsets.Type.toString(mType));
+        }
         mFrame.dumpDebug(proto, FRAME);
         if (mVisibleFrame != null) {
             mVisibleFrame.dumpDebug(proto, VISIBLE_FRAME);
         }
         proto.write(VISIBLE, mVisible);
+        proto.write(TYPE_NUMBER, mType);
         proto.end(token);
     }
 
@@ -373,6 +574,8 @@ public class InsetsSource implements Parcelable {
         }
         pw.print(" visible="); pw.print(mVisible);
         pw.print(" flags="); pw.print(flagsToString(mFlags));
+        pw.print(" sideHint="); pw.print(sideToString(mSideHint));
+        pw.print(" boundingRects="); pw.print(Arrays.toString(mBoundingRects));
         pw.println();
     }
 
@@ -395,14 +598,17 @@ public class InsetsSource implements Parcelable {
         if (mType != that.mType) return false;
         if (mVisible != that.mVisible) return false;
         if (mFlags != that.mFlags) return false;
+        if (mSideHint != that.mSideHint) return false;
         if (excludeInvisibleImeFrames && !mVisible && mType == WindowInsets.Type.ime()) return true;
         if (!Objects.equals(mVisibleFrame, that.mVisibleFrame)) return false;
-        return mFrame.equals(that.mFrame);
+        if (!mFrame.equals(that.mFrame)) return false;
+        return Arrays.equals(mBoundingRects, that.mBoundingRects);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mId, mType, mFrame, mVisibleFrame, mVisible, mFlags);
+        return Objects.hash(mId, mType, mFrame, mVisibleFrame, mVisible, mFlags, mSideHint,
+                Arrays.hashCode(mBoundingRects));
     }
 
     public InsetsSource(Parcel in) {
@@ -416,6 +622,8 @@ public class InsetsSource implements Parcelable {
         }
         mVisible = in.readBoolean();
         mFlags = in.readInt();
+        mSideHint = in.readInt();
+        mBoundingRects = in.createTypedArray(Rect.CREATOR);
     }
 
     @Override
@@ -436,6 +644,8 @@ public class InsetsSource implements Parcelable {
         }
         dest.writeBoolean(mVisible);
         dest.writeInt(mFlags);
+        dest.writeInt(mSideHint);
+        dest.writeTypedArray(mBoundingRects, flags);
     }
 
     @Override
@@ -444,7 +654,9 @@ public class InsetsSource implements Parcelable {
                 + " mType=" + WindowInsets.Type.toString(mType)
                 + " mFrame=" + mFrame.toShortString()
                 + " mVisible=" + mVisible
-                + " mFlags=[" + flagsToString(mFlags) + "]"
+                + " mFlags=" + flagsToString(mFlags)
+                + " mSideHint=" + sideToString(mSideHint)
+                + " mBoundingRects=" + Arrays.toString(mBoundingRects)
                 + "}";
     }
 

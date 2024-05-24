@@ -137,8 +137,25 @@ public final class StepSegment extends VibrationEffectSegment {
         if (Float.compare(mAmplitude, VibrationEffect.DEFAULT_AMPLITUDE) == 0) {
             return this;
         }
-        return new StepSegment(VibrationEffect.scale(mAmplitude, scaleFactor), mFrequencyHz,
-                mDuration);
+        float newAmplitude = VibrationEffect.scale(mAmplitude, scaleFactor);
+        if (Float.compare(newAmplitude, mAmplitude) == 0) {
+            return this;
+        }
+        return new StepSegment(newAmplitude, mFrequencyHz, mDuration);
+    }
+
+    /** @hide */
+    @NonNull
+    @Override
+    public StepSegment scaleLinearly(float scaleFactor) {
+        if (Float.compare(mAmplitude, VibrationEffect.DEFAULT_AMPLITUDE) == 0) {
+            return this;
+        }
+        float newAmplitude = VibrationEffect.scaleLinearly(mAmplitude, scaleFactor);
+        if (Float.compare(newAmplitude, mAmplitude) == 0) {
+            return this;
+        }
+        return new StepSegment(newAmplitude, mFrequencyHz, mDuration);
     }
 
     /** @hide */

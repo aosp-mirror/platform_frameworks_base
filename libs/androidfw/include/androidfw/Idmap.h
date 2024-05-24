@@ -23,6 +23,7 @@
 #include <variant>
 
 #include "android-base/macros.h"
+#include "android-base/unique_fd.h"
 #include "androidfw/ConfigDescription.h"
 #include "androidfw/StringPiece.h"
 #include "androidfw/ResourceTypes.h"
@@ -71,7 +72,7 @@ class OverlayDynamicRefTable : public DynamicRefTable {
 
   // Rewrites a compile-time overlay resource id to the runtime resource id of corresponding target
   // resource.
-  virtual status_t lookupResourceIdNoRewrite(uint32_t* resId) const;
+  status_t lookupResourceIdNoRewrite(uint32_t* resId) const;
 
   const Idmap_data_header* data_header_;
   const Idmap_overlay_entry* entries_;
@@ -159,11 +160,6 @@ class LoadedIdmap {
   // Loads an IDMAP from a chunk of memory. Returns nullptr if the IDMAP data was malformed.
   static std::unique_ptr<LoadedIdmap> Load(StringPiece idmap_path, StringPiece idmap_data);
 
-  // Returns the path to the IDMAP.
-  std::string_view IdmapPath() const {
-    return idmap_path_;
-  }
-
   // Returns the path to the RRO (Runtime Resource Overlay) APK for which this IDMAP was generated.
   std::string_view OverlayApkPath() const {
     return overlay_apk_path_;
@@ -203,7 +199,7 @@ class LoadedIdmap {
   const Idmap_overlay_entry* overlay_entries_;
   const std::unique_ptr<ResStringPool> string_pool_;
 
-  std::string idmap_path_;
+  android::base::unique_fd idmap_fd_;
   std::string_view overlay_apk_path_;
   std::string_view target_apk_path_;
   time_t idmap_last_mod_time_;
@@ -211,7 +207,7 @@ class LoadedIdmap {
  private:
   DISALLOW_COPY_AND_ASSIGN(LoadedIdmap);
 
-  explicit LoadedIdmap(std::string&& idmap_path,
+  explicit LoadedIdmap(const std::string& idmap_path,
                        const Idmap_header* header,
                        const Idmap_data_header* data_header,
                        const Idmap_target_entry* target_entries,

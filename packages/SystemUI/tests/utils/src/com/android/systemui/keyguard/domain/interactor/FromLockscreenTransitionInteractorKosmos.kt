@@ -20,21 +20,23 @@ import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.shade.data.repository.shadeRepository
-import dagger.Lazy
 
-val Kosmos.fromLockscreenTransitionInteractor by
+var Kosmos.fromLockscreenTransitionInteractor by
     Kosmos.Fixture {
         FromLockscreenTransitionInteractor(
             transitionRepository = keyguardTransitionRepository,
             transitionInteractor = keyguardTransitionInteractor,
             scope = applicationCoroutineScope,
+            bgDispatcher = testDispatcher,
+            mainDispatcher = testDispatcher,
             keyguardInteractor = keyguardInteractor,
             flags = featureFlagsClassic,
             shadeRepository = shadeRepository,
             powerInteractor = powerInteractor,
-            inWindowLauncherUnlockAnimationInteractor =
-                Lazy { inWindowLauncherUnlockAnimationInteractor },
+            glanceableHubTransitions = glanceableHubTransitions,
+            swipeToDismissInteractor = swipeToDismissInteractor,
         )
     }

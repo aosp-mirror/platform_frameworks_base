@@ -800,7 +800,6 @@ public final class FileUtils {
      *
      * @hide
      */
-    @android.ravenwood.annotation.RavenwoodReplace
     public static void bytesToFile(String filename, byte[] content) throws IOException {
         if (filename.startsWith("/proc/")) {
             final int oldMask = StrictMode.allowThreadDiskWritesMask();
@@ -813,14 +812,6 @@ public final class FileUtils {
             try (FileOutputStream fos = new FileOutputStream(filename)) {
                 fos.write(content);
             }
-        }
-    }
-
-    /** @hide */
-    public static void bytesToFile$ravenwood(String filename, byte[] content) throws IOException {
-        // No StrictMode support, so we can just directly write
-        try (FileOutputStream fos = new FileOutputStream(filename)) {
-            fos.write(content);
         }
     }
 

@@ -29,11 +29,14 @@ android_test {
         "src/**/*.java",
         "src/**/*.kt",
 
-        "test-apps/JobTestApp/src/**/*.java",
-
         "test-apps/SuspendTestApp/src/**/*.java",
     ],
+
+    kotlincflags: [
+        "-Werror",
+    ],
     static_libs: [
+        "cts-input-lib",
         "frameworks-base-testutils",
         "services.accessibility",
         "services.appwidget",
@@ -81,6 +84,8 @@ android_test {
         "flag-junit",
         "ravenwood-junit",
         "net_flags_lib",
+        "CtsVirtualDeviceCommonLib",
+        "com_android_server_accessibility_flags_lib",
     ],
 
     libs: [
@@ -125,7 +130,6 @@ android_test {
     },
 
     data: [
-        ":JobTestApp",
         ":SimpleServiceTestApp1",
         ":SimpleServiceTestApp2",
         ":SimpleServiceTestApp3",
@@ -150,8 +154,8 @@ android_ravenwood_test {
     static_libs: [
         "androidx.annotation_annotation",
         "androidx.test.rules",
-        "mockito_ravenwood",
         "services.core",
+        "flag-junit",
     ],
     srcs: [
         "src/com/android/server/uri/**/*.java",
@@ -212,6 +216,16 @@ java_library {
     ],
     libs: [
         "android.test.runner",
+    ],
+}
+
+java_library {
+    name: "mockito-test-utils",
+    srcs: [
+        "utils-mockito/**/*.kt",
+    ],
+    static_libs: [
+        "mockito-target-minus-junit4",
     ],
 }
 

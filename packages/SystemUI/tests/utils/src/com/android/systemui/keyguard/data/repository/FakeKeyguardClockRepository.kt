@@ -20,6 +20,7 @@ import com.android.keyguard.ClockEventController
 import com.android.keyguard.KeyguardClockSwitch.ClockSize
 import com.android.keyguard.KeyguardClockSwitch.LARGE
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
+import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockId
 import com.android.systemui.shared.clocks.DEFAULT_CLOCK_ID
 import com.android.systemui.util.mockito.mock
@@ -29,6 +30,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.mockito.Mockito
 
 class FakeKeyguardClockRepository @Inject constructor() : KeyguardClockRepository {
     private val _clockSize = MutableStateFlow(LARGE)
@@ -42,6 +44,16 @@ class FakeKeyguardClockRepository @Inject constructor() : KeyguardClockRepositor
 
     private val _currentClock = MutableStateFlow(null)
     override val currentClock = _currentClock
+
+    private val _previewClockPair =
+        MutableStateFlow(
+            Pair(
+                Mockito.mock(ClockController::class.java),
+                Mockito.mock(ClockController::class.java)
+            )
+        )
+    override val previewClockPair: StateFlow<Pair<ClockController, ClockController>> =
+        _previewClockPair
     override val clockEventController: ClockEventController
         get() = mock()
 

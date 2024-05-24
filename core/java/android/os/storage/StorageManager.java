@@ -28,6 +28,7 @@ import static android.os.UserHandle.PER_USER_RANGE;
 
 import android.annotation.BytesLong;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -58,6 +59,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Environment;
 import android.os.FileUtils;
+import android.os.Flags;
 import android.os.Handler;
 import android.os.IInstalld;
 import android.os.IVold;
@@ -2939,4 +2941,24 @@ public class StorageManager {
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int CRYPT_TYPE_DEFAULT = 1;
+
+    /**
+     * Returns the remaining lifetime of the internal storage device, as an integer percentage. For
+     * example, 90 indicates that 90% of the storage device's useful lifetime remains. If no
+     * information is available, -1 is returned.
+     *
+     * @return Percentage of the remaining useful lifetime of the internal storage device.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_STORAGE_LIFETIME_API)
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public int getInternalStorageRemainingLifetime() {
+        try {
+            return mStorageManager.getInternalStorageRemainingLifetime();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

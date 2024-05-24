@@ -44,6 +44,9 @@ data class KeyguardSurfaceBehindModel(
      * running, in which case we'll animate from the current value to [translationY].
      */
     val animateFromTranslationY: Float = translationY,
+
+    /** Velocity with which to start the Y-translation spring animation. */
+    val startVelocity: Float = 0f,
 ) {
     fun willAnimateAlpha(): Boolean {
         return animateFromAlpha != alpha

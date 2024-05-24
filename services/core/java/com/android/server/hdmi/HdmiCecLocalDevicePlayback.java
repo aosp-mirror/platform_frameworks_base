@@ -514,6 +514,18 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     protected int handleRoutingInformation(HdmiCecMessage message) {
         assertRunOnServiceThread();
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
+        HdmiDeviceInfo sourceDevice = mService.getHdmiCecNetwork()
+                .getCecDeviceInfo(message.getSource());
+        // Ignore <Routing Information> messages pointing to the same physical address as the
+        // message sender. In this case, we shouldn't consider the sender to be the active source.
+        // See more b/321771821#comment7.
+        if (sourceDevice != null
+                && sourceDevice.getLogicalAddress() != Constants.ADDR_TV
+                && sourceDevice.getPhysicalAddress() == physicalAddress) {
+            Slog.d(TAG, "<Routing Information> is ignored, it is pointing to the same physical"
+                    + " address as the message sender");
+            return Constants.HANDLED;
+        }
         handleRoutingChangeAndInformation(physicalAddress, message);
         return Constants.HANDLED;
     }

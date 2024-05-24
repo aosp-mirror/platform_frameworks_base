@@ -35,8 +35,10 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
@@ -62,7 +64,6 @@ public class Searchables {
     private static final String MD_SEARCHABLE_SYSTEM_SEARCH = "*";
 
     private Context mContext;
-
     private HashMap<ComponentName, SearchableInfo> mSearchablesMap = null;
     private ArrayList<SearchableInfo> mSearchablesList = null;
     private ArrayList<SearchableInfo> mSearchablesInGlobalSearchList = null;
@@ -81,6 +82,12 @@ public class Searchables {
     final private IPackageManager mPm;
     // User for which this Searchables caches information
     private int mUserId;
+    @GuardedBy("this")
+    private boolean mRebuildSearchables = true;
+
+    // Package names that are known to contain {@link SearchableInfo}
+    @GuardedBy("this")
+    private ArraySet<String> mKnownSearchablePackageNames = new ArraySet<>();
 
     /**
      *
@@ -145,6 +152,9 @@ public class Searchables {
             ai = mPm.getActivityInfo(activity, PackageManager.GET_META_DATA, mUserId);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error getting activity info " + re);
+            return null;
+        }
+        if (ai == null) {
             return null;
         }
         String refActivityName = null;
@@ -221,7 +231,14 @@ public class Searchables {
      *
      * TODO: sort the list somehow?  UI choice.
      */
-    public void updateSearchableList() {
+    public void updateSearchableListIfNeeded() {
+        synchronized (this) {
+            if (!mRebuildSearchables) {
+                // The searchable list is valid, no need to rebuild.
+                return;
+            }
+        }
+
         // These will become the new values at the end of the method
         HashMap<ComponentName, SearchableInfo> newSearchablesMap
                                 = new HashMap<ComponentName, SearchableInfo>();
@@ -229,6 +246,7 @@ public class Searchables {
                                 = new ArrayList<SearchableInfo>();
         ArrayList<SearchableInfo> newSearchablesInGlobalSearchList
                                 = new ArrayList<SearchableInfo>();
+        ArraySet<String> newKnownSearchablePackageNames = new ArraySet<>();
 
         // Use intent resolver to generate list of ACTION_SEARCH & ACTION_WEB_SEARCH receivers.
         List<ResolveInfo> searchList;
@@ -261,6 +279,7 @@ public class Searchables {
                                 mUserId);
                         if (searchable != null) {
                             newSearchablesList.add(searchable);
+                            newKnownSearchablePackageNames.add(ai.packageName);
                             newSearchablesMap.put(searchable.getSearchActivity(), searchable);
                             if (searchable.shouldIncludeInGlobalSearch()) {
                                 newSearchablesInGlobalSearchList.add(searchable);
@@ -283,14 +302,39 @@ public class Searchables {
             synchronized (this) {
                 mSearchablesMap = newSearchablesMap;
                 mSearchablesList = newSearchablesList;
+                mKnownSearchablePackageNames = newKnownSearchablePackageNames;
                 mSearchablesInGlobalSearchList = newSearchablesInGlobalSearchList;
                 mGlobalSearchActivities = newGlobalSearchActivities;
                 mCurrentGlobalSearchActivity = newGlobalSearchActivity;
                 mWebSearchActivity = newWebSearchActivity;
+                for (ResolveInfo globalSearchActivity: mGlobalSearchActivities) {
+                    mKnownSearchablePackageNames.add(
+                            globalSearchActivity.getComponentInfo().packageName);
+                }
+                if (mCurrentGlobalSearchActivity != null) {
+                    mKnownSearchablePackageNames.add(
+                            mCurrentGlobalSearchActivity.getPackageName());
+                }
+                if (mWebSearchActivity != null) {
+                    mKnownSearchablePackageNames.add(mWebSearchActivity.getPackageName());
+                }
+
+                mRebuildSearchables = false;
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    synchronized ArraySet<String> getKnownSearchablePackageNames() {
+        return mKnownSearchablePackageNames;
+    }
+
+    synchronized void invalidateSearchableList() {
+        mRebuildSearchables = true;
+
+        // Don't rebuild the searchable list, it will be rebuilt
+        // when the next updateSearchableList gets called.
     }
 
     /**
@@ -529,6 +573,8 @@ public class Searchables {
                     pw.print("  "); pw.println(info.getSuggestAuthority());
                 }
             }
+
+            pw.println("mRebuildSearchables = " + mRebuildSearchables);
         }
     }
 }

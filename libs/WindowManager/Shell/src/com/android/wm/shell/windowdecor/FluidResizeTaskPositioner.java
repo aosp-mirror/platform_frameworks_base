@@ -16,23 +16,42 @@
 
 package com.android.wm.shell.windowdecor;
 
+import static android.view.WindowManager.TRANSIT_CHANGE;
+
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.os.IBinder;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.window.TransitionInfo;
+import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.transition.Transitions;
 
 import java.util.function.Supplier;
 
 /**
  * A task positioner that resizes/relocates task contents as it is dragged.
  * Utilizes {@link DragPositioningCallbackUtility} to determine new task bounds.
+ *
+ * This positioner applies the final bounds after a resize or drag using a shell transition in order
+ * to utilize the startAnimation callback to set the final task position and crop. In most cases,
+ * the transition will be aborted since the final bounds are usually the same bounds set in the
+ * final {@link #onDragPositioningMove} call. In this case, the cropping and positioning would be
+ * set by {@link WindowDecoration#relayout} due to the final bounds change; however, it is important
+ * that we send the final shell transition since we still utilize the {@link #onTransitionConsumed}
+ * callback.
  */
-class FluidResizeTaskPositioner implements DragPositioningCallback {
+class FluidResizeTaskPositioner implements DragPositioningCallback,
+        TaskDragResizer, Transitions.TransitionHandler {
     private final ShellTaskOrganizer mTaskOrganizer;
+    private final Transitions mTransitions;
     private final WindowDecoration mWindowDecoration;
     private final Supplier<SurfaceControl.Transaction> mTransactionSupplier;
     private DisplayController mDisplayController;
@@ -45,21 +64,28 @@ class FluidResizeTaskPositioner implements DragPositioningCallback {
     // finalize the bounds there using WCT#setBounds
     private final int mDisallowedAreaForEndBoundsHeight;
     private boolean mHasDragResized;
+    private boolean mIsResizingOrAnimatingResize;
     private int mCtrlType;
+    private IBinder mDragResizeEndTransition;
     @Surface.Rotation private int mRotation;
 
-    FluidResizeTaskPositioner(ShellTaskOrganizer taskOrganizer, WindowDecoration windowDecoration,
-            DisplayController displayController, int disallowedAreaForEndBoundsHeight) {
-        this(taskOrganizer, windowDecoration, displayController, dragStartListener -> {},
-                SurfaceControl.Transaction::new, disallowedAreaForEndBoundsHeight);
+    FluidResizeTaskPositioner(ShellTaskOrganizer taskOrganizer, Transitions transitions,
+            WindowDecoration windowDecoration, DisplayController displayController,
+            int disallowedAreaForEndBoundsHeight) {
+        this(taskOrganizer, transitions, windowDecoration, displayController,
+                dragStartListener -> {}, SurfaceControl.Transaction::new,
+                disallowedAreaForEndBoundsHeight);
     }
 
-    FluidResizeTaskPositioner(ShellTaskOrganizer taskOrganizer, WindowDecoration windowDecoration,
+    FluidResizeTaskPositioner(ShellTaskOrganizer taskOrganizer,
+            Transitions transitions,
+            WindowDecoration windowDecoration,
             DisplayController displayController,
             DragPositioningCallbackUtility.DragStartListener dragStartListener,
             Supplier<SurfaceControl.Transaction> supplier,
             int disallowedAreaForEndBoundsHeight) {
         mTaskOrganizer = taskOrganizer;
+        mTransitions = transitions;
         mWindowDecoration = windowDecoration;
         mDisplayController = displayController;
         mDragStartListener = dragStartListener;
@@ -103,9 +129,10 @@ class FluidResizeTaskPositioner implements DragPositioningCallback {
                 // This is the first bounds change since drag resize operation started.
                 wct.setDragResizing(mWindowDecoration.mTaskInfo.token, true /* dragResizing */);
             }
-            DragPositioningCallbackUtility.applyTaskBoundsChange(wct, mWindowDecoration,
-                    mRepositionTaskBounds, mTaskOrganizer);
+            wct.setBounds(mWindowDecoration.mTaskInfo.token, mRepositionTaskBounds);
+            mTaskOrganizer.applyTransaction(wct);
             mHasDragResized = true;
+            mIsResizingOrAnimatingResize = true;
         } else if (mCtrlType == CTRL_TYPE_UNDEFINED) {
             final SurfaceControl.Transaction t = mTransactionSupplier.get();
             DragPositioningCallbackUtility.setPositionOnDrag(mWindowDecoration,
@@ -129,16 +156,17 @@ class FluidResizeTaskPositioner implements DragPositioningCallback {
                     mWindowDecoration)) {
                 wct.setBounds(mWindowDecoration.mTaskInfo.token, mRepositionTaskBounds);
             }
-            mTaskOrganizer.applyTransaction(wct);
+            mDragResizeEndTransition = mTransitions.startTransition(TRANSIT_CHANGE, wct, this);
         } else if (mCtrlType == CTRL_TYPE_UNDEFINED
                 && DragPositioningCallbackUtility.isBelowDisallowedArea(
                 mDisallowedAreaForEndBoundsHeight, mTaskBoundsAtDragStart, mRepositionStartPoint,
                 y)) {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             DragPositioningCallbackUtility.onDragEnd(mRepositionTaskBounds,
-                    mTaskBoundsAtDragStart, mStableBounds, mRepositionStartPoint, x, y);
+                    mTaskBoundsAtDragStart, mRepositionStartPoint, x, y,
+                    mWindowDecoration.calculateValidDragArea());
             wct.setBounds(mWindowDecoration.mTaskInfo.token, mRepositionTaskBounds);
-            mTaskOrganizer.applyTransaction(wct);
+            mTransitions.startTransition(TRANSIT_CHANGE, wct, this);
         }
 
         mTaskBoundsAtDragStart.setEmpty();
@@ -153,4 +181,51 @@ class FluidResizeTaskPositioner implements DragPositioningCallback {
                 || (mCtrlType & CTRL_TYPE_LEFT) != 0 || (mCtrlType & CTRL_TYPE_RIGHT) != 0;
     }
 
+    @Override
+    public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        for (TransitionInfo.Change change: info.getChanges()) {
+            final SurfaceControl sc = change.getLeash();
+            final Rect endBounds = change.getEndAbsBounds();
+            startTransaction.setWindowCrop(sc, endBounds.width(), endBounds.height())
+                    .setPosition(sc, endBounds.left, endBounds.top);
+            finishTransaction.setWindowCrop(sc, endBounds.width(), endBounds.height())
+                    .setPosition(sc, endBounds.left, endBounds.top);
+        }
+
+        startTransaction.apply();
+        if (transition.equals(mDragResizeEndTransition)) {
+            mIsResizingOrAnimatingResize = false;
+            mDragResizeEndTransition = null;
+        }
+        finishCallback.onTransitionFinished(null);
+        return true;
+    }
+
+    /**
+     * We should never reach this as this handler's transitions are only started from shell
+     * explicitly.
+     */
+    @Nullable
+    @Override
+    public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
+            @NonNull TransitionRequestInfo request) {
+        return null;
+    }
+
+    @Override
+    public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted,
+            @Nullable SurfaceControl.Transaction finishTransaction) {
+        if (transition.equals(mDragResizeEndTransition)) {
+            mIsResizingOrAnimatingResize = false;
+            mDragResizeEndTransition = null;
+        }
+    }
+
+    @Override
+    public boolean isResizingOrAnimating() {
+        return mIsResizingOrAnimatingResize;
+    }
 }

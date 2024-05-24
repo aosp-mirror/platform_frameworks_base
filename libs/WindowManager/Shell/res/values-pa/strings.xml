@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"ਬੰਦ ਕਰੋ"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"ਵਿਸਤਾਰ ਕਰੋ"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"ਸੈਟਿੰਗਾਂ"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਵਿੱਚ ਦਾਖਲ ਹੋਵੋ"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"ਮੀਨੂ"</string>
     <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"ਤਸਵੀਰ-ਵਿੱਚ-ਤਸਵੀਰ ਮੀਨੂ"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> ਤਸਵੀਰ-ਅੰਦਰ-ਤਸਵੀਰ ਵਿੱਚ ਹੈ"</string>

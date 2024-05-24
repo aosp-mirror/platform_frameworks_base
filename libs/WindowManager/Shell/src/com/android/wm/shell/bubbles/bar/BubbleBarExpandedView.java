@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.bubbles.bar;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -25,27 +27,26 @@ import android.graphics.Insets;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.FloatProperty;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.widget.FrameLayout;
 
-import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.Bubble;
-import com.android.wm.shell.bubbles.BubbleController;
+import com.android.wm.shell.bubbles.BubbleExpandedViewManager;
 import com.android.wm.shell.bubbles.BubbleOverflowContainerView;
+import com.android.wm.shell.bubbles.BubblePositioner;
+import com.android.wm.shell.bubbles.BubbleTaskView;
 import com.android.wm.shell.bubbles.BubbleTaskViewHelper;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.taskview.TaskView;
 
 import java.util.function.Supplier;
 
-/**
- * Expanded view of a bubble when it's part of the bubble bar.
- *
- * {@link BubbleController#isShowingAsBubbleBar()}
- */
+/** Expanded view of a bubble when it's part of the bubble bar. */
 public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskViewHelper.Listener {
     /**
      * The expanded view listener notifying the {@link BubbleBarLayerView} about the internal
@@ -60,24 +61,46 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         void onBackPressed();
     }
 
+    /**
+     * A property wrapper around corner radius for the expanded view, handled by
+     * {@link #setCornerRadius(float)} and {@link #getCornerRadius()} methods.
+     */
+    public static final FloatProperty<BubbleBarExpandedView> CORNER_RADIUS = new FloatProperty<>(
+            "cornerRadius") {
+        @Override
+        public void setValue(BubbleBarExpandedView bbev, float radius) {
+            bbev.setCornerRadius(radius);
+        }
+
+        @Override
+        public Float get(BubbleBarExpandedView bbev) {
+            return bbev.getCornerRadius();
+        }
+    };
+
     private static final String TAG = BubbleBarExpandedView.class.getSimpleName();
     private static final int INVALID_TASK_ID = -1;
 
-    private BubbleController mController;
+    private BubbleExpandedViewManager mManager;
     private boolean mIsOverflow;
     private BubbleTaskViewHelper mBubbleTaskViewHelper;
     private BubbleBarMenuViewController mMenuViewController;
     private @Nullable Supplier<Rect> mLayerBoundsSupplier;
     private @Nullable Listener mListener;
 
-    private BubbleBarHandleView mHandleView = new BubbleBarHandleView(getContext());
+    private BubbleBarHandleView mHandleView;
     private @Nullable TaskView mTaskView;
     private @Nullable BubbleOverflowContainerView mOverflowView;
 
     private int mCaptionHeight;
 
     private int mBackgroundColor;
-    private float mCornerRadius = 0f;
+    /** Corner radius used when view is resting */
+    private float mRestingCornerRadius = 0f;
+    /** Corner radius applied while dragging */
+    private float mDraggedCornerRadius = 0f;
+    /** Current corner radius */
+    private float mCurrentCornerRadius = 0f;
 
     /**
      * Whether we want the {@code TaskView}'s content to be visible (alpha = 1f). If
@@ -111,15 +134,17 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         setElevation(getResources().getDimensionPixelSize(R.dimen.bubble_elevation));
         mCaptionHeight = context.getResources().getDimensionPixelSize(
                 R.dimen.bubble_bar_expanded_view_caption_height);
-        addView(mHandleView);
+        mHandleView = findViewById(R.id.bubble_bar_handle_view);
         applyThemeAttrs();
         setClipToOutline(true);
         setOutlineProvider(new ViewOutlineProvider() {
             @Override
             public void getOutline(View view, Outline outline) {
-                outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), mCornerRadius);
+                outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), mCurrentCornerRadius);
             }
         });
+        // Set a touch sink to ensure that clicks on the caption area do not propagate to the parent
+        setOnTouchListener((v, event) -> true);
     }
 
     @Override
@@ -129,25 +154,33 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         mMenuViewController.hideMenu(false /* animated */);
     }
 
-    /** Set the BubbleController on the view, must be called before doing anything else. */
-    public void initialize(BubbleController controller, boolean isOverflow) {
-        mController = controller;
+    /** Initializes the view, must be called before doing anything else. */
+    public void initialize(BubbleExpandedViewManager expandedViewManager,
+            BubblePositioner positioner,
+            boolean isOverflow,
+            @Nullable BubbleTaskView bubbleTaskView) {
+        mManager = expandedViewManager;
         mIsOverflow = isOverflow;
 
         if (mIsOverflow) {
             mOverflowView = (BubbleOverflowContainerView) LayoutInflater.from(getContext()).inflate(
                     R.layout.bubble_overflow_container, null /* root */);
-            mOverflowView.setBubbleController(mController);
+            mOverflowView.initialize(expandedViewManager, positioner);
             addView(mOverflowView);
         } else {
-
-            mBubbleTaskViewHelper = new BubbleTaskViewHelper(mContext, mController,
-                    /* listener= */ this,
+            mTaskView = bubbleTaskView.getTaskView();
+            mBubbleTaskViewHelper = new BubbleTaskViewHelper(mContext, expandedViewManager,
+                    /* listener= */ this, bubbleTaskView,
                     /* viewParent= */ this);
-            mTaskView = mBubbleTaskViewHelper.getTaskView();
-            addView(mTaskView);
+            if (mTaskView.getParent() != null) {
+                ((ViewGroup) mTaskView.getParent()).removeView(mTaskView);
+            }
+            FrameLayout.LayoutParams lp =
+                    new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT);
+            addView(mTaskView, lp);
             mTaskView.setEnableSurfaceClipping(true);
-            mTaskView.setCornerRadius(mCornerRadius);
+            mTaskView.setCornerRadius(mCurrentCornerRadius);
+            mTaskView.setVisibility(VISIBLE);
 
             // Handle view needs to draw on top of task view.
             bringChildToFront(mHandleView);
@@ -168,13 +201,13 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
 
             @Override
             public void onOpenAppSettings(Bubble bubble) {
-                mController.collapseStack();
+                mManager.collapseStack();
                 mContext.startActivityAsUser(bubble.getSettingsIntent(mContext), bubble.getUser());
             }
 
             @Override
             public void onDismissBubble(Bubble bubble) {
-                mController.dismissBubble(bubble, Bubbles.DISMISS_USER_REMOVED);
+                mManager.dismissBubble(bubble, Bubbles.DISMISS_USER_REMOVED);
             }
         });
         mHandleView.setOnClickListener(view -> {
@@ -189,22 +222,24 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     // TODO (b/275087636): call this when theme/config changes
     /** Updates the view based on the current theme. */
     public void applyThemeAttrs() {
-        boolean supportsRoundedCorners = ScreenDecorationsUtils.supportsRoundedCornersOnWindows(
-                mContext.getResources());
+        mRestingCornerRadius = getResources().getDimensionPixelSize(
+                R.dimen.bubble_bar_expanded_view_corner_radius
+        );
+        mDraggedCornerRadius = getResources().getDimensionPixelSize(
+                R.dimen.bubble_bar_expanded_view_corner_radius_dragged
+        );
+
+        mCurrentCornerRadius = mRestingCornerRadius;
+
         final TypedArray ta = mContext.obtainStyledAttributes(new int[]{
-                android.R.attr.dialogCornerRadius,
                 android.R.attr.colorBackgroundFloating});
-        mCornerRadius = supportsRoundedCorners ? ta.getDimensionPixelSize(0, 0) : 0;
-        mCornerRadius = mCornerRadius / 2f;
-        mBackgroundColor = ta.getColor(1, Color.WHITE);
-
+        mBackgroundColor = ta.getColor(0, Color.WHITE);
         ta.recycle();
-
         mCaptionHeight = getResources().getDimensionPixelSize(
                 R.dimen.bubble_bar_expanded_view_caption_height);
 
         if (mTaskView != null) {
-            mTaskView.setCornerRadius(mCornerRadius);
+            mTaskView.setCornerRadius(mCurrentCornerRadius);
             updateHandleColor(true /* animated */);
         }
     }
@@ -212,12 +247,8 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int height = MeasureSpec.getSize(heightMeasureSpec);
-        int menuViewHeight = Math.min(mCaptionHeight, height);
-        measureChild(mHandleView, widthMeasureSpec, MeasureSpec.makeMeasureSpec(menuViewHeight,
-                MeasureSpec.getMode(heightMeasureSpec)));
-
         if (mTaskView != null) {
+            int height = MeasureSpec.getSize(heightMeasureSpec);
             measureChild(mTaskView, widthMeasureSpec, MeasureSpec.makeMeasureSpec(height,
                     MeasureSpec.getMode(heightMeasureSpec)));
         }
@@ -226,14 +257,11 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
-        final int captionBottom = t + mCaptionHeight;
         if (mTaskView != null) {
             mTaskView.layout(l, t, r,
                     t + mTaskView.getMeasuredHeight());
             mTaskView.setCaptionInsets(Insets.of(0, mCaptionHeight, 0, 0));
         }
-        // Handle draws on top of task view in the caption area.
-        mHandleView.layout(l, t, r, captionBottom);
     }
 
     @Override
@@ -256,14 +284,8 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         mListener.onBackPressed();
     }
 
-    /** Cleans up task view, should be called when the bubble is no longer active. */
+    /** Cleans up the expanded view, should be called when the bubble is no longer active. */
     public void cleanUpExpandedState() {
-        if (mBubbleTaskViewHelper != null) {
-            if (mTaskView != null) {
-                removeView(mTaskView);
-            }
-            mBubbleTaskViewHelper.cleanUpTaskView();
-        }
         mMenuViewController.hideMenu(false /* animated */);
     }
 
@@ -275,7 +297,7 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         if (mMenuViewController.isMenuVisible()) {
             mMenuViewController.hideMenu(/* animated = */ true);
         } else {
-            mController.collapseStack();
+            mManager.collapseStack();
         }
     }
 
@@ -392,5 +414,31 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
      */
     public boolean isAnimating() {
         return mIsAnimating;
+    }
+
+    /** @return corner radius that should be applied while view is in rest */
+    public float getRestingCornerRadius() {
+        return mRestingCornerRadius;
+    }
+
+    /** @return corner radius that should be applied while view is being dragged */
+    public float getDraggedCornerRadius() {
+        return mDraggedCornerRadius;
+    }
+
+    /** @return current corner radius */
+    public float getCornerRadius() {
+        return mCurrentCornerRadius;
+    }
+
+    /** Update corner radius */
+    public void setCornerRadius(float cornerRadius) {
+        if (mCurrentCornerRadius != cornerRadius) {
+            mCurrentCornerRadius = cornerRadius;
+            if (mTaskView != null) {
+                mTaskView.setCornerRadius(cornerRadius);
+            }
+            invalidateOutline();
+        }
     }
 }

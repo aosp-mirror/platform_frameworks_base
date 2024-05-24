@@ -17,9 +17,14 @@ package com.android.systemui.keyguard.ui
 
 import android.view.animation.Interpolator
 import com.android.app.animation.Interpolators.LINEAR
+import com.android.app.tracing.coroutines.launch
 import com.android.keyguard.logging.KeyguardTransitionAnimationLogger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionState.CANCELED
 import com.android.systemui.keyguard.shared.model.TransitionState.FINISHED
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
@@ -31,12 +36,12 @@ import kotlin.math.min
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.mapNotNull
 
 /**
  * Assists in creating sub-flows for a KeyguardTransition. Call [setup] once for a transition, and
@@ -47,29 +52,55 @@ class KeyguardTransitionAnimationFlow
 @Inject
 constructor(
     @Application private val scope: CoroutineScope,
+    private val transitionInteractor: KeyguardTransitionInteractor,
     private val logger: KeyguardTransitionAnimationLogger,
 ) {
+    private val transitionMap = mutableMapOf<Edge, MutableSharedFlow<TransitionStep>>()
 
-    /**
-     * Invoke once per transition between FROM->TO states to get access to
-     * [SharedFlowBuilder#sharedFlow].
-     */
+    init {
+        scope.launch("KeyguardTransitionAnimationFlow") {
+            transitionInteractor.transitions.collect {
+                // FROM->TO
+                transitionMap[Edge(it.from, it.to)]?.emit(it)
+                // FROM->(ANY)
+                transitionMap[Edge(it.from, null)]?.emit(it)
+                // (ANY)->TO
+                transitionMap[Edge(null, it.to)]?.emit(it)
+            }
+        }
+    }
+
+    private fun getOrCreateFlow(edge: Edge): MutableSharedFlow<TransitionStep> {
+        return transitionMap.getOrPut(edge) {
+            MutableSharedFlow<TransitionStep>(
+                extraBufferCapacity = 10,
+                onBufferOverflow = BufferOverflow.DROP_OLDEST
+            )
+        }
+    }
+
+    /** Invoke once per transition between FROM->TO states to get access to a shared flow. */
     fun setup(
         duration: Duration,
-        stepFlow: Flow<TransitionStep>,
-    ) = SharedFlowBuilder(duration, stepFlow)
+        from: KeyguardState?,
+        to: KeyguardState?,
+    ): FlowBuilder {
+        if (from == null && to == null) {
+            throw IllegalArgumentException("from and to are both null")
+        }
 
-    inner class SharedFlowBuilder(
+        return FlowBuilder(duration, Edge(from, to))
+    }
+
+    inner class FlowBuilder(
         private val transitionDuration: Duration,
-        private val stepFlow: Flow<TransitionStep>,
+        private val edge: Edge,
     ) {
         /**
          * Transitions will occur over a [transitionDuration] with [TransitionStep]s being emitted
          * in the range of [0, 1]. View animations should begin and end within a subset of this
          * range. This function maps the [startTime] and [duration] into [0, 1], when this subset is
          * valid.
-         *
-         * Will produce a [SharedFlow], so that identical animations can use the same value.
          */
         fun sharedFlow(
             duration: Duration,
@@ -80,7 +111,39 @@ constructor(
             onFinish: (() -> Float)? = null,
             interpolator: Interpolator = LINEAR,
             name: String? = null
-        ): SharedFlow<Float> {
+        ): Flow<Float> {
+            return sharedFlowWithState(
+                    duration = duration,
+                    onStep = onStep,
+                    startTime = startTime,
+                    onStart = onStart,
+                    onCancel = onCancel,
+                    onFinish = onFinish,
+                    interpolator = interpolator,
+                    name = name,
+                )
+                .mapNotNull { stateToValue -> stateToValue.value }
+        }
+
+        /**
+         * Transitions will occur over a [transitionDuration] with [TransitionStep]s being emitted
+         * in the range of [0, 1]. View animations should begin and end within a subset of this
+         * range. This function maps the [startTime] and [duration] into [0, 1], when this subset is
+         * valid.
+         *
+         * Will return a [StateToValue], which encompasses the calculated value as well as the
+         * transitionState that is associated with it.
+         */
+        fun sharedFlowWithState(
+            duration: Duration,
+            onStep: (Float) -> Float,
+            startTime: Duration = 0.milliseconds,
+            onStart: (() -> Unit)? = null,
+            onCancel: (() -> Float)? = null,
+            onFinish: (() -> Float)? = null,
+            interpolator: Interpolator = LINEAR,
+            name: String? = null
+        ): Flow<StateToValue> {
             if (!duration.isPositive()) {
                 throw IllegalArgumentException("duration must be a positive number: $duration")
             }
@@ -94,7 +157,6 @@ constructor(
             val start = (startTime / transitionDuration).toFloat()
             val chunks = (transitionDuration / duration).toFloat()
             logger.logCreate(name, start)
-            var isComplete = true
 
             fun stepToValue(step: TransitionStep): Float? {
                 val value = (step.value - start) * chunks
@@ -103,17 +165,13 @@ constructor(
                     // middle, it is possible this animation is being skipped but we need to inform
                     // the ViewModels of the last update
                     STARTED -> {
-                        isComplete = false
                         onStart?.invoke()
                         max(0f, min(1f, value))
                     }
                     // Always send a final value of 1. Because of rounding, [value] may never be
                     // exactly 1.
                     RUNNING ->
-                        if (isComplete) {
-                            null
-                        } else if (value >= 1f) {
-                            isComplete = true
+                        if (value >= 1f) {
                             1f
                         } else if (value >= 0f) {
                             value
@@ -124,20 +182,23 @@ constructor(
                 }?.let { onStep(interpolator.getInterpolation(it)) }
             }
 
-            return stepFlow
+            return getOrCreateFlow(edge)
                 .map { step ->
-                    val value =
-                        when (step.transitionState) {
-                            STARTED -> stepToValue(step)
-                            RUNNING -> stepToValue(step)
-                            CANCELED -> onCancel?.invoke()
-                            FINISHED -> onFinish?.invoke()
-                        }
-                    logger.logTransitionStep(name, step, value)
-                    value
+                    StateToValue(
+                            from = step.from,
+                            to = step.to,
+                            transitionState = step.transitionState,
+                            value =
+                                when (step.transitionState) {
+                                    STARTED -> stepToValue(step)
+                                    RUNNING -> stepToValue(step)
+                                    CANCELED -> onCancel?.invoke()
+                                    FINISHED -> onFinish?.invoke()
+                                }
+                        )
+                        .also { logger.logTransitionStep(name, step, it.value) }
                 }
-                .filterNotNull()
-                .shareIn(scope, SharingStarted.WhileSubscribed())
+                .distinctUntilChanged()
         }
 
         /**
@@ -147,4 +208,13 @@ constructor(
             return sharedFlow(duration = 1.milliseconds, onStep = { value }, onFinish = { value })
         }
     }
+}
+
+data class StateToValue(
+    val from: KeyguardState? = null,
+    val to: KeyguardState? = null,
+    val transitionState: TransitionState = TransitionState.FINISHED,
+    val value: Float? = 0f,
+) {
+    fun isToOrFrom(state: KeyguardState) = from == state || to == state
 }

@@ -17,6 +17,7 @@
 package android.window;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.util.FloatProperty;
 
 import com.android.internal.dynamicanimation.animation.DynamicAnimation;
@@ -44,6 +45,14 @@ public class BackProgressAnimator {
     private float mProgress = 0;
     private BackMotionEvent mLastBackEvent;
     private boolean mBackAnimationInProgress = false;
+    @Nullable
+    private Runnable mBackCancelledFinishRunnable;
+    private final DynamicAnimation.OnAnimationEndListener mOnAnimationEndListener =
+            (animation, canceled, value, velocity) -> {
+                invokeBackCancelledRunnable();
+                reset();
+            };
+
 
     private void setProgress(float progress) {
         mProgress = progress;
@@ -116,6 +125,11 @@ public class BackProgressAnimator {
      * Resets the back progress animation. This should be called when back is invoked or cancelled.
      */
     public void reset() {
+        if (mBackCancelledFinishRunnable != null) {
+            // Ensure that last progress value that apps see is 0
+            updateProgressValue(0);
+            invokeBackCancelledRunnable();
+        }
         mSpring.animateToFinalPosition(0);
         if (mSpring.canSkipToEnd()) {
             mSpring.skipToEnd();
@@ -136,17 +150,8 @@ public class BackProgressAnimator {
      * @param finishCallback the callback to be invoked when the progress is reach to 0.
      */
     public void onBackCancelled(@NonNull Runnable finishCallback) {
-        final DynamicAnimation.OnAnimationEndListener listener =
-                new DynamicAnimation.OnAnimationEndListener() {
-            @Override
-            public void onAnimationEnd(DynamicAnimation animation, boolean canceled, float value,
-                    float velocity) {
-                mSpring.removeEndListener(this);
-                finishCallback.run();
-                reset();
-            }
-        };
-        mSpring.addEndListener(listener);
+        mBackCancelledFinishRunnable = finishCallback;
+        mSpring.addEndListener(mOnAnimationEndListener);
         mSpring.animateToFinalPosition(0);
     }
 
@@ -162,6 +167,12 @@ public class BackProgressAnimator {
         mCallback.onProgressUpdate(
                 new BackEvent(mLastBackEvent.getTouchX(), mLastBackEvent.getTouchY(),
                         progress / SCALE_FACTOR, mLastBackEvent.getSwipeEdge()));
+    }
+
+    private void invokeBackCancelledRunnable() {
+        mSpring.removeEndListener(mOnAnimationEndListener);
+        mBackCancelledFinishRunnable.run();
+        mBackCancelledFinishRunnable = null;
     }
 
 }

@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> پس از <xliff:g id="TIME_DELAY">{2}</xliff:g> ثانیه"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: هدایت نشده"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: هدایت نشده"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"امنیت شبکه تلفن همراه"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"مرور تنظیمات"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"شناسه دستگاه دردسترس قرار گرفت"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"‏شبکه‌ای در اتصال <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> شناسه یکتای (IMSI) دستگاه شما را <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> بار در بازه زمانی <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> و <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> ضبط کرده است."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"اتصال رمزگذاری‌شده به <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"اکنون به شبکه تلفن همراه ایمن‌تری متصل‌شده‌اید."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"اتصال رمزگذاری‌نشده به <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"اکنون به یک شبکه تلفن همراه رمزگذاری‌نشده متصل شده‌اید. تماس‌ها، پیام‌ها، و داده‌هایتان دربرابر شنود آسیب‌پذیر هستند."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"تنظیمات امنیتی شبکه همراه"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"بیشتر بدانید"</string>
     <string name="fcComplete" msgid="1080909484660507044">"کد ویژگی کامل شد."</string>
     <string name="fcError" msgid="5325116502080221346">"مشکل در اتصال یا کد ویژگی نامعتبر."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"تأیید"</string>
@@ -338,7 +348,7 @@
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"نوشتاری را که تایپ می‌کنید مشاهده کند"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"اطلاعات شخصی مانند شماره کارت اعتباری و گذرواژه‌ها را لحاظ می‌کند."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"کنترل درشت‌نمایی نمایشگر"</string>
-    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"سطح و موقعیت بزرگ‌نمایی نمایشگر را کنترل کنید."</string>
+    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"موقعیت و سطح بزرگ‌نمایی نمایشگر را کنترل کنید."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"اجرای اشاره‌ها"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"می‌توانید ضربه بزنید، انگشتتان را تند بکشید، انگشتانتان را به هم نزدیک یا از هم دور کنید و اشاره‌های دیگری اجرا کنید."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"اشاره‌های اثر انگشت"</string>
@@ -370,6 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"به برنامه امکان می‌دهد به مدول پخش سلولی متصل شود تا پیام‌های پخش سلولی را به محض دریافت بازارسال کند. هشدارهای پخش سلولی در برخی از موقعیت‌های مکانی ارسال می‌شوند تا موقعیت‌های اضطراری را به شما اعلام کنند. وقتی پخش سلولی دریافت می‌شود، ممکن است برنامه‌های مخرب در عملکرد یا کارکرد دستگاه شما اختلال ایجاد کنند."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"مدیریت تماس‌های درحال انجام"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"به برنامه اجازه می‌دهد جزئیات تماس‌های درحال انجام در دستگاه را ببیند و این تماس‌ها را کنترل کند."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"دسترسی به آخرین شناسه سلولی شناخته‌شده."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"به برنامه اجازه می‌دهد به آخرین شناسه سلولی شناخته‌شده که سرویس تلفنی ارائه داده است دسترسی داشته باشد."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"خواندن پیام‌های پخش سلولی"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"‏به برنامه اجازه می‎دهد پیام‌های پخش سلولی دستگاه شما را بخواند. هشدارهای پخش سلولی در برخی از موقعیت‌های مکانی تحویل داده می‎شوند تا موقعیت‌های اضطراری را به شما اعلام کنند. وقتی پخش سلولی دریافت می‎شود، ممکن است برنامه‌های مخرب در عملکرد یا کارکرد دستگاه شما اختلال ایجاد کنند."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"خواندن فیدهای مشترک"</string>
@@ -434,6 +446,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"به برنامه اجازه می‌دهد از سرویس‌های پیش‌نما از نوع «معافیت سیستم» استفاده کند"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"‏اجرای سرویس پیش‌نما از نوع «fileManagement»"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"‏به برنامه اجازه می‌دهد از سرویس‌های پیش‌نما از نوع «fileManagement» استفاده کند"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"‏اجرای سرویس پیش‌زمینه‌ای از نوع «mediaProcessing»"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"‏به برنامه اجازه می‌دهد از سرویس‌های پیش‌زمینه‌ای از نوع «mediaProcessing» استفاده کند"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"اجرای سرویس پیش‌نما از نوع «استفاده ویژه»"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"به برنامه اجازه می‌دهد از سرویس‌های پیش‌نما از نوع «استفاده ویژه» استفاده کند"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"اندازه‌گیری اندازه فضای ذخیره‌سازی برنامه"</string>
@@ -539,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"به برنامه اجازه می‌دهد تا از فرستنده مادون قرمز تلفن استفاده کند."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"تنظیم کاغذدیواری"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"‏به برنامه اجازه می‎دهد تا کاغذدیواری سیستم را تنظیم کند."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"دسترسی به نمایه‌های پنهان"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"به برنامه اجازه می‌دهد به نمایه‌های پنهان دسترسی پیدا کند."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"تنظیم اندازه کاغذدیواری"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"‏به برنامه اجازه می‎دهد تا نکات اندازه کاغذدیواری سیستم را تنظیم کند."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"تنظیم منطقهٔ زمانی"</string>
@@ -617,8 +633,8 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"به برنامه اجازه می‌دهد مجموعه عکستان را تغییر دهد."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"خواندن مکان‌ها از مجموعه رسانه شما"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"به برنامه اجازه می‌دهد مکان‌ها را از مجموعه رسانه‌تان بخواند."</string>
-    <string name="biometric_app_setting_name" msgid="3339209978734534457">"استفاده از زیست‌سنجشی"</string>
-    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"استفاده از زیست‌سنجشی یا قفل صفحه"</string>
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"استفاده از داده‌های زیست‌سنجشی"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"استفاده از داده‌های زیست‌سنجشی یا قفل صفحه"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"تأیید کنید این شمایید"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"برای ادامه، از زیست‌سنجشی استفاده کنید"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"برای ادامه، از زیست‌سنجشی یا قفل صفحه استفاده کنید"</string>
@@ -632,7 +648,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"از قفل صفحه استفاده کنید"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"برای ادامه، قفل صفحه‌تان را وارد کنید"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"محکم روی حسگر فشار دهید"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"اثر انگشت شناسایی نشد. دوباره امتحان کنید."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"اثر انگشت شناسایی نشد. دوباره امتحان کنید."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"حسگر اثر انگشت را تمیز و دوباره امتحان کنید"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"حسگر را تمیز و دوباره امتحان کنید"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"محکم روی حسگر فشار دهید"</string>
@@ -650,18 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"اثر انگشت اصالت‌سنجی شد"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"چهره اصالت‌سنجی شد"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"چهره اصالت‌سنجی شد، لطفاً تأیید را فشار دهید"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"سخت‌افزار اثرانگشت در دسترس نیست."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"سخت‌افزار اثر انگشت دردسترس نیست"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"اثر انگشت راه‌اندازی نشد"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"مهلت تنظیم اثر انگشت به‌پایان رسید. دوباره امتحان کنید."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"عملکرد اثر انگشت لغو شد."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"کاربر عملیات اثر انگشت را لغو کرد"</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"عملکرد اثر انگشت لغو شد"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"کاربر عملیات اثر انگشت را لغو کرد"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"تلاش‌ها از حد مجاز بیشتر شده است. به‌جای آن از قفل صفحه استفاده کنید."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"تلاش‌های بیش‌ازحد. حالا از قفل صفحه استفاده کنید."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"اثر انگشت پردازش نشد. دوباره امتحان کنید."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"اثر انگشتی ثبت نشده است."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"این دستگاه حسگر اثر انگشت ندارد."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"حسگر به‌طور موقت غیرفعال است."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"امکان استفاده از حسگر اثر انگشت وجود ندارد. به ارائه‌دهنده خدمات تعمیر مراجعه کنید"</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"اثر انگشتی ثبت نشده است"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"این دستگاه حسگر اثر انگشت ندارد"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"حسگر موقتاً غیرفعال شده است"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"نمی‌توان از حسگر اثر انگشت استفاده کرد. به ارائه‌دهنده خدمات تعمیر مراجعه کنید."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"دکمه روشن/خاموش فشار داده شد"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"انگشت <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"استفاده از اثر انگشت"</string>
@@ -696,7 +712,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"چهره دیده نمی‌شود. تلفن را هم‌سطح چشمانتان نگه دارید."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"حرکت خیلی زیاد است. تلفن را ثابت نگه‌دارید."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"لطفاً چهره‌تان را مجدداً ثبت کنید."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"چهره شناسایی نشد. دوباره امتحان کنید."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"چهره شناسایی نشد. دوباره امتحان کنید."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"موقعیت سرتان را کمی تغییر دهید"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"مستقیم‌تر به تلفن نگاه کنید"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"مستقیم‌تر به تلفن نگاه کنید"</string>
@@ -807,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"به برنامه اجازه می‌دهد داده‌های حسگر را با نرخ بیش‌از ۲۰۰ هرتز نمونه‌برداری کند"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"به‌روزرسانی برنامه بدون اقدام کاربر"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"به دارنده اجازه می‌دهد برنامه‌ای را که قبلاً نصب کرده است بدون اقدام کاربر به‌روزرسانی کند"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"‏به‌روزرسانی وضعیت‌های راستی‌آزمایی کلیدهای تماسی E2EE متعلق به برنامه‌های دیگر"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"‏به برنامه اجازه می‌دهد وضعیت‌های راستی‌آزمایی کلیدهای تماسی E2EE متعلق به برنامه‌های دیگر را به‌روزرسانی کند"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"تنظیم قوانین گذرواژه"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"کنترل طول و نوع نویسه‌هایی که در گذرواژه و پین قفل صفحه مجاز است."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"پایش تلاش‌های باز کردن قفل صفحه"</string>
@@ -1906,6 +1924,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"آخر هفته"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"رویداد"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"خوابیدن"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"تحت‌مدیریت <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"روشن"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"خاموش"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> درحال قطع کردن بعضی از صداهاست"</string>
@@ -1925,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"تأییدشده"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"بزرگ کردن"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"کوچک کردن"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"جمع شد"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"ازهم باز شد"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"روشن/خاموش کردن بزرگ‌نمایی"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"‏درگاه جانبی Android USB"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1965,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"مکث برنامه‌های کاری لغو شود؟"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"لغو مکث"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"اضطراری"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"قفل صفحه تنظیم کنید"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"تنظیم قفل صفحه"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"برای استفاده از فضای خصوصی، قفل صفحه تنظیم کنید"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"برنامه در دسترس نیست"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> درحال‌حاضر در دسترس نیست."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> دردسترس نیست"</string>
@@ -2338,11 +2362,9 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"به برنامه همراه اجازه می‌دهد سرویس‌های پیش‌نما را از پس‌زمینه راه‌اندازی کند."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"میکروفون دردسترس است"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"میکروفون مسدود شد"</string>
-    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"بازتاب دادن به نمایشگر ممکن نبود"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"قرینه‌سازی روی نمایشگر ممکن نبود"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"از کابل دیگری استفاده کنید و دوباره امتحان کنید"</string>
-    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"دستگاه بسیار گرم است و تا زمانی‌که خنک نشود نمی‌تواند محتوا را در نمایشگر بازتاب دهد."</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"شاید کابل از نمایشگر پشتیبانی نکند"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"‏کابل USB-C شما ممکن است به‌درستی به نمایشگرها وصل نشود"</string>
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"دستگاه بسیار گرم است و تا زمانی‌که خنک نشود نمی‌تواند محتوا را روی نمایشگر قرینه‌سازی کند."</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"‫Dual screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"‏‫Dual Screen روشن است"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"‫<xliff:g id="APP_NAME">%1$s</xliff:g> از هر دو نمایشگر برای نمایش محتوا استفاده می‌کند"</string>
@@ -2366,4 +2388,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"کار ۳"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"آزمایش"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"عمومی"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"به‌طور خودکار به ماهواره متصل شد"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"‏می‌توانید بدون شبکه تلفن همراه یا Wi-Fi پیام ارسال و دریافت کنید"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"باز کردن «پیام‌ها»"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"روش کار"</string>
 </resources>

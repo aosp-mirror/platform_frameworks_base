@@ -24,6 +24,8 @@ import java.io.IOException;
  * Utility methods for Backup/Restore
  * @hide
  */
+// Exported to Mainline modules; cannot use annotations
+// @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class BackupUtils {
 
     public static final int NULL = 0;

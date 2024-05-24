@@ -38,6 +38,7 @@ import androidx.core.view.doOnLayout
 import com.android.app.animation.Interpolators
 import com.android.settingslib.Utils
 import com.android.systemui.Dumpable
+import com.android.systemui.Flags.centralizedStatusBarHeightFix
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
@@ -432,6 +433,9 @@ constructor(
             changes += combinedShadeHeadersConstraintManager.emptyCutoutConstraints()
         }
 
+        if (centralizedStatusBarHeightFix()) {
+            view.setPadding(view.paddingLeft, sbInsets.top, view.paddingRight, view.paddingBottom)
+        }
         view.updateAllConstraints(changes)
         updateBatteryMode()
     }

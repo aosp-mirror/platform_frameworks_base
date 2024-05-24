@@ -225,7 +225,7 @@ interface IActivityTaskManager {
             boolean focused, boolean newSessionId);
     boolean requestAutofillData(in IAssistDataReceiver receiver, in Bundle receiverExtras,
             in IBinder activityToken, int flags);
-    boolean isAssistDataAllowedOnCurrentActivity();
+    boolean isAssistDataAllowed();
     boolean requestAssistDataForTask(in IAssistDataReceiver receiver, int taskId,
             in String callingPackageName, String callingAttributionTag);
 
@@ -332,8 +332,10 @@ interface IActivityTaskManager {
 
     /**
      * When the Picture-in-picture state has changed.
+     * @param pipState the {@link PictureInPictureUiState} is sent to current pip task if there is
+     * any -or- the top most task (state like entering PiP does not require a pinned task).
      */
-    void onPictureInPictureStateChanged(in PictureInPictureUiState pipState);
+    void onPictureInPictureUiStateChanged(in PictureInPictureUiState pipState);
 
     /**
      * Re-attach navbar to the display during a recents transition.

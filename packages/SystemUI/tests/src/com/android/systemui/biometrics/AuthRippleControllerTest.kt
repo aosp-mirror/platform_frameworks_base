@@ -27,11 +27,13 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.keyguard.logging.KeyguardLogger
+import com.android.systemui.Flags
 import com.android.systemui.Flags.FLAG_LIGHT_REVEAL_MIGRATION
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dump.logcatLogBuffer
-import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
+import com.android.systemui.deviceentry.domain.interactor.AuthRippleInteractor
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.NotificationShadeWindowController
@@ -41,7 +43,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.leak.RotationUtils
 import com.android.systemui.util.mockito.any
-import javax.inject.Provider
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -60,8 +62,10 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.MockitoSession
 import org.mockito.quality.Strictness
+import javax.inject.Provider
 
 
+@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class AuthRippleControllerTest : SysuiTestCase() {
@@ -73,6 +77,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
     @Mock private lateinit var configurationController: ConfigurationController
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var authController: AuthController
+    @Mock private lateinit var authRippleInteractor: AuthRippleInteractor
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock
     private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
@@ -87,12 +92,11 @@ class AuthRippleControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var statusBarStateController: StatusBarStateController
     @Mock
-    private lateinit var featureFlags: FeatureFlags
-    @Mock
     private lateinit var lightRevealScrim: LightRevealScrim
     @Mock
     private lateinit var fpSensorProp: FingerprintSensorPropertiesInternal
 
+    private val facePropertyRepository = FakeFacePropertyRepository()
     private val displayMetrics = DisplayMetrics()
 
     @Captor
@@ -101,6 +105,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
         MockitoAnnotations.initMocks(this)
         staticMockSession = mockitoSession()
                 .mockStatic(RotationUtils::class.java)
@@ -123,10 +128,11 @@ class AuthRippleControllerTest : SysuiTestCase() {
             udfpsControllerProvider,
             statusBarStateController,
             displayMetrics,
-            featureFlags,
             KeyguardLogger(logcatLogBuffer(AuthRippleController.TAG)),
             biometricUnlockController,
             lightRevealScrim,
+            authRippleInteractor,
+            facePropertyRepository,
             rippleView,
         )
         controller.init()
@@ -203,7 +209,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
 
     @Test
     fun testNullFaceSensorLocationDoesNothing() {
-        `when`(authController.faceSensorLocation).thenReturn(null)
+        facePropertyRepository.setSensorLocation(null)
         controller.onViewAttached()
 
         val captor = ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback::class.java)
@@ -271,7 +277,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
     fun testAnimatorRunWhenWakeAndUnlock_faceUdfpsFingerDown() {
         mSetFlagsRule.disableFlags(FLAG_LIGHT_REVEAL_MIGRATION)
         val faceLocation = Point(5, 5)
-        `when`(authController.faceSensorLocation).thenReturn(faceLocation)
+        facePropertyRepository.setSensorLocation(faceLocation)
         controller.onViewAttached()
         `when`(keyguardStateController.isShowing).thenReturn(true)
         `when`(biometricUnlockController.isWakeAndUnlock).thenReturn(true)

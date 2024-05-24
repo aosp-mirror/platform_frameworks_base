@@ -19,27 +19,28 @@ package com.android.systemui.bouncer.domain.interactor
 import android.content.Context
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.domain.interactor.AuthenticationResult
-import com.android.systemui.authentication.shared.model.AuthenticationLockoutModel
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Password
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pattern
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pin
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Sim
 import com.android.systemui.bouncer.data.repository.BouncerRepository
 import com.android.systemui.classifier.FalsingClassifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.res.R
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
-import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 /** Encapsulates business logic and application state accessing use-cases. */
@@ -51,34 +52,13 @@ constructor(
     @Application private val applicationContext: Context,
     private val repository: BouncerRepository,
     private val authenticationInteractor: AuthenticationInteractor,
-    private val keyguardFaceAuthInteractor: KeyguardFaceAuthInteractor,
-    flags: SceneContainerFlags,
+    private val deviceEntryFaceAuthInteractor: DeviceEntryFaceAuthInteractor,
     private val falsingInteractor: FalsingInteractor,
     private val powerInteractor: PowerInteractor,
     private val simBouncerInteractor: SimBouncerInteractor,
 ) {
-
-    /** The user-facing message to show in the bouncer. */
-    val message: StateFlow<String?> =
-        combine(repository.message, authenticationInteractor.lockout) { message, lockout ->
-                messageOrLockoutMessage(message, lockout)
-            }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue =
-                    messageOrLockoutMessage(
-                        repository.message.value,
-                        authenticationInteractor.lockout.value,
-                    )
-            )
-
-    /**
-     * The current authentication lockout (aka "throttling") state, set when the user has to wait
-     * before being able to try another authentication attempt. `null` indicates lockout isn't
-     * active.
-     */
-    val lockout: StateFlow<AuthenticationLockoutModel?> = authenticationInteractor.lockout
+    /** The user-facing message to show in the bouncer when lockout is not active. */
+    val message: StateFlow<String?> = repository.message
 
     /** Whether the auto confirm feature is enabled for the currently-selected user. */
     val isAutoConfirmEnabled: StateFlow<Boolean> = authenticationInteractor.isAutoConfirmEnabled
@@ -101,18 +81,13 @@ constructor(
     /** Emits a [Unit] each time the IME (keyboard) is hidden by the user. */
     val onImeHiddenByUser: SharedFlow<Unit> = _onImeHiddenByUser
 
-    init {
-        if (flags.isEnabled()) {
-            // Clear the message if moved from locked-out to no-longer locked-out.
-            applicationScope.launch {
-                lockout.pairwise().collect { (previous, current) ->
-                    if (previous != null && current == null) {
-                        clearMessage()
-                    }
-                }
+    /** Emits a [Unit] each time a lockout is started for the selected user. */
+    val onLockoutStarted: Flow<Unit> =
+        authenticationInteractor.onAuthenticationResult
+            .filter { successfullyAuthenticated ->
+                !successfullyAuthenticated && authenticationInteractor.lockoutEndTimestamp != null
             }
-        }
-    }
+            .map {}
 
     /** Notifies that the user has places down a pointer, not necessarily dragging just yet. */
     fun onDown() {
@@ -125,7 +100,7 @@ constructor(
      * user's pocket or by the user's face while holding their device up to their ear.
      */
     fun onIntentionalUserInput() {
-        keyguardFaceAuthInteractor.onPrimaryBouncerUserInput()
+        deviceEntryFaceAuthInteractor.onPrimaryBouncerUserInput()
         powerInteractor.onUserTouch()
         falsingInteractor.updateFalseConfidence(FalsingClassifier.Result.passed(0.6))
     }
@@ -145,7 +120,7 @@ constructor(
     }
 
     fun setMessage(message: String?) {
-        repository.setMessage(message)
+        repository.message.value = message
     }
 
     /**
@@ -154,13 +129,13 @@ constructor(
      */
     fun resetMessage() {
         applicationScope.launch {
-            repository.setMessage(promptMessage(authenticationInteractor.getAuthenticationMethod()))
+            setMessage(promptMessage(authenticationInteractor.getAuthenticationMethod()))
         }
     }
 
     /** Removes the user-facing message. */
     fun clearMessage() {
-        repository.setMessage(null)
+        setMessage(null)
     }
 
     /**
@@ -187,8 +162,8 @@ constructor(
             return AuthenticationResult.SKIPPED
         }
 
-        if (authenticationInteractor.getAuthenticationMethod() == AuthenticationMethodModel.Sim) {
-            // We authenticate sim in SimInteractor
+        if (authenticationInteractor.getAuthenticationMethod() == Sim) {
+            // SIM is authenticated in SimBouncerInteractor.
             return AuthenticationResult.SKIPPED
         }
 
@@ -196,30 +171,32 @@ constructor(
         // view-models, whose lifecycle (and thus scope) is shorter than this interactor.
         // This allows the task to continue running properly even when the calling scope has been
         // cancelled.
-        return applicationScope
-            .async {
-                val authResult = authenticationInteractor.authenticate(input, tryAutoConfirm)
-                if (
-                    authResult == AuthenticationResult.FAILED ||
-                        (authResult == AuthenticationResult.SKIPPED && !tryAutoConfirm)
-                ) {
-                    showErrorMessage()
-                }
-                authResult
-            }
-            .await()
+        val authResult =
+            applicationScope
+                .async { authenticationInteractor.authenticate(input, tryAutoConfirm) }
+                .await()
+
+        if (authenticationInteractor.lockoutEndTimestamp != null) {
+            clearMessage()
+        } else if (
+            authResult == AuthenticationResult.FAILED ||
+                (authResult == AuthenticationResult.SKIPPED && !tryAutoConfirm)
+        ) {
+            showWrongInputMessage()
+        }
+        return authResult
     }
 
     /**
-     * Shows the error message.
+     * Shows the a message notifying the user that their credentials input is wrong.
      *
      * Callers should use this instead of [authenticate] when they know ahead of time that an auth
      * attempt will fail but aren't interested in the other side effects like triggering lockout.
      * For example, if the user entered a pattern that's too short, the system can show the error
      * message without having the attempt trigger lockout.
      */
-    private suspend fun showErrorMessage() {
-        repository.setMessage(errorMessage(authenticationInteractor.getAuthenticationMethod()))
+    private suspend fun showWrongInputMessage() {
+        setMessage(wrongInputMessage(authenticationInteractor.getAuthenticationMethod()))
     }
 
     /** Notifies that the input method editor (software keyboard) has been hidden by the user. */
@@ -229,39 +206,19 @@ constructor(
 
     private fun promptMessage(authMethod: AuthenticationMethodModel): String {
         return when (authMethod) {
-            is AuthenticationMethodModel.Sim -> simBouncerInteractor.getDefaultMessage()
-            is AuthenticationMethodModel.Pin ->
-                applicationContext.getString(R.string.keyguard_enter_your_pin)
-            is AuthenticationMethodModel.Password ->
-                applicationContext.getString(R.string.keyguard_enter_your_password)
-            is AuthenticationMethodModel.Pattern ->
-                applicationContext.getString(R.string.keyguard_enter_your_pattern)
+            is Sim -> simBouncerInteractor.getDefaultMessage()
+            is Pin -> applicationContext.getString(R.string.keyguard_enter_your_pin)
+            is Password -> applicationContext.getString(R.string.keyguard_enter_your_password)
+            is Pattern -> applicationContext.getString(R.string.keyguard_enter_your_pattern)
             else -> ""
         }
     }
 
-    private fun errorMessage(authMethod: AuthenticationMethodModel): String {
+    private fun wrongInputMessage(authMethod: AuthenticationMethodModel): String {
         return when (authMethod) {
-            is AuthenticationMethodModel.Pin -> applicationContext.getString(R.string.kg_wrong_pin)
-            is AuthenticationMethodModel.Password ->
-                applicationContext.getString(R.string.kg_wrong_password)
-            is AuthenticationMethodModel.Pattern ->
-                applicationContext.getString(R.string.kg_wrong_pattern)
-            else -> ""
-        }
-    }
-
-    private fun messageOrLockoutMessage(
-        message: String?,
-        lockoutModel: AuthenticationLockoutModel?,
-    ): String {
-        return when {
-            lockoutModel != null ->
-                applicationContext.getString(
-                    com.android.internal.R.string.lockscreen_too_many_failed_attempts_countdown,
-                    lockoutModel.remainingSeconds,
-                )
-            message != null -> message
+            is Pin -> applicationContext.getString(R.string.kg_wrong_pin)
+            is Password -> applicationContext.getString(R.string.kg_wrong_password)
+            is Pattern -> applicationContext.getString(R.string.kg_wrong_pattern)
             else -> ""
         }
     }

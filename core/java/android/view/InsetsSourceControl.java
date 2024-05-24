@@ -20,7 +20,7 @@ import static android.graphics.PointProto.X;
 import static android.graphics.PointProto.Y;
 import static android.view.InsetsSourceControlProto.LEASH;
 import static android.view.InsetsSourceControlProto.POSITION;
-import static android.view.InsetsSourceControlProto.TYPE;
+import static android.view.InsetsSourceControlProto.TYPE_NUMBER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -244,8 +244,6 @@ public class InsetsSourceControl implements Parcelable {
      */
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        proto.write(TYPE, WindowInsets.Type.toString(mType));
-
         final long surfaceToken = proto.start(POSITION);
         proto.write(X, mSurfacePosition.x);
         proto.write(Y, mSurfacePosition.y);
@@ -254,6 +252,8 @@ public class InsetsSourceControl implements Parcelable {
         if (mLeash != null) {
             mLeash.dumpDebug(proto, LEASH);
         }
+
+        proto.write(TYPE_NUMBER, mType);
         proto.end(token);
     }
 

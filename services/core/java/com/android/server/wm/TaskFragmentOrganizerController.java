@@ -35,6 +35,7 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.IApplicationThread;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Binder;
@@ -106,6 +107,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
      */
     private class TaskFragmentOrganizerState implements IBinder.DeathRecipient {
         private final ArrayList<TaskFragment> mOrganizedTaskFragments = new ArrayList<>();
+        private final IApplicationThread mAppThread;
         private final ITaskFragmentOrganizer mOrganizer;
         private final int mOrganizerPid;
         private final int mOrganizerUid;
@@ -169,6 +171,11 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
 
         TaskFragmentOrganizerState(@NonNull ITaskFragmentOrganizer organizer, int pid, int uid,
                 boolean isSystemOrganizer) {
+            if (Flags.bundleClientTransactionFlag()) {
+                mAppThread = getAppThread(pid, uid);
+            } else {
+                mAppThread = null;
+            }
             mOrganizer = organizer;
             mOrganizerPid = pid;
             mOrganizerUid = uid;
@@ -369,10 +376,15 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                         + " is not in a task belong to the organizer app.");
                 return null;
             }
-            if (task.isAllowedToEmbedActivity(activity, mOrganizerUid) != EMBEDDING_ALLOWED
-                    || !task.isAllowedToEmbedActivityInTrustedMode(activity, mOrganizerUid)) {
+            if (task.isAllowedToEmbedActivity(activity, mOrganizerUid) != EMBEDDING_ALLOWED) {
                 Slog.d(TAG, "Reparent activity=" + activity.token
-                        + " is not allowed to be embedded in trusted mode.");
+                        + " is not allowed to be embedded.");
+                return null;
+            }
+            if (!task.isAllowedToEmbedActivityInTrustedMode(activity, mOrganizerUid)
+                    && !activity.isUntrustedEmbeddingStateSharingAllowed()) {
+                Slog.d(TAG, "Reparent activity=" + activity.token
+                        + " is not allowed to be shared with untrusted host.");
                 return null;
             }
 
@@ -407,7 +419,13 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 return;
             }
             try {
-                mOrganizer.onTransactionReady(transaction);
+                if (Flags.bundleClientTransactionFlag()) {
+                    // Dispatch through IApplicationThread to ensure the binder call is in order
+                    // with ClientTransaction.
+                    mAppThread.scheduleTaskFragmentTransaction(mOrganizer, transaction);
+                } else {
+                    mOrganizer.onTransactionReady(transaction);
+                }
             } catch (RemoteException e) {
                 Slog.d(TAG, "Exception sending TaskFragmentTransaction", e);
                 return;
@@ -464,11 +482,6 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 : null;
     }
 
-    @VisibleForTesting
-    void registerOrganizer(@NonNull ITaskFragmentOrganizer organizer) {
-        registerOrganizerInternal(organizer, false /* isSystemOrganizer */);
-    }
-
     @Override
     public void registerOrganizer(
             @NonNull ITaskFragmentOrganizer organizer, boolean isSystemOrganizer) {
@@ -477,8 +490,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 Flags.taskFragmentSystemOrganizerFlag() && isSystemOrganizer);
     }
 
-    @VisibleForTesting
-    void registerOrganizerInternal(
+    private void registerOrganizerInternal(
             @NonNull ITaskFragmentOrganizer organizer, boolean isSystemOrganizer) {
         if (isSystemOrganizer) {
             enforceTaskPermission("registerSystemOrganizer()");
@@ -1185,17 +1197,28 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
     }
 
-    // TODO(b/204399167): change to push the embedded state to the client side
     @Override
     public boolean isActivityEmbedded(IBinder activityToken) {
         synchronized (mGlobalLock) {
             final ActivityRecord activity = ActivityRecord.forTokenLocked(activityToken);
-            if (activity == null) {
-                return false;
-            }
-            final TaskFragment taskFragment = activity.getOrganizedTaskFragment();
-            return taskFragment != null && taskFragment.isEmbeddedWithBoundsOverride();
+            return activity != null
+                    ? activity.isEmbeddedInHostContainer()
+                    : false;
         }
+    }
+
+    @VisibleForTesting
+    @NonNull
+    IApplicationThread getAppThread(int pid, int uid) {
+        final WindowProcessController wpc = mAtmService.mProcessMap.getProcess(pid);
+        final IApplicationThread appThread = wpc != null && wpc.mUid == uid
+                ? wpc.getThread()
+                : null;
+        if (appThread == null) {
+            throw new IllegalArgumentException("Cannot find process for pid=" + pid
+                    + " uid=" + uid);
+        }
+        return appThread;
     }
 
     /**

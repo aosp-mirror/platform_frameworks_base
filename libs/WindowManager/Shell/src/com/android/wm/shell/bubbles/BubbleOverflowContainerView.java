@@ -16,9 +16,9 @@
 
 package com.android.wm.shell.bubbles;
 
-import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_OVERFLOW;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -28,7 +28,6 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -43,6 +42,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.wm.shell.R;
 
@@ -62,7 +62,8 @@ public class BubbleOverflowContainerView extends LinearLayout {
     private ImageView mEmptyStateImage;
     private int mHorizontalMargin;
     private int mVerticalMargin;
-    private BubbleController mController;
+    private BubbleExpandedViewManager mExpandedViewManager;
+    private BubblePositioner mPositioner;
     private BubbleOverflowAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private List<Bubble> mOverflowBubbles = new ArrayList<>();
@@ -70,7 +71,7 @@ public class BubbleOverflowContainerView extends LinearLayout {
     private View.OnKeyListener mKeyListener = (view, i, keyEvent) -> {
         if (keyEvent.getAction() == KeyEvent.ACTION_UP
                 && keyEvent.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-            mController.collapseStack();
+            mExpandedViewManager.collapseStack();
             return true;
         }
         return false;
@@ -126,8 +127,11 @@ public class BubbleOverflowContainerView extends LinearLayout {
         setFocusableInTouchMode(true);
     }
 
-    public void setBubbleController(BubbleController controller) {
-        mController = controller;
+    /** Initializes the view. Must be called after creation. */
+    public void initialize(BubbleExpandedViewManager expandedViewManager,
+            BubblePositioner positioner) {
+        mExpandedViewManager = expandedViewManager;
+        mPositioner = positioner;
     }
 
     public void show() {
@@ -149,9 +153,9 @@ public class BubbleOverflowContainerView extends LinearLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (mController != null) {
+        if (mExpandedViewManager != null) {
             // For the overflow to get key events (e.g. back press) we need to adjust the flags
-            mController.updateWindowFlagsForBackpress(true);
+            mExpandedViewManager.updateWindowFlagsForBackpress(true);
         }
         setOnKeyListener(mKeyListener);
     }
@@ -159,8 +163,8 @@ public class BubbleOverflowContainerView extends LinearLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (mController != null) {
-            mController.updateWindowFlagsForBackpress(false);
+        if (mExpandedViewManager != null) {
+            mExpandedViewManager.updateWindowFlagsForBackpress(false);
         }
         setOnKeyListener(null);
     }
@@ -177,15 +181,15 @@ public class BubbleOverflowContainerView extends LinearLayout {
             mRecyclerView.addItemDecoration(new OverflowItemDecoration());
         }
         mAdapter = new BubbleOverflowAdapter(getContext(), mOverflowBubbles,
-                mController::promoteBubbleFromOverflow,
-                mController.getPositioner());
+                mExpandedViewManager::promoteBubbleFromOverflow,
+                mPositioner);
         mRecyclerView.setAdapter(mAdapter);
 
         mOverflowBubbles.clear();
-        mOverflowBubbles.addAll(mController.getOverflowBubbles());
+        mOverflowBubbles.addAll(mExpandedViewManager.getOverflowBubbles());
         mAdapter.notifyDataSetChanged();
 
-        mController.setOverflowListener(mDataListener);
+        mExpandedViewManager.setOverflowListener(mDataListener);
         updateEmptyStateVisibility();
         updateTheme();
     }
@@ -238,6 +242,11 @@ public class BubbleOverflowContainerView extends LinearLayout {
         mEmptyStateSubtitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
     }
 
+    public void updateLocale() {
+        mEmptyStateTitle.setText(mContext.getString(R.string.bubble_overflow_empty_title));
+        mEmptyStateSubtitle.setText(mContext.getString(R.string.bubble_overflow_empty_subtitle));
+    }
+
     private final BubbleData.Listener mDataListener = new BubbleData.Listener() {
 
         @Override
@@ -245,9 +254,6 @@ public class BubbleOverflowContainerView extends LinearLayout {
 
             Bubble toRemove = update.removedOverflowBubble;
             if (toRemove != null) {
-                if (DEBUG_OVERFLOW) {
-                    Log.d(TAG, "remove: " + toRemove);
-                }
                 toRemove.cleanupViews();
                 final int indexToRemove = mOverflowBubbles.indexOf(toRemove);
                 mOverflowBubbles.remove(toRemove);
@@ -257,9 +263,6 @@ public class BubbleOverflowContainerView extends LinearLayout {
             Bubble toAdd = update.addedOverflowBubble;
             if (toAdd != null) {
                 final int indexToAdd = mOverflowBubbles.indexOf(toAdd);
-                if (DEBUG_OVERFLOW) {
-                    Log.d(TAG, "add: " + toAdd + " prevIndex: " + indexToAdd);
-                }
                 if (indexToAdd > 0) {
                     mOverflowBubbles.remove(toAdd);
                     mOverflowBubbles.add(0, toAdd);
@@ -272,10 +275,9 @@ public class BubbleOverflowContainerView extends LinearLayout {
 
             updateEmptyStateVisibility();
 
-            if (DEBUG_OVERFLOW) {
-                Log.d(TAG, BubbleDebugConfig.formatBubblesString(
-                        mController.getOverflowBubbles(), null));
-            }
+            ProtoLog.d(WM_SHELL_BUBBLES, "Apply overflow update, added=%s removed=%s",
+                    (toAdd != null ? toAdd.getKey() : "null"),
+                    (toRemove != null ? toRemove.getKey() : "null"));
         }
     };
 }

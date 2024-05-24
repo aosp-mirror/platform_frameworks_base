@@ -39,8 +39,10 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Sandi akan tetap tersedia bersama kunci sandi seiring perjalanan menuju era di mana sandi tidak diperlukan lagi."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Pilih tempat penyimpanan <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Pilih pengelola sandi untuk menyimpan info Anda dan login lebih cepat lain kali"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Buat kunci sandi untuk <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Simpan sandi untuk <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
+    <skip />
+    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
+    <skip />
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Simpan info login untuk <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"kunci sandi"</string>
     <string name="password" msgid="6738570945182936667">"sandi"</string>
@@ -92,4 +94,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Dari perangkat lain"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Gunakan perangkat lain"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"Permintaan dibatalkan oleh <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Opsi login"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"Lainnya"</string>
 </resources>

@@ -150,17 +150,49 @@ java_library {
     srcs: ["core/java/com/android/server/utils/Slogf.java"],
 }
 
+soong_config_module_type {
+    name: "art_profile_java_defaults",
+    module_type: "java_defaults",
+    config_namespace: "art_profile",
+    variables: ["services_profile_path"],
+    properties: ["dex_preopt"],
+}
+
+soong_config_string_variable {
+    name: "services_profile_path",
+    values: ["art_wear_profile"],
+}
+
+art_profile_java_defaults {
+    name: "art_profile_java_defaults",
+    soong_config_variables: {
+        services_profile_path: {
+            art_wear_profile: {
+                dex_preopt: {
+                    app_image: true,
+                    profile: "art-wear-profile",
+                },
+            },
+            conditions_default: {
+                dex_preopt: {
+                    app_image: true,
+                    profile: "art-profile",
+                },
+            },
+        },
+    },
+}
+
 // merge all required services into one jar
 // ============================================================
 java_library {
     name: "services",
-    defaults: ["services_java_defaults"],
+    defaults: [
+        "services_java_defaults",
+        "art_profile_java_defaults",
+    ],
     installable: true,
 
-    dex_preopt: {
-        app_image: true,
-        profile: "art-profile",
-    },
     exclude_kotlinc_generated_files: true,
 
     srcs: [":services-main-sources"],
@@ -221,6 +253,9 @@ java_library {
         "libukey2_jni_shared",
         "protolog.conf.json.gz",
     ],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 
     // Uncomment to enable output of certain warnings (deprecated, unchecked)
     //javacflags: ["-Xlint"],

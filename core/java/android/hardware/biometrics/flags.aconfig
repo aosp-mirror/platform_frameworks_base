@@ -24,3 +24,17 @@ flag {
   bug: "307601768"
 }
 
+flag {
+  name: "custom_biometric_prompt"
+  namespace: "biometrics_framework"
+  description: "Feature flag for adding a custom content view API to BiometricPrompt.Builder."
+  bug: "302735104"
+}
+
+flag {
+  name: "face_background_authentication"
+  namespace: "biometrics_framework"
+  description: "Feature flag for allowing face background authentication with USE_BACKGROUND_FACE_AUTHENTICATION."
+  bug: "318584190"
+}
+

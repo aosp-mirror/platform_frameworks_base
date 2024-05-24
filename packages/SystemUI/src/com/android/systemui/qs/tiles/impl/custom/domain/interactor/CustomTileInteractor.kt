@@ -19,13 +19,14 @@ package com.android.systemui.qs.tiles.impl.custom.domain.interactor
 import android.os.UserHandle
 import android.service.quicksettings.Tile
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.qs.external.TileServiceManager
+import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTileDefaultsRepository
 import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTileRepository
-import com.android.systemui.qs.tiles.impl.custom.di.bound.CustomTileBoundScope
+import com.android.systemui.qs.tiles.impl.di.QSTileScope
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -33,79 +34,110 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /** Manages updates of the [Tile] assigned for the current custom tile. */
-@CustomTileBoundScope
+@QSTileScope
 class CustomTileInteractor
 @Inject
 constructor(
-    private val user: UserHandle,
+    private val tileSpec: TileSpec.CustomTileSpec,
     private val defaultsRepository: CustomTileDefaultsRepository,
     private val customTileRepository: CustomTileRepository,
-    private val tileServiceManager: TileServiceManager,
-    @CustomTileBoundScope private val boundScope: CoroutineScope,
+    @QSTileScope private val tileScope: CoroutineScope,
     @Background private val backgroundContext: CoroutineContext,
 ) {
 
+    private val userMutex = Mutex()
     private val tileUpdates =
         MutableSharedFlow<Tile>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
+    private var currentUser: UserHandle? = null
+    private var updatesJob: Job? = null
+
     /** [Tile] updates. [updateTile] to emit a new one. */
-    val tiles: Flow<Tile>
-        get() = customTileRepository.getTiles(user)
+    fun getTiles(user: UserHandle): Flow<Tile> = customTileRepository.getTiles(user)
 
     /**
      * Current [Tile]
      *
      * @throws IllegalStateException when the repository stores a tile for another user. This means
      *   the tile hasn't been updated for the current user. Can happen when this is accessed before
-     *   [init] returns.
+     *   [initForUser] returns.
      */
-    val tile: Tile
-        get() =
-            customTileRepository.getTile(user)
-                ?: throw IllegalStateException("Attempt to get a tile for a wrong user")
+    fun getTile(user: UserHandle): Tile =
+        customTileRepository.getTile(user)
+            ?: throw IllegalStateException("Attempt to get a tile for a wrong user")
 
     /**
-     * Initializes the repository for the current user. Suspends until it's safe to call [tile]
+     * True if the tile is toggleable like a switch and false if it operates as a clickable button.
+     */
+    suspend fun isTileToggleable(): Boolean = customTileRepository.isTileToggleable()
+
+    /**
+     * True if the tile is active and false the otherwise. This effectively is a value of the
+     * [android.service.quicksettings.TileService.META_DATA_ACTIVE_TILE]. This is not the same as
+     * [Tile.STATE_ACTIVE].
+     */
+    suspend fun isTileActive(): Boolean = customTileRepository.isTileActive()
+
+    /**
+     * Initializes the repository for the current user. Suspends until it's safe to call [getTile]
      * which needs at least one of the following:
      * - defaults are loaded;
      * - receive tile update in [updateTile];
      * - restoration happened for a persisted tile.
      */
-    suspend fun init() {
-        launchUpdates()
-        customTileRepository.restoreForTheUserIfNeeded(user, tileServiceManager.isActiveTile)
-        // Suspend to make sure it gets the tile from one of the sources: restoration, defaults, or
-        // tile update.
-        customTileRepository.getTiles(user).firstOrNull()
+    suspend fun initForUser(user: UserHandle) {
+        userMutex.withLock {
+            if (currentUser == user) {
+                return
+            }
+            updatesJob?.cancel()
+            defaultsRepository.requestNewDefaults(user, tileSpec.componentName)
+            launchUpdates(user)
+            customTileRepository.restoreForTheUserIfNeeded(
+                user,
+                customTileRepository.isTileActive()
+            )
+            // Suspend to make sure it gets the tile from one of the sources: restoration, defaults,
+            // or
+            // tile update.
+            customTileRepository.getTiles(user).firstOrNull()
+            currentUser = user
+        }
     }
 
-    private fun launchUpdates() {
-        tileUpdates
-            .onEach {
-                customTileRepository.updateWithTile(
-                    user,
-                    it,
-                    tileServiceManager.isActiveTile,
-                )
+    private fun launchUpdates(user: UserHandle) {
+        updatesJob =
+            tileScope.launch {
+                tileUpdates
+                    .onEach {
+                        customTileRepository.updateWithTile(
+                            user,
+                            it,
+                            customTileRepository.isTileActive(),
+                        )
+                    }
+                    .flowOn(backgroundContext)
+                    .launchIn(this)
+                defaultsRepository
+                    .defaults(user)
+                    .onEach {
+                        customTileRepository.updateWithDefaults(
+                            user,
+                            it,
+                            customTileRepository.isTileActive(),
+                        )
+                    }
+                    .flowOn(backgroundContext)
+                    .launchIn(this)
             }
-            .flowOn(backgroundContext)
-            .launchIn(boundScope)
-        defaultsRepository
-            .defaults(user)
-            .onEach {
-                customTileRepository.updateWithDefaults(
-                    user,
-                    it,
-                    tileServiceManager.isActiveTile,
-                )
-            }
-            .flowOn(backgroundContext)
-            .launchIn(boundScope)
     }
 
-    /** Updates current [Tile]. Emits a new event in [tiles]. */
+    /** Updates current [Tile]. Emits a new event in [getTiles]. */
     fun updateTile(newTile: Tile) {
         tileUpdates.tryEmit(newTile)
     }

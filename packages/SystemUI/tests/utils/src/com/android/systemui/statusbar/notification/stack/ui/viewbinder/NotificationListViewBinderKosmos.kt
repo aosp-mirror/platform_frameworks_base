@@ -22,11 +22,14 @@ import com.android.systemui.common.ui.configurationState
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.statusbar.notification.icon.ui.viewbinder.shelfNotificationIconViewStore
-import com.android.systemui.statusbar.notification.icon.ui.viewbinder.statusBarIconViewBindingFailureTracker
+import com.android.systemui.statusbar.notification.collection.render.silentHeaderController
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.notificationIconContainerShelfViewBinder
+import com.android.systemui.statusbar.notification.notificationActivityStarter
+import com.android.systemui.statusbar.notification.stack.displaySwitchNotificationsHiderTracker
+import com.android.systemui.statusbar.notification.stack.ui.view.notificationStatsLogger
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationListViewModel
 import com.android.systemui.statusbar.phone.notificationIconAreaController
-import com.android.systemui.statusbar.ui.systemBarUtilsState
+import java.util.Optional
 
 val Kosmos.notificationListViewBinder by Fixture {
     NotificationListViewBinder(
@@ -35,9 +38,11 @@ val Kosmos.notificationListViewBinder by Fixture {
         configuration = configurationState,
         falsingManager = falsingManager,
         iconAreaController = notificationIconAreaController,
-        iconViewBindingFailureTracker = statusBarIconViewBindingFailureTracker,
+        loggerOptional = Optional.of(notificationStatsLogger),
         metricsLogger = metricsLogger,
-        shelfIconViewStore = shelfNotificationIconViewStore,
-        systemBarUtilsState = systemBarUtilsState,
+        hiderTracker = displaySwitchNotificationsHiderTracker,
+        nicBinder = notificationIconContainerShelfViewBinder,
+        notificationActivityStarter = { notificationActivityStarter },
+        silentHeaderController = silentHeaderController,
     )
 }

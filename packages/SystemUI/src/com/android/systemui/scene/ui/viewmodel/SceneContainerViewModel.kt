@@ -17,12 +17,14 @@
 package com.android.systemui.scene.ui.viewmodel
 
 import android.view.MotionEvent
+import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.SceneKey
+import com.android.systemui.classifier.Classifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,6 +36,7 @@ class SceneContainerViewModel
 constructor(
     private val sceneInteractor: SceneInteractor,
     private val falsingInteractor: FalsingInteractor,
+    private val powerInteractor: PowerInteractor,
 ) {
     /**
      * Keys of all scenes in the container.
@@ -44,18 +47,10 @@ constructor(
     val allSceneKeys: List<SceneKey> = sceneInteractor.allSceneKeys()
 
     /** The scene that should be rendered. */
-    val currentScene: StateFlow<SceneModel> = sceneInteractor.desiredScene
+    val currentScene: StateFlow<SceneKey> = sceneInteractor.currentScene
 
     /** Whether the container is visible. */
     val isVisible: StateFlow<Boolean> = sceneInteractor.isVisible
-
-    /** Notifies that the UI has transitioned sufficiently to the given scene. */
-    fun onSceneChanged(scene: SceneModel) {
-        sceneInteractor.onSceneChanged(
-            scene = scene,
-            loggingReason = SCENE_TRANSITION_LOGGING_REASON,
-        )
-    }
 
     /**
      * Binds the given flow so the system remembers it.
@@ -72,8 +67,14 @@ constructor(
      * Call this before the [MotionEvent] starts to propagate through the UI hierarchy.
      */
     fun onMotionEvent(event: MotionEvent) {
-        sceneInteractor.onUserInput()
+        powerInteractor.onUserTouch()
         falsingInteractor.onTouchEvent(event)
+        if (
+            event.actionMasked == MotionEvent.ACTION_UP ||
+                event.actionMasked == MotionEvent.ACTION_CANCEL
+        ) {
+            sceneInteractor.onUserInteractionFinished()
+        }
     }
 
     /**
@@ -86,7 +87,33 @@ constructor(
         falsingInteractor.onMotionEventComplete()
     }
 
-    companion object {
-        private const val SCENE_TRANSITION_LOGGING_REASON = "user input"
+    /**
+     * Returns `true` if a change to [toScene] is currently allowed; `false` otherwise.
+     *
+     * This is invoked only for user-initiated transitions. The goal is to check with the falsing
+     * system whether the change from the current scene to the given scene should be rejected due to
+     * it being a false touch.
+     */
+    fun canChangeScene(toScene: SceneKey): Boolean {
+        val interactionTypeOrNull =
+            when (toScene) {
+                Scenes.Bouncer -> Classifier.BOUNCER_UNLOCK
+                Scenes.Gone -> Classifier.UNLOCK
+                Scenes.Shade -> Classifier.NOTIFICATION_DRAG_DOWN
+                Scenes.QuickSettings -> Classifier.QUICK_SETTINGS
+                else -> null
+            }
+
+        return interactionTypeOrNull?.let { interactionType ->
+            // It's important that the falsing system is always queried, even if no enforcement will
+            // occur. This helps build up the right signal in the system.
+            val isFalseTouch = falsingInteractor.isFalseTouch(interactionType)
+
+            // Only enforce falsing if moving from the lockscreen scene to a new scene.
+            val fromLockscreenScene = currentScene.value == Scenes.Lockscreen
+
+            !fromLockscreenScene || !isFalseTouch
+        }
+            ?: true
     }
 }

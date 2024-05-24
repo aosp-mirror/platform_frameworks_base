@@ -69,12 +69,15 @@ import android.view.SurfaceControl;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
 import android.window.AddToSurfaceSyncGroupResult;
+import android.window.IGlobalDragListener;
+import android.window.IScreenRecordingCallback;
 import android.window.ISurfaceSyncGroupCompletedListener;
 import android.window.ITaskFpsCallback;
-import android.window.ScreenCapture;
-import android.window.WindowContextInfo;
 import android.window.ITrustedPresentationListener;
+import android.window.InputTransferToken;
+import android.window.ScreenCapture;
 import android.window.TrustedPresentationThresholds;
+import android.window.WindowContextInfo;
 
 /**
  * System private interface to the window manager.
@@ -1083,4 +1086,18 @@ interface IWindowManager
 
 
     void unregisterTrustedPresentationListener(in ITrustedPresentationListener listener, int id);
+
+    @EnforcePermission("DETECT_SCREEN_RECORDING")
+    boolean registerScreenRecordingCallback(IScreenRecordingCallback callback);
+
+    @EnforcePermission("DETECT_SCREEN_RECORDING")
+    void unregisterScreenRecordingCallback(IScreenRecordingCallback callback);
+
+    /**
+     * Sets the listener to be called back when a cross-window drag and drop operation happens.
+     */
+    void setGlobalDragListener(IGlobalDragListener listener);
+
+    boolean transferTouchGesture(in InputTransferToken transferFromToken,
+            in InputTransferToken transferToToken);
 }

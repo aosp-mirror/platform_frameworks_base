@@ -33,6 +33,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
@@ -518,6 +519,7 @@ class CustomizationProviderClientImpl(
                 awaitClose { context.contentResolver.unregisterContentObserver(observer) }
             }
             .onStart { emit(Unit) }
+            .flowOn(backgroundDispatcher)
     }
 
     private fun String.toIntent(

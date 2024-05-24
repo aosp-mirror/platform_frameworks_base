@@ -320,7 +320,7 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
 
     private double calculateActiveModemPowerMah(BatteryStats bs, long elapsedRealtimeUs) {
         final long elapsedRealtimeMs = elapsedRealtimeUs / 1000;
-        final int txLvlCount = CellSignalStrength.getNumSignalStrengthLevels();
+        final int txLvlCount = NUM_SIGNAL_STRENGTH_LEVELS;
         double consumptionMah = 0.0;
 
         if (DEBUG) {

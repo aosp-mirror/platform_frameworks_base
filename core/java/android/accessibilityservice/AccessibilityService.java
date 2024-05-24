@@ -69,6 +69,7 @@ import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.inputmethod.EditorInfo;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.CancellationGroup;
 import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
 import com.android.internal.inputmethod.IAccessibilityInputMethodSessionCallback;
@@ -850,6 +851,7 @@ public abstract class AccessibilityService extends Service {
     private boolean mInputMethodInitialized = false;
     private final SparseArray<AccessibilityButtonController> mAccessibilityButtonControllers =
             new SparseArray<>(0);
+    private BrailleDisplayController mBrailleDisplayController;
 
     private int mGestureStatusCallbackSequence;
 
@@ -1385,7 +1387,9 @@ public abstract class AccessibilityService extends Service {
         getFingerprintGestureController().onGesture(gesture);
     }
 
-    int getConnectionId() {
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public int getConnectionId() {
         return mConnectionId;
     }
 
@@ -3633,5 +3637,21 @@ public abstract class AccessibilityService extends Service {
         AccessibilityInteractionClient.getInstance(this)
                 .attachAccessibilityOverlayToWindow(
                         mConnectionId, accessibilityWindowId, sc, executor, callback);
+    }
+
+    /**
+     * Returns the {@link BrailleDisplayController} which may be used to communicate with
+     * refreshable Braille displays that provide USB or Bluetooth Braille display HID support.
+     */
+    @FlaggedApi(android.view.accessibility.Flags.FLAG_BRAILLE_DISPLAY_HID)
+    @NonNull
+    public BrailleDisplayController getBrailleDisplayController() {
+        BrailleDisplayController.checkApiFlagIsEnabled();
+        synchronized (mLock) {
+            if (mBrailleDisplayController == null) {
+                mBrailleDisplayController = new BrailleDisplayControllerImpl(this, mLock);
+            }
+            return mBrailleDisplayController;
+        }
     }
 }

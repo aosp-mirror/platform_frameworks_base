@@ -26,8 +26,11 @@ class TestUnfoldProgressListener : UnfoldTransitionProgressProvider.TransitionPr
 
     private val recordings: MutableList<UnfoldTransitionRecording> = arrayListOf()
     private var currentRecording: UnfoldTransitionRecording? = null
+    var lastCallbackThread: Thread? = null
+        private set
 
     override fun onTransitionStarted() {
+        lastCallbackThread = Thread.currentThread()
         assertWithMessage("Trying to start a transition when it is already in progress")
             .that(currentRecording)
             .isNull()
@@ -36,6 +39,7 @@ class TestUnfoldProgressListener : UnfoldTransitionProgressProvider.TransitionPr
     }
 
     override fun onTransitionProgress(progress: Float) {
+        lastCallbackThread = Thread.currentThread()
         assertWithMessage("Received transition progress event when it's not started")
             .that(currentRecording)
             .isNotNull()
@@ -43,6 +47,7 @@ class TestUnfoldProgressListener : UnfoldTransitionProgressProvider.TransitionPr
     }
 
     override fun onTransitionFinishing() {
+        lastCallbackThread = Thread.currentThread()
         assertWithMessage("Received transition finishing event when it's not started")
             .that(currentRecording)
             .isNotNull()
@@ -50,6 +55,7 @@ class TestUnfoldProgressListener : UnfoldTransitionProgressProvider.TransitionPr
     }
 
     override fun onTransitionFinished() {
+        lastCallbackThread = Thread.currentThread()
         assertWithMessage("Received transition finish event when it's not started")
             .that(currentRecording)
             .isNotNull()

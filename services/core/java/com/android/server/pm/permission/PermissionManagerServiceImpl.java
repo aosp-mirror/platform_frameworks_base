@@ -279,7 +279,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     @NonNull
     private final int[] mGlobalGids;
 
-    private final HandlerThread mHandlerThread;
     private final Handler mHandler;
     private final Context mContext;
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
@@ -432,10 +431,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             }
         }
 
-        mHandlerThread = new ServiceThread(TAG,
+        HandlerThread handlerThread = new ServiceThread(TAG,
                 Process.THREAD_PRIORITY_BACKGROUND, true /*allowIo*/);
-        mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper());
+        handlerThread.start();
+        mHandler = new Handler(handlerThread.getLooper());
         Watchdog.getInstance().addThread(mHandler);
 
         SystemConfig systemConfig = SystemConfig.getInstance();
@@ -683,7 +682,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Override
-    public int getPermissionFlags(String packageName, String permName, int deviceId, int userId) {
+    public int getPermissionFlags(String packageName, String permName, String deviceId,
+            int userId) {
         final int callingUid = Binder.getCallingUid();
         return getPermissionFlagsInternal(packageName, permName, callingUid, userId);
     }
@@ -726,7 +726,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
     @Override
     public void updatePermissionFlags(String packageName, String permName, int flagMask,
-            int flagValues, boolean checkAdjustPolicyFlagPermission, int deviceId, int userId) {
+            int flagValues, boolean checkAdjustPolicyFlagPermission, String deviceId, int userId) {
         final int callingUid = Binder.getCallingUid();
         boolean overridePolicy = false;
 
@@ -911,11 +911,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     private int checkPermission(String pkgName, String permName, int userId) {
-        return checkPermission(pkgName, permName, Context.DEVICE_ID_DEFAULT, userId);
+        return checkPermission(pkgName, permName, VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT,
+                userId);
     }
 
     @Override
-    public int checkPermission(String pkgName, String permName, int deviceId, int userId) {
+    public int checkPermission(String pkgName, String permName, String deviceId, int userId) {
         if (!mUserManagerInt.exists(userId)) {
             return PackageManager.PERMISSION_DENIED;
         }
@@ -982,11 +983,11 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     private int checkUidPermission(int uid, String permName) {
-        return checkUidPermission(uid, permName, Context.DEVICE_ID_DEFAULT);
+        return checkUidPermission(uid, permName, VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT);
     }
 
     @Override
-    public int checkUidPermission(int uid, String permName, int deviceId) {
+    public int checkUidPermission(int uid, String permName, String deviceId) {
         final int userId = UserHandle.getUserId(uid);
         if (!mUserManagerInt.exists(userId)) {
             return PackageManager.PERMISSION_DENIED;
@@ -994,6 +995,13 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
         final AndroidPackage pkg = mPackageManagerInt.getPackage(uid);
         return checkUidPermissionInternal(pkg, uid, permName);
+    }
+
+    @Override
+    public Map<String, PermissionManager.PermissionState> getAllPermissionStates(
+            @NonNull String packageName, @NonNull String deviceId, int userId) {
+        throw new UnsupportedOperationException(
+                "This method is supported in newer implementation only");
     }
 
     /**
@@ -1305,7 +1313,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Override
-    public void grantRuntimePermission(String packageName, String permName, int deviceId,
+    public void grantRuntimePermission(String packageName, String permName, String deviceId,
             int userId) {
         final int callingUid = Binder.getCallingUid();
         final boolean overridePolicy =
@@ -1479,11 +1487,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Override
-    public void revokeRuntimePermission(String packageName, String permName, int deviceId,
+    public void revokeRuntimePermission(String packageName, String permName, String deviceId,
             int userId, String reason) {
         final int callingUid = Binder.getCallingUid();
         final boolean overridePolicy =
-                checkUidPermission(callingUid, ADJUST_RUNTIME_PERMISSIONS_POLICY, deviceId)
+                checkUidPermission(callingUid, ADJUST_RUNTIME_PERMISSIONS_POLICY,
+                        VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT)
                         == PackageManager.PERMISSION_GRANTED;
 
         revokeRuntimePermissionInternal(packageName, permName, overridePolicy, callingUid, userId,
@@ -1870,7 +1879,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
     @Override
     public boolean shouldShowRequestPermissionRationale(String packageName, String permName,
-            int deviceId, @UserIdInt int userId) {
+            String deviceId, @UserIdInt int userId) {
         final int callingUid = Binder.getCallingUid();
         if (UserHandle.getCallingUserId() != userId) {
             mContext.enforceCallingPermission(
@@ -1933,7 +1942,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Override
-    public boolean isPermissionRevokedByPolicy(String packageName, String permName, int deviceId,
+    public boolean isPermissionRevokedByPolicy(String packageName, String permName, String deviceId,
             int userId) {
         if (UserHandle.getCallingUserId() != userId) {
             mContext.enforceCallingPermission(
@@ -2071,8 +2080,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     continue;
                 }
                 boolean isSystemOrPolicyFixed = (getPermissionFlags(newPackage.getPackageName(),
-                        permInfo.name, Context.DEVICE_ID_DEFAULT, userId) & (
-                        FLAG_PERMISSION_SYSTEM_FIXED | FLAG_PERMISSION_POLICY_FIXED)) != 0;
+                        permInfo.name, VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT, userId)
+                        & (FLAG_PERMISSION_SYSTEM_FIXED | FLAG_PERMISSION_POLICY_FIXED)) != 0;
                 if (isSystemOrPolicyFixed) {
                     continue;
                 }
@@ -2239,7 +2248,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     final int permissionState = checkPermission(packageName, permName,
                             userId);
                     final int flags = getPermissionFlags(packageName, permName,
-                            Context.DEVICE_ID_DEFAULT, userId);
+                            VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT, userId);
                     final int flagMask = FLAG_PERMISSION_SYSTEM_FIXED
                             | FLAG_PERMISSION_POLICY_FIXED
                             | FLAG_PERMISSION_GRANTED_BY_DEFAULT
@@ -4045,10 +4054,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     // Not checking sourcePackageSetting because it can be null when
                     // the permission source package is the target package and the target package is
                     // being uninstalled,
-                    continue;
-                }
-                // Don't remove config permissions and lose their GIDs.
-                if (bp.getType() == Permission.TYPE_CONFIG && !bp.isReconciled()) {
                     continue;
                 }
                 // The target package is the source of the current permission

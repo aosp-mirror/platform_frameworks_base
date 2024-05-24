@@ -28,9 +28,12 @@ import dagger.Module
 import java.util.UUID
 import javax.inject.Inject
 import junit.framework.Assert.fail
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -40,7 +43,7 @@ import kotlinx.coroutines.test.runCurrent
 class FakeKeyguardTransitionRepository @Inject constructor() : KeyguardTransitionRepository {
 
     private val _transitions =
-        MutableSharedFlow<TransitionStep>(replay = 2, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+        MutableSharedFlow<TransitionStep>(replay = 3, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     override val transitions: SharedFlow<TransitionStep> = _transitions
 
     init {
@@ -147,8 +150,16 @@ class FakeKeyguardTransitionRepository @Inject constructor() : KeyguardTransitio
                 )
             }
         }
-
         _transitions.emit(step)
+    }
+
+    /** Version of [sendTransitionStep] that's usable from Java tests. */
+    fun sendTransitionStepJava(
+        coroutineScope: CoroutineScope,
+        step: TransitionStep,
+        validateStep: Boolean = true
+    ): Job {
+        return coroutineScope.launch { sendTransitionStep(step, validateStep) }
     }
 
     suspend fun sendTransitionSteps(

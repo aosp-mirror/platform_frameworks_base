@@ -21,6 +21,8 @@ import static android.view.WindowManagerPolicyConstants.APPLICATION_MEDIA_OVERLA
 import static android.view.WindowManagerPolicyConstants.APPLICATION_MEDIA_SUBLAYER;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_PANEL_SUBLAYER;
 
+import android.annotation.FlaggedApi;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -187,6 +189,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     final Rect mScreenRect = new Rect();
     private final SurfaceSession mSurfaceSession = new SurfaceSession();
+    private final boolean mLimitedHdrEnabled = Flags.limitedHdr();
 
     SurfaceControl mSurfaceControl;
     SurfaceControl mBackgroundControl;
@@ -196,6 +199,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private int mRequestedSurfaceLifecycleStrategy = SURFACE_LIFECYCLE_DEFAULT;
     @SurfaceLifecycleStrategy
     private int mSurfaceLifecycleStrategy = SURFACE_LIFECYCLE_DEFAULT;
+
+    private float mRequestedHdrHeadroom = 0.f;
+    private float mHdrHeadroom = 0.f;
 
     /**
      * We use this lock to protect access to mSurfaceControl. Both are accessed on the UI
@@ -821,6 +827,45 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         updateSurface();
     }
 
+
+    /**
+     * Sets the desired amount of HDR headroom to be used when HDR content is presented on this
+     * SurfaceView.
+     *
+     * <p>By default the system will choose an amount of HDR headroom that is appropriate
+     * for the underlying device capabilities & bit-depth of the panel. However, for some types
+     * of content this can end up being more headroom than necessary or desired. An example
+     * would be a messaging app or gallery thumbnail view where some amount of HDR pop is desired
+     * without overly influencing the perceived brightness of the majority SDR content. This can
+     * also be used to animate in/out of an HDR range for smoother transitions.</p>
+     *
+     * <p>Note: The actual amount of HDR headroom that will be given is subject to a variety
+     * of factors such as ambient conditions, display capabilities, or bit-depth limitations.
+     * See {@link Display#getHdrSdrRatio()} for more information as well as how to query the
+     * current value.</p>
+     *
+     * @param desiredHeadroom The amount of HDR headroom that is desired. Must be >= 1.0 (no HDR)
+     *                        and <= 10,000.0. Passing 0.0 will reset to the default, automatically
+     *                        chosen value.
+     * @see Display#getHdrSdrRatio()
+     */
+    @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_LIMITED_HDR)
+    public void setDesiredHdrHeadroom(
+            @FloatRange(from = 0.0f, to = 10000.0) float desiredHeadroom) {
+        if (!Float.isFinite(desiredHeadroom)) {
+            throw new IllegalArgumentException("desiredHeadroom must be finite: "
+                    + desiredHeadroom);
+        }
+        if (desiredHeadroom != 0 && (desiredHeadroom < 1.0f || desiredHeadroom > 10000.0f)) {
+            throw new IllegalArgumentException(
+                    "desiredHeadroom must be 0.0 or in the range [1.0, 10000.0f], received: "
+                            + desiredHeadroom);
+        }
+        mRequestedHdrHeadroom = desiredHeadroom;
+        updateSurface();
+        invalidate();
+    }
+
     private void updateOpaqueFlag() {
         if (!PixelFormat.formatHasAlpha(mRequestedFormat)) {
             mSurfaceFlags |= SurfaceControl.OPAQUE;
@@ -941,6 +986,10 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
             updateBackgroundVisibility(surfaceUpdateTransaction);
             updateBackgroundColor(surfaceUpdateTransaction);
+            if (mLimitedHdrEnabled) {
+                surfaceUpdateTransaction.setDesiredHdrHeadroom(
+                        mBlastSurfaceControl, mHdrHeadroom);
+            }
             if (isAboveParent()) {
                 float alpha = getAlpha();
                 surfaceUpdateTransaction.setAlpha(mSurfaceControl, alpha);
@@ -1085,11 +1134,12 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         final boolean relativeZChanged = mSubLayer != mRequestedSubLayer;
         final boolean surfaceLifecycleStrategyChanged =
                 mSurfaceLifecycleStrategy != mRequestedSurfaceLifecycleStrategy;
+        final boolean hdrHeadroomChanged = mHdrHeadroom != mRequestedHdrHeadroom;
 
         if (creating || formatChanged || sizeChanged || visibleChanged
                 || alphaChanged || windowVisibleChanged || positionChanged
                 || layoutSizeChanged || hintChanged || relativeZChanged || !mAttachedToWindow
-                || surfaceLifecycleStrategyChanged) {
+                || surfaceLifecycleStrategyChanged || hdrHeadroomChanged) {
 
             if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
                     + "Changes: creating=" + creating
@@ -1117,6 +1167,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
                 final int previousSurfaceLifecycleStrategy = mSurfaceLifecycleStrategy;
                 mSurfaceLifecycleStrategy = mRequestedSurfaceLifecycleStrategy;
+                mHdrHeadroom = mRequestedHdrHeadroom;
 
                 mScreenRect.left = mWindowSpaceLeft;
                 mScreenRect.top = mWindowSpaceTop;
@@ -2099,7 +2150,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
         try {
             viewRoot.mWindowSession.grantEmbeddedWindowFocus(viewRoot.mWindow,
-                    mSurfacePackage.getInputToken(), gainFocus);
+                    mSurfacePackage.getInputTransferToken(), gainFocus);
         } catch (Exception e) {
             Log.e(TAG, System.identityHashCode(this)
                     + "Exception requesting focus on embedded window", e);

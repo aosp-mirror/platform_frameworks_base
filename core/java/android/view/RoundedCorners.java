@@ -198,6 +198,12 @@ public class RoundedCorners implements Parcelable {
             radius = res.getDimensionPixelSize(R.dimen.rounded_corner_radius);
         }
         array.recycle();
+        // For devices with round displays (e.g. watches) that don't otherwise provide the rounded
+        // corner radius via resource overlays, we can infer the corner radius directly from the
+        // display size.
+        if (radius == 0 && res.getConfiguration().isScreenRound()) {
+            radius = res.getDisplayMetrics().widthPixels / 2;
+        }
         return radius;
     }
 

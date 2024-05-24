@@ -25,6 +25,7 @@ import android.compat.annotation.UnsupportedAppUsage;
  * @hide
  */
 @SystemApi
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class RemoteCallback implements Parcelable {
 
     public interface OnResultListener {
@@ -82,6 +83,11 @@ public final class RemoteCallback implements Parcelable {
                 /* ignore */
             }
         }
+    }
+
+    /** @hide */
+    public IRemoteCallback getInterface() {
+        return mCallback;
     }
 
     @Override

@@ -1756,6 +1756,7 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
     private ProcessRecord makeProcessRecord(ApplicationInfo info) {
         final ProcessRecord r = spy(new ProcessRecord(mAms, info, info.processName, info.uid));
         r.setPid(mNextPid.incrementAndGet());
+        ProcessRecord.updateProcessRecordNodes(r);
         return r;
     }
 

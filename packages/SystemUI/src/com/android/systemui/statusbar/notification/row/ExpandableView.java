@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static com.android.systemui.Flags.notificationColorUpdateLogger;
+
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -54,8 +56,8 @@ import java.util.List;
 public abstract class ExpandableView extends FrameLayout implements Dumpable, Roundable {
     private static final String TAG = "ExpandableView";
     /** whether the dump() for this class should include verbose details */
-    protected static final boolean DUMP_VERBOSE =
-            Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE);
+    protected static final boolean DUMP_VERBOSE = Compile.IS_DEBUG
+            && (Log.isLoggable(TAG, Log.VERBOSE) || notificationColorUpdateLogger());
 
     private RoundableState mRoundableState = null;
     protected OnHeightChangedListener mOnHeightChangedListener;
@@ -676,8 +678,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
         mViewState.headsUpIsVisible = false;
 
         // handling reset for child notifications
-        if (this instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) this;
+        if (this instanceof ExpandableNotificationRow row) {
             List<ExpandableNotificationRow> children = row.getAttachedChildren();
             if (row.isSummaryWithChildren() && children != null) {
                 for (ExpandableNotificationRow childRow : children) {
@@ -721,6 +722,9 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
         mInShelf = inShelf;
     }
 
+    /**
+     * @return true if the view is currently fully in the notification shelf.
+     */
     public boolean isInShelf() {
         return mInShelf;
     }

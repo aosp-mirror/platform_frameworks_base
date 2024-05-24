@@ -181,6 +181,26 @@ class DragPositioningCallbackUtilityTest {
     }
 
     @Test
+    fun testDragEndSnapsTaskBoundsWhenOutsideValidDragArea() {
+        val startingPoint = PointF(STARTING_BOUNDS.right.toFloat(), STARTING_BOUNDS.top.toFloat())
+        val repositionTaskBounds = Rect(STARTING_BOUNDS)
+        val validDragArea = Rect(DISPLAY_BOUNDS.left - 100,
+            STABLE_BOUNDS.top,
+            DISPLAY_BOUNDS.right - 100,
+            DISPLAY_BOUNDS.bottom - 100)
+
+        DragPositioningCallbackUtility.onDragEnd(repositionTaskBounds, STARTING_BOUNDS,
+            startingPoint, startingPoint.x - 1000, (DISPLAY_BOUNDS.bottom + 1000).toFloat(),
+            validDragArea)
+        assertThat(repositionTaskBounds.left).isEqualTo(validDragArea.left)
+        assertThat(repositionTaskBounds.top).isEqualTo(validDragArea.bottom)
+        assertThat(repositionTaskBounds.right)
+            .isEqualTo(validDragArea.left + STARTING_BOUNDS.width())
+        assertThat(repositionTaskBounds.bottom)
+            .isEqualTo(validDragArea.bottom + STARTING_BOUNDS.height())
+    }
+
+    @Test
     fun testChangeBounds_toDisallowedBounds_freezesAtLimit() {
         var hasMoved = false
         val startingPoint = PointF(STARTING_BOUNDS.right.toFloat(),

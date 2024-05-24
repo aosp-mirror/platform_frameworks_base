@@ -26,7 +26,7 @@ import com.android.internal.logging.nano.MetricsProto
 import com.android.internal.logging.testing.FakeMetricsLogger
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.globalactions.GlobalActionsDialogLite
 import com.android.systemui.plugins.ActivityStarter
@@ -127,7 +127,7 @@ class FooterActionsInteractorTest : SysuiTestCase() {
             .startActivity(
                 intentCaptor.capture(),
                 /* dismissShade= */ eq(true),
-                nullable() as? ActivityLaunchAnimator.Controller,
+                nullable() as? ActivityTransitionAnimator.Controller,
             )
         assertThat(intentCaptor.value.action).isEqualTo(Settings.ACTION_SETTINGS)
     }

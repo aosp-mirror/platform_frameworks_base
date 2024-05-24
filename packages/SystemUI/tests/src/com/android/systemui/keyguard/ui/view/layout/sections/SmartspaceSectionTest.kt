@@ -26,13 +26,18 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
+import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardSmartspaceInteractor
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
+import com.android.systemui.shared.R as sharedR
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.flow.StateFlow
+import dagger.Lazy
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,13 +53,17 @@ class SmartspaceSectionTest : SysuiTestCase() {
     @Mock private lateinit var keyguardSmartspaceViewModel: KeyguardSmartspaceViewModel
     @Mock private lateinit var lockscreenSmartspaceController: LockscreenSmartspaceController
     @Mock private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
-    @Mock private lateinit var hasCustomWeatherDataDisplay: StateFlow<Boolean>
+    @Mock private lateinit var keyguardSmartspaceInteractor: KeyguardSmartspaceInteractor
+    @Mock private lateinit var blueprintInteractor: Lazy<KeyguardBlueprintInteractor>
 
-    private val smartspaceView = View(mContext).also { it.id = View.generateViewId() }
-    private val weatherView = View(mContext).also { it.id = View.generateViewId() }
-    private val dateView = View(mContext).also { it.id = View.generateViewId() }
+    private val smartspaceView = View(mContext).also { it.id = sharedR.id.bc_smartspace_view }
+    private val weatherView = View(mContext).also { it.id = sharedR.id.weather_smartspace_view }
+    private val dateView = View(mContext).also { it.id = sharedR.id.date_smartspace_view }
     private lateinit var constraintLayout: ConstraintLayout
     private lateinit var constraintSet: ConstraintSet
+
+    private val clockShouldBeCentered = MutableStateFlow(false)
+    private val hasCustomWeatherDataDisplay = MutableStateFlow(false)
 
     @Before
     fun setup() {
@@ -62,21 +71,25 @@ class SmartspaceSectionTest : SysuiTestCase() {
         mSetFlagsRule.enableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
         underTest =
             SmartspaceSection(
+                mContext,
                 keyguardClockViewModel,
                 keyguardSmartspaceViewModel,
-                mContext,
+                keyguardSmartspaceInteractor,
                 lockscreenSmartspaceController,
                 keyguardUnlockAnimationController,
+                blueprintInteractor
             )
         constraintLayout = ConstraintLayout(mContext)
-        whenever(lockscreenSmartspaceController.buildAndConnectView(constraintLayout))
+        whenever(lockscreenSmartspaceController.buildAndConnectView(any()))
             .thenReturn(smartspaceView)
-        whenever(lockscreenSmartspaceController.buildAndConnectWeatherView(constraintLayout))
+        whenever(lockscreenSmartspaceController.buildAndConnectWeatherView(any()))
             .thenReturn(weatherView)
-        whenever(lockscreenSmartspaceController.buildAndConnectDateView(constraintLayout))
-            .thenReturn(dateView)
+        whenever(lockscreenSmartspaceController.buildAndConnectDateView(any())).thenReturn(dateView)
         whenever(keyguardClockViewModel.hasCustomWeatherDataDisplay)
             .thenReturn(hasCustomWeatherDataDisplay)
+        whenever(keyguardClockViewModel.clockShouldBeCentered).thenReturn(clockShouldBeCentered)
+        whenever(keyguardSmartspaceViewModel.isSmartspaceEnabled).thenReturn(true)
+
         constraintSet = ConstraintSet()
     }
 
@@ -92,7 +105,6 @@ class SmartspaceSectionTest : SysuiTestCase() {
 
     @Test
     fun testAddViews_smartspaceEnabled_dateWeatherDecoupled() {
-        whenever(keyguardSmartspaceViewModel.isSmartspaceEnabled).thenReturn(true)
         whenever(keyguardSmartspaceViewModel.isDateWeatherDecoupled).thenReturn(true)
         underTest.addViews(constraintLayout)
         assert(smartspaceView.parent == constraintLayout)
@@ -102,7 +114,6 @@ class SmartspaceSectionTest : SysuiTestCase() {
 
     @Test
     fun testAddViews_smartspaceEnabled_notDateWeatherDecoupled() {
-        whenever(keyguardSmartspaceViewModel.isSmartspaceEnabled).thenReturn(true)
         whenever(keyguardSmartspaceViewModel.isDateWeatherDecoupled).thenReturn(false)
         underTest.addViews(constraintLayout)
         assert(smartspaceView.parent == constraintLayout)
@@ -112,9 +123,8 @@ class SmartspaceSectionTest : SysuiTestCase() {
 
     @Test
     fun testConstraintsWhenNotHasCustomWeatherDataDisplay() {
-        whenever(keyguardSmartspaceViewModel.isSmartspaceEnabled).thenReturn(true)
         whenever(keyguardSmartspaceViewModel.isDateWeatherDecoupled).thenReturn(true)
-        whenever(keyguardClockViewModel.hasCustomWeatherDataDisplay.value).thenReturn(false)
+        hasCustomWeatherDataDisplay.value = false
         underTest.addViews(constraintLayout)
         underTest.applyConstraints(constraintSet)
         assertWeatherSmartspaceConstrains(constraintSet)
@@ -128,7 +138,7 @@ class SmartspaceSectionTest : SysuiTestCase() {
 
     @Test
     fun testConstraintsWhenHasCustomWeatherDataDisplay() {
-        whenever(keyguardClockViewModel.hasCustomWeatherDataDisplay.value).thenReturn(true)
+        hasCustomWeatherDataDisplay.value = true
         underTest.addViews(constraintLayout)
         underTest.applyConstraints(constraintSet)
         assertWeatherSmartspaceConstrains(constraintSet)
@@ -139,7 +149,7 @@ class SmartspaceSectionTest : SysuiTestCase() {
 
     @Test
     fun testNormalDateWeatherVisibility() {
-        whenever(keyguardClockViewModel.hasCustomWeatherDataDisplay.value).thenReturn(false)
+        hasCustomWeatherDataDisplay.value = false
         whenever(keyguardSmartspaceViewModel.isWeatherEnabled).thenReturn(true)
         underTest.addViews(constraintLayout)
         underTest.applyConstraints(constraintSet)
@@ -152,7 +162,7 @@ class SmartspaceSectionTest : SysuiTestCase() {
     }
     @Test
     fun testCustomDateWeatherVisibility() {
-        whenever(keyguardClockViewModel.hasCustomWeatherDataDisplay.value).thenReturn(true)
+        hasCustomWeatherDataDisplay.value = true
         underTest.addViews(constraintLayout)
         underTest.applyConstraints(constraintSet)
 

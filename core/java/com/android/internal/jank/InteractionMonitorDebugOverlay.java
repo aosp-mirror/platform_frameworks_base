@@ -28,6 +28,7 @@ import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Trace;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.WindowCallbacks;
@@ -52,6 +53,7 @@ import com.android.internal.jank.FrameTracker.Reasons;
  * @hide
  */
 class InteractionMonitorDebugOverlay implements WindowCallbacks {
+    private static final String TAG = "InteractionMonitorDebug";
     private static final int REASON_STILL_RUNNING = -1000;
     private final Object mLock;
     // Sparse array where the key in the CUJ and the value is the session status, or null if
@@ -77,7 +79,7 @@ class InteractionMonitorDebugOverlay implements WindowCallbacks {
         mDebugPaint.setAntiAlias(false);
         mDebugFontMetrics = new Paint.FontMetrics();
         final Context context = ActivityThread.currentApplication();
-        mPackageName = context.getPackageName();
+        mPackageName = context == null ? "null" : context.getPackageName();
     }
 
     @UiThread
@@ -153,8 +155,14 @@ class InteractionMonitorDebugOverlay implements WindowCallbacks {
                           SparseArray<InteractionJankMonitor.RunningTracker> runningTrackers) {
         synchronized (mLock) {
             mRunningCujs.put(removedCuj, reason);
+            boolean isLoggable = Log.isLoggable(TAG, Log.DEBUG);
+            if (isLoggable) {
+                String cujName = Cuj.getNameOfCuj(removedCuj);
+                Log.d(TAG, cujName + (reason == REASON_END_NORMAL ? " ended" : " cancelled"));
+            }
             // If REASON_STILL_RUNNING is not in mRunningCujs, then all CUJs have ended
             if (mRunningCujs.indexOfValue(REASON_STILL_RUNNING) < 0) {
+                if (isLoggable) Log.d(TAG, "All CUJs ended");
                 mRunningCujs.clear();
                 dispose();
             } else {
@@ -186,6 +194,10 @@ class InteractionMonitorDebugOverlay implements WindowCallbacks {
 
     @UiThread
     void onTrackerAdded(@Cuj.CujType int addedCuj, InteractionJankMonitor.RunningTracker tracker) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            String cujName = Cuj.getNameOfCuj(addedCuj);
+            Log.d(TAG, cujName + " started");
+        }
         synchronized (mLock) {
             // Use REASON_STILL_RUNNING (not technically one of the '@Reasons') to indicate the CUJ
             // is still running

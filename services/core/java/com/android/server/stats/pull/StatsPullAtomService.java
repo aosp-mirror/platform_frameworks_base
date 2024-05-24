@@ -59,6 +59,7 @@ import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STA
 import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__TELEPHONY;
 import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__UNKNOWN;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
+import static com.android.server.stats.Flags.addMobileBytesTransferByProcStatePuller;
 import static com.android.server.stats.pull.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
 import static com.android.server.stats.pull.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
 import static com.android.server.stats.pull.ProcfsMemoryUtil.getProcessCmdlines;
@@ -409,6 +410,15 @@ public class StatsPullAtomService extends SystemService {
     @GuardedBy("mKeystoreLock")
     private IKeystoreMetrics mIKeystoreMetrics;
 
+    private AggregatedMobileDataStatsPuller mAggregatedMobileDataStatsPuller = null;
+
+    /**
+     * Whether or not to enable the new puller with aggregation by process state per uid on a
+     * system server side.
+     */
+    public static final boolean ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER =
+                addMobileBytesTransferByProcStatePuller();
+
     // Puller locks
     private final Object mDataBytesTransferLock = new Object();
     private final Object mBluetoothBytesTransferLock = new Object();
@@ -469,6 +479,20 @@ public class StatsPullAtomService extends SystemService {
         mContext = context;
     }
 
+    private final class StatsPullAtomServiceInternalImpl extends StatsPullAtomServiceInternal {
+
+        @Override
+        public void noteUidProcessState(int uid, int state) {
+            if (ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER
+                    && mAggregatedMobileDataStatsPuller != null) {
+                final long elapsedRealtime = SystemClock.elapsedRealtime();
+                final long uptime = SystemClock.uptimeMillis();
+                mAggregatedMobileDataStatsPuller.noteUidProcessState(uid, state, elapsedRealtime,
+                        uptime);
+            }
+        }
+    }
+
     private native void initializeNativePullers();
 
     /**
@@ -486,6 +510,11 @@ public class StatsPullAtomService extends SystemService {
             }
             try {
                 switch (atomTag) {
+                    case FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_PROC_STATE:
+                        if (ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER
+                                && mAggregatedMobileDataStatsPuller != null) {
+                            return mAggregatedMobileDataStatsPuller.pullDataBytesTransfer(data);
+                        }
                     case FrameworkStatsLog.WIFI_BYTES_TRANSFER:
                     case FrameworkStatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG:
                     case FrameworkStatsLog.MOBILE_BYTES_TRANSFER:
@@ -776,7 +805,10 @@ public class StatsPullAtomService extends SystemService {
 
     @Override
     public void onStart() {
-        // no op
+        if (ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER) {
+            LocalServices.addService(StatsPullAtomServiceInternal.class,
+                    new StatsPullAtomServiceInternalImpl());
+        }
     }
 
     @Override
@@ -811,6 +843,9 @@ public class StatsPullAtomService extends SystemService {
         mStatsSubscriptionsListener = new StatsSubscriptionsListener(mSubscriptionManager);
         mStorageManager = (StorageManager) mContext.getSystemService(StorageManager.class);
         mNetworkStatsManager = mContext.getSystemService(NetworkStatsManager.class);
+
+        initMobileDataStatsPuller();
+
         // Initialize DiskIO
         mStoragedUidIoStatsReader = new StoragedUidIoStatsReader();
 
@@ -972,6 +1007,18 @@ public class StatsPullAtomService extends SystemService {
         registerCachedAppsHighWatermarkPuller();
     }
 
+    private void initMobileDataStatsPuller() {
+        if (DEBUG) {
+            Slog.d(TAG,
+                    "ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER = "
+                            + ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER);
+        }
+        if (ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER) {
+            mAggregatedMobileDataStatsPuller =
+                    new AggregatedMobileDataStatsPuller(mNetworkStatsManager);
+        }
+    }
+
     private void initAndRegisterNetworkStatsPullers() {
         if (DEBUG) {
             Slog.d(TAG, "Registering NetworkStats pullers with statsd");
@@ -1013,12 +1060,22 @@ public class StatsPullAtomService extends SystemService {
         registerWifiBytesTransferBackground();
         registerMobileBytesTransfer();
         registerMobileBytesTransferBackground();
+        if (ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER) {
+            registerMobileBytesTransferByProcState();
+        }
         registerBytesTransferByTagAndMetered();
         registerDataUsageBytesTransfer();
         registerOemManagedBytesTransfer();
         if (canQueryTypeProxy) {
             registerProxyBytesTransferBackground();
         }
+    }
+
+    private void registerMobileBytesTransferByProcState() {
+        final int tagId = FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_PROC_STATE;
+        PullAtomMetadata metadata =
+                new PullAtomMetadata.Builder().setAdditiveFields(new int[] {3, 4, 5, 6}).build();
+        mStatsManager.setPullAtomCallback(tagId, metadata, DIRECT_EXECUTOR, mStatsCallbackImpl);
     }
 
     private void initAndRegisterDeferredPullers() {
@@ -2001,7 +2058,8 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerCpuCyclesPerThreadGroupCluster() {
-        if (KernelCpuBpfTracking.isSupported()) {
+        if (KernelCpuBpfTracking.isSupported()
+                && !com.android.server.power.optimization.Flags.disableSystemServicePowerAttr()) {
             int tagId = FrameworkStatsLog.CPU_CYCLES_PER_THREAD_GROUP_CLUSTER;
             PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                     .setAdditiveFields(new int[]{3, 4})
@@ -2016,6 +2074,10 @@ public class StatsPullAtomService extends SystemService {
     }
 
     int pullCpuCyclesPerThreadGroupCluster(int atomTag, List<StatsEvent> pulledData) {
+        if (com.android.server.power.optimization.Flags.disableSystemServicePowerAttr()) {
+            return StatsManager.PULL_SKIP;
+        }
+
         SystemServiceCpuThreadTimes times = LocalServices.getService(BatteryStatsInternal.class)
                 .getSystemServiceCpuThreadTimes();
         if (times == null) {

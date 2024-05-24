@@ -18,25 +18,42 @@ package com.android.systemui.reardisplay;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotSame;
-import static junit.framework.Assert.assertTrue;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.hardware.devicestate.DeviceStateManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.model.SysUiState;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -45,24 +62,48 @@ public class RearDisplayDialogControllerTest extends SysuiTestCase {
 
     @Mock
     private CommandQueue mCommandQueue;
+    @Mock
+    private SystemUIDialog.Factory mSystemUIDialogFactory;
+    @Mock
+    private SystemUIDialog mSystemUIDialog;
+    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
+    @Mock
+    private SysUiState mSysUiState;
+    @Mock
+    private Resources mResources;
 
-    private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
+    LayoutInflater mLayoutInflater = LayoutInflater.from(mContext);
 
+    private final FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
     private static final int CLOSED_BASE_STATE = 0;
     private static final int OPEN_BASE_STATE = 1;
 
+    @Before
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+
+        when(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState);
+        when(mSystemUIDialogFactory.create()).thenReturn(mSystemUIDialog);
+        when(mSystemUIDialog.getContext()).thenReturn(mContext);
+    }
     @Test
     public void testClosedDialogIsShown() {
-        RearDisplayDialogController controller = new RearDisplayDialogController(mContext,
-                mCommandQueue, mFakeExecutor);
+        RearDisplayDialogController controller = new RearDisplayDialogController(
+                mCommandQueue,
+                mFakeExecutor,
+                mResources,
+                mLayoutInflater,
+                mSystemUIDialogFactory);
         controller.setDeviceStateManagerCallback(new TestDeviceStateManagerCallback());
         controller.setFoldedStates(new int[]{0});
         controller.setAnimationRepeatCount(0);
 
         controller.showRearDisplayDialog(CLOSED_BASE_STATE);
-        assertTrue(controller.mRearDisplayEducationDialog.isShowing());
-        TextView deviceClosedTitleTextView = controller.mRearDisplayEducationDialog.findViewById(
+        verify(mSystemUIDialog).show();
+
+        View container = getDialogViewContainer();
+        TextView deviceClosedTitleTextView = container.findViewById(
                 R.id.rear_display_title_text_view);
         assertEquals(deviceClosedTitleTextView.getText().toString(),
                 getContext().getResources().getString(
@@ -71,20 +112,28 @@ public class RearDisplayDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void testClosedDialogIsRefreshedOnConfigurationChange() {
-        RearDisplayDialogController controller = new RearDisplayDialogController(mContext,
-                mCommandQueue, mFakeExecutor);
+        RearDisplayDialogController controller = new RearDisplayDialogController(
+                mCommandQueue,
+                mFakeExecutor,
+                mResources,
+                mLayoutInflater,
+                mSystemUIDialogFactory);
         controller.setDeviceStateManagerCallback(new TestDeviceStateManagerCallback());
         controller.setFoldedStates(new int[]{0});
         controller.setAnimationRepeatCount(0);
 
         controller.showRearDisplayDialog(CLOSED_BASE_STATE);
-        assertTrue(controller.mRearDisplayEducationDialog.isShowing());
-        TextView deviceClosedTitleTextView = controller.mRearDisplayEducationDialog.findViewById(
+        verify(mSystemUIDialog).show();
+        View container = getDialogViewContainer();
+        TextView deviceClosedTitleTextView = container.findViewById(
                 R.id.rear_display_title_text_view);
 
-        controller.onConfigurationChanged(new Configuration());
-        assertTrue(controller.mRearDisplayEducationDialog.isShowing());
-        TextView deviceClosedTitleTextView2 = controller.mRearDisplayEducationDialog.findViewById(
+        reset(mSystemUIDialog);
+        when(mSystemUIDialog.isShowing()).thenReturn(true);
+        when(mSystemUIDialog.getContext()).thenReturn(mContext);
+
+        controller.onConfigChanged(new Configuration());
+        TextView deviceClosedTitleTextView2 = container.findViewById(
                 R.id.rear_display_title_text_view);
 
         assertNotSame(deviceClosedTitleTextView, deviceClosedTitleTextView2);
@@ -92,22 +141,33 @@ public class RearDisplayDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void testOpenDialogIsShown() {
-        RearDisplayDialogController controller = new RearDisplayDialogController(mContext,
-                mCommandQueue, mFakeExecutor);
+        RearDisplayDialogController controller = new RearDisplayDialogController(
+                mCommandQueue,
+                mFakeExecutor,
+                mResources,
+                mLayoutInflater,
+                mSystemUIDialogFactory);
         controller.setDeviceStateManagerCallback(new TestDeviceStateManagerCallback());
         controller.setFoldedStates(new int[]{0});
         controller.setAnimationRepeatCount(0);
 
         controller.showRearDisplayDialog(OPEN_BASE_STATE);
 
-        assertTrue(controller.mRearDisplayEducationDialog.isShowing());
-        TextView deviceClosedTitleTextView = controller.mRearDisplayEducationDialog.findViewById(
+        verify(mSystemUIDialog).show();
+        View container = getDialogViewContainer();
+        TextView deviceClosedTitleTextView = container.findViewById(
                 R.id.rear_display_title_text_view);
         assertEquals(deviceClosedTitleTextView.getText().toString(),
                 getContext().getResources().getString(
                         R.string.rear_display_unfolded_bottom_sheet_title));
     }
 
+    private View getDialogViewContainer() {
+        ArgumentCaptor<View> viewCaptor = ArgumentCaptor.forClass(View.class);
+        verify(mSystemUIDialog).setView(viewCaptor.capture());
+
+        return viewCaptor.getValue();
+    }
     /**
      * Empty device state manager callbacks, so we can verify that the correct
      * dialogs are being created regardless of device state of the test device.

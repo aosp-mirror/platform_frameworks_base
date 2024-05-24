@@ -21,6 +21,7 @@ import static android.content.res.Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED
 import android.app.ActivityManager;
 import android.app.GrammaticalInflectionManager;
 import android.app.IGrammaticalInflectionManager;
+import android.content.AttributionSource;
 import android.content.res.Configuration;
 import android.os.RemoteException;
 import android.os.ShellCommand;
@@ -44,9 +45,12 @@ class GrammaticalInflectionShellCommand extends ShellCommand {
     }
 
     private final IGrammaticalInflectionManager mBinderService;
+    private AttributionSource mAttributionSource;
 
-    GrammaticalInflectionShellCommand(IGrammaticalInflectionManager grammaticalInflectionManager) {
+    GrammaticalInflectionShellCommand(IGrammaticalInflectionManager grammaticalInflectionManager,
+            AttributionSource attributionSource) {
         mBinderService = grammaticalInflectionManager;
+        mAttributionSource = attributionSource;
     }
 
     @Override
@@ -115,7 +119,7 @@ class GrammaticalInflectionShellCommand extends ShellCommand {
         } while (true);
 
         try {
-            mBinderService.setSystemWideGrammaticalGender(userId, grammaticalGender);
+            mBinderService.setSystemWideGrammaticalGender(grammaticalGender, userId);
         } catch (RemoteException e) {
             getOutPrintWriter().println("Remote Exception: " + e);
         }
@@ -141,7 +145,8 @@ class GrammaticalInflectionShellCommand extends ShellCommand {
         } while (true);
 
         try {
-            int grammaticalGender = mBinderService.getSystemGrammaticalGender(userId);
+            int grammaticalGender = mBinderService.getSystemGrammaticalGender(mAttributionSource,
+                    userId);
             getOutPrintWriter().println(GRAMMATICAL_GENDER_MAP.get(grammaticalGender));
         } catch (RemoteException e) {
             getOutPrintWriter().println("Remote Exception: " + e);

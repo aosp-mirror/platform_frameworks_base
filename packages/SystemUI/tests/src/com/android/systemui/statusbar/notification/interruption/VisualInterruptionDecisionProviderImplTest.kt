@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.notification.interruption
 
+import android.app.Notification.CATEGORY_EVENT
+import android.app.Notification.CATEGORY_REMINDER
+import android.app.NotificationManager
 import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
@@ -47,6 +50,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
             systemClock,
             uiEventLogger,
             userTracker,
+            avalancheProvider
         )
     }
 
@@ -67,6 +71,114 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
             assertPulseNotSuppressed()
             assertBubbleNotSuppressed()
             assertFsiNotSuppressed()
+        }
+    }
+
+    // Avalanche tests are in VisualInterruptionDecisionProviderImplTest
+    // instead of VisualInterruptionDecisionProviderTestBase
+    // because avalanche code is based on the suppression refactor.
+
+    @Test
+    fun testAvalancheFilter_duringAvalanche_allowConversationFromAfterEvent() {
+        avalancheProvider.startTime = whenAgo(10)
+
+        withFilter(AvalancheSuppressor(avalancheProvider, systemClock)) {
+            ensurePeekState()
+            assertShouldHeadsUp(buildEntry {
+                importance = NotificationManager.IMPORTANCE_HIGH
+                isConversation = true
+                isImportantConversation = false
+                whenMs = whenAgo(5)
+            })
+        }
+    }
+
+    @Test
+    fun testAvalancheFilter_duringAvalanche_suppressConversationFromBeforeEvent() {
+        avalancheProvider.startTime = whenAgo(10)
+
+        withFilter(AvalancheSuppressor(avalancheProvider, systemClock)) {
+            ensurePeekState()
+            assertShouldNotHeadsUp(buildEntry {
+                importance = NotificationManager.IMPORTANCE_DEFAULT
+                isConversation = true
+                isImportantConversation = false
+                whenMs = whenAgo(15)
+            })
+        }
+    }
+
+    @Test
+    fun testAvalancheFilter_duringAvalanche_allowHighPriorityConversation() {
+        avalancheProvider.startTime = whenAgo(10)
+
+        withFilter(AvalancheSuppressor(avalancheProvider, systemClock)) {
+            ensurePeekState()
+            assertShouldHeadsUp(buildEntry {
+                importance = NotificationManager.IMPORTANCE_HIGH
+                isImportantConversation = true
+            })
+        }
+    }
+
+    @Test
+    fun testAvalancheFilter_duringAvalanche_allowCall() {
+        avalancheProvider.startTime = whenAgo(10)
+
+        withFilter(AvalancheSuppressor(avalancheProvider, systemClock)) {
+            ensurePeekState()
+            assertShouldHeadsUp(buildEntry {
+                importance = NotificationManager.IMPORTANCE_HIGH
+                isCall = true
+            })
+        }
+    }
+
+    @Test
+    fun testAvalancheFilter_duringAvalanche_allowCategoryReminder() {
+        avalancheProvider.startTime = whenAgo(10)
+
+        withFilter(AvalancheSuppressor(avalancheProvider, systemClock)) {
+            ensurePeekState()
+            assertShouldHeadsUp(buildEntry {
+                importance = NotificationManager.IMPORTANCE_HIGH
+                category = CATEGORY_REMINDER
+            })
+        }
+    }
+
+    @Test
+    fun testAvalancheFilter_duringAvalanche_allowCategoryEvent() {
+        avalancheProvider.startTime = whenAgo(10)
+
+        withFilter(AvalancheSuppressor(avalancheProvider, systemClock)) {
+            ensurePeekState()
+            assertShouldHeadsUp(buildEntry {
+                importance = NotificationManager.IMPORTANCE_HIGH
+                category = CATEGORY_EVENT
+            })
+        }
+    }
+
+    @Test
+    fun testAvalancheFilter_duringAvalanche_allowFsi() {
+        avalancheProvider.startTime = whenAgo(10)
+
+        withFilter(AvalancheSuppressor(avalancheProvider, systemClock)) {
+            assertFsiNotSuppressed()
+        }
+    }
+
+    @Test
+    fun testAvalancheFilter_duringAvalanche_allowColorized() {
+        avalancheProvider.startTime = whenAgo(10)
+
+        withFilter(AvalancheSuppressor(avalancheProvider, systemClock)) {
+            ensurePeekState()
+            assertShouldHeadsUp(buildEntry {
+                importance = NotificationManager.IMPORTANCE_HIGH
+                isColorized = true
+            })
         }
     }
 

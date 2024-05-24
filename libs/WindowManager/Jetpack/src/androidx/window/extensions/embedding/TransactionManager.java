@@ -77,9 +77,11 @@ class TransactionManager {
     @NonNull
     TransactionRecord startNewTransaction(@Nullable IBinder taskFragmentTransactionToken) {
         if (mCurrentTransaction != null) {
+            final TransactionRecord lastTransaction = mCurrentTransaction;
             mCurrentTransaction = null;
             throw new IllegalStateException(
-                    "The previous transaction has not been applied or aborted,");
+                    "The previous transaction:" + lastTransaction + " has not been applied or "
+                            + "aborted.");
         }
         mCurrentTransaction = new TransactionRecord(taskFragmentTransactionToken);
         return mCurrentTransaction;
@@ -198,6 +200,16 @@ class TransactionManager {
             return mOriginType != TASK_FRAGMENT_TRANSIT_NONE
                     ? mOriginType
                     : TASK_FRAGMENT_TRANSIT_CHANGE;
+        }
+
+        @Override
+        @NonNull
+        public String toString() {
+            return TransactionRecord.class.getSimpleName() + "{"
+                    + "token=" + mTaskFragmentTransactionToken
+                    + ", type=" + getTransactionTransitionType()
+                    + ", transaction=" + mTransaction
+                    + "}";
         }
     }
 }

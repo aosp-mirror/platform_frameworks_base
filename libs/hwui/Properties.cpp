@@ -38,6 +38,9 @@ namespace hwui_flags {
 constexpr bool clip_surfaceviews() {
     return false;
 }
+constexpr bool hdr_10bit_plus() {
+    return false;
+}
 }  // namespace hwui_flags
 #endif
 
@@ -56,6 +59,7 @@ std::optional<std::int32_t> render_ahead() {
 
 bool Properties::debugLayersUpdates = false;
 bool Properties::debugOverdraw = false;
+bool Properties::debugTraceGpuResourceCategories = false;
 bool Properties::showDirtyRegions = false;
 bool Properties::skipEmptyFrames = true;
 bool Properties::useBufferAge = true;
@@ -104,6 +108,7 @@ bool Properties::isSystemOrPersistent = false;
 float Properties::maxHdrHeadroomOn8bit = 5.f;  // TODO: Refine this number
 
 bool Properties::clipSurfaceViews = false;
+bool Properties::hdr10bitPlus = false;
 
 StretchEffectBehavior Properties::stretchEffectBehavior = StretchEffectBehavior::ShaderHWUI;
 
@@ -151,10 +156,12 @@ bool Properties::load() {
 
     skpCaptureEnabled = debuggingEnabled && base::GetBoolProperty(PROPERTY_CAPTURE_SKP_ENABLED, false);
 
-    SkAndroidFrameworkTraceUtil::setEnableTracing(
-            base::GetBoolProperty(PROPERTY_SKIA_TRACING_ENABLED, false));
+    bool skiaBroadTracing = base::GetBoolProperty(PROPERTY_SKIA_TRACING_ENABLED, false);
+    SkAndroidFrameworkTraceUtil::setEnableTracing(skiaBroadTracing);
     SkAndroidFrameworkTraceUtil::setUsePerfettoTrackEvents(
             base::GetBoolProperty(PROPERTY_SKIA_USE_PERFETTO_TRACK_EVENTS, false));
+    debugTraceGpuResourceCategories =
+            base::GetBoolProperty(PROPERTY_TRACE_GPU_RESOURCES, skiaBroadTracing);
 
     runningInEmulator = base::GetBoolProperty(PROPERTY_IS_EMULATOR, false);
 
@@ -174,6 +181,7 @@ bool Properties::load() {
 
     clipSurfaceViews =
             base::GetBoolProperty("debug.hwui.clip_surfaceviews", hwui_flags::clip_surfaceviews());
+    hdr10bitPlus = hwui_flags::hdr_10bit_plus();
 
     return (prevDebugLayersUpdates != debugLayersUpdates) || (prevDebugOverdraw != debugOverdraw);
 }

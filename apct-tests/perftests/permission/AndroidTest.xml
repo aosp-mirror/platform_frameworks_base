@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2020 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<configuration description="Runs PermissionServicePerfTests metric instrumentation.">
+    <option name="test-suite-tag" value="apct"/>
+    <option name="test-suite-tag" value="apct-metric-instrumentation"/>
+    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
+        <option name="cleanup-apks" value="true"/>
+        <option name="test-file-name" value="PermissionServicePerfTests.apk"/>
+    </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
+        <option name="cleanup-apks" value="true"/>
+        <option name="force-queryable" value="false"/>
+        <option name="test-file-name" value="UsePermissionApp0.apk"/>
+        <option name="test-file-name" value="UsePermissionApp1.apk"/>
+        <option name="test-file-name" value="UsePermissionApp2.apk"/>
+        <option name="test-file-name" value="UsePermissionApp3.apk"/>
+        <option name="test-file-name" value="UsePermissionApp4.apk"/>
+        <option name="test-file-name" value="UsePermissionApp5.apk"/>
+        <option name="test-file-name" value="UsePermissionApp6.apk"/>
+        <option name="test-file-name" value="UsePermissionApp7.apk"/>
+        <option name="test-file-name" value="UsePermissionApp8.apk"/>
+        <option name="test-file-name" value="UsePermissionApp9.apk"/>
+        <option name="test-file-name" value="UsePermissionApp10.apk"/>
+        <option name="test-file-name" value="UsePermissionApp11.apk"/>
+        <option name="test-file-name" value="UsePermissionApp12.apk"/>
+        <option name="test-file-name" value="UsePermissionApp13.apk"/>
+        <option name="test-file-name" value="UsePermissionApp14.apk"/>
+        <option name="test-file-name" value="UsePermissionApp15.apk"/>
+        <option name="test-file-name" value="UsePermissionApp16.apk"/>
+        <option name="test-file-name" value="UsePermissionApp17.apk"/>
+        <option name="test-file-name" value="UsePermissionApp18.apk"/>
+        <option name="test-file-name" value="UsePermissionApp19.apk"/>
+        <option name="test-file-name" value="UsePermissionApp20.apk"/>
+        <option name="test-file-name" value="UsePermissionApp21.apk"/>
+        <option name="test-file-name" value="UsePermissionApp22.apk"/>
+        <option name="test-file-name" value="UsePermissionApp23.apk"/>
+        <option name="test-file-name" value="UsePermissionApp24.apk"/>
+        <option name="test-file-name" value="UsePermissionApp25.apk"/>
+        <option name="test-file-name" value="UsePermissionApp26.apk"/>
+        <option name="test-file-name" value="UsePermissionApp27.apk"/>
+        <option name="test-file-name" value="UsePermissionApp28.apk"/>
+        <option name="test-file-name" value="UsePermissionApp29.apk"/>
+    </target_preparer>
+
+    <test class="com.android.tradefed.testtype.AndroidJUnitTest">
+        <option name="package" value="android.perftests.permission"/>
+        <option name="hidden-api-checks" value="false"/>
+    </test>
+
+    <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
+        <option name="directory-keys" value="/data/local/PermissionServicePerfTests"/>
+        <option name="collect-on-run-ended-only" value="true"/>
+    </metrics_collector>
+
+    <!-- Needed for pushing the trace config file -->
+    <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer"/>
+    <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
+        <option name="push-file" key="trace_config_detailed.textproto"
+                value="/data/misc/perfetto-traces/trace_config.textproto"/>
+        <!--Install the content provider automatically when we push some file in sdcard folder.-->
+        <!--Needed to avoid the installation during the test suite.-->
+        <option name="push-file" key="trace_config_detailed.textproto"
+                value="/sdcard/sample.textproto"/>
+        <option name="push-file" key="UsePermissionApp0.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp0.apk" />
+        <option name="push-file" key="UsePermissionApp1.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp1.apk" />
+        <option name="push-file" key="UsePermissionApp2.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp2.apk" />
+        <option name="push-file" key="UsePermissionApp3.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp3.apk" />
+        <option name="push-file" key="UsePermissionApp4.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp4.apk" />
+        <option name="push-file" key="UsePermissionApp5.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp5.apk" />
+        <option name="push-file" key="UsePermissionApp6.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp6.apk" />
+        <option name="push-file" key="UsePermissionApp7.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp7.apk" />
+        <option name="push-file" key="UsePermissionApp8.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp8.apk" />
+        <option name="push-file" key="UsePermissionApp9.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp9.apk" />
+        <option name="push-file" key="UsePermissionApp10.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp10.apk" />
+        <option name="push-file" key="UsePermissionApp11.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp11.apk" />
+        <option name="push-file" key="UsePermissionApp12.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp12.apk" />
+        <option name="push-file" key="UsePermissionApp13.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp13.apk" />
+        <option name="push-file" key="UsePermissionApp14.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp14.apk" />
+        <option name="push-file" key="UsePermissionApp15.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp15.apk" />
+        <option name="push-file" key="UsePermissionApp16.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp16.apk" />
+        <option name="push-file" key="UsePermissionApp17.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp17.apk" />
+        <option name="push-file" key="UsePermissionApp18.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp18.apk" />
+        <option name="push-file" key="UsePermissionApp19.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp19.apk" />
+        <option name="push-file" key="UsePermissionApp20.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp20.apk" />
+        <option name="push-file" key="UsePermissionApp21.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp21.apk" />
+        <option name="push-file" key="UsePermissionApp22.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp22.apk" />
+        <option name="push-file" key="UsePermissionApp23.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp23.apk" />
+        <option name="push-file" key="UsePermissionApp24.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp24.apk" />
+        <option name="push-file" key="UsePermissionApp25.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp25.apk" />
+        <option name="push-file" key="UsePermissionApp26.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp26.apk" />
+        <option name="push-file" key="UsePermissionApp27.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp27.apk" />
+        <option name="push-file" key="UsePermissionApp28.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp28.apk" />
+        <option name="push-file" key="UsePermissionApp29.apk"
+                value="/data/local/tmp/perftests/UsePermissionApp29.apk" />
+    </target_preparer>
+
+    <!-- Needed for pulling the collected trace config on to the host -->
+    <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
+        <option name="pull-pattern-keys" value="perfetto_file_path"/>
+    </metrics_collector>
+
+    <!-- Needed for storing the perfetto trace files in the sdcard/test_results -->
+    <option name="isolated-storage" value="false"/>
+
+    <test class="com.android.tradefed.testtype.AndroidJUnitTest">
+        <option name="package" value="android.perftests.permission"/>
+        <option name="hidden-api-checks" value="false"/>
+
+        <!-- Listener related args for collecting the traces and waiting for the device to
+             stabilize. -->
+        <option name="device-listeners"
+                value="android.device.collectors.ProcLoadListener,android.device.collectors.PerfettoListener"/>
+        <!-- Guarantee that user defined RunListeners will be running before any of the default
+             listeners defined in this runner. -->
+        <option name="instrumentation-arg" key="newRunListenerMode" value="true"/>
+
+        <!-- ProcLoadListener related arguments -->
+        <!-- Wait for device last minute threshold to reach 3 with 2 minute timeout before starting
+             the test run -->
+        <option name="instrumentation-arg" key="procload-collector:per_run" value="true"/>
+        <option name="instrumentation-arg" key="proc-loadavg-threshold" value="3"/>
+        <option name="instrumentation-arg" key="proc-loadavg-timeout" value="120000"/>
+        <option name="instrumentation-arg" key="proc-loadavg-interval" value="10000"/>
+
+        <!-- PerfettoListener related arguments -->
+        <option name="instrumentation-arg" key="perfetto_config_text_proto" value="true"/>
+        <option name="instrumentation-arg" key="perfetto_config_file"
+                value="trace_config.textproto"/>
+
+        <!--
+         PackageInstallerBenchmark will break for 5 minutes time out so it changes to 10 minutes
+          -->
+        <option name="test-timeout" value="600000" />
+    </test>
+
+
+</configuration>

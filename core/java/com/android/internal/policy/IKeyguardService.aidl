@@ -130,4 +130,10 @@ oneway interface IKeyguardService {
      * Note that it's called only if the device is interactive.
      */
     void onSystemKeyPressed(int keycode);
+
+    /**
+     * Requests to show the keyguard immediately without locking the device. Keyguard will show
+     * whether a screen lock was configured or not (including if screen lock is SWIPE or NONE).
+     */
+    void showDismissibleKeyguard();
 }

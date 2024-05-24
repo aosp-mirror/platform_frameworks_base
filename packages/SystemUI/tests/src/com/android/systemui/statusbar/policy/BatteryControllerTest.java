@@ -17,10 +17,12 @@
 package com.android.systemui.statusbar.policy;
 
 import static android.os.BatteryManager.EXTRA_PRESENT;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.inOrder;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.staticMockMarker;
 import static com.android.settingslib.fuelgauge.BatterySaverLogging.SAVER_ENABLED_QS;
+
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -59,6 +61,7 @@ import org.mockito.MockitoSession;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -284,6 +287,24 @@ public class BatteryControllerTest extends SysuiTestCase {
         mBatteryController.onReceive(getContext(), intent);
 
         Assert.assertFalse(mBatteryController.isIncompatibleCharging());
+    }
+
+    @Test
+    public void callbackRemovedWhileDispatching_doesntCrash() {
+        final AtomicBoolean remove = new AtomicBoolean(false);
+        BatteryStateChangeCallback callback = new BatteryStateChangeCallback() {
+            @Override
+            public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
+                if (remove.get()) {
+                    mBatteryController.removeCallback(this);
+                }
+            }
+        };
+        mBatteryController.addCallback(callback);
+        // Add another callback so the iteration continues
+        mBatteryController.addCallback(new BatteryStateChangeCallback() {});
+        remove.set(true);
+        mBatteryController.fireBatteryLevelChanged();
     }
 
     private void setupIncompatibleCharging() {

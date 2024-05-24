@@ -16,16 +16,16 @@
 
 package com.android.mediaframeworktest.functional.audio;
 
-import com.android.mediaframeworktest.MediaFrameworkTest;
 import android.content.Context;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.os.Looper;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.util.Log;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
+
+import com.android.mediaframeworktest.MediaFrameworkTest;
 
 /**
  * Junit / Instrumentation test case for the media AudioManager api

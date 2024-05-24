@@ -16,15 +16,16 @@
 
 package com.android.server.accessibility;
 
+import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_MANAGER;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_MANAGER_CLIENT;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_SERVICE_CLIENT;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_FINGERPRINT;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_INPUT_FILTER;
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATION_CONNECTION;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_PACKAGE_BROADCAST_RECEIVER;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_USER_BROADCAST_RECEIVER;
-import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATION_CONNECTION;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAGER_INTERNAL;
 import static android.companion.virtual.VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED;
 import static android.companion.virtual.VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID;
@@ -63,6 +64,7 @@ import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.app.admin.DevicePolicyManager;
+import android.app.ecm.EnhancedConfirmationManager;
 import android.appwidget.AppWidgetManagerInternal;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -111,6 +113,7 @@ import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.util.ArraySet;
 import android.util.IntArray;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -1743,6 +1746,23 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         synchronized (mLock) {
             notifyAccessibilityButtonVisibilityChangedLocked(shown);
         }
+    }
+
+    @Override
+    @RequiresPermission(Manifest.permission.STATUS_BAR_SERVICE)
+    public void notifyQuickSettingsTilesChanged(
+            @UserIdInt int userId, List<ComponentName> tileComponentNames) {
+        mSecurityPolicy.enforceCallingPermission(
+                Manifest.permission.STATUS_BAR_SERVICE,
+                /* function= */ "notifyQuickSettingsTilesChanged");
+
+        Slog.d(LOG_TAG, TextUtils.formatSimple(
+                "notifyQuickSettingsTilesChanged userId: %d, tileComponentNames: %s",
+                        userId, tileComponentNames));
+        // TODO (b/314843909): in the follow up cl
+        // update in-memory copy of QS_TILES in AccessibilityManager
+        // update Settings.Secure.ACCESSIBILITY_QS_TARGETS and its in-memory copy
+        // show full device control warning if needed (b/314850435)
     }
 
     /**
@@ -3440,13 +3460,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         if (!mMagnificationController.supportWindowMagnification()) {
             return;
         }
-        final boolean connect = (userState.isShortcutMagnificationEnabledLocked()
+
+        final boolean shortcutEnabled = (userState.isShortcutMagnificationEnabledLocked()
                 || userState.isMagnificationSingleFingerTripleTapEnabledLocked()
                 || (Flags.enableMagnificationMultipleFingerMultipleTapGesture()
-                && userState.isMagnificationTwoFingerTripleTapEnabledLocked()))
-                && (userState.getMagnificationCapabilitiesLocked()
-                != Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN)
+                    && userState.isMagnificationTwoFingerTripleTapEnabledLocked()));
+
+        final boolean createConnectionForCurrentCapability =
+                com.android.window.flags.Flags.magnificationAlwaysDrawFullscreenBorder()
+                        || (userState.getMagnificationCapabilitiesLocked()
+                                != Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+
+        final boolean connect = (shortcutEnabled && createConnectionForCurrentCapability)
                 || userHasMagnificationServicesLocked(userState);
+
         getMagnificationConnectionManager().requestConnection(connect);
     }
 
@@ -4376,13 +4403,29 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             // permittedServices null means all accessibility services are allowed.
             boolean allowed = permittedServices == null || permittedServices.contains(packageName);
             if (allowed) {
-                final AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
-                final int mode = appOps.noteOpNoThrow(
-                        AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS,
-                        uid, packageName, /* attributionTag= */ null, /* message= */ null);
-                final boolean ecmEnabled = mContext.getResources().getBoolean(
-                        R.bool.config_enhancedConfirmationModeEnabled);
-                return !ecmEnabled || mode == AppOpsManager.MODE_ALLOWED;
+                if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
+                        && android.security.Flags.extendEcmToAllSettings()) {
+                    try {
+                        return !mContext.getSystemService(EnhancedConfirmationManager.class)
+                                .isRestricted(packageName,
+                                        AppOpsManager.OPSTR_BIND_ACCESSIBILITY_SERVICE);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        Log.e(LOG_TAG, "Exception when retrieving package:" + packageName, e);
+                        return false;
+                    }
+                } else {
+                    try {
+                        final int mode = mContext.getSystemService(AppOpsManager.class)
+                                .noteOpNoThrow(AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS,
+                                        uid, packageName);
+                        final boolean ecmEnabled = mContext.getResources().getBoolean(
+                                com.android.internal.R.bool.config_enhancedConfirmationModeEnabled);
+                        return !ecmEnabled || mode == AppOpsManager.MODE_ALLOWED;
+                    } catch (Exception e) {
+                        // Fallback in case if app ops is not available in testing.
+                        return false;
+                    }
+                }
             }
             return false;
         } finally {
@@ -4405,31 +4448,69 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return true;
         }
 
-        RestrictedLockUtils.sendShowRestrictedSettingDialogIntent(mContext,
-                packageName, uid);
+        if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
+                && android.security.Flags.extendEcmToAllSettings()) {
+            try {
+                Intent settingDialogIntent = mContext
+                        .getSystemService(EnhancedConfirmationManager.class)
+                        .createRestrictedSettingDialogIntent(packageName,
+                                AppOpsManager.OPSTR_BIND_ACCESSIBILITY_SERVICE);
+                mContext.startActivity(settingDialogIntent);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.e(LOG_TAG, "Exception when retrieving package:" + packageName, e);
+            }
+        } else {
+            RestrictedLockUtils.sendShowRestrictedSettingDialogIntent(mContext,
+                    packageName, uid);
+        }
         return true;
     }
 
     @Override
     public boolean isAccessibilityServiceWarningRequired(AccessibilityServiceInfo info) {
         mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
+        final ComponentName componentName = info.getComponentName();
 
         // Warning is not required if the service is already enabled.
         synchronized (mLock) {
             final AccessibilityUserState userState = getCurrentUserStateLocked();
-            if (userState.getEnabledServicesLocked().contains(info.getComponentName())) {
+            if (userState.getEnabledServicesLocked().contains(componentName)) {
                 return false;
             }
         }
         // Warning is not required if the service is already assigned to a shortcut.
         for (int shortcutType : AccessibilityManager.SHORTCUT_TYPES) {
             if (getAccessibilityShortcutTargets(shortcutType).contains(
-                    info.getComponentName().flattenToString())) {
+                    componentName.flattenToString())) {
                 return false;
             }
         }
+        // Warning is not required if the service is preinstalled and in the
+        // trustedAccessibilityServices allowlist.
+        if (android.view.accessibility.Flags.skipAccessibilityWarningDialogForTrustedServices()
+                && isAccessibilityServicePreinstalledAndTrusted(info)) {
+            return false;
+        }
+
         // Warning is required by default.
         return true;
+    }
+
+    private boolean isAccessibilityServicePreinstalledAndTrusted(AccessibilityServiceInfo info) {
+        final ComponentName componentName = info.getComponentName();
+        final boolean isPreinstalled =
+                info.getResolveInfo().serviceInfo.applicationInfo.isSystemApp();
+        if (isPreinstalled) {
+            final String[] trustedAccessibilityServices =
+                    mContext.getResources().getStringArray(
+                            R.array.config_trustedAccessibilityServices);
+            if (Arrays.stream(trustedAccessibilityServices)
+                    .map(ComponentName::unflattenFromString)
+                    .anyMatch(componentName::equals)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -4578,8 +4659,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     public void onShellCommand(FileDescriptor in, FileDescriptor out,
             FileDescriptor err, String[] args, ShellCallback callback,
             ResultReceiver resultReceiver) {
-        new AccessibilityShellCommand(this, mSystemActionPerformer).exec(this, in, out, err, args,
-                callback, resultReceiver);
+        new AccessibilityShellCommand(mContext, this, mSystemActionPerformer)
+                .exec(this, in, out, err, args, callback, resultReceiver);
     }
 
     private final class InteractionBridge {
@@ -5695,6 +5776,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public void attachAccessibilityOverlayToDisplay(
+            int displayId, SurfaceControl sc) {
+        mContext.enforceCallingPermission(
+                INTERNAL_SYSTEM_WINDOW, "attachAccessibilityOverlayToDisplay");
+        mMainHandler.sendMessage(
+                obtainMessage(
+                        AccessibilityManagerService::attachAccessibilityOverlayToDisplayInternal,
+                        this,
+                        -1,
+                        displayId,
+                        sc,
+                        null));
+    }
+
+    @Override
+    public void attachAccessibilityOverlayToDisplay(
             int interactionId,
             int displayId,
             SurfaceControl sc,
@@ -5729,12 +5825,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             t.close();
             result = AccessibilityService.OVERLAY_RESULT_SUCCESS;
         }
-        // Send the result back to the service.
-        try {
-            callback.sendAttachOverlayResult(result, interactionId);
-        } catch (RemoteException re) {
-            Slog.e(LOG_TAG, "Exception while attaching overlay.", re);
-            // the other side will time out
+
+        if (callback != null) {
+            // Send the result back to the service.
+            try {
+                callback.sendAttachOverlayResult(result, interactionId);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG, "Exception while attaching overlay.", re);
+                // the other side will time out
+            }
         }
     }
 }

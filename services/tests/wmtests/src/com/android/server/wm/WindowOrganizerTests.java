@@ -40,14 +40,15 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
-import static com.android.server.wm.testing.Assert.assertThrows;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowContainer.SYNC_STATE_READY;
 import static com.android.server.wm.WindowState.BLAST_TIMEOUT_DURATION;
+import static com.android.server.wm.testing.Assert.assertThrows;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -92,8 +93,8 @@ import android.window.WindowContainerTransaction;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.wm.TaskOrganizerController.PendingTaskEvent;
+import com.android.window.flags.Flags;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -150,13 +151,6 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
     Task createRootTask() {
         return createTask(mDisplayContent);
-    }
-
-    @Before
-    public void setUp() {
-        // We defer callbacks since we need to adjust task surface visibility, but for these tests,
-        // just run the callbacks synchronously
-        mWm.mAtmService.mTaskOrganizerController.setDeferTaskOrgCallbacksConsumer((r) -> r.run());
     }
 
     @Test
@@ -585,6 +579,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
     @Test
     public void testTaskFragmentHiddenFocusableTranslucentChanges() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG);
+
         removeGlobalMinSizeRestriction();
         final Task rootTask = new TaskBuilder(mSupervisor).setCreateActivity(true)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).build();
@@ -660,6 +656,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
     private void testTaskFragmentChangesWithoutSystemOrganizerThrowException(
             BiConsumer<WindowContainerTransaction, WindowContainerToken> addOp) {
+        mSetFlagsRule.enableFlags(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG);
+
         removeGlobalMinSizeRestriction();
         final Task rootTask = new TaskBuilder(mSupervisor).setCreateActivity(true)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).build();
@@ -904,12 +902,38 @@ public class WindowOrganizerTests extends WindowTestsBase {
                 new Binder(),
                 0 /* index */,
                 WindowInsets.Type.systemOverlays(),
-                new Rect(0, 0, 1080, 200));
+                new Rect(0, 0, 1080, 200),
+                null /* boundingRects */);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
 
         assertThat(navigationBarInsetsReceiverTask.mLocalInsetsSources
                 .valueAt(0).getType()).isEqualTo(
                         WindowInsets.Type.systemOverlays());
+    }
+
+    @Test
+    public void testAddInsetsSource_withBoundingRects() {
+        final Task rootTask = createTask(mDisplayContent);
+
+        final Task navigationBarInsetsReceiverTask = createTaskInRootTask(rootTask, 0);
+        navigationBarInsetsReceiverTask.getConfiguration().windowConfiguration.setBounds(new Rect(
+                0, 200, 1080, 700));
+
+        final Rect[] boundingRects = new Rect[]{
+                new Rect(0, 0, 10, 10), new Rect(100, 100, 200, 100)
+        };
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.addInsetsSource(
+                navigationBarInsetsReceiverTask.mRemoteToken.toWindowContainerToken(),
+                new Binder(),
+                0 /* index */,
+                WindowInsets.Type.systemOverlays(),
+                new Rect(0, 0, 1080, 200),
+                boundingRects);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
+
+        assertArrayEquals(boundingRects, navigationBarInsetsReceiverTask.mLocalInsetsSources
+                .valueAt(0).getBoundingRects());
     }
 
     @Test
@@ -926,7 +950,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
                 owner,
                 0 /* index */,
                 WindowInsets.Type.systemOverlays(),
-                new Rect(0, 0, 1080, 200));
+                new Rect(0, 0, 1080, 200),
+                null /* boundingRects */);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
 
         final WindowContainerTransaction wct2 = new WindowContainerTransaction();
@@ -1735,11 +1760,9 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final ITaskFragmentOrganizer organizerInterface =
                 ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder());
-        mWm.mAtmService.mWindowOrganizerController.mTaskFragmentOrganizerController
-                .registerOrganizerInternal(
-                        ITaskFragmentOrganizer.Stub.asInterface(
-                                organizer.getOrganizerToken().asBinder()),
-                        isSystemOrganizer);
+        registerTaskFragmentOrganizer(
+                ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder()),
+                isSystemOrganizer);
         t.setTaskFragmentOrganizer(organizerInterface);
 
         return organizer;

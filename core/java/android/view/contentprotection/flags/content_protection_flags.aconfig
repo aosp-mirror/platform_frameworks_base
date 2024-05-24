@@ -35,3 +35,10 @@ flag {
     description: "If true, an appop is logged when a notification is rapidly cleared by a notification listener."
     bug: "289080543"
 }
+
+flag {
+    name: "manage_device_policy_enabled"
+    namespace: "content_protection"
+    description: "If true, the APIs to manage content protection device policy will be enabled."
+    bug: "319477846"
+}

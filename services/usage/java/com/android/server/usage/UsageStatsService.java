@@ -1121,13 +1121,8 @@ public class UsageStatsService extends SystemService implements
 
             switch (event.mEventType) {
                 case Event.ACTIVITY_RESUMED:
-                    FrameworkStatsLog.write(
-                            FrameworkStatsLog.APP_USAGE_EVENT_OCCURRED,
-                            uid,
-                            event.mPackage,
-                            "",
-                            FrameworkStatsLog
-                                    .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_FOREGROUND);
+                    logAppUsageEventReportedAtomLocked(Event.ACTIVITY_RESUMED, uid, event.mPackage);
+
                     // check if this activity has already been resumed
                     if (mVisibleActivities.get(event.mInstanceId) != null) break;
                     final String usageSourcePackage = getUsageSourcePackage(event);
@@ -1172,13 +1167,8 @@ public class UsageStatsService extends SystemService implements
                                 usageSourcePackage2);
                         mVisibleActivities.put(event.mInstanceId, pausedData);
                     } else {
-                        FrameworkStatsLog.write(
-                                FrameworkStatsLog.APP_USAGE_EVENT_OCCURRED,
-                                uid,
-                                event.mPackage,
-                                "",
-                                FrameworkStatsLog
-                                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_BACKGROUND);
+                        logAppUsageEventReportedAtomLocked(Event.ACTIVITY_PAUSED, uid,
+                                event.mPackage);
                     }
 
                     pausedData.lastEvent = Event.ACTIVITY_PAUSED;
@@ -1203,13 +1193,8 @@ public class UsageStatsService extends SystemService implements
                     }
 
                     if (prevData.lastEvent != Event.ACTIVITY_PAUSED) {
-                        FrameworkStatsLog.write(
-                                FrameworkStatsLog.APP_USAGE_EVENT_OCCURRED,
-                                uid,
-                                event.mPackage,
-                                "",
-                                FrameworkStatsLog
-                                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_BACKGROUND);
+                        logAppUsageEventReportedAtomLocked(Event.ACTIVITY_PAUSED, uid,
+                                event.mPackage);
                     }
 
                     ArraySet<String> tokens;
@@ -1244,10 +1229,18 @@ public class UsageStatsService extends SystemService implements
                     }
                     break;
                 case Event.USER_INTERACTION:
-                    // Fall through
+                    logAppUsageEventReportedAtomLocked(Event.USER_INTERACTION, uid, event.mPackage);
+                    // Fall through.
                 case Event.APP_COMPONENT_USED:
                     convertToSystemTimeLocked(event);
                     mLastTimeComponentUsedGlobal.put(event.mPackage, event.mTimeStamp);
+                    break;
+                case Event.SHORTCUT_INVOCATION:
+                case Event.CHOOSER_ACTION:
+                case Event.STANDBY_BUCKET_CHANGED:
+                case Event.FOREGROUND_SERVICE_START:
+                case Event.FOREGROUND_SERVICE_STOP:
+                    logAppUsageEventReportedAtomLocked(event.mEventType, uid, event.mPackage);
                     break;
             }
 
@@ -1259,6 +1252,45 @@ public class UsageStatsService extends SystemService implements
         }
 
         mIoHandler.obtainMessage(MSG_NOTIFY_USAGE_EVENT_LISTENER, userId, 0, event).sendToTarget();
+    }
+
+    @GuardedBy("mLock")
+    private void logAppUsageEventReportedAtomLocked(int eventType, int uid, String packageName) {
+        FrameworkStatsLog.write(FrameworkStatsLog.APP_USAGE_EVENT_OCCURRED, uid, packageName,
+                "", getAppUsageEventOccurredAtomEventType(eventType));
+    }
+
+    /** Make sure align with the EventType defined in the AppUsageEventOccurred atom. */
+    private int getAppUsageEventOccurredAtomEventType(int eventType) {
+        switch (eventType) {
+            case Event.ACTIVITY_RESUMED:
+                return FrameworkStatsLog
+                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_FOREGROUND;
+            case Event.ACTIVITY_PAUSED:
+                return FrameworkStatsLog
+                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_BACKGROUND;
+            case Event.USER_INTERACTION:
+                return FrameworkStatsLog
+                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__USER_INTERACTION;
+            case Event.SHORTCUT_INVOCATION:
+                return FrameworkStatsLog
+                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__SHORTCUT_INVOCATION;
+            case Event.CHOOSER_ACTION:
+                return FrameworkStatsLog
+                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__CHOOSER_ACTION;
+            case Event.STANDBY_BUCKET_CHANGED:
+                return FrameworkStatsLog
+                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__STANDBY_BUCKET_CHANGED;
+            case Event.FOREGROUND_SERVICE_START:
+                return FrameworkStatsLog
+                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__FOREGROUND_SERVICE_START;
+            case Event.FOREGROUND_SERVICE_STOP:
+                return FrameworkStatsLog
+                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__FOREGROUND_SERVICE_STOP;
+            default:
+                Slog.w(TAG, "Unsupported usage event logging: " + eventType);
+                return -1;
+        }
     }
 
     private String getUsageSourcePackage(Event event) {
@@ -1494,14 +1526,15 @@ public class UsageStatsService extends SystemService implements
      * Called by the Binder stub.
      */
     UsageEvents queryEvents(int userId, long beginTime, long endTime, int flags) {
-        return queryEventsWithTypes(userId, beginTime, endTime, flags, EmptyArray.INT);
+        return queryEventsWithQueryFilters(userId, beginTime, endTime, flags,
+                /* eventTypeFilter= */ EmptyArray.INT, /* pkgNameFilter= */ null);
     }
 
     /**
      * Called by the Binder stub.
      */
-    UsageEvents queryEventsWithTypes(int userId, long beginTime, long endTime, int flags,
-            int[] eventTypeFilter) {
+    UsageEvents queryEventsWithQueryFilters(int userId, long beginTime, long endTime, int flags,
+            int[] eventTypeFilter, ArraySet<String> pkgNameFilter) {
         synchronized (mLock) {
             if (!mUserUnlockedStates.contains(userId)) {
                 Slog.w(TAG, "Failed to query events for locked user " + userId);
@@ -1512,7 +1545,7 @@ public class UsageStatsService extends SystemService implements
             if (service == null) {
                 return null; // user was stopped or removed
             }
-            return service.queryEvents(beginTime, endTime, flags, eventTypeFilter);
+            return service.queryEvents(beginTime, endTime, flags, eventTypeFilter, pkgNameFilter);
         }
     }
 
@@ -2244,7 +2277,7 @@ public class UsageStatsService extends SystemService implements
         }
 
         private UsageEvents queryEventsHelper(int userId, long beginTime, long endTime,
-                String callingPackage, int[] eventTypeFilter) {
+                String callingPackage, int[] eventTypeFilter, ArraySet<String> pkgNameFilter) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(
@@ -2263,8 +2296,8 @@ public class UsageStatsService extends SystemService implements
                 if (hideLocusIdEvents) flags |= UsageEvents.HIDE_LOCUS_EVENTS;
                 if (obfuscateNotificationEvents) flags |= UsageEvents.OBFUSCATE_NOTIFICATION_EVENTS;
 
-                return UsageStatsService.this.queryEventsWithTypes(userId, beginTime, endTime,
-                        flags, eventTypeFilter);
+                return UsageStatsService.this.queryEventsWithQueryFilters(userId,
+                        beginTime, endTime, flags, eventTypeFilter, pkgNameFilter);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -2382,7 +2415,8 @@ public class UsageStatsService extends SystemService implements
             }
 
             return queryEventsHelper(UserHandle.getCallingUserId(), beginTime, endTime,
-                    callingPackage, /* eventTypeFilter= */ EmptyArray.INT);
+                    callingPackage, /* eventTypeFilter= */ EmptyArray.INT,
+                    /* pkgNameFilter= */ null);
         }
 
         @Override
@@ -2395,8 +2429,21 @@ public class UsageStatsService extends SystemService implements
                 return null;
             }
 
-            return queryEventsHelper(UserHandle.getCallingUserId(), query.getBeginTimeMillis(),
-                    query.getEndTimeMillis(), callingPackage, query.getEventTypeFilter());
+            final int callingUserId = UserHandle.getCallingUserId();
+            int userId = query.getUserId();
+            if (userId == UserHandle.USER_NULL) {
+                // Convert userId to actual user Id if not specified in the query object.
+                userId = callingUserId;
+            }
+            if (userId != callingUserId) {
+                getContext().enforceCallingPermission(
+                        Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                        "No permission to query usage stats for user " + userId);
+            }
+
+            return queryEventsHelper(userId, query.getBeginTimeMillis(),
+                    query.getEndTimeMillis(), callingPackage, query.getEventTypes(),
+                    /* pkgNameFilter= */ new ArraySet<>(query.getPackageNames()));
         }
 
         @Override
@@ -2432,7 +2479,8 @@ public class UsageStatsService extends SystemService implements
             }
 
             return queryEventsHelper(userId, beginTime, endTime, callingPackage,
-                    /* eventTypeFilter= */ EmptyArray.INT);
+                    /* eventTypeFilter= */ EmptyArray.INT,
+                    /* pkgNameFilter= */ null);
         }
 
         @Override

@@ -113,6 +113,7 @@ message ApplicationInfoProto {
         optional int32 enable_gwp_asan = 19;
         optional int32 enable_memtag = 20;
         optional bool native_heap_zero_init = 21;
+        optional bool allow_cross_uid_activity_switch_from_below = 22;
     }
     optional Detail detail = 17;
     repeated string overlay_paths = 18;

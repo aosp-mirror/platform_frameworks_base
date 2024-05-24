@@ -124,7 +124,7 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         repo.addVisibleTasksListener(listener, executor)
         executor.flushAll()
 
-        assertThat(listener.hasVisibleTasksOnDefaultDisplay).isTrue()
+        assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(1)
         assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(1)
     }
 
@@ -148,7 +148,7 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         repo.addVisibleTasksListener(listener, executor)
         executor.flushAll()
 
-        assertThat(listener.hasVisibleTasksOnDefaultDisplay).isFalse()
+        assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(0)
         // One call as adding listener notifies it
         assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(0)
     }
@@ -162,8 +162,8 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 2, visible = true)
         executor.flushAll()
 
-        assertThat(listener.hasVisibleTasksOnDefaultDisplay).isTrue()
-        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(1)
+        assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(2)
+        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(2)
     }
 
     @Test
@@ -175,16 +175,16 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 1, visible = true)
         executor.flushAll()
 
-        assertThat(listener.hasVisibleTasksOnDefaultDisplay).isTrue()
+        assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(1)
         assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(1)
-        assertThat(listener.hasVisibleTasksOnSecondaryDisplay).isFalse()
+        assertThat(listener.visibleTasksCountOnSecondaryDisplay).isEqualTo(0)
         assertThat(listener.visibleChangesOnSecondaryDisplay).isEqualTo(0)
 
         repo.updateVisibleFreeformTasks(displayId = 1, taskId = 2, visible = true)
         executor.flushAll()
 
         // Listener for secondary display is notified
-        assertThat(listener.hasVisibleTasksOnSecondaryDisplay).isTrue()
+        assertThat(listener.visibleTasksCountOnSecondaryDisplay).isEqualTo(1)
         assertThat(listener.visibleChangesOnSecondaryDisplay).isEqualTo(1)
         // No changes to listener for default display
         assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(1)
@@ -198,7 +198,7 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
 
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 1, visible = true)
         executor.flushAll()
-        assertThat(listener.hasVisibleTasksOnDefaultDisplay).isTrue()
+        assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(1)
 
         // Mark task 1 visible on secondary display
         repo.updateVisibleFreeformTasks(displayId = 1, taskId = 1, visible = true)
@@ -208,11 +208,11 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         // 1 - visible task added
         // 2 - visible task removed
         assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(2)
-        assertThat(listener.hasVisibleTasksOnDefaultDisplay).isFalse()
+        assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(0)
 
         // Secondary display should have 1 call for visible task added
         assertThat(listener.visibleChangesOnSecondaryDisplay).isEqualTo(1)
-        assertThat(listener.hasVisibleTasksOnSecondaryDisplay).isTrue()
+        assertThat(listener.visibleTasksCountOnSecondaryDisplay).isEqualTo(1)
     }
 
     @Test
@@ -224,17 +224,17 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 2, visible = true)
         executor.flushAll()
 
-        assertThat(listener.hasVisibleTasksOnDefaultDisplay).isTrue()
+        assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(2)
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 1, visible = false)
         executor.flushAll()
 
-        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(1)
+        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(3)
 
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 2, visible = false)
         executor.flushAll()
 
-        assertThat(listener.hasVisibleTasksOnDefaultDisplay).isFalse()
-        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(2)
+        assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(0)
+        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(4)
     }
 
     @Test
@@ -397,8 +397,8 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
     }
 
     class TestVisibilityListener : DesktopModeTaskRepository.VisibleTasksListener {
-        var hasVisibleTasksOnDefaultDisplay = false
-        var hasVisibleTasksOnSecondaryDisplay = false
+        var visibleTasksCountOnDefaultDisplay = 0
+        var visibleTasksCountOnSecondaryDisplay = 0
 
         var visibleChangesOnDefaultDisplay = 0
         var visibleChangesOnSecondaryDisplay = 0
@@ -409,14 +409,14 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         var stashedChangesOnDefaultDisplay = 0
         var stashedChangesOnSecondaryDisplay = 0
 
-        override fun onVisibilityChanged(displayId: Int, hasVisibleFreeformTasks: Boolean) {
+        override fun onTasksVisibilityChanged(displayId: Int, visibleTasksCount: Int) {
             when (displayId) {
                 DEFAULT_DISPLAY -> {
-                    hasVisibleTasksOnDefaultDisplay = hasVisibleFreeformTasks
+                    visibleTasksCountOnDefaultDisplay = visibleTasksCount
                     visibleChangesOnDefaultDisplay++
                 }
                 SECOND_DISPLAY -> {
-                    hasVisibleTasksOnSecondaryDisplay = hasVisibleFreeformTasks
+                    visibleTasksCountOnSecondaryDisplay = visibleTasksCount
                     visibleChangesOnSecondaryDisplay++
                 }
                 else -> fail("Visible task listener received unexpected display id: $displayId")

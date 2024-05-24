@@ -124,6 +124,9 @@ class AssetManager2 {
   // new resource IDs.
   bool SetApkAssets(ApkAssetsList apk_assets, bool invalidate_caches = true);
   bool SetApkAssets(std::initializer_list<ApkAssetsPtr> apk_assets, bool invalidate_caches = true);
+  // This one is an optimization - it skips all calculations for applying the currently set
+  // configuration, expecting a configuration update later with a forced refresh.
+  void PresetApkAssets(ApkAssetsList apk_assets);
 
   const ApkAssetsPtr& GetApkAssets(ApkAssetsCookie cookie) const;
   int GetApkAssetsCount() const {
@@ -156,7 +159,7 @@ class AssetManager2 {
 
   // Sets/resets the configuration for this AssetManager. This will cause all
   // caches that are related to the configuration change to be invalidated.
-  void SetConfigurations(std::vector<ResTable_config> configurations);
+  void SetConfigurations(std::vector<ResTable_config> configurations, bool force_refresh = false);
 
   inline const std::vector<ResTable_config>& GetConfigurations() const {
     return configurations_;

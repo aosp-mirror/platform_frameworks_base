@@ -18,8 +18,14 @@ package android.media.projection;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.app.Activity;
+import android.app.ActivityOptions.LaunchCookie;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
+import android.compat.annotation.Overridable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -63,6 +69,18 @@ public final class MediaProjectionManager {
     private static final String TAG = "MediaProjectionManager";
 
     /**
+     * This change id ensures that users are presented with a choice of capturing a single app
+     * or the entire screen when initiating a MediaProjection session, overriding the usage of
+     * MediaProjectionConfig#createConfigForDefaultDisplay.
+     *
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_DISABLE_MEDIA_PROJECTION_SINGLE_APP_OPTION = 316897322L;
+
+    /**
      * Intent extra to customize the permission dialog based on the host app's preferences.
      * @hide
      */
@@ -73,6 +91,9 @@ public final class MediaProjectionManager {
     /** @hide */
     public static final String EXTRA_MEDIA_PROJECTION =
             "android.media.projection.extra.EXTRA_MEDIA_PROJECTION";
+    /** @hide */
+    public static final String EXTRA_LAUNCH_COOKIE =
+            "android.media.projection.extra.EXTRA_LAUNCH_COOKIE";
 
     /** @hide */
     public static final int TYPE_SCREEN_CAPTURE = 0;
@@ -158,13 +179,25 @@ public final class MediaProjectionManager {
      */
     @NonNull
     public Intent createScreenCaptureIntent(@NonNull MediaProjectionConfig config) {
-        Intent i = new Intent();
-        final ComponentName mediaProjectionPermissionDialogComponent =
-                ComponentName.unflattenFromString(mContext.getResources()
-                        .getString(com.android.internal.R.string
-                                .config_mediaProjectionPermissionDialogComponent));
-        i.setComponent(mediaProjectionPermissionDialogComponent);
+        Intent i = createScreenCaptureIntent();
         i.putExtra(EXTRA_MEDIA_PROJECTION_CONFIG, config);
+        return i;
+    }
+
+    /**
+     * Returns an intent similar to {@link #createScreenCaptureIntent()} that will enable screen
+     * recording of the task with the specified launch cookie. This method should only be used for
+     * testing.
+     *
+     * @param launchCookie the launch cookie corresponding to the task to record.
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi")
+    @TestApi
+    @NonNull
+    public Intent createScreenCaptureIntent(@NonNull LaunchCookie launchCookie) {
+        Intent i = createScreenCaptureIntent();
+        i.putExtra(EXTRA_LAUNCH_COOKIE, launchCookie);
         return i;
     }
 

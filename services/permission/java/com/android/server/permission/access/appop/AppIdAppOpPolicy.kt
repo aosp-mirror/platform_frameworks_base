@@ -17,6 +17,7 @@
 package com.android.server.permission.access.appop
 
 import android.app.AppOpsManager
+import android.util.Slog
 import com.android.server.permission.access.GetStateScope
 import com.android.server.permission.access.MutableAccessState
 import com.android.server.permission.access.MutateStateScope
@@ -84,6 +85,10 @@ class AppIdAppOpPolicy : BaseAppOpPolicy(AppIdAppOpPersistence()) {
         appOpName: String,
         mode: Int
     ): Boolean {
+        if (userId !in newState.userStates) {
+            Slog.e(LOG_TAG, "Unable to set app op mode for missing user $userId")
+            return false
+        }
         val defaultMode = AppOpsManager.opToDefaultMode(appOpName)
         val oldMode =
             newState.userStates[userId]!!
@@ -151,5 +156,9 @@ class AppIdAppOpPolicy : BaseAppOpPolicy(AppIdAppOpPersistence()) {
          * Implementations should keep this method fast to avoid stalling the locked state mutation.
          */
         abstract fun onStateMutated()
+    }
+
+    companion object {
+        private val LOG_TAG = AppIdAppOpPolicy::class.java.simpleName
     }
 }

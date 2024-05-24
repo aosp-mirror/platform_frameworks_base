@@ -16,20 +16,20 @@
 
 package com.android.systemui.scene.ui.composable
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.Swipe
+import com.android.compose.animation.scene.SwipeDirection
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
+import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.notifications.ui.composable.HeadsUpNotificationSpace
-import com.android.systemui.scene.shared.model.Direction
-import com.android.systemui.scene.shared.model.Edge
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
-import com.android.systemui.scene.shared.model.UserAction
+import com.android.systemui.qs.ui.composable.QuickSettings
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,17 +46,17 @@ class GoneScene
 constructor(
     private val notificationsViewModel: NotificationsPlaceholderViewModel,
 ) : ComposableScene {
-    override val key = SceneKey.Gone
+    override val key = Scenes.Gone
 
-    override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> =
-        MutableStateFlow<Map<UserAction, SceneModel>>(
+    override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
+        MutableStateFlow<Map<UserAction, UserActionResult>>(
                 mapOf(
-                    UserAction.Swipe(
+                    Swipe(
                         pointerCount = 2,
-                        fromEdge = Edge.TOP,
-                        direction = Direction.DOWN,
-                    ) to SceneModel(SceneKey.QuickSettings),
-                    UserAction.Swipe(direction = Direction.DOWN) to SceneModel(SceneKey.Shade),
+                        fromSource = Edge.Top,
+                        direction = SwipeDirection.Down,
+                    ) to UserActionResult(Scenes.QuickSettings),
+                    Swipe(direction = SwipeDirection.Down) to UserActionResult(Scenes.Shade),
                 )
             )
             .asStateFlow()
@@ -65,11 +65,10 @@ constructor(
     override fun SceneScope.Content(
         modifier: Modifier,
     ) {
-        Box(modifier = modifier) {
-            HeadsUpNotificationSpace(
-                viewModel = notificationsViewModel,
-                modifier = Modifier.padding(16.dp).fillMaxSize(),
-            )
-        }
+        animateSceneFloatAsState(
+            value = QuickSettings.SharedValues.SquishinessValues.GoneSceneStarting,
+            key = QuickSettings.SharedValues.TilesSquishiness,
+        )
+        Spacer(modifier.fillMaxSize())
     }
 }

@@ -58,6 +58,22 @@ class MagnificationConnectionWrapper {
         mConnection.asBinder().linkToDeath(deathRecipient, 0);
     }
 
+    boolean onFullscreenMagnificationActivationChanged(int displayId, boolean activated) {
+        if (mTrace.isA11yTracingEnabledForTypes(FLAGS_MAGNIFICATION_CONNECTION)) {
+            mTrace.logTrace(TAG + ".onFullscreenMagnificationActivationChanged",
+                    FLAGS_MAGNIFICATION_CONNECTION);
+        }
+        try {
+            mConnection.onFullscreenMagnificationActivationChanged(displayId, activated);
+        } catch (RemoteException e) {
+            if (DBG) {
+                Slog.e(TAG, "Error calling onFullscreenMagnificationActivationChanged");
+            }
+            return false;
+        }
+        return true;
+    }
+
     boolean enableWindowMagnification(int displayId, float scale, float centerX, float centerY,
             float magnificationFrameOffsetRatioX, float magnificationFrameOffsetRatioY,
             @Nullable MagnificationAnimationCallback callback) {

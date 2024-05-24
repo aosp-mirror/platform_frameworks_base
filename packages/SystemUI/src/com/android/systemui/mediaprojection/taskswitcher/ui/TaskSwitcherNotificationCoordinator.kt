@@ -16,23 +16,25 @@
 
 package com.android.systemui.mediaprojection.taskswitcher.ui
 
+import android.app.ActivityManager.RunningTaskInfo
 import android.app.Notification
-import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.Parcelable
 import android.util.Log
-import com.android.systemui.res.R
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.mediaprojection.taskswitcher.ui.model.TaskSwitcherNotificationUiState.NotShowing
 import com.android.systemui.mediaprojection.taskswitcher.ui.model.TaskSwitcherNotificationUiState.Showing
 import com.android.systemui.mediaprojection.taskswitcher.ui.viewmodel.TaskSwitcherNotificationViewModel
+import com.android.systemui.res.R
 import com.android.systemui.util.NotificationChannels
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
 /** Coordinator responsible for showing/hiding the task switcher notification. */
@@ -43,32 +45,54 @@ constructor(
     private val context: Context,
     private val notificationManager: NotificationManager,
     @Application private val applicationScope: CoroutineScope,
-    @Main private val mainDispatcher: CoroutineDispatcher,
     private val viewModel: TaskSwitcherNotificationViewModel,
+    private val broadcastDispatcher: BroadcastDispatcher,
 ) {
+
     fun start() {
         applicationScope.launch {
-            viewModel.uiState.flowOn(mainDispatcher).collect { uiState ->
-                Log.d(TAG, "uiState -> $uiState")
-                when (uiState) {
-                    is Showing -> showNotification()
-                    is NotShowing -> hideNotification()
+            launch {
+                viewModel.uiState.collect { uiState ->
+                    Log.d(TAG, "uiState -> $uiState")
+                    when (uiState) {
+                        is Showing -> showNotification(uiState)
+                        is NotShowing -> hideNotification()
+                    }
                 }
+            }
+            launch {
+                broadcastDispatcher
+                    .broadcastFlow(IntentFilter(SWITCH_ACTION)) { intent, _ ->
+                        intent.requireParcelableExtra<RunningTaskInfo>(EXTRA_ACTION_TASK)
+                    }
+                    .collect { task: RunningTaskInfo ->
+                        Log.d(TAG, "Switch action triggered: $task")
+                        viewModel.onSwitchTaskClicked(task)
+                    }
+            }
+            launch {
+                broadcastDispatcher
+                    .broadcastFlow(IntentFilter(GO_BACK_ACTION)) { intent, _ ->
+                        intent.requireParcelableExtra<RunningTaskInfo>(EXTRA_ACTION_TASK)
+                    }
+                    .collect { task ->
+                        Log.d(TAG, "Go back action triggered: $task")
+                        viewModel.onGoBackToTaskClicked(task)
+                    }
             }
         }
     }
 
-    private fun showNotification() {
-        notificationManager.notify(TAG, NOTIFICATION_ID, createNotification())
+    private fun showNotification(uiState: Showing) {
+        notificationManager.notify(TAG, NOTIFICATION_ID, createNotification(uiState))
     }
 
-    private fun createNotification(): Notification {
-        // TODO(b/286201261): implement actions
+    private fun createNotification(uiState: Showing): Notification {
         val actionSwitch =
             Notification.Action.Builder(
                     /* icon = */ null,
                     context.getString(R.string.media_projection_task_switcher_action_switch),
-                    /* intent = */ null
+                    createActionPendingIntent(action = SWITCH_ACTION, task = uiState.foregroundTask)
                 )
                 .build()
 
@@ -76,34 +100,40 @@ constructor(
             Notification.Action.Builder(
                     /* icon = */ null,
                     context.getString(R.string.media_projection_task_switcher_action_back),
-                    /* intent = */ null
+                    createActionPendingIntent(action = GO_BACK_ACTION, task = uiState.projectedTask)
                 )
                 .build()
-
-        val channel =
-            NotificationChannel(
-                NotificationChannels.HINTS,
-                context.getString(R.string.media_projection_task_switcher_notification_channel),
-                NotificationManager.IMPORTANCE_HIGH
-            )
-        notificationManager.createNotificationChannel(channel)
-        return Notification.Builder(context, channel.id)
+        return Notification.Builder(context, NotificationChannels.ALERTS)
             .setSmallIcon(R.drawable.qs_screen_record_icon_on)
             .setAutoCancel(true)
             .setContentText(context.getString(R.string.media_projection_task_switcher_text))
             .addAction(actionSwitch)
             .addAction(actionBack)
-            .setPriority(Notification.PRIORITY_HIGH)
-            .setDefaults(Notification.DEFAULT_VIBRATE)
             .build()
     }
 
     private fun hideNotification() {
-        notificationManager.cancel(NOTIFICATION_ID)
+        notificationManager.cancel(TAG, NOTIFICATION_ID)
     }
+
+    private fun createActionPendingIntent(action: String, task: RunningTaskInfo) =
+        PendingIntent.getBroadcast(
+            context,
+            /* requestCode= */ 0,
+            Intent(action).apply { putExtra(EXTRA_ACTION_TASK, task) },
+            /* flags= */ PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
 
     companion object {
         private const val TAG = "TaskSwitchNotifCoord"
         private const val NOTIFICATION_ID = 5566
+
+        private const val EXTRA_ACTION_TASK = "extra_task"
+
+        private const val SWITCH_ACTION = "com.android.systemui.mediaprojection.SWITCH_TASK"
+        private const val GO_BACK_ACTION = "com.android.systemui.mediaprojection.GO_BACK"
     }
 }
+
+private fun <T : Parcelable> Intent.requireParcelableExtra(key: String) =
+    getParcelableExtra<T>(key)!!

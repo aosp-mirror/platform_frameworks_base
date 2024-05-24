@@ -52,8 +52,8 @@ class ConversationNotificationProcessor @Inject constructor(
             entry: NotificationEntry,
             recoveredBuilder: Notification.Builder,
             logger: NotificationContentInflaterLogger
-    ) {
-        val messagingStyle = recoveredBuilder.style as? Notification.MessagingStyle ?: return
+    ): Notification.MessagingStyle? {
+        val messagingStyle = recoveredBuilder.style as? Notification.MessagingStyle ?: return null
         messagingStyle.conversationType =
                 if (entry.ranking.channel.isImportantConversation)
                     Notification.MessagingStyle.CONVERSATION_TYPE_IMPORTANT
@@ -68,6 +68,7 @@ class ConversationNotificationProcessor @Inject constructor(
         }
         messagingStyle.unreadMessageCount =
                 conversationNotificationManager.getUnreadCount(entry, recoveredBuilder)
+        return messagingStyle
     }
 }
 

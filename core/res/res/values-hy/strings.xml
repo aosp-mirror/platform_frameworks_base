@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>. <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> վայրկյանից"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>. Չի վերահասցեավորվել"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>. Չի վերահասցեավորվել"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Բջջային ցանցի անվտանգություն"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Ստուգել կարգավորումները"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Սարքի նույնացուցիչը հասանելի է դարձել"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> ցանցային կապը <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> - <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> ժամանակահատվածում <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> անգամ գրանցել է ձեր սարքի եզակի նույնացուցիչը (IMSI)։"</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> գաղտնագրված կապ"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Դուք միացել եք ավելի հուսալի բջջային ցանցի։"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Չգաղտնագրված միացում <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ցանցին"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Դուք միացել եք չգաղտնագրված բջջային ցանցի։ Ձեր զանգերը, հաղորդագրությունները և բջջային ինտերնետը խոցելի են։"</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Բջջային կապի անվտանգության կարգավորումներ"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Իմանալ ավելին"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Հատկության կոդը ամբողջական է:"</string>
     <string name="fcError" msgid="5325116502080221346">"Կապի խնդիր կամ անվավեր գործառույթի կոդ:"</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"Եղավ"</string>
@@ -370,6 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Թույլ է տալիս հավելվածին կապ հաստատել բջջային հեռարձակման մոդուլի հետ՝ բնակչությանը ծանուցող հաղորդագրությունները վերահասցեավորելու համար։ Որոշ երկրներում այս հաղորդագրություններն օգտագործվում են բնակչությանը արտակարգ իրավիճակների մասին զգուշացնելու համար: Վնասարար հավելվածները կարող են խանգարել ձեր սարքի աշխատանքին, որին ուղարկվում են այս հաղորդագրությունները:"</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Ընթացիկ զանգերի կառավարում"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Թույլ է տալիս հավելվածին ձեր սարքում տեսնել ընթացիկ զանգերի մասին տեղեկությունները և կառավարել այդ զանգերը։"</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Հասանելի դարձնել բջջային կապի աշտարակի վերջին հայտնի նույնացուցիչը։"</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Հասանելի է դարձնում հավելվածին բջջային կապի աշտարակի վերջին հայտնի նույնացուցիչը՝ տրամադրված զանգերի համակարգի կողմից։"</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"կարդալ բջջային զեկուցվող հաղորդագրությունները"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Թույլ է տալիս հավելվածին կարդալ ձեր սարքի կողմից ստացված բջջային հեռարձակվող հաղորդագրությունները: Բջջային հեռարձակվող զգուշացումները ուղարկվում են որոշ վայրերում` արտակարգ իրավիճակների մասին ձեզ զգուշացնելու համար: Վնասարար հավելվածները կարող են խանգարել ձեր սարքի արդյունավետությանը կամ շահագործմանը, երբ ստացվում է արտակարգ իրավիճակի մասին բջջային հաղորդում:"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"կարդալ բաժանորդագրված հոսքերը"</string>
@@ -434,6 +446,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Հավելվածին թույլ է տալիս օգտագործել systemExempted տեսակով ակտիվ ծառայությունները"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"fileManagement տեսակով ակտիվ ծառայությունների գործարկում"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Թույլատրում է հավելվածին օգտագործել fileManagement տեսակով ակտիվ ծառայությունները"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"mediaProcessing տեսակով ակտիվ ծառայությունների գործարկում"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Հավելվածին թույլ է տալիս օգտագործել mediaProcessing տեսակով ակտիվ ծառայությունները"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"գործարկել specialUse տեսակով ակտիվ ծառայությունները"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Հավելվածին թույլ է տալիս օգտագործել specialUse տեսակով ակտիվ ծառայությունները"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"չափել հավելվածի պահոցի տարածքը"</string>
@@ -539,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Հավելվածին թույլ է տալիս օգտագործել հեռախոսի ինֆրակարմիր հաղորդիչը:"</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"դնել պաստառ"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Թույլ է տալիս հավելվածին տեղադրել համակարգի պաստառը:"</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Տեսնել թաքցված պրոֆիլները"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Թույլատրում է հավելվածին տեսնել թաքցված պրոֆիլները։"</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"կարգաբերել ձեր պաստառի չափերը"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Թույլ է տալիս հավելվածին տեղադրել համակարգի պաստառի չափի հուշումները:"</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"կարգավորել ժամային գոտին"</string>
@@ -632,7 +648,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Էկրանի կողպում"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Շարունակելու համար ապակողպեք էկրանը"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Մատը ուժեղ սեղմեք սկաների վրա"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Մատնահետքը չի հաջողվում ճանաչել։ Նորից փորձեք։"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Մատնահետքը չի ճանաչվել։ Նորից փորձեք։"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Մաքրեք մատնահետքերի սկաները և նորից փորձեք"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Մաքրեք սկաները և նորից փորձեք"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Մատը ուժեղ սեղմեք սկաների վրա"</string>
@@ -650,18 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Մատնահետքը նույնականացվեց"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Դեմքը ճանաչվեց"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Դեմքը ճանաչվեց: Սեղմեք «Հաստատել»:"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Մատնահետքի սարքն անհասանելի է:"</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Մատնահետքերի սկաներն անհասանելի է"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Հնարավոր չէ կարգավորել մատնահետքը"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Մատնահետքի կարգավորման ժամանակը սպառվել է։ Նորից փորձեք։"</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Իսկորոշումը մատնահետքի միջոցով չեղարկվեց:"</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Մատնահետքով նույնականացման գործողությունը չեղարկվել է օգտատիրոջ կողմից:"</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Մատնահետքի օգտագործմամբ գործողությունը չեղարկվել է"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Մատնահետքի օգտագործմամբ գործողությունը չեղարկվել է օգտատիրոջ կողմից"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Չափազանց շատ փորձեր են արվել։ Օգտագործեք էկրանի կողպումը։"</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Չափազանց շատ փորձեր են արվել։ Օգտագործեք էկրանի կողպումը։"</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Չի հաջողվում մշակել մատնահետքը։ Նորից փորձեք։"</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Գրանցված մատնահետք չկա:"</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Այս սարքը չունի մատնահետքերի սկաներ։"</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Տվիչը ժամանակավորապես անջատված է:"</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Մատնահետքերի սկաները հնարավոր չէ օգտագործել։ Այցելեք սպասարկման կենտրոն։"</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Գրանցված մատնահետքեր չկան"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Սարքը չունի մատնահետքի սկաներ"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Տվիչը ժամանակավորապես անջատված է"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Մատնահետքերի սկաները հնարավոր չէ օգտագործել։ Այցելեք սպասարկման կենտրոն։"</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Սեղմվել է սնուցման կոճակը"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Մատնահետք <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Օգտագործել մատնահետք"</string>
@@ -696,7 +712,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Դեմքը չի երևում։ Հեռախոսը պահեք աչքերի մա­­կարդակում։"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Շատ եք շարժում։ Հեռախոսն անշարժ պահեք։"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Նորից փորձեք։"</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Դեմքը չի հաջողվում ճանաչել։ Նորից փորձեք։"</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Դեմքը չի ճանաչվել։ Նորից փորձեք։"</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Թեթևակի փոխեք գլխի դիրքը"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Նայեք ուղիղ էկրանին"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Նայեք ուղիղ էկրանին"</string>
@@ -807,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Թույլ է տալիս հավելվածին փորձել սենսորների տվյալները 200 Հց-ից բարձր հաճախականության վրա"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"թարմացնել հավելվածն առանց օգտատիրոջ գործողության"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Թույլ է տալիս թարմացնել նախկինում տեղադրված հավելվածները՝ առանց օգտատիրոջ գործողության"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"Թարմացնել այլ հավելվածներին պատկանող կոնտակտների E2EE բանալիների հաստատման կարգավիճակները"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Թույլատրում է հավելվածին թարմացնել այլ հավելվածներին պատկանող կոնտակտների E2EE բանալիների հաստատման կարգավիճակները"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Սահմանել գաղտնաբառի կանոնները"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Կառավարել էկրանի ապակողպման գաղտնաբառերի և PIN կոդերի թույլատրելի երկարությունն ու գրանշանները:"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Վերահսկել էկրանի ապակողպման փորձերը"</string>
@@ -1583,8 +1601,8 @@
     <string name="storage_internal" msgid="8490227947584914460">"Ներքին ընդհանուր կրիչ"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"SD քարտ"</string>
     <string name="storage_sd_card_label" msgid="7526153141147470509">"SD քարտ <xliff:g id="MANUFACTURER">%s</xliff:g>-ից"</string>
-    <string name="storage_usb_drive" msgid="448030813201444573">"USB սարքավար"</string>
-    <string name="storage_usb_drive_label" msgid="6631740655876540521">"USB սարքավար <xliff:g id="MANUFACTURER">%s</xliff:g>-ից"</string>
+    <string name="storage_usb_drive" msgid="448030813201444573">"USB կրիչ"</string>
+    <string name="storage_usb_drive_label" msgid="6631740655876540521">"USB կրիչ <xliff:g id="MANUFACTURER">%s</xliff:g>-ից"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB կրիչ"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"Խմբագրել"</string>
     <string name="data_usage_warning_title" msgid="9034893717078325845">"Զգուշացում թրաֆիկի օգտագործման մասին"</string>
@@ -1906,6 +1924,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Շաբաթ-կիրակի"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Միջոցառում"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Քնի ժամանակ"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Կառավարվում է <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի կողմից"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Միացված է"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Անջատված է"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>-ն անջատում է որոշ ձայներ"</string>
@@ -1925,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Հաստատված է"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Ընդարձակել"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Կոծկել"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Ծալված է"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Ծավալված է"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"Կոծկել/Ընդարձակել"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB արտաքին միացք"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1965,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Վերսկսե՞լ աշխ. հավելվածները"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Վերսկսել"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Արտակարգ իրավիճակ"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Կարգավորեք էկրանի կողպումը"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Կարգավորել էկրանի կողպումը"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Մասնավոր տարածքն օգտագործելու համար այս սարքում կարգավորեք էկրանի կողպումը"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Հավելվածը հասանելի չէ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածն այս պահին հասանելի չէ։"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>՝ անհասանելի է"</string>
@@ -2341,8 +2365,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Չհաջողվեց հայելապատճենել էկրանին"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Օգտագործեք այլ մալուխ և նորից փորձեք"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Ձեր սարքը գերտաքացել է և չի կարող հայելապատճենել էկրանը, մինչև ջերմաստիճանը չնվազի"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Մալուխը կարող է համատեղելի չլինել էկրանների հետ"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Հնարավոր է՝ USB-C մալուխը սխալ է միացված էկրանին"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen-ը միացված է"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածն օգտագործում է երկու էկրանները"</string>
@@ -2366,4 +2388,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Աշխատանքային 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Փորձնական"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Ընդհանուր"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Ավտոմատ միացել է արբանյակին"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Դուք կարող եք ուղարկել և ստանալ հաղորդագրություններ՝ առանց բջջային կամ Wi-Fi կապի"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Բացել Messages-ը"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ինչպես է դա աշխատում"</string>
 </resources>

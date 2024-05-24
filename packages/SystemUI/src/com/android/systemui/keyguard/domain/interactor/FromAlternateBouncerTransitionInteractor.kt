@@ -17,20 +17,21 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.util.kotlin.Utils.Companion.toQuad
-import com.android.systemui.util.kotlin.Utils.Companion.toQuint
-import com.android.systemui.util.kotlin.sample
+import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
+import com.android.systemui.util.kotlin.sample as sampleUtil
 import com.android.wm.shell.animation.Interpolators
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
@@ -39,38 +40,43 @@ class FromAlternateBouncerTransitionInteractor
 @Inject
 constructor(
     override val transitionRepository: KeyguardTransitionRepository,
-    override val transitionInteractor: KeyguardTransitionInteractor,
-    @Application private val scope: CoroutineScope,
+    transitionInteractor: KeyguardTransitionInteractor,
+    @Background private val scope: CoroutineScope,
+    @Background bgDispatcher: CoroutineDispatcher,
+    @Main mainDispatcher: CoroutineDispatcher,
     private val keyguardInteractor: KeyguardInteractor,
+    private val communalInteractor: CommunalInteractor,
     private val powerInteractor: PowerInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.ALTERNATE_BOUNCER,
+        transitionInteractor = transitionInteractor,
+        mainDispatcher = mainDispatcher,
+        bgDispatcher = bgDispatcher,
     ) {
 
     override fun start() {
         listenForAlternateBouncerToGone()
-        listenForAlternateBouncerToLockscreenAodOrDozing()
+        listenForAlternateBouncerToLockscreenHubAodOrDozing()
         listenForAlternateBouncerToPrimaryBouncer()
         listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
-    private fun listenForAlternateBouncerToLockscreenAodOrDozing() {
+    private fun listenForAlternateBouncerToLockscreenHubAodOrDozing() {
         scope.launch {
             keyguardInteractor.alternateBouncerShowing
                 // Add a slight delay, as alternateBouncer and primaryBouncer showing event changes
                 // will arrive with a small gap in time. This prevents a transition to LOCKSCREEN
                 // happening prematurely.
-                .onEach { delay(50) }
-                .sample(
-                    combine(
-                        keyguardInteractor.primaryBouncerShowing,
-                        transitionInteractor.startedKeyguardTransitionStep,
-                        powerInteractor.isAwake,
-                        keyguardInteractor.isAodAvailable,
-                        ::toQuad
-                    ),
-                    ::toQuint
+                // This should eventually be removed in favor of
+                // [KeyguardTransitionInteractor#startDismissKeyguardTransition]
+                .onEach { delay(150L) }
+                .sampleCombine(
+                    keyguardInteractor.primaryBouncerShowing,
+                    startedKeyguardTransitionStep,
+                    powerInteractor.isAwake,
+                    keyguardInteractor.isAodAvailable,
+                    communalInteractor.isIdleOnCommunal
                 )
                 .collect {
                     (
@@ -78,7 +84,8 @@ constructor(
                         isPrimaryBouncerShowing,
                         lastStartedTransitionStep,
                         isAwake,
-                        isAodAvailable) ->
+                        isAodAvailable,
+                        isIdleOnCommunal) ->
                     if (
                         !isAlternateBouncerShowing &&
                             !isPrimaryBouncerShowing &&
@@ -92,7 +99,11 @@ constructor(
                                     KeyguardState.DOZING
                                 }
                             } else {
-                                KeyguardState.LOCKSCREEN
+                                if (isIdleOnCommunal) {
+                                    KeyguardState.GLANCEABLE_HUB
+                                } else {
+                                    KeyguardState.LOCKSCREEN
+                                }
                             }
                         startTransitionTo(to)
                     }
@@ -103,7 +114,7 @@ constructor(
     private fun listenForAlternateBouncerToGone() {
         scope.launch {
             keyguardInteractor.isKeyguardGoingAway
-                .sample(transitionInteractor.finishedKeyguardState, ::Pair)
+                .sampleUtil(finishedKeyguardState, ::Pair)
                 .collect { (isKeyguardGoingAway, keyguardState) ->
                     if (isKeyguardGoingAway && keyguardState == KeyguardState.ALTERNATE_BOUNCER) {
                         startTransitionTo(KeyguardState.GONE)
@@ -115,7 +126,7 @@ constructor(
     private fun listenForAlternateBouncerToPrimaryBouncer() {
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
-                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .sampleUtil(startedKeyguardTransitionStep, ::Pair)
                 .collect { (isPrimaryBouncerShowing, startedKeyguardState) ->
                     if (
                         isPrimaryBouncerShowing &&
@@ -139,7 +150,11 @@ constructor(
     }
 
     companion object {
+        const val TAG = "FromAlternateBouncerTransitionInteractor"
         val TRANSITION_DURATION_MS = 300.milliseconds
         val TO_GONE_DURATION = 500.milliseconds
+        val TO_AOD_DURATION = TRANSITION_DURATION_MS
+        val TO_PRIMARY_BOUNCER_DURATION = TRANSITION_DURATION_MS
+        val TO_DOZING_DURATION = TRANSITION_DURATION_MS
     }
 }

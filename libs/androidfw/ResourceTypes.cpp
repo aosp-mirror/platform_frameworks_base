@@ -54,6 +54,8 @@
 #define INT32_MAX ((int32_t)(2147483647))
 #endif
 
+using namespace std::literals;
+
 namespace android {
 
 #if defined(_WIN32)
@@ -237,12 +239,24 @@ void Res_png_9patch::serialize(const Res_png_9patch& patch, const int32_t* xDivs
     fill9patchOffsets(reinterpret_cast<Res_png_9patch*>(outData));
 }
 
-bool IsFabricatedOverlay(const std::string& path) {
-  return IsFabricatedOverlay(path.c_str());
+bool IsFabricatedOverlayName(std::string_view path) {
+  static constexpr auto suffixFrro = ".frro"sv;
+  static constexpr auto suffixIdmap = ".frro@idmap"sv;
+
+  return (path.size() > suffixFrro.size() && path.ends_with(suffixFrro))
+        || (path.size() > suffixIdmap.size() && path.ends_with(suffixIdmap));
 }
 
-bool IsFabricatedOverlay(const char* path) {
-  auto fd = base::unique_fd(base::utf8::open(path, O_RDONLY|O_CLOEXEC));
+bool IsFabricatedOverlay(std::string_view path) {
+  if (!IsFabricatedOverlayName(path)) {
+    return false;
+  }
+  std::string path_copy;
+  if (path[path.size()] != '\0') {
+    path_copy.assign(path);
+    path = path_copy;
+  }
+  auto fd = base::unique_fd(base::utf8::open(path.data(), O_RDONLY|O_CLOEXEC|O_BINARY));
   if (fd < 0) {
     return false;
   }
@@ -447,15 +461,19 @@ Res_png_9patch* Res_png_9patch::deserialize(void* inData)
 // --------------------------------------------------------------------
 // --------------------------------------------------------------------
 
-ResStringPool::ResStringPool()
-    : mError(NO_INIT), mOwnedData(NULL), mHeader(NULL), mCache(NULL)
-{
+ResStringPool::ResStringPool() : mError(NO_INIT), mOwnedData(NULL), mHeader(NULL), mCache(NULL) {
 }
 
-ResStringPool::ResStringPool(const void* data, size_t size, bool copyData)
-    : mError(NO_INIT), mOwnedData(NULL), mHeader(NULL), mCache(NULL)
-{
-    setTo(data, size, copyData);
+ResStringPool::ResStringPool(bool optimize_name_lookups) : ResStringPool() {
+  if (optimize_name_lookups) {
+    mIndexLookupCache.emplace();
+  }
+}
+
+ResStringPool::ResStringPool(const void* data, size_t size, bool copyData,
+                             bool optimize_name_lookups)
+    : ResStringPool(optimize_name_lookups) {
+  setTo(data, size, copyData);
 }
 
 ResStringPool::~ResStringPool()
@@ -683,6 +701,14 @@ status_t ResStringPool::setTo(incfs::map_ptr<void> data, size_t size, bool copyD
         mStylePoolSize = 0;
     }
 
+    if (mIndexLookupCache) {
+      if ((mHeader->flags & ResStringPool_header::UTF8_FLAG) != 0) {
+        mIndexLookupCache->first.reserve(mHeader->stringCount);
+      } else {
+        mIndexLookupCache->second.reserve(mHeader->stringCount);
+      }
+    }
+
     return (mError=NO_ERROR);
 }
 
@@ -707,6 +733,10 @@ void ResStringPool::uninit()
     if (mOwnedData) {
         free(mOwnedData);
         mOwnedData = NULL;
+    }
+    if (mIndexLookupCache) {
+      mIndexLookupCache->first.clear();
+      mIndexLookupCache->second.clear();
     }
 }
 
@@ -824,11 +854,11 @@ base::expected<StringPiece16, NullOrIOError> ResStringPool::stringAt(size_t idx)
 
                 // encLen must be less than 0x7FFF due to encoding.
                 if ((uint32_t)(u8str+*u8len-strings) < mStringPoolSize) {
-                    AutoMutex lock(mDecodeLock);
+                  AutoMutex lock(mCachesLock);
 
-                    if (mCache != NULL && mCache[idx] != NULL) {
-                        return StringPiece16(mCache[idx], *u16len);
-                    }
+                  if (mCache != NULL && mCache[idx] != NULL) {
+                    return StringPiece16(mCache[idx], *u16len);
+                  }
 
                     // Retrieve the actual length of the utf8 string if the
                     // encoded length was truncated
@@ -1093,12 +1123,24 @@ base::expected<size_t, NullOrIOError> ResStringPool::indexOfString(const char16_
             // block, start searching at the back.
             String8 str8(str, strLen);
             const size_t str8Len = str8.size();
+            std::optional<AutoMutex> cacheLock;
+            if (mIndexLookupCache) {
+              cacheLock.emplace(mCachesLock);
+              if (auto it = mIndexLookupCache->first.find(std::string_view(str8));
+                  it != mIndexLookupCache->first.end()) {
+                return it->second;
+              }
+            }
+
             for (int i=mHeader->stringCount-1; i>=0; i--) {
                 const base::expected<StringPiece, NullOrIOError> s = string8At(i);
                 if (UNLIKELY(IsIOError(s))) {
                     return base::unexpected(s.error());
                 }
                 if (s.has_value()) {
+                  if (mIndexLookupCache) {
+                    mIndexLookupCache->first.insert({*s, i});
+                  }
                     if (kDebugStringPoolNoisy) {
                         ALOGI("Looking at %s, i=%d\n", s->data(), i);
                     }
@@ -1151,20 +1193,32 @@ base::expected<size_t, NullOrIOError> ResStringPool::indexOfString(const char16_
             // most often this happens because we want to get IDs for style
             // span tags; since those always appear at the end of the string
             // block, start searching at the back.
+            std::optional<AutoMutex> cacheLock;
+            if (mIndexLookupCache) {
+              cacheLock.emplace(mCachesLock);
+              if (auto it = mIndexLookupCache->second.find({str, strLen});
+                  it != mIndexLookupCache->second.end()) {
+                return it->second;
+              }
+            }
             for (int i=mHeader->stringCount-1; i>=0; i--) {
                 const base::expected<StringPiece16, NullOrIOError> s = stringAt(i);
                 if (UNLIKELY(IsIOError(s))) {
                     return base::unexpected(s.error());
                 }
                 if (kDebugStringPoolNoisy) {
-                    ALOGI("Looking at %s, i=%d\n", String8(s->data(), s->size()).c_str(), i);
+                  ALOGI("Looking16 at %s, i=%d\n", String8(s->data(), s->size()).c_str(), i);
                 }
-                if (s.has_value() && strLen == s->size() &&
-                        strzcmp16(s->data(), s->size(), str, strLen) == 0) {
+                if (s.has_value()) {
+                  if (mIndexLookupCache) {
+                    mIndexLookupCache->second.insert({*s, i});
+                  }
+                  if (strLen == s->size() && strzcmp16(s->data(), s->size(), str, strLen) == 0) {
                     if (kDebugStringPoolNoisy) {
-                        ALOGI("MATCH!");
+                      ALOGI("MATCH16!");
                     }
                     return i;
+                  }
                 }
             }
         }
@@ -7279,9 +7333,6 @@ class IdmapTypeMapping {
 public:
     void add(uint32_t targetResId, uint32_t overlayResId) {
         uint8_t targetTypeId = Res_GETTYPE(targetResId);
-        if (mData.find(targetTypeId) == mData.end()) {
-            mData.emplace(targetTypeId, std::set<std::pair<uint32_t, uint32_t>>());
-        }
         auto& entries = mData[targetTypeId];
         entries.insert(std::make_pair(targetResId, overlayResId));
     }

@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.permission.flags.Flags.FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.Surface.ROTATION_0;
@@ -52,7 +53,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doThrow;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -91,6 +91,7 @@ import android.os.IBinder;
 import android.os.InputConfig;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.util.ArraySet;
 import android.util.MergedConfiguration;
 import android.view.Gravity;
@@ -103,6 +104,7 @@ import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.inputmethod.ImeTracker;
 import android.window.ClientWindowFrames;
 import android.window.ITaskFragmentOrganizer;
 import android.window.TaskFragmentOrganizer;
@@ -110,7 +112,9 @@ import android.window.TaskFragmentOrganizer;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.testutils.StubTransaction;
+import com.android.server.wm.SensitiveContentPackages.PackageInfo;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -123,13 +127,18 @@ import java.util.List;
 /**
  * Tests for the {@link WindowState} class.
  *
- * Build/Install/Run:
+ * <p> Build/Install/Run:
  * atest WmTests:WindowStateTests
  */
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class WindowStateTests extends WindowTestsBase {
+
+    @After
+    public void tearDown() {
+        mWm.mSensitiveContentPackages.clearBlockedApps();
+    }
 
     @Test
     public void testIsParentWindowHidden() {
@@ -228,6 +237,26 @@ public class WindowStateTests extends WindowTestsBase {
         assertTrue(window.isOnScreen());
         window.hide(false /* doAnimation */, false /* requestAnim */);
         assertFalse(window.isOnScreen());
+
+        // Verifies that a window without animation can be hidden even if its parent is animating.
+        window.show(false /* doAnimation */, false /* requestAnim */);
+        assertTrue(window.isVisibleByPolicy());
+        window.getParent().startAnimation(mTransaction, mock(AnimationAdapter.class),
+                false /* hidden */, SurfaceAnimator.ANIMATION_TYPE_TOKEN_TRANSFORM);
+        window.mAttrs.windowAnimations = 0;
+        window.hide(true /* doAnimation */, true /* requestAnim */);
+        assertFalse(window.isSelfAnimating(0, SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION));
+        assertFalse(window.isVisibleByPolicy());
+        assertFalse(window.isOnScreen());
+
+        // Verifies that a window with animation can be hidden after the hide animation is finished.
+        window.show(false /* doAnimation */, false /* requestAnim */);
+        window.mAttrs.windowAnimations = android.R.style.Animation_Dialog;
+        window.hide(true /* doAnimation */, true /* requestAnim */);
+        assertTrue(window.isSelfAnimating(0, SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION));
+        assertTrue(window.isVisibleByPolicy());
+        window.cancelAnimation();
+        assertFalse(window.isVisibleByPolicy());
     }
 
     @Test
@@ -368,28 +397,26 @@ public class WindowStateTests extends WindowTestsBase {
         firstWindow.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
         secondWindow.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 
-        final WindowState.PowerManagerWrapper powerManagerWrapper =
-                mSystemServicesTestRule.getPowerManagerWrapper();
-        reset(powerManagerWrapper);
+        final var powerManager = mWm.mPowerManager;
+        clearInvocations(powerManager);
         firstWindow.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(powerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
+        verify(powerManager).wakeUp(anyLong(), anyInt(), anyString());
 
-        reset(powerManagerWrapper);
+        clearInvocations(powerManager);
         secondWindow.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(powerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
+        verify(powerManager).wakeUp(anyLong(), anyInt(), anyString());
     }
 
     private void testPrepareWindowToDisplayDuringRelayout(WindowState appWindow,
             boolean expectedWakeupCalled, boolean expectedCurrentLaunchCanTurnScreenOn) {
-        final WindowState.PowerManagerWrapper powerManagerWrapper =
-                mSystemServicesTestRule.getPowerManagerWrapper();
-        reset(powerManagerWrapper);
+        final var powerManager = mWm.mPowerManager;
+        clearInvocations(powerManager);
         appWindow.prepareWindowToDisplayDuringRelayout(false /* wasVisible */);
 
         if (expectedWakeupCalled) {
-            verify(powerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
+            verify(powerManager).wakeUp(anyLong(), anyInt(), anyString());
         } else {
-            verify(powerManagerWrapper, never()).wakeUp(anyLong(), anyInt(), anyString());
+            verify(powerManager, never()).wakeUp(anyLong(), anyInt(), anyString());
         }
         // If wakeup is expected to be called, the currentLaunchCanTurnScreenOn should be false
         // because the state will be consumed.
@@ -817,7 +844,7 @@ public class WindowStateTests extends WindowTestsBase {
     @Test
     public void testEmbeddedActivityResizing_clearAllDrawn() {
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
-        mAtm.mTaskFragmentOrganizerController.registerOrganizer(
+        registerTaskFragmentOrganizer(
                 ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder()));
         final Task task = createTask(mDisplayContent);
         final TaskFragment embeddedTf = createTaskFragmentWithEmbeddedActivity(task, organizer);
@@ -1073,7 +1100,7 @@ public class WindowStateTests extends WindowTestsBase {
         mDisplayContent.setImeInputTarget(app);
         app.setRequestedVisibleTypes(ime(), ime());
         assertTrue(mDisplayContent.shouldImeAttachedToApp());
-        controller.getImeSourceProvider().scheduleShowImePostLayout(app, null /* statsToken */);
+        controller.getImeSourceProvider().scheduleShowImePostLayout(app, ImeTracker.Token.empty());
         controller.getImeSourceProvider().getSource().setVisible(true);
         controller.updateAboveInsetsState(false);
 
@@ -1111,7 +1138,7 @@ public class WindowStateTests extends WindowTestsBase {
         mDisplayContent.setImeInputTarget(app);
         app.setRequestedVisibleTypes(ime(), ime());
         assertTrue(mDisplayContent.shouldImeAttachedToApp());
-        controller.getImeSourceProvider().scheduleShowImePostLayout(app, null /* statsToken */);
+        controller.getImeSourceProvider().scheduleShowImePostLayout(app, ImeTracker.Token.empty());
         controller.getImeSourceProvider().getSource().setVisible(true);
         controller.updateAboveInsetsState(false);
 
@@ -1374,6 +1401,47 @@ public class WindowStateTests extends WindowTestsBase {
         assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
         assertThat(listener.mIsRemoved).isTrue();
         assertThat(listener.mIsVisibleForImeTargetOverlay).isFalse();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION)
+    public void testIsSecureLocked_sensitiveContentProtectionManagerEnabled() {
+        String testPackage = "test";
+        int ownerId1 = 20;
+        int ownerId2 = 21;
+        final WindowState window1 = createWindow(null, TYPE_APPLICATION, "window1", ownerId1);
+        final WindowState window2 = createWindow(null, TYPE_APPLICATION, "window2", ownerId2);
+
+        // Setting packagename for targeted feature
+        window1.mAttrs.packageName = testPackage;
+        window2.mAttrs.packageName = testPackage;
+
+        PackageInfo blockedPackage = new PackageInfo(testPackage, ownerId1);
+        ArraySet<PackageInfo> blockedPackages = new ArraySet();
+        blockedPackages.add(blockedPackage);
+        mWm.mSensitiveContentPackages.addBlockScreenCaptureForApps(blockedPackages);
+
+        assertTrue(window1.isSecureLocked());
+        assertFalse(window2.isSecureLocked());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION)
+    public void testIsSecureLocked_sensitiveContentBlockOrClearScreenCaptureForApp() {
+        String testPackage = "test";
+        int ownerId = 20;
+        final WindowState window = createWindow(null, TYPE_APPLICATION, "window", ownerId);
+        window.mAttrs.packageName = testPackage;
+        assertFalse(window.isSecureLocked());
+
+        PackageInfo blockedPackage = new PackageInfo(testPackage, ownerId);
+        ArraySet<PackageInfo> blockedPackages = new ArraySet();
+        blockedPackages.add(blockedPackage);
+        mWm.mSensitiveContentPackages.addBlockScreenCaptureForApps(blockedPackages);
+        assertTrue(window.isSecureLocked());
+
+        mWm.mSensitiveContentPackages.removeBlockScreenCaptureForApps(blockedPackages);
+        assertFalse(window.isSecureLocked());
     }
 
     private static class TestImeTargetChangeListener implements ImeTargetChangeListener {

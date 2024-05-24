@@ -30,6 +30,8 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertThrows;
 
+import android.annotation.NonNull;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateInfo;
 import android.hardware.devicestate.DeviceStateRequest;
 import android.hardware.devicestate.IDeviceStateManagerCallback;
@@ -52,6 +54,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Optional;
@@ -70,7 +73,8 @@ public final class DeviceStateManagerServiceTest {
             new DeviceState(0, "DEFAULT", 0 /* flags */);
     private static final DeviceState OTHER_DEVICE_STATE =
             new DeviceState(1, "OTHER", 0 /* flags */);
-    private static final DeviceState DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP =
+    private static final DeviceState
+            DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP =
             new DeviceState(2, "DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP",
                     DeviceState.FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP /* flags */);
     // A device state that is not reported as being supported for the default test provider.
@@ -959,6 +963,10 @@ public final class DeviceStateManagerServiceTest {
             }
             onComplete.run();
         }
+
+        @Override
+        public void dump(@NonNull PrintWriter writer, @Nullable String[] args) {
+        }
     }
 
     private static final class TestDeviceStateProvider implements DeviceStateProvider {
@@ -1000,6 +1008,10 @@ public final class DeviceStateManagerServiceTest {
 
         public void setState(int identifier) {
             mListener.onStateChanged(identifier);
+        }
+
+        @Override
+        public void dump(@NonNull PrintWriter writer, @Nullable String[] args) {
         }
     }
 

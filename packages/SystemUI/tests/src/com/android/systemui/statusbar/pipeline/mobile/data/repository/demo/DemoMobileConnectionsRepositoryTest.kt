@@ -579,6 +579,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
                 assertThat(conn.carrierName.value)
                     .isEqualTo(NetworkNameModel.SubscriptionDerived("${model.name} ${model.subId}"))
                 assertThat(conn.hasPrioritizedNetworkCapabilities.value).isEqualTo(model.slice)
+                assertThat(conn.isNonTerrestrial.value).isEqualTo(model.ntn)
 
                 // TODO(b/261029387) check these once we start handling them
                 assertThat(conn.isEmergencyOnly.value).isFalse()
@@ -615,7 +616,7 @@ fun validMobileEvent(
     dataType: SignalIcon.MobileIconGroup? = THREE_G,
     subId: Int? = 1,
     carrierId: Int? = UNKNOWN_CARRIER_ID,
-    inflateStrength: Boolean? = false,
+    inflateStrength: Boolean = false,
     activity: Int? = null,
     carrierNetworkChange: Boolean = false,
     roaming: Boolean = false,

@@ -18,16 +18,21 @@ package com.android.systemui.shade
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.shade.data.repository.PrivacyChipRepository
+import com.android.systemui.shade.data.repository.PrivacyChipRepositoryImpl
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.data.repository.ShadeRepositoryImpl
 import com.android.systemui.shade.domain.interactor.BaseShadeInteractor
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorLegacyImpl
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorSceneContainerImpl
+import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractor
+import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractorImpl
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl
 import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl
 import com.android.systemui.shade.domain.interactor.ShadeInteractorSceneContainerImpl
+import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractorImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -53,11 +58,53 @@ abstract class ShadeModule {
 
         @Provides
         @SysUISingleton
+        fun provideShadeController(
+            sceneContainerFlags: SceneContainerFlags,
+            sceneContainerOn: Provider<ShadeControllerSceneImpl>,
+            sceneContainerOff: Provider<ShadeControllerImpl>
+        ): ShadeController {
+            return if (sceneContainerFlags.isEnabled()) {
+                sceneContainerOn.get()
+            } else {
+                sceneContainerOff.get()
+            }
+        }
+
+        @Provides
+        @SysUISingleton
         fun provideShadeAnimationInteractor(
             sceneContainerFlags: SceneContainerFlags,
             sceneContainerOn: Provider<ShadeAnimationInteractorSceneContainerImpl>,
             sceneContainerOff: Provider<ShadeAnimationInteractorLegacyImpl>
         ): ShadeAnimationInteractor {
+            return if (sceneContainerFlags.isEnabled()) {
+                sceneContainerOn.get()
+            } else {
+                sceneContainerOff.get()
+            }
+        }
+
+        @Provides
+        @SysUISingleton
+        fun provideShadeBackActionInteractor(
+            sceneContainerFlags: SceneContainerFlags,
+            sceneContainerOn: Provider<ShadeBackActionInteractorImpl>,
+            sceneContainerOff: Provider<NotificationPanelViewController>
+        ): ShadeBackActionInteractor {
+            return if (sceneContainerFlags.isEnabled()) {
+                sceneContainerOn.get()
+            } else {
+                sceneContainerOff.get()
+            }
+        }
+
+        @Provides
+        @SysUISingleton
+        fun provideShadeLockscreenInteractor(
+            sceneContainerFlags: SceneContainerFlags,
+            sceneContainerOn: Provider<ShadeLockscreenInteractorImpl>,
+            sceneContainerOff: Provider<NotificationPanelViewController>
+        ): ShadeLockscreenInteractor {
             return if (sceneContainerFlags.isEnabled()) {
                 sceneContainerOn.get()
             } else {
@@ -82,5 +129,5 @@ abstract class ShadeModule {
 
     @Binds
     @SysUISingleton
-    abstract fun bindsShadeController(shadeControllerImpl: ShadeControllerImpl): ShadeController
+    abstract fun bindsPrivacyChipRepository(impl: PrivacyChipRepositoryImpl): PrivacyChipRepository
 }

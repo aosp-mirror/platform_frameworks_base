@@ -72,6 +72,8 @@ import java.util.Objects;
     @NonNull
     private final AudioRoutesObserver mAudioRoutesObserver = new AudioRoutesObserver();
 
+    @MediaRoute2Info.SuitabilityStatus private final int mBuiltInSpeakerSuitabilityStatus;
+
     private int mDeviceVolume;
     private MediaRoute2Info mDeviceRoute;
 
@@ -89,6 +91,9 @@ import java.util.Objects;
 
         mAudioManager = audioManager;
         mAudioService = audioService;
+
+        mBuiltInSpeakerSuitabilityStatus =
+                DeviceRouteController.getBuiltInSpeakerSuitabilityStatus(mContext);
 
         AudioRoutesInfo newAudioRoutes = null;
         try {
@@ -165,19 +170,28 @@ import java.util.Objects;
         }
 
         synchronized (this) {
-            return new MediaRoute2Info.Builder(
-                    DEVICE_ROUTE_ID, mContext.getResources().getText(name).toString())
-                    .setVolumeHandling(mAudioManager.isVolumeFixed()
-                            ? MediaRoute2Info.PLAYBACK_VOLUME_FIXED
-                            : MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
-                    .setVolume(mDeviceVolume)
-                    .setVolumeMax(mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
-                    .setType(type)
-                    .addFeature(FEATURE_LIVE_AUDIO)
-                    .addFeature(FEATURE_LIVE_VIDEO)
-                    .addFeature(FEATURE_LOCAL_PLAYBACK)
-                    .setConnectionState(MediaRoute2Info.CONNECTION_STATE_CONNECTED)
-                    .build();
+            MediaRoute2Info.Builder builder =
+                    new MediaRoute2Info.Builder(
+                                    DEVICE_ROUTE_ID,
+                                    mContext.getResources().getText(name).toString())
+                            .setVolumeHandling(
+                                    mAudioManager.isVolumeFixed()
+                                            ? MediaRoute2Info.PLAYBACK_VOLUME_FIXED
+                                            : MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
+                            .setVolume(mDeviceVolume)
+                            .setVolumeMax(
+                                    mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
+                            .setType(type)
+                            .addFeature(FEATURE_LIVE_AUDIO)
+                            .addFeature(FEATURE_LIVE_VIDEO)
+                            .addFeature(FEATURE_LOCAL_PLAYBACK)
+                            .setConnectionState(MediaRoute2Info.CONNECTION_STATE_CONNECTED);
+
+            if (type == TYPE_BUILTIN_SPEAKER) {
+                builder.setSuitabilityStatus(mBuiltInSpeakerSuitabilityStatus);
+            }
+
+            return builder.build();
         }
     }
 

@@ -354,14 +354,17 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
     }
 
     @Test
-    public void getEntryDestinationBounds_reentryStateExists_restoreLastSize() {
+    public void getEntryDestinationBounds_reentryStateExists_restoreProportionalSize() {
         mPipBoundsState.setAspectRatio(DEFAULT_ASPECT_RATIO);
+        final Size maxSize = mSizeSpecSource.getMaxSize(DEFAULT_ASPECT_RATIO);
+        mPipBoundsState.setMaxSize(maxSize.getWidth(), maxSize.getHeight());
         final Rect reentryBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
         reentryBounds.scale(1.25f);
+        mPipBoundsState.setBounds(reentryBounds); // this updates the bounds scale used in reentry
+
         final float reentrySnapFraction = mPipBoundsAlgorithm.getSnapFraction(reentryBounds);
 
-        mPipBoundsState.saveReentryState(
-                new Size(reentryBounds.width(), reentryBounds.height()), reentrySnapFraction);
+        mPipBoundsState.saveReentryState(reentrySnapFraction);
         final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
 
         assertEquals(reentryBounds.width(), destinationBounds.width());
@@ -375,8 +378,7 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
         reentryBounds.offset(0, -100);
         final float reentrySnapFraction = mPipBoundsAlgorithm.getSnapFraction(reentryBounds);
 
-        mPipBoundsState.saveReentryState(
-                new Size(reentryBounds.width(), reentryBounds.height()), reentrySnapFraction);
+        mPipBoundsState.saveReentryState(reentrySnapFraction);
 
         final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
 

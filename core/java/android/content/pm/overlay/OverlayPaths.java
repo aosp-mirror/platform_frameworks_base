@@ -49,6 +49,13 @@ public class OverlayPaths {
     public static class Builder {
         final OverlayPaths mPaths = new OverlayPaths();
 
+        public Builder() {}
+
+        public Builder(@NonNull OverlayPaths base) {
+            mPaths.mResourceDirs.addAll(base.getResourceDirs());
+            mPaths.mOverlayPaths.addAll(base.getOverlayPaths());
+        }
+
         /**
          * Adds a non-APK path to the contents of {@link OverlayPaths#getOverlayPaths()}.
          */

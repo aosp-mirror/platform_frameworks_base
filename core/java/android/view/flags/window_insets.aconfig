@@ -1,0 +1,10 @@
+package: "android.view.flags"
+container: "system"
+
+flag {
+    name: "customizable_window_headers"
+    namespace: "lse_desktop_experience"
+    description: "Flag to control the caption bar appearance and to fit app content in its empty space"
+    bug: "316387515"
+    is_fixed_read_only: true
+}

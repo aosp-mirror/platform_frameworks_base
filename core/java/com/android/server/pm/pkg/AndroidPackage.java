@@ -273,6 +273,13 @@ public interface AndroidPackage {
     String getRestrictedAccountType();
 
     /**
+     * @see R.styleable#AndroidManifestApplication_emergencyInstaller
+     * @hide
+     */
+    @Nullable
+    String getEmergencyInstaller();
+
+    /**
      * @see ApplicationInfo#roundIconRes
      * @see R.styleable#AndroidManifestApplication_roundIcon
      */
@@ -1500,4 +1507,11 @@ public interface AndroidPackage {
      * @hide
      */
     boolean isVisibleToInstantApps();
+
+    /**
+     * @see ApplicationInfo#allowCrossUidActivitySwitchFromBelow
+     * @see R.styleable#AndroidManifestApplication_allowCrossUidActivitySwitchFromBelow
+     * @hide
+     */
+    boolean isAllowCrossUidActivitySwitchFromBelow();
 }

@@ -60,7 +60,7 @@ public class TinyFrameworkClassWithAnnotTest {
         TinyFrameworkClassAnnotations tfc = new TinyFrameworkClassAnnotations();
 
         thrown.expect(RuntimeException.class);
-        thrown.expectMessage("This method is not supported on the host side");
+        thrown.expectMessage("not yet supported");
         tfc.visibleButUsesUnsupportedMethod();
     }
 }

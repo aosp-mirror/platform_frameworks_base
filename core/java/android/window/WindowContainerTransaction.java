@@ -676,18 +676,20 @@ public final class WindowContainerTransaction implements Parcelable {
      *                 This identifies them.
      * @param type     The {@link InsetsType} of the insets source.
      * @param frame    The rectangle area of the insets source.
+     * @param boundingRects The bounding rects within this inset, relative to the |frame|.
      * @hide
      */
     @NonNull
     public WindowContainerTransaction addInsetsSource(
             @NonNull WindowContainerToken receiver,
-            IBinder owner, int index, @InsetsType int type, Rect frame) {
+            IBinder owner, int index, @InsetsType int type, Rect frame, Rect[] boundingRects) {
         final HierarchyOp hierarchyOp =
                 new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER)
                         .setContainer(receiver.asBinder())
                         .setInsetsFrameProvider(new InsetsFrameProvider(owner, index, type)
                                 .setSource(InsetsFrameProvider.SOURCE_ARBITRARY_RECTANGLE)
-                                .setArbitraryRectangle(frame))
+                                .setArbitraryRectangle(frame)
+                                .setBoundingRects(boundingRects))
                         .setInsetsFrameOwner(owner)
                         .build();
         mHierarchyOps.add(hierarchyOp);
@@ -914,6 +916,23 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Defers client-facing configuration changes for activities in `container` until the end of
+     * the transition animation. The configuration will still be applied to the WMCore hierarchy
+     * at the normal time (beginning); so, special consideration must be made for this in the
+     * animation.
+     *
+     * @param container WindowContainerToken who's children should defer config notification.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction deferConfigToTransitionEnd(
+            @NonNull WindowContainerToken container) {
+        final Change change = getOrCreateChange(container.asBinder());
+        change.mConfigAtTransitionEnd = true;
+        return this;
+    }
+
+    /**
      * Merges another WCT into this one.
      * @param transfer When true, this will transfer everything from other potentially leaving
      *                 other in an unusable state. When false, other is left alone, but
@@ -1050,6 +1069,7 @@ public final class WindowContainerTransaction implements Parcelable {
         private Rect mBoundsChangeSurfaceBounds = null;
         @Nullable
         private Rect mRelativeBounds = null;
+        private boolean mConfigAtTransitionEnd = false;
 
         private int mActivityWindowingMode = -1;
         private int mWindowingMode = -1;
@@ -1082,6 +1102,7 @@ public final class WindowContainerTransaction implements Parcelable {
                 mRelativeBounds = new Rect();
                 mRelativeBounds.readFromParcel(in);
             }
+            mConfigAtTransitionEnd = in.readBoolean();
 
             mWindowingMode = in.readInt();
             mActivityWindowingMode = in.readInt();
@@ -1134,6 +1155,8 @@ public final class WindowContainerTransaction implements Parcelable {
                         ? other.mRelativeBounds
                         : new Rect(other.mRelativeBounds);
             }
+            mConfigAtTransitionEnd = mConfigAtTransitionEnd
+                    || other.mConfigAtTransitionEnd;
         }
 
         public int getWindowingMode() {
@@ -1189,6 +1212,11 @@ public final class WindowContainerTransaction implements Parcelable {
                         + "Check CHANGE_DRAG_RESIZING first");
             }
             return mDragResizing;
+        }
+
+        /** Gets whether the config should be sent to the client at the end of the transition. */
+        public boolean getConfigAtTransitionEnd() {
+            return mConfigAtTransitionEnd;
         }
 
         public int getChangeMask() {
@@ -1269,6 +1297,9 @@ public final class WindowContainerTransaction implements Parcelable {
             if ((mChangeMask & CHANGE_RELATIVE_BOUNDS) != 0) {
                 sb.append("relativeBounds:").append(mRelativeBounds).append(",");
             }
+            if (mConfigAtTransitionEnd) {
+                sb.append("configAtTransitionEnd").append(",");
+            }
             sb.append("}");
             return sb.toString();
         }
@@ -1297,6 +1328,7 @@ public final class WindowContainerTransaction implements Parcelable {
             if (mRelativeBounds != null) {
                 mRelativeBounds.writeToParcel(dest, flags);
             }
+            dest.writeBoolean(mConfigAtTransitionEnd);
 
             dest.writeInt(mWindowingMode);
             dest.writeInt(mActivityWindowingMode);

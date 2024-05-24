@@ -65,6 +65,14 @@ public class WebViewClient {
      * {@code true} causes the current WebView to abort loading the URL, while returning
      * {@code false} causes the WebView to continue loading the URL as usual.
      *
+     * <p>This callback is not called for all page navigations. In particular, this is not called
+     * for navigations which the app initiated with {@code loadUrl()}: this callback would not serve
+     * a purpose in this case, because the app already knows about the navigation. This callback
+     * lets the app know about navigations initiated by the web page (such as navigations initiated
+     * by JavaScript code), by the user (such as when the user taps on a link), or by an HTTP
+     * redirect (ex. if {@code loadUrl("foo.com")} redirects to {@code "bar.com"} because of HTTP
+     * 301).
+     *
      * <p class="note"><b>Note:</b> Do not call {@link WebView#loadUrl(String)} with the request's
      * URL and then return {@code true}. This unnecessarily cancels the current load and starts a
      * new load with the same URL. The correct way to continue loading a given URL is to simply

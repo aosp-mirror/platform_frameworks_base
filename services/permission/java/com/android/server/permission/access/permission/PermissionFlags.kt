@@ -347,7 +347,8 @@ object PermissionFlags {
     }
 
     fun isAppOpGranted(flags: Int): Boolean =
-        isPermissionGranted(flags) && !flags.hasBits(APP_OP_REVOKED)
+        isPermissionGranted(flags) && !flags.hasBits(RESTRICTION_REVOKED) &&
+            !flags.hasBits(APP_OP_REVOKED)
 
     fun toApiFlags(flags: Int): Int {
         var apiFlags = 0

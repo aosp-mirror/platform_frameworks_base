@@ -28,7 +28,7 @@ import java.util.Arrays;
 /** @hide */
 public class Cuj {
     @VisibleForTesting
-    public static final int MAX_LENGTH_OF_CUJ_NAME = 80;
+    public static final int MAX_LENGTH_OF_CUJ_NAME = 82;
 
     // Every value must have a corresponding entry in CUJ_STATSD_INTERACTION_TYPE.
     public static final int CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE = 0;
@@ -120,11 +120,14 @@ public class Cuj {
     public static final int CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY = 84;
     public static final int CUJ_PREDICTIVE_BACK_CROSS_TASK = 85;
     public static final int CUJ_PREDICTIVE_BACK_HOME = 86;
-    public static final int CUJ_LAUNCHER_SEARCH_QSB_OPEN = 87;
+    // 87 is reserved - previously assigned to deprecated CUJ_LAUNCHER_SEARCH_QSB_OPEN.
+    public static final int CUJ_BACK_PANEL_ARROW = 88;
+    public static final int CUJ_LAUNCHER_CLOSE_ALL_APPS_BACK = 89;
+    public static final int CUJ_LAUNCHER_SEARCH_QSB_WEB_SEARCH = 90;
 
     // When adding a CUJ, update this and make sure to also update CUJ_TO_STATSD_INTERACTION_TYPE.
     @VisibleForTesting
-    static final int LAST_CUJ = CUJ_LAUNCHER_SEARCH_QSB_OPEN;
+    static final int LAST_CUJ = CUJ_LAUNCHER_SEARCH_QSB_WEB_SEARCH;
 
     /** @hide */
     @IntDef({
@@ -206,7 +209,9 @@ public class Cuj {
             CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY,
             CUJ_PREDICTIVE_BACK_CROSS_TASK,
             CUJ_PREDICTIVE_BACK_HOME,
-            CUJ_LAUNCHER_SEARCH_QSB_OPEN,
+            CUJ_BACK_PANEL_ARROW,
+            CUJ_LAUNCHER_CLOSE_ALL_APPS_BACK,
+            CUJ_LAUNCHER_SEARCH_QSB_WEB_SEARCH,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -298,8 +303,9 @@ public class Cuj {
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PREDICTIVE_BACK_CROSS_ACTIVITY;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_PREDICTIVE_BACK_CROSS_TASK] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PREDICTIVE_BACK_CROSS_TASK;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_PREDICTIVE_BACK_HOME] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PREDICTIVE_BACK_HOME;
-        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_SEARCH_QSB_OPEN] =
-            FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_SEARCH_QSB_OPEN;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_BACK_PANEL_ARROW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__BACK_PANEL_ARROW;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_CLOSE_ALL_APPS_BACK] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_CLOSE_ALL_APPS_BACK;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_SEARCH_QSB_WEB_SEARCH] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_SEARCH_QSB_WEB_SEARCH;
     }
 
     private Cuj() {
@@ -472,8 +478,12 @@ public class Cuj {
                 return "PREDICTIVE_BACK_CROSS_TASK";
             case CUJ_PREDICTIVE_BACK_HOME:
                 return "PREDICTIVE_BACK_HOME";
-            case CUJ_LAUNCHER_SEARCH_QSB_OPEN:
-                return "LAUNCHER_SEARCH_QSB_OPEN";
+            case CUJ_BACK_PANEL_ARROW:
+                return "BACK_PANEL_ARROW";
+            case CUJ_LAUNCHER_CLOSE_ALL_APPS_BACK:
+                return "LAUNCHER_CLOSE_ALL_APPS_BACK";
+            case CUJ_LAUNCHER_SEARCH_QSB_WEB_SEARCH:
+                return "LAUNCHER_SEARCH_QSB_WEB_SEARCH";
         }
         return "UNKNOWN";
     }

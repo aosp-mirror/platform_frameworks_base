@@ -58,9 +58,9 @@ public class PowerStatsAggregatorTest {
 
     @Before
     public void setup() throws ParseException {
-        mHistory = new BatteryStatsHistory(32, 1024,
+        mHistory = new BatteryStatsHistory(1024,
                 mock(BatteryStatsHistory.HistoryStepDetailsCalculator.class), mClock,
-                mMonotonicClock, mock(BatteryStatsHistory.TraceDelegate.class));
+                mMonotonicClock, mock(BatteryStatsHistory.TraceDelegate.class), null);
 
         AggregatedPowerStatsConfig config = new AggregatedPowerStatsConfig();
         config.trackPowerComponent(TEST_POWER_COMPONENT)
@@ -120,7 +120,7 @@ public class PowerStatsAggregatorTest {
         powerStats.uidStats.put(TEST_UID, new long[]{4444});
         mHistory.recordPowerStats(mClock.realtime, mClock.uptime, powerStats);
 
-        mAggregator.aggregatePowerStats(0, 0, stats -> {
+        mAggregator.aggregatePowerStats(0, MonotonicClock.UNDEFINED, stats -> {
             assertThat(mAggregatedStatsCount++).isEqualTo(0);
             assertThat(stats.getStartTime()).isEqualTo(START_TIME);
 
@@ -178,7 +178,7 @@ public class PowerStatsAggregatorTest {
     }
 
     @NonNull
-    private static CharSequence formatDateTime(long timeInMillis) {
+    private static String formatDateTime(long timeInMillis) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         format.getCalendar().setTimeZone(TimeZone.getTimeZone("GMT"));
         return format.format(new Date(timeInMillis));
@@ -220,7 +220,7 @@ public class PowerStatsAggregatorTest {
 
         mHistory.recordBatteryState(mClock.realtime, mClock.uptime, 50, /* plugged */ true);
 
-        mAggregator.aggregatePowerStats(0, 0, stats -> {
+        mAggregator.aggregatePowerStats(0, MonotonicClock.UNDEFINED, stats -> {
             long[] values = new long[1];
 
             PowerComponentAggregatedPowerStats powerComponentStats =

@@ -20,9 +20,10 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.window.TransitionInfo.FLAG_FIRST_CUSTOM;
 
 import android.annotation.IntDef;
+
+import com.android.wm.shell.shared.TransitionUtil;
 
 /** Helper utility class of methods and constants that are available to be imported in Launcher. */
 public class SplitScreenConstants {
@@ -126,7 +127,7 @@ public class SplitScreenConstants {
             WINDOWING_MODE_FREEFORM};
 
     /** Flag applied to a transition change to identify it as a divider bar for animation. */
-    public static final int FLAG_IS_DIVIDER_BAR = FLAG_FIRST_CUSTOM;
+    public static final int FLAG_IS_DIVIDER_BAR = TransitionUtil.FLAG_IS_DIVIDER_BAR;
 
     public static final String splitPositionToString(@SplitPosition int pos) {
         switch (pos) {

@@ -25,39 +25,55 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class SettingsPageProviderRepositoryTest {
     @Test
-    fun getStartPageTest() {
-        val sppRepoEmpty = SettingsPageProviderRepository(emptyList(), emptyList())
+    fun rootPages_empty() {
+        val sppRepoEmpty = SettingsPageProviderRepository(emptyList())
+
         assertThat(sppRepoEmpty.getDefaultStartPage()).isEqualTo("")
         assertThat(sppRepoEmpty.getAllRootPages()).isEmpty()
-
-        val nullPage = NullPageProvider.createSettingsPage()
-        val sppRepoNull =
-            SettingsPageProviderRepository(emptyList(), listOf(nullPage))
-        assertThat(sppRepoNull.getDefaultStartPage()).isEqualTo("NULL")
-        assertThat(sppRepoNull.getAllRootPages()).contains(nullPage)
-
-        val rootPage1 = createSettingsPage(sppName = "Spp1", displayName = "Spp1")
-        val rootPage2 = createSettingsPage(sppName = "Spp2", displayName = "Spp2")
-        val sppRepo = SettingsPageProviderRepository(emptyList(), listOf(rootPage1, rootPage2))
-        val allRoots = sppRepo.getAllRootPages()
-        assertThat(sppRepo.getDefaultStartPage()).isEqualTo("Spp1")
-        assertThat(allRoots.size).isEqualTo(2)
-        assertThat(allRoots).contains(rootPage1)
-        assertThat(allRoots).contains(rootPage2)
     }
 
     @Test
-    fun getProviderTest() {
-        val sppRepoEmpty = SettingsPageProviderRepository(emptyList(), emptyList())
+    fun rootPages_single() {
+        val nullPage = NullPageProvider.createSettingsPage()
+
+        val sppRepoNull = SettingsPageProviderRepository(
+            allPageProviders = emptyList(),
+            rootPages = listOf(nullPage),
+        )
+
+        assertThat(sppRepoNull.getDefaultStartPage()).isEqualTo("NULL")
+        assertThat(sppRepoNull.getAllRootPages()).containsExactly(nullPage)
+    }
+
+    @Test
+    fun rootPages_twoPages() {
+        val rootPage1 = createSettingsPage(sppName = "Spp1", displayName = "Spp1")
+        val rootPage2 = createSettingsPage(sppName = "Spp2", displayName = "Spp2")
+
+        val sppRepo = SettingsPageProviderRepository(
+            allPageProviders = emptyList(),
+            rootPages = listOf(rootPage1, rootPage2),
+        )
+
+        assertThat(sppRepo.getDefaultStartPage()).isEqualTo("Spp1")
+        assertThat(sppRepo.getAllRootPages()).containsExactly(rootPage1, rootPage2)
+    }
+
+    @Test
+    fun getProviderOrNull_empty() {
+        val sppRepoEmpty = SettingsPageProviderRepository(emptyList())
         assertThat(sppRepoEmpty.getAllProviders()).isEmpty()
         assertThat(sppRepoEmpty.getProviderOrNull("Spp")).isNull()
+    }
 
+    @Test
+    fun getProviderOrNull_single() {
         val sppRepo = SettingsPageProviderRepository(listOf(
             object : SettingsPageProvider {
                 override val name = "Spp"
             }
-        ), emptyList())
-        assertThat(sppRepo.getAllProviders().size).isEqualTo(1)
+        ))
+        assertThat(sppRepo.getAllProviders()).hasSize(1)
         assertThat(sppRepo.getProviderOrNull("Spp")).isNotNull()
         assertThat(sppRepo.getProviderOrNull("SppUnknown")).isNull()
     }

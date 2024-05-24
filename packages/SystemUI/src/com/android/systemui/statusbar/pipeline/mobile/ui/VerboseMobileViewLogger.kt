@@ -59,7 +59,7 @@ constructor(
                 str1 = parentView.getIdForLogging()
                 int1 = subId
                 int2 = icon.level
-                bool1 = icon.showExclamationMark
+                bool1 = if (icon is SignalIconModel.Cellular) icon.showExclamationMark else false
             },
             {
                 "Binder[subId=$int1, viewId=$str1] received new signal icon: " +

@@ -18,11 +18,13 @@ package com.android.wallpaperbackup;
 
 import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
+import static android.app.WallpaperManager.ORIENTATION_UNKNOWN;
 
 import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_INELIGIBLE;
 import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_NO_METADATA;
 import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_NO_WALLPAPER;
 import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_QUOTA_EXCEEDED;
+import static com.android.window.flags.Flags.multiCrop;
 
 import android.app.AppGlobals;
 import android.app.WallpaperManager;
@@ -43,7 +45,9 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -55,6 +59,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Backs up and restores wallpaper and metadata related to it.
@@ -432,6 +437,27 @@ public class WallpaperBackupAgent extends BackupAgent {
     private void restoreFromStage(File stage, File info, String hintTag, int which)
             throws IOException {
         if (stage.exists()) {
+            if (multiCrop()) {
+                SparseArray<Rect> cropHints = parseCropHints(info, hintTag);
+                if (cropHints != null) {
+                    Slog.i(TAG, "Got restored wallpaper; applying which=" + which
+                            + "; cropHints = " + cropHints);
+                    try (FileInputStream in = new FileInputStream(stage)) {
+                        mWallpaperManager.setStreamWithCrops(in, cropHints, true, which);
+                    }
+                    // And log the success
+                    if ((which & FLAG_SYSTEM) > 0) {
+                        mEventLogger.onSystemImageWallpaperRestored();
+                    }
+                    if ((which & FLAG_LOCK) > 0) {
+                        mEventLogger.onLockImageWallpaperRestored();
+                    }
+                } else {
+                    logRestoreError(which, ERROR_NO_METADATA);
+                }
+                return;
+            }
+
             // Parse the restored info file to find the crop hint.  Note that this currently
             // relies on a priori knowledge of the wallpaper info file schema.
             Rect cropHint = parseCropHint(info, hintTag);
@@ -499,6 +525,47 @@ public class WallpaperBackupAgent extends BackupAgent {
         }
 
         return cropHint;
+    }
+
+    private SparseArray<Rect> parseCropHints(File wallpaperInfo, String sectionTag) {
+        SparseArray<Rect> cropHints = new SparseArray<>();
+        try (FileInputStream stream = new FileInputStream(wallpaperInfo)) {
+            XmlPullParser parser = Xml.resolvePullParser(stream);
+            int type;
+            do {
+                type = parser.next();
+                if (type != XmlPullParser.START_TAG) continue;
+                String tag = parser.getName();
+                if (!sectionTag.equals(tag)) continue;
+                for (Pair<Integer, String> pair: List.of(
+                        new Pair<>(WallpaperManager.PORTRAIT, "Portrait"),
+                        new Pair<>(WallpaperManager.LANDSCAPE, "Landscape"),
+                        new Pair<>(WallpaperManager.SQUARE_PORTRAIT, "SquarePortrait"),
+                        new Pair<>(WallpaperManager.SQUARE_LANDSCAPE, "SquareLandscape"))) {
+                    Rect cropHint = new Rect(
+                            getAttributeInt(parser, "cropLeft" + pair.second, 0),
+                            getAttributeInt(parser, "cropTop" + pair.second, 0),
+                            getAttributeInt(parser, "cropRight" + pair.second, 0),
+                            getAttributeInt(parser, "cropBottom" + pair.second, 0));
+                    if (!cropHint.isEmpty()) cropHints.put(pair.first, cropHint);
+                }
+                if (cropHints.size() == 0) {
+                    // migration case: the crops per screen orientation are not specified.
+                    // use the old attributes to restore the crop for one screen orientation.
+                    Rect cropHint = new Rect(
+                            getAttributeInt(parser, "cropLeft", 0),
+                            getAttributeInt(parser, "cropTop", 0),
+                            getAttributeInt(parser, "cropRight", 0),
+                            getAttributeInt(parser, "cropBottom", 0));
+                    if (!cropHint.isEmpty()) cropHints.put(ORIENTATION_UNKNOWN, cropHint);
+                }
+            } while (type != XmlPullParser.END_DOCUMENT);
+        } catch (Exception e) {
+            // Whoops; can't process the info file at all.  Report failure.
+            Slog.w(TAG, "Failed to parse restored crops: " + e.getMessage());
+            return null;
+        }
+        return cropHints;
     }
 
     private ComponentName parseWallpaperComponent(File wallpaperInfo, String sectionTag) {

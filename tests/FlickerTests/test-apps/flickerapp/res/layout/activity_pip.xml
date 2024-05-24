@@ -27,6 +27,15 @@
          where things are arranged differently and to circle back up to the top once we reach the
          bottom. -->
 
+    <!-- View used for testing sourceRectHint. -->
+    <View
+        android:id="@+id/source_rect"
+        android:layout_width="320dp"
+        android:layout_height="180dp"
+        android:visibility="gone"
+        android:background="@android:color/holo_green_light"
+        />
+
     <Button
         android:id="@+id/enter_pip"
         android:layout_width="wrap_content"
@@ -112,6 +121,13 @@
             android:text="Tall [1:2]"
             android:onClick="onRatioSelected"/>
     </RadioGroup>
+
+    <Button
+        android:id="@+id/set_source_rect_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Set SourceRectHint"
+        android:onClick="setSourceRectHint"/>
 
     <TextView
         android:layout_width="wrap_content"

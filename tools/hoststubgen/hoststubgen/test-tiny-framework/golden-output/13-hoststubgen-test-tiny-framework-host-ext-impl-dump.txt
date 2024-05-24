@@ -4226,6 +4226,417 @@ RuntimeVisibleAnnotations:
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestWholeClassStub
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/C1.class
+  Compiled from "C1.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.C1
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/C1
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 2
+  private static {};
+    descriptor: ()V
+    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
+    Code:
+      stack=2, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/subclasstest/C1
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
+         x: return
+}
+SourceFile: "C1.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/C2.class
+  Compiled from "C2.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.C2 extends com.android.hoststubgen.test.tinyframework.subclasstest.C1
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/C2
+  super_class: #x                         // com/android/hoststubgen/test/tinyframework/subclasstest/C1
+  interfaces: 0, fields: 0, methods: 1, attributes: 2
+  private static {};
+    descriptor: ()V
+    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
+    Code:
+      stack=2, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/subclasstest/C2
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
+         x: return
+}
+SourceFile: "C2.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/C3.class
+  Compiled from "C3.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.C3 extends com.android.hoststubgen.test.tinyframework.subclasstest.C2
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/C3
+  super_class: #x                         // com/android/hoststubgen/test/tinyframework/subclasstest/C2
+  interfaces: 0, fields: 0, methods: 1, attributes: 2
+  private static {};
+    descriptor: ()V
+    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
+    Code:
+      stack=2, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/subclasstest/C3
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
+         x: return
+}
+SourceFile: "C3.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/CA.class
+  Compiled from "CA.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.CA
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/CA
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 2
+  private static {};
+    descriptor: ()V
+    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
+    Code:
+      stack=2, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/subclasstest/CA
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
+         x: return
+}
+SourceFile: "CA.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/CB.class
+  Compiled from "CB.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.CB
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/CB
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 2
+  private static {};
+    descriptor: ()V
+    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
+    Code:
+      stack=2, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/subclasstest/CB
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
+         x: return
+}
+SourceFile: "CB.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_C1.class
+  Compiled from "Class_C1.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_C1 extends com.android.hoststubgen.test.tinyframework.subclasstest.C1
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_C1
+  super_class: #x                         // com/android/hoststubgen/test/tinyframework/subclasstest/C1
+  interfaces: 0, fields: 0, methods: 1, attributes: 2
+  private static {};
+    descriptor: ()V
+    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
+    Code:
+      stack=2, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/subclasstest/Class_C1
+         x: ldc           #x                  // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
+         x: return
+}
+SourceFile: "Class_C1.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_C2.class
+  Compiled from "Class_C2.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_C2 extends com.android.hoststubgen.test.tinyframework.subclasstest.C2
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_C2
+  super_class: #x                         // com/android/hoststubgen/test/tinyframework/subclasstest/C2
+  interfaces: 0, fields: 0, methods: 1, attributes: 2
+  private static {};
+    descriptor: ()V
+    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
+    Code:
+      stack=2, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/subclasstest/Class_C2
+         x: ldc           #x                  // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
+         x: return
+}
+SourceFile: "Class_C2.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_C3.class
+  Compiled from "Class_C3.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_C3 extends com.android.hoststubgen.test.tinyframework.subclasstest.C3
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_C3
+  super_class: #x                         // com/android/hoststubgen/test/tinyframework/subclasstest/C3
+  interfaces: 0, fields: 0, methods: 1, attributes: 2
+  private static {};
+    descriptor: ()V
+    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
+    Code:
+      stack=2, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/subclasstest/Class_C3
+         x: ldc           #x                  // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
+         x: return
+}
+SourceFile: "Class_C3.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_I1.class
+  Compiled from "Class_I1.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_I1 implements com.android.hoststubgen.test.tinyframework.subclasstest.I1
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_I1
+  super_class: #x                         // java/lang/Object
+  interfaces: 1, fields: 0, methods: 1, attributes: 2
+  private static {};
+    descriptor: ()V
+    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
+    Code:
+      stack=2, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/subclasstest/Class_I1
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
+         x: return
+}
+SourceFile: "Class_I1.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_I1_IA.class
+  Compiled from "Class_I1_IA.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_I1_IA implements com.android.hoststubgen.test.tinyframework.subclasstest.I1,com.android.hoststubgen.test.tinyframework.subclasstest.IA
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_I1_IA
+  super_class: #x                         // java/lang/Object
+  interfaces: 2, fields: 0, methods: 1, attributes: 2
+  private static {};
+    descriptor: ()V
+    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
+    Code:
+      stack=2, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/subclasstest/Class_I1_IA
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
+         x: return
+}
+SourceFile: "Class_I1_IA.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_I2.class
+  Compiled from "Class_I2.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_I2 implements com.android.hoststubgen.test.tinyframework.subclasstest.I2
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_I2
+  super_class: #x                         // java/lang/Object
+  interfaces: 1, fields: 0, methods: 1, attributes: 2
+  private static {};
+    descriptor: ()V
+    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
+    Code:
+      stack=2, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/subclasstest/Class_I2
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
+         x: return
+}
+SourceFile: "Class_I2.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_I3.class
+  Compiled from "Class_I3.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_I3 implements com.android.hoststubgen.test.tinyframework.subclasstest.I3
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_I3
+  super_class: #x                         // java/lang/Object
+  interfaces: 1, fields: 0, methods: 1, attributes: 2
+  private static {};
+    descriptor: ()V
+    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
+    Code:
+      stack=2, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/subclasstest/Class_I3
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
+         x: return
+}
+SourceFile: "Class_I3.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/I1.class
+  Compiled from "I1.java"
+public interface com.android.hoststubgen.test.tinyframework.subclasstest.I1
+  minor version: 0
+  major version: 61
+  flags: (0x0601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/I1
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 2
+  private static {};
+    descriptor: ()V
+    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
+    Code:
+      stack=2, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/subclasstest/I1
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
+         x: return
+}
+SourceFile: "I1.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/I2.class
+  Compiled from "I2.java"
+public interface com.android.hoststubgen.test.tinyframework.subclasstest.I2 extends com.android.hoststubgen.test.tinyframework.subclasstest.I1
+  minor version: 0
+  major version: 61
+  flags: (0x0601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/I2
+  super_class: #x                         // java/lang/Object
+  interfaces: 1, fields: 0, methods: 1, attributes: 2
+  private static {};
+    descriptor: ()V
+    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
+    Code:
+      stack=2, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/subclasstest/I2
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
+         x: return
+}
+SourceFile: "I2.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/I3.class
+  Compiled from "I3.java"
+public interface com.android.hoststubgen.test.tinyframework.subclasstest.I3 extends com.android.hoststubgen.test.tinyframework.subclasstest.I2
+  minor version: 0
+  major version: 61
+  flags: (0x0601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/I3
+  super_class: #x                         // java/lang/Object
+  interfaces: 1, fields: 0, methods: 1, attributes: 2
+  private static {};
+    descriptor: ()V
+    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
+    Code:
+      stack=2, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/subclasstest/I3
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
+         x: return
+}
+SourceFile: "I3.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/IA.class
+  Compiled from "IA.java"
+public interface com.android.hoststubgen.test.tinyframework.subclasstest.IA
+  minor version: 0
+  major version: 61
+  flags: (0x0601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/IA
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 2
+  private static {};
+    descriptor: ()V
+    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
+    Code:
+      stack=2, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/subclasstest/IA
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
+         x: return
+}
+SourceFile: "IA.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/IB.class
+  Compiled from "IB.java"
+public interface com.android.hoststubgen.test.tinyframework.subclasstest.IB
+  minor version: 0
+  major version: 61
+  flags: (0x0601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/IB
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 2
+  private static {};
+    descriptor: ()V
+    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
+    Code:
+      stack=2, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/subclasstest/IB
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
+         x: return
+}
+SourceFile: "IB.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 ## Class: com/supported/UnsupportedClass.class
   Compiled from "UnsupportedClass.java"
 public class com.supported.UnsupportedClass

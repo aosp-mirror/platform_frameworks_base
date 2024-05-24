@@ -16,8 +16,12 @@
 
 package android.hardware.face;
 
+import static android.hardware.biometrics.Flags.FLAG_FACE_BACKGROUND_AUTHENTICATION;
+
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.SensorProperties;
 
@@ -30,6 +34,8 @@ import java.util.List;
  * Container for face sensor properties.
  * @hide
  */
+@TestApi
+@FlaggedApi(FLAG_FACE_BACKGROUND_AUTHENTICATION)
 public class FaceSensorProperties extends SensorProperties {
     /**
      * @hide

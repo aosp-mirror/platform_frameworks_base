@@ -11,6 +11,20 @@ flag {
 }
 
 flag {
+    name: "floating_menu_drag_to_hide"
+    namespace: "accessibility"
+    description: "Allows users to hide the FAB then use notification to dismiss or bring it back."
+    bug: "298718415"
+}
+
+flag {
+    name: "floating_menu_drag_to_edit"
+    namespace: "accessibility"
+    description: "adds a second drag button to allow the user edit the shortcut."
+    bug: "297583708"
+}
+
+flag {
     name: "floating_menu_ime_displacement_animation"
     namespace: "accessibility"
     description: "Adds an animation for when the FAB is displaced by an IME becoming visible."
@@ -29,4 +43,11 @@ flag {
     namespace: "accessibility"
     description: "Animates the floating menu's transition between curved and jagged edges."
     bug: "281140482"
+}
+
+flag {
+    name: "create_windowless_window_magnifier"
+    namespace: "accessibility"
+    description: "Uses SurfaceControlViewHost to create the magnifier for window magnification."
+    bug: "280992417"
 }

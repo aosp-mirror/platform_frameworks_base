@@ -16,7 +16,8 @@
 
 package com.android.server.notification;
 
-import static android.app.UiModeManager.MODE_NIGHT_CUSTOM_TYPE_BEDTIME;
+import static android.app.UiModeManager.MODE_ATTENTION_THEME_OVERLAY_NIGHT;
+import static android.app.UiModeManager.MODE_ATTENTION_THEME_OVERLAY_OFF;
 
 import android.app.UiModeManager;
 import android.app.WallpaperManager;
@@ -64,7 +65,9 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
         mColorDisplayManager = context.getSystemService(ColorDisplayManager.class);
         mPowerManager = context.getSystemService(PowerManager.class);
         mUiModeManager = context.getSystemService(UiModeManager.class);
-        mWallpaperManager = context.getSystemService(WallpaperManager.class);
+        WallpaperManager wallpaperManager = context.getSystemService(WallpaperManager.class);
+        mWallpaperManager = wallpaperManager != null && wallpaperManager.isWallpaperSupported()
+                ? wallpaperManager : null;
     }
 
     @Override
@@ -109,7 +112,6 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
         if (origin == ZenModeConfig.UPDATE_ORIGIN_INIT
                 || origin == ZenModeConfig.UPDATE_ORIGIN_INIT_USER
                 || origin == ZenModeConfig.UPDATE_ORIGIN_USER
-                || origin == ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
                 || !mPowerManager.isInteractive()) {
             unregisterScreenOffReceiver();
             updateNightModeImmediately(useNightMode);
@@ -129,10 +131,9 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
 
     private void updateNightModeImmediately(boolean useNightMode) {
         Binder.withCleanCallingIdentity(() -> {
-            // TODO: b/314285749 - Placeholder; use real APIs when available.
-            mUiModeManager.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
-            mUiModeManager.setNightModeActivatedForCustomMode(MODE_NIGHT_CUSTOM_TYPE_BEDTIME,
-                    useNightMode);
+            mUiModeManager.setAttentionModeThemeOverlay(
+                    useNightMode ? MODE_ATTENTION_THEME_OVERLAY_NIGHT
+                            : MODE_ATTENTION_THEME_OVERLAY_OFF);
         });
     }
 

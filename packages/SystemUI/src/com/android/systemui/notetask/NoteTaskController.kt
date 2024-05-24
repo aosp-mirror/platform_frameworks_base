@@ -37,7 +37,7 @@ import android.os.UserManager
 import android.provider.Settings
 import android.widget.Toast
 import androidx.annotation.VisibleForTesting
-import com.android.app.tracing.TraceUtils.Companion.launch
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background

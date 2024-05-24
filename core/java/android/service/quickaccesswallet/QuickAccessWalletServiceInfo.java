@@ -19,6 +19,7 @@ package android.service.quickaccesswallet;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -30,6 +31,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
+import android.os.Binder;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -69,12 +71,17 @@ class QuickAccessWalletServiceInfo {
 
     @Nullable
     static QuickAccessWalletServiceInfo tryCreate(@NonNull Context context) {
-        ComponentName defaultPaymentApp = getDefaultPaymentApp(context);
-        if (defaultPaymentApp == null) {
-            return null;
+        String defaultAppPackageName = getDefaultWalletApp(context);
+
+        if (defaultAppPackageName == null) {
+            ComponentName defaultPaymentApp = getDefaultPaymentApp(context);
+            if (defaultPaymentApp == null) {
+                return null;
+            }
+            defaultAppPackageName = defaultPaymentApp.getPackageName();
         }
 
-        ServiceInfo serviceInfo = getWalletServiceInfo(context, defaultPaymentApp.getPackageName());
+        ServiceInfo serviceInfo = getWalletServiceInfo(context, defaultAppPackageName);
         if (serviceInfo == null) {
             return null;
         }
@@ -90,6 +97,20 @@ class QuickAccessWalletServiceInfo {
         TileServiceMetadata tileServiceMetadata =
                 new TileServiceMetadata(parseTileServiceMetadata(context, serviceInfo));
         return new QuickAccessWalletServiceInfo(serviceInfo, metadata, tileServiceMetadata);
+    }
+
+    private static String getDefaultWalletApp(Context context) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            RoleManager roleManager = context.getSystemService(RoleManager.class);
+            if (roleManager.isRoleAvailable(RoleManager.ROLE_WALLET)) {
+                List<String> roleHolders = roleManager.getRoleHolders(RoleManager.ROLE_WALLET);
+                return roleHolders.isEmpty() ? null : roleHolders.get(0);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return null;
     }
 
     private static ComponentName getDefaultPaymentApp(Context context) {

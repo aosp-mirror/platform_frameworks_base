@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.content.ComponentName;
 import android.os.IBinder;
 
 /**
@@ -28,11 +29,15 @@ public class ActivityAssistInfo {
     private final IBinder mActivityToken;
     private final IBinder mAssistToken;
     private final int mTaskId;
+    private final ComponentName mComponentName;
+    private final int mUserId;
 
     public ActivityAssistInfo(ActivityRecord activityRecord) {
         this.mActivityToken = activityRecord.token;
         this.mAssistToken = activityRecord.assistToken;
         this.mTaskId = activityRecord.getTask().mTaskId;
+        this.mComponentName = activityRecord.mActivityComponent;
+        this.mUserId = activityRecord.mUserId;
     }
 
     /** @hide */
@@ -48,5 +53,15 @@ public class ActivityAssistInfo {
     /** @hide */
     public int getTaskId() {
         return mTaskId;
+    }
+
+    /** @hide */
+    public ComponentName getComponentName() {
+        return mComponentName;
+    }
+
+    /** @hide */
+    public int getUserId() {
+        return mUserId;
     }
 }

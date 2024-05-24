@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_FROM_AOD;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_TO_AOD;
+import static com.android.systemui.util.kotlin.JavaAdapterKt.combineFlows;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -35,6 +36,7 @@ import android.view.animation.Interpolator;
 import androidx.annotation.NonNull;
 
 import com.android.app.animation.Interpolators;
+import com.android.compose.animation.scene.SceneKey;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -43,19 +45,26 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardClockSwitch;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.domain.interactor.SceneInteractor;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.kotlin.JavaAdapter;
 
+import com.google.common.base.Preconditions;
+
 import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -97,6 +106,8 @@ public class StatusBarStateControllerImpl implements
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final JavaAdapter mJavaAdapter;
     private final Lazy<ShadeInteractor> mShadeInteractorLazy;
+    private final Lazy<DeviceUnlockedInteractor> mDeviceUnlockedInteractorLazy;
+    private final Lazy<SceneInteractor> mSceneInteractorLazy;
     private int mState;
     private int mLastState;
     private int mUpcomingState;
@@ -160,11 +171,15 @@ public class StatusBarStateControllerImpl implements
             UiEventLogger uiEventLogger,
             InteractionJankMonitor interactionJankMonitor,
             JavaAdapter javaAdapter,
-            Lazy<ShadeInteractor> shadeInteractorLazy) {
+            Lazy<ShadeInteractor> shadeInteractorLazy,
+            Lazy<DeviceUnlockedInteractor> deviceUnlockedInteractorLazy,
+            Lazy<SceneInteractor> sceneInteractorLazy) {
         mUiEventLogger = uiEventLogger;
         mInteractionJankMonitor = interactionJankMonitor;
         mJavaAdapter = javaAdapter;
         mShadeInteractorLazy = shadeInteractorLazy;
+        mDeviceUnlockedInteractorLazy = deviceUnlockedInteractorLazy;
+        mSceneInteractorLazy = sceneInteractorLazy;
         for (int i = 0; i < HISTORY_SIZE; i++) {
             mHistoricalRecords[i] = new HistoricalState();
         }
@@ -174,6 +189,15 @@ public class StatusBarStateControllerImpl implements
     public void start() {
         mJavaAdapter.alwaysCollectFlow(mShadeInteractorLazy.get().isAnyExpanded(),
                 this::onShadeOrQsExpanded);
+
+        if (SceneContainerFlag.isEnabled()) {
+            mJavaAdapter.alwaysCollectFlow(
+                    combineFlows(
+                        mDeviceUnlockedInteractorLazy.get().isDeviceUnlocked(),
+                        mSceneInteractorLazy.get().getCurrentScene(),
+                        this::calculateStateFromSceneFramework),
+                    this::onStatusBarStateChanged);
+        }
     }
 
     @Override
@@ -183,6 +207,10 @@ public class StatusBarStateControllerImpl implements
 
     @Override
     public boolean setState(int state, boolean force) {
+        if (SceneContainerFlag.isEnabled()) {
+            return false;
+        }
+
         if (state > MAX_STATE || state < MIN_STATE) {
             throw new IllegalArgumentException("Invalid state " + state);
         }
@@ -194,6 +222,14 @@ public class StatusBarStateControllerImpl implements
             return false;
         }
 
+        updateStateAndNotifyListeners(state);
+        return true;
+    }
+
+    /**
+     * Updates the {@link StatusBarState} and notifies registered listeners, if needed.
+     */
+    private void updateStateAndNotifyListeners(int state) {
         if (state != mUpcomingState) {
             Log.d(TAG, "setState: requested state " + StatusBarState.toString(state)
                     + "!= upcomingState: " + StatusBarState.toString(mUpcomingState) + ". "
@@ -229,15 +265,16 @@ public class StatusBarStateControllerImpl implements
             }
             DejankUtils.stopDetectingBlockingIpcs(tag);
         }
-
-        return true;
     }
 
     @Override
     public void setUpcomingState(int nextState) {
+        if (SceneContainerFlag.isEnabled()) {
+            return;
+        }
+
         recordHistoricalState(nextState /* newState */, mState /* lastState */, true);
         updateUpcomingState(nextState);
-
     }
 
     private void updateUpcomingState(int upcomingState) {
@@ -468,7 +505,7 @@ public class StatusBarStateControllerImpl implements
 
     @Override
     public boolean goingToFullShade() {
-        return mState == StatusBarState.SHADE && mLeaveOpenOnKeyguardHide;
+        return getState() == StatusBarState.SHADE && mLeaveOpenOnKeyguardHide;
     }
 
     @Override
@@ -598,6 +635,37 @@ public class StatusBarStateControllerImpl implements
         state.mTimestamp = System.currentTimeMillis();
         state.mUpcoming = upcoming;
     }
+
+    private int calculateStateFromSceneFramework(
+            boolean isDeviceUnlocked,
+            SceneKey currentScene) {
+        SceneContainerFlag.isUnexpectedlyInLegacyMode();
+
+        if (isDeviceUnlocked) {
+            return StatusBarState.SHADE;
+        } else {
+            return Preconditions.checkNotNull(sStatusBarStateByLockedSceneKey.get(currentScene));
+        }
+    }
+
+    /** Notifies that the {@link StatusBarState} has changed to the given new state. */
+    private void onStatusBarStateChanged(int newState) {
+        SceneContainerFlag.isUnexpectedlyInLegacyMode();
+
+        if (newState == mState) {
+            return;
+        }
+
+        updateStateAndNotifyListeners(newState);
+    }
+
+    private static final Map<SceneKey, Integer> sStatusBarStateByLockedSceneKey = Map.of(
+            Scenes.Lockscreen, StatusBarState.KEYGUARD,
+            Scenes.Bouncer, StatusBarState.KEYGUARD,
+            Scenes.Communal, StatusBarState.KEYGUARD,
+            Scenes.Shade, StatusBarState.SHADE_LOCKED,
+            Scenes.QuickSettings, StatusBarState.SHADE_LOCKED
+    );
 
     /**
      * For keeping track of our previous state to help with debugging

@@ -16,8 +16,6 @@
 
 package com.android.server.job.controllers;
 
-import static android.text.format.DateUtils.HOUR_IN_MILLIS;
-
 import static com.android.server.job.JobSchedulerService.ACTIVE_INDEX;
 import static com.android.server.job.JobSchedulerService.EXEMPTED_INDEX;
 import static com.android.server.job.JobSchedulerService.NEVER_INDEX;
@@ -48,6 +46,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Pair;
+import android.util.Patterns;
 import android.util.Range;
 import android.util.Slog;
 import android.util.TimeUtils;
@@ -76,6 +75,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Random;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 /**
  * Uniquely identifies a job internally.
@@ -106,11 +106,8 @@ public final class JobStatus {
     public static final long NO_LATEST_RUNTIME = Long.MAX_VALUE;
     public static final long NO_EARLIEST_RUNTIME = 0L;
 
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public static final int CONSTRAINT_CHARGING = JobInfo.CONSTRAINT_FLAG_CHARGING; // 1 < 0
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public static final int CONSTRAINT_IDLE = JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE;  // 1 << 2
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public static final int CONSTRAINT_BATTERY_NOT_LOW =
             JobInfo.CONSTRAINT_FLAG_BATTERY_NOT_LOW; // 1 << 1
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
@@ -125,7 +122,7 @@ public final class JobStatus {
     static final int CONSTRAINT_WITHIN_QUOTA = 1 << 24;      // Implicit constraint
     static final int CONSTRAINT_PREFETCH = 1 << 23;
     static final int CONSTRAINT_BACKGROUND_NOT_RESTRICTED = 1 << 22; // Implicit constraint
-    static final int CONSTRAINT_FLEXIBLE = 1 << 21; // Implicit constraint
+    public static final int CONSTRAINT_FLEXIBLE = 1 << 21; // Implicit constraint
 
     private static final int IMPLICIT_CONSTRAINTS = 0
             | CONSTRAINT_BACKGROUND_NOT_RESTRICTED
@@ -206,6 +203,17 @@ public final class JobStatus {
     // TODO(b/129954980): ensure this doesn't spam statsd, especially at boot
     private static final boolean STATS_LOG_ENABLED = false;
 
+    /**
+     * Simple patterns to match some common forms of PII. This is not intended all-encompassing and
+     * any clients should aim to do additional filtering.
+     */
+    private static final ArrayMap<Pattern, String> BASIC_PII_FILTERS = new ArrayMap<>();
+
+    static {
+        BASIC_PII_FILTERS.put(Patterns.EMAIL_ADDRESS, "[EMAIL]");
+        BASIC_PII_FILTERS.put(Patterns.PHONE, "[PHONE]");
+    }
+
     // No override.
     public static final int OVERRIDE_NONE = 0;
     // Override to improve sorting order. Does not affect constraint evaluation.
@@ -252,6 +260,18 @@ public final class JobStatus {
     /** An ID that can be used to uniquely identify the job when logging statsd metrics. */
     private final long mLoggingJobId;
 
+    /**
+     * List of tags from {@link JobInfo#getDebugTags()}, filtered using {@link #BASIC_PII_FILTERS}.
+     * Lazily loaded in {@link #getFilteredDebugTags()}.
+     */
+    @Nullable
+    private String[] mFilteredDebugTags;
+    /**
+     * Trace tag from {@link JobInfo#getTraceTag()}, filtered using {@link #BASIC_PII_FILTERS}.
+     * Lazily loaded in {@link #getFilteredTraceTag()}.
+     */
+    @Nullable
+    private String mFilteredTraceTag;
     /**
      * Tag to identify the wakelock held for this job. Lazily loaded in
      * {@link #getWakelockTag()} since it's not typically needed until the job is about to run.
@@ -408,9 +428,6 @@ public final class JobStatus {
      */
     public static final int INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ = 1 << 2;
 
-    /** Minimum difference between start and end time to have flexible constraint */
-    @VisibleForTesting
-    static final long MIN_WINDOW_FOR_FLEXIBILITY_MS = HOUR_IN_MILLIS;
     /**
      * Versatile, persistable flags for a job that's updated within the system server,
      * as opposed to {@link JobInfo#flags} that's set by callers.
@@ -635,7 +652,7 @@ public final class JobStatus {
                     .build());
             // Don't perform validation checks at this point since we've already passed the
             // initial validation check.
-            job = builder.build(false, false, false);
+            job = builder.build(false, false, false, false);
         }
 
         this.job = job;
@@ -686,14 +703,10 @@ public final class JobStatus {
         final boolean lacksSomeFlexibleConstraints =
                 ((~requiredConstraints) & SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS) != 0
                         || mCanApplyTransportAffinities;
-        final boolean satisfiesMinWindowException =
-                (latestRunTimeElapsedMillis - earliestRunTimeElapsedMillis)
-                >= MIN_WINDOW_FOR_FLEXIBILITY_MS;
 
         // The first time a job is rescheduled it will not be subject to flexible constraints.
         // Otherwise, every consecutive reschedule increases a jobs' flexibility deadline.
         if (!isRequestedExpeditedJob() && !job.isUserInitiated()
-                && satisfiesMinWindowException
                 && (numFailures + numSystemStops) != 1
                 && lacksSomeFlexibleConstraints) {
             requiredConstraints |= CONSTRAINT_FLEXIBLE;
@@ -1200,21 +1213,25 @@ public final class JobStatus {
             return ACTIVE_INDEX;
         }
 
-        final int bucketWithMediaExemption;
-        if (actualBucket != RESTRICTED_INDEX && actualBucket != NEVER_INDEX
-                && mHasMediaBackupExemption) {
+        final boolean isEligibleAsBackupJob = job.getTriggerContentUris() != null
+                && job.getRequiredNetwork() != null
+                && !job.hasLateConstraint()
+                && mJobSchedulerInternal.hasRunBackupJobsPermission(sourcePackageName, sourceUid);
+        final boolean isBackupExempt = mHasMediaBackupExemption || isEligibleAsBackupJob;
+        final int bucketWithBackupExemption;
+        if (actualBucket != RESTRICTED_INDEX && actualBucket != NEVER_INDEX && isBackupExempt) {
             // Treat it as if it's at most WORKING_INDEX (lower index grants higher quota) since
             // media backup jobs are important to the user, and the source package may not have
             // been used directly in a while.
-            bucketWithMediaExemption = Math.min(WORKING_INDEX, actualBucket);
+            bucketWithBackupExemption = Math.min(WORKING_INDEX, actualBucket);
         } else {
-            bucketWithMediaExemption = actualBucket;
+            bucketWithBackupExemption = actualBucket;
         }
 
         // If the app is considered buggy, but hasn't yet been put in the RESTRICTED bucket
         // (potentially because it's used frequently by the user), limit its effective bucket
         // so that it doesn't get to run as much as a normal ACTIVE app.
-        if (isBuggy && bucketWithMediaExemption < WORKING_INDEX) {
+        if (isBuggy && bucketWithBackupExemption < WORKING_INDEX) {
             if (!mIsDowngradedDueToBuggyApp) {
                 // Safety check to avoid logging multiple times for the same job.
                 Counter.logIncrementWithUid(
@@ -1224,7 +1241,7 @@ public final class JobStatus {
             }
             return WORKING_INDEX;
         }
-        return bucketWithMediaExemption;
+        return bucketWithBackupExemption;
     }
 
     /** Returns the real standby bucket of the job. */
@@ -1326,6 +1343,47 @@ public final class JobStatus {
 
     public String getBatteryName() {
         return batteryName;
+    }
+
+    @VisibleForTesting
+    @NonNull
+    static String applyBasicPiiFilters(@NonNull String val) {
+        for (int i = BASIC_PII_FILTERS.size() - 1; i >= 0; --i) {
+            val = BASIC_PII_FILTERS.keyAt(i).matcher(val).replaceAll(BASIC_PII_FILTERS.valueAt(i));
+        }
+        return val;
+    }
+
+    /**
+     * List of tags from {@link JobInfo#getDebugTags()}, filtered using a basic set of PII filters.
+     */
+    @NonNull
+    public String[] getFilteredDebugTags() {
+        if (mFilteredDebugTags != null) {
+            return mFilteredDebugTags;
+        }
+        final ArraySet<String> debugTags = job.getDebugTagsArraySet();
+        mFilteredDebugTags = new String[debugTags.size()];
+        for (int i = 0; i < mFilteredDebugTags.length; ++i) {
+            mFilteredDebugTags[i] = applyBasicPiiFilters(debugTags.valueAt(i));
+        }
+        return mFilteredDebugTags;
+    }
+
+    /**
+     * Trace tag from {@link JobInfo#getTraceTag()}, filtered using a basic set of PII filters.
+     */
+    @Nullable
+    public String getFilteredTraceTag() {
+        if (mFilteredTraceTag != null) {
+            return mFilteredTraceTag;
+        }
+        final String rawTag = job.getTraceTag();
+        if (rawTag == null) {
+            return null;
+        }
+        mFilteredTraceTag = applyBasicPiiFilters(rawTag);
+        return mFilteredTraceTag;
     }
 
     /** Return the String to be used as the tag for the wakelock held for this job. */
@@ -1534,7 +1592,7 @@ public final class JobStatus {
 
     /**
      * Returns the number of required flexible job constraints that have been dropped with time.
-     * The lower this number is the easier it is for the flexibility constraint to be satisfied.
+     * The higher this number is the easier it is for the flexibility constraint to be satisfied.
      */
     public int getNumDroppedFlexibleConstraints() {
         return mNumDroppedFlexibleConstraints;
@@ -1600,7 +1658,8 @@ public final class JobStatus {
         mTransportAffinitiesSatisfied = isSatisfied;
     }
 
-    boolean canApplyTransportAffinities() {
+    /** Whether transport affinities can be applied to the job in flex scheduling. */
+    public boolean canApplyTransportAffinities() {
         return mCanApplyTransportAffinities;
     }
 
@@ -1985,6 +2044,11 @@ public final class JobStatus {
             case CONSTRAINT_WITHIN_QUOTA:
                 return JobParameters.STOP_REASON_QUOTA;
 
+            // This can change from true to false, but should never change when a job is already
+            // running, so there's no reason to log a message or create a new stop reason.
+            case CONSTRAINT_FLEXIBLE:
+                return JobParameters.STOP_REASON_UNDEFINED;
+
             // These should never be stop reasons since they can never go from true to false.
             case CONSTRAINT_CONTENT_TRIGGER:
             case CONSTRAINT_DEADLINE:
@@ -2194,7 +2258,7 @@ public final class JobStatus {
      * @return Whether or not this job would be ready to run if it had the specified constraint
      * granted, based on its requirements.
      */
-    boolean wouldBeReadyWithConstraint(int constraint) {
+    public boolean wouldBeReadyWithConstraint(int constraint) {
         return readinessStatusWithConstraint(constraint, true);
     }
 

@@ -85,7 +85,7 @@
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ਤਰਜੀਹੀ ਨੈੱਟਵਰਕ ਨੂੰ ਬਦਲ ਕੇ ਦੇਖੋ। ਬਦਲਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ਸੰਕਟਕਾਲੀਨ ਕਾਲਿੰਗ ਉਪਲਬਧ ਨਹੀਂ"</string>
     <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"ਵਾਈ-ਫਾਈ ਰਾਹੀਂ ਸੰਕਟਕਾਲੀਨ ਕਾਲਾਂ ਨਹੀਂ ਕਰ ਸਕਦੇ"</string>
-    <string name="notification_channel_network_alert" msgid="4788053066033851841">"ਸੁਚੇਤਨਾਵਾਂ"</string>
+    <string name="notification_channel_network_alert" msgid="4788053066033851841">"ਅਲਰਟ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ਕਾਲ ਫਾਰਵਰਡਿੰਗ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"ਸੰਕਟਕਾਲੀਨ ਕਾਲਬੈਕ ਮੋਡ"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"ਮੋਬਾਈਲ ਡਾਟੇ ਦੀ ਸਥਿਤੀ"</string>
@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> ਸਕਿੰਟਾਂ ਬਾਅਦ"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ਅੱਗੇ ਨਹੀਂ ਭੇਜਿਆ ਗਿਆ"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ਅੱਗੇ ਨਹੀਂ ਭੇਜਿਆ ਗਿਆ"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"ਸੈਲਿਊਲਰ ਨੈੱਟਵਰਕ ਸੁਰੱਖਿਆ"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"ਸੈਟਿੰਗਾਂ ਦੀ ਸਮੀਖਿਆ ਕਰੋ"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"ਡੀਵਾਈਸ ਪਛਾਣਕਰਤਾ ਤੱਕ ਪਹੁੰਚ ਕੀਤੀ ਗਈ"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> ਕਨੈਕਸ਼ਨ ਵਾਲੇ ਨੈੱਟਵਰਕ ਨੇ <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> ਅਤੇ <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> ਦੇ ਵਿਚਕਾਰ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦੀ ਵਿਲੱਖਣ ਪਛਾਣ (IMSI) ਨੂੰ <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> ਵਾਰ ਰਿਕਾਰਡ ਕੀਤਾ।"</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ਦੇ ਨਾਲ ਇਨਕ੍ਰਿਪਟਡ ਕਨੈਕਸ਼ਨ"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"ਤੁਸੀਂ ਹੁਣ ਇੱਕ ਵਧੇਰੇ ਸੁਰੱਖਿਅਤ ਸੈਲਿਊਲਰ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਹੋ।"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ਦੇ ਨਾਲ ਗੈਰ-ਇਨਕ੍ਰਿਪਟਡ ਕਨੈਕਸ਼ਨ"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"ਤੁਸੀਂ ਕਿਸੇ ਗੈਰ-ਇਨਕ੍ਰਿਪਟਡ ਸੈਲਿਊਲਰ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਹੋ। ਤੁਹਾਡੀਆਂ ਕਾਲਾਂ, ਸੁਨੇਹੇ ਅਤੇ ਡਾਟੇ ਵਿੱਚ ਰੁਕਾਵਟ ਪੈਣ ਦਾ ਖਤਰਾ ਹੈ।"</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"ਸੈਲਿਊਲਰ ਸੁਰੱਖਿਆ ਸੈਟਿੰਗਾਂ"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"ਹੋਰ ਜਾਣੋ"</string>
     <string name="fcComplete" msgid="1080909484660507044">"ਵਿਸ਼ੇਸ਼ਤਾ ਕੋਡ ਪੂਰਾ।"</string>
     <string name="fcError" msgid="5325116502080221346">"ਕਨੈਕਸ਼ਨ ਸਮੱਸਿਆ ਜਾਂ ਅਵੈਧ ਵਿਸ਼ੇਸ਼ਤਾ ਕੋਡ।"</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ਠੀਕ ਹੈ"</string>
@@ -279,11 +289,11 @@
     <string name="notification_channel_developer_important" msgid="7197281908918789589">"ਮਹੱਤਵਪੂਰਨ ਵਿਕਾਸਕਾਰ ਸੁਨੇਹੇ"</string>
     <string name="notification_channel_updates" msgid="7907863984825495278">"ਅੱਪਡੇਟ"</string>
     <string name="notification_channel_network_status" msgid="2127687368725272809">"ਨੈੱਟਵਰਕ ਅਵਸਥਾ"</string>
-    <string name="notification_channel_network_alerts" msgid="6312366315654526528">"ਨੈੱਟਵਰਕ ਸੁਚੇਤਨਾਵਾਂ"</string>
+    <string name="notification_channel_network_alerts" msgid="6312366315654526528">"ਨੈੱਟਵਰਕ ਅਲਰਟ"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"ਨੈੱਟਵਰਕ ਉਪਲਬਧ ਹੈ"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN ਅਵਸਥਾ"</string>
-    <string name="notification_channel_device_admin" msgid="6384932669406095506">"ਤੁਹਾਡੇ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਸੁਚੇਤਨਾਵਾਂ"</string>
-    <string name="notification_channel_alerts" msgid="5070241039583668427">"ਸੁਚੇਤਨਾਵਾਂ"</string>
+    <string name="notification_channel_device_admin" msgid="6384932669406095506">"ਤੁਹਾਡੇ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਅਲਰਟ"</string>
+    <string name="notification_channel_alerts" msgid="5070241039583668427">"ਅਲਰਟ"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"ਪ੍ਰਚੂਨ ਸਟੋਰਾਂ ਲਈ ਡੈਮੋ"</string>
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB ਕਨੈਕਸ਼ਨ"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"ਚੱਲ ਰਹੀ ਐਪ"</string>
@@ -367,9 +377,11 @@
     <string name="permlab_receiveMms" msgid="4000650116674380275">"ਲਿਖਤ ਸੁਨੇਹੇ (MMS) ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="permdesc_receiveMms" msgid="958102423732219710">"ਐਪ ਨੂੰ MMS ਸੁਨੇਹੇ ਪ੍ਰਾਪਤ ਕਰਨ ਅਤੇ ਉਹਨਾਂ ਦੀ ਪ੍ਰਕਿਰਿਆ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਸਦਾ ਮਤਲਬ ਹੈ ਕਿ ਐਪ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਤੇ ਭੇਜੇ ਗਏ ਸੁਨੇਹਿਆਂ ਨੂੰ ਤੁਹਾਨੂੰ ਦਿਖਾਏ ਬਿਨਾਂ ਨਿਰੀਖਣ ਕਰ ਸਕਦੀ ਹੈ ਜਾਂ ਮਿਟਾ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਸੁਨੇਹਿਆਂ ਨੂੰ ਅੱਗੇ ਭੇਜੋ"</string>
-    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"ਐਪ ਨੂੰ ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਸੁਨੇਹਿਆਂ ਦੇ ਪ੍ਰਾਪਤ ਹੁੰਦੇ ਹੀ ਉਹਨਾਂ ਨੂੰ ਅੱਗੇ ਭੇਜਣ ਲਈ ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਮਾਡਿਊਲ ਨਾਲ ਜੋੜਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਸੁਚੇਤਨਾਵਾਂ ਤੁਹਾਨੂੰ ਸੰਕਟਕਾਲੀ ਸਥਿਤੀਆਂ ਦੀ ਚਿਤਾਵਨੀ ਦੇਣ ਲਈ ਕੁਝ ਟਿਕਾਣਿਆਂ \'ਤੇ ਪ੍ਰਦਾਨ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ। ਭੈੜੀਆਂ ਐਪਾਂ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦੀ ਕਾਰਗੁਜ਼ਾਰੀ ਜਾਂ ਓਪਰੇਸ਼ਨ ਵਿੱਚ ਵਿਘਨ ਪਾ ਸਕਦੀਆਂ ਹਨ ਜਦੋਂ ਇੱਕ ਸੰਕਟਕਾਲੀ ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਪ੍ਰਾਪਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"ਐਪ ਨੂੰ ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਸੁਨੇਹਿਆਂ ਦੇ ਪ੍ਰਾਪਤ ਹੁੰਦੇ ਹੀ ਉਨ੍ਹਾਂ ਨੂੰ ਅੱਗੇ ਭੇਜਣ ਲਈ ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਮਾਡਿਊਲ ਨਾਲ ਜੋੜਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਅਲਰਟ ਤੁਹਾਨੂੰ ਐਮਰਜੈਂਸੀ ਸਥਿਤੀਆਂ ਦੀ ਚਿਤਾਵਨੀ ਦੇਣ ਲਈ ਕੁਝ ਟਿਕਾਣਿਆਂ \'ਤੇ ਪ੍ਰਦਾਨ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ। ਭੈੜੀਆਂ ਐਪਾਂ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦੀ ਕਾਰਗੁਜ਼ਾਰੀ ਜਾਂ ਓਪਰੇਸ਼ਨ ਵਿੱਚ ਵਿਘਨ ਪਾ ਸਕਦੀਆਂ ਹਨ ਜਦੋਂ ਇੱਕ ਐਮਰਜੈਂਸੀ ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਪ੍ਰਾਪਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।"</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"ਜਾਰੀ ਕਾਲਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"ਐਪ ਨੂੰ ਆਪਣੇ ਡੀਵਾਈਸ \'ਤੇ ਜਾਰੀ ਕਾਲਾਂ ਬਾਰੇ ਵੇਰਵੇ ਦੇਖਣ ਅਤੇ ਇਹਨਾਂ ਕਾਲਾਂ ਨੂੰ ਕੰਟਰੋਲ ਕਰਨ ਦਿਓ।"</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"ਆਖਰੀ ਜਾਣੂ ਸੈੱਲ ਪਛਾਣ ਤੱਕ ਪਹੁੰਚ ਕਰੋ।"</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"ਇੱਕ ਐਪ ਨੂੰ ਟੈਲੀਫ਼ੋਨੀ ਰਾਹੀਂ ਮੁਹੱਈਆ ਕੀਤੀ ਗਈ ਆਖਰੀ ਜਾਣੂ ਸੈੱਲ ਪਛਾਣ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"ਸੈਲ ਪ੍ਰਸਾਰਨ ਸੁਨੇਹੇ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"ਐਪ ਨੂੰ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਵੱਲੋਂ ਪ੍ਰਾਪਤ ਕੀਤੇ ਸੈੱਲ ਪ੍ਰਸਾਰਣ ਸੁਨੇਹੇ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਸੈੱਲ ਪ੍ਰਸਾਰਣ ਚਿਤਾਵਨੀਆਂ ਤੁਹਾਨੂੰ ਸੰਕਟਕਾਲੀਨ ਸਥਿਤੀਆਂ ਦੀ ਚਿਤਾਵਨੀ ਦੇਣ ਲਈ ਕੁਝ ਨਿਰਧਾਰਤ ਟਿਕਾਣਿਆਂ ਤੇ ਪ੍ਰਦਾਨ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ। ਖਰਾਬ ਐਪਾਂ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦੇ ਪ੍ਰਦਰਸ਼ਨ ਜਾਂ ਓਪਰੇਸ਼ਨ ਵਿੱਚ ਵਿਘਨ ਪਾ ਸਕਦੀਆਂ ਹਨ ਜਦੋਂ ਇੱਕ ਸੰਕਟਕਾਲੀਨ ਸੈੱਲ ਪ੍ਰਸਾਰਣ ਪ੍ਰਾਪਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"ਸਬਸਕ੍ਰਾਈਬ ਕੀਤੇ ਫੀਡਸ ਪੜ੍ਹੋ"</string>
@@ -434,6 +446,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"ਐਪ ਨੂੰ \"systemExempted\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"\"fileManagement\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾ ਨੂੰ ਚਲਾਓ"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"ਐਪ ਨੂੰ \"fileManagement\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤਣ ਦੀ ਆਗਿਆ ਮਿਲਦੀ ਹੈ"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"\"mediaProcessing\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾ ਨੂੰ ਚਲਾਓ"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"ਐਪ ਨੂੰ \"mediaProcessing\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾਵਾਂ ਵਰਤਣ ਦੀ ਆਗਿਆ ਮਿਲਦੀ ਹੈ"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"\"specialUse\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾ ਨੂੰ ਚਲਾਉਂਦੀ ਹੈ"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"ਐਪ ਨੂੰ \"specialUse\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"ਐਪ ਸਟੋਰੇਜ ਜਗ੍ਹਾ ਮਾਪੋ"</string>
@@ -539,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"ਐਪ ਨੂੰ ਫ਼ੋਨ ਦਾ ਇੰਫਰਾਰੈਡ ਟ੍ਰਾਂਸਮੀਟਰ ਵਰਤਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"ਵਾਲਪੇਪਰ ਸੈੱਟ ਕਰੋ"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"ਐਪ ਨੂੰ ਸਿਸਟਮ ਵਾਲਪੇਪਰ ਸੈਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"ਅਦਿੱਖਾਂ ਪ੍ਰੋਫਾਈਲਾਂ ਤੱਕ ਪਹੁੰਚ"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"ਅਦਿੱਖ ਪ੍ਰੋਫਾਈਲਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਲਈ ਐਪ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"ਆਪਣਾ ਵਾਲਪੇਪਰ ਆਕਾਰ ਵਿਵਸਥਿਤ ਕਰੋ"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"ਐਪ ਨੂੰ ਸਿਸਟਮ ਵਾਲਪੇਪਰ ਆਕਾਰ ਸੰਕੇਤ ਸੈਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"ਸਮਾਂ ਜ਼ੋਨ ਸੈੱਟ ਕਰੋ"</string>
@@ -632,7 +648,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"ਜਾਰੀ ਰੱਖਣ ਲਈ ਆਪਣਾ ਸਕ੍ਰੀਨ ਲਾਕ ਦਾਖਲ ਕਰੋ"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"ਸੈਂਸਰ ਨੂੰ ਜ਼ੋਰ ਨਾਲ ਦਬਾਓ"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦੀ ਪਛਾਣ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦੀ ਪਛਾਣ ਨਹੀਂ ਹੋਈ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਨੂੰ ਸਾਫ਼ ਕਰੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"ਸੈਂਸਰ ਨੂੰ ਸਾਫ਼ ਕਰੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"ਸੈਂਸਰ ਨੂੰ ਜ਼ੋਰ ਨਾਲ ਦਬਾਓ"</string>
@@ -650,18 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਪ੍ਰਮਾਣਿਤ ਹੋਇਆ"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ਚਿਹਰਾ ਪੁਸ਼ਟੀਕਰਨ"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ਚਿਹਰਾ ਪੁਸ਼ਟੀਕਰਨ, ਕਿਰਪਾ ਕਰਕੇ \'ਪੁਸ਼ਟੀ ਕਰੋ\' ਦਬਾਓ"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਹਾਰਡਵੇਅਰ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।"</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਹਾਰਡਵੇਅਰ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਾ ਸੈੱਟਅੱਪ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਾ ਸੈੱਟਅੱਪ ਕਰਨ ਲਈ ਸਮਾਂ ਸਮਾਪਤ ਹੋਇਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਓਪਰੇਸ਼ਨ ਰੱਦ ਕੀਤਾ ਗਿਆ।"</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਓਪਰੇਸ਼ਨ ਵਰਤੋਂਕਾਰ ਵੱਲੋਂ ਰੱਦ ਕੀਤਾ ਗਿਆ।"</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੰਬੰਧੀ ਕਾਰਵਾਈ ਰੱਦ ਕੀਤੀ ਗਈ"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੰਬੰਧੀ ਕਾਰਵਾਈ ਵਰਤੋਂਕਾਰ ਵੱਲੋਂ ਰੱਦ ਕੀਤੀ ਗਈ"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"ਬਹੁਤ ਸਾਰੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ। ਇਸਦੀ ਬਜਾਏ ਸਕ੍ਰੀਨ ਲਾਕ ਵਰਤੋ।"</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"ਬਹੁਤ ਸਾਰੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ। ਇਸਦੀ ਬਜਾਏ ਸਕ੍ਰੀਨ ਲਾਕ ਵਰਤੋ।"</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"ਫਿੰਗਰਪ੍ਰਿੰਟ \'ਤੇ ਪ੍ਰਕਿਰਿਆ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ਕੋਈ ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਰਜ ਨਹੀਂ ਕੀਤੇ ਗਏ।"</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ਇਸ ਡੀਵਾਈਸ ਵਿੱਚ ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਨਹੀਂ ਹੈ।"</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ਸੈਂਸਰ ਅਸਥਾਈ ਤੌਰ \'ਤੇ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਦੀ ਵਰਤੋਂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਮੁਰੰਮਤ ਪ੍ਰਦਾਨਕ \'ਤੇ ਜਾਓ"</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"ਕੋਈ ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਰਜ ਨਹੀਂ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"ਇਸ ਡੀਵਾਈਸ ਵਿੱਚ ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਨਹੀਂ ਹੈ"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"ਸੈਂਸਰ ਕੁਝ ਸਮੇਂ ਲਈ ਬੰਦ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਦੀ ਵਰਤੋਂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਮੁਰੰਮਤ ਕਰਨ ਵਾਲੇ ਪ੍ਰਦਾਨਕ ਕੋਲ ਜਾਓ।"</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"\'ਪਾਵਰ\' ਬਟਨ ਦਬਾਇਆ ਗਿਆ"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ਉਂਗਲ <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
@@ -696,7 +712,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"ਤੁਹਾਡਾ ਚਿਹਰਾ ਨਹੀਂ ਦਿਸ ਰਿਹਾ। ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਅੱਖਾਂ ਦੀ ਸੀਧ ਵਿੱਚ ਰੱਖੋ।"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"ਬਹੁਤ ਜ਼ਿਆਦਾ ਹਿਲਜੁਲ। ਫ਼ੋਨ ਨੂੰ ਸਥਿਰ ਰੱਖੋ।"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"ਕਿਰਪਾ ਕਰਕੇ ਆਪਣਾ ਚਿਹਰਾ ਦੁਬਾਰਾ ਦਰਜ ਕਰੋ।"</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"ਚਿਹਰੇ ਦੀ ਪਛਾਣ ਨਹੀਂ ਹੋਈ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"ਚਿਹਰੇ ਦੀ ਪਛਾਣ ਨਹੀਂ ਹੋਈ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"ਆਪਣੇ ਸਿਰ ਨੂੰ ਥੋੜ੍ਹਾ ਹਿਲਾਓ"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"ਸਿੱਧਾ ਆਪਣੇ ਫ਼ੋਨ ਵੱਲ ਦੇਖੋ"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"ਸਿੱਧਾ ਆਪਣੇ ਫ਼ੋਨ ਵੱਲ ਦੇਖੋ"</string>
@@ -807,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"ਐਪ ਨੂੰ 200 Hz ਤੋਂ ਵੱਧ ਦੀ ਦਰ \'ਤੇ ਸੈਂਸਰ ਡਾਟੇ ਦਾ ਨਮੂਨਾ ਲੈਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ਵਰਤੋਂਕਾਰ ਕਾਰਵਾਈ ਤੋਂ ਬਿਨਾਂ ਐਪ ਨੂੰ ਅੱਪਡੇਟ ਕਰੋ"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"ਧਾਰਕ ਨੂੰ ਵਰਤੋਂਕਾਰ ਕਾਰਵਾਈ ਤੋਂ ਬਿਨਾਂ ਪਹਿਲਾਂ ਸਥਾਪਤ ਕੀਤੀ ਐਪ ਨੂੰ ਅੱਪਡੇਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"ਐਪ ਨੂੰ ਹੋਰ ਐਪਾਂ ਦੀ ਮਲਕੀਅਤ ਵਾਲੀਆਂ E2EE ਸੰਪਰਕ ਕੁੰਜੀਆਂ ਦੀ ਪੁਸ਼ਟੀਕਰਨ ਸਥਿਤੀਆਂ ਨੂੰ ਅੱਪਡੇਟ ਕਰੋ"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"ਐਪ ਨੂੰ ਹੋਰ ਐਪਾਂ ਦੀ ਮਲਕੀਅਤ ਵਾਲੀਆਂ E2EE ਸੰਪਰਕ ਕੁੰਜੀਆਂ ਦੀ ਪੁਸ਼ਟੀਕਰਨ ਸਥਿਤੀਆਂ ਨੂੰ ਅੱਪਡੇਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"ਪਾਸਵਰਡ ਨਿਯਮ ਸੈੱਟ ਕਰੋ"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"ਸਕ੍ਰੀਨ ਲਾਕ ਪਾਸਵਰਡਾਂ ਅਤੇ ਪਿੰਨ ਵਿੱਚ ਆਗਿਆ ਦਿੱਤੀ ਲੰਮਾਈ ਅਤੇ ਅੱਖਰਾਂ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ।"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ਸਕ੍ਰੀਨ ਅਣਲਾਕ ਕਰਨ ਦੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ \'ਤੇ ਨਿਗਰਾਨੀ ਰੱਖੋ"</string>
@@ -1906,6 +1924,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"ਹਫ਼ਤੇ ਦਾ ਅੰਤਲਾ ਦਿਨ"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ਇਵੈਂਟ"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ਸੌਣ ਵੇਲੇ"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਵੱਲੋਂ ਪ੍ਰਬੰਧਿਤ"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ਚਾਲੂ ਹੈ"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ਬੰਦ ਹੈ"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ਕੁਝ ਧੁਨੀਆਂ ਨੂੰ ਮਿਊਟ ਕਰ ਰਹੀ ਹੈ"</string>
@@ -1919,12 +1938,14 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS ਬੇਨਤੀ ਨੂੰ ਵੀਡੀਓ ਕਾਲ ਵਿੱਚ ਬਦਲਿਆ ਗਿਆ"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS ਬੇਨਤੀ ਨੂੰ USSD ਬੇਨਤੀ ਵਿੱਚ ਬਦਲਿਆ ਗਿਆ"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"ਨਵੀਂ SS ਬੇਨਤੀ ਵਿੱਚ ਬਦਲਿਆ ਗਿਆ"</string>
-    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ਫ਼ਿਸ਼ਿੰਗ ਸੰਬੰਧੀ ਸੁਚੇਤਨਾ"</string>
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ਫ਼ਿਸ਼ਿੰਗ ਸੰਬੰਧੀ ਅਲਰਟ"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ"</string>
-    <string name="notification_alerted_content_description" msgid="6139691253611265992">"ਸੁਚੇਤਨਾਵਾਂ"</string>
+    <string name="notification_alerted_content_description" msgid="6139691253611265992">"ਅਲਰਟ"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"ਪੁਸ਼ਟੀਕਿਰਤ"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ਵਿਸਤਾਰ ਕਰੋ"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"ਸਮੇਟੋ"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"ਸਮੇਟਿਆ ਗਿਆ"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"ਵਿਸਤਾਰ ਕੀਤਾ ਗਿਆ"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"ਟੌਗਲ ਵਿਸਤਾਰ"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB ਪੈਰੀਫੈਰਲ ਪੋਰਟ"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1965,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"ਕੰਮ ਸੰਬੰਧੀ ਐਪਾਂ ਤੋਂ ਰੋਕ ਹਟਾਈਏ?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"ਰੋਕ ਹਟਾਓ"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"ਐਮਰਜੈਂਸੀ"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"ਸਕ੍ਰੀਨ ਲਾਕ ਸੈੱਟ ਕਰੋ"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"ਸਕ੍ਰੀਨ ਲਾਕ ਸੈੱਟ ਕਰੋ"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"ਆਪਣੀ ਪ੍ਰਾਈਵੇਟ ਸਪੇਸ ਵਰਤਣ ਲਈ, ਇਸ ਡੀਵਾਈਸ \'ਤੇ ਸਕ੍ਰੀਨ ਲਾਕ ਸੈੱਟ ਕਰੋ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ਐਪ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਐਪ ਇਸ ਵੇਲੇ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
@@ -2341,8 +2365,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"ਡਿਸਪਲੇ \'ਤੇ ਪ੍ਰਤਿਬਿੰਬਿਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"ਕੋਈ ਵੱਖਰੀ ਕੇਬਲ ਵਰਤ ਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"ਤੁਹਾਡਾ ਡੀਵਾਈਸ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਰਮ ਹੈ ਅਤੇ ਜਦੋਂ ਤੱਕ ਇਹ ਠੰਡਾ ਨਹੀਂ ਹੋ ਜਾਂਦਾ ਉਦੋਂ ਤੱਕ ਡਿਸਪਲੇ ਨੂੰ ਪ੍ਰਤਿਬਿੰਬਿਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਕੇਬਲ ਡਿਸਪਲੇਆਂ ਦਾ ਸਮਰਥਨ ਨਾ ਕਰੇ"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਤੁਹਾਡੀ USB-C ਕੇਬਲ ਡਿਸਪਲੇਆਂ ਨਾਲ ਠੀਕ ਤਰ੍ਹਾਂ ਕਨੈਕਟ ਨਾ ਹੋਵੇ"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen ਚਾਲੂ ਹੈ"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਸਮੱਗਰੀ ਨੂੰ ਦਿਖਾਉਣ ਲਈ ਦੋਵੇਂ ਡਿਸਪਲੇਆਂ ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀ ਹੈ"</string>
@@ -2366,4 +2388,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"ਕੰਮ ਸੰਬੰਧੀ 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"ਜਾਂਚ"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"ਭਾਈਚਾਰਕ"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"ਸੈਟੇਲਾਈਟ ਨਾਲ ਸਵੈ-ਕਨੈਕਟ ਹੋਇਆ"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"ਤੁਸੀਂ ਮੋਬਾਈਲ ਜਾਂ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਤੋਂ ਬਿਨਾਂ ਸੁਨੇਹੇ ਭੇਜ ਅਤੇ ਪ੍ਰਾਪਤ ਕਰ ਸਕਦੇ ਹੋ"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ਐਪ ਖੋਲ੍ਹੋ"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ਇਹ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ"</string>
 </resources>

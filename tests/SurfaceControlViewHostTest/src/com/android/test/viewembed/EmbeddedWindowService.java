@@ -23,25 +23,35 @@ import android.annotation.Nullable;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.util.Log;
+import android.view.Choreographer;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.window.InputTransferToken;
 
 public class EmbeddedWindowService extends Service {
     private static final String TAG = "EmbeddedWindowService";
     private SurfaceControlViewHost mVr;
 
     private Handler mHandler;
+
+    private IBinder mInputToken;
+    private SurfaceControl mSurfaceControl;
 
     @Override
     public void onCreate() {
@@ -101,9 +111,47 @@ public class EmbeddedWindowService extends Service {
                 }
             });
         }
+
         @Override
         public void relayout(WindowManager.LayoutParams lp) {
             mHandler.post(() -> mVr.relayout(lp));
+        }
+
+        @Override
+        public void attachEmbeddedSurfaceControl(SurfaceControl parentSc, int displayId,
+                InputTransferToken inputTransferToken) {
+            mHandler.post(() -> {
+                Paint paint = new Paint();
+                paint.setTextSize(40);
+                paint.setColor(Color.WHITE);
+
+                mSurfaceControl = new SurfaceControl.Builder().setName("Child SurfaceControl")
+                        .setParent(parentSc).setBufferSize(500, 500).build();
+                new SurfaceControl.Transaction().show(mSurfaceControl).apply();
+
+                Surface surface = new Surface(mSurfaceControl);
+                Canvas c = surface.lockCanvas(null);
+                c.drawColor(Color.BLUE);
+                c.drawText("Remote", 250, 250, paint);
+                surface.unlockCanvasAndPost(c);
+                WindowManager wm = getSystemService(WindowManager.class);
+                wm.registerBatchedSurfaceControlInputReceiver(displayId, inputTransferToken,
+                        mSurfaceControl,
+                        Choreographer.getInstance(), event -> {
+                            Log.d(TAG, "onInputEvent-remote " + event);
+                            return false;
+                        });
+
+            });
+        }
+
+        @Override
+        public void tearDownEmbeddedSurfaceControl() {
+            if (mSurfaceControl != null) {
+                WindowManager wm = getSystemService(WindowManager.class);
+                wm.unregisterSurfaceControlInputReceiver(mSurfaceControl);
+                new SurfaceControl.Transaction().remove(mSurfaceControl).apply();
+            }
         }
     }
 }

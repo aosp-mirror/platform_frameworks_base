@@ -30,6 +30,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -59,6 +60,13 @@ constructor(
     /** If the prompt is currently showing. */
     val isShowing: Flow<Boolean> = biometricPromptRepository.isShowing
 
+    /**
+     * If biometric prompt without icon needs to show for displaying content prior to credential
+     * view.
+     */
+    val showBpWithoutIconForCredential: StateFlow<Boolean> =
+        biometricPromptRepository.showBpWithoutIconForCredential
+
     /** Metadata about the current credential prompt, including app-supplied preferences. */
     val prompt: Flow<BiometricPromptRequest.Credential?> =
         combine(
@@ -75,20 +83,32 @@ constructor(
                     PromptKind.Pin ->
                         BiometricPromptRequest.Credential.Pin(
                             info = promptInfo,
-                            userInfo = userInfo(userId),
+                            userInfo =
+                                userInfo(
+                                    userId,
+                                    promptInfo.shouldUseParentProfileForDeviceCredential()
+                                ),
                             operationInfo = operationInfo(challenge)
                         )
                     PromptKind.Pattern ->
                         BiometricPromptRequest.Credential.Pattern(
                             info = promptInfo,
-                            userInfo = userInfo(userId),
+                            userInfo =
+                                userInfo(
+                                    userId,
+                                    promptInfo.shouldUseParentProfileForDeviceCredential()
+                                ),
                             operationInfo = operationInfo(challenge),
                             stealthMode = credentialInteractor.isStealthModeActive(userId)
                         )
                     PromptKind.Password ->
                         BiometricPromptRequest.Credential.Password(
                             info = promptInfo,
-                            userInfo = userInfo(userId),
+                            userInfo =
+                                userInfo(
+                                    userId,
+                                    promptInfo.shouldUseParentProfileForDeviceCredential()
+                                ),
                             operationInfo = operationInfo(challenge)
                         )
                     else -> null
@@ -96,10 +116,17 @@ constructor(
             }
             .distinctUntilChanged()
 
-    private fun userInfo(userId: Int): BiometricUserInfo =
+    private fun userInfo(
+        userId: Int,
+        useParentProfileForDeviceCredential: Boolean
+    ): BiometricUserInfo =
         BiometricUserInfo(
             userId = userId,
-            deviceCredentialOwnerId = credentialInteractor.getCredentialOwnerOrSelfId(userId)
+            deviceCredentialOwnerId = credentialInteractor.getCredentialOwnerOrSelfId(userId),
+            userIdForPasswordEntry =
+                if (useParentProfileForDeviceCredential)
+                    credentialInteractor.getParentProfileIdOrSelfId(userId)
+                else credentialInteractor.getCredentialOwnerOrSelfId(userId),
         )
 
     private fun operationInfo(challenge: Long): BiometricOperationInfo =
@@ -115,12 +142,14 @@ constructor(
         @Utils.CredentialType kind: Int,
         userId: Int,
         challenge: Long,
+        opPackageName: String,
     ) {
         biometricPromptRepository.setPrompt(
             promptInfo,
             userId,
             challenge,
-            kind.asBiometricPromptCredential()
+            kind.asBiometricPromptCredential(),
+            opPackageName,
         )
     }
 

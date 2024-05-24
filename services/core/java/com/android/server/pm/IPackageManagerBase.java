@@ -107,9 +107,6 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     @Nullable
     private final ComponentName mInstantAppResolverSettingsComponent;
 
-    @NonNull
-    private final String mRequiredSupplementalProcessPackage;
-
     @Nullable
     private final String mServicesExtensionPackageName;
 
@@ -125,7 +122,6 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
             @NonNull PackageInstallerService installerService,
             @NonNull PackageProperty packageProperty, @NonNull ComponentName resolveComponentName,
             @Nullable ComponentName instantAppResolverSettingsComponent,
-            @NonNull String requiredSupplementalProcessPackage,
             @Nullable String servicesExtensionPackageName,
             @Nullable String sharedSystemSharedLibraryPackageName) {
         mService = service;
@@ -140,7 +136,6 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
         mPackageProperty = packageProperty;
         mResolveComponentName = resolveComponentName;
         mInstantAppResolverSettingsComponent = instantAppResolverSettingsComponent;
-        mRequiredSupplementalProcessPackage = requiredSupplementalProcessPackage;
         mServicesExtensionPackageName = servicesExtensionPackageName;
         mSharedSystemSharedLibraryPackageName = sharedSystemSharedLibraryPackageName;
     }

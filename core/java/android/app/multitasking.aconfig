@@ -1,0 +1,9 @@
+package: "android.app"
+container: "system"
+
+flag {
+    name: "enable_pip_ui_state_callback_on_entering"
+    namespace: "multitasking"
+    description: "Enables PiP UI state callback on entering"
+    bug: "303718131"
+}

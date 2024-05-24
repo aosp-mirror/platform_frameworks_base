@@ -30,6 +30,7 @@ java_library {
 
     static_libs: [
         "modules-utils-fastxmlserializer",
+        "service-jobscheduler-alarm.flags-aconfig-java",
         "service-jobscheduler-job.flags-aconfig-java",
     ],
 

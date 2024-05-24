@@ -25,6 +25,7 @@ import android.compat.annotation.UnsupportedAppUsage;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public abstract class Singleton<T> {
 
     @UnsupportedAppUsage

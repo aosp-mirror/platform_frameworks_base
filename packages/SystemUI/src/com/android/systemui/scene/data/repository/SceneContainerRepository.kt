@@ -18,11 +18,12 @@
 
 package com.android.systemui.scene.data.repository
 
+import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneContainerConfig
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.scene.shared.model.SceneDataSource
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,12 +42,19 @@ class SceneContainerRepository
 constructor(
     @Application applicationScope: CoroutineScope,
     private val config: SceneContainerConfig,
+    private val dataSource: SceneDataSource,
 ) {
-    private val _desiredScene = MutableStateFlow(SceneModel(config.initialSceneKey))
-    val desiredScene: StateFlow<SceneModel> = _desiredScene.asStateFlow()
+    val currentScene: StateFlow<SceneKey> = dataSource.currentScene
 
     private val _isVisible = MutableStateFlow(true)
     val isVisible: StateFlow<Boolean> = _isVisible.asStateFlow()
+
+    /**
+     * Whether there's an ongoing remotely-initiated user interaction.
+     *
+     * For more information see the logic in `SceneInteractor` that mutates this.
+     */
+    val isRemoteUserInteractionOngoing = MutableStateFlow(false)
 
     private val defaultTransitionState = ObservableTransitionState.Idle(config.initialSceneKey)
     private val _transitionState = MutableStateFlow<Flow<ObservableTransitionState>?>(null)
@@ -69,16 +77,22 @@ constructor(
         return config.sceneKeys
     }
 
-    fun setDesiredScene(scene: SceneModel) {
-        check(allSceneKeys().contains(scene.key)) {
+    fun changeScene(
+        toScene: SceneKey,
+        transitionKey: TransitionKey? = null,
+    ) {
+        check(allSceneKeys().contains(toScene)) {
             """
-                Cannot set the desired scene key to "${scene.key}". The configuration does not
+                Cannot set the desired scene key to "$toScene". The configuration does not
                 contain a scene with that key.
             """
                 .trimIndent()
         }
 
-        _desiredScene.value = scene
+        dataSource.changeScene(
+            toScene = toScene,
+            transitionKey = transitionKey,
+        )
     }
 
     /** Sets whether the container is visible. */

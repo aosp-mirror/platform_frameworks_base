@@ -22,7 +22,7 @@ import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.res.R
 import javax.inject.Inject
 
@@ -35,7 +35,7 @@ class FaceAuthAccessibilityDelegate
 @Inject
 constructor(
     @Main private val resources: Resources,
-    private val faceAuthInteractor: KeyguardFaceAuthInteractor,
+    private val faceAuthInteractor: DeviceEntryFaceAuthInteractor,
 ) : View.AccessibilityDelegate() {
     override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfo) {
         super.onInitializeAccessibilityNodeInfo(host, info)

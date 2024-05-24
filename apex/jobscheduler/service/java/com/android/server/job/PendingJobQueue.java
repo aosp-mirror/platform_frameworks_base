@@ -18,6 +18,7 @@ package com.android.server.job;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.util.ArraySet;
 import android.util.Pools;
 import android.util.SparseArray;
 
@@ -96,10 +97,10 @@ class PendingJobQueue {
         }
     }
 
-    void addAll(@NonNull List<JobStatus> jobs) {
+    void addAll(@NonNull ArraySet<JobStatus> jobs) {
         final SparseArray<List<JobStatus>> jobsByUid = new SparseArray<>();
         for (int i = jobs.size() - 1; i >= 0; --i) {
-            final JobStatus job = jobs.get(i);
+            final JobStatus job = jobs.valueAt(i);
             List<JobStatus> appJobs = jobsByUid.get(job.getSourceUid());
             if (appJobs == null) {
                 appJobs = new ArrayList<>();

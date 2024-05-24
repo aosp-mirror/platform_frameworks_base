@@ -16,36 +16,31 @@
 
 package com.android.mediaframeworktest.functional.mediarecorder;
 
-import com.android.mediaframeworktest.MediaFrameworkTest;
-import com.android.mediaframeworktest.MediaNames;
-
-import java.io.*;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Typeface;
 import android.hardware.Camera;
+import android.media.EncoderCapabilities.AudioEncoderCap;
+import android.media.EncoderCapabilities.VideoEncoderCap;
 import android.media.MediaCodec;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.media.EncoderCapabilities;
-import android.media.EncoderCapabilities.VideoEncoderCap;
-import android.media.EncoderCapabilities.AudioEncoderCap;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import com.android.mediaframeworktest.MediaProfileReader;
+
+import androidx.test.filters.LargeTest;
+
+import com.android.mediaframeworktest.MediaFrameworkTest;
 import com.android.mediaframeworktest.MediaFrameworkTestRunner;
+import com.android.mediaframeworktest.MediaNames;
+import com.android.mediaframeworktest.MediaProfileReader;
 
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.Suppress;
+import java.io.*;
 import java.util.List;
-
 
 /**
  * Junit / Instrumentation test case for the media recorder api

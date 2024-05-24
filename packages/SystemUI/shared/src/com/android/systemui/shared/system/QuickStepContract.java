@@ -20,10 +20,11 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
+import static com.android.systemui.shared.Flags.shadeAllowBackGesture;
+
 import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.Resources;
-import android.os.SystemProperties;
 import android.view.ViewConfiguration;
 import android.view.WindowManagerPolicyConstants;
 
@@ -132,8 +133,7 @@ public class QuickStepContract {
             SYSUI_STATE_WAKEFULNESS_TRANSITION | SYSUI_STATE_AWAKE;
 
     // Whether the back gesture is allowed (or ignored) by the Shade
-    public static final boolean ALLOW_BACK_GESTURE_IN_SHADE = SystemProperties.getBoolean(
-            "persist.wm.debug.shade_allow_back_gesture", false);
+    public static final boolean ALLOW_BACK_GESTURE_IN_SHADE = shadeAllowBackGesture();
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -367,7 +367,7 @@ public class QuickStepContract {
     /**
      * Corner radius that should be used on windows in order to cover the display.
      * These values are expressed in pixels because they should not respect display or font
-     * scaling, this means that we don't have to reload them on config changes.
+     * scaling. The corner radius may change when folding/unfolding the device.
      */
     public static float getWindowCornerRadius(Context context) {
         return ScreenDecorationsUtils.getWindowCornerRadius(context);

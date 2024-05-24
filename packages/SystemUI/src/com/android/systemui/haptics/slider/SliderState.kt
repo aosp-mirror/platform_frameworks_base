@@ -32,6 +32,12 @@ enum class SliderState {
     DRAG_HANDLE_REACHED_BOOKEND,
     /* A location in the slider track has been selected. */
     JUMP_TRACK_LOCATION_SELECTED,
-    /* The slider handled moved to a bookend after it was selected. */
+    /* The slider handle moved to a bookend after it was selected. */
     JUMP_BOOKEND_SELECTED,
+    /** The slider handle moved due to single select-and-arrow operation */
+    ARROW_HANDLE_MOVED_ONCE,
+    /** The slider handle moves continuously due to constant select-and-arrow operations */
+    ARROW_HANDLE_MOVES_CONTINUOUSLY,
+    /** The slider handle reached a bookend due to a select-and-arrow operation */
+    ARROW_HANDLE_REACHED_BOOKEND,
 }

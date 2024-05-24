@@ -31,6 +31,7 @@ import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -48,9 +49,9 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.testing.ViewUtils;
 import android.util.MathUtils;
 import android.view.View;
 
@@ -59,19 +60,21 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToGoneTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.shade.transition.LinearLargeScreenShadeInterpolator;
@@ -102,7 +105,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import kotlinx.coroutines.CoroutineDispatcher;
 import kotlinx.coroutines.test.TestScope;
 
 @RunWith(AndroidTestingRunner.class)
@@ -111,13 +113,14 @@ import kotlinx.coroutines.test.TestScope;
 public class ScrimControllerTest extends SysuiTestCase {
 
     @Rule public Expect mExpect = Expect.create();
+    private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
 
     private final FakeConfigurationController mConfigurationController =
             new FakeConfigurationController();
     private final LargeScreenShadeInterpolator
             mLinearLargeScreenShadeInterpolator = new LinearLargeScreenShadeInterpolator();
 
-    private final TestScope mTestScope = TestScopeProvider.getTestScope();
+    private final TestScope mTestScope = mKosmos.getTestScope();
     private final JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope.getBackgroundScope());
 
     private ScrimController mScrimController;
@@ -134,7 +137,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Mock private AlarmManager mAlarmManager;
     @Mock private DozeParameters mDozeParameters;
     @Mock private LightBarController mLightBarController;
-    @Mock private DelayedWakeLock.Builder mDelayedWakeLockBuilder;
+    @Mock private DelayedWakeLock.Factory mDelayedWakeLockFactory;
     @Mock private DelayedWakeLock mWakeLock;
     @Mock private KeyguardStateController mKeyguardStateController;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -144,9 +147,12 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Mock private PrimaryBouncerToGoneTransitionViewModel mPrimaryBouncerToGoneTransitionViewModel;
     @Mock private AlternateBouncerToGoneTransitionViewModel
             mAlternateBouncerToGoneTransitionViewModel;
-    @Mock private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    private final KeyguardTransitionInteractor mKeyguardTransitionInteractor =
+            mKosmos.getKeyguardTransitionInteractor();
+    private final FakeKeyguardTransitionRepository mKeyguardTransitionRepository =
+            mKosmos.getKeyguardTransitionRepository();
+    @Mock private KeyguardInteractor mKeyguardInteractor;
     private final FakeWallpaperRepository mWallpaperRepository = new FakeWallpaperRepository();
-    @Mock private CoroutineDispatcher mMainDispatcher;
     @Mock private TypedArray mMockTypedArray;
 
     // TODO(b/204991468): Use a real PanelExpansionStateManager object once this bug is fixed. (The
@@ -260,15 +266,9 @@ public class ScrimControllerTest extends SysuiTestCase {
         }).when(mLightBarController).setScrimState(
                 any(ScrimState.class), anyFloat(), any(GradientColors.class));
 
-        when(mDelayedWakeLockBuilder.setHandler(any(Handler.class)))
-                .thenReturn(mDelayedWakeLockBuilder);
-        when(mDelayedWakeLockBuilder.setTag(any(String.class)))
-                .thenReturn(mDelayedWakeLockBuilder);
-        when(mDelayedWakeLockBuilder.build()).thenReturn(mWakeLock);
+        when(mDelayedWakeLockFactory.create(any(String.class))).thenReturn(mWakeLock);
         when(mDockManager.isDocked()).thenReturn(false);
 
-        when(mKeyguardTransitionInteractor.transition(any(), any()))
-                .thenReturn(emptyFlow());
         when(mPrimaryBouncerToGoneTransitionViewModel.getScrimAlpha())
                 .thenReturn(emptyFlow());
         when(mAlternateBouncerToGoneTransitionViewModel.getScrimAlpha())
@@ -279,7 +279,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mDozeParameters,
                 mAlarmManager,
                 mKeyguardStateController,
-                mDelayedWakeLockBuilder,
+                mDelayedWakeLockFactory,
                 new FakeHandler(mLooper.getLooper()),
                 mKeyguardUpdateMonitor,
                 mDockManager,
@@ -292,13 +292,17 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mPrimaryBouncerToGoneTransitionViewModel,
                 mAlternateBouncerToGoneTransitionViewModel,
                 mKeyguardTransitionInteractor,
+                mKeyguardInteractor,
                 mWallpaperRepository,
-                mMainDispatcher,
+                mKosmos.getTestDispatcher(),
                 mLinearLargeScreenShadeInterpolator);
         mScrimController.start();
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);
         mScrimController.setAnimatorListener(mAnimatorListener);
+
+        // Attach behind scrim so flows that are collecting on it start running.
+        ViewUtils.attachView(mScrimBehind);
 
         mScrimController.setHasBackdrop(false);
 
@@ -311,6 +315,8 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @After
     public void tearDown() {
+        // Detaching view stops flow collection and prevents memory leak.
+        ViewUtils.detachView(mScrimBehind);
         finishAnimationsImmediately();
         Arrays.stream(ScrimState.values()).forEach((scrim) -> {
             scrim.setAodFrontScrimAlpha(0f);
@@ -627,6 +633,164 @@ public class ScrimControllerTest extends SysuiTestCase {
         ));
 
         assertScrimTint(mScrimBehind, mSurfaceColor);
+    }
+
+    @Test
+    public void lockscreenToHubTransition_setsBehindScrimAlpha() {
+        // Start on lockscreen.
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        finishAnimationsImmediately();
+
+        // Behind scrim starts at default alpha.
+        final float transitionProgress = 0f;
+        float expectedAlpha = ScrimState.KEYGUARD.getBehindAlpha();
+        mKeyguardTransitionRepository.sendTransitionStepJava(mKosmos.getTestScope(),
+                new TransitionStep(
+                        KeyguardState.LOCKSCREEN,
+                        KeyguardState.GLANCEABLE_HUB,
+                        transitionProgress,
+                        TransitionState.STARTED
+                ), true);
+        mTestScope.getTestScheduler().runCurrent();
+        assertThat(mScrimBehind.getViewAlpha()).isEqualTo(expectedAlpha);
+
+        // Scrim fades out as transition runs.
+        final float runningProgress = 0.2f;
+        expectedAlpha = (1 - runningProgress) * ScrimState.KEYGUARD.getBehindAlpha();
+        mKeyguardTransitionRepository.sendTransitionStepJava(mKosmos.getTestScope(),
+                new TransitionStep(
+                        KeyguardState.LOCKSCREEN,
+                        KeyguardState.GLANCEABLE_HUB,
+                        runningProgress,
+                        TransitionState.RUNNING
+                ), true);
+        mTestScope.getTestScheduler().runCurrent();
+        assertThat(mScrimBehind.getViewAlpha()).isEqualTo(expectedAlpha);
+
+        // Scrim invisible at end of transition.
+        final float finishedProgress = 1f;
+        expectedAlpha = 0f;
+        mKeyguardTransitionRepository.sendTransitionStepJava(mKosmos.getTestScope(),
+                new TransitionStep(
+                        KeyguardState.LOCKSCREEN,
+                        KeyguardState.GLANCEABLE_HUB,
+                        finishedProgress,
+                        TransitionState.FINISHED
+                ), true);
+        mTestScope.getTestScheduler().runCurrent();
+        assertThat(mScrimBehind.getViewAlpha()).isEqualTo(expectedAlpha);
+    }
+
+    @Test
+    public void hubToLockscreenTransition_setsViewAlpha() {
+        // Start on glanceable hub.
+        mScrimController.transitionTo(ScrimState.GLANCEABLE_HUB);
+        finishAnimationsImmediately();
+
+        // Behind scrim starts at 0 alpha.
+        final float transitionProgress = 0f;
+        float expectedAlpha = 0f;
+        mKeyguardTransitionRepository.sendTransitionStepJava(mKosmos.getTestScope(),
+                new TransitionStep(
+                        KeyguardState.GLANCEABLE_HUB,
+                        KeyguardState.LOCKSCREEN,
+                        transitionProgress,
+                        TransitionState.STARTED
+                ), true);
+        mTestScope.getTestScheduler().runCurrent();
+        assertThat(mScrimBehind.getViewAlpha()).isEqualTo(expectedAlpha);
+
+        // Scrim fades in as transition runs.
+        final float runningProgress = 0.2f;
+        expectedAlpha = runningProgress * ScrimState.KEYGUARD.getBehindAlpha();
+        mKeyguardTransitionRepository.sendTransitionStepJava(mKosmos.getTestScope(),
+                new TransitionStep(
+                        KeyguardState.GLANCEABLE_HUB,
+                        KeyguardState.LOCKSCREEN,
+                        runningProgress,
+                        TransitionState.RUNNING
+                ), true);
+        mTestScope.getTestScheduler().runCurrent();
+        assertThat(mScrimBehind.getViewAlpha()).isEqualTo(expectedAlpha);
+
+        // Scrim at default visibility at end of transition.
+        final float finishedProgress = 1f;
+        expectedAlpha = finishedProgress * ScrimState.KEYGUARD.getBehindAlpha();
+        mKeyguardTransitionRepository.sendTransitionStepJava(mKosmos.getTestScope(),
+                new TransitionStep(
+                        KeyguardState.GLANCEABLE_HUB,
+                        KeyguardState.LOCKSCREEN,
+                        finishedProgress,
+                        TransitionState.FINISHED
+                ), true);
+        mTestScope.getTestScheduler().runCurrent();
+        assertThat(mScrimBehind.getViewAlpha()).isEqualTo(expectedAlpha);
+    }
+
+    @Test
+    public void transitionToHub() {
+        mScrimController.setRawPanelExpansionFraction(0f);
+        mScrimController.setBouncerHiddenFraction(KeyguardBouncerConstants.EXPANSION_HIDDEN);
+        mScrimController.transitionTo(ScrimState.GLANCEABLE_HUB);
+        finishAnimationsImmediately();
+
+        // All scrims transparent on the hub.
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mNotificationsScrim, TRANSPARENT,
+                mScrimBehind, TRANSPARENT));
+    }
+
+    @Test
+    public void openBouncerOnHub() {
+        mScrimController.transitionTo(ScrimState.GLANCEABLE_HUB);
+
+        // Open the bouncer.
+        mScrimController.setRawPanelExpansionFraction(0f);
+        mScrimController.setBouncerHiddenFraction(KeyguardBouncerConstants.EXPANSION_VISIBLE);
+        finishAnimationsImmediately();
+
+        // Only behind widget is visible.
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mNotificationsScrim, TRANSPARENT,
+                mScrimBehind, OPAQUE));
+
+        // Bouncer is closed.
+        mScrimController.setBouncerHiddenFraction(KeyguardBouncerConstants.EXPANSION_HIDDEN);
+        mScrimController.transitionTo(ScrimState.GLANCEABLE_HUB);
+        finishAnimationsImmediately();
+
+        // All scrims are transparent.
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mNotificationsScrim, TRANSPARENT,
+                mScrimBehind, TRANSPARENT));
+    }
+
+    @Test
+    public void openShadeOnHub() {
+        mScrimController.transitionTo(ScrimState.GLANCEABLE_HUB);
+
+        // Open the shade.
+        mScrimController.transitionTo(SHADE_LOCKED);
+        mScrimController.setQsPosition(1f, 0);
+        finishAnimationsImmediately();
+
+        // Shade scrims are visible.
+        assertScrimAlpha(Map.of(
+                mNotificationsScrim, OPAQUE,
+                mScrimInFront, TRANSPARENT,
+                mScrimBehind, OPAQUE));
+
+        mScrimController.transitionTo(ScrimState.GLANCEABLE_HUB);
+        finishAnimationsImmediately();
+
+        // All scrims are transparent.
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mNotificationsScrim, TRANSPARENT,
+                mScrimBehind, TRANSPARENT));
     }
 
     @Test
@@ -987,7 +1151,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mDozeParameters,
                 mAlarmManager,
                 mKeyguardStateController,
-                mDelayedWakeLockBuilder,
+                mDelayedWakeLockFactory,
                 new FakeHandler(mLooper.getLooper()),
                 mKeyguardUpdateMonitor,
                 mDockManager,
@@ -1000,8 +1164,9 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mPrimaryBouncerToGoneTransitionViewModel,
                 mAlternateBouncerToGoneTransitionViewModel,
                 mKeyguardTransitionInteractor,
+                mKeyguardInteractor,
                 mWallpaperRepository,
-                mMainDispatcher,
+                mKosmos.getTestDispatcher(),
                 mLinearLargeScreenShadeInterpolator);
         mScrimController.start();
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
@@ -1267,7 +1432,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 ScrimState.UNINITIALIZED, ScrimState.KEYGUARD, BOUNCER,
                 ScrimState.DREAMING, ScrimState.BOUNCER_SCRIMMED, ScrimState.BRIGHTNESS_MIRROR,
                 ScrimState.UNLOCKED, SHADE_LOCKED, ScrimState.AUTH_SCRIMMED,
-                ScrimState.AUTH_SCRIMMED_SHADE));
+                ScrimState.AUTH_SCRIMMED_SHADE, ScrimState.GLANCEABLE_HUB));
 
         for (ScrimState state : ScrimState.values()) {
             if (!lowPowerModeStates.contains(state) && !regularStates.contains(state)) {
@@ -1681,6 +1846,26 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setNotificationsOverScrollAmount(overScrollAmount);
 
         assertThat(mScrimInFront.getTranslationY()).isEqualTo(0);
+    }
+
+    @Test
+    public void notificationBoundsTopGetsPassedToKeyguard() {
+        mScrimController.transitionTo(SHADE_LOCKED);
+        mScrimController.setQsPosition(1f, 0);
+        finishAnimationsImmediately();
+
+        mScrimController.setNotificationsBounds(0f, 100f, 0f, 0f);
+        verify(mKeyguardInteractor).setTopClippingBounds(eq(100));
+    }
+
+    @Test
+    public void notificationBoundsTopDoesNotGetPassedToKeyguardWhenNotifScrimIsNotVisible() {
+        mScrimController.setKeyguardOccluded(true);
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        finishAnimationsImmediately();
+
+        mScrimController.setNotificationsBounds(0f, 100f, 0f, 0f);
+        verify(mKeyguardInteractor).setTopClippingBounds(eq(null));
     }
 
     @Test

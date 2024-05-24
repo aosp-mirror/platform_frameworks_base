@@ -49,7 +49,7 @@
             android:layout_centerVertical="true"
             android:paddingTop="1dp"
             android:importantForAccessibility="yes"
-            android:tint="#9E9E9E" />
+            android:tint="?android:attr/textColorPrimary"/>
 
         <TextView
             android:id="@+id/undo"

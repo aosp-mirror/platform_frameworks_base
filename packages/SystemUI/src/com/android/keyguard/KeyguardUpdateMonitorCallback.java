@@ -339,4 +339,9 @@ public class KeyguardUpdateMonitorCallback {
      * On biometric enrollment state changed
      */
     public void onBiometricEnrollmentStateChanged(BiometricSourceType biometricSourceType) { }
+
+    /**
+     * On force is dismissible state changed.
+     */
+    public void onForceIsDismissibleChanged(boolean forceIsDismissible) { }
 }

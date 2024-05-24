@@ -5,21 +5,22 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysUITestModule
-import com.android.systemui.TestMocksModule
 import com.android.systemui.ExpandHelper
+import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.TestMocksModule
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FakeFeatureFlagsClassicModule
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingObserver
-import com.android.systemui.media.controls.ui.MediaHierarchyManager
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.res.R
-import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.shade.ShadeLockscreenInteractor
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
@@ -60,8 +61,8 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+import org.mockito.Mockito.`when` as whenever
 
 private fun <T> anyObject(): T {
     return Mockito.anyObject<T>()
@@ -82,6 +83,8 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     private val testScope
         get() = testComponent.testScope
 
+    private val qsSceneAdapter = FakeQSSceneAdapter({ mock() })
+
     lateinit var row: ExpandableNotificationRow
 
     @Mock lateinit var centralSurfaces: CentralSurfaces
@@ -94,7 +97,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var qS: QS
     @Mock lateinit var qsTransitionController: LockscreenShadeQsTransitionController
     @Mock lateinit var scrimController: ScrimController
-    @Mock lateinit var shadeViewController: ShadeViewController
+    @Mock lateinit var shadeLockscreenInteractor: ShadeLockscreenInteractor
     @Mock lateinit var singleShadeOverScroller: SingleShadeLockScreenOverScroller
     @Mock lateinit var splitShadeOverScroller: SplitShadeLockScreenOverScroller
     @Mock lateinit var stackscroller: NotificationStackScrollLayout
@@ -167,7 +170,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                 keyguardTransitionControllerFactory = { notificationPanelController ->
                     LockscreenShadeKeyguardTransitionController(
                         mediaHierarchyManager = mediaHierarchyManager,
-                        notificationPanelController = notificationPanelController,
+                        shadeLockscreenInteractor = notificationPanelController,
                         context = context,
                         configurationController = configurationController,
                         dumpManager = mock(),
@@ -186,13 +189,13 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                 qsTransitionControllerFactory = { qsTransitionController },
                 shadeRepository = testComponent.shadeRepository,
                 shadeInteractor = testComponent.shadeInteractor,
-                powerInteractor = testComponent.powerInteractor,
                 splitShadeStateController = ResourcesSplitShadeStateController(),
+                shadeLockscreenInteractorLazy = {shadeLockscreenInteractor},
                 naturalScrollingSettingObserver = naturalScrollingSettingObserver,
+                lazyQSSceneAdapter = { qsSceneAdapter }
             )
 
         transitionController.addCallback(transitionControllerCallback)
-        transitionController.shadeViewController = shadeViewController
         transitionController.centralSurfaces = centralSurfaces
         transitionController.qS = qS
         transitionController.setStackScroller(nsslController)
@@ -286,7 +289,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun testGoToLockedShadeCreatesQSAnimation() {
         transitionController.goToLockedShade(null)
         verify(statusbarStateController).setState(StatusBarState.SHADE_LOCKED)
-        verify(shadeViewController).transitionToExpandedShade(anyLong())
+        verify(shadeLockscreenInteractor).transitionToExpandedShade(anyLong())
         assertNotNull(transitionController.dragDownAnimator)
     }
 
@@ -294,7 +297,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun testGoToLockedShadeDoesntCreateQSAnimation() {
         transitionController.goToLockedShade(null, needsQSAnimation = false)
         verify(statusbarStateController).setState(StatusBarState.SHADE_LOCKED)
-        verify(shadeViewController).transitionToExpandedShade(anyLong())
+        verify(shadeLockscreenInteractor).transitionToExpandedShade(anyLong())
         assertNull(transitionController.dragDownAnimator)
     }
 
@@ -302,7 +305,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun testGoToLockedShadeAlwaysCreatesQSAnimationInSplitShade() {
         enableSplitShade()
         transitionController.goToLockedShade(null, needsQSAnimation = true)
-        verify(shadeViewController).transitionToExpandedShade(anyLong())
+        verify(shadeLockscreenInteractor).transitionToExpandedShade(anyLong())
         assertNotNull(transitionController.dragDownAnimator)
     }
 
@@ -358,7 +361,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun setDragAmount_setsKeyguardTransitionProgress() {
         transitionController.dragDownAmount = 10f
 
-        verify(shadeViewController).setKeyguardTransitionProgress(anyFloat(), anyInt())
+        verify(shadeLockscreenInteractor).setKeyguardTransitionProgress(anyFloat(), anyInt())
     }
 
     @Test
@@ -370,7 +373,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         transitionController.dragDownAmount = 10f
 
         val expectedAlpha = 1 - 10f / alphaDistance
-        verify(shadeViewController).setKeyguardTransitionProgress(eq(expectedAlpha), anyInt())
+        verify(shadeLockscreenInteractor).setKeyguardTransitionProgress(eq(expectedAlpha), anyInt())
     }
 
     @Test
@@ -383,7 +386,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
 
         transitionController.dragDownAmount = 10f
 
-        verify(shadeViewController).setKeyguardTransitionProgress(anyFloat(), eq(0))
+        verify(shadeLockscreenInteractor).setKeyguardTransitionProgress(anyFloat(), eq(0))
     }
 
     @Test
@@ -396,7 +399,8 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
 
         transitionController.dragDownAmount = 10f
 
-        verify(shadeViewController).setKeyguardTransitionProgress(anyFloat(), eq(mediaTranslationY))
+        verify(shadeLockscreenInteractor)
+                .setKeyguardTransitionProgress(anyFloat(), eq(mediaTranslationY))
     }
 
     @Test
@@ -416,7 +420,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                 R.dimen.lockscreen_shade_keyguard_transition_vertical_offset
             )
         val expectedTranslation = 10f / distance * offset
-        verify(shadeViewController)
+        verify(shadeLockscreenInteractor)
             .setKeyguardTransitionProgress(anyFloat(), eq(expectedTranslation.toInt()))
     }
 
@@ -555,7 +559,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         transitionController.dragDownAmount = dragDownAmount
 
         val expectedAlpha = 1 - dragDownAmount / alphaDistance
-        verify(shadeViewController).setKeyguardStatusBarAlpha(expectedAlpha)
+        verify(shadeLockscreenInteractor).setKeyguardStatusBarAlpha(expectedAlpha)
     }
 
     @Test
@@ -564,7 +568,17 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
 
         transitionController.dragDownAmount = 10f
 
-        verify(shadeViewController).setKeyguardStatusBarAlpha(-1f)
+        verify(shadeLockscreenInteractor).setKeyguardStatusBarAlpha(-1f)
+    }
+
+    @Test
+    fun nullQs_canDragDownFromAdapter() {
+        transitionController.qS = null
+
+        qsSceneAdapter.isQsFullyCollapsed = true
+        assertTrue("Can't drag down on keyguard", transitionController.canDragDown())
+        qsSceneAdapter.isQsFullyCollapsed = false
+        assertFalse("Can drag down when QS is expanded", transitionController.canDragDown())
     }
 
     private fun enableSplitShade() {

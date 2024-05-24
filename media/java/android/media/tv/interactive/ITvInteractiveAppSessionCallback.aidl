@@ -50,6 +50,7 @@ oneway interface ITvInteractiveAppSessionCallback {
     void onRequestCurrentTvInputId();
     void onRequestTimeShiftMode();
     void onRequestAvailableSpeeds();
+    void onRequestSelectedTrackInfo();
     void onRequestStartRecording(in String requestId, in Uri programUri);
     void onRequestStopRecording(in String recordingId);
     void onRequestScheduleRecording(in String requestId, in String inputId, in Uri channelUri,
@@ -60,5 +61,7 @@ oneway interface ITvInteractiveAppSessionCallback {
     void onRequestTvRecordingInfo(in String recordingId);
     void onRequestTvRecordingInfoList(in int type);
     void onRequestSigning(in String id, in String algorithm, in String alias, in byte[] data);
+    void onRequestSigning2(in String id, in String algorithm, in String host, int port, in byte[] data);
+    void onRequestCertificate(in String host, int port);
     void onAdRequest(in AdRequest request);
 }

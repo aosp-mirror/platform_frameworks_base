@@ -9,6 +9,13 @@ flag {
 }
 
 flag {
+    name: "bal_require_opt_in_same_uid"
+    namespace: "responsible_apis"
+    description: "Require the PendingIntent creator/sender to opt in if it is the same UID"
+    bug: "296478951"
+}
+
+flag {
     name: "bal_dont_bring_existing_background_task_stack_to_fg"
     namespace: "responsible_apis"
     description: "When starting a PendingIntent with ONLY creator privileges, don't bring the existing task stack to foreground"
@@ -30,13 +37,6 @@ flag {
 }
 
 flag {
-    name: "bal_return_correct_code_if_caller_is_persistent_system_process"
-    namespace: "responsible_apis"
-    description: "Split visibility check and return a better status code in case of system process."
-    bug: "171459802"
-}
-
-flag {
     name: "bal_improve_real_caller_visibility_check"
     namespace: "responsible_apis"
     description: "Prevent a task to restart based on a visible window during task switch."
@@ -47,5 +47,5 @@ flag {
     name: "bal_respect_app_switch_state_when_check_bound_by_foreground_uid"
     namespace: "responsible_apis"
     description: "Prevent BAL based on it is bound by foreground Uid but the app switch is stopped."
-    bug: "171459802"
+    bug: "283801068"
 }

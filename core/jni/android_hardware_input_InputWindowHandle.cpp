@@ -75,6 +75,7 @@ static struct {
     jfieldID windowToken;
     jfieldID focusTransferTarget;
     jfieldID alpha;
+    jfieldID canOccludePresentation;
 } gInputWindowHandleClassInfo;
 
 static struct {
@@ -327,6 +328,8 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowIn
                         javaObjectForIBinder(env, windowInfo.windowToken));
 
     env->SetFloatField(inputWindowHandle, gInputWindowHandleClassInfo.alpha, windowInfo.alpha);
+    env->SetBooleanField(inputWindowHandle, gInputWindowHandleClassInfo.canOccludePresentation,
+                         windowInfo.canOccludePresentation);
 
     return inputWindowHandle;
 }
@@ -450,6 +453,9 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
             "touchableRegionSurfaceControl", "Ljava/lang/ref/WeakReference;");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.alpha, clazz, "alpha", "F");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.canOccludePresentation, clazz,
+                 "canOccludePresentation", "Z");
 
     jclass surfaceControlClazz;
     FIND_CLASS(surfaceControlClazz, "android/view/SurfaceControl");

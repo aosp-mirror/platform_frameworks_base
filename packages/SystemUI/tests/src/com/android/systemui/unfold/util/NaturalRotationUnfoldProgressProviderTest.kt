@@ -16,6 +16,7 @@
 package com.android.systemui.unfold.util
 
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper
 import android.view.Surface
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -37,6 +38,7 @@ import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
+@TestableLooper.RunWithLooper
 class NaturalRotationUnfoldProgressProviderTest : SysuiTestCase() {
 
     @Mock lateinit var rotationChangeProvider: RotationChangeProvider
@@ -48,10 +50,12 @@ class NaturalRotationUnfoldProgressProviderTest : SysuiTestCase() {
     @Captor private lateinit var rotationListenerCaptor: ArgumentCaptor<RotationListener>
 
     lateinit var progressProvider: NaturalRotationUnfoldProgressProvider
+    private lateinit var testableLooper : TestableLooper
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        testableLooper = TestableLooper.get(this)
 
         progressProvider =
             NaturalRotationUnfoldProgressProvider(context, rotationChangeProvider, sourceProvider)
@@ -123,5 +127,6 @@ class NaturalRotationUnfoldProgressProviderTest : SysuiTestCase() {
 
     private fun onRotationChanged(rotation: Int) {
         rotationListenerCaptor.value.onRotationChanged(rotation)
+        testableLooper.processAllMessages()
     }
 }

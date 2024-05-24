@@ -18,9 +18,13 @@ package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
@@ -30,13 +34,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.approachLayout
+import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.test.assertTopPositionInRootIsEqualTo
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -68,7 +77,7 @@ class ElementTest {
                 .offset(offset)
                 .element(key)
                 .approachLayout(
-                    isMeasurementApproachInProgress = { layoutState.isTransitioning() },
+                    isMeasurementApproachInProgress = { layoutState.isTransitioning() }
                 ) { measurable, constraints ->
                     onLayout()
                     val placement = measurable.measure(constraints)
@@ -118,7 +127,13 @@ class ElementTest {
             toSceneContent = {
                 Box(Modifier.size(layoutSize)) {
                     // Shared element.
-                    Element(TestElements.Foo, elementSize, elementOffset)
+                    Element(
+                        TestElements.Foo,
+                        elementSize,
+                        elementOffset,
+                        onLayout = { fooLayouts++ },
+                        onPlacement = { fooPlacements++ },
+                    )
                 }
             },
             transition = {
@@ -129,21 +144,25 @@ class ElementTest {
                 scaleSize(TestElements.Bar, width = 1f, height = 1f)
             },
         ) {
-            var numberOfLayoutsAfterOneAnimationFrame = 0
-            var numberOfPlacementsAfterOneAnimationFrame = 0
+            var fooLayoutsAfterOneAnimationFrame = 0
+            var fooPlacementsAfterOneAnimationFrame = 0
+            var barLayoutsAfterOneAnimationFrame = 0
+            var barPlacementsAfterOneAnimationFrame = 0
 
             fun assertNumberOfLayoutsAndPlacements() {
-                assertThat(fooLayouts).isEqualTo(numberOfLayoutsAfterOneAnimationFrame)
-                assertThat(fooPlacements).isEqualTo(numberOfPlacementsAfterOneAnimationFrame)
-                assertThat(barLayouts).isEqualTo(numberOfLayoutsAfterOneAnimationFrame)
-                assertThat(barPlacements).isEqualTo(numberOfPlacementsAfterOneAnimationFrame)
+                assertThat(fooLayouts).isEqualTo(fooLayoutsAfterOneAnimationFrame)
+                assertThat(fooPlacements).isEqualTo(fooPlacementsAfterOneAnimationFrame)
+                assertThat(barLayouts).isEqualTo(barLayoutsAfterOneAnimationFrame)
+                assertThat(barPlacements).isEqualTo(barPlacementsAfterOneAnimationFrame)
             }
 
             at(16) {
                 // Capture the number of layouts and placements that happened after 1 animation
                 // frame.
-                numberOfLayoutsAfterOneAnimationFrame = fooLayouts
-                numberOfPlacementsAfterOneAnimationFrame = fooPlacements
+                fooLayoutsAfterOneAnimationFrame = fooLayouts
+                fooPlacementsAfterOneAnimationFrame = fooPlacements
+                barLayoutsAfterOneAnimationFrame = barLayouts
+                barPlacementsAfterOneAnimationFrame = barPlacements
             }
             repeat(nFrames - 2) { i ->
                 // Ensure that all animation frames (except the final one) don't relayout or replace
@@ -189,7 +208,13 @@ class ElementTest {
             toSceneContent = {
                 Box(Modifier.size(layoutSize)) {
                     // Shared element.
-                    Element(TestElements.Foo, elementSize, offset = 20.dp)
+                    Element(
+                        TestElements.Foo,
+                        elementSize,
+                        offset = 20.dp,
+                        onLayout = { fooLayouts++ },
+                        onPlacement = { fooPlacements++ },
+                    )
                 }
             },
             transition = {
@@ -200,25 +225,30 @@ class ElementTest {
                 scaleSize(TestElements.Bar, width = 1f, height = 1f)
             },
         ) {
-            var numberOfLayoutsAfterOneAnimationFrame = 0
-            var lastNumberOfPlacements = 0
+            var fooLayoutsAfterOneAnimationFrame = 0
+            var barLayoutsAfterOneAnimationFrame = 0
+            var lastFooPlacements = 0
+            var lastBarPlacements = 0
 
             fun assertNumberOfLayoutsAndPlacements() {
                 // The number of layouts have not changed.
-                assertThat(fooLayouts).isEqualTo(numberOfLayoutsAfterOneAnimationFrame)
-                assertThat(barLayouts).isEqualTo(numberOfLayoutsAfterOneAnimationFrame)
+                assertThat(fooLayouts).isEqualTo(fooLayoutsAfterOneAnimationFrame)
+                assertThat(barLayouts).isEqualTo(barLayoutsAfterOneAnimationFrame)
 
                 // The number of placements have increased.
-                assertThat(fooPlacements).isGreaterThan(lastNumberOfPlacements)
-                assertThat(barPlacements).isGreaterThan(lastNumberOfPlacements)
-                lastNumberOfPlacements = fooPlacements
+                assertThat(fooPlacements).isGreaterThan(lastFooPlacements)
+                assertThat(barPlacements).isGreaterThan(lastBarPlacements)
+                lastFooPlacements = fooPlacements
+                lastBarPlacements = barPlacements
             }
 
             at(16) {
                 // Capture the number of layouts and placements that happened after 1 animation
                 // frame.
-                numberOfLayoutsAfterOneAnimationFrame = fooLayouts
-                lastNumberOfPlacements = fooPlacements
+                fooLayoutsAfterOneAnimationFrame = fooLayouts
+                barLayoutsAfterOneAnimationFrame = barLayouts
+                lastFooPlacements = fooPlacements
+                lastBarPlacements = barPlacements
             }
             repeat(nFrames - 2) { i ->
                 // Ensure that all animation frames (except the final one) only replaced the
@@ -237,13 +267,11 @@ class ElementTest {
 
         rule.setContent {
             SceneTransitionLayoutForTesting(
-                currentScene = currentScene,
-                onChangeScene = { currentScene = it },
-                transitions = remember { transitions {} },
-                state = remember { SceneTransitionLayoutState(currentScene) },
-                edgeDetector = DefaultEdgeDetector,
-                modifier = Modifier,
-                transitionInterceptionThreshold = 0f,
+                state =
+                    updateSceneTransitionLayoutState(
+                        currentScene = currentScene,
+                        onChangeScene = { currentScene = it }
+                    ),
                 onLayoutImpl = { nullableLayoutImpl = it },
             ) {
                 scene(TestScenes.SceneA) { /* Nothing */}
@@ -272,7 +300,7 @@ class ElementTest {
 
         assertThat(layoutImpl.elements.keys).containsExactly(key)
         val element = layoutImpl.elements.getValue(key)
-        assertThat(element.sceneValues.keys).containsExactly(TestScenes.SceneB)
+        assertThat(element.sceneStates.keys).containsExactly(TestScenes.SceneB)
 
         // Scene C, state 0: the same element is reused.
         currentScene = TestScenes.SceneC
@@ -281,13 +309,13 @@ class ElementTest {
 
         assertThat(layoutImpl.elements.keys).containsExactly(key)
         assertThat(layoutImpl.elements.getValue(key)).isSameInstanceAs(element)
-        assertThat(element.sceneValues.keys).containsExactly(TestScenes.SceneC)
+        assertThat(element.sceneStates.keys).containsExactly(TestScenes.SceneC)
 
         // Scene C, state 1: the element is removed from the map.
         sceneCState = 1
         rule.waitForIdle()
 
-        assertThat(element.sceneValues).isEmpty()
+        assertThat(element.sceneStates).isEmpty()
         assertThat(layoutImpl.elements).isEmpty()
     }
 
@@ -369,13 +397,11 @@ class ElementTest {
 
         rule.setContent {
             SceneTransitionLayoutForTesting(
-                currentScene = TestScenes.SceneA,
-                onChangeScene = {},
-                transitions = remember { transitions {} },
-                state = remember { SceneTransitionLayoutState(TestScenes.SceneA) },
-                edgeDetector = DefaultEdgeDetector,
-                modifier = Modifier,
-                transitionInterceptionThreshold = 0f,
+                state =
+                    updateSceneTransitionLayoutState(
+                        currentScene = TestScenes.SceneA,
+                        onChangeScene = {}
+                    ),
                 onLayoutImpl = { nullableLayoutImpl = it },
             ) {
                 scene(TestScenes.SceneA) { Box(Modifier.element(key)) }
@@ -388,7 +414,7 @@ class ElementTest {
         // There is only Foo in the elements map.
         assertThat(layoutImpl.elements.keys).containsExactly(TestElements.Foo)
         val fooElement = layoutImpl.elements.getValue(TestElements.Foo)
-        assertThat(fooElement.sceneValues.keys).containsExactly(TestScenes.SceneA)
+        assertThat(fooElement.sceneStates.keys).containsExactly(TestScenes.SceneA)
 
         key = TestElements.Bar
 
@@ -396,8 +422,8 @@ class ElementTest {
         rule.waitForIdle()
         assertThat(layoutImpl.elements.keys).containsExactly(TestElements.Bar)
         val barElement = layoutImpl.elements.getValue(TestElements.Bar)
-        assertThat(barElement.sceneValues.keys).containsExactly(TestScenes.SceneA)
-        assertThat(fooElement.sceneValues).isEmpty()
+        assertThat(barElement.sceneStates.keys).containsExactly(TestScenes.SceneA)
+        assertThat(fooElement.sceneStates).isEmpty()
     }
 
     @Test
@@ -424,13 +450,11 @@ class ElementTest {
             scrollScope = rememberCoroutineScope()
 
             SceneTransitionLayoutForTesting(
-                currentScene = TestScenes.SceneA,
-                onChangeScene = {},
-                transitions = remember { transitions {} },
-                state = remember { SceneTransitionLayoutState(TestScenes.SceneA) },
-                edgeDetector = DefaultEdgeDetector,
-                modifier = Modifier,
-                transitionInterceptionThreshold = 0f,
+                state =
+                    updateSceneTransitionLayoutState(
+                        currentScene = TestScenes.SceneA,
+                        onChangeScene = {}
+                    ),
                 onLayoutImpl = { nullableLayoutImpl = it },
             ) {
                 scene(TestScenes.SceneA) {
@@ -456,7 +480,7 @@ class ElementTest {
         // There is only Foo in the elements map.
         assertThat(layoutImpl.elements.keys).containsExactly(TestElements.Foo)
         val element = layoutImpl.elements.getValue(TestElements.Foo)
-        val sceneValues = element.sceneValues
+        val sceneValues = element.sceneStates
         assertThat(sceneValues.keys).containsExactly(TestScenes.SceneA)
 
         // Get the ElementModifier node that should be reused later on when coming back to this
@@ -479,7 +503,7 @@ class ElementTest {
 
         assertThat(layoutImpl.elements.keys).containsExactly(TestElements.Foo)
         val newElement = layoutImpl.elements.getValue(TestElements.Foo)
-        val newSceneValues = newElement.sceneValues
+        val newSceneValues = newElement.sceneStates
         assertThat(newElement).isNotEqualTo(element)
         assertThat(newSceneValues).isNotEqualTo(sceneValues)
         assertThat(newSceneValues.keys).containsExactly(TestScenes.SceneA)
@@ -515,5 +539,158 @@ class ElementTest {
             at(48) { assertThat(fooCompositions).isEqualTo(1) }
             after { assertThat(fooCompositions).isEqualTo(1) }
         }
+    }
+
+    @Test
+    fun elementTransitionDuringOverscroll() {
+        // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
+        // detected as a drag event.
+        var touchSlop = 0f
+        val overscrollTranslateY = 10.dp
+        val layoutWidth = 200.dp
+        val layoutHeight = 400.dp
+
+        val state =
+            MutableSceneTransitionLayoutState(
+                initialScene = TestScenes.SceneA,
+                transitions =
+                    transitions {
+                        overscroll(TestScenes.SceneB, Orientation.Vertical) {
+                            translate(TestElements.Foo, y = overscrollTranslateY)
+                        }
+                    }
+            )
+                as MutableSceneTransitionLayoutStateImpl
+
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            SceneTransitionLayout(
+                state = state,
+                modifier = Modifier.size(layoutWidth, layoutHeight)
+            ) {
+                scene(
+                    key = TestScenes.SceneA,
+                    userActions = mapOf(Swipe.Down to TestScenes.SceneB)
+                ) {
+                    Spacer(Modifier.fillMaxSize())
+                }
+                scene(TestScenes.SceneB) {
+                    Spacer(Modifier.element(TestElements.Foo).fillMaxSize())
+                }
+            }
+        }
+
+        assertThat(state.currentTransition).isNull()
+        assertThat(state.currentOverscrollSpec).isNull()
+
+        // Swipe by half of verticalSwipeDistance.
+        rule.onRoot().performTouchInput {
+            val middleTop = Offset((layoutWidth / 2).toPx(), 0f)
+            down(middleTop)
+            // Scroll 50%
+            moveBy(Offset(0f, touchSlop + layoutHeight.toPx() * 0.5f), delayMillis = 1_000)
+        }
+
+        val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag, useUnmergedTree = true)
+        fooElement.assertTopPositionInRootIsEqualTo(0.dp)
+        val transition = state.currentTransition
+        assertThat(transition).isNotNull()
+        assertThat(transition!!.progress).isEqualTo(0.5f)
+
+        rule.onRoot().performTouchInput {
+            // Scroll another 100%
+            moveBy(Offset(0f, layoutHeight.toPx()), delayMillis = 1_000)
+        }
+
+        // Scroll 150% (Scene B overscroll by 50%)
+        assertThat(transition.progress).isEqualTo(1.5f)
+        assertThat(state.currentOverscrollSpec).isNotNull()
+        fooElement.assertTopPositionInRootIsEqualTo(overscrollTranslateY * 0.5f)
+
+        rule.onRoot().performTouchInput {
+            // Scroll another 100%
+            moveBy(Offset(0f, layoutHeight.toPx()), delayMillis = 1_000)
+        }
+
+        // Scroll 250% (Scene B overscroll by 150%)
+        assertThat(transition.progress).isEqualTo(2.5f)
+        assertThat(state.currentOverscrollSpec).isNotNull()
+        fooElement.assertTopPositionInRootIsEqualTo(overscrollTranslateY * 1.5f)
+    }
+
+    @Test
+    fun elementTransitionDuringNestedScrollOverscroll() {
+        // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
+        // detected as a drag event.
+        var touchSlop = 0f
+        val overscrollTranslateY = 10.dp
+        val layoutWidth = 200.dp
+        val layoutHeight = 400.dp
+
+        val state =
+            MutableSceneTransitionLayoutState(
+                initialScene = TestScenes.SceneB,
+                transitions =
+                    transitions {
+                        overscroll(TestScenes.SceneB, Orientation.Vertical) {
+                            translate(TestElements.Foo, y = overscrollTranslateY)
+                        }
+                    }
+            )
+                as MutableSceneTransitionLayoutStateImpl
+
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            SceneTransitionLayout(
+                state = state,
+                modifier = Modifier.size(layoutWidth, layoutHeight)
+            ) {
+                scene(TestScenes.SceneA) { Spacer(Modifier.fillMaxSize()) }
+                scene(TestScenes.SceneB, userActions = mapOf(Swipe.Up to TestScenes.SceneA)) {
+                    Box(
+                        Modifier
+                            // Unconsumed scroll gesture will be intercepted by STL
+                            .verticalNestedScrollToScene()
+                            // A scrollable that does not consume the scroll gesture
+                            .scrollable(
+                                rememberScrollableState(consumeScrollDelta = { 0f }),
+                                Orientation.Vertical
+                            )
+                            .fillMaxSize()
+                    ) {
+                        Spacer(Modifier.element(TestElements.Foo).fillMaxSize())
+                    }
+                }
+            }
+        }
+
+        assertThat(state.currentTransition).isNull()
+        assertThat(state.currentOverscrollSpec).isNull()
+        val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag, useUnmergedTree = true)
+        fooElement.assertTopPositionInRootIsEqualTo(0.dp)
+
+        // Swipe by half of verticalSwipeDistance.
+        rule.onRoot().performTouchInput {
+            val middleTop = Offset((layoutWidth / 2).toPx(), 0f)
+            down(middleTop)
+            // Scroll 50%
+            moveBy(Offset(0f, touchSlop + layoutHeight.toPx() * 0.5f), delayMillis = 1_000)
+        }
+
+        val transition = state.currentTransition
+        assertThat(state.currentOverscrollSpec).isNotNull()
+        assertThat(transition).isNotNull()
+        assertThat(transition!!.progress).isEqualTo(-0.5f)
+        fooElement.assertTopPositionInRootIsEqualTo(overscrollTranslateY * 0.5f)
+
+        rule.onRoot().performTouchInput {
+            // Scroll another 100%
+            moveBy(Offset(0f, layoutHeight.toPx()), delayMillis = 1_000)
+        }
+
+        // Scroll 150% (Scene B overscroll by 50%)
+        assertThat(transition.progress).isEqualTo(-1.5f)
+        assertThat(state.currentOverscrollSpec).isNotNull()
+        fooElement.assertTopPositionInRootIsEqualTo(overscrollTranslateY * 1.5f)
     }
 }

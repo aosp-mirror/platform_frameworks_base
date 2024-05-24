@@ -112,4 +112,8 @@ public class HidlToAidlCallbackConverter extends IBiometricsFaceClientCallback.S
     void onAuthenticatorIdRetrieved(long authenticatorId) {
         mAidlResponseHandler.onAuthenticatorIdRetrieved(authenticatorId);
     }
+
+    void onUnsupportedClientScheduled() {
+        mAidlResponseHandler.onUnsupportedClientScheduled();
+    }
 }

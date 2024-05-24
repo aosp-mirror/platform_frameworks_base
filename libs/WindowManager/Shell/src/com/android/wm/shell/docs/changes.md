@@ -102,5 +102,5 @@ AIDL interfaces and constants.  Currently, all AIDL files, and classes under the
 Launcher uses.
 
 If the new code doesn't fall into those categories, they can be added explicitly in the Shell's
-[Android.bp](frameworks/base/libs/WindowManager/Shell/Android.bp) file under the
+[Android.bp](/libs/WindowManager/Shell/Android.bp) file under the
 `wm_shell_util-sources` filegroup.

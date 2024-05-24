@@ -85,7 +85,7 @@ public class BrightnessWearBedtimeModeClamperTest {
 
     @Test
     public void testType() {
-        assertEquals(BrightnessClamper.Type.BEDTIME_MODE, mClamper.getType());
+        assertEquals(BrightnessClamper.Type.WEAR_BEDTIME_MODE, mClamper.getType());
     }
 
     @Test

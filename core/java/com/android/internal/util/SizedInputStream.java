@@ -16,8 +16,6 @@
 
 package com.android.internal.util;
 
-import libcore.io.Streams;
-
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -25,6 +23,7 @@ import java.io.InputStream;
  * Reads exact number of bytes from wrapped stream, returning EOF once those
  * bytes have been read.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class SizedInputStream extends InputStream {
     private final InputStream mWrapped;
     private long mLength;
@@ -42,7 +41,9 @@ public class SizedInputStream extends InputStream {
 
     @Override
     public int read() throws IOException {
-        return Streams.readSingleByte(this);
+        byte[] buffer = new byte[1];
+        int result = read(buffer, 0, 1);
+        return (result != -1) ? buffer[0] & 0xff : -1;
     }
 
     @Override

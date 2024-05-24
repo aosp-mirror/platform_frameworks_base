@@ -535,6 +535,10 @@ MissingNullability: android.widget.ImageView#isDefaultFocusHighlightNeeded(andro
     Missing nullability on parameter `foreground` in method `isDefaultFocusHighlightNeeded`
 
 
+OptionalBuilderConstructorArgument: android.service.notification.ZenPolicy.Builder#Builder(android.service.notification.ZenPolicy) parameter #0:
+    Builder constructor arguments must be mandatory (i.e. not @Nullable): parameter policy in android.service.notification.ZenPolicy.Builder(android.service.notification.ZenPolicy policy)
+
+
 ProtectedMember: android.app.AppDetailsActivity#onCreate(android.os.Bundle):
     Protected methods not allowed; must be public: method android.app.AppDetailsActivity.onCreate(android.os.Bundle)}
 ProtectedMember: android.view.ViewGroup#resetResolvedDrawables():
@@ -669,6 +673,8 @@ RequiresPermission: android.app.admin.DevicePolicyManager#generateKeyPair(androi
     Method 'generateKeyPair' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.app.admin.DevicePolicyManager#getApplicationExemptions(String):
     Method 'getApplicationExemptions' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#getContentProtectionPolicy(android.content.ComponentName):
+    Method 'getContentProtectionPolicy' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.app.admin.DevicePolicyManager#getCrossProfileWidgetProviders(android.content.ComponentName):
     Method 'getCrossProfileWidgetProviders' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.app.admin.DevicePolicyManager#getLockTaskFeatures(android.content.ComponentName):
@@ -717,6 +723,8 @@ RequiresPermission: android.app.admin.DevicePolicyManager#setAlwaysOnVpnPackage(
     Method 'setAlwaysOnVpnPackage' documentation mentions permissions without declaring @RequiresPermission
 RequiresPermission: android.app.admin.DevicePolicyManager#setApplicationExemptions(String, java.util.Set<java.lang.Integer>):
     Method 'setApplicationExemptions' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#setContentProtectionPolicy(android.content.ComponentName, int):
+    Method 'setContentProtectionPolicy' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.app.admin.DevicePolicyManager#setDeviceOwner(android.content.ComponentName, int):
     Method 'setDeviceOwner' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.app.admin.DevicePolicyManager#setDeviceProvisioningConfigApplied():
@@ -1923,6 +1931,8 @@ Todo: android.Manifest.permission#READ_PEOPLE_DATA:
     Documentation mentions 'TODO'
 Todo: android.app.NotificationManager#isNotificationAssistantAccessGranted(android.content.ComponentName):
     Documentation mentions 'TODO'
+Todo: android.app.ondeviceintelligence.OnDeviceIntelligenceManager#requestFeatureDownload(android.app.ondeviceintelligence.Feature, android.app.ondeviceintelligence.CancellationSignal, java.util.concurrent.Executor, android.app.ondeviceintelligence.DownloadCallback):
+    Documentation mentions 'TODO'
 Todo: android.hardware.camera2.params.StreamConfigurationMap:
     Documentation mentions 'TODO'
 Todo: android.hardware.location.ContextHubManager#getNanoAppInstanceInfo(int):
@@ -2009,6 +2019,12 @@ UnflaggedApi: android.content.AttributionSource#AttributionSource(int, int, Stri
     New API must be flagged with @FlaggedApi: constructor android.content.AttributionSource(int,int,String,String,android.os.IBinder,String[],android.content.AttributionSource)
 UnflaggedApi: android.content.AttributionSource#AttributionSource(int, int, String, String, android.os.IBinder, String[], int, android.content.AttributionSource):
     New API must be flagged with @FlaggedApi: constructor android.content.AttributionSource(int,int,String,String,android.os.IBinder,String[],int,android.content.AttributionSource)
+UnflaggedApi: android.content.Intent#EXTENDED_FLAG_FILTER_MISMATCH:
+    New API must be flagged with @FlaggedApi: field android.content.Intent.EXTENDED_FLAG_FILTER_MISMATCH
+UnflaggedApi: android.content.Intent#addExtendedFlags(int):
+    New API must be flagged with @FlaggedApi: method android.content.Intent.addExtendedFlags(int)
+UnflaggedApi: android.content.Intent#getExtendedFlags():
+    New API must be flagged with @FlaggedApi: method android.content.Intent.getExtendedFlags()
 UnflaggedApi: android.content.pm.UserInfo#isCommunalProfile():
     New API must be flagged with @FlaggedApi: method android.content.pm.UserInfo.isCommunalProfile()
 UnflaggedApi: android.content.pm.UserInfo#isPrivateProfile():
@@ -2039,14 +2055,8 @@ UnflaggedApi: android.media.RingtoneSelection#SOUND_SOURCE_DEFAULT:
     New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.SOUND_SOURCE_DEFAULT
 UnflaggedApi: android.media.RingtoneSelection#SOUND_SOURCE_OFF:
     New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.SOUND_SOURCE_OFF
-UnflaggedApi: android.media.RingtoneSelection#SOUND_SOURCE_SYSTEM_DEFAULT:
-    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.SOUND_SOURCE_SYSTEM_DEFAULT
-UnflaggedApi: android.media.RingtoneSelection#SOUND_SOURCE_UNSPECIFIED:
-    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.SOUND_SOURCE_UNSPECIFIED
 UnflaggedApi: android.media.RingtoneSelection#SOUND_SOURCE_URI:
     New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.SOUND_SOURCE_URI
-UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_APPLICATION_DEFAULT:
-    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.VIBRATION_SOURCE_APPLICATION_DEFAULT
 UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_APPLICATION_PROVIDED:
     New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.VIBRATION_SOURCE_APPLICATION_PROVIDED
 UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_AUDIO_CHANNEL:
@@ -2057,10 +2067,6 @@ UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_HAPTIC_GENERATOR:
     New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.VIBRATION_SOURCE_HAPTIC_GENERATOR
 UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_OFF:
     New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.VIBRATION_SOURCE_OFF
-UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_SYSTEM_DEFAULT:
-    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.VIBRATION_SOURCE_SYSTEM_DEFAULT
-UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_UNSPECIFIED:
-    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.VIBRATION_SOURCE_UNSPECIFIED
 UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_URI:
     New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.VIBRATION_SOURCE_URI
 UnflaggedApi: android.media.RingtoneSelection#fromUri(android.net.Uri, int):
@@ -2143,6 +2149,8 @@ UnflaggedApi: android.service.notification.NotificationRankingUpdate#PARCELABLE_
     New API must be flagged with @FlaggedApi: field android.service.notification.NotificationRankingUpdate.PARCELABLE_WRITE_RETURN_VALUE
 UnflaggedApi: android.service.notification.NotificationRankingUpdate#isFdNotNullAndClosed():
     New API must be flagged with @FlaggedApi: method android.service.notification.NotificationRankingUpdate.isFdNotNullAndClosed()
+UnflaggedApi: android.service.notification.ZenPolicy.Builder#Builder(android.service.notification.ZenPolicy):
+    New API must be flagged with @FlaggedApi: constructor android.service.notification.ZenPolicy.Builder(android.service.notification.ZenPolicy)
 UnflaggedApi: android.telephony.TelephonyManager#HAL_SERVICE_SATELLITE:
     New API must be flagged with @FlaggedApi: field android.telephony.TelephonyManager.HAL_SERVICE_SATELLITE
 UnflaggedApi: android.telephony.ims.feature.MmTelFeature.MmTelCapabilities:
@@ -2179,6 +2187,8 @@ UnflaggedApi: android.view.accessibility.AccessibilityWindowInfo#UNDEFINED_WINDO
     New API must be flagged with @FlaggedApi: field android.view.accessibility.AccessibilityWindowInfo.UNDEFINED_WINDOW_ID
 UnflaggedApi: android.view.animation.AnimationUtils#lockAnimationClock(long, long):
     New API must be flagged with @FlaggedApi: method android.view.animation.AnimationUtils.lockAnimationClock(long,long)
+UnflaggedApi: android.view.inputmethod.InputMethodInfo#InputMethodInfo(String, String, CharSequence, String, String, boolean, String):
+    New API must be flagged with @FlaggedApi: constructor android.view.inputmethod.InputMethodInfo(String,String,CharSequence,String,String,boolean,String)
 UnflaggedApi: android.view.inputmethod.InputMethodManager#getEnabledInputMethodListAsUser(android.os.UserHandle):
     New API must be flagged with @FlaggedApi: method android.view.inputmethod.InputMethodManager.getEnabledInputMethodListAsUser(android.os.UserHandle)
 UnflaggedApi: android.view.inputmethod.InputMethodManager#getEnabledInputMethodSubtypeListAsUser(String, boolean, android.os.UserHandle):

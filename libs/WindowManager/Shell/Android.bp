@@ -19,6 +19,7 @@ package {
     // to get the below license kinds:
     //   SPDX-license-identifier-Apache-2.0
     default_applicable_licenses: ["frameworks_base_license"],
+    default_team: "trendy_team_multitasking_windowing",
 }
 
 // Begin ProtoLog
@@ -39,6 +40,7 @@ filegroup {
 }
 
 // Sources that have no dependencies that can be used directly downstream of this library
+// TODO(b/322791067): move these sources to WindowManager-Shell-shared
 filegroup {
     name: "wm_shell_util-sources",
     srcs: [
@@ -80,16 +82,18 @@ filegroup {
 genrule {
     name: "wm_shell_protolog_src",
     srcs: [
+        ":protolog-impl",
         ":wm_shell_protolog-groups",
         ":wm_shell-sources",
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) transform-protolog-calls " +
         "--protolog-class com.android.internal.protolog.common.ProtoLog " +
-        "--protolog-impl-class com.android.wm.shell.protolog.ShellProtoLogImpl " +
-        "--protolog-cache-class com.android.wm.shell.protolog.ShellProtoLogCache " +
         "--loggroups-class com.android.wm.shell.protolog.ShellProtoLogGroup " +
         "--loggroups-jar $(location :wm_shell_protolog-groups) " +
+        "--viewer-config-file-path /system_ext/etc/wmshell.protolog.pb " +
+        "--legacy-viewer-config-file-path /system_ext/etc/wmshell.protolog.json.gz " +
+        "--legacy-output-file-path /data/misc/wmtrace/shell_log.winscope " +
         "--output-srcjar $(out) " +
         "$(locations :wm_shell-sources)",
     out: ["wm_shell_protolog.srcjar"],
@@ -106,9 +110,27 @@ genrule {
         "--protolog-class com.android.internal.protolog.common.ProtoLog " +
         "--loggroups-class com.android.wm.shell.protolog.ShellProtoLogGroup " +
         "--loggroups-jar $(location :wm_shell_protolog-groups) " +
-        "--viewer-conf $(out) " +
+        "--viewer-config-type json " +
+        "--viewer-config $(out) " +
         "$(locations :wm_shell-sources)",
     out: ["wm_shell_protolog.json"],
+}
+
+genrule {
+    name: "gen-wmshell.protolog.pb",
+    srcs: [
+        ":wm_shell_protolog-groups",
+        ":wm_shell-sources",
+    ],
+    tools: ["protologtool"],
+    cmd: "$(location protologtool) generate-viewer-config " +
+        "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+        "--loggroups-class com.android.wm.shell.protolog.ShellProtoLogGroup " +
+        "--loggroups-jar $(location :wm_shell_protolog-groups) " +
+        "--viewer-config-type proto " +
+        "--viewer-config $(out) " +
+        "$(locations :wm_shell-sources)",
+    out: ["wmshell.protolog.pb"],
 }
 
 genrule {
@@ -125,6 +147,13 @@ prebuilt_etc {
     filename_from_src: true,
 }
 
+prebuilt_etc {
+    name: "wmshell.protolog.pb",
+    system_ext_specific: true,
+    src: ":gen-wmshell.protolog.pb",
+    filename_from_src: true,
+}
+
 // End ProtoLog
 
 java_library {
@@ -135,6 +164,12 @@ java_library {
     proto: {
         type: "nano",
     },
+}
+
+java_library {
+    name: "WindowManager-Shell-shared",
+
+    srcs: ["shared/**/*.java"],
 }
 
 android_library {
@@ -162,6 +197,8 @@ android_library {
         "com_android_wm_shell_flags_lib",
         "com.android.window.flags.window-aconfig-java",
         "WindowManager-Shell-proto",
+        "WindowManager-Shell-shared",
+        "perfetto_trace_java_protos",
         "dagger2",
         "jsr330",
     ],

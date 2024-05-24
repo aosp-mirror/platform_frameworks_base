@@ -21,8 +21,12 @@ package com.android.systemui.biometrics.shared.model
  *
  * If the user's fallback credential is owned by another profile user the [deviceCredentialOwnerId]
  * will differ from the user's [userId].
+ *
+ * If prompt requests to use the user's parent profile for device credential,
+ * [userIdForPasswordEntry] might differ from the user's [userId].
  */
 data class BiometricUserInfo(
     val userId: Int,
     val deviceCredentialOwnerId: Int = userId,
+    val userIdForPasswordEntry: Int = userId,
 )

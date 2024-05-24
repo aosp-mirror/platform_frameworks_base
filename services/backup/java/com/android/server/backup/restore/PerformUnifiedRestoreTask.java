@@ -44,6 +44,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -51,6 +52,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Slog;
 
@@ -82,6 +84,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -140,8 +143,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     // Widget-related data handled as part of this restore operation
     private byte[] mWidgetData;
 
-    // Number of apps restored in this pass
-    private int mCount;
+    // Number of apps attempted to restore in this pass
+    private int mRestoreAttemptedAppsCount;
 
     // When did we start?
     private long mStartRealtime;
@@ -158,6 +161,15 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     // When finished call listener
     private final OnTaskFinishedListener mListener;
 
+    // List of packages that support  V-> U downgrade but do not have RestoreAnyVersion set to true.
+    private List<String> mVToUAllowlist;
+
+    // List of packages that have RestoreAnyVersion set to true but do not support  V-> U downgrade.
+    private List<String> mVToUDenylist;
+
+    // Whether we have already initialised the V to U allowlist/denylist
+    private Boolean mAreVToUListsSet = false;
+
     // Key/value: bookkeeping about staged data and files for agent access
     private File mBackupDataName;
     private File mStageName;
@@ -172,7 +184,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     @VisibleForTesting
     PerformUnifiedRestoreTask(
             UserBackupManagerService backupManagerService,
-            TransportConnection transportConnection) {
+            TransportConnection transportConnection,
+            String vToUAllowlist, String vToUDenyList) {
         mListener = null;
         mAgentTimeoutParameters = null;
         mOperationStorage = null;
@@ -183,6 +196,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         mBackupEligibilityRules = null;
         this.backupManagerService = backupManagerService;
         mBackupManagerMonitorEventSender = new BackupManagerMonitorEventSender(/* monitor= */ null);
+        mVToUAllowlist = createVToUList(vToUAllowlist);
+        mVToUDenylist = createVToUList(vToUDenyList);
     }
 
     // This task can assume that the wakelock is properly held for it and doesn't have to worry
@@ -574,7 +589,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                     Slog.v(TAG, "No more packages; finishing restore");
                 }
                 int millis = (int) (SystemClock.elapsedRealtime() - mStartRealtime);
-                EventLog.writeEvent(EventLogTags.RESTORE_SUCCESS, mCount, millis);
+                EventLog.writeEvent(
+                        EventLogTags.RESTORE_SUCCESS, mRestoreAttemptedAppsCount, millis);
                 nextState = UnifiedRestoreState.FINAL;
                 return;
             }
@@ -582,7 +598,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             if (DEBUG) {
                 Slog.i(TAG, "Next restore package: " + mRestoreDescription);
             }
-            sendOnRestorePackage(pkgName);
+            mRestoreAttemptedAppsCount++;
+            sendOnRestorePackage(mRestoreAttemptedAppsCount, pkgName);
 
             Metadata metaInfo = mPmAgent.getRestoredMetadata(pkgName);
             if (metaInfo == null) {
@@ -634,60 +651,56 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 // Data is from a "newer" version of the app than we have currently
                 // installed.  If the app has not declared that it is prepared to
                 // handle this case, we do not attempt the restore.
-                if ((mCurrentPackage.applicationInfo.flags
-                                & ApplicationInfo.FLAG_RESTORE_ANY_VERSION)
-                        == 0) {
-                    String message =
-                            "Source version "
-                                    + metaInfo.versionCode
-                                    + " > installed version "
-                                    + mCurrentPackage.getLongVersionCode();
-                    Slog.w(TAG, "Package " + pkgName + ": " + message);
-                    Bundle monitoringExtras =
-                            mBackupManagerMonitorEventSender.putMonitoringExtra(
-                                    null,
-                                    BackupManagerMonitor.EXTRA_LOG_RESTORE_VERSION,
-                                    metaInfo.versionCode);
-                    monitoringExtras =
-                            mBackupManagerMonitorEventSender.putMonitoringExtra(
-                                    monitoringExtras,
-                                    BackupManagerMonitor.EXTRA_LOG_RESTORE_ANYWAY,
-                                    false);
-                    monitoringExtras = addRestoreOperationTypeToEvent(monitoringExtras);
-                    mBackupManagerMonitorEventSender.monitorEvent(
-                            BackupManagerMonitor.LOG_EVENT_ID_RESTORE_VERSION_HIGHER,
-                            mCurrentPackage,
-                            BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                            monitoringExtras);
-                    EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, pkgName, message);
-                    nextState = UnifiedRestoreState.RUNNING_QUEUE;
-                    return;
-                } else {
-                    if (DEBUG) {
-                        Slog.v(
-                                TAG,
-                                "Source version "
-                                        + metaInfo.versionCode
-                                        + " > installed version "
-                                        + mCurrentPackage.getLongVersionCode()
-                                        + " but restoreAnyVersion");
+                if (mIsSystemRestore
+                        && isVToUDowngrade(mPmAgent.getSourceSdk(),
+                        android.os.Build.VERSION.SDK_INT)) {
+                    if (!mAreVToUListsSet) {
+                        mVToUAllowlist =
+                                createVToUList(
+                                        Settings.Secure.getStringForUser(
+                                            backupManagerService.getContext().getContentResolver(),
+                                            Settings.Secure.V_TO_U_RESTORE_ALLOWLIST,
+                                            mUserId));
+                        mVToUDenylist =
+                                createVToUList(
+                                        Settings.Secure.getStringForUser(
+                                            backupManagerService.getContext().getContentResolver(),
+                                            Settings.Secure.V_TO_U_RESTORE_DENYLIST,
+                                            mUserId));
+                        logVToUListsToBMM();
+                        mAreVToUListsSet = true;
                     }
-                    Bundle monitoringExtras =
-                            mBackupManagerMonitorEventSender.putMonitoringExtra(
-                                    null,
-                                    BackupManagerMonitor.EXTRA_LOG_RESTORE_VERSION,
-                                    metaInfo.versionCode);
-                    monitoringExtras =
-                            mBackupManagerMonitorEventSender.putMonitoringExtra(
-                                    monitoringExtras,
-                                    BackupManagerMonitor.EXTRA_LOG_RESTORE_ANYWAY,
-                                    true);
-                    monitoringExtras = addRestoreOperationTypeToEvent(monitoringExtras);
-                    mBackupManagerMonitorEventSender.monitorEvent(
-                            BackupManagerMonitor.LOG_EVENT_ID_RESTORE_VERSION_HIGHER,
-                            mCurrentPackage,
-                            BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                            monitoringExtras);
+                    if (isPackageEligibleForVToURestore(mCurrentPackage)) {
+                        mBackupManagerMonitorEventSender.monitorEvent(
+                                BackupManagerMonitor.LOG_EVENT_ID_V_TO_U_RESTORE_PKG_ELIGIBLE,
+                                mCurrentPackage,
+                                BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                addRestoreOperationTypeToEvent(/* extras= */null));
+                        Slog.i(TAG, "Package " + pkgName
+                                + " is eligible for V to U downgrade scenario");
+                    } else {
+                        mBackupManagerMonitorEventSender.monitorEvent(
+                                BackupManagerMonitor.LOG_EVENT_ID_V_TO_U_RESTORE_PKG_NOT_ELIGIBLE,
+                                mCurrentPackage,
+                                BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                addRestoreOperationTypeToEvent(/* extras= */null));
+                        String message = "Package not eligible for V to U downgrade scenario";
+                        Slog.i(TAG, pkgName + " : " + message);
+                        EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, pkgName, message);
+                        nextState = UnifiedRestoreState.RUNNING_QUEUE;
+                        return;
+                    }
+                } else {
+                    if ((mCurrentPackage.applicationInfo.flags
+                            & ApplicationInfo.FLAG_RESTORE_ANY_VERSION)
+                            == 0) {
+                        // Downgrade scenario with RestoreAnyVersion flag off
+                        logDowngradeScenario(/* isRestoreAnyVersion */ false, metaInfo);
+                        nextState = UnifiedRestoreState.RUNNING_QUEUE;
+                        return;
+                    } else {
+                        logDowngradeScenario(/* isRestoreAnyVersion */ true, metaInfo);
+                    }
                 }
             }
 
@@ -730,6 +743,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                     BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
                     monitoringExtras);
             EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
+            mStatus = BackupTransport.TRANSPORT_ERROR;
             nextState = UnifiedRestoreState.FINAL;
         } finally {
             executeNextState(nextState);
@@ -810,7 +824,6 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         // And then finally start the restore on this agent
         try {
             initiateOneRestore(mCurrentPackage, metaInfo.versionCode);
-            ++mCount;
         } catch (Exception e) {
             Slog.e(TAG, "Error when attempting restore: " + e.toString());
             Bundle monitoringExtras = addRestoreOperationTypeToEvent(/* extras= */ null);
@@ -968,7 +981,12 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             throws Exception {
         Set<String> excludedKeysForPackage = getExcludedKeysForPackage(packageName);
 
-        byte[] buffer = new byte[8192]; // will grow when needed
+        int bufferSize = 8192; // 8KB
+        if (Flags.enableMaxSizeWritesToPipes()) {
+            // Linux pipe capacity (buffer size) is 16 pages where each page is 4KB
+            bufferSize = 64 * 1024; // 64KB
+        }
+        byte[] buffer = new byte[bufferSize]; // will grow when needed
         while (in.readNextHeader()) {
             final String key = in.getKey();
             final int size = in.getDataSize();
@@ -1116,7 +1134,11 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             ParcelFileDescriptor tReadEnd = mTransportPipes[0];
             ParcelFileDescriptor tWriteEnd = mTransportPipes[1];
 
-            int bufferSize = 32 * 1024;
+            int bufferSize = 32 * 1024; // 32KB
+            if (Flags.enableMaxSizeWritesToPipes()) {
+                // Linux pipe capacity (buffer size) is 16 pages where each page is 4KB
+                bufferSize = 64 * 1024; // 64KB
+            }
             byte[] buffer = new byte[bufferSize];
             FileOutputStream engineOut = new FileOutputStream(eWriteEnd.getFileDescriptor());
             FileInputStream transportIn = new FileInputStream(tReadEnd.getFileDescriptor());
@@ -1322,13 +1344,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         }
 
         // Tell the observer we're done
-        if (mObserver != null) {
-            try {
-                mObserver.restoreFinished(mStatus);
-            } catch (RemoteException e) {
-                Slog.d(TAG, "Restore observer died at restoreFinished");
-            }
-        }
+        sendEndRestore();
 
         // Clear any ongoing session timeout.
         backupManagerService.getBackupHandler().removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
@@ -1642,10 +1658,10 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         }
     }
 
-    void sendOnRestorePackage(String name) {
+    void sendOnRestorePackage(int index, String name) {
         if (mObserver != null) {
             try {
-                mObserver.onUpdate(mCount, name);
+                mObserver.onUpdate(index, name);
             } catch (RemoteException e) {
                 Slog.d(TAG, "Restore observer died in onUpdate");
                 mObserver = null;
@@ -1668,4 +1684,124 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         return mBackupManagerMonitorEventSender.putMonitoringExtra(
                 extras, BackupManagerMonitor.EXTRA_LOG_OPERATION_TYPE, RESTORE);
     }
+
+    // checks the sdk of the target/source device for a B&R operation.
+    // system components can opt in/out of V->U restore via allowlists. All other apps are
+    // not impacted
+    @SuppressWarnings("AndroidFrameworkCompatChange")
+    @VisibleForTesting
+    protected boolean isVToUDowngrade(int sourceSdk, int targetSdk) {
+        // We assume that if the source sdk is greater than U then the source is V.
+        return Flags.enableVToURestoreForSystemComponentsInAllowlist()
+                && (sourceSdk > Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+                && (targetSdk == Build.VERSION_CODES.UPSIDE_DOWN_CAKE);
+    }
+
+    @VisibleForTesting
+    protected List<String> createVToUList(@Nullable String listString) {
+        // The allowlist/denylist is stored as a comma-separated list of package names
+        List<String> list = new ArrayList<>();
+        if (listString != null) {
+            list = Arrays.asList(listString.split(","));
+        }
+        return list;
+    }
+
+    @VisibleForTesting
+    protected boolean isPackageEligibleForVToURestore(PackageInfo mCurrentPackage) {
+        // A package is eligible for V to U downgrade restore if either:
+        //    - The package has restoreAnyVersion set to false and is part of the V to U allowlist
+        //      (and not in the denylist)
+        //    - The package has restoreAnyVersion set to true and is not part of the denylist
+        if (mVToUDenylist.contains(mCurrentPackage.packageName)){
+            if (DEBUG) {
+                Slog.i(TAG, mCurrentPackage.packageName + " : Package is in V to U denylist");
+            }
+            return false;
+        } else if ((mCurrentPackage.applicationInfo.flags
+                & ApplicationInfo.FLAG_RESTORE_ANY_VERSION)
+                == 0) {
+            // package has restoreAnyVersion set to false
+            if (DEBUG) {
+                Slog.i(TAG, mCurrentPackage.packageName
+                        + " : Package has restoreAnyVersion=false and is in V to U allowlist");
+            }
+            return mVToUAllowlist.contains(mCurrentPackage.packageName);
+        } else {
+            // package has restoreAnyVersion set to true and is nor in denylist
+            if (DEBUG) {
+                Slog.i(TAG, mCurrentPackage.packageName
+                        + " : Package has restoreAnyVersion=true and is not in V to U denylist");
+            }
+            return true;
+        }
+    }
+
+    private void logDowngradeScenario(boolean isRestoreAnyVersion, Metadata metaInfo) {
+        Bundle monitoringExtras =
+                mBackupManagerMonitorEventSender.putMonitoringExtra(
+                        null,
+                        BackupManagerMonitor.EXTRA_LOG_RESTORE_VERSION,
+                        metaInfo.versionCode);
+        String message;
+        if (isRestoreAnyVersion) {
+            monitoringExtras =
+                    mBackupManagerMonitorEventSender.putMonitoringExtra(
+                            monitoringExtras,
+                            BackupManagerMonitor.EXTRA_LOG_RESTORE_ANYWAY,
+                            true);
+            message = "Source version "
+                    + metaInfo.versionCode
+                    + " > installed version "
+                    + mCurrentPackage.getLongVersionCode()
+                    + " but restoreAnyVersion";
+        } else {
+            monitoringExtras =
+                    mBackupManagerMonitorEventSender.putMonitoringExtra(
+                            monitoringExtras,
+                            BackupManagerMonitor.EXTRA_LOG_RESTORE_ANYWAY,
+                            false);
+            message = "Source version "
+                    + metaInfo.versionCode
+                    + " > installed version "
+                    + mCurrentPackage.getLongVersionCode();
+            EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, mCurrentPackage.packageName,
+                    message);
+        }
+        Slog.i(TAG, "Package " + mCurrentPackage.packageName + ": " + message);
+        monitoringExtras = addRestoreOperationTypeToEvent(monitoringExtras);
+        mBackupManagerMonitorEventSender.monitorEvent(
+                BackupManagerMonitor.LOG_EVENT_ID_RESTORE_VERSION_HIGHER,
+                mCurrentPackage,
+                BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                monitoringExtras);
+    }
+
+    private void logVToUListsToBMM() {
+        // send a BMM event with the allowlist
+        Bundle monitoringExtrasAllowlist =
+                mBackupManagerMonitorEventSender.putMonitoringExtra(
+                        null,
+                        BackupManagerMonitor.EXTRA_LOG_V_TO_U_ALLOWLIST,
+                        mVToUAllowlist.toString());
+        monitoringExtrasAllowlist = addRestoreOperationTypeToEvent(monitoringExtrasAllowlist);
+        mBackupManagerMonitorEventSender.monitorEvent(
+                BackupManagerMonitor.LOG_EVENT_ID_V_TO_U_RESTORE_SET_LIST,
+                null,
+                BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                monitoringExtrasAllowlist);
+        // send a BMM event with the denylist
+        Bundle monitoringExtrasDenylist =
+                mBackupManagerMonitorEventSender.putMonitoringExtra(
+                        null,
+                        BackupManagerMonitor.EXTRA_LOG_V_TO_U_DENYLIST,
+                        mVToUDenylist.toString());
+        monitoringExtrasDenylist = addRestoreOperationTypeToEvent(monitoringExtrasDenylist);
+        mBackupManagerMonitorEventSender.monitorEvent(
+                BackupManagerMonitor.LOG_EVENT_ID_V_TO_U_RESTORE_SET_LIST,
+                null,
+                BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                monitoringExtrasDenylist);
+    }
+
 }

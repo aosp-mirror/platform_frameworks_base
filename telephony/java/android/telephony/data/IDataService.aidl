@@ -48,5 +48,5 @@ oneway interface IDataService
     void cancelHandover(int slotId, int cid, IDataServiceCallback callback);
     void registerForUnthrottleApn(int slotIndex, IDataServiceCallback callback);
     void unregisterForUnthrottleApn(int slotIndex, IDataServiceCallback callback);
-    void requestValidation(int slotId, int cid, IIntegerConsumer callback);
+    void requestNetworkValidation(int slotId, int cid, IIntegerConsumer callback);
 }

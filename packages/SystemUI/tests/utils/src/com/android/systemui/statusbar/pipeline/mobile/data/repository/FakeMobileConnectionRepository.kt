@@ -35,6 +35,7 @@ class FakeMobileConnectionRepository(
     override val isRoaming = MutableStateFlow(false)
     override val operatorAlphaShort: MutableStateFlow<String?> = MutableStateFlow(null)
     override val isInService = MutableStateFlow(false)
+    override val isNonTerrestrial = MutableStateFlow(false)
     override val isGsm = MutableStateFlow(false)
     override val cdmaLevel = MutableStateFlow(0)
     override val primaryLevel = MutableStateFlow(0)

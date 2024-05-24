@@ -16,6 +16,7 @@
 
 package android.media.tv.ad;
 
+import android.annotation.FlaggedApi;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,7 +25,9 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.media.tv.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -41,8 +44,8 @@ import java.util.List;
 
 /**
  * This class is used to specify meta information of a TV AD service.
- * @hide
  */
+@FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
 public final class TvAdServiceInfo implements Parcelable {
     private static final boolean DEBUG = false;
     private static final String TAG = "TvAdServiceInfo";
@@ -63,8 +66,7 @@ public final class TvAdServiceInfo implements Parcelable {
         if (context == null) {
             throw new IllegalArgumentException("context cannot be null.");
         }
-        // TODO: use a constant
-        Intent intent = new Intent("android.media.tv.ad.TvAdService").setComponent(component);
+        Intent intent = new Intent(TvAdService.SERVICE_INTERFACE).setComponent(component);
         ResolveInfo resolveInfo = context.getPackageManager().resolveService(
                 intent, PackageManager.GET_SERVICES | PackageManager.GET_META_DATA);
         if (resolveInfo == null) {
@@ -80,6 +82,7 @@ public final class TvAdServiceInfo implements Parcelable {
 
         mService = resolveInfo;
         mId = id;
+        mTypes.addAll(types);
     }
 
     private TvAdServiceInfo(ResolveInfo service, String id, List<String> types) {
@@ -94,6 +97,7 @@ public final class TvAdServiceInfo implements Parcelable {
         in.readStringList(mTypes);
     }
 
+    @NonNull
     public static final Creator<TvAdServiceInfo> CREATOR = new Creator<TvAdServiceInfo>() {
         @Override
         public TvAdServiceInfo createFromParcel(Parcel in) {
@@ -147,9 +151,8 @@ public final class TvAdServiceInfo implements Parcelable {
             ResolveInfo resolveInfo, Context context, List<String> types) {
         ServiceInfo serviceInfo = resolveInfo.serviceInfo;
         PackageManager pm = context.getPackageManager();
-        // TODO: use constant for the metadata
         try (XmlResourceParser parser =
-                     serviceInfo.loadXmlMetaData(pm, "android.media.tv.ad.service")) {
+                     serviceInfo.loadXmlMetaData(pm, TvAdService.SERVICE_META_DATA)) {
             if (parser == null) {
                 throw new IllegalStateException(
                         "No " + "android.media.tv.ad.service"
@@ -171,7 +174,15 @@ public final class TvAdServiceInfo implements Parcelable {
                         + XML_START_TAG_NAME + " tag for " + serviceInfo.name);
             }
 
-            // TODO: parse attributes
+            TypedArray sa = resources.obtainAttributes(attrs,
+                    com.android.internal.R.styleable.TvAdService);
+            CharSequence[] textArr = sa.getTextArray(
+                    com.android.internal.R.styleable.TvAdService_adServiceTypes);
+            for (CharSequence cs : textArr) {
+                types.add(cs.toString().toLowerCase());
+            }
+
+            sa.recycle();
         } catch (IOException | XmlPullParserException e) {
             throw new IllegalStateException(
                     "Failed reading meta-data for " + serviceInfo.packageName, e);

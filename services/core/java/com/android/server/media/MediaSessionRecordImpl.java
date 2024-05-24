@@ -16,39 +16,55 @@
 
 package com.android.server.media;
 
+import android.app.ForegroundServiceDelegationOptions;
 import android.media.AudioManager;
+import android.media.session.PlaybackState;
 import android.os.ResultReceiver;
 import android.view.KeyEvent;
 
 import com.android.server.media.MediaSessionPolicyProvider.SessionPolicy;
 
 import java.io.PrintWriter;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Common interfaces between {@link MediaSessionRecord} and {@link MediaSession2Record}.
  */
-public interface MediaSessionRecordImpl extends AutoCloseable {
+public abstract class MediaSessionRecordImpl {
+
+    static final AtomicInteger sNextMediaSessionRecordId = new AtomicInteger(1);
+    int mUniqueId;
 
     /**
      * Get the info for this session.
      *
      * @return Info that identifies this session.
      */
-    String getPackageName();
+    public abstract String getPackageName();
 
     /**
      * Get the UID this session was created for.
      *
      * @return The UID for this session.
      */
-    int getUid();
+    public abstract int getUid();
 
     /**
      * Get the user id this session was created for.
      *
      * @return The user id for this session.
      */
-    int getUserId();
+    public abstract int getUserId();
+
+    /**
+     * Get the {@link ForegroundServiceDelegationOptions} needed for notifying activity manager
+     * service with changes in the {@link PlaybackState} for this session.
+     *
+     * @return the {@link ForegroundServiceDelegationOptions} needed for notifying the activity
+     *     manager service with changes in the {@link PlaybackState} for this session.
+     */
+    public abstract ForegroundServiceDelegationOptions getForegroundServiceDelegationOptions();
 
     /**
      * Check if this session has system priority and should receive media buttons before any other
@@ -56,7 +72,7 @@ public interface MediaSessionRecordImpl extends AutoCloseable {
      *
      * @return True if this is a system priority session, false otherwise
      */
-    boolean isSystemPriority();
+    public abstract boolean isSystemPriority();
 
     /**
      * Send a volume adjustment to the session owner. Direction must be one of
@@ -77,7 +93,7 @@ public interface MediaSessionRecordImpl extends AutoCloseable {
      * @param useSuggested True to use adjustSuggestedStreamVolumeForUid instead of
      *          adjustStreamVolumeForUid
      */
-    void adjustVolume(String packageName, String opPackageName, int pid, int uid,
+    public abstract void adjustVolume(String packageName, String opPackageName, int pid, int uid,
             boolean asSystemService, int direction, int flags, boolean useSuggested);
 
     /**
@@ -87,7 +103,7 @@ public interface MediaSessionRecordImpl extends AutoCloseable {
      * @return True if the session is active, false otherwise.
      */
     // TODO(jaewan): Find better naming, or remove this from the MediaSessionRecordImpl.
-    boolean isActive();
+    public abstract boolean isActive();
 
     /**
      * Check if the session's playback active state matches with the expectation. This always
@@ -97,7 +113,7 @@ public interface MediaSessionRecordImpl extends AutoCloseable {
      * @param expected True if playback is expected to be active. False otherwise.
      * @return True if the session's playback matches with the expectation. False otherwise.
      */
-    boolean checkPlaybackActiveState(boolean expected);
+    public abstract boolean checkPlaybackActiveState(boolean expected);
 
     /**
      * Check whether the playback type is local or remote.
@@ -110,7 +126,7 @@ public interface MediaSessionRecordImpl extends AutoCloseable {
      *
      * @return {@code true} if the playback is local. {@code false} if the playback is remote.
      */
-    boolean isPlaybackTypeLocal();
+    public abstract boolean isPlaybackTypeLocal();
 
     /**
      * Sends media button.
@@ -127,27 +143,27 @@ public interface MediaSessionRecordImpl extends AutoCloseable {
      * @return {@code true} if the attempt to send media button was successfully.
      *         {@code false} otherwise.
      */
-    boolean sendMediaButton(String packageName, int pid, int uid, boolean asSystemService,
-            KeyEvent ke, int sequenceId, ResultReceiver cb);
+    public abstract boolean sendMediaButton(String packageName, int pid, int uid,
+            boolean asSystemService, KeyEvent ke, int sequenceId, ResultReceiver cb);
 
     /**
      * Returns whether the media session can handle volume key events.
      *
      * @return True if this media session can handle volume key events, false otherwise.
      */
-    boolean canHandleVolumeKey();
+    public abstract boolean canHandleVolumeKey();
 
     /**
      * Get session policies from custom policy provider set when MediaSessionRecord is instantiated.
      * If custom policy does not exist, will return null.
      */
     @SessionPolicy
-    int getSessionPolicies();
+    public abstract int getSessionPolicies();
 
     /**
      * Overwrite session policies that have been set when MediaSessionRecord is instantiated.
      */
-    void setSessionPolicies(@SessionPolicy int policies);
+    public abstract void setSessionPolicies(@SessionPolicy int policies);
 
     /**
      * Dumps internal state
@@ -155,16 +171,37 @@ public interface MediaSessionRecordImpl extends AutoCloseable {
      * @param pw print writer
      * @param prefix prefix
      */
-    void dump(PrintWriter pw, String prefix);
+    public abstract void dump(PrintWriter pw, String prefix);
 
     /**
-     * Override {@link AutoCloseable#close} to tell it not to throw exception.
+     * Similar to {@link AutoCloseable#close} without throwing an exception.
      */
-    @Override
-    void close();
+    public abstract void close();
+
+    /**
+     * Get the unique id of this session record.
+     *
+     * @return a unique id of this session record.
+     */
+    public int getUniqueId() {
+        return mUniqueId;
+    }
 
     /**
      * Returns whether {@link #close()} is called before.
      */
-    boolean isClosed();
+    public abstract boolean isClosed();
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof MediaSessionRecordImpl)) return false;
+        MediaSessionRecordImpl that = (MediaSessionRecordImpl) o;
+        return mUniqueId == that.mUniqueId;
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(mUniqueId);
+    }
 }

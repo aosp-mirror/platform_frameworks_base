@@ -25,8 +25,8 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.content.ComponentName;
 import android.os.IpcDataCache;
-import android.test.suitebuilder.annotation.SmallTest;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;

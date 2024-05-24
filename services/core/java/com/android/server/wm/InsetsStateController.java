@@ -34,6 +34,7 @@ import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
+import android.util.SparseLongArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
@@ -58,6 +59,7 @@ class InsetsStateController {
     private final DisplayContent mDisplayContent;
 
     private final SparseArray<InsetsSourceProvider> mProviders = new SparseArray<>();
+    private final SparseLongArray mSurfaceTransactionIds = new SparseLongArray();
     private final ArrayMap<InsetsControlTarget, ArrayList<InsetsSourceProvider>>
             mControlTargetProvidersMap = new ArrayMap<>();
     private final SparseArray<InsetsControlTarget> mIdControlTargetMap = new SparseArray<>();
@@ -72,7 +74,7 @@ class InsetsStateController {
     };
     private final InsetsControlTarget mEmptyImeControlTarget = new InsetsControlTarget() {
         @Override
-        public void notifyInsetsControlChanged() {
+        public void notifyInsetsControlChanged(int displayId) {
             InsetsSourceControl[] controls = getControlsForDispatch(this);
             if (controls == null) {
                 return;
@@ -80,7 +82,7 @@ class InsetsStateController {
             for (InsetsSourceControl control : controls) {
                 if (control.getType() == WindowInsets.Type.ime()) {
                     mDisplayContent.mWmService.mH.post(() ->
-                            InputMethodManagerInternal.get().removeImeSurface());
+                            InputMethodManagerInternal.get().removeImeSurface(displayId));
                 }
             }
         }
@@ -360,19 +362,38 @@ class InsetsStateController {
         notifyPendingInsetsControlChanged();
     }
 
+    void notifySurfaceTransactionReady(InsetsSourceProvider provider, long id, boolean ready) {
+        if (ready) {
+            mSurfaceTransactionIds.put(provider.getSource().getId(), id);
+        } else {
+            mSurfaceTransactionIds.delete(provider.getSource().getId());
+        }
+    }
+
     private void notifyPendingInsetsControlChanged() {
         if (mPendingControlChanged.isEmpty()) {
             return;
         }
+        final int size = mSurfaceTransactionIds.size();
+        final SparseLongArray surfaceTransactionIds = new SparseLongArray(size);
+        for (int i = 0; i < size; i++) {
+            surfaceTransactionIds.append(
+                    mSurfaceTransactionIds.keyAt(i), mSurfaceTransactionIds.valueAt(i));
+        }
         mDisplayContent.mWmService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
-            for (int i = mProviders.size() - 1; i >= 0; i--) {
-                final InsetsSourceProvider provider = mProviders.valueAt(i);
-                provider.onSurfaceTransactionApplied();
+            for (int i = 0; i < size; i++) {
+                final int sourceId = surfaceTransactionIds.keyAt(i);
+                final InsetsSourceProvider provider = mProviders.get(sourceId);
+                if (provider == null) {
+                    continue;
+                }
+                provider.onSurfaceTransactionCommitted(surfaceTransactionIds.valueAt(i));
             }
             final ArraySet<InsetsControlTarget> newControlTargets = new ArraySet<>();
+            int displayId = mDisplayContent.getDisplayId();
             for (int i = mPendingControlChanged.size() - 1; i >= 0; i--) {
                 final InsetsControlTarget controlTarget = mPendingControlChanged.valueAt(i);
-                controlTarget.notifyInsetsControlChanged();
+                controlTarget.notifyInsetsControlChanged(displayId);
                 if (mControlTargetProvidersMap.containsKey(controlTarget)) {
                     // We only collect targets who get controls, not lose controls.
                     newControlTargets.add(controlTarget);

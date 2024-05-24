@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.ui.adapter
 
+import android.platform.test.annotations.EnabledOnRavenwood
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -25,8 +26,15 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
+@EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
 class QSSceneAdapterTest : SysuiTestCase() {
+
+    @Test
+    fun expanding_squishiness1() {
+        assertThat(QSSceneAdapter.State.Expanding(0.3f).squishiness).isEqualTo(1f)
+    }
+
     @Test
     fun expandingSpecialValues() {
         assertThat(QSSceneAdapter.State.QQS).isEqualTo(QSSceneAdapter.State.Expanding(0f))
@@ -38,5 +46,12 @@ class QSSceneAdapterTest : SysuiTestCase() {
         val collapsingProgress = 0.3f
         assertThat(Collapsing(collapsingProgress))
             .isEqualTo(QSSceneAdapter.State.Expanding(1 - collapsingProgress))
+    }
+
+    @Test
+    fun unsquishing_expansionSameAsQQS() {
+        val squishiness = 0.6f
+        assertThat(QSSceneAdapter.State.Unsquishing(squishiness).expansion)
+            .isEqualTo(QSSceneAdapter.State.QQS.expansion)
     }
 }

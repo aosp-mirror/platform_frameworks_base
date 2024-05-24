@@ -155,6 +155,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> po <xliff:g id="TIME_DELAY">{2}</xliff:g> sek."</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nepřesměrováno"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nepřesměrováno"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Zabezpečení mobilní sítě"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Zkontrolovat nastavení"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Byl sdílen identifikátor zařízení"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"V období od <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> do <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> síť na připojení <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> zaznamenala <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g>krát jedinečný identifikátor vašeho zařízení (IMSI)."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Šifrované připojení k síti <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Nyní jste připojeni k zabezpečenější mobilní síti."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Nešifrované připojení k síti <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Jste připojeni k nešifrované mobilní síti. Vaše hovory, zprávy a data by někdo mohl zachytit."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Nastavení zabezpečení mobilní sítě"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Další informace"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Požadavek zadaný pomocí kódu funkce byl úspěšně dokončen."</string>
     <string name="fcError" msgid="5325116502080221346">"Problém s připojením nebo neplatný kód funkce."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -372,6 +382,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Umožňuje aplikaci vytvořit vazbu s modulem informačních služeb za účelem přesměrovávání přijatých zpráv informačních služeb. Výstražná upozornění informačních služeb jsou v některých oblastech odesílána za účelem varování před výjimečnými událostmi. Škodlivé aplikace mohou narušit výkon či provoz vašeho zařízení během přijímání zpráv informačních služeb."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Správa probíhajících hovorů"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Umožňuje aplikaci zobrazit podrobnosti o probíhajících hovorech v zařízení a tyto hovory ovládat."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Přístup k poslednímu známému ID buňky."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Umožňuje aplikaci přístup k poslednímu známému ID buňky poskytnutému telefonickou službou."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"čtení zpráv informačních služeb"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Umožňuje aplikaci číst zprávy informačních služeb přijaté ve vašem zařízení. Výstražná upozornění informačních služeb jsou v některých oblastech odesílána za účelem varování před výjimečnými událostmi. Škodlivé aplikace mohou narušit výkon či provoz vašeho zařízení během přijímání zpráv informačních služeb."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"čtení zdrojů přihlášených k odběru"</string>
@@ -436,6 +448,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Umožňuje aplikaci používat služby v popředí typu „systemExempted“"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"používat službu v popředí typu „fileManagement“"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Umožňuje aplikaci používat služby v popředí typu „fileManagement“"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"používat službu v popředí typu mediaProcessing"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Umožňuje aplikaci používat služby v popředí typu mediaProjection"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"používat službu v popředí typu „specialUse“"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Umožňuje aplikaci používat služby v popředí typu „specialUse“"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"výpočet místa pro ukládání aplikací"</string>
@@ -485,7 +499,7 @@
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"přístup k poloze na pozadí"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Tato aplikace má kdykoliv přístup k poloze (i když ji zrovna nepoužíváte)."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"změna nastavení zvuku"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Umožňuje aplikaci změnit globální nastavení zvuku, například hlasitost či reproduktor pro výstup zvuku."</string>
+    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Umožňuje aplikaci změnit globální nastavení zvuku, například hlasitost či reproduktor pro zvukový výstup."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"nahrávání zvuku"</string>
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"Tato aplikace může pomocí mikrofonu během svého používání zaznamenat zvuk."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"zaznamenávat zvuk na pozadí"</string>
@@ -541,6 +555,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Umožňuje aplikaci využívat infračervený vysílač telefonu."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"nastavení tapety"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Umožňuje aplikaci nastavit tapetu systému."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Přístup ke skrytým profilům"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Umožňuje aplikaci přístup ke skrytým profilům."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"úprava velikosti tapety"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Umožňuje aplikaci nastavit nápovědu pro velikost tapety systému."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"nastavení časového pásma"</string>
@@ -634,7 +650,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Použít zámek obrazovky"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Pokračujte zadáním zámku obrazovky"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Pevně zatlačte na snímač"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Otisk prstu se nepodařilo rozpoznat. Zkuste to znovu."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Otisk prstu nebyl rozpoznán. Zkuste to znovu."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Vyčistěte snímač otisků prstů a zkuste to znovu"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Vyčistěte senzor a zkuste to znovu"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Pevně přitiskněte prst na snímač"</string>
@@ -652,18 +668,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Otisk byl ověřen"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Obličej byl ověřen"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Obličej byl ověřen, stiskněte tlačítko pro potvrzení"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Není k dispozici hardware ke snímání otisků prstů."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Není k dispozici hardware ke snímání otisků prstů"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Otisk prstu se nepodařilo nastavit"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Časový limit nastavení otisku prstu vypršel. Zkuste to znovu."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operace otisku prstu byla zrušena."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Uživatel operaci s otiskem prstu zrušil."</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Operace otisku prstu byla zrušena"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Uživatel operaci s otiskem prstu zrušil"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Příliš mnoho pokusů. Použijte zámek obrazovky."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Příliš mnoho pokusů. Použijte zámek obrazovky."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Otisk prstu nelze zpracovat. Zkuste to znovu."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nejsou zaregistrovány žádné otisky prstů."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Toto zařízení nemá snímač otisků prstů."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Senzor je dočasně deaktivován."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Snímač otisků prstů nelze použít. Navštivte servis"</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Nejsou zaregistrovány žádné otisky prstů"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Toto zařízení nemá snímač otisků prstů"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Senzor je dočasně deaktivován"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Snímač otisků prstů nelze použít. Navštivte servis"</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Bylo stisknut vypínač"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Prst <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Použít otisk prstu"</string>
@@ -698,7 +714,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Obličej není vidět. Držte telefon v úrovni očí."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Příliš mnoho pohybu. Držte telefon nehybně."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Zaznamenejte obličej znovu."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Obličej se nepodařilo rozpoznat. Zkuste to znovu."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Obličej nebyl rozpoznán. Zkuste to znovu."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Mírně pohněte hlavou"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Dívejte se přímo na telefon"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Dívejte se přímo na telefon"</string>
@@ -809,6 +825,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Umožňuje aplikaci vzorkovat data ze senzorů s frekvencí vyšší než 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"aktualizovat aplikaci bez zásahu uživatele"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Umožňuje držiteli aktualizovat aplikaci, kterou dříve nainstaloval, bez zásahu uživatele"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"aktualizace stavů ověření kontaktních klíčů E2EE vlastněných jinými aplikacemi"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Umožňuje aplikaci aktualizovat stavy ověření kontaktních klíčů E2EE vlastněných jinými aplikacemi"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Nastavit pravidla pro heslo"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Ovládání délky a znaků povolených v heslech a kódech PIN zámku obrazovky."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Sledovat pokusy o odemknutí obrazovky"</string>
@@ -1908,6 +1926,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Víkend"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Událost"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Spánek"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Spravováno aplikací <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Zapnuto"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Vypnuto"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> vypíná určité zvuky"</string>
@@ -1927,6 +1946,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Ověřeno"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Rozbalit"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Sbalit"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Sbaleno"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Rozbaleno"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"přepnout rozbalení"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Port USB pro periferní zařízení – Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1967,6 +1988,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Zrušit pozastavení pracovních aplikací?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Zrušit pozastavení"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Stav nouze"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Nastavení zámku obrazovky"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Nastavit zámek obrazovky"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Pokud chcete používat soukromý prostor, nastavte na tomto zařízení zámek obrazovky"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikace není k dispozici"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> v tuto chvíli není k dispozici."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> není k dispozici"</string>
@@ -2343,8 +2367,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Nelze zrcadlit na displej"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Použijte jiný kabel a zkuste to znovu"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Zařízení je moc zahřáté, a dokud se nezchladí, nemůže zrcadlit displej"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Kabel možná nepodporuje displeje"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Váš kabel USB-C se možná nedokáže správně připojit k displejům"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Je zapnutá funkce Dual Screen"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> používá k zobrazení obsahu oba displeje"</string>
@@ -2368,4 +2390,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Práce 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Komunální"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Automaticky připojeno k satelitu"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Zprávy můžete odesílat a přijímat bez mobilní sítě nebo sítě Wi-Fi"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otevřít Zprávy"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Jak to funguje"</string>
 </resources>

@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar.data
 
 import com.android.systemui.statusbar.data.repository.KeyguardStatusBarRepositoryModule
+import com.android.systemui.statusbar.data.repository.RemoteInputRepositoryModule
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryModule
 import com.android.systemui.statusbar.phone.data.StatusBarPhoneDataLayerModule
 import dagger.Module
@@ -24,6 +25,7 @@ import dagger.Module
     includes =
         [
             KeyguardStatusBarRepositoryModule::class,
+            RemoteInputRepositoryModule::class,
             StatusBarModeRepositoryModule::class,
             StatusBarPhoneDataLayerModule::class
         ]

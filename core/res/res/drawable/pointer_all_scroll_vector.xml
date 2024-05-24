@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="24dp"
+        android:height="24dp"
+        android:viewportWidth="24"
+        android:viewportHeight="24">
+    <path
+        android:pathData="M12.93 4.54a1.06 1.06 0 0 0-1.85 0L9.32 7.6c-.4.71.1 1.6.92 1.6h.82v1.86H9.2v-.84c0-.82-.88-1.33-1.6-.93l-3.06 1.76c-.7.41-.7 1.44 0 1.85l3.07 1.76c.7.4 1.6-.1 1.6-.93v-.79h1.86v1.87h-.82c-.81 0-1.33.88-.92 1.6l1.76 3.06c.4.71 1.44.71 1.85 0l1.75-3.07c.41-.7-.1-1.6-.92-1.6h-.82v-1.86h1.86v.8c0 .81.89 1.32 1.6.92l3.07-1.76c.7-.41.7-1.44 0-1.85L16.4 9.3c-.71-.4-1.6.1-1.6.93v.84h-1.86V9.2h.82c.82 0 1.33-.89.92-1.6l-1.75-3.06z"
+        android:fillColor="#000000"/>
+    <path
+        android:pathData="M12 4c.36 0 .72.18.93.54l1.75 3.06c.41.71-.1 1.6-.92 1.6h-.82v1.86h1.86v-.84a1.07 1.07 0 0 1 1.6-.92l3.06 1.75c.72.41.72 1.44 0 1.85l-3.06 1.76a1.07 1.07 0 0 1-1.6-.92v-.8h-1.86v1.87h.82c.82 0 1.33.88.92 1.6l-1.75 3.06a1.07 1.07 0 0 1-1.85 0L9.32 16.4c-.4-.7.1-1.6.93-1.6h.81v-1.86H9.2v.8a1.07 1.07 0 0 1-1.6.92L4.54 12.9a1.06 1.06 0 0 1 0-1.85L7.6 9.3a1.07 1.07 0 0 1 1.6.92v.85h1.86V9.2h-.82c-.81 0-1.33-.89-.92-1.6l1.76-3.06c.2-.36.56-.54.92-.54m0-1c-.74 0-1.41.39-1.79 1.04L8.45 7.1c-.18.33-.28.7-.27 1.05h-.05c-.36 0-.71.1-1.03.28l-3.06 1.76a2.05 2.05 0 0 0 0 3.58l3.06 1.75c.32.18.67.28 1.03.28h.05c-.01.38.08.76.28 1.1l1.75 3.07c.38.65 1.05 1.03 1.8 1.03s1.41-.38 1.78-1.03l1.76-3.07c.2-.34.3-.72.28-1.1h.04c.36 0 .71-.1 1.03-.28l3.06-1.75a2.07 2.07 0 0 0 0-3.58L16.9 8.43a2.07 2.07 0 0 0-1.03-.28h-.04c0-.36-.09-.72-.28-1.05L13.8 4.04A2.04 2.04 0 0 0 12 3z"
+        android:fillColor="#FFFFFF"/>
+</vector>

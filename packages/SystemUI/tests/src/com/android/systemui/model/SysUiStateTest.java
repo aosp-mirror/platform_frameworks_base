@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.settings.FakeDisplayTracker;
 
 import org.junit.Before;
@@ -42,13 +43,15 @@ public class SysUiStateTest extends SysuiTestCase {
     private static final int FLAG_4 = 1 << 3;
     private static final int DISPLAY_ID = DEFAULT_DISPLAY;
 
+    private KosmosJavaAdapter mKosmos;
     private SysUiState.SysUiStateCallback mCallback;
     private SysUiState mFlagsContainer;
 
     @Before
     public void setup() {
         FakeDisplayTracker displayTracker = new FakeDisplayTracker(mContext);
-        mFlagsContainer = new SysUiState(displayTracker);
+        mKosmos = new KosmosJavaAdapter(this);
+        mFlagsContainer = new SysUiState(displayTracker, mKosmos.getSceneContainerPlugin());
         mCallback = mock(SysUiState.SysUiStateCallback.class);
         mFlagsContainer.addCallback(mCallback);
     }

@@ -22,7 +22,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import com.android.packageinstaller.R;
-import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallUninstalling;
+import com.android.packageinstaller.v2.model.UninstallUninstalling;
 
 /**
  * Dialog to show that the app is uninstalling.

@@ -217,7 +217,6 @@ public final class Slog {
      * @see Log#wtf(String, String)
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    @android.ravenwood.annotation.RavenwoodThrow
     public static int wtf(@Nullable String tag, @NonNull String msg) {
         return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, null, false, true);
     }
@@ -263,7 +262,6 @@ public final class Slog {
      *
      * @see Log#wtf(String, Throwable)
      */
-    @android.ravenwood.annotation.RavenwoodThrow
     public static int wtf(@Nullable String tag, @Nullable Throwable tr) {
         return Log.wtf(Log.LOG_ID_SYSTEM, tag, tr.getMessage(), tr, false, true);
     }
@@ -284,7 +282,6 @@ public final class Slog {
      * @see Log#wtf(String, String, Throwable)
      */
     @UnsupportedAppUsage
-    @android.ravenwood.annotation.RavenwoodThrow
     public static int wtf(@Nullable String tag, @NonNull String msg, @Nullable Throwable tr) {
         return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, tr, false, true);
     }

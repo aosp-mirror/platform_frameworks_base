@@ -33,8 +33,8 @@ import android.media.tv.TvContentRating;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvRecordingInfo;
 import android.media.tv.TvTrackInfo;
-import android.media.tv.interactive.TvInteractiveAppService.Session;
 import android.net.Uri;
+import android.net.http.SslCertificate;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -506,6 +506,18 @@ public final class TvInteractiveAppManager {
             }
 
             @Override
+            public void onRequestSelectedTrackInfo(int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestSelectedTrackInfo();
+                }
+            }
+
+            @Override
             public void onRequestCurrentTvInputId(int seq) {
                 synchronized (mSessionCallbackRecordMap) {
                     SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
@@ -641,6 +653,31 @@ public final class TvInteractiveAppManager {
                         return;
                     }
                     record.postRequestSigning(id, algorithm, alias, data);
+                }
+            }
+
+            @Override
+            public void onRequestSigning2(
+                    String id, String algorithm, String host, int port, byte[] data, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestSigning(id, algorithm, host, port, data);
+                }
+            }
+
+            @Override
+            public void onRequestCertificate(String host, int port, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestCertificate(host, port);
                 }
             }
 
@@ -1209,6 +1246,18 @@ public final class TvInteractiveAppManager {
             }
         }
 
+        void sendSelectedTrackInfo(@NonNull List<TvTrackInfo> tracks) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendSelectedTrackInfo(mToken, tracks, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
         void sendCurrentTvInputId(@Nullable String inputId) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
@@ -1300,6 +1349,19 @@ public final class TvInteractiveAppManager {
             }
             try {
                 mService.sendSigningResult(mToken, signingId, result, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void sendCertificate(@NonNull String host, int port, @NonNull SslCertificate cert) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendCertificate(mToken, host, port, SslCertificate.saveState(cert),
+                        mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1708,6 +1770,22 @@ public final class TvInteractiveAppManager {
         }
 
         /**
+         * Notifies Interactive app session when the video freeze state is updated
+         * @param isFrozen Whether or not the video is frozen
+         */
+        public void notifyVideoFreezeUpdated(boolean isFrozen) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyVideoFreezeUpdated(mToken, isFrozen, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Notifies Interactive APP session when content is allowed.
          */
         public void notifyContentAllowed() {
@@ -2108,6 +2186,15 @@ public final class TvInteractiveAppManager {
             });
         }
 
+        void postRequestSelectedTrackInfo() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestSelectedTrackInfo(mSession);
+                }
+            });
+        }
+
         void postRequestCurrentTvInputId() {
             mHandler.post(new Runnable() {
                 @Override
@@ -2180,6 +2267,26 @@ public final class TvInteractiveAppManager {
                 @Override
                 public void run() {
                     mSessionCallback.onRequestSigning(mSession, id, algorithm, alias, data);
+                }
+            });
+        }
+
+        void postRequestSigning(String id, String algorithm, String host, int port,
+                byte[] data) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestSigning(mSession, id, algorithm, host,
+                            port, data);
+                }
+            });
+        }
+
+        void postRequestCertificate(String host, int port) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestCertificate(mSession, host, port);
                 }
             });
         }
@@ -2378,6 +2485,15 @@ public final class TvInteractiveAppManager {
         }
 
         /**
+         * This is called when {@link TvInteractiveAppService.Session#requestSelectedTrackInfo()} is
+         * called.
+         *
+         * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
+         */
+        public void onRequestSelectedTrackInfo(Session session) {
+        }
+
+        /**
          * This is called when {@link TvInteractiveAppService.Session#requestCurrentTvInputId} is
          * called.
          *
@@ -2514,6 +2630,34 @@ public final class TvInteractiveAppManager {
          */
         public void onRequestSigning(
                 Session session, String signingId, String algorithm, String alias, byte[] data) {
+        }
+
+        /**
+         * This is called when
+         * {@link TvInteractiveAppService.Session#requestSigning(String, String, String, int, byte[])}
+         * is called.
+         *
+         * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
+         * @param signingId the ID to identify the request.
+         * @param algorithm the standard name of the signature algorithm requested, such as
+         *                  MD5withRSA, SHA256withDSA, etc.
+         * @param host The host of the SSL CLient Authentication Server
+         * @param port The port of the SSL Client Authentication Server
+         * @param data the original bytes to be signed.
+         */
+        public void onRequestSigning(
+                Session session, String signingId, String algorithm, String host,
+                int port, byte[] data) {
+        }
+
+        /**
+         * This is called when the service requests a SSL certificate for client validation.
+         *
+         * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
+         * @param host the host name of the SSL authentication server.
+         * @param port the port of the SSL authentication server. E.g., 443
+         */
+        public void onRequestCertificate(Session session, String host, int port) {
         }
 
         /**

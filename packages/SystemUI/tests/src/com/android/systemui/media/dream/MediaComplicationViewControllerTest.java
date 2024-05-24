@@ -25,7 +25,7 @@ import android.widget.FrameLayout;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.media.controls.ui.MediaHost;
+import com.android.systemui.media.controls.ui.view.MediaHost;
 import com.android.systemui.util.animation.UniqueObjectHostView;
 
 import org.junit.Before;

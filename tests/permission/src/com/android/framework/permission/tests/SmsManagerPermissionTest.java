@@ -18,7 +18,8 @@ package com.android.framework.permission.tests;
 
 import android.telephony.SmsManager;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import java.util.ArrayList;
 

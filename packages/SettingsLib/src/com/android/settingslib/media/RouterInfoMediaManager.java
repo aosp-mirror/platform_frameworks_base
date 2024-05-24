@@ -26,11 +26,13 @@ import android.media.MediaRouter2Manager;
 import android.media.RouteDiscoveryPreference;
 import android.media.RouteListingPreference;
 import android.media.RoutingSessionInfo;
+import android.os.Process;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.media.flags.Flags;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 
 import java.util.ArrayList;
@@ -39,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -62,26 +65,35 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
                 refreshDevices();
             };
 
-    // TODO: b/192657812 - Create factory method in InfoMediaManager to return
-    //      RouterInfoMediaManager or ManagerInfoMediaManager based on flag.
-    public RouterInfoMediaManager(
+    private final AtomicReference<MediaRouter2.ScanToken> mScanToken = new AtomicReference<>();
+
+    // TODO (b/321969740): Plumb target UserHandle between UMO and RouterInfoMediaManager.
+    /* package */ RouterInfoMediaManager(
             Context context,
-            String packageName,
+            @NonNull String packageName,
             Notification notification,
-            LocalBluetoothManager localBluetoothManager) throws PackageNotAvailableException {
+            LocalBluetoothManager localBluetoothManager)
+            throws PackageNotAvailableException {
         super(context, packageName, notification, localBluetoothManager);
 
-        // TODO: b/291277292 - Change optional package name for a mandatory uid.
-        if (packageName == null) {
-            packageName = context.getPackageName();
+        MediaRouter2 router = null;
+
+        if (Flags.enableCrossUserRoutingInMediaRouter2()) {
+            try {
+                router = MediaRouter2.getInstance(context, packageName, Process.myUserHandle());
+            } catch (IllegalArgumentException ex) {
+                // Do nothing
+            }
+        } else {
+            router = MediaRouter2.getInstance(context, packageName);
         }
-
-        mRouter = MediaRouter2.getInstance(context, packageName);
-
-        if (mRouter == null) {
+        if (router == null) {
             throw new PackageNotAvailableException(
                     "Package name " + packageName + " does not exist.");
         }
+        // We have to defer initialization because mRouter is final.
+        mRouter = router;
+
         mRouterManager = MediaRouter2Manager.getInstance(context);
     }
 
@@ -92,27 +104,28 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
                 mExecutor, mRouteListingPreferenceCallback);
         mRouter.registerTransferCallback(mExecutor, mTransferCallback);
         mRouter.registerControllerCallback(mExecutor, mControllerCallback);
-        mRouter.startScan();
+        if (Flags.enableScreenOffScanning()) {
+            MediaRouter2.ScanRequest request = new MediaRouter2.ScanRequest.Builder().build();
+            mScanToken.compareAndSet(null, mRouter.requestScan(request));
+        } else {
+            mRouter.startScan();
+        }
     }
 
     @Override
     public void stopScan() {
-        mRouter.stopScan();
+        if (Flags.enableScreenOffScanning()) {
+            MediaRouter2.ScanToken token = mScanToken.getAndSet(null);
+            if (token != null) {
+                mRouter.cancelScanRequest(token);
+            }
+        } else {
+            mRouter.stopScan();
+        }
         mRouter.unregisterControllerCallback(mControllerCallback);
         mRouter.unregisterTransferCallback(mTransferCallback);
         mRouter.unregisterRouteListingPreferenceUpdatedCallback(mRouteListingPreferenceCallback);
         mRouter.unregisterRouteCallback(mRouteCallback);
-    }
-
-    @Override
-    protected boolean connectDeviceWithoutPackageName(@NonNull MediaDevice device) {
-        if (device.mRouteInfo == null) {
-            return false;
-        }
-
-        RoutingController controller = mRouter.getSystemController();
-        mRouter.transfer(controller, device.mRouteInfo);
-        return true;
     }
 
     @Override
@@ -228,12 +241,6 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
 
         RoutingSessionInfo systemSession = mRouterManager.getSystemRoutingSession(null);
         return TextUtils.equals(systemSession.getId(), sessionId) ? systemSession : null;
-    }
-
-    @NonNull
-    @Override
-    protected List<MediaRoute2Info> getAllRoutes() {
-        return mRouter.getAllRoutes();
     }
 
     @NonNull

@@ -17,10 +17,10 @@ import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
 import com.android.systemui.DejankUtils
 import com.android.app.animation.Interpolators
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LightRevealScrim
@@ -32,7 +32,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator
 import com.android.systemui.statusbar.notification.stack.AnimationProperties
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.app.tracing.TraceUtils
+import com.android.app.tracing.namedRunnable
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
 
@@ -125,7 +125,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     }
 
     // FrameCallback used to delay starting the light reveal animation until the next frame
-    private val startLightRevealCallback = TraceUtils.namedRunnable("startLightReveal") {
+    private val startLightRevealCallback = namedRunnable("startLightReveal") {
         lightRevealAnimationPlaying = true
         lightRevealAnimator.start()
     }
@@ -286,7 +286,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                 // up, with unpredictable consequences.
                 if (!powerManager.isInteractive(Display.DEFAULT_DISPLAY) &&
                         shouldAnimateInKeyguard) {
-                    if (!KeyguardShadeMigrationNssl.isEnabled) {
+                    if (!migrateClocksToBlueprint()) {
                         // Tracking this state should no longer be relevant, as the isInteractive
                         // check covers it
                         aodUiAnimationPlaying = true

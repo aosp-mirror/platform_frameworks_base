@@ -126,6 +126,11 @@ class TaskContainer {
     }
 
     @NonNull
+    Rect getBounds() {
+        return mConfiguration.windowConfiguration.getBounds();
+    }
+
+    @NonNull
     TaskProperties getTaskProperties() {
         return new TaskProperties(mDisplayId, mConfiguration);
     }
@@ -138,6 +143,21 @@ class TaskContainer {
     }
 
     /**
+     * Returns {@code true} if the container should be updated with {@code info}.
+     */
+    boolean shouldUpdateContainer(@NonNull TaskFragmentParentInfo info) {
+        final Configuration configuration = info.getConfiguration();
+
+        return info.isVisible()
+                // No need to update presentation in PIP until the Task exit PIP.
+                && !isInPictureInPicture(configuration)
+                // If the task properties equals regardless of starting position, don't need to
+                // update the container.
+                && (mConfiguration.diffPublicOnly(configuration) != 0
+                || mDisplayId != info.getDisplayId());
+    }
+
+    /**
      * Returns the windowing mode for the TaskFragments below this Task, which should be split with
      * other TaskFragments.
      *
@@ -145,7 +165,7 @@ class TaskContainer {
      *                              the pair of TaskFragments are stacked due to the limited space.
      */
     @WindowingMode
-    int getWindowingModeForSplitTaskFragment(@Nullable Rect taskFragmentBounds) {
+    int getWindowingModeForTaskFragment(@Nullable Rect taskFragmentBounds) {
         // Only set to multi-windowing mode if the pair are showing side-by-side. Otherwise, it
         // will be set to UNDEFINED which will then inherit the Task windowing mode.
         if (taskFragmentBounds == null || taskFragmentBounds.isEmpty() || isInPictureInPicture()) {
@@ -161,7 +181,11 @@ class TaskContainer {
     }
 
     boolean isInPictureInPicture() {
-        return getWindowingMode() == WINDOWING_MODE_PINNED;
+        return isInPictureInPicture(mConfiguration);
+    }
+
+    private static boolean isInPictureInPicture(@NonNull Configuration configuration) {
+        return configuration.windowConfiguration.getWindowingMode() == WINDOWING_MODE_PINNED;
     }
 
     boolean isInMultiWindow() {
@@ -441,6 +465,26 @@ class TaskContainer {
             splitStates.add(splitInfo);
         }
         return splitStates;
+    }
+
+    // TODO(b/317358445): Makes ActivityStack and SplitInfo callback more stable.
+    /**
+     * Returns a list of currently active {@link ActivityStack activityStacks}.
+     *
+     * @return a list of {@link ActivityStack activityStacks} if all the containers are in
+     * a stable state, or {@code null} otherwise.
+     */
+    @Nullable
+    List<ActivityStack> getActivityStacksIfStable() {
+        final List<ActivityStack> activityStacks = new ArrayList<>();
+        for (TaskFragmentContainer container : mContainers) {
+            final ActivityStack activityStack = container.toActivityStackIfStable();
+            if (activityStack == null) {
+                return null;
+            }
+            activityStacks.add(activityStack);
+        }
+        return activityStacks;
     }
 
     /** A wrapper class which contains the information of {@link TaskContainer} */

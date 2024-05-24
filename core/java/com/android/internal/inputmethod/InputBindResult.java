@@ -271,6 +271,7 @@ public final class InputBindResult implements Parcelable {
     public String toString() {
         return "InputBindResult{result=" + getResultString() + " method=" + method + " id=" + id
                 + " sequence=" + sequence
+                + " result=" + result
                 + " isInputMethodSuppressingSpellChecker=" + isInputMethodSuppressingSpellChecker
                 + "}";
     }

@@ -18,6 +18,7 @@ per-file apphibernationservice.proto = file:/core/java/android/apphibernation/OW
 per-file android/hardware/sensorprivacy.proto = ntmyren@google.com,evanseverson@google.com
 per-file background_install_control.proto = wenhaowang@google.com,georgechan@google.com,billylau@google.com
 per-file android/content/intent.proto = file:/PACKAGE_MANAGER_OWNERS
+per-file android/hardware/location/context_hub_info.proto = file:/services/core/java/com/android/server/location/contexthub/OWNERS
 
 # Biometrics
 jbolinger@google.com

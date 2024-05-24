@@ -20,8 +20,9 @@ import com.android.app.animation.Interpolators.EMPHASIZED_DECELERATE
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.FromGoneTransitionInteractor.Companion.TO_AOD_DURATION
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.StateToValue
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -36,7 +37,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 class GoneToAodTransitionViewModel
 @Inject
 constructor(
-    interactor: KeyguardTransitionInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
@@ -44,29 +44,36 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = TO_AOD_DURATION,
-            stepFlow = interactor.goneToAodTransition,
+            from = KeyguardState.GONE,
+            to = KeyguardState.AOD,
         )
 
     /** y-translation from the top of the screen for AOD */
-    fun enterFromTopTranslationY(translatePx: Int): Flow<Float> {
-        return transitionAnimation.sharedFlow(
+    fun enterFromTopTranslationY(translatePx: Int): Flow<StateToValue> {
+        return transitionAnimation.sharedFlowWithState(
             startTime = 600.milliseconds,
             duration = 500.milliseconds,
-            onStart = { translatePx },
             onStep = { translatePx + it * -translatePx },
             onFinish = { 0f },
-            onCancel = { 0f },
             interpolator = EMPHASIZED_DECELERATE,
         )
     }
 
+    val notificationAlpha: Flow<Float> =
+        transitionAnimation.sharedFlow(
+            duration = 200.milliseconds,
+            onStep = { 1f - it },
+            // Needs to be 1f in order for HUNs to appear on AOD
+            onFinish = { 1f },
+        )
+
     /** alpha animation upon entering AOD */
     val enterFromTopAnimationAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
-            startTime = 600.milliseconds,
-            duration = 500.milliseconds,
-            onStart = { 0f },
+            startTime = 700.milliseconds,
+            duration = 400.milliseconds,
             onStep = { it },
+            onFinish = { 1f },
         )
     val deviceEntryBackgroundViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(0f)

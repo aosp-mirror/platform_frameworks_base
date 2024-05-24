@@ -26,18 +26,24 @@ import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.isDefaultOrientation
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.log.SideFpsLogger
 import com.android.systemui.res.R
 import java.util.Optional
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 
+@ExperimentalCoroutinesApi
 @SysUISingleton
 class SideFpsSensorInteractor
 @Inject
@@ -47,8 +53,13 @@ constructor(
     windowManager: WindowManager,
     displayStateInteractor: DisplayStateInteractor,
     fingerprintInteractiveToAuthProvider: Optional<FingerprintInteractiveToAuthProvider>,
+    biometricSettingsRepository: BiometricSettingsRepository,
+    keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val logger: SideFpsLogger,
 ) {
+
+    private val isProlongedTouchEnabledForDevice =
+        context.resources.getBoolean(R.bool.config_restToUnlockSupported)
 
     private val sensorLocationForCurrentDisplay =
         combine(
@@ -62,16 +73,40 @@ constructor(
     val isAvailable: Flow<Boolean> =
         fingerprintPropertyRepository.sensorType.map { it == FingerprintSensorType.POWER_BUTTON }
 
-    val authenticationDuration: Long =
-        context.resources?.getInteger(R.integer.config_restToUnlockDuration)?.toLong() ?: 0L
+    val authenticationDuration: Flow<Long> =
+        keyguardTransitionInteractor
+            .isFinishedInStateWhere { it == KeyguardState.OFF || it == KeyguardState.DOZING }
+            .map {
+                if (it)
+                    context.resources
+                        ?.getInteger(R.integer.config_restToUnlockDurationScreenOff)
+                        ?.toLong()
+                else
+                    context.resources
+                        ?.getInteger(R.integer.config_restToUnlockDurationDefault)
+                        ?.toLong()
+            }
+            .map { it ?: 0L }
+            .onEach { logger.authDurationChanged(it) }
+
+    private val isSettingEnabled: Flow<Boolean> =
+        biometricSettingsRepository.isFingerprintEnrolledAndEnabled
+            .flatMapLatest { enabledAndEnrolled ->
+                if (!enabledAndEnrolled || fingerprintInteractiveToAuthProvider.isEmpty) {
+                    flowOf(false)
+                } else {
+                    fingerprintInteractiveToAuthProvider.get().enabledForCurrentUser
+                }
+            }
+            .onEach { logger.restToUnlockSettingEnabledChanged(it) }
 
     val isProlongedTouchRequiredForAuthentication: Flow<Boolean> =
-        if (fingerprintInteractiveToAuthProvider.isEmpty) {
+        if (!isProlongedTouchEnabledForDevice) {
             flowOf(false)
         } else {
             combine(
                 isAvailable,
-                fingerprintInteractiveToAuthProvider.get().enabledForCurrentUser
+                isSettingEnabled,
             ) { sfpsAvailable, isSettingEnabled ->
                 sfpsAvailable && isSettingEnabled
             }

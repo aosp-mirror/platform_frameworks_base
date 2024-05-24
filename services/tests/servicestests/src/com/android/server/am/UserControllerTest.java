@@ -87,6 +87,7 @@ import android.os.HandlerThread;
 import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -682,19 +683,19 @@ public class UserControllerTest {
                 /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
 
         setUpAndStartUserInBackground(TEST_USER_ID);
-        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID, /* delayedLocking= */ true,
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID, /* allowDelayedLocking= */ true,
                 /* keyEvictedCallback= */ null, /* expectLocking= */ true);
 
         setUpAndStartUserInBackground(TEST_USER_ID1);
-        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* delayedLocking= */ true,
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* allowDelayedLocking= */ true,
                 /* keyEvictedCallback= */ mKeyEvictedCallback, /* expectLocking= */ true);
 
         setUpAndStartUserInBackground(TEST_USER_ID2);
-        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID2, /* delayedLocking= */ false,
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID2, /* allowDelayedLocking= */ false,
                 /* keyEvictedCallback= */ null, /* expectLocking= */ true);
 
         setUpAndStartUserInBackground(TEST_USER_ID3);
-        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID3, /* delayedLocking= */ false,
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID3, /* allowDelayedLocking= */ false,
                 /* keyEvictedCallback= */ mKeyEvictedCallback, /* expectLocking= */ true);
     }
 
@@ -739,21 +740,21 @@ public class UserControllerTest {
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
                 /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ true);
 
-        // delayedLocking set and no KeyEvictedCallback, so it should not lock.
+        // allowDelayedLocking set and no KeyEvictedCallback, so it should not lock.
         setUpAndStartUserInBackground(TEST_USER_ID);
-        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID, /* delayedLocking= */ true,
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID, /* allowDelayedLocking= */ true,
                 /* keyEvictedCallback= */ null, /* expectLocking= */ false);
 
         setUpAndStartUserInBackground(TEST_USER_ID1);
-        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* delayedLocking= */ true,
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* allowDelayedLocking= */ true,
                 /* keyEvictedCallback= */ mKeyEvictedCallback, /* expectLocking= */ true);
 
         setUpAndStartUserInBackground(TEST_USER_ID2);
-        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID2, /* delayedLocking= */ false,
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID2, /* allowDelayedLocking= */ false,
                 /* keyEvictedCallback= */ null, /* expectLocking= */ true);
 
         setUpAndStartUserInBackground(TEST_USER_ID3);
-        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID3, /* delayedLocking= */ false,
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID3, /* allowDelayedLocking= */ false,
                 /* keyEvictedCallback= */ mKeyEvictedCallback, /* expectLocking= */ true);
     }
 
@@ -843,7 +844,7 @@ public class UserControllerTest {
         mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE,
                 android.multiuser.Flags.FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE);
         setUpAndStartProfileInBackground(TEST_USER_ID1, UserManager.USER_TYPE_PROFILE_PRIVATE);
-        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* delayedLocking= */ true,
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* allowDelayedLocking= */ true,
                 /* keyEvictedCallback */ null, /* expectLocking= */ false);
     }
 
@@ -855,19 +856,20 @@ public class UserControllerTest {
         mSetFlagsRule.disableFlags(
                 android.multiuser.Flags.FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE);
         setUpAndStartProfileInBackground(TEST_USER_ID1, UserManager.USER_TYPE_PROFILE_PRIVATE);
-        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* delayedLocking= */ true,
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* allowDelayedLocking= */ true,
                 /* keyEvictedCallback */ null, /* expectLocking= */ true);
 
         mSetFlagsRule.disableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE);
         mSetFlagsRule.enableFlags(
                 android.multiuser.Flags.FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE);
         setUpAndStartProfileInBackground(TEST_USER_ID2, UserManager.USER_TYPE_PROFILE_PRIVATE);
-        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID2, /* delayedLocking= */ true,
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID2, /* allowDelayedLocking= */ true,
                 /* keyEvictedCallback */ null, /* expectLocking= */ true);
     }
 
+    /** Delayed-locking users (as opposed to devices) have no limits on how many can be unlocked. */
     @Test
-    public void testStopPrivateProfileWithDelayedLocking_maxRunningUsersBreached()
+    public void testStopPrivateProfileWithDelayedLocking_imperviousToNumberOfRunningUsers()
             throws Exception {
         mUserController.setInitialConfig(/* mUserSwitchUiEnabled */ true,
                 /* maxRunningUsers= */ 1, /* delayUserDataLocking= */ false);
@@ -875,10 +877,14 @@ public class UserControllerTest {
                 android.multiuser.Flags.FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE);
         setUpAndStartProfileInBackground(TEST_USER_ID1, UserManager.USER_TYPE_PROFILE_PRIVATE);
         setUpAndStartProfileInBackground(TEST_USER_ID2, UserManager.USER_TYPE_PROFILE_MANAGED);
-        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* delayedLocking= */ true,
-                /* keyEvictedCallback */ null, /* expectLocking= */ true);
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* allowDelayedLocking= */ true,
+                /* keyEvictedCallback */ null, /* expectLocking= */ false);
     }
 
+    /**
+        * Tests that when a device/user (managed profile) does not permit delayed locking, then
+        * even if allowDelayedLocking is true, the user will still be locked.
+    */
     @Test
     public void testStopManagedProfileWithDelayedLocking() throws Exception {
         mUserController.setInitialConfig(/* mUserSwitchUiEnabled */ true,
@@ -886,7 +892,7 @@ public class UserControllerTest {
         mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE,
                 android.multiuser.Flags.FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE);
         setUpAndStartProfileInBackground(TEST_USER_ID1, UserManager.USER_TYPE_PROFILE_MANAGED);
-        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* delayedLocking= */ true,
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* allowDelayedLocking= */ true,
                 /* keyEvictedCallback */ null, /* expectLocking= */ true);
     }
 
@@ -1087,29 +1093,29 @@ public class UserControllerTest {
         mUserStates.put(userId, mUserController.getStartedUserState(userId));
     }
 
-    private void assertUserLockedOrUnlockedAfterStopping(int userId, boolean delayedLocking,
+    private void assertUserLockedOrUnlockedAfterStopping(int userId, boolean allowDelayedLocking,
             KeyEvictedCallback keyEvictedCallback, boolean expectLocking) throws Exception {
-        int r = mUserController.stopUser(userId, /* force= */ true, /* delayedLocking= */
-                delayedLocking, null, keyEvictedCallback);
+        int r = mUserController.stopUser(userId, /* force= */ true, /* allowDelayedLocking= */
+                allowDelayedLocking, null, keyEvictedCallback);
         assertThat(r).isEqualTo(ActivityManager.USER_OP_SUCCESS);
-        assertUserLockedOrUnlockedState(userId, delayedLocking, expectLocking);
+        assertUserLockedOrUnlockedState(userId, allowDelayedLocking, expectLocking);
     }
 
     private void assertProfileLockedOrUnlockedAfterStopping(int userId, boolean expectLocking)
             throws Exception {
         boolean profileStopped = mUserController.stopProfile(userId);
         assertThat(profileStopped).isTrue();
-        assertUserLockedOrUnlockedState(userId, /* delayedLocking= */ false, expectLocking);
+        assertUserLockedOrUnlockedState(userId, /* allowDelayedLocking= */ false, expectLocking);
     }
 
-    private void assertUserLockedOrUnlockedState(int userId, boolean delayedLocking,
+    private void assertUserLockedOrUnlockedState(int userId, boolean allowDelayedLocking,
             boolean expectLocking) throws InterruptedException, RemoteException {
         // fake all interim steps
         UserState ussUser = mUserStates.get(userId);
         ussUser.setState(UserState.STATE_SHUTDOWN);
         // Passing delayedLocking invalidates incorrect internal data passing but currently there is
         // no easy way to get that information passed through lambda.
-        mUserController.finishUserStopped(ussUser, delayedLocking);
+        mUserController.finishUserStopped(ussUser, allowDelayedLocking);
         waitForHandlerToComplete(FgThread.getHandler(), HANDLER_WAIT_TIME_MS);
         verify(mInjector.mStorageManagerMock, times(expectLocking ? 1 : 0))
                 .lockCeStorage(userId);
@@ -1218,6 +1224,7 @@ public class UserControllerTest {
         private final UserManagerInternal mUserManagerInternalMock;
         private final WindowManagerService mWindowManagerMock;
         private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
+        private final PowerManagerInternal mPowerManagerInternal;
         private final KeyguardManager mKeyguardManagerMock;
         private final LockPatternUtils mLockPatternUtilsMock;
 
@@ -1239,6 +1246,7 @@ public class UserControllerTest {
             mWindowManagerMock = mock(WindowManagerService.class);
             mActivityTaskManagerInternal = mock(ActivityTaskManagerInternal.class);
             mStorageManagerMock = mock(IStorageManager.class);
+            mPowerManagerInternal = mock(PowerManagerInternal.class);
             mKeyguardManagerMock = mock(KeyguardManager.class);
             when(mKeyguardManagerMock.isDeviceSecure(anyInt())).thenReturn(true);
             mLockPatternUtilsMock = mock(LockPatternUtils.class);
@@ -1301,6 +1309,11 @@ public class UserControllerTest {
         @Override
         ActivityTaskManagerInternal getActivityTaskManagerInternal() {
             return mActivityTaskManagerInternal;
+        }
+
+        @Override
+        PowerManagerInternal getPowerManagerInternal() {
+            return mPowerManagerInternal;
         }
 
         @Override

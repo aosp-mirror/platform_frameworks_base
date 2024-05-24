@@ -17,6 +17,7 @@
 
 package com.android.systemui.user.data.repository
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.UserInfo
 import android.os.UserHandle
@@ -209,18 +210,15 @@ constructor(
 
     override val selectedUserInfo: Flow<UserInfo> = selectedUser.map { it.userInfo }
 
+    @SuppressLint("MissingPermission")
     override fun refreshUsers() {
         applicationScope.launch {
-            val result = withContext(backgroundDispatcher) { manager.aliveUsers }
-
-            if (result != null) {
-                _userInfos.value =
-                    result
-                        // Users should be sorted by ascending creation time.
-                        .sortedBy { it.creationTime }
-                        // The guest user is always last, regardless of creation time.
-                        .sortedBy { it.isGuest }
-            }
+            _userInfos.value =
+                withContext(backgroundDispatcher) { manager.aliveUsers }
+                    // Users should be sorted by ascending creation time.
+                    .sortedBy { it.creationTime }
+                    // The guest user is always last, regardless of creation time.
+                    .sortedBy { it.isGuest }
 
             if (mainUserId == UserHandle.USER_NULL) {
                 val mainUser = withContext(backgroundDispatcher) { manager.mainUser }

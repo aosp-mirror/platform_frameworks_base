@@ -1366,6 +1366,12 @@ public class HdmiControlService extends SystemService {
                                     // we don't call onInitializeCecComplete()
                                     // since we reallocate the logical address only.
                                     onInitializeCecComplete(initiatedBy);
+                                } else if (initiatedBy == INITIATED_BY_HOTPLUG
+                                        && mDisplayStatusCallback == null) {
+                                    // Force to update display status for hotplug event.
+                                    synchronized (mLock) {
+                                        announceHdmiControlStatusChange(mHdmiControlEnabled);
+                                    }
                                 }
                                 // We remove local devices here, instead of before the start of
                                 // address allocation, to prevent multiple local devices of the
@@ -1783,8 +1789,9 @@ public class HdmiControlService extends SystemService {
         // initPortInfo at hotplug event.
         mHdmiCecNetwork.initPortInfo();
 
+        HdmiPortInfo portInfo = getPortInfo(portId);
         if (connected && !isTvDevice()
-                && getPortInfo(portId).getType() == HdmiPortInfo.PORT_OUTPUT) {
+                && portInfo != null && portInfo.getType() == HdmiPortInfo.PORT_OUTPUT) {
             ArrayList<HdmiCecLocalDevice> localDevices = new ArrayList<>();
             for (int type : getCecLocalDeviceTypes()) {
                 HdmiCecLocalDevice localDevice = mHdmiCecNetwork.getLocalDevice(type);
@@ -3616,7 +3623,7 @@ public class HdmiControlService extends SystemService {
         }
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     protected boolean isEarcSupported() {
         synchronized (mLock) {
             return mEarcSupported;
@@ -3792,6 +3799,11 @@ public class HdmiControlService extends SystemService {
                 }
             }
         });
+
+        // Make sure we switch away from absolute volume behavior (AVB) when entering standby.
+        // We do this because AVB should not be used unless AbsoluteVolumeAudioStatusAction exists,
+        // and the action cannot exist in standby because there are no local devices.
+        checkAndUpdateAbsoluteVolumeBehavior();
     }
 
     boolean canGoToStandby() {
@@ -4445,10 +4457,11 @@ public class HdmiControlService extends SystemService {
      * This allows the volume level of the System Audio device to be tracked and set by Android.
      *
      * Absolute volume behavior requires the following conditions:
-     * 1. If the System Audio Device is an Audio System: System Audio Mode is active
-     * 2. All AVB-capable audio output devices are already using full/absolute volume behavior
-     * 3. CEC volume is enabled
-     * 4. The System Audio device supports the <Set Audio Volume Level> message
+     * 1. The device is not in standby or transient to standby
+     * 2. If the System Audio Device is an Audio System: System Audio Mode is active
+     * 3. All AVB-capable audio output devices are already using full/absolute volume behavior
+     * 4. CEC volume is enabled
+     * 5. The System Audio device supports the <Set Audio Volume Level> message
      *
      * This method enables adjust-only absolute volume behavior on TV panels when conditions
      * 1, 2, and 3 are met, but condition 4 is not. This allows TVs to track the volume level of
@@ -4464,10 +4477,16 @@ public class HdmiControlService extends SystemService {
             return;
         }
 
+        // Condition 1: The device is not in standby or transient to standby
+        if (mPowerStatusController != null && isPowerStandbyOrTransient()) {
+            switchToFullVolumeBehavior();
+            return;
+        }
+
         HdmiCecLocalDevice localCecDevice;
         if (isTvDevice() && tv() != null) {
             localCecDevice = tv();
-            // Condition 1: TVs need System Audio Mode to be active
+            // Condition 2: TVs need System Audio Mode to be active
             // (Doesn't apply to Playback Devices, where if SAM isn't active, we assume the
             // TV is the System Audio Device instead.)
             if (!isSystemAudioActivated()) {
@@ -4484,7 +4503,7 @@ public class HdmiControlService extends SystemService {
         HdmiDeviceInfo systemAudioDeviceInfo = getDeviceInfo(
                 localCecDevice.findAudioReceiverAddress());
 
-        // Condition 2: All AVB-capable audio outputs already use full/absolute volume behavior
+        // Condition 3: All AVB-capable audio outputs already use full/absolute volume behavior
         // We only need to check the first AVB-capable audio output because only TV panels
         // have more than one of them, and they always have the same volume behavior.
         @AudioManager.DeviceVolumeBehavior int currentVolumeBehavior =
@@ -4492,7 +4511,7 @@ public class HdmiControlService extends SystemService {
         boolean alreadyUsingFullOrAbsoluteVolume =
                 FULL_AND_ABSOLUTE_VOLUME_BEHAVIORS.contains(currentVolumeBehavior);
 
-        // Condition 3: CEC volume is enabled
+        // Condition 4: CEC volume is enabled
         boolean cecVolumeEnabled =
                 getHdmiCecVolumeControl() == HdmiControlManager.VOLUME_CONTROL_ENABLED;
 
@@ -4508,7 +4527,7 @@ public class HdmiControlService extends SystemService {
             return;
         }
 
-        // Condition 4: The System Audio device supports <Set Audio Volume Level>
+        // Condition 5: The System Audio device supports <Set Audio Volume Level>
         switch (systemAudioDeviceInfo.getDeviceFeatures().getSetAudioVolumeLevelSupport()) {
             case DeviceFeatures.FEATURE_SUPPORTED:
                 if (currentVolumeBehavior != AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE) {
@@ -4555,6 +4574,8 @@ public class HdmiControlService extends SystemService {
      * are currently used. Removes the action for handling volume updates for these behaviors.
      */
     private void switchToFullVolumeBehavior() {
+        Slog.d(TAG, "Switching to full volume behavior");
+
         if (playback() != null) {
             playback().removeAvbAudioStatusAction();
         } else if (tv() != null) {
@@ -4596,12 +4617,14 @@ public class HdmiControlService extends SystemService {
         // Otherwise, enable adjust-only AVB on TVs only.
         if (systemAudioDevice.getDeviceFeatures().getSetAudioVolumeLevelSupport()
                 == DeviceFeatures.FEATURE_SUPPORTED) {
+            Slog.d(TAG, "Enabling absolute volume behavior");
             for (AudioDeviceAttributes device : getAvbCapableAudioOutputDevices()) {
                 getAudioDeviceVolumeManager().setDeviceAbsoluteVolumeBehavior(
                         device, volumeInfo, mServiceThreadExecutor,
                         mAbsoluteVolumeChangedListener, true);
             }
         } else if (tv() != null) {
+            Slog.d(TAG, "Enabling adjust-only absolute volume behavior");
             for (AudioDeviceAttributes device : getAvbCapableAudioOutputDevices()) {
                 getAudioDeviceVolumeManager().setDeviceAbsoluteVolumeAdjustOnlyBehavior(
                         device, volumeInfo, mServiceThreadExecutor,

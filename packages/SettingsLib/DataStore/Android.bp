@@ -1,0 +1,16 @@
+package {
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_library {
+    name: "SettingsLibDataStore",
+    defaults: [
+        "SettingsLintDefaults",
+    ],
+    srcs: ["src/**/*"],
+    static_libs: [
+        "androidx.annotation_annotation",
+        "androidx.collection_collection-ktx",
+        "guava",
+    ],
+}

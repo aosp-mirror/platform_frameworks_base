@@ -20,12 +20,14 @@ import android.content.res.mainResources
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.notification.icon.domain.interactor.alwaysOnDisplayNotificationIconsInteractor
 
 val Kosmos.notificationIconContainerAlwaysOnDisplayViewModel by
     Kosmos.Fixture {
         NotificationIconContainerAlwaysOnDisplayViewModel(
+            bgContext = testDispatcher,
             iconsInteractor = alwaysOnDisplayNotificationIconsInteractor,
             keyguardInteractor = keyguardInteractor,
             keyguardTransitionInteractor = keyguardTransitionInteractor,

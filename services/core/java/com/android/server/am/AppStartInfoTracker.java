@@ -81,18 +81,18 @@ public final class AppStartInfoTracker {
     private static final int FOREACH_ACTION_REMOVE_ITEM = 1;
     private static final int FOREACH_ACTION_STOP_ITERATION = 2;
 
-    private static final int APP_START_INFO_HISTORY_LIST_SIZE = 16;
+    @VisibleForTesting static final int APP_START_INFO_HISTORY_LIST_SIZE = 16;
 
     @VisibleForTesting static final String APP_START_STORE_DIR = "procstartstore";
 
     @VisibleForTesting static final String APP_START_INFO_FILE = "procstartinfo";
 
-    private final Object mLock = new Object();
+    @VisibleForTesting final Object mLock = new Object();
 
-    private boolean mEnabled = false;
+    @VisibleForTesting boolean mEnabled = false;
 
     /** Initialized in {@link #init} and read-only after that. */
-    private ActivityManagerService mService;
+    @VisibleForTesting ActivityManagerService mService;
 
     /** Initialized in {@link #init} and read-only after that. */
     private Handler mHandler;
@@ -112,14 +112,14 @@ public final class AppStartInfoTracker {
      *
      * <p>Initialized in {@link #init} and read-only after that. No lock is needed.
      */
-    private int mAppStartInfoHistoryListSize;
+    @VisibleForTesting int mAppStartInfoHistoryListSize;
 
     @GuardedBy("mLock")
     private final ProcessMap<AppStartInfoContainer> mData;
 
     /** UID as key. */
     @GuardedBy("mLock")
-    private final SparseArray<ApplicationStartInfoCompleteCallback> mCallbacks;
+    private final SparseArray<ArrayList<ApplicationStartInfoCompleteCallback>> mCallbacks;
 
     /**
      * Whether or not we've loaded the historical app process start info from persistent storage.
@@ -146,7 +146,8 @@ public final class AppStartInfoTracker {
      * Key is timestamp of launch from {@link #ActivityMetricsLaunchObserver}.
      */
     @GuardedBy("mLock")
-    private ArrayMap<Long, ApplicationStartInfo> mInProgRecords = new ArrayMap<>();
+    @VisibleForTesting
+    final ArrayMap<Long, ApplicationStartInfo> mInProgRecords = new ArrayMap<>();
 
     AppStartInfoTracker() {
         mCallbacks = new SparseArray<>();
@@ -229,7 +230,7 @@ public final class AppStartInfoTracker {
                 ApplicationStartInfo info = mInProgRecords.get(id);
                 info.setStartType((int) temperature);
                 addBaseFieldsFromProcessRecord(info, app);
-                addStartInfoLocked(info);
+                mInProgRecords.put(id, addStartInfoLocked(info));
             } else {
                 mInProgRecords.remove(id);
             }
@@ -262,6 +263,7 @@ public final class AppStartInfoTracker {
             ApplicationStartInfo info = mInProgRecords.get(id);
             info.setStartupState(ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN);
             info.setLaunchMode(launchMode);
+            checkCompletenessAndCallback(info);
         }
     }
 
@@ -281,7 +283,7 @@ public final class AppStartInfoTracker {
     }
 
     public void handleProcessServiceStart(long startTimeNs, ProcessRecord app,
-                ServiceRecord serviceRecord, HostingRecord hostingRecord, boolean cold) {
+                ServiceRecord serviceRecord, boolean cold) {
         synchronized (mLock) {
             if (!mEnabled) {
                 return;
@@ -297,7 +299,9 @@ public final class AppStartInfoTracker {
                     && serviceRecord.permission.contains("android.permission.BIND_JOB_SERVICE")
                     ? ApplicationStartInfo.START_REASON_JOB
                     : ApplicationStartInfo.START_REASON_SERVICE);
-            start.setIntent(serviceRecord.intent.getIntent());
+            if (serviceRecord.intent != null) {
+                start.setIntent(serviceRecord.intent.getIntent());
+            }
             addStartInfoLocked(start);
         }
     }
@@ -378,6 +382,12 @@ public final class AppStartInfoTracker {
         start.setPackageUid(app.info.uid);
         start.setDefiningUid(definingUid > 0 ? definingUid : app.info.uid);
         start.setProcessName(app.processName);
+        start.setPackageName(app.info.packageName);
+        if (android.content.pm.Flags.stayStopped()) {
+            // TODO: Verify this is created at the right time to have the correct force-stopped
+            // state in the ProcessRecord. Also use the WindowProcessRecord if activity.
+            start.setForceStopped(app.wasForceStopped());
+        }
     }
 
     void reportApplicationOnCreateTimeNanos(ProcessRecord app, long timeNs) {
@@ -419,12 +429,12 @@ public final class AppStartInfoTracker {
     }
 
     private void addTimestampToStart(ProcessRecord app, long timeNs, int key) {
-        addTimestampToStart(app.processName, app.uid, timeNs, key);
+        addTimestampToStart(app.info.packageName, app.uid, timeNs, key);
     }
 
-    private void addTimestampToStart(String processName, int uid, long timeNs, int key) {
+    private void addTimestampToStart(String packageName, int uid, long timeNs, int key) {
         synchronized (mLock) {
-            AppStartInfoContainer container = mData.get(processName, uid);
+            AppStartInfoContainer container = mData.get(packageName, uid);
             if (container == null) {
                 // Record was not created, discard new data.
                 return;
@@ -443,11 +453,11 @@ public final class AppStartInfoTracker {
 
         final ApplicationStartInfo info = new ApplicationStartInfo(raw);
 
-        AppStartInfoContainer container = mData.get(raw.getProcessName(), raw.getRealUid());
+        AppStartInfoContainer container = mData.get(raw.getPackageName(), raw.getRealUid());
         if (container == null) {
             container = new AppStartInfoContainer(mAppStartInfoHistoryListSize);
             container.mUid = info.getRealUid();
-            mData.put(raw.getProcessName(), raw.getRealUid(), container);
+            mData.put(raw.getPackageName(), raw.getRealUid(), container);
         }
         container.addStartInfoLocked(info);
 
@@ -465,11 +475,18 @@ public final class AppStartInfoTracker {
         synchronized (mLock) {
             if (startInfo.getStartupState()
                     == ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN) {
-                ApplicationStartInfoCompleteCallback callback =
+                final List<ApplicationStartInfoCompleteCallback> callbacks =
                         mCallbacks.get(startInfo.getRealUid());
-                if (callback != null) {
-                    callback.onApplicationStartInfoComplete(startInfo);
+                if (callbacks == null) {
+                    return;
                 }
+                final int size = callbacks.size();
+                for (int i = 0; i < size; i++) {
+                    if (callbacks.get(i) != null) {
+                        callbacks.get(i).onApplicationStartInfoComplete(startInfo);
+                    }
+                }
+                mCallbacks.remove(startInfo.getRealUid());
             }
         }
     }
@@ -478,6 +495,9 @@ public final class AppStartInfoTracker {
             int maxNum, ArrayList<ApplicationStartInfo> results) {
         if (!mEnabled) {
             return;
+        }
+        if (maxNum == 0) {
+            maxNum = APP_START_INFO_HISTORY_LIST_SIZE;
         }
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -542,7 +562,6 @@ public final class AppStartInfoTracker {
             } catch (RemoteException e) {
                 /*ignored*/
             }
-            clearStartInfoCompleteListener(mUid, true);
         }
 
         void unlinkToDeath() {
@@ -551,7 +570,7 @@ public final class AppStartInfoTracker {
 
         @Override
         public void binderDied() {
-            clearStartInfoCompleteListener(mUid, false);
+            removeStartInfoCompleteListener(mCallback, mUid, false);
         }
     }
 
@@ -561,22 +580,43 @@ public final class AppStartInfoTracker {
             if (!mEnabled) {
                 return;
             }
-            mCallbacks.put(uid, new ApplicationStartInfoCompleteCallback(listener, uid));
+            ArrayList<ApplicationStartInfoCompleteCallback> callbacks = mCallbacks.get(uid);
+            if (callbacks == null) {
+                mCallbacks.set(uid,
+                        callbacks = new ArrayList<ApplicationStartInfoCompleteCallback>());
+            }
+            callbacks.add(new ApplicationStartInfoCompleteCallback(listener, uid));
         }
     }
 
-    void clearStartInfoCompleteListener(final int uid, boolean unlinkDeathRecipient) {
+    void removeStartInfoCompleteListener(
+            final IApplicationStartInfoCompleteListener listener, final int uid,
+            boolean unlinkDeathRecipient) {
         synchronized (mLock) {
             if (!mEnabled) {
                 return;
             }
-            if (unlinkDeathRecipient) {
-                ApplicationStartInfoCompleteCallback callback = mCallbacks.get(uid);
-                if (callback != null) {
-                    callback.unlinkToDeath();
+            final ArrayList<ApplicationStartInfoCompleteCallback> callbacks = mCallbacks.get(uid);
+            if (callbacks == null) {
+                return;
+            }
+            final int size  = callbacks.size();
+            int index;
+            for (index = 0; index < size; index++) {
+                final ApplicationStartInfoCompleteCallback callback = callbacks.get(index);
+                if (callback.mCallback == listener) {
+                    if (unlinkDeathRecipient) {
+                        callback.unlinkToDeath();
+                    }
+                    break;
                 }
             }
-            mCallbacks.remove(uid);
+            if (index < size) {
+                callbacks.remove(index);
+            }
+            if (callbacks.isEmpty()) {
+                mCallbacks.remove(uid);
+            }
         }
     }
 
@@ -864,6 +904,7 @@ public final class AppStartInfoTracker {
                 mProcStartInfoFile.delete();
             }
             mData.getMap().clear();
+            mInProgRecords.clear();
         }
     }
 
@@ -933,6 +974,10 @@ public final class AppStartInfoTracker {
 
     /** Convenience method to obtain timestamp of beginning of start.*/
     private static long getStartTimestamp(ApplicationStartInfo startInfo) {
+        if (startInfo.getStartupTimestamps() == null
+                    || !startInfo.getStartupTimestamps().containsKey(START_TIMESTAMP_LAUNCH)) {
+            return -1;
+        }
         return startInfo.getStartupTimestamps().get(START_TIMESTAMP_LAUNCH);
     }
 
@@ -970,7 +1015,6 @@ public final class AppStartInfoTracker {
                 if (oldestIndex >= 0) {
                     mInfos.remove(oldestIndex);
                 }
-                mInfos.remove(0);
             }
             mInfos.add(info);
             Collections.sort(mInfos, (a, b) ->

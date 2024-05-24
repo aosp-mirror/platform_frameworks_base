@@ -16,6 +16,9 @@
 
 package android.hardware.biometrics;
 
+import static android.hardware.biometrics.Flags.FLAG_FACE_BACKGROUND_AUTHENTICATION;
+
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
@@ -141,8 +144,10 @@ public class SensorProperties {
     /**
      * @hide
      */
+    @TestApi
+    @FlaggedApi(FLAG_FACE_BACKGROUND_AUTHENTICATION)
     public SensorProperties(int sensorId, @Strength int sensorStrength,
-            List<ComponentInfo> componentInfo) {
+            @NonNull List<ComponentInfo> componentInfo) {
         mSensorId = sensorId;
         mSensorStrength = sensorStrength;
         mComponentInfo = componentInfo;

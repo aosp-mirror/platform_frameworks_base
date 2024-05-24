@@ -30,6 +30,7 @@ import org.mockito.junit.MockitoJUnit
 
 private const val USER_ID = 22
 private const val OPERATION_ID = 100L
+private const val OP_PACKAGE_NAME = "biometric.testapp"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -114,7 +115,8 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
                 },
                 kind = kind,
                 userId = USER_ID,
-                challenge = OPERATION_ID
+                challenge = OPERATION_ID,
+                opPackageName = OP_PACKAGE_NAME
             )
 
             assertThat(prompt?.title).isEqualTo(title)

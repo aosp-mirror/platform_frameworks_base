@@ -36,6 +36,7 @@ public final class BackMotionEvent implements Parcelable {
     private final float mProgress;
     private final float mVelocityX;
     private final float mVelocityY;
+    private final boolean mTriggerBack;
 
     @BackEvent.SwipeEdge
     private final int mSwipeEdge;
@@ -54,6 +55,7 @@ public final class BackMotionEvent implements Parcelable {
      *                  Value in pixels/second. {@link Float#NaN} if was not computed.
      * @param velocityY Y velocity computed from the touch point of this event.
      *                  Value in pixels/second. {@link Float#NaN} if was not computed.
+     * @param triggerBack Indicates whether the back arrow is in the triggered state or not
      * @param swipeEdge Indicates which edge the swipe starts from.
      * @param departingAnimationTarget The remote animation target of the departing
      *                                 application window.
@@ -64,6 +66,7 @@ public final class BackMotionEvent implements Parcelable {
             float progress,
             float velocityX,
             float velocityY,
+            boolean triggerBack,
             @BackEvent.SwipeEdge int swipeEdge,
             @Nullable RemoteAnimationTarget departingAnimationTarget) {
         mTouchX = touchX;
@@ -71,6 +74,7 @@ public final class BackMotionEvent implements Parcelable {
         mProgress = progress;
         mVelocityX = velocityX;
         mVelocityY = velocityY;
+        mTriggerBack = triggerBack;
         mSwipeEdge = swipeEdge;
         mDepartingAnimationTarget = departingAnimationTarget;
     }
@@ -81,6 +85,7 @@ public final class BackMotionEvent implements Parcelable {
         mProgress = in.readFloat();
         mVelocityX = in.readFloat();
         mVelocityY = in.readFloat();
+        mTriggerBack = in.readBoolean();
         mSwipeEdge = in.readInt();
         mDepartingAnimationTarget = in.readTypedObject(RemoteAnimationTarget.CREATOR);
     }
@@ -110,6 +115,7 @@ public final class BackMotionEvent implements Parcelable {
         dest.writeFloat(mProgress);
         dest.writeFloat(mVelocityX);
         dest.writeFloat(mVelocityY);
+        dest.writeBoolean(mTriggerBack);
         dest.writeInt(mSwipeEdge);
         dest.writeTypedObject(mDepartingAnimationTarget, flags);
     }
@@ -157,6 +163,15 @@ public final class BackMotionEvent implements Parcelable {
     }
 
     /**
+     * Returns whether the back arrow is in the triggered state or not
+     *
+     * @return boolean indicating whether the back arrow is in the triggered state or not
+     */
+    public boolean getTriggerBack() {
+        return mTriggerBack;
+    }
+
+    /**
      * Returns the screen edge that the swipe starts from.
      */
     @BackEvent.SwipeEdge
@@ -182,6 +197,7 @@ public final class BackMotionEvent implements Parcelable {
                 + ", mProgress=" + mProgress
                 + ", mVelocityX=" + mVelocityX
                 + ", mVelocityY=" + mVelocityY
+                + ", mTriggerBack=" + mTriggerBack
                 + ", mSwipeEdge" + mSwipeEdge
                 + ", mDepartingAnimationTarget" + mDepartingAnimationTarget
                 + "}";

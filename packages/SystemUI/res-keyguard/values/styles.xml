@@ -69,13 +69,14 @@
         <item name="android:singleLine">true</item>
         <item name="android:gravity">center_horizontal|center_vertical</item>
         <item name="android:background">@null</item>
-        <item name="android:textSize">32sp</item>
+        <item name="android:textSize">32dp</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:paddingBottom">-16dp</item>
     </style>
     <style name="Widget.TextView.Password" parent="@android:style/Widget.TextView">
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:background">@drawable/bouncer_pin_view_focused_background</item>
         <item name="android:gravity">center</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>

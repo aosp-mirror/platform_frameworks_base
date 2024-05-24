@@ -26,7 +26,8 @@ import java.lang.annotation.Retention;
 import javax.inject.Qualifier;
 
 /**
- * A {@link LogBuffer} for {@link com.android.systemui.media.controls.ui.MediaCarouselController}
+ * A {@link LogBuffer} for
+ * {@link com.android.systemui.media.controls.ui.controller.MediaCarouselController}
  */
 @Qualifier
 @Documented

@@ -63,7 +63,7 @@ oneway interface ITvInputSession {
     void timeShiftSetMode(int mode);
     void timeShiftEnablePositionTracking(boolean enable);
 
-    void startPlayback();
+    void resumePlayback();
     void stopPlayback(int mode);
 
     // For the recording session
@@ -83,4 +83,9 @@ oneway interface ITvInputSession {
     // For TV messages
     void notifyTvMessage(int type, in Bundle data);
     void setTvMessageEnabled(int type, boolean enabled);
+
+    // For freezing video
+    void setVideoFrozen(boolean isFrozen);
+
+    void notifyTvAdSessionData(in String type, in Bundle data);
 }

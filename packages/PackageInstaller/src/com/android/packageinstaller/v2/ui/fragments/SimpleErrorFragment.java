@@ -24,7 +24,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import com.android.packageinstaller.R;
-import com.android.packageinstaller.v2.model.installstagedata.InstallStage;
+import com.android.packageinstaller.v2.model.InstallStage;
 import com.android.packageinstaller.v2.ui.InstallActionListener;
 
 public class SimpleErrorFragment extends DialogFragment {

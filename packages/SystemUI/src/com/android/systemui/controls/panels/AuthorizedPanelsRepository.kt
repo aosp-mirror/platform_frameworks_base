@@ -17,11 +17,16 @@
 
 package com.android.systemui.controls.panels
 
+import android.os.UserHandle
+import kotlinx.coroutines.flow.Flow
+
 /**
  * Repository for keeping track of which packages the panel has authorized to show control panels
  * (embedded activity).
  */
 interface AuthorizedPanelsRepository {
+    /** Exposes the authorized panels as a [Flow] for subscribing to updates */
+    fun observeAuthorizedPanels(user: UserHandle): Flow<Set<String>>
 
     /** A set of package names that the user has previously authorized to show panels. */
     fun getAuthorizedPanels(): Set<String>

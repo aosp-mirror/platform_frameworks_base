@@ -18,7 +18,6 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
-import com.android.systemui.common.shared.model.Position
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
@@ -58,14 +57,11 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     private val _bottomAreaAlpha = MutableStateFlow(1f)
     override val bottomAreaAlpha: StateFlow<Float> = _bottomAreaAlpha
 
-    private val _clockPosition = MutableStateFlow(Position(0, 0))
-    override val clockPosition: StateFlow<Position> = _clockPosition
-
     private val _isKeyguardShowing = MutableStateFlow(false)
     override val isKeyguardShowing: Flow<Boolean> = _isKeyguardShowing
 
     private val _isKeyguardUnlocked = MutableStateFlow(false)
-    override val isKeyguardUnlocked: StateFlow<Boolean> = _isKeyguardUnlocked.asStateFlow()
+    override val isKeyguardDismissible: StateFlow<Boolean> = _isKeyguardUnlocked.asStateFlow()
 
     private val _isKeyguardOccluded = MutableStateFlow(false)
     override val isKeyguardOccluded: Flow<Boolean> = _isKeyguardOccluded
@@ -80,7 +76,7 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     override val lastDozeTapToWakePosition = _lastDozeTapToWakePosition.asStateFlow()
 
     private val _isAodAvailable = MutableStateFlow(false)
-    override val isAodAvailable: Flow<Boolean> = _isAodAvailable
+    override val isAodAvailable: StateFlow<Boolean> = _isAodAvailable
 
     private val _isDreaming = MutableStateFlow(false)
     override val isDreaming: Flow<Boolean> = _isDreaming
@@ -127,6 +123,11 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override val ambientIndicationVisible: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
+    private val _isEncryptedOrLockdown = MutableStateFlow(true)
+    override val isEncryptedOrLockdown: Flow<Boolean> = _isEncryptedOrLockdown
+
+    override val topClippingBounds = MutableStateFlow<Int?>(null)
+
     override fun setQuickSettingsVisible(isVisible: Boolean) {
         _isQuickSettingsVisible.value = isVisible
     }
@@ -144,10 +145,6 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
         _bottomAreaAlpha.value = alpha
     }
 
-    override fun setClockPosition(x: Int, y: Int) {
-        _clockPosition.value = Position(x, y)
-    }
-
     fun setKeyguardShowing(isShowing: Boolean) {
         _isKeyguardShowing.value = isShowing
     }
@@ -160,7 +157,7 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
         _isKeyguardOccluded.value = isOccluded
     }
 
-    fun setKeyguardUnlocked(isUnlocked: Boolean) {
+    fun setKeyguardDismissible(isUnlocked: Boolean) {
         _isKeyguardUnlocked.value = isUnlocked
     }
 
@@ -246,6 +243,10 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override fun setKeyguardAlpha(alpha: Float) {
         _keyguardAlpha.value = alpha
+    }
+
+    fun setIsEncryptedOrLockdown(value: Boolean) {
+        _isEncryptedOrLockdown.value = value
     }
 }
 

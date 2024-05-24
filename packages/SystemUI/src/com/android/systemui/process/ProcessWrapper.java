@@ -16,6 +16,9 @@
 
 package com.android.systemui.process;
 
+import android.os.Process;
+import android.os.UserHandle;
+
 import javax.inject.Inject;
 
 /**
@@ -30,6 +33,18 @@ public class ProcessWrapper {
      * Returns {@code true} if System User is running the current process.
      */
     public boolean isSystemUser() {
-        return android.os.Process.myUserHandle().isSystem();
+        return myUserHandle().isSystem();
+    }
+
+    /**
+     * Returns {@link UserHandle} as returned statically by {@link Process#myUserHandle()}.
+     *
+     * This should not be used to get the "current" user. This information only applies to the
+     * current process, not the current state of SystemUI. Please use
+     * {@link com.android.systemui.settings.UserTracker} if you want to learn about the currently
+     * active user in SystemUI.
+     */
+    public UserHandle myUserHandle() {
+        return Process.myUserHandle();
     }
 }

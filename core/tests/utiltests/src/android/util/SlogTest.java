@@ -44,4 +44,11 @@ public class SlogTest {
         Slog.w(TAG, MSG, THROWABLE);
         Slog.e(TAG, MSG, THROWABLE);
     }
+
+    @Test
+    public void testWtf() {
+        Slog.wtf(TAG, MSG);
+        Slog.wtf(TAG, MSG, THROWABLE);
+        Slog.wtf(TAG, THROWABLE);
+    }
 }

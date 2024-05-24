@@ -1463,4 +1463,9 @@ public abstract class PackageManagerInternal {
      */
     @NonNull
     public abstract PackageArchiver getPackageArchiver();
+
+    /**
+     * Returns true if the device is upgrading from an SDK version lower than the one specified.
+     */
+    public abstract boolean isUpgradingFromLowerThan(int sdkVersion);
 }

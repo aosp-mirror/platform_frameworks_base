@@ -27,8 +27,8 @@ import android.window.WindowContainerToken;
 
 import androidx.annotation.NonNull;
 
-import com.android.wm.shell.util.CounterRotator;
-import com.android.wm.shell.util.TransitionUtil;
+import com.android.wm.shell.shared.CounterRotator;
+import com.android.wm.shell.shared.TransitionUtil;
 
 import java.util.List;
 

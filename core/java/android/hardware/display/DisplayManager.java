@@ -28,6 +28,7 @@ import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -367,6 +368,8 @@ public final class DisplayManager {
      * @see #createVirtualDisplay
      * @hide
      */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     public static final int VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH = 1 << 6;
 
     /**
@@ -1829,15 +1832,6 @@ public final class DisplayManager {
          * device config.
          */
         String KEY_POWER_THROTTLING_DATA = "power_throttling_data";
-
-        /**
-         * Key for new power controller feature flag. If enabled new DisplayPowerController will
-         * be used.
-         * Read value via {@link android.provider.DeviceConfig#getBoolean(String, String, boolean)}
-         * with {@link android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER} as the namespace.
-         * @hide
-         */
-        String KEY_NEW_POWER_CONTROLLER = "use_newly_structured_display_power_controller";
 
         /**
          * Key for normal brightness mode controller feature flag.

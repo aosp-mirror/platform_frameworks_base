@@ -140,8 +140,8 @@
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Tumia kwa kuingiza"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="3374057355721486932">"Tumia kwa visaidizi vya kusikia"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Tumia kwa ajili ya LE_AUDIO"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Oanisha"</string>
-    <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"OANISHA"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Unganisha"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"UNGANISHA"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Ghairi"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Kuoanisha hutoa ruhusa ya kufikiwa kwa unaowasiliana nao na rekodi ya simu zilizopigwa unapounganishwa."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Haikuwezakulinganisha na <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
@@ -154,6 +154,7 @@
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"Kupiga picha"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Kifaa cha sauti"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Vifaa vya Ziada vya Kuingiza Data"</string>
+    <string name="bluetooth_talkback_hearing_aids" msgid="3983279945542595479">"Visaidizi vya Kusikia"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wifi imezimwa."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wifi imeondolewa."</string>
@@ -237,10 +238,10 @@
     <string name="adb_wireless_error" msgid="721958772149779856">"Hitilafu"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Utatuzi usiotumia waya"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Ili kuangalia na kutumia vifaa vinavyopatikana, washa utatuzi usiotumia waya"</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Oanisha kifaa ukitumia msimbo wa QR"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Oanisha vifaa vipya ukitumia kichanganuzi cha Msimbo wa QR"</string>
-    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Oanisha kifaa ukitumia msimbo wa kuoanisha"</string>
-    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Oanisha vifaa vipya ukitumia msimbo wa tarakimu sita"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Unganisha kifaa ukitumia msimbo wa QR"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Unganisha vifaa vipya ukitumia kichanganuzi cha Msimbo wa QR"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Unganisha kifaa ukitumia msimbo wa kuunganisha"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Unganisha vifaa vipya ukitumia msimbo wa tarakimu sita"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Vifaa vilivyooanishwa"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Vilivyounganishwa kwa sasa"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Maelezo ya kifaa"</string>
@@ -248,16 +249,16 @@
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Alama bainifu ya kifaa: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Imeshindwa kuunganisha"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Hakikisha kuwa <xliff:g id="DEVICE_NAME">%1$s</xliff:g> kimeunganishwa kwenye mtandao sahihi"</string>
-    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Oanisha na kifaa"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Unganisha na kifaa"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Msimbo wa kuoanisha wa Wi-Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Imeshindwa kuoanisha"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Hakikisha kuwa kifaa kimeunganishwa kwenye mtandao mmoja."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Oanisha kifaa kupitia Wi-Fi kwa kuchanganua msimbo wa QR"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Unganisha kifaa kupitia Wi-Fi kwa kuchanganua msimbo wa QR"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Inaoanisha kifaa…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Imeshindwa kuoanisha kifaa. Huenda msimbo wa QR haukuwa sahihi au kifaa hakijaunganishwa kwenye mtandao mmoja."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Anwani ya IP na Mlango"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Changanua msimbo wa QR"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Oanisha kifaa kupitia Wi-Fi kwa kuchanganua msimbo wa QR"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Unganisha kifaa kupitia Wi-Fi kwa kuchanganua msimbo wa QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Tafadhali unganisha kwenye mtandao wa Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, tatua, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Njia ya mkato ya kuripoti hitilafu"</string>
@@ -455,6 +456,8 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Usahihishaji wa rangi unaweza kusaidia wakati unataka:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Kuona rangi kwa usahihi zaidi&lt;/li&gt; &lt;li&gt;&amp;nbsp;Kuondoa rangi ili ikusaidie kumakinika&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Imetanguliwa na <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - Imesitisha kuchaji ili kulinda betri yako"</string>
+    <string name="power_incompatible_charging_settings_home_page" msgid="1322050766135126880">"<xliff:g id="LEVEL">%1$s</xliff:g> - Kagua kifaa cha kuchaji"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Zimesalia takribani <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"Zimesalia takribani <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"Zimesalia takribani <xliff:g id="TIME_REMAINING">%1$s</xliff:g> kulingana na jinsi unavyoitumia"</string>
@@ -475,7 +478,7 @@
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Zimesalia <xliff:g id="TIME">%1$s</xliff:g> ijae chaji"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> zimesalia ijae chaji"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Hali ya kuchaji imeboreshwa"</string>
-    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - Hali ya kuchaji imeboreshwa"</string>
+    <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - Inachaji"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Haijulikani"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Inachaji"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Inachaji kwa kasi"</string>
@@ -483,9 +486,10 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Inachaji bila kutumia waya"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Inachaji"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Haichaji"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Imeunganishwa, haichaji"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Imeunganishwa, lakini haichaji"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Imechajiwa"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Imejaa Chaji"</string>
+    <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Imesitisha kuchaji"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Imedhibitiwa na msimamizi"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Imedhibitiwa na Mpangilio wenye Mipaka"</string>
     <string name="disabled" msgid="8017887509554714950">"Imezimwa"</string>
@@ -513,7 +517,7 @@
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Mbinu zinazotumika"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Tumia lugha za mfumo"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Imeshindwa kufungua mipangilio ya <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
-    <string name="ime_security_warning" msgid="6547562217880551450">"Huenda mbinu hii ya kuingiza ikakusanya maandishi yote unayoandika, pamoja na data ya kibinafsi kama vile manenosiri na nambari za kadi za mkopo. Inatoka kwa programu <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Je, ungependa kutumia mbinu hii ya kingiza?"</string>
+    <string name="ime_security_warning" msgid="6547562217880551450">"Huenda mbinu hii ya kuingiza ikakusanya maandishi yote unayoandika, pamoja na data ya kibinafsi kama vile manenosiri na namba za kadi za mkopo. Inatoka kwa programu <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Je, ungependa kutumia mbinu hii ya kingiza?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Kumbuka: Baada ya kuwasha tena programu hii, hutaweza kuitumia hadi utakapofungua simu yako"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"Hali ya usajili wa IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Imesajiliwa"</string>
@@ -547,9 +551,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Uliza kila wakati"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Hadi utakapoizima"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Sasa hivi"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Simu hii"</string>
-    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Kompyuta kibao hii"</string>
-    <!-- no translation found for media_transfer_this_device_name (8899776297775466649) -->
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Simu hii"</string>
+    <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Kishikwambi hiki"</string>
+    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Spika ya kituo"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Kifaa cha Nje"</string>
@@ -615,6 +619,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Imeshindwa kuweka mtumiaji mpya"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Imeshindwa kuunda wasifu mpya wa mgeni"</string>
     <string name="user_nickname" msgid="262624187455825083">"Jina wakilishi"</string>
+    <string name="edit_user_info_message" msgid="5199468585059260053">"Mtu yeyote anayetumia kifaa hiki ataona jina na picha yako."</string>
     <string name="user_add_user" msgid="7876449291500212468">"Ongeza mtumiaji"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Ongeza mgeni"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Ondoa mgeni"</string>

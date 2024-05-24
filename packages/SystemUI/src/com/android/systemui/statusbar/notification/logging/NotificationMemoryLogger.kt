@@ -142,7 +142,7 @@ constructor(
 
     private fun getAllNotificationsOnMainThread() =
         runBlocking(mainDispatcher) {
-            traceSection("NML#getNotifications") { notificationPipeline.allNotifs }
+            traceSection("NML#getNotifications") { notificationPipeline.allNotifs.toList() }
         }
 }
 

@@ -19,6 +19,7 @@ package android.app;
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
 import android.adservices.AdServicesFrameworkInitializer;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -31,6 +32,7 @@ import android.app.appsearch.AppSearchManagerFrameworkInitializer;
 import android.app.blob.BlobStoreManagerFrameworkInitializer;
 import android.app.contentsuggestions.ContentSuggestionsManager;
 import android.app.contentsuggestions.IContentSuggestionsManager;
+import android.app.ecm.EnhancedConfirmationFrameworkInitializer;
 import android.app.job.JobSchedulerFrameworkInitializer;
 import android.app.people.PeopleManager;
 import android.app.prediction.AppPredictionManager;
@@ -184,6 +186,7 @@ import android.os.IncidentManager;
 import android.os.PerformanceHintManager;
 import android.os.PermissionEnforcer;
 import android.os.PowerManager;
+import android.os.ProfilingFrameworkInitializer;
 import android.os.RecoverySystem;
 import android.os.SecurityStateManager;
 import android.os.ServiceManager;
@@ -209,6 +212,7 @@ import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.print.IPrintManager;
 import android.print.PrintManager;
+import android.provider.E2eeContactKeysManager;
 import android.safetycenter.SafetyCenterFrameworkInitializer;
 import android.scheduling.SchedulingFrameworkInitializer;
 import android.security.FileIntegrityManager;
@@ -247,6 +251,7 @@ import android.view.textservice.TextServicesManager;
 import android.view.translation.ITranslationManager;
 import android.view.translation.TranslationManager;
 import android.view.translation.UiTranslationManager;
+import android.webkit.WebViewBootstrapFrameworkInitializer;
 
 import com.android.internal.R;
 import com.android.internal.app.IAppOpsService;
@@ -1603,6 +1608,31 @@ public final class SystemServiceRegistry {
                     }
                 });
 
+        registerService(Context.CONTACT_KEYS_SERVICE, E2eeContactKeysManager.class,
+                new CachedServiceFetcher<E2eeContactKeysManager>() {
+                    @Override
+                    public E2eeContactKeysManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        if (!android.provider.Flags.userKeys()) {
+                            throw new ServiceNotFoundException(
+                                    "ContactKeysManager is not supported");
+                        }
+                        return new E2eeContactKeysManager(ctx);
+                    }});
+
+        // DO NOT do a flag check like this unless the flag is read-only.
+        // (because this code is executed during preload in zygote.)
+        // If the flag is mutable, the check should be inside CachedServiceFetcher.
+        if (Flags.bicClient()) {
+            registerService(Context.BACKGROUND_INSTALL_CONTROL_SERVICE,
+                    BackgroundInstallControlManager.class,
+                    new CachedServiceFetcher<BackgroundInstallControlManager>() {
+                        @Override
+                        public BackgroundInstallControlManager createService(ContextImpl ctx) {
+                            return new BackgroundInstallControlManager(ctx);
+                        }
+                    });
+        }
         sInitializing = true;
         try {
             // Note: the following functions need to be @SystemApis, once they become mainline
@@ -1631,6 +1661,17 @@ public final class SystemServiceRegistry {
             OnDevicePersonalizationFrameworkInitializer.registerServiceWrappers();
             DeviceLockFrameworkInitializer.registerServiceWrappers();
             VirtualizationFrameworkInitializer.registerServiceWrappers();
+            // This code is executed on zygote during preload, where only read-only
+            // flags can be used. Do not use mutable flags.
+            if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()) {
+                EnhancedConfirmationFrameworkInitializer.registerServiceWrappers();
+            }
+            if (android.server.Flags.telemetryApisService()) {
+                ProfilingFrameworkInitializer.registerServiceWrappers();
+            }
+            if (android.webkit.Flags.updateServiceIpcWrapper()) {
+                WebViewBootstrapFrameworkInitializer.registerServiceWrappers();
+            }
         } finally {
             // If any of the above code throws, we're in a pretty bad shape and the process
             // will likely crash, but we'll reset it just in case there's an exception handler...
@@ -1651,11 +1692,7 @@ public final class SystemServiceRegistry {
         return new Object[sServiceCacheSize];
     }
 
-    /**
-     * Gets a system service from a given context.
-     * @hide
-     */
-    public static Object getSystemService(ContextImpl ctx, String name) {
+    private static ServiceFetcher<?> getSystemServiceFetcher(String name) {
         if (name == null) {
             return null;
         }
@@ -1664,6 +1701,18 @@ public final class SystemServiceRegistry {
             if (sEnableServiceNotFoundWtf) {
                 Slog.wtf(TAG, "Unknown manager requested: " + name);
             }
+            return null;
+        }
+        return fetcher;
+    }
+
+    /**
+     * Gets a system service from a given context.
+     * @hide
+     */
+    public static Object getSystemService(@NonNull ContextImpl ctx, String name) {
+        final ServiceFetcher<?> fetcher = getSystemServiceFetcher(name);
+        if (fetcher == null) {
             return null;
         }
 
@@ -1690,6 +1739,26 @@ public final class SystemServiceRegistry {
             return null;
         }
         return ret;
+    }
+
+    /**
+     * Gets a system service which has opted-in to being fetched without a context.
+     * @hide
+     */
+    @FlaggedApi(android.webkit.Flags.FLAG_UPDATE_SERVICE_IPC_WRAPPER)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static @Nullable Object getSystemServiceWithNoContext(@NonNull String name) {
+        final ServiceFetcher<?> fetcher = getSystemServiceFetcher(name);
+        if (fetcher == null) {
+            return null;
+        }
+
+        if (!fetcher.supportsFetchWithoutContext()) {
+            throw new IllegalArgumentException(
+                    "Manager cannot be fetched without a context: " + name);
+        }
+
+        return fetcher.getService(null);
     }
 
     /**
@@ -1846,6 +1915,50 @@ public final class SystemServiceRegistry {
     }
 
     /**
+     * Used by apex modules to register a "service wrapper" that is not tied to any {@link Context}
+     * and will never require a context in the future.
+     *
+     * Services registered in this way can be fetched via
+     * {@link #getSystemServiceWithNoContext(String)}, so cannot require a context in future without
+     * a breaking change.
+     *
+     * <p>This can only be called from the methods called by the static initializer of
+     * {@link SystemServiceRegistry}. (Otherwise it throws a {@link IllegalStateException}.)
+     *
+     * @param serviceName the name of the binder object, such as
+     *     {@link Context#JOB_SCHEDULER_SERVICE}.
+     * @param serviceWrapperClass the wrapper class, such as the class of
+     *     {@link android.app.job.JobScheduler}.
+     * @param serviceProducer Callback that takes the service binder object with the name
+     *     {@code serviceName} and returns an actual service wrapper instance.
+     *
+     * @hide
+     */
+    @FlaggedApi(android.webkit.Flags.FLAG_UPDATE_SERVICE_IPC_WRAPPER)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static <TServiceClass> void registerForeverStaticService(
+            @NonNull String serviceName, @NonNull Class<TServiceClass> serviceWrapperClass,
+            @NonNull StaticServiceProducerWithBinder<TServiceClass> serviceProducer) {
+        ensureInitializing("registerStaticService");
+        Preconditions.checkStringNotEmpty(serviceName);
+        Objects.requireNonNull(serviceWrapperClass);
+        Objects.requireNonNull(serviceProducer);
+
+        registerService(serviceName, serviceWrapperClass,
+                new StaticServiceFetcher<TServiceClass>() {
+                    @Override
+                    public TServiceClass createService() throws ServiceNotFoundException {
+                        return serviceProducer.createService(
+                                ServiceManager.getServiceOrThrow(serviceName));
+                    }
+
+                    @Override
+                    public boolean supportsFetchWithoutContext() {
+                        return true;
+                    }});
+    }
+
+    /**
      * Similar to {@link #registerStaticService(String, Class, StaticServiceProducerWithBinder)},
      * but used for a "service wrapper" that doesn't take a service binder in its constructor.
      *
@@ -1935,6 +2048,18 @@ public final class SystemServiceRegistry {
      */
     static abstract interface ServiceFetcher<T> {
         T getService(ContextImpl ctx);
+
+        /**
+         * Should this service fetcher support being fetched via {@link #getSystemService(String)},
+         * without a Context?
+         *
+         * This means that the service cannot depend on a Context in future!
+         *
+         * @return true if this is supported for this service.
+         */
+        default boolean supportsFetchWithoutContext() {
+            return false;
+        }
     }
 
     /**
@@ -2042,6 +2167,11 @@ public final class SystemServiceRegistry {
         }
 
         public abstract T createService(ContextImpl ctx) throws ServiceNotFoundException;
+
+        // Services that explicitly use a Context can never be fetched without one.
+        public final boolean supportsFetchWithoutContext() {
+            return false;
+        }
     }
 
     /**
@@ -2066,6 +2196,13 @@ public final class SystemServiceRegistry {
         }
 
         public abstract T createService() throws ServiceNotFoundException;
+
+        // Services that do not need a Context can potentially be fetched without one, but the
+        // default is false, so that the service can require one in future without this being a
+        // breaking change.
+        public boolean supportsFetchWithoutContext() {
+            return false;
+        }
     }
 
     /** @hide */

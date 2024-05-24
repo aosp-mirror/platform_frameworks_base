@@ -16,10 +16,12 @@
 
 package com.android.systemui.keyguard.shared.model
 
+import android.hardware.biometrics.BiometricFingerprintConstants
 import android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_GOOD
 import android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START
 import android.hardware.fingerprint.FingerprintManager
 import android.os.SystemClock.elapsedRealtime
+import com.android.systemui.biometrics.shared.model.AuthenticationReason
 
 /**
  * Fingerprint authentication status provided by
@@ -40,8 +42,10 @@ data class HelpFingerprintAuthenticationStatus(
 ) : FingerprintAuthenticationStatus()
 
 /** Fingerprint acquired message. */
-data class AcquiredFingerprintAuthenticationStatus(val acquiredInfo: Int) :
-    FingerprintAuthenticationStatus() {
+data class AcquiredFingerprintAuthenticationStatus(
+    val authenticationReason: AuthenticationReason,
+    val acquiredInfo: Int
+) : FingerprintAuthenticationStatus() {
 
     val fingerprintCaptureStarted: Boolean = acquiredInfo == FINGERPRINT_ACQUIRED_START
 
@@ -58,8 +62,14 @@ data class ErrorFingerprintAuthenticationStatus(
     // present to break equality check if the same error occurs repeatedly.
     val createdAt: Long = elapsedRealtime(),
 ) : FingerprintAuthenticationStatus() {
-    fun isLockoutMessage(): Boolean {
-        return msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT ||
+    fun isCancellationError(): Boolean =
+        msgId == BiometricFingerprintConstants.FINGERPRINT_ERROR_CANCELED ||
+            msgId == BiometricFingerprintConstants.FINGERPRINT_ERROR_USER_CANCELED
+
+    fun isPowerPressedError(): Boolean =
+        msgId == BiometricFingerprintConstants.BIOMETRIC_ERROR_POWER_PRESSED
+
+    fun isLockoutError(): Boolean =
+        msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT ||
             msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT
-    }
 }

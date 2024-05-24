@@ -28,19 +28,21 @@ import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.DejankUtils
+import com.android.systemui.Flags
 import com.android.systemui.biometrics.shared.SideFpsControllerRefactor
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN
+import com.android.systemui.bouncer.shared.model.BouncerDismissActionModel
 import com.android.systemui.bouncer.shared.model.BouncerShowMessageModel
 import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.TrustRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.shared.system.SysUiStatsLog
@@ -77,7 +79,7 @@ constructor(
     private val trustRepository: TrustRepository,
     @Application private val applicationScope: CoroutineScope,
     private val selectedUserInteractor: SelectedUserInteractor,
-    private val keyguardFaceAuthInteractor: KeyguardFaceAuthInteractor,
+    private val deviceEntryFaceAuthInteractor: DeviceEntryFaceAuthInteractor,
 ) {
     private val passiveAuthBouncerDelay =
         context.resources.getInteger(R.integer.primary_bouncer_passive_auth_delay).toLong()
@@ -154,12 +156,12 @@ constructor(
     /** Show the bouncer if necessary and set the relevant states. */
     @JvmOverloads
     fun show(isScrimmed: Boolean) {
-        if (primaryBouncerView.delegate == null) {
+        if (primaryBouncerView.delegate == null && !Flags.composeBouncer()) {
             Log.d(
                 TAG,
                 "PrimaryBouncerInteractor#show is being called before the " +
-                    "primaryBouncerDelegate is set. Let's exit early so we don't set the wrong " +
-                    "primaryBouncer state."
+                    "primaryBouncerDelegate is set. Let's exit early so we don't " +
+                    "set the wrong primaryBouncer state."
             )
             return
         }
@@ -272,15 +274,24 @@ constructor(
         repository.setShowMessage(BouncerShowMessageModel(message, colorStateList))
     }
 
+    val bouncerDismissAction: BouncerDismissActionModel?
+        get() = repository.bouncerDismissActionModel
+
     /**
      * Sets actions to the bouncer based on how the bouncer is dismissed. If the bouncer is
-     * unlocked, we will run the onDismissAction. If the bouncer is existed before unlocking, we
-     * call cancelAction.
+     * unlocked, we will run the onDismissAction. If the bouncer is exited before unlocking, we call
+     * cancelAction.
      */
     fun setDismissAction(
         onDismissAction: ActivityStarter.OnDismissAction?,
         cancelAction: Runnable?
     ) {
+        repository.bouncerDismissActionModel =
+            if (onDismissAction != null && cancelAction != null) {
+                BouncerDismissActionModel(onDismissAction, cancelAction)
+            } else {
+                null
+            }
         primaryBouncerView.delegate?.setDismissAction(onDismissAction, cancelAction)
     }
 
@@ -429,7 +440,7 @@ constructor(
                 keyguardUpdateMonitor.canTriggerActiveUnlockBasedOnDeviceState()
 
         return !needsFullscreenBouncer() &&
-            (keyguardFaceAuthInteractor.canFaceAuthRun() || canRunActiveUnlock)
+            (deviceEntryFaceAuthInteractor.canFaceAuthRun() || canRunActiveUnlock)
     }
 
     companion object {

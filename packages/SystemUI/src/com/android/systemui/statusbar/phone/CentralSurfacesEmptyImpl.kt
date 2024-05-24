@@ -17,9 +17,10 @@
 package com.android.systemui.statusbar.phone
 
 import android.content.Intent
+import android.view.MotionEvent
 import androidx.lifecycle.LifecycleRegistry
 import com.android.keyguard.AuthKeyguardMessageArea
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.navigationbar.NavigationBarView
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.qs.QSPanelController
@@ -78,6 +79,7 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun updateScrimController() {}
     override fun shouldIgnoreTouch() = false
     override fun isDeviceInteractive() = false
+    override fun handleDreamTouch(event: MotionEvent?) {}
     override fun awakenDreams() {}
     override fun isBouncerShowing() = false
     override fun isBouncerShowingScrimmed() = false
@@ -97,5 +99,5 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun setIsLaunchingActivityOverLockscreen(isLaunchingActivityOverLockscreen: Boolean) {}
     override fun getAnimatorControllerFromNotification(
         associatedView: ExpandableNotificationRow?,
-    ): ActivityLaunchAnimator.Controller? = null
+    ): ActivityTransitionAnimator.Controller? = null
 }

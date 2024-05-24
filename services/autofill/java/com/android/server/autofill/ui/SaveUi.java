@@ -58,11 +58,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.autofill.AutofillManager;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.android.internal.R;
@@ -370,7 +372,21 @@ final class SaveUi {
         params.windowAnimations = R.style.AutofillSaveAnimation;
         params.setTrustedOverlay();
 
+        ScrollView scrollView = view.findViewById(R.id.autofill_sheet_scroll_view);
+
+        View divider = view.findViewById(R.id.autofill_sheet_divider);
+
+        ViewTreeObserver observer = scrollView.getViewTreeObserver();
+        observer.addOnGlobalLayoutListener(() -> adjustDividerVisibility(scrollView, divider));
+
+        scrollView.getViewTreeObserver()
+                .addOnScrollChangedListener(() -> adjustDividerVisibility(scrollView, divider));
         show();
+    }
+
+    private void adjustDividerVisibility(ScrollView scrollView, View divider) {
+        boolean canScrollDown = scrollView.canScrollVertically(1); // 1 to check scrolling down
+        divider.setVisibility(canScrollDown ? View.VISIBLE : View.INVISIBLE);
     }
 
     private boolean applyCustomDescription(@NonNull Context context, @NonNull View saveUiView,

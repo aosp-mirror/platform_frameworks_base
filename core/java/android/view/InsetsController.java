@@ -28,7 +28,6 @@ import static android.view.WindowInsets.Type.LAST;
 import static android.view.WindowInsets.Type.all;
 import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.ime;
-import static android.view.inputmethod.ImeTracker.PHASE_CLIENT_ANIMATION_CANCEL;
 
 import android.animation.AnimationHandler;
 import android.animation.Animator;
@@ -47,7 +46,6 @@ import android.graphics.Rect;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Process;
 import android.os.Trace;
 import android.text.TextUtils;
 import android.util.IntArray;
@@ -224,6 +222,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
          * @param running {@code true} if there is any animation running; {@code false} otherwise.
          */
         default void notifyAnimationRunningStateChanged(boolean running) {}
+
+        /** @see ViewRootImpl#isHandlingPointerEvent */
+        default boolean isHandlingPointerEvent() {
+            return false;
+        }
     }
 
     private static final String TAG = "InsetsController";
@@ -654,6 +657,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private final Runnable mAnimCallback;
 
     /** Pending control request that is waiting on IME to be ready to be shown */
+    @Nullable
     private PendingControlRequest mPendingImeControlRequest;
 
     private int mWindowType;
@@ -1038,12 +1042,18 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         hideTypes[0] &= ~animatingTypes;
 
         if (showTypes[0] != 0) {
-            applyAnimation(showTypes[0], true /* show */, false /* fromIme */,
-                    null /* statsToken */);
+            final var statsToken = (showTypes[0] & ime()) == 0 ? null
+                    : ImeTracker.forLogging().onStart(ImeTracker.TYPE_SHOW,
+                            ImeTracker.ORIGIN_CLIENT, SoftInputShowHideReason.CONTROLS_CHANGED,
+                            mHost.isHandlingPointerEvent() /* fromUser */);
+            applyAnimation(showTypes[0], true /* show */, false /* fromIme */, statsToken);
         }
         if (hideTypes[0] != 0) {
-            applyAnimation(hideTypes[0], false /* show */, false /* fromIme */,
-                    null /* statsToken */);
+            final var statsToken = (hideTypes[0] & ime()) == 0 ? null
+                    : ImeTracker.forLogging().onStart(ImeTracker.TYPE_HIDE,
+                            ImeTracker.ORIGIN_CLIENT, SoftInputShowHideReason.CONTROLS_CHANGED,
+                            mHost.isHandlingPointerEvent() /* fromUser */);
+            applyAnimation(hideTypes[0], false /* show */, false /* fromIme */, statsToken);
         }
 
         if (mControllableTypes != controllableTypes) {
@@ -1059,14 +1069,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @Override
     public void show(@InsetsType int types) {
-        ImeTracker.Token statsToken = null;
-        if ((types & ime()) != 0) {
-            statsToken = ImeTracker.forLogging().onRequestShow(null /* component */,
-                    Process.myUid(), ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT,
-                    SoftInputShowHideReason.SHOW_SOFT_INPUT_BY_INSETS_API);
-        }
-
-        show(types, false /* fromIme */, statsToken);
+        show(types, false /* fromIme */, null /* statsToken */);
     }
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
@@ -1074,6 +1077,13 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             @Nullable ImeTracker.Token statsToken) {
         if ((types & ime()) != 0) {
             Log.d(TAG, "show(ime(), fromIme=" + fromIme + ")");
+
+            if (statsToken == null) {
+                statsToken = ImeTracker.forLogging().onStart(ImeTracker.TYPE_SHOW,
+                        ImeTracker.ORIGIN_CLIENT,
+                        SoftInputShowHideReason.SHOW_SOFT_INPUT_BY_INSETS_API,
+                        mHost.isHandlingPointerEvent() /* fromUser */);
+            }
         }
         if (fromIme) {
             ImeTracing.getInstance().triggerClientDump("InsetsController#show",
@@ -1142,9 +1152,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     /**
-     * Handle the {@link #mPendingImeControlRequest} when
-     * - The IME insets is ready to show.
-     * - The IME insets has being requested invisible.
+     * Handle the {@link #mPendingImeControlRequest} when:
+     * <ul>
+     *     <li> The IME insets is ready to show.
+     *     <li> The IME insets has being requested invisible.
+     * </ul>
      */
     private void handlePendingControlRequest(@Nullable ImeTracker.Token statsToken) {
         PendingControlRequest pendingRequest = mPendingImeControlRequest;
@@ -1164,19 +1176,22 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @Override
     public void hide(@InsetsType int types) {
-        ImeTracker.Token statsToken = null;
-        if ((types & ime()) != 0) {
-            statsToken = ImeTracker.forLogging().onRequestHide(null /* component */,
-                    Process.myUid(), ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
-                    SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API);
-        }
-
-        hide(types, false /* fromIme */, statsToken);
+        hide(types, false /* fromIme */, null /* statsToken */);
     }
 
     @VisibleForTesting
     public void hide(@InsetsType int types, boolean fromIme,
             @Nullable ImeTracker.Token statsToken) {
+        if ((types & ime()) != 0) {
+            Log.d(TAG, "hide(ime(), fromIme=" + fromIme + ")");
+
+            if (statsToken == null) {
+                statsToken = ImeTracker.forLogging().onStart(ImeTracker.TYPE_HIDE,
+                        ImeTracker.ORIGIN_CLIENT,
+                        SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API,
+                        mHost.isHandlingPointerEvent() /* fromUser */);
+            }
+        }
         if (fromIme) {
             ImeTracing.getInstance().triggerClientDump("InsetsController#hide",
                     mHost.getInputMethodManager(), null /* icProto */);
@@ -1300,10 +1315,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             if (monitoredAnimation && (types & Type.ime()) != 0) {
                 if (animationType == ANIMATION_TYPE_SHOW) {
                     ImeTracker.forLatency().onShowCancelled(statsToken,
-                            PHASE_CLIENT_ANIMATION_CANCEL, ActivityThread::currentApplication);
+                            ImeTracker.PHASE_CLIENT_ANIMATION_CANCEL,
+                            ActivityThread::currentApplication);
                 } else {
                     ImeTracker.forLatency().onHideCancelled(statsToken,
-                            PHASE_CLIENT_ANIMATION_CANCEL, ActivityThread::currentApplication);
+                            ImeTracker.PHASE_CLIENT_ANIMATION_CANCEL,
+                            ActivityThread::currentApplication);
                 }
                 ImeTracker.forLogging().onCancelled(statsToken,
                         ImeTracker.PHASE_CLIENT_CONTROL_ANIMATION);
@@ -1352,6 +1369,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     }
                 });
             }
+
+            // The leashes are copied, but they won't be used.
+            releaseControls(controls);
 
             // The requested visibilities should be delayed as well. Otherwise, we might override
             // the insets visibility before playing animation.
@@ -1422,6 +1442,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
     }
 
+    static void releaseControls(SparseArray<InsetsSourceControl> controls) {
+        for (int i = controls.size() - 1; i >= 0; i--) {
+            controls.valueAt(i).release(SurfaceControl::release);
+        }
+    }
+
     // TODO(b/242962223): Make this setter restrictive.
     @Override
     public void setSystemDrivenInsetsAnimationLoggingListener(
@@ -1482,6 +1508,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     && (control.getLeash() != null || control.getId() == ID_IME_CAPTION_BAR)) {
                 controls.put(control.getId(), new InsetsSourceControl(control));
                 typesReady |= consumer.getType();
+            } else if (fromIme) {
+                Log.w(TAG, "collectSourceControls can't continue for type: ime,"
+                        + " fromIme: true requires a control with a leash but we have "
+                        + ((control == null)
+                            ? "control: null"
+                            : "control: non-null and control.getLeash(): null"));
+                ImeTracker.forLogging().onFailed(statsToken,
+                        ImeTracker.PHASE_CLIENT_COLLECT_SOURCE_CONTROLS);
             }
         }
         return new Pair<>(typesReady, imeReady);
@@ -1578,12 +1612,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private void cancelAnimation(InsetsAnimationControlRunner control, boolean invokeCallback) {
         if (invokeCallback) {
             ImeTracker.forLogging().onCancelled(control.getStatsToken(),
-                    PHASE_CLIENT_ANIMATION_CANCEL);
+                    ImeTracker.PHASE_CLIENT_ANIMATION_CANCEL);
             control.cancel();
         } else {
             // Succeeds if invokeCallback is false (i.e. when called from notifyFinished).
             ImeTracker.forLogging().onProgress(control.getStatsToken(),
-                    PHASE_CLIENT_ANIMATION_CANCEL);
+                    ImeTracker.PHASE_CLIENT_ANIMATION_CANCEL);
         }
         if (DEBUG) {
             Log.d(TAG, TextUtils.formatSimple(

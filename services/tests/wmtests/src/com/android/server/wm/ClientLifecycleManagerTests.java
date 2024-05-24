@@ -36,13 +36,12 @@ import android.app.servertransaction.ClientTransactionItem;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -52,17 +51,10 @@ import org.mockito.MockitoAnnotations;
  * Build/Install/Run:
  *  atest WmTests:ClientLifecycleManagerTests
  */
-// Suppress GuardedBy warning on unit tests
-@SuppressWarnings("GuardedBy")
 @SmallTest
 @Presubmit
-public class ClientLifecycleManagerTests {
-
-    @Rule(order = 0)
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
-
-    @Rule(order = 1)
-    public final SystemServicesTestRule mSystemServices = new SystemServicesTestRule();
+@RunWith(WindowTestRunner.class)
+public class ClientLifecycleManagerTests extends SystemServiceTestsBase {
 
     @Mock
     private IBinder mClientBinder;
@@ -86,7 +78,7 @@ public class ClientLifecycleManagerTests {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        mWms = mSystemServices.getWindowManagerService();
+        mWms = mSystemServicesTestRule.getWindowManagerService();
         mLifecycleManager = spy(new ClientLifecycleManager());
         mLifecycleManager.setWindowManager(mWms);
 
@@ -151,7 +143,9 @@ public class ClientLifecycleManagerTests {
                 mLifecycleManager.mPendingTransactions.get(mNonBinderClient);
         assertEquals(1, transaction.getTransactionItems().size());
         assertEquals(mTransactionItem, transaction.getTransactionItems().get(0));
-        assertNull(transaction.getCallbacks());
+        // TODO(b/324203798): cleanup after remove UnsupportedAppUsage
+        assertEquals(1, transaction.getCallbacks().size());
+        assertEquals(mTransactionItem, transaction.getCallbacks().get(0));
         assertNull(transaction.getLifecycleStateRequest());
         verify(mLifecycleManager, never()).scheduleTransaction(any());
 
@@ -164,15 +158,17 @@ public class ClientLifecycleManagerTests {
         assertEquals(2, transaction.getTransactionItems().size());
         assertEquals(mTransactionItem, transaction.getTransactionItems().get(0));
         assertEquals(mLifecycleItem, transaction.getTransactionItems().get(1));
-        assertNull(transaction.getCallbacks());
-        assertNull(transaction.getLifecycleStateRequest());
+        // TODO(b/324203798): cleanup after remove UnsupportedAppUsage
+        assertEquals(1, transaction.getCallbacks().size());
+        assertEquals(mTransactionItem, transaction.getCallbacks().get(0));
+        assertEquals(mLifecycleItem, transaction.getLifecycleStateRequest());
         verify(mLifecycleManager, never()).scheduleTransaction(any());
     }
 
     @Test
     public void testScheduleTransactionItemUnlocked() throws RemoteException {
         // Use non binder client to get non-recycled ClientTransaction.
-        mLifecycleManager.scheduleTransactionItemUnlocked(mNonBinderClient, mTransactionItem);
+        mLifecycleManager.scheduleTransactionItemNow(mNonBinderClient, mTransactionItem);
 
         // Dispatch immediately.
         assertTrue(mLifecycleManager.mPendingTransactions.isEmpty());
@@ -210,13 +206,32 @@ public class ClientLifecycleManagerTests {
         assertEquals(2, transaction.getTransactionItems().size());
         assertEquals(mTransactionItem, transaction.getTransactionItems().get(0));
         assertEquals(mLifecycleItem, transaction.getTransactionItems().get(1));
-        assertNull(transaction.getCallbacks());
-        assertNull(transaction.getLifecycleStateRequest());
+        // TODO(b/324203798): cleanup after remove UnsupportedAppUsage
+        assertEquals(1, transaction.getCallbacks().size());
+        assertEquals(mTransactionItem, transaction.getCallbacks().get(0));
+        assertEquals(mLifecycleItem, transaction.getLifecycleStateRequest());
         verify(mLifecycleManager, never()).scheduleTransaction(any());
     }
 
     @Test
+    public void testScheduleTransactionAndLifecycleItems_shouldDispatchImmediately()
+            throws RemoteException {
+        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
+        spyOn(mWms.mWindowPlacerLocked);
+        doReturn(true).when(mWms.mWindowPlacerLocked).isTraversalScheduled();
+
+        // Use non binder client to get non-recycled ClientTransaction.
+        mLifecycleManager.scheduleTransactionAndLifecycleItems(mNonBinderClient, mTransactionItem,
+                mLifecycleItem, true /* shouldDispatchImmediately */);
+
+        verify(mLifecycleManager).scheduleTransaction(any());
+        assertTrue(mLifecycleManager.mPendingTransactions.isEmpty());
+    }
+
+    @Test
     public void testDispatchPendingTransactions() throws RemoteException {
+        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
+
         mLifecycleManager.mPendingTransactions.put(mClientBinder, mTransaction);
 
         mLifecycleManager.dispatchPendingTransactions();
@@ -224,5 +239,31 @@ public class ClientLifecycleManagerTests {
         assertTrue(mLifecycleManager.mPendingTransactions.isEmpty());
         verify(mTransaction).schedule();
         verify(mTransaction).recycle();
+    }
+
+    @Test
+    public void testLayoutDeferred() throws RemoteException {
+        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
+        spyOn(mWms.mWindowPlacerLocked);
+        doReturn(false).when(mWms.mWindowPlacerLocked).isInLayout();
+        doReturn(false).when(mWms.mWindowPlacerLocked).isTraversalScheduled();
+        doReturn(true).when(mWms.mWindowPlacerLocked).isLayoutDeferred();
+
+        // Queue transactions during layout deferred.
+        mLifecycleManager.scheduleTransactionItem(mNonBinderClient, mLifecycleItem);
+
+        verify(mLifecycleManager, never()).scheduleTransaction(any());
+
+        // Continue queueing when there are multi-level defer.
+        mLifecycleManager.onLayoutContinued();
+
+        verify(mLifecycleManager, never()).scheduleTransaction(any());
+
+        // Immediately dispatch when layout continue without ongoing/scheduled layout.
+        doReturn(false).when(mWms.mWindowPlacerLocked).isLayoutDeferred();
+
+        mLifecycleManager.onLayoutContinued();
+
+        verify(mLifecycleManager).scheduleTransaction(any());
     }
 }

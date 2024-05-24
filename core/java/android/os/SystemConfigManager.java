@@ -16,12 +16,15 @@
 package android.os;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.SignedPackage;
+import android.content.pm.SignedPackageParcel;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -29,6 +32,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 /**
@@ -171,6 +175,71 @@ public class SystemConfigManager {
     public List<String> getPreventUserDisablePackages() {
         try {
             return mInterface.getPreventUserDisablePackages();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
+    /**
+     * Returns a set of signed packages, represented as (packageName, certificateDigest) pairs, that
+     * should be considered "trusted packages" by ECM (Enhanced Confirmation Mode).
+     *
+     * <p>"Trusted packages" are exempt from ECM (i.e., they will never be considered "restricted").
+     *
+     * <p>A package will be considered "trusted package" if and only if it *matches* least one of
+     * the (*packageName*, *certificateDigest*) pairs in this set, where *matches* means satisfying
+     * both of the following:
+     *
+     * <ol>
+     *   <li>The package's name equals *packageName*
+     *   <li>The package is, or was ever, signed by *certificateDigest*, according to the package's
+     *       {@link android.content.pm.SigningDetails}
+     * </ol>
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(android.permission.flags.Flags.FLAG_ENHANCED_CONFIRMATION_MODE_APIS_ENABLED)
+    @RequiresPermission(Manifest.permission.MANAGE_ENHANCED_CONFIRMATION_STATES)
+    @NonNull
+    public Set<SignedPackage> getEnhancedConfirmationTrustedPackages() {
+        try {
+            List<SignedPackageParcel> parcels = mInterface.getEnhancedConfirmationTrustedPackages();
+            return parcels.stream().map(SignedPackage::new).collect(Collectors.toSet());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns a set of signed packages, represented as (packageName, certificateDigest) pairs, that
+     * should be considered "trusted installers" by ECM (Enhanced Confirmation Mode).
+     *
+     * <p>"Trusted installers", and all apps installed by a trusted installer, are exempt from ECM
+     * (i.e., they will never be considered "restricted").
+     *
+     * <p>A package will be considered a "trusted installer" if and only if it *matches* least one
+     * of the (*packageName*, *certificateDigest*) pairs in this set, where *matches* means
+     * satisfying both of the following:
+     *
+     * <ol>
+     *   <li>The package's name equals *packageName*
+     *   <li>The package is, or was ever, signed by *certificateDigest*, according to the package's
+     *       {@link android.content.pm.SigningDetails}
+     * </ol>
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(android.permission.flags.Flags.FLAG_ENHANCED_CONFIRMATION_MODE_APIS_ENABLED)
+    @RequiresPermission(Manifest.permission.MANAGE_ENHANCED_CONFIRMATION_STATES)
+    @NonNull
+    public Set<SignedPackage> getEnhancedConfirmationTrustedInstallers() {
+        try {
+            List<SignedPackageParcel> parcels =
+                    mInterface.getEnhancedConfirmationTrustedInstallers();
+            return parcels.stream().map(SignedPackage::new).collect(Collectors.toSet());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

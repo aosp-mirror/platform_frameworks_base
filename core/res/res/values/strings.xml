@@ -396,6 +396,27 @@
     <!-- Displayed when the call forwarding query was set but forwarding is not enabled. -->
     <string name="cfTemplateRegisteredTime"><xliff:g id="bearer_service_code">{0}</xliff:g>: Not forwarded</string>
 
+    <!-- Title of the cellular network security safety center source's status. -->
+    <string name="scCellularNetworkSecurityTitle">Cellular network security</string>
+    <!-- Summary of the cellular network security safety center source's status. -->
+    <string name="scCellularNetworkSecuritySummary">Review settings</string>
+    <!-- Title of the safety center issue and notification when the phone's identifier is shared over the network. -->
+    <string name="scIdentifierDisclosureIssueTitle">Device identifier accessed</string>
+    <!-- Summary of the safety center issue and notification when the phone's identifier is shared over the network. -->
+    <string name="scIdentifierDisclosureIssueSummary">A network on the <xliff:g id="disclosure_network">%4$s</xliff:g> connection recorded your device\'s unique identifier (IMSI) <xliff:g id="disclosure_count">%1$d</xliff:g> times in the period between <xliff:g id="disclosure_window_start_time">%2$tr</xliff:g> and <xliff:g id="disclosure_window_end_time">%3$tr</xliff:g>.</string>
+    <!-- Title of the safety center issue and notification when the phone restores an encrypted connection to the network. -->
+    <string name="scNullCipherIssueEncryptedTitle">Encrypted connection to <xliff:g id="network_name">%1$s</xliff:g></string>
+    <!-- Summary of the safety center issue and notification when the phone restores an encrypted connection to the network. -->
+    <string name="scNullCipherIssueEncryptedSummary">You\'re now connected to a more secure cellular network.</string>
+    <!-- Title of the safety center issue and notification when a connected network is not using encryption. -->
+    <string name="scNullCipherIssueNonEncryptedTitle">Non-encrypted connection to <xliff:g id="network_name">%1$s</xliff:g></string>
+    <!-- Summary of the safety center issue and notification when a connected network is not using encryption.  -->
+    <string name="scNullCipherIssueNonEncryptedSummary">You\'re connected to a non-encrypted cellular network. Your calls, messages, and data are vulnerable to interception.</string>
+    <!-- Label for the button that links to the cellular network security settings. -->
+    <string name="scNullCipherIssueActionSettings">Cellular security settings</string>
+    <!-- Label for the button that link to education resourcess about cellular network security settings. -->
+    <string name="scNullCipherIssueActionLearnMore">Learn more</string>
+
     <!-- android.net.http Error strings --> <skip />
     <!-- Displayed when a feature code (non-phone number) is dialed and completes successfully. -->
     <string name="fcComplete">Feature code complete.</string>
@@ -1075,6 +1096,12 @@
     <string name="permdesc_manageOngoingCalls">Allows an app to see details about ongoing calls
          on your device and to control these calls.</string>
 
+    <!-- Title for an application permission, listed so that the user can access the last known cell id provided by telephony. -->
+    <string name="permlab_accessLastKnownCellId">Access last known cell identity.</string>
+    <!-- Description on an application permission, listed so that the user can access the last known cell id provided by telephony -->
+    <string name="permdesc_accessLastKnownCellId">Allows an app to access to the last known
+        cell identity provided by telephony.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCellBroadcasts">read cell broadcast messages</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1246,6 +1273,11 @@
     <string name="permlab_foregroundServiceFileManagement">run foreground service with the type \"fileManagement\"</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_foregroundServiceFileManagement">Allows the app to make use of foreground services with the type \"fileManagement\"</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_foregroundServiceMediaProcessing">run foreground service with the type \"mediaProcessing\"</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_foregroundServiceMediaProcessing">Allows the app to make use of foreground services with the type \"mediaProcessing\"</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_foregroundServiceSpecialUse">run foreground service with the type \"specialUse\"</string>
@@ -1561,6 +1593,11 @@
     <string name="permdesc_setWallpaper">Allows the app to set the system wallpaper.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_accessHiddenProfile">Access hidden profiles</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_accessHiddenProfile">Allows the app to access hidden profiles.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_setWallpaperHints">adjust your wallpaper size</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_setWallpaperHints">Allows the app to set the system wallpaper size hints.</string>
@@ -1820,7 +1857,7 @@
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
     <string name="fingerprint_acquired_partial">Press firmly on the sensor</string>
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
-    <string name="fingerprint_acquired_insufficient">Can\u2019t recognize fingerprint. Try again.</string>
+    <string name="fingerprint_acquired_insufficient">Fingerprint not recognized. Try again.</string>
     <!-- Message shown during fingerprint acquisision when the fingerprint sensor needs cleaning -->
     <string name="fingerprint_acquired_imager_dirty">Clean fingerprint sensor and try again</string>
     <string name="fingerprint_acquired_imager_dirty_alt">Clean sensor and try again</string>
@@ -1856,15 +1893,15 @@
     <string name="face_authenticated_confirmation_required">Face authenticated, please press confirm</string>
 
     <!-- Error message shown when the fingerprint hardware can't be accessed -->
-    <string name="fingerprint_error_hw_not_available">Fingerprint hardware not available.</string>
+    <string name="fingerprint_error_hw_not_available">Fingerprint hardware not available</string>
     <!-- Error message shown when the fingerprint hardware has run out of room for storing fingerprints -->
     <string name="fingerprint_error_no_space">Can\u2019t set up fingerprint</string>
     <!-- Error message shown when the fingerprint hardware timer has expired and the user needs to restart the operation. -->
     <string name="fingerprint_error_timeout">Fingerprint setup timed out. Try again.</string>
     <!-- Generic error message shown when the fingerprint operation (e.g. enrollment or authentication) is canceled. Generally not shown to the user-->
-    <string name="fingerprint_error_canceled">Fingerprint operation canceled.</string>
+    <string name="fingerprint_error_canceled">Fingerprint operation canceled</string>
     <!-- Generic error message shown when the fingerprint authentication operation is canceled due to user input. Generally not shown to the user -->
-    <string name="fingerprint_error_user_canceled">Fingerprint operation canceled by user.</string>
+    <string name="fingerprint_error_user_canceled">Fingerprint operation canceled by user</string>
     <!-- Generic error message shown when the fingerprint operation fails because too many attempts have been made. -->
     <string name="fingerprint_error_lockout">Too many attempts. Use screen lock instead.</string>
     <!-- Generic error message shown when the fingerprint operation fails because strong authentication is required -->
@@ -1872,13 +1909,13 @@
     <!-- Generic error message shown when the fingerprint hardware can't recognize the fingerprint -->
     <string name="fingerprint_error_unable_to_process">Can\u2019t process fingerprint. Try again.</string>
     <!-- Generic error message shown when the user has no enrolled fingerprints -->
-    <string name="fingerprint_error_no_fingerprints">No fingerprints enrolled.</string>
+    <string name="fingerprint_error_no_fingerprints">No fingerprints enrolled</string>
     <!-- Generic error message shown when the app requests fingerprint authentication on a device without a sensor -->
-    <string name="fingerprint_error_hw_not_present">This device does not have a fingerprint sensor.</string>
+    <string name="fingerprint_error_hw_not_present">This device does not have a fingerprint sensor</string>
     <!-- Generic error message shown when fingerprint is not available due to a security vulnerability. [CHAR LIMIT=50] -->
-    <string name="fingerprint_error_security_update_required">Sensor temporarily disabled.</string>
+    <string name="fingerprint_error_security_update_required">Sensor temporarily disabled</string>
     <!-- Generic error message shown when fingerprint needs calibration [CHAR LIMIT=150] -->
-    <string name="fingerprint_error_bad_calibration">Can\u2019t use fingerprint sensor. Visit a repair provider</string>
+    <string name="fingerprint_error_bad_calibration">Can\u2019t use fingerprint sensor. Visit a repair provider.</string>
     <!-- Generic error message shown when the power button has been pressed. [CHAR LIMIT=150] -->
     <string name="fingerprint_error_power_pressed">Power button pressed</string>
 
@@ -1954,7 +1991,7 @@
     <!-- Message shown during face acquisition when the sensor needs to be recalibrated [CHAR LIMIT=50] -->
     <string name="face_acquired_recalibrate">Please re-enroll your face.</string>
     <!-- Message shown during face enrollment when a different person's face is detected [CHAR LIMIT=50] -->
-    <string name="face_acquired_too_different">Can\u2019t recognize face. Try again.</string>
+    <string name="face_acquired_too_different">Face not recognized. Try again.</string>
     <!-- Message shown during face enrollment when the face is too similar to a previous acquisition [CHAR LIMIT=50] -->
     <string name="face_acquired_too_similar">Change the position of your head slightly</string>
     <!-- Message shown during acqusition when the user's face is turned too far left or right [CHAR LIMIT=50] -->
@@ -2210,6 +2247,11 @@
     <string name="permlab_updatePackagesWithoutUserAction">update app without user action</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this.[CHAR_LIMIT=NONE] -->
     <string name="permdesc_updatePackagesWithoutUserAction">Allows the holder to update the app it previously installed without user action</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permlab_writeVerificationStateE2eeContactKeys">update the verification states of E2EE contact keys owned by other apps</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this.[CHAR_LIMIT=NONE] -->
+    <string name="permdesc_writeVerificationStateE2eeContactKeys">Allows the app to update the verification states of E2EE contact keys owned by other apps</string>
 
     <!-- Policy administration -->
 
@@ -5296,6 +5338,12 @@
     <!-- Content description of the expand button icon in the notification when expanded.-->
     <string name="expand_button_content_description_expanded">Collapse</string>
 
+    <!-- A11y announcement when a view is collapsed. -->
+    <string name="content_description_collapsed">Collapsed</string>
+
+    <!-- A11y announcement when a view is expanded. -->
+    <string name="content_description_expanded">Expanded</string>
+
     <!-- Accessibility action description on the expand button. -->
     <string name="expand_action_accessibility">toggle expansion</string>
 
@@ -5399,6 +5447,13 @@
     <string name="work_mode_turn_on">Unpause</string>
     <!-- Title for button to launch the personal safety app to make an emergency call    -->
     <string name="work_mode_emergency_call_button">Emergency</string>
+
+    <!-- Title of the alert dialog prompting the user to set up a screen lock [CHAR LIMIT=30] -->
+    <string name="set_up_screen_lock_title">Set a screen lock</string>
+    <!-- Action label for the dialog prompting the user to set up a screen lock [CHAR LIMIT=30] -->
+    <string name="set_up_screen_lock_action_label">Set screen lock</string>
+    <!-- Message shown in the dialog prompting the user to set up a screen lock to access private space [CHAR LIMIT=30] -->
+    <string name="private_space_set_up_screen_lock_message">To use your private space, set a screen lock on this device</string>
 
     <!-- Title of the dialog that is shown when the user tries to launch a blocked application [CHAR LIMIT=50] -->
     <string name="app_blocked_title">App is not available</string>
@@ -6363,4 +6418,20 @@ ul.</string>
     <!-- Communal profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
     <string name="profile_label_communal">Communal</string>
 
+    <!-- Notification message used when a notification's normal message contains sensitive information. -->
+    <!-- TODO b/301960090: replace with redacted message string and action title, when/if UX provides one -->
+    <!-- DO NOT TRANSLATE -->
+    <string name="redacted_notification_message"></string>
+    <!-- Notification action title used instead of a notification's normal title sensitive [CHAR_LIMIT=NOTIF_BODY] -->
+    <string name="redacted_notification_action_title"></string>
+
+    <!-- Satellite related messages -->
+    <!-- Notification title when satellite service is connected. -->
+    <string name="satellite_notification_title">Auto connected to satellite</string>
+    <!-- Notification summary when satellite service is connected. [CHAR LIMIT=NONE] -->
+    <string name="satellite_notification_summary">You can send and receive messages without a mobile or Wi-Fi network</string>
+    <!-- Invoke "What to expect" dialog of messaging application -->
+    <string name="satellite_notification_open_message">Open Messages</string>
+    <!-- Invoke Satellite setting activity of Settings -->
+    <string name="satellite_notification_how_it_works">How it works</string>
 </resources>

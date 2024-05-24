@@ -8,3 +8,10 @@ flag {
     bug: "286084594"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "disable_game_mode_when_app_top"
+    namespace: "game"
+    description: "Disable game power mode when a non-game app is also top and visible"
+    bug: "299295925"
+}

@@ -153,7 +153,7 @@ public class ContentCaptureManagerTest {
         final ContentCaptureManager manager =
                 new ContentCaptureManager(mMockContext, mMockContentCaptureManager, EMPTY_OPTIONS);
         // Ensure main session is created.
-        final MainContentCaptureSession unused = manager.getMainContentCaptureSession();
+        final ContentCaptureSession unused = manager.getMainContentCaptureSession();
         final WindowManager.LayoutParams initialParam = new WindowManager.LayoutParams();
         initialParam.flags |= WindowManager.LayoutParams.FLAG_SECURE;
 
@@ -167,7 +167,7 @@ public class ContentCaptureManagerTest {
         final ContentCaptureManager manager =
                 new ContentCaptureManager(mMockContext, mMockContentCaptureManager, EMPTY_OPTIONS);
         // Ensure main session is created.
-        final MainContentCaptureSession unused = manager.getMainContentCaptureSession();
+        final ContentCaptureSession unused = manager.getMainContentCaptureSession();
         final WindowManager.LayoutParams initialParam = new WindowManager.LayoutParams();
         initialParam.flags |= WindowManager.LayoutParams.FLAG_SECURE;
         // Default param does not have FLAG_SECURE set.
@@ -184,7 +184,7 @@ public class ContentCaptureManagerTest {
         final ContentCaptureManager manager =
                 new ContentCaptureManager(mMockContext, mMockContentCaptureManager, EMPTY_OPTIONS);
         // Ensure main session is created.
-        final MainContentCaptureSession unused = manager.getMainContentCaptureSession();
+        final ContentCaptureSession unused = manager.getMainContentCaptureSession();
         // Default param does not have FLAG_SECURE set.
         final WindowManager.LayoutParams resetParam = new WindowManager.LayoutParams();
 

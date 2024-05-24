@@ -25,6 +25,7 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+import androidx.window.extensions.embedding.AnimationBackground;
 import androidx.window.extensions.embedding.SplitAttributes;
 
 import org.junit.Before;
@@ -70,7 +71,7 @@ public class WindowExtensionsTest {
                 .isEqualTo(SplitAttributes.LayoutDirection.LOCALE);
         assertThat(splitAttributes.getSplitType())
                 .isEqualTo(new SplitAttributes.SplitType.RatioSplitType(0.5f));
-        // TODO(b/263047900): Update extensions API.
-        // assertThat(splitAttributes.getAnimationBackgroundColor()).isEqualTo(0);
+        assertThat(splitAttributes.getAnimationBackground())
+                .isEqualTo(AnimationBackground.ANIMATION_BACKGROUND_DEFAULT);
     }
 }

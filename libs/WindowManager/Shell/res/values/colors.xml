@@ -66,4 +66,9 @@
     <color name="desktop_mode_maximize_menu_button_outline">#797869</color>
     <color name="desktop_mode_maximize_menu_button_outline_on_hover">#606219</color>
     <color name="desktop_mode_maximize_menu_button_on_hover">#E7E790</color>
+    <color name="desktop_mode_maximize_menu_progress_light">#33000000</color>
+    <color name="desktop_mode_maximize_menu_progress_dark">#33FFFFFF</color>
+    <color name="desktop_mode_caption_button_on_hover_light">#11000000</color>
+    <color name="desktop_mode_caption_button_on_hover_dark">#11FFFFFF</color>
+    <color name="desktop_mode_caption_button">#00000000</color>
 </resources>

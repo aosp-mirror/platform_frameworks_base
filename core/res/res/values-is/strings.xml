@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> eftir <xliff:g id="TIME_DELAY">{2}</xliff:g> sekúndur"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ekki áframsent"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ekki áframsent"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Öryggi farsímakerfis"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Yfirfara stillingar"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Auðkenni tækis opnað"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Netkerfi á <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g>-tengingunni skráði einkvæmt auðkenni (IMSI-númer) tækisins <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> sinnum frá <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> til <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Dulkóðuð tenging við <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Nú ertu með tengingu við öruggara farsímakerfi."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Ódulkóðuð tenging við <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Þú ert með tengingu við farsímakerfi sem er ekki dulkóðað. Símtöl, skilaboð og gögn eru berskjölduð fyrir hlerun."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Öryggisstillingar farsímakerfis"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Nánar"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Kóðaskipun framkvæmd."</string>
     <string name="fcError" msgid="5325116502080221346">"Vandamál með tengingu eða ógild kóðaskipun."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"Í lagi"</string>
@@ -370,6 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Heimilar forritinu að bindast endurvarpseiningunni til að framsenda skilaboð frá endurvarpa þegar þau berast. Viðvaranir frá endurvarpa berast á tilteknum stöðum til að vara þig við neyðarástandi. Spilliforrit geta truflað afköst eða virkni tækisins þegar neyðarboð berast frá endurvarpa."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Stjórna símtölum sem eru í gangi"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Leyfir forriti að sjá upplýsingar um og stjórna símtölum sem eru í gangi í tækinu þínu."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Aðgangur að síðasta þekkta auðkenni farsíma."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Veitir forriti aðgang að síðasta þekkta auðkenni farsíma sem símatækni veitir."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"lesa skilaboð frá endurvarpa"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Leyfir forriti að lesa skilaboð frá endurvarpa sem tækið móttekur. Viðvaranir frá endurvarpa berast á tilteknum stöðum til að vara þig við neyðarástandi. Spilliforrit geta truflað afköst eða virkni tækisins þegar neyðarboð berast frá endurvarpa."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"lesa strauma í áskrift"</string>
@@ -434,6 +446,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Leyfir forritinu að nota forgrunnsþjónustu af gerðinni „systemExempted“"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"keyra forgrunnsþjónustu af gerðinni „fileManagement“"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Leyfir forritinu að nota forgrunnsþjónustur af gerðinni „fileManagement“"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"Keyra forgrunnsþjónustu af gerðinni „mediaProcessing“"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Leyfir forritinu að nota forgrunnsþjónustu af gerðinni „mediaProcessing“"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"keyra forgrunnsþjónustu af gerðinni „specialUse“"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Leyfir forritinu að nota forgrunnsþjónustu af gerðinni „specialUse“"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"mæla geymslurými forrits"</string>
@@ -539,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Leyfir forriti að nota innrauðan sendi símans."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"velja veggfóður"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Leyfir forriti að velja veggfóður kerfisins."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Aðgangur að földum prófílum"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Veitir forritinu aðgang að földum prófílum."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"stilla stærð veggfóðurs"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Leyfir forriti að stilla stærðarleiðréttingu veggfóðurs í kerfinu."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"stilla tímabelti"</string>
@@ -632,7 +648,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Nota skjálás"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Sláðu inn skjálásinn þinn til að halda áfram"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Ýttu ákveðið á lesarann"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Fingrafar þekkist ekki. Reyndu aftur."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Ekki tókst að bera kennsl á fingrafar. Reyndu aftur."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Hreinsaðu fingrafaralesarann og reyndu aftur"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Hreinsaðu lesarann og reyndu aftur"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Ýttu ákveðið á lesarann"</string>
@@ -650,18 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Fingrafar staðfest"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Andlit staðfest"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Andlit staðfest, ýttu til að staðfesta"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Fingrafarsvélbúnaður ekki til staðar."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Fingrafarabúnaður er ekki til staðar"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Ekki er hægt að setja upp fingrafar"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Fingrafarsuppsetning rann út á tíma. Reyndu aftur."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Hætt við fingrafarsaðgerð."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Notandi hætti við að nota fingrafar."</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Hætt var við að nota fingrafar"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Notandi hætti við að nota fingrafar"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Of margar tilraunir. Notaðu skjálás í staðinn."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Of margar tilraunir. Notaðu skjálás í staðinn."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Ekki tekst að vinna úr fingrafari. Reyndu aftur."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Engin fingraför hafa verið skráð."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Þetta tæki er ekki með fingrafaralesara."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Slökkt tímabundið á skynjara."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Ekki er hægt að nota fingrafaralesara. Þú verður að fara með hann á verkstæði"</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Engin fingraför hafa verið skráð"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Þetta tæki er ekki með fingrafaralesara"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Slökkt var á lesara tímabundið"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Ekki er hægt að nota fingrafaralesara. Þú verður að fara á verkstæði."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Ýtt á aflrofa"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Fingur <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Nota fingrafar"</string>
@@ -696,7 +712,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Sé ekki andlitið á þér. Haltu símanum í augnhæð."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Of mikil hreyfing. Haltu símanum stöðugum."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Skráðu nafnið þitt aftur."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Andlit þekkist ekki. Reyndu aftur."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Ekki tókst að bera kennsl á andlit. Reyndu aftur."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Færðu höfuðið aðeins til"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Horfðu beint á símann"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Horfðu beint á símann"</string>
@@ -807,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Leyfir forritinu að nota upptökutíðni yfir 200 Hz fyrir skynjaragögn"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"uppfæra forrit án aðgerðar notanda"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Gerir eiganda kleift að uppfæra forritið sem hann setti upp áður án aðgerðar notanda"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"uppfæra stöður á staðfestingum fyrir E2EE-tengiliðalykla í eigu annarra forrita"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Gerir forritinu kleift að uppfæra stöður á staðfestingum fyrir E2EE-tengiliðalykla í eigu annarra forrita"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Setja reglur um aðgangsorð"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Stjórna lengd og fjölda stafa í aðgangsorðum og PIN-númerum skjáláss."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Fylgjast með tilraunum til að taka skjáinn úr lás"</string>
@@ -1906,6 +1924,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Helgi"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Viðburður"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Svefn"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Stýrt af <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Kveikt"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Slökkt"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> þaggar í einhverjum hljóðum"</string>
@@ -1925,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Staðfest"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Stækka"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Minnka"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Minnkað"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Stækkað"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"stækka eða minnka"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB-tengi fyrir jaðartæki"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1965,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Ljúka hléi vinnuforrita?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Ljúka hléi"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Neyðartilvik"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Stilltu skjálás"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Stilltu skjálás"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Stilltu skjálás í tækinu til að nota leynirými"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Forrit er ekki tiltækt"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> er ekki tiltækt núna."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ekki í boði"</string>
@@ -2341,8 +2365,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Ekki er hægt að spegla á skjá"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Notaðu aðra snúru og reyndu aftur"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Tækið er of heitt og getur ekki speglað á skjáinn fyrr en það kólnar"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Ekki er víst að snúran styðji skjái"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Ekki er víst að USB-C-snúran tengist skjám á réttan hátt"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Tveir skjáir"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Kveikt er á tveimur skjám"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> er að nota báða skjái til að sýna efni"</string>
@@ -2366,4 +2388,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Vinna 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Prófun"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Sameiginlegt"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Tengdist sjálfkrafa við gervihnött"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Þú getur sent og móttekið skilaboð án tengingar við farsímakerfi eða Wi-Fi"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Opna Messages"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Svona virkar þetta"</string>
 </resources>

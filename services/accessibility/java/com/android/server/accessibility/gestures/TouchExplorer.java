@@ -852,6 +852,11 @@ public class TouchExplorer extends BaseEventStreamTransformation
         final int pointerIdBits = (1 << pointerId);
         if (mSendHoverEnterAndMoveDelayed.isPending()) {
             // If we have not delivered the enter schedule an exit.
+            if (Flags.resetHoverEventTimerOnActionUp()) {
+                // We cancel first to reset the time window so that the user has the full amount of
+                // time to do a multi tap.
+                mSendHoverEnterAndMoveDelayed.repost();
+            }
             mSendHoverExitDelayed.post(event, rawEvent, pointerIdBits, policyFlags);
         } else {
             // The user is touch exploring so we send events for end.
@@ -882,22 +887,10 @@ public class TouchExplorer extends BaseEventStreamTransformation
         final int pointerIndex = event.findPointerIndex(pointerId);
         switch (event.getPointerCount()) {
             case 1:
-                // Touch exploration.
+            // Touch exploration.
                 sendTouchExplorationGestureStartAndHoverEnterIfNeeded(policyFlags);
-                if (Flags.reduceTouchExplorationSensitivity()
-                        && mState.getLastInjectedHoverEvent() != null) {
-                    final MotionEvent lastEvent = mState.getLastInjectedHoverEvent();
-                    final float deltaX = lastEvent.getX() - rawEvent.getX();
-                    final float deltaY = lastEvent.getY() - rawEvent.getY();
-                    final double moveDelta = Math.hypot(deltaX, deltaY);
-                    if (moveDelta > mTouchSlop) {
-                        mDispatcher.sendMotionEvent(
-                                event, ACTION_HOVER_MOVE, rawEvent, pointerIdBits, policyFlags);
-                    }
-                } else {
-                    mDispatcher.sendMotionEvent(
-                            event, ACTION_HOVER_MOVE, rawEvent, pointerIdBits, policyFlags);
-                }
+                mDispatcher.sendMotionEvent(
+                        event, ACTION_HOVER_MOVE, rawEvent, pointerIdBits, policyFlags);
                 break;
             case 2:
                 if (mGestureDetector.isMultiFingerGesturesEnabled()
@@ -1478,8 +1471,11 @@ public class TouchExplorer extends BaseEventStreamTransformation
             int policyFlags = mState.getLastReceivedPolicyFlags();
             if (mState.isDragging()) {
                 // Send an event to the end of the drag gesture.
-                mDispatcher.sendMotionEvent(
-                        event, ACTION_UP, rawEvent, ALL_POINTER_ID_BITS, policyFlags);
+                int pointerIdBits = ALL_POINTER_ID_BITS;
+                if (Flags.fixDragPointerWhenEndingDrag()) {
+                    pointerIdBits = 1 << mDraggingPointerId;
+                }
+                mDispatcher.sendMotionEvent(event, ACTION_UP, rawEvent, pointerIdBits, policyFlags);
             }
             mState.startDelegating();
             // Deliver all pointers to the view hierarchy.
@@ -1560,6 +1556,14 @@ public class TouchExplorer extends BaseEventStreamTransformation
             if (isPending()) {
                 mHandler.removeCallbacks(this);
                 clear();
+            }
+        }
+
+        public void repost() {
+            // cancel without clearing
+            if (isPending()) {
+                mHandler.removeCallbacks(this);
+                mHandler.postDelayed(this, mDetermineUserIntentTimeout);
             }
         }
 

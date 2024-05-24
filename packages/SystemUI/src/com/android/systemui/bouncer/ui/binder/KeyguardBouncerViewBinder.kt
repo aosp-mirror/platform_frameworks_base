@@ -32,7 +32,6 @@ import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE
 import com.android.systemui.bouncer.ui.BouncerViewDelegate
 import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.log.BouncerLogger
@@ -53,7 +52,6 @@ object KeyguardBouncerViewBinder {
         messageAreaControllerFactory: KeyguardMessageAreaController.Factory,
         bouncerMessageInteractor: BouncerMessageInteractor,
         bouncerLogger: BouncerLogger,
-        featureFlags: FeatureFlags,
         selectedUserInteractor: SelectedUserInteractor,
     ) {
         // Builds the KeyguardSecurityContainerController from bouncer view group.
@@ -141,8 +139,7 @@ object KeyguardBouncerViewBinder {
                                     it.bindMessageView(
                                         bouncerMessageInteractor,
                                         messageAreaControllerFactory,
-                                        bouncerLogger,
-                                        featureFlags
+                                        bouncerLogger
                                     )
                                 }
                             } else {

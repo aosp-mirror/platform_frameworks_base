@@ -19,12 +19,14 @@ package com.android.systemui.statusbar.notification.footer.ui.viewmodel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shared.notifications.domain.interactor.notificationSettingsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.seenNotificationsInteractor
 
 val Kosmos.footerViewModel by Fixture {
     FooterViewModel(
         activeNotificationsInteractor = activeNotificationsInteractor,
+        notificationSettingsInteractor = notificationSettingsInteractor,
         seenNotificationsInteractor = seenNotificationsInteractor,
         shadeInteractor = shadeInteractor,
     )

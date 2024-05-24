@@ -18,6 +18,8 @@ package com.android.server.companion;
 
 import static android.companion.CompanionDeviceManager.MESSAGE_REQUEST_CONTEXT_SYNC;
 
+import static com.android.server.companion.utils.PermissionsUtils.sanitizeWithCallerChecks;
+
 import android.companion.AssociationInfo;
 import android.companion.ContextSyncMessage;
 import android.companion.Flags;
@@ -25,13 +27,16 @@ import android.companion.Telecom;
 import android.companion.datatransfer.PermissionSyncRequest;
 import android.net.MacAddress;
 import android.os.Binder;
+import android.os.ParcelUuid;
 import android.os.ShellCommand;
+import android.util.Base64;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.server.companion.datatransfer.SystemDataTransferProcessor;
 import com.android.server.companion.datatransfer.contextsync.BitmapUtils;
 import com.android.server.companion.datatransfer.contextsync.CrossDeviceSyncController;
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
+import com.android.server.companion.presence.ObservableUuid;
 import com.android.server.companion.transport.CompanionTransportManager;
 
 import java.io.PrintWriter;
@@ -41,25 +46,31 @@ class CompanionDeviceShellCommand extends ShellCommand {
     private static final String TAG = "CDM_CompanionDeviceShellCommand";
 
     private final CompanionDeviceManagerService mService;
+    private final AssociationRevokeProcessor mRevokeProcessor;
     private final AssociationStoreImpl mAssociationStore;
     private final CompanionDevicePresenceMonitor mDevicePresenceMonitor;
     private final CompanionTransportManager mTransportManager;
 
     private final SystemDataTransferProcessor mSystemDataTransferProcessor;
     private final AssociationRequestsProcessor mAssociationRequestsProcessor;
+    private final BackupRestoreProcessor mBackupRestoreProcessor;
 
     CompanionDeviceShellCommand(CompanionDeviceManagerService service,
             AssociationStoreImpl associationStore,
             CompanionDevicePresenceMonitor devicePresenceMonitor,
             CompanionTransportManager transportManager,
             SystemDataTransferProcessor systemDataTransferProcessor,
-            AssociationRequestsProcessor associationRequestsProcessor) {
+            AssociationRequestsProcessor associationRequestsProcessor,
+            BackupRestoreProcessor backupRestoreProcessor,
+            AssociationRevokeProcessor revokeProcessor) {
         mService = service;
         mAssociationStore = associationStore;
         mDevicePresenceMonitor = devicePresenceMonitor;
         mTransportManager = transportManager;
         mSystemDataTransferProcessor = systemDataTransferProcessor;
         mAssociationRequestsProcessor = associationRequestsProcessor;
+        mBackupRestoreProcessor = backupRestoreProcessor;
+        mRevokeProcessor = revokeProcessor;
     }
 
     @Override
@@ -74,6 +85,19 @@ class CompanionDeviceShellCommand extends ShellCommand {
                 mDevicePresenceMonitor.simulateDeviceEvent(associationId, event);
                 return 0;
             }
+
+            if ("simulate-device-uuid-event".equals(cmd) && Flags.devicePresence()) {
+                String uuid = getNextArgRequired();
+                String packageName = getNextArgRequired();
+                int userId = getNextIntArgRequired();
+                int event = getNextIntArgRequired();
+                ObservableUuid observableUuid = new ObservableUuid(
+                        userId, ParcelUuid.fromString(uuid), packageName,
+                        System.currentTimeMillis());
+                mDevicePresenceMonitor.simulateDeviceEventByUuid(observableUuid, event);
+                return 0;
+            }
+
             switch (cmd) {
                 case "list": {
                     final int userId = getNextIntArgRequired();
@@ -95,7 +119,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     String deviceProfile = getNextArg();
                     final MacAddress macAddress = MacAddress.fromString(address);
                     mService.createNewAssociation(userId, packageName, macAddress,
-                            null, deviceProfile, false);
+                            /* displayName= */ deviceProfile, deviceProfile, false);
                 }
                 break;
 
@@ -106,7 +130,20 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     final AssociationInfo association =
                             mService.getAssociationWithCallerChecks(userId, packageName, address);
                     if (association != null) {
-                        mService.disassociateInternal(association.getId());
+                        mRevokeProcessor.disassociateInternal(association.getId());
+                    }
+                }
+                break;
+
+                case "disassociate-all": {
+                    final int userId = getNextIntArgRequired();
+                    final String packageName = getNextArgRequired();
+                    final List<AssociationInfo> userAssociations =
+                            mAssociationStore.getAssociationsForPackage(userId, packageName);
+                    for (AssociationInfo association : userAssociations) {
+                        if (sanitizeWithCallerChecks(mService.getContext(), association) != null) {
+                            mRevokeProcessor.disassociateInternal(association.getId());
+                        }
                     }
                 }
                 break;
@@ -125,6 +162,20 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     associationId = getNextIntArgRequired();
                     mDevicePresenceMonitor.simulateDeviceEvent(associationId, /* event */ 1);
                     break;
+
+                case "get-backup-payload": {
+                    final int userId = getNextIntArgRequired();
+                    byte[] payload = mBackupRestoreProcessor.getBackupPayload(userId);
+                    out.println(Base64.encodeToString(payload, Base64.NO_WRAP));
+                }
+                break;
+
+                case "apply-restored-payload": {
+                    final int userId = getNextIntArgRequired();
+                    byte[] payload = Base64.decode(getNextArgRequired(), Base64.NO_WRAP);
+                    mBackupRestoreProcessor.applyRestoredPayload(payload, userId);
+                }
+                break;
 
                 case "remove-inactive-associations": {
                     // This command should trigger the same "clean-up" job as performed by the
@@ -355,6 +406,8 @@ class CompanionDeviceShellCommand extends ShellCommand {
         pw.println("      Create a new Association.");
         pw.println("  disassociate USER_ID PACKAGE MAC_ADDRESS");
         pw.println("      Remove an existing Association.");
+        pw.println("  disassociate-all USER_ID");
+        pw.println("      Remove all Associations for a user.");
         pw.println("  clear-association-memory-cache");
         pw.println("      Clear the in-memory association cache and reload all association ");
         pw.println("      information from persistent storage. USE FOR DEBUGGING PURPOSES ONLY.");
@@ -377,6 +430,14 @@ class CompanionDeviceShellCommand extends ShellCommand {
         pw.println("      NOTE: This will only have effect if 'simulate-device-appeared' was");
         pw.println("      invoked for the same device (same ASSOCIATION_ID) no longer than");
         pw.println("      60 seconds ago.");
+
+        pw.println("  get-backup-payload USER_ID");
+        pw.println("      Generate backup payload for the given user and print its content");
+        pw.println("      encoded to a Base64 string.");
+        pw.println("      USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
+        pw.println("  apply-restored-payload USER_ID PAYLOAD");
+        pw.println("      Apply restored backup payload for the given user.");
+        pw.println("      USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
 
         if (Flags.devicePresence()) {
             pw.println("  simulate-device-event ASSOCIATION_ID EVENT");
@@ -403,6 +464,16 @@ class CompanionDeviceShellCommand extends ShellCommand {
             pw.println("      Make CDM act as if the given companion device is BT connected ");
             pw.println("    Case(3): ");
             pw.println("      Make CDM act as if the given companion device is BT disconnected ");
+            pw.println("      USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
+
+            pw.println("  simulate-device-uuid-event UUID PACKAGE USERID EVENT");
+            pw.println("  Simulate the companion device event changes:");
+            pw.println("    Case(2): ");
+            pw.println("      Make CDM act as if the given DEVICE is BT connected base"
+                    + "on the UUID");
+            pw.println("    Case(3): ");
+            pw.println("      Make CDM act as if the given DEVICE is BT disconnected base"
+                    + "on the UUID");
             pw.println("      USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
         }
 

@@ -31,6 +31,7 @@ import android.view.RemotableViewMethod;
 import android.widget.FrameLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
+import android.widget.flags.Flags;
 
 import com.android.internal.R;
 
@@ -41,7 +42,17 @@ import com.android.internal.R;
 public class CallLayout extends FrameLayout {
     private final PeopleHelper mPeopleHelper = new PeopleHelper();
 
+    /**
+     * Layout Color is used for creating CallLayout person avatar.
+     * It will be set on the background thread during CallLayout's inflation
+     * when call_style_set_data_async is enabled.
+     */
     private int mLayoutColor;
+    /**
+     * LargeIcon is used for creating CallLayout person avatar.
+     * It will be set on the background thread during CallLayout's inflation
+     * when call_style_set_data_async is enabled.
+     */
     private Icon mLargeIcon;
     private Person mUser;
 
@@ -49,7 +60,6 @@ public class CallLayout extends FrameLayout {
     private CachingIconView mIcon;
     private CachingIconView mConversationIconBadgeBg;
     private TextView mConversationText;
-    private boolean mSetDataAsyncEnabled = false;
 
     public CallLayout(@NonNull Context context) {
         super(context);
@@ -103,7 +113,19 @@ public class CallLayout extends FrameLayout {
         return icon;
     }
 
-    @RemotableViewMethod
+    /**
+     * async version of {@link CallLayout#setLayoutColor}
+     */
+    public Runnable setLayoutColorAsync(int color) {
+        if (!Flags.callStyleSetDataAsync()) {
+            return () -> setLayoutColor(color);
+        }
+
+        mLayoutColor = color;
+        return () -> {};
+    }
+
+    @RemotableViewMethod(asyncImpl = "setLayoutColorAsync")
     public void setLayoutColor(int color) {
         mLayoutColor = color;
     }
@@ -116,7 +138,19 @@ public class CallLayout extends FrameLayout {
         mConversationIconBadgeBg.setImageTintList(ColorStateList.valueOf(color));
     }
 
-    @RemotableViewMethod
+    /**
+     * async version of {@link CallLayout#setLargeIcon}
+     */
+    public Runnable setLargeIconAsync(Icon largeIcon) {
+        if (!Flags.callStyleSetDataAsync()) {
+            return () -> setLargeIcon(largeIcon);
+        }
+
+        mLargeIcon = largeIcon;
+        return () -> {};
+    }
+
+    @RemotableViewMethod(asyncImpl = "setLargeIconAsync")
     public void setLargeIcon(Icon largeIcon) {
         mLargeIcon = largeIcon;
     }
@@ -133,16 +167,11 @@ public class CallLayout extends FrameLayout {
         mConversationIconView.setImageIcon(icon);
     }
 
-
-    public void setSetDataAsyncEnabled(boolean setDataAsyncEnabled) {
-        mSetDataAsyncEnabled = setDataAsyncEnabled;
-    }
-
     /**
      * Async implementation for setData
      */
     public Runnable setDataAsync(Bundle extras) {
-        if (!mSetDataAsyncEnabled) {
+        if (!Flags.callStyleSetDataAsync()) {
             return () -> setData(extras);
         }
 

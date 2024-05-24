@@ -77,7 +77,7 @@ public class SystemUIService extends Service {
         super.onCreate();
 
         // Start all of SystemUI
-        ((SystemUIApplication) getApplication()).startServicesIfNeeded();
+        ((SystemUIApplication) getApplication()).startSystemUserServicesIfNeeded();
 
         // Finish initializing dump logic
         mLogBufferFreezer.attach(mBroadcastDispatcher);

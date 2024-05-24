@@ -21,9 +21,11 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.os.BatteryConsumer;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
@@ -36,7 +38,6 @@ import android.telephony.NetworkRegistrationInfo;
 import android.util.AtomicFile;
 import android.util.Log;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BatteryStatsHistory;
@@ -56,6 +57,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -77,13 +79,14 @@ public class BatteryStatsHistoryTest {
     private BatteryStatsHistory.TraceDelegate mTracer;
     @Mock
     private BatteryStatsHistory.HistoryStepDetailsCalculator mStepDetailsCalculator;
+    @Mock
+    private BatteryStatsHistory.EventLogger mEventLogger;
     private List<String> mReadFiles = new ArrayList<>();
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
-        Context context = InstrumentationRegistry.getContext();
-        mSystemDir = context.getDataDir();
+        mSystemDir = Files.createTempDirectory("BatteryStatsHistoryTest").toFile();
         mHistoryDir = new File(mSystemDir, "battery-history");
         String[] files = mHistoryDir.list();
         if (files != null) {
@@ -96,17 +99,10 @@ public class BatteryStatsHistoryTest {
         mClock.realtime = 123;
 
         mHistory = new BatteryStatsHistory(mHistoryBuffer, mSystemDir, 32, 1024,
-                mStepDetailsCalculator, mClock, mMonotonicClock, mTracer) {
-            @Override
-            public boolean readFileToParcel(Parcel out, AtomicFile file) {
-                mReadFiles.add(file.getBaseFile().getName());
-                return super.readFileToParcel(out, file);
-            }
-        };
+                mStepDetailsCalculator, mClock, mMonotonicClock, mTracer, mEventLogger);
 
         when(mStepDetailsCalculator.getHistoryStepDetails())
                 .thenReturn(new BatteryStats.HistoryStepDetails());
-
 
         mHistoryPrinter = new BatteryStats.HistoryPrinter();
     }
@@ -242,7 +238,7 @@ public class BatteryStatsHistoryTest {
 
         // create a new BatteryStatsHistory object, it will pick up existing history files.
         BatteryStatsHistory history2 = new BatteryStatsHistory(mHistoryBuffer, mSystemDir, 32, 1024,
-                null, mClock, mMonotonicClock, mTracer);
+                null, mClock, mMonotonicClock, mTracer, mEventLogger);
         // verify constructor can pick up all files from file system.
         verifyFileNames(history2, fileList);
         verifyActiveFile(history2, "33000.bh");
@@ -276,8 +272,17 @@ public class BatteryStatsHistoryTest {
 
         mReadFiles.clear();
 
+        // Make an immutable copy and spy on it
+        mHistory = spy(mHistory.copy());
+
+        doAnswer(invocation -> {
+            AtomicFile file = invocation.getArgument(1);
+            mReadFiles.add(file.getBaseFile().getName());
+            return invocation.callRealMethod();
+        }).when(mHistory).readFileToParcel(any(), any());
+
         // Prepare history for iteration
-        mHistory.iterate(0, 0);
+        mHistory.iterate(0, MonotonicClock.UNDEFINED);
 
         Parcel parcel = mHistory.getNextParcel(0, Long.MAX_VALUE);
         assertThat(parcel).isNotNull();
@@ -308,6 +313,15 @@ public class BatteryStatsHistoryTest {
         prepareMultiFileHistory();
 
         mReadFiles.clear();
+
+        // Make an immutable copy and spy on it
+        mHistory = spy(mHistory.copy());
+
+        doAnswer(invocation -> {
+            AtomicFile file = invocation.getArgument(1);
+            mReadFiles.add(file.getBaseFile().getName());
+            return invocation.callRealMethod();
+        }).when(mHistory).readFileToParcel(any(), any());
 
         // Prepare history for iteration
         mHistory.iterate(1000, 3000);
@@ -399,7 +413,7 @@ public class BatteryStatsHistoryTest {
 
         mHistory.recordPowerStats(200, 200, powerStats);
 
-        BatteryStatsHistoryIterator iterator = mHistory.iterate(0, 0);
+        BatteryStatsHistoryIterator iterator = mHistory.iterate(0, MonotonicClock.UNDEFINED);
         BatteryStats.HistoryItem item;
         assertThat(item = iterator.next()).isNotNull(); // First item contains current time only
 
@@ -429,7 +443,7 @@ public class BatteryStatsHistoryTest {
         mHistory.recordNrStateChangeEvent(500, 500,
                 NetworkRegistrationInfo.NR_STATE_NONE);
 
-        BatteryStatsHistoryIterator iterator = mHistory.iterate(0, 0);
+        BatteryStatsHistoryIterator iterator = mHistory.iterate(0, MonotonicClock.UNDEFINED);
         BatteryStats.HistoryItem item = new BatteryStats.HistoryItem();
         assertThat(item = iterator.next()).isNotNull(); // First item contains current time only
 
@@ -470,7 +484,7 @@ public class BatteryStatsHistoryTest {
         mHistory.recordNrStateChangeEvent(500, 500,
                 NetworkRegistrationInfo.NR_STATE_NONE);
 
-        BatteryStatsHistoryIterator iterator = mHistory.iterate(0, 0);
+        BatteryStatsHistoryIterator iterator = mHistory.iterate(0, MonotonicClock.UNDEFINED);
         BatteryStats.HistoryItem item = new BatteryStats.HistoryItem();
         assertThat(item = iterator.next()).isNotNull(); // First item contains current time only
 
@@ -520,7 +534,7 @@ public class BatteryStatsHistoryTest {
         // Keep the preserved part of history short - we only need to capture the very tail of
         // history.
         mHistory = new BatteryStatsHistory(mHistoryBuffer, mSystemDir, 1, 6000,
-                mStepDetailsCalculator, mClock, mMonotonicClock, mTracer);
+                mStepDetailsCalculator, mClock, mMonotonicClock, mTracer, mEventLogger);
 
         mHistory.forceRecordAllHistory();
 
@@ -552,7 +566,8 @@ public class BatteryStatsHistoryTest {
         int wakelockTagsUnpooled = 0;
         int wakeReasonTagsPooled = 0;
         int wakeReasonTagsUnpooled = 0;
-        for (BatteryStatsHistoryIterator iterator = mHistory.iterate(0, 0); iterator.hasNext(); ) {
+        for (BatteryStatsHistoryIterator iterator =
+                mHistory.iterate(0, MonotonicClock.UNDEFINED); iterator.hasNext(); ) {
             HistoryItem item = iterator.next();
             if (item.cmd != HistoryItem.CMD_UPDATE) {
                 continue;
@@ -608,7 +623,7 @@ public class BatteryStatsHistoryTest {
                 UserHandle.getUid(777, Process.LAST_ISOLATED_UID),
                 BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE);
 
-        BatteryStatsHistoryIterator iterator = mHistory.iterate(0, 0);
+        BatteryStatsHistoryIterator iterator = mHistory.iterate(0, MonotonicClock.UNDEFINED);
         BatteryStats.HistoryItem item;
         assertThat(item = iterator.next()).isNotNull(); // First item contains current time only
 

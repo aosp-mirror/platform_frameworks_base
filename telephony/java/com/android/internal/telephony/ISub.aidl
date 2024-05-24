@@ -332,12 +332,23 @@ interface ISub {
      UserHandle getSubscriptionUserHandle(int subId);
 
     /**
+     * Returns whether the given subscription is associated with the calling user.
+     *
+     * @param subscriptionId the subscription ID of the subscription
+     * @return {@code true} if the subscription is associated with the user that the current process
+     *         is running in; {@code false} otherwise.
+     *
+     * @throws IllegalArgumentException if subscription doesn't exist.
+     * @throws SecurityException if the caller doesn't have permissions required.
+     */
+    boolean isSubscriptionAssociatedWithCallingUser(int subscriptionId);
+
+    /**
      * Check if subscription and user are associated with each other.
      *
      * @param subscriptionId the subId of the subscription
      * @param userHandle user handle of the user
      * @return {@code true} if subscription is associated with user
-     * {code true} if there are no subscriptions on device
      * else {@code false} if subscription is not associated with user.
      *
      * @throws IllegalArgumentException if subscription is invalid.
@@ -376,4 +387,12 @@ interface ISub {
      * @param data with the sim specific configs to be backed up.
      */
     void restoreAllSimSpecificSettingsFromBackup(in byte[] data);
+
+    /**
+     * Set the transfer status of the subscriptionInfo that corresponds to subId.
+     * @param subId The unique SubscriptionInfo key in database.
+     * @param status The transfer status to change. This value must be one of the following.
+     */
+    @EnforcePermission("WRITE_EMBEDDED_SUBSCRIPTIONS")
+    void setTransferStatus(int subId, int status);
 }

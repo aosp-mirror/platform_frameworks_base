@@ -225,6 +225,19 @@ nativeGetSensorAtIndex(JNIEnv *env, jclass clazz, jlong sensorManager, jobject s
     return translateNativeSensorToJavaSensor(env, sensor, *sensorList[index]) != NULL;
 }
 
+static jboolean nativeGetDefaultDeviceSensorAtIndex(JNIEnv *env, jclass clazz, jlong sensorManager,
+                                                    jobject sensor, jint index) {
+    SensorManager *mgr = reinterpret_cast<SensorManager *>(sensorManager);
+
+    Vector<Sensor> sensorList;
+    ssize_t count = mgr->getDefaultDeviceSensorList(sensorList);
+    if (ssize_t(index) >= count) {
+        return false;
+    }
+
+    return translateNativeSensorToJavaSensor(env, sensor, sensorList[index]) != NULL;
+}
+
 static void
 nativeGetDynamicSensors(JNIEnv *env, jclass clazz, jlong sensorManager, jobject sensorList) {
 
@@ -538,6 +551,9 @@ static const JNINativeMethod gSystemSensorManagerMethods[] = {
 
         {"nativeGetSensorAtIndex", "(JLandroid/hardware/Sensor;I)Z",
          (void *)nativeGetSensorAtIndex},
+
+        {"nativeGetDefaultDeviceSensorAtIndex", "(JLandroid/hardware/Sensor;I)Z",
+         (void *)nativeGetDefaultDeviceSensorAtIndex},
 
         {"nativeGetDynamicSensors", "(JLjava/util/List;)V", (void *)nativeGetDynamicSensors},
 

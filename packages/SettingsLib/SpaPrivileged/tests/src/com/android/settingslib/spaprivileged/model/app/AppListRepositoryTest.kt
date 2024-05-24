@@ -21,13 +21,17 @@ import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.content.pm.FakeFeatureFlagsImpl
 import android.content.pm.Flags
+import android.content.pm.ModuleInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.ApplicationInfoFlags
 import android.content.pm.PackageManager.ResolveInfoFlags
 import android.content.pm.ResolveInfo
 import android.content.pm.UserInfo
 import android.content.res.Resources
+import android.os.BadParcelableException
+import android.os.DeadObjectException
 import android.os.UserManager
+import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.internal.R
@@ -35,12 +39,14 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
@@ -50,6 +56,9 @@ import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class AppListRepositoryTest {
+    @get:Rule
+    val mSetFlagsRule = SetFlagsRule()
+
     private val resources = mock<Resources> {
         on { getStringArray(R.array.config_hideWhenDisabled_packageNames) } doReturn emptyArray()
     }
@@ -273,6 +282,51 @@ class AppListRepositoryTest {
     }
 
     @Test
+    fun loadApps_hasApkInApexInfo_shouldNotIncludeAllHiddenApps() = runTest {
+        mSetFlagsRule.enableFlags(Flags.FLAG_PROVIDE_INFO_OF_APK_IN_APEX)
+        packageManager.stub {
+            on { getInstalledModules(any()) } doReturn listOf(HIDDEN_MODULE)
+        }
+        mockInstalledApplications(
+            listOf(NORMAL_APP, HIDDEN_APEX_APP, HIDDEN_MODULE_APP),
+            ADMIN_USER_ID
+        )
+
+        val appList = repository.loadApps(userId = ADMIN_USER_ID)
+
+        assertThat(appList).containsExactly(NORMAL_APP)
+    }
+
+    @Test
+    fun loadApps_noApkInApexInfo_shouldNotIncludeHiddenSystemModule() = runTest {
+        mSetFlagsRule.disableFlags(Flags.FLAG_PROVIDE_INFO_OF_APK_IN_APEX)
+        packageManager.stub {
+            on { getInstalledModules(any()) } doReturn listOf(HIDDEN_MODULE)
+        }
+        mockInstalledApplications(
+            listOf(NORMAL_APP, HIDDEN_APEX_APP, HIDDEN_MODULE_APP),
+            ADMIN_USER_ID
+        )
+
+        val appList = repository.loadApps(userId = ADMIN_USER_ID)
+
+        assertThat(appList).containsExactly(NORMAL_APP, HIDDEN_APEX_APP)
+    }
+
+    @Test
+    fun loadApps_hasException_returnEmptyList() = runTest {
+        packageManager.stub {
+            on {
+                getInstalledApplicationsAsUser(any<ApplicationInfoFlags>(), eq(ADMIN_USER_ID))
+            } doThrow BadParcelableException(DeadObjectException())
+        }
+
+        val appList = repository.loadApps(userId = ADMIN_USER_ID)
+
+        assertThat(appList).isEmpty()
+    }
+
+    @Test
     fun showSystemPredicate_showSystem() = runTest {
         val app = SYSTEM_APP
 
@@ -400,6 +454,20 @@ class AppListRepositoryTest {
             packageName = "archived.app"
             flags = ApplicationInfo.FLAG_SYSTEM
             isArchived = true
+        }
+
+        val HIDDEN_APEX_APP = ApplicationInfo().apply {
+            packageName = "hidden.apex.package"
+        }
+
+        val HIDDEN_MODULE_APP = ApplicationInfo().apply {
+            packageName = "hidden.module.package"
+        }
+
+        val HIDDEN_MODULE = ModuleInfo().apply {
+            packageName = "hidden.module.package"
+            apkInApexPackageNames = listOf("hidden.apex.package")
+            isHidden = true
         }
 
         fun resolveInfoOf(packageName: String) = ResolveInfo().apply {

@@ -30,6 +30,7 @@ import static com.android.server.pm.PackageManagerService.RANDOM_DIR_PREFIX;
 import static com.android.server.pm.PackageManagerService.TAG;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.PackageManager;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
@@ -66,7 +67,6 @@ final class RemovePackageHelper {
     private final PackageManagerService mPm;
     private final IncrementalManager mIncrementalManager;
     private final Installer mInstaller;
-    private final UserManagerInternal mUserManagerInternal;
     private final PermissionManagerServiceInternal mPermissionManager;
     private final SharedLibrariesImpl mSharedLibraries;
     private final AppDataHelper mAppDataHelper;
@@ -78,7 +78,6 @@ final class RemovePackageHelper {
         mPm = pm;
         mIncrementalManager = mPm.mInjector.getIncrementalManager();
         mInstaller = mPm.mInjector.getInstaller();
-        mUserManagerInternal = mPm.mInjector.getUserManagerInternal();
         mPermissionManager = mPm.mInjector.getPermissionManagerServiceInternal();
         mSharedLibraries = mPm.mInjector.getSharedLibrariesImpl();
         mAppDataHelper = appDataHelper;
@@ -252,65 +251,135 @@ final class RemovePackageHelper {
         }
     }
 
+    /**
+     * This method clears the data and states stored in the system that are related to the
+     * package being deleted and the target user, including the data directory.
+     * If the DELETE_KEEP_DATA flag is set, everything is preserved except ART profiles.
+     * Make sure this flag is set for partially installed apps. If not it's meaningless to
+     * delete a partially installed application.
+     */
     public void clearPackageStateForUserLIF(PackageSetting ps, int userId, int flags) {
+        final String packageName = ps.getPackageName();
+        // Step 1: always destroy app profiles.
+        mAppDataHelper.destroyAppProfilesLIF(packageName);
+
+        // Everything else is preserved if the DELETE_KEEP_DATA flag is on
+        if ((flags & PackageManager.DELETE_KEEP_DATA) != 0) {
+            return;
+        }
+
         final AndroidPackage pkg;
         final SharedUserSetting sus;
         synchronized (mPm.mLock) {
-            pkg = mPm.mPackages.get(ps.getPackageName());
+            pkg = mPm.mPackages.get(packageName);
             sus = mPm.mSettings.getSharedUserSettingLPr(ps);
         }
 
-        mAppDataHelper.destroyAppProfilesLIF(ps.getPackageName());
+        final AndroidPackage resolvedPkg;
+        if (pkg != null) {
+            resolvedPkg = pkg;
+        } else {
+            // We don't have a parsed package when it lives on an ejected
+            // adopted storage device, so fake something together
+            resolvedPkg = PackageImpl.buildFakeForDeletion(packageName, ps.getVolumeUuid());
+        }
 
-        final List<AndroidPackage> sharedUserPkgs =
-                sus != null ? sus.getPackages() : Collections.emptyList();
+        // Step 2: destroy app data.
+        mAppDataHelper.destroyAppDataLIF(resolvedPkg, userId,
+                FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
+        if (userId != UserHandle.USER_ALL) {
+            ps.setCeDataInode(-1, userId);
+            ps.setDeDataInode(-1, userId);
+        }
+
         final PreferredActivityHelper preferredActivityHelper = new PreferredActivityHelper(mPm,
                 mBroadcastHelper);
-        final int[] userIds = (userId == UserHandle.USER_ALL) ? mUserManagerInternal.getUserIds()
-                : new int[] {userId};
-        for (int nextUserId : userIds) {
+        if (userId == UserHandle.USER_ALL) {
             if (DEBUG_REMOVE) {
-                Slog.d(TAG, "Updating package:" + ps.getPackageName() + " install state for user:"
-                        + nextUserId);
+                Slog.d(TAG, "Clear package:" + packageName + " state for all users");
             }
-            if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
-                mAppDataHelper.destroyAppDataLIF(pkg, nextUserId,
-                        FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
-                ps.setCeDataInode(-1, nextUserId);
-                ps.setDeDataInode(-1, nextUserId);
+            // Step 3: inform DomainVerificationManager.
+            mPm.mDomainVerificationManager.clearPackage(packageName);
+            synchronized (mPm.mLock) {
+                // Step 3.1 (only for USER_ALL): notify KeySetManagerService.
+                mPm.mSettings.getKeySetManagerService().removeAppKeySetDataLPw(packageName);
+                // Step 3.2 (only for USER_ALL): update installer ownership.
+                mPm.mInjector.getUpdateOwnershipHelper().removeUpdateOwnerDenyList(packageName);
+                // Step 3.3 (only for USER_ALL): update AppsFilter.
+                final Computer snapshot = mPm.snapshotComputer();
+                mPm.mAppsFilter.removePackage(snapshot,
+                        snapshot.getPackageStateInternal(packageName));
+                // Step 4: clear perferred activities.
+                final SparseBooleanArray changedUsers = new SparseBooleanArray();
+                mPm.clearPackagePreferredActivitiesLPw(
+                        packageName, changedUsers, UserHandle.USER_ALL);
+                mPm.mInjector.getBackgroundHandler().post(() -> {
+                    if (changedUsers.size() > 0) {
+                        preferredActivityHelper.updateDefaultHomeNotLocked(mPm.snapshotComputer(),
+                                changedUsers);
+                        mBroadcastHelper.sendPreferredActivityChangedBroadcast(UserHandle.USER_ALL);
+                    }
+                });
+                // Step 5: inform PermissionManager.
+                // This has to be done after the removal from mSettings in removePackageDataLIF.
             }
-            mAppDataHelper.clearKeystoreData(nextUserId, ps.getAppId());
-            preferredActivityHelper.clearPackagePreferredActivities(ps.getPackageName(),
-                    nextUserId);
-            mPm.mDomainVerificationManager.clearPackageForUser(ps.getPackageName(), nextUserId);
+        } else {
+            if (DEBUG_REMOVE) {
+                Slog.d(TAG, "Clear package:" + packageName + " state for user:" + userId);
+            }
+            // Step 3: inform DomainVerificationManager.
+            mPm.mDomainVerificationManager.clearPackageForUser(packageName, userId);
+            // Step 4: clear perferred activities.
+            preferredActivityHelper.clearPackagePreferredActivities(packageName, userId);
+            // Step 5: inform PermissionManager.
+            List<AndroidPackage> sharedUserPkgs =
+                    sus != null ? sus.getPackages() : Collections.emptyList();
+            mPermissionManager.onPackageUninstalled(packageName, ps.getAppId(), ps, pkg,
+                    sharedUserPkgs, userId);
         }
-        mPermissionManager.onPackageUninstalled(ps.getPackageName(), ps.getAppId(), ps, pkg,
-                sharedUserPkgs, userId);
+
+        // Step 6: detroy keystore data.
+        mPm.mInjector.getBackgroundHandler().post(() -> {
+            try {
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER,
+                        "clearKeystoreData:" + ps.getAppId() + " for user: " + userId);
+                mAppDataHelper.clearKeystoreData(userId, ps.getAppId());
+            } finally {
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            }
+        });
     }
 
     // Called to clean up disabled system packages
     public void removePackageData(final PackageSetting deletedPs, @NonNull int[] allUserHandles) {
         synchronized (mPm.mInstallLock) {
-            removePackageDataLIF(deletedPs, allUserHandles, new PackageRemovedInfo(),
-                    /* flags= */ 0, /* writeSettings= */ false);
+            removePackageDataLIF(deletedPs, UserHandle.USER_ALL, allUserHandles,
+                    new PackageRemovedInfo(), /* flags= */ 0, /* writeSettings= */ false);
         }
     }
 
-    /*
-     * This method deletes the package from internal data structures. If the DELETE_KEEP_DATA
-     * flag is not set, the data directory is removed as well.
-     * make sure this flag is set for partially installed apps. If not it's meaningless to
-     * delete a partially installed application.
+    /**
+     * This method deletes the package from internal data structures such as mPackages / mSettings.
+     *
+     * @param targetUserId indicates the target user of the deletion. It equals to
+     *                     {@link UserHandle.USER_ALL} if the deletion was initiated for all users,
+     *                     otherwise it equals to the specific user id that the deletion was meant
+     *                     for.
      */
     @GuardedBy("mPm.mInstallLock")
-    public void removePackageDataLIF(final PackageSetting deletedPs, @NonNull int[] allUserHandles,
+    public void removePackageDataLIF(final PackageSetting deletedPs, int targetUserId,
+            @NonNull int[] allUserHandles,
             @NonNull PackageRemovedInfo outInfo, int flags, boolean writeSettings) {
         String packageName = deletedPs.getPackageName();
         if (DEBUG_REMOVE) Slog.d(TAG, "removePackageDataLI: " + deletedPs);
         // Retrieve object to delete permissions for shared user later on
         final AndroidPackage deletedPkg = deletedPs.getPkg();
 
-        removePackageLI(deletedPs.getPackageName(), (flags & PackageManager.DELETE_CHATTY) != 0);
+        // Delete all the data and states related to this package.
+        clearPackageStateForUserLIF(deletedPs, targetUserId, flags);
+
+        // Delete from mPackages
+        removePackageLI(packageName, (flags & PackageManager.DELETE_CHATTY) != 0);
         if (!deletedPs.isSystem()) {
             // A non-system app's AndroidPackage object has been removed from the service.
             // Explicitly nullify the corresponding app's PackageSetting's pkg object to
@@ -319,40 +388,16 @@ final class RemovePackageHelper {
             deletedPs.setPkg(null);
         }
 
-        if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
-            final AndroidPackage resolvedPkg;
-            if (deletedPkg != null) {
-                resolvedPkg = deletedPkg;
-            } else {
-                // We don't have a parsed package when it lives on an ejected
-                // adopted storage device, so fake something together
-                resolvedPkg = PackageImpl.buildFakeForDeletion(deletedPs.getPackageName(),
-                        deletedPs.getVolumeUuid());
-            }
-            mAppDataHelper.destroyAppDataLIF(resolvedPkg, UserHandle.USER_ALL,
-                    FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
-            mAppDataHelper.destroyAppProfilesLIF(resolvedPkg.getPackageName());
-        }
-
-        int removedAppId = -1;
-
-        // writer
-        if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
+        if (shouldDeletePackageSetting(deletedPs, targetUserId, allUserHandles, flags)) {
+            // Delete from mSettings
             final SparseBooleanArray changedUsers = new SparseBooleanArray();
             synchronized (mPm.mLock) {
-                mPm.mDomainVerificationManager.clearPackage(deletedPs.getPackageName());
-                mPm.mSettings.getKeySetManagerService().removeAppKeySetDataLPw(packageName);
-                mPm.mInjector.getUpdateOwnershipHelper().removeUpdateOwnerDenyList(packageName);
-                final Computer snapshot = mPm.snapshotComputer();
-                mPm.mAppsFilter.removePackage(snapshot,
-                        snapshot.getPackageStateInternal(packageName));
-                removedAppId = mPm.mSettings.removePackageLPw(packageName);
-                outInfo.mIsAppIdRemoved = true;
+                outInfo.mIsAppIdRemoved = mPm.mSettings.removePackageAndAppIdLPw(packageName);
                 if (!mPm.mSettings.isDisabledSystemPackageLPr(packageName)) {
+                    final SharedUserSetting sus = mPm.mSettings.getSharedUserSettingLPr(deletedPs);
                     // If we don't have a disabled system package to reinstall, the package is
                     // really gone and its permission state should be removed.
-                    SharedUserSetting sus = mPm.mSettings.getSharedUserSettingLPr(deletedPs);
-                    List<AndroidPackage> sharedUserPkgs =
+                    final List<AndroidPackage> sharedUserPkgs =
                             sus != null ? sus.getPackages() : Collections.emptyList();
                     mPermissionManager.onPackageUninstalled(packageName, deletedPs.getAppId(),
                             deletedPs, deletedPkg, sharedUserPkgs, UserHandle.USER_ALL);
@@ -361,19 +406,7 @@ final class RemovePackageHelper {
                         mPm.mSettings.checkAndConvertSharedUserSettingsLPw(sus);
                     }
                 }
-                mPm.clearPackagePreferredActivitiesLPw(
-                        deletedPs.getPackageName(), changedUsers, UserHandle.USER_ALL);
-
                 mPm.mSettings.removeRenamedPackageLPw(deletedPs.getRealName());
-            }
-            if (changedUsers.size() > 0) {
-                mPm.mInjector.getBackgroundHandler().post(() -> {
-                    final PreferredActivityHelper preferredActivityHelper =
-                            new PreferredActivityHelper(mPm, mBroadcastHelper);
-                    preferredActivityHelper.updateDefaultHomeNotLocked(mPm.snapshotComputer(),
-                            changedUsers);
-                    mBroadcastHelper.sendPreferredActivityChangedBroadcast(UserHandle.USER_ALL);
-                });
             }
         } else if (!deletedPs.isSystem() && !outInfo.mIsUpdate
                 && outInfo.mRemovedUsers != null && !deletedPs.isExternalStorage()) {
@@ -393,6 +426,7 @@ final class RemovePackageHelper {
                 deletedPs.setInstalled(/* installed= */ false, userId);
             }
         }
+
         // make sure to preserve per-user installed state if this removal was just
         // a downgrade of a system app to the factory package
         boolean installedStateChanged = false;
@@ -424,31 +458,46 @@ final class RemovePackageHelper {
                 mPm.mSettings.writeKernelMappingLPr(deletedPs);
             }
         }
-
-        if (removedAppId != -1) {
-            // A user ID was deleted here. Go through all users and remove it from KeyStore.
-            final int appIdToRemove = removedAppId;
-            mPm.mInjector.getBackgroundHandler().post(() -> {
-                try {
-                    Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER,
-                            "clearKeystoreData:" + appIdToRemove);
-                    mAppDataHelper.clearKeystoreData(UserHandle.USER_ALL, appIdToRemove);
-                } finally {
-                    Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-                }
-            });
-        }
     }
 
-    void cleanUpResources(File codeFile, String[] instructionSets) {
+    private static boolean shouldDeletePackageSetting(PackageSetting deletedPs, int userId,
+                                                      int[] allUserHandles, int flags) {
+        if ((flags & PackageManager.DELETE_KEEP_DATA) != 0) {
+            return false;
+        }
+        if (userId == UserHandle.USER_ALL) {
+            // Deleting for ALL. Let's wipe the PackageSetting.
+            return true;
+        }
+        if (deletedPs.hasDataOnAnyOtherUser(allUserHandles, userId)) {
+            // We arrived here because we are uninstalling the package for a specified user, and the
+            // package isn't installed on any other user. Before we proceed to completely delete the
+            // PackageSetting from mSettings, let's first check if data exists on any other user.
+            // If so, do not wipe the PackageSetting.
+            return false;
+        }
+        return true;
+    }
+
+    void cleanUpResources(@Nullable String packageName, @Nullable File codeFile,
+                          @Nullable String[] instructionSets) {
         synchronized (mPm.mInstallLock) {
             cleanUpResourcesLI(codeFile, instructionSets);
+        }
+        if (packageName == null) {
+            return;
+        }
+        synchronized (mPm.mLock) {
+            PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
+            if (ps != null) {
+                ps.removeOldPath(codeFile);
+            }
         }
     }
 
     // Need installer lock especially for dex file removal.
     @GuardedBy("mPm.mInstallLock")
-    private void cleanUpResourcesLI(File codeFile, String[] instructionSets) {
+    private void cleanUpResourcesLI(@Nullable File codeFile, @Nullable String[] instructionSets) {
         // Try enumerating all code paths before deleting
         List<String> allCodePaths = Collections.EMPTY_LIST;
         if (codeFile != null && codeFile.exists()) {
@@ -466,7 +515,8 @@ final class RemovePackageHelper {
     }
 
     @GuardedBy("mPm.mInstallLock")
-    private void removeDexFilesLI(List<String> allCodePaths, String[] instructionSets) {
+    private void removeDexFilesLI(@NonNull List<String> allCodePaths,
+                                  @Nullable  String[] instructionSets) {
         if (!allCodePaths.isEmpty()) {
             if (instructionSets == null) {
                 throw new IllegalStateException("instructionSet == null");

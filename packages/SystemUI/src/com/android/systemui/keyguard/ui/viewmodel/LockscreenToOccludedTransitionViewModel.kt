@@ -20,7 +20,7 @@ import com.android.app.animation.Interpolators.EMPHASIZED_ACCELERATE
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor.Companion.TO_OCCLUDED_DURATION
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.res.R
@@ -37,7 +37,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 class LockscreenToOccludedTransitionViewModel
 @Inject
 constructor(
-    interactor: KeyguardTransitionInteractor,
     shadeDependentFlows: ShadeDependentFlows,
     configurationInteractor: ConfigurationInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
@@ -46,7 +45,8 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = TO_OCCLUDED_DURATION,
-            stepFlow = interactor.lockscreenToOccludedTransition,
+            from = KeyguardState.LOCKSCREEN,
+            to = KeyguardState.OCCLUDED,
         )
 
     /** Lockscreen views alpha */

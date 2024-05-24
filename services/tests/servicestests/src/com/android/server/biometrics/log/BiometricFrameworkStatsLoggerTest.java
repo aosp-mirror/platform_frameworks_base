@@ -18,6 +18,7 @@ package com.android.server.biometrics.log;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.AuthenticateReason;
 import android.hardware.biometrics.common.OperationContext;
@@ -48,11 +49,13 @@ public class BiometricFrameworkStatsLoggerTest {
     public void testConvertsWakeReason_whenPowerReason() {
         final OperationContext context = new OperationContext();
         context.wakeReason = WakeReason.WAKE_MOTION;
-        final OperationContextExt ctx = new OperationContextExt(context, false);
+        final OperationContextExt ctx = new OperationContextExt(context, false,
+                BiometricAuthenticator.TYPE_NONE);
 
         final int reason = BiometricFrameworkStatsLogger.toProtoWakeReason(ctx);
         final int[] reasonDetails = BiometricFrameworkStatsLogger
-                .toProtoWakeReasonDetails(new OperationContextExt(context, false));
+                .toProtoWakeReasonDetails(
+                        new OperationContextExt(context, false, BiometricAuthenticator.TYPE_NONE));
 
         assertThat(reason).isEqualTo(BiometricsProtoEnums.WAKE_REASON_WAKE_MOTION);
         assertThat(reasonDetails).isEmpty();
@@ -63,7 +66,8 @@ public class BiometricFrameworkStatsLoggerTest {
         final OperationContext context = new OperationContext();
         context.authenticateReason = AuthenticateReason.faceAuthenticateReason(
                 AuthenticateReason.Face.ASSISTANT_VISIBLE);
-        final OperationContextExt ctx = new OperationContextExt(context, false);
+        final OperationContextExt ctx = new OperationContextExt(context, false,
+                BiometricAuthenticator.TYPE_NONE);
 
         final int reason = BiometricFrameworkStatsLogger.toProtoWakeReason(ctx);
         final int[] reasonDetails = BiometricFrameworkStatsLogger
@@ -79,7 +83,8 @@ public class BiometricFrameworkStatsLoggerTest {
         final OperationContext context = new OperationContext();
         context.authenticateReason = AuthenticateReason.vendorAuthenticateReason(
                 new AuthenticateReason.Vendor());
-        final OperationContextExt ctx = new OperationContextExt(context, false);
+        final OperationContextExt ctx = new OperationContextExt(context, false,
+                BiometricAuthenticator.TYPE_NONE);
 
         final int reason = BiometricFrameworkStatsLogger.toProtoWakeReason(ctx);
         final int[] reasonDetails = BiometricFrameworkStatsLogger
@@ -96,7 +101,8 @@ public class BiometricFrameworkStatsLoggerTest {
         context.wakeReason = WakeReason.WAKE_KEY;
         context.authenticateReason = AuthenticateReason.faceAuthenticateReason(
                 AuthenticateReason.Face.PRIMARY_BOUNCER_SHOWN);
-        final OperationContextExt ctx = new OperationContextExt(context, false);
+        final OperationContextExt ctx = new OperationContextExt(context, false,
+                BiometricAuthenticator.TYPE_NONE);
 
         final int reason = BiometricFrameworkStatsLogger.toProtoWakeReason(ctx);
         final int[] reasonDetails = BiometricFrameworkStatsLogger
@@ -113,7 +119,8 @@ public class BiometricFrameworkStatsLoggerTest {
         context.wakeReason = WakeReason.LID;
         context.authenticateReason = AuthenticateReason.vendorAuthenticateReason(
                 new AuthenticateReason.Vendor());
-        final OperationContextExt ctx = new OperationContextExt(context, false);
+        final OperationContextExt ctx = new OperationContextExt(context, false,
+                BiometricAuthenticator.TYPE_NONE);
 
         final int reason = BiometricFrameworkStatsLogger.toProtoWakeReason(ctx);
         final int[] reasonDetails = BiometricFrameworkStatsLogger

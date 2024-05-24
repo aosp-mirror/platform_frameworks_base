@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> секунддан кийин"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Багытталган эмес"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Багытталган эмес"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Мобилдик тармактын коопсуздугу"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Параметрлерди карап чыгуу"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Түзмөк идентификаторун пайдалануу"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Тармак (<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> туташуусу) <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> баштап <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> чейинки аралыкта түзмөгүңүздүн так аныкталуучу номерин (IMSI) <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> жолу жаздырып алды."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> тармагына шифрленген туташуу"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Сиз эми коопсуз мобилдик тармакка туташтыңыз."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> тармагына шифрленбеген туташуу"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Сиз шифрленбеген мобилдик тармакка туташкансыз. Чалууларыңыз, билдирүүлөрүңүз жана маалыматыңыз кармалып калышы мүмкүн."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Мобилдик тармактын коопсуздук параметрлери"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Кеңири маалымат"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Функция коду аткарылды."</string>
     <string name="fcError" msgid="5325116502080221346">"Туташууда көйгөй чыкты же функция коду жараксыз."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"Жарайт"</string>
@@ -370,6 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Уюк жөнөтүүлөрүнүн билдирүүлөрү келген сайын башка номерге багыттап туруу үчүн колдонмого уюк жөнөтүүлөрүнүн модулу менен байланышууга уруксат берет. Шашылыш уюк жөнөтүүлөрү кээ бир жерлердеги өзгөчө кырдаалдар тууралуу сизге эскертүү үчүн жөнөтүлөт. Зыянкеч колдонмолор шашылыш уюк жөнөтүүлөрү кабыл алынганда түзмөктүн майнаптуулугуна же иштешине жолтоо болушу мүмкүн."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Учурдагы чалууларды башкаруу"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Колдонмого телефонуңузда аткарылып жаткан чалууларды көрүп, аларды көзөмөлдөөгө уруксат берет."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Акыркы белгилүү уюлдук телефондун идентификаторун көрүү мүмкүнчүлүгү."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Колдонмого телефония камсыздаган акыркы белгилүү уюлдук телефондун идентификаторун көрүү мүмкүнчүлүгүн берет."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"уюктук берүү билдирүүлөрүн окуу"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Колдонмого түзмөгүңүз кабыл алган уюк берүүнүн билдирүүлөрүн окууга жол берет. Шашылыш эскертүү билдирүүлөрү кээ бир жерлердеги өзгөчө кырдаалдар тууралу сизди эскертүү үчүн жөнөтүлөт. Зыяндуу колдономолор шашылыш эскертүүлөр берилип жатканда, сиздин түзмөктүн иштешине жолтоо болушу мүмкүн."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"жазылган түрмөктөрдү окуу"</string>
@@ -434,6 +446,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Колдонмолорго алдынкы пландагы \"systemExempted\" түрүндөгү кызматтарды колдонууга уруксат берет"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"алдынкы пландагы \"fileManagement\" түрүндөгү кызматты аткаруу"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Колдонмолорго алдынкы пландагы \"fileManagement\" түрүндөгү кызматтарды колдонууга уруксат берет"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"алдыңкы пландагы \"mediaProcessing\" түрүндөгү кызматты иштетүү"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Колдонмолорго алдыңкы пландагы \"mediaProcessing\" түрүндөгү кызматтарды колдонууга уруксат берет"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"алдынкы пландагы \"specialUse\" түрүндөгү кызматты аткаруу"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Колдонмолорго алдынкы пландагы \"specialUse\" түрүндөгү кызматтарды колдонууга уруксат берет"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"колдонмо сактагычынын мейкиндигин өлчөө"</string>
@@ -539,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Колдонмого телефондун инфракызыл өткөргүчүн колдонуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"тушкагаз коюу"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Колдонмого системанын тушкагазын коюу мүмкүнчүлүгүн берет."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Жашырылган профилдерди көрүү"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Колдонмо жашыруун профилдерди көрө алат."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"тушкагазыңыздын өлчөмүн өзгөртүү"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Колдонмого тутум тушкагазынын өлчөмдөрүн коюу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"убакыт алкагын коюу"</string>
@@ -632,7 +648,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Экран кулпусун колдонуу"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Улантуу үчүн экрандын кулпусун киргизиңиз"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Сенсорду катуу басыңыз"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Манжа изи таанылбай жатат. Кайра аракет кылыңыз."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Манжа изи таанылган жок. Кайра аракет кылыңыз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Манжа изинин сенсорун тазалап, кайра аракет кылыңыз"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Сенсорду тазалап, кайра аракет кылыңыз"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Сенсорду катуу басыңыз"</string>
@@ -650,18 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Манжа изи текшерилди"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Жүздүн аныктыгы текшерилди"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Жүздүн аныктыгы текшерилди, эми \"Ырастоону\" басыңыз"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Манжа изинин аппараттык камсыздоосу жеткиликтүү эмес."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Манжа издеринин сканери жеткиликтүү эмес"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Манжа изи жөндөлбөй жатат"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Манжа изин коюу убакыты бүтүп калды. Кайра аракет кылыңыз."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Манжа изи иш-аракети жокко чыгарылды."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Манжа изи операциясын колдонуучу жокко чыгарды."</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Манжа изи менен аныктыгын текшерүү жокко чыгарылды"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Манжа изи менен аныктыгын текшерүүнү колдонуучу жокко чыгарды"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Өтө көп жолу аракет кылдыңыз. Экранды кулпулоо функциясын колдонуңуз."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Өтө көп жолу аракет кылдыңыз. Экранды кулпулоо функциясын колдонуңуз."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Манжа изи иштетилген жок. Кайра аракет кылыңыз."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Бир да манжа изи катталган эмес."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Бул түзмөктө манжа изинин сенсору жок."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Сенсор убактылуу өчүрүлгөн."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Манжа изинин сенсорун колдонууга болбойт. Тейлөө кызматына кайрылыңыз"</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Бир да манжа изи катталган эмес"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Бул түзмөктө манжа изинин сенсору жок"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Сенсор убактылуу өчүрүлгөн"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Манжа изинин сенсорун колдонууга болбойт. Тейлөө кызматына кайрылыңыз."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Кубат баскычы басылды"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>-манжа"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Манжа изин колдонуу"</string>
@@ -696,7 +712,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Жүзүңүз көрүнбөй жатат. Телефонду маңдайыңызга кармаңыз."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Кыймылдап жибердиңиз. Телефонду түз кармаңыз."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Жүзүңүздү кайра таанытыңыз."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Жүз таанылбай жатат. Кайталаңыз."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Жүз таанылган жок. Кайра аракет кылыңыз."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Башыңызды бир аз буруңуз"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Телефонуңузду караңыз"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Телефонуңузду караңыз"</string>
@@ -807,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Колдонмолорго сенсор дайындарынын үлгүсү 200 Герцтен жогору болгон үлгүлөрдү алууга уруксат берет"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"колдонмону автоматтык түрдө жаңыртуу"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Буга чейин орнотулган колдонмону автоматтык түрдө жаңыртууга мүмкүндүк берет"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"башка колдонмолорго таандык шифрленген байланыш ачкычтарынын текшерүү абалдарын жаңыртуу"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Колдонмо башка колдонмолорго таандык шифрленген байланыш ачкычтарынын текшерүү абалдарын жаңырта алат."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Сырсөз эрежелерин коюу"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Экран кулпусунун сырсөздөрү менен PIN\'дерине уруксат берилген узундук менен белгилерди көзөмөлдөө."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Экран кулпусун ачуу аракеттерин көзөмөлдөө"</string>
@@ -1454,7 +1472,7 @@
     <string name="ext_media_status_checking" msgid="159013362442090347">"Текшерилүүдө…"</string>
     <string name="ext_media_status_mounted" msgid="3459448555811203459">"Даяр"</string>
     <string name="ext_media_status_mounted_ro" msgid="1974809199760086956">"Окуу үчүн гана"</string>
-    <string name="ext_media_status_bad_removal" msgid="508448566481406245">"Коопсуз өчүрүлгөн жок"</string>
+    <string name="ext_media_status_bad_removal" msgid="508448566481406245">"Коопсуз өчкөн жок"</string>
     <string name="ext_media_status_unmountable" msgid="7043574843541087748">"Бузулган"</string>
     <string name="ext_media_status_unsupported" msgid="5460509911660539317">"Колдоого алынбайт"</string>
     <string name="ext_media_status_ejecting" msgid="7532403368044013797">"Чыгарылууда…"</string>
@@ -1906,6 +1924,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Дем алыш"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Иш-чара"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Уйку режими"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> башкарат"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Күйүк"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Өчүк"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> айрым үндөрдү өчүрүүдө"</string>
@@ -1925,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Ырасталды"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Жайып көрсөтүү"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Жыйыштыруу"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Жыйыштырылды"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Жайылып көрсөтүлдү"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"жайып көрсөтүү же жыйыштыруу"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB Сырткы оюкча"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1965,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Жумуш колдонмолорун иштетесизби?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Иштетүү"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Шашылыш чалуу"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Экран кулпусун коюп алыңыз"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Экран кулпусун коюу"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Жеке мейкиндикти колдонуу үчүн бул түзмөктүн экранын кулпулаңыз"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Колдонмо учурда жеткиликсиз"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> учурда жеткиликсиз"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> жеткиликсиз"</string>
@@ -2338,11 +2362,9 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Көмөкчү колдонмого активдүү кызматтарды фондо иштетүүгө уруксат берет."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Микрофон жеткиликтүү"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофон бөгөттөлгөн"</string>
-    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Экранга күзгүдөй чагылдыруу мүмкүн эмес"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Башка экранга чыгаруу мүмкүн эмес"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Башка кабелди колдонуп, кайра аракет кылыңыз"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Түзмөгүңүз өтө ысып кетти жана ал муздамайынча башка экранга чыгара албайт"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Кабель дисплейлерди колдоого албашы мүмкүн"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"USB-C кабели дисплейлерге туура туташпашы мүмкүн"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Кош экран"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen күйүк"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> контентти эки түзмөктө тең көрсөтүүдө"</string>
@@ -2366,4 +2388,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Жумуш 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Сыноо"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Жалпы"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Спутникке автоматтык түрдө туташтырылган"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Сиз мобилдик же Wi-Fi тармагы жок эле билдирүүлөрдү жөнөтүп, ала аласыз"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Жазышуулар колдонмосун ачуу"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ал кантип иштейт"</string>
 </resources>

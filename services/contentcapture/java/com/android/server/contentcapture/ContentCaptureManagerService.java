@@ -50,7 +50,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
-import android.app.admin.DevicePolicyManagerInternal;
+import android.app.admin.DevicePolicyCache;
 import android.app.assist.ActivityId;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
@@ -940,7 +940,7 @@ public class ContentCaptureManagerService extends
         return new ContentProtectionConsentManager(
                 BackgroundThread.getHandler(),
                 getContext().getContentResolver(),
-                LocalServices.getService(DevicePolicyManagerInternal.class));
+                DevicePolicyCache.getInstance());
     }
 
     @Nullable

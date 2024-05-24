@@ -3202,7 +3202,7 @@ public final class Telephony {
         /**
          * The infrastructure bitmask which the APN can be used on. For example, some APNs can only
          * be used when the device is on cellular, on satellite, or both. The default value is
-         * 1 (INFRASTRUCTURE_CELLULAR).
+         * 3 (INFRASTRUCTURE_CELLULAR | INFRASTRUCTURE_SATELLITE).
          *
          * <P>Type: INTEGER</P>
          * @hide
@@ -4927,7 +4927,7 @@ public final class Telephony {
         /**
          * TelephonyProvider column name for satellite attach enabled for carrier. The value of this
          * column is set based on user settings.
-         * By default, it's disabled.
+         * By default, it's enabled.
          *
          * @hide
          */
@@ -4941,6 +4941,40 @@ public final class Telephony {
          * @hide
          */
         public static final String COLUMN_IS_NTN = "is_ntn";
+
+        /**
+         * TelephonyProvider column name for transferred status
+         *
+         * @hide
+         */
+        public static final String COLUMN_TRANSFER_STATUS = "transfer_status";
+
+        /**
+         * TelephonyProvider column name to indicate the service capability bitmasks.
+         *
+         * @hide
+         */
+        public static final String COLUMN_SERVICE_CAPABILITIES = "service_capabilities";
+
+        /**
+         * TelephonyProvider column name for satellite entitlement status. The value of this column
+         * is set based on entitlement query result for satellite configuration.
+         * By default, it's disabled.
+         *
+         * @hide
+         */
+        public static final String COLUMN_SATELLITE_ENTITLEMENT_STATUS =
+                "satellite_entitlement_status";
+
+        /**
+         * TelephonyProvider column name for satellite entitlement plmns. The value of this
+         * column is set based on entitlement query result for satellite configuration.
+         * By default, it's empty.
+         *
+         * @hide
+         */
+        public static final String COLUMN_SATELLITE_ENTITLEMENT_PLMNS =
+                "satellite_entitlement_plmns";
 
         /** All columns in {@link SimInfo} table. */
         private static final List<String> ALL_COLUMNS = List.of(
@@ -5013,7 +5047,11 @@ public final class Telephony {
                 COLUMN_USER_HANDLE,
                 COLUMN_SATELLITE_ENABLED,
                 COLUMN_SATELLITE_ATTACH_ENABLED_FOR_CARRIER,
-                COLUMN_IS_NTN
+                COLUMN_IS_NTN,
+                COLUMN_SERVICE_CAPABILITIES,
+                COLUMN_TRANSFER_STATUS,
+                COLUMN_SATELLITE_ENTITLEMENT_STATUS,
+                COLUMN_SATELLITE_ENTITLEMENT_PLMNS
         );
 
         /**

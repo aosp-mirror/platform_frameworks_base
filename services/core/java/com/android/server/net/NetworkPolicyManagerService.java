@@ -4239,6 +4239,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
                 fout.decreaseIndent();
 
+                fout.println();
                 fout.println("Admin restricted uids for metered data:");
                 fout.increaseIndent();
                 size = mMeteredRestrictedUids.size();
@@ -4248,6 +4249,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
                 fout.decreaseIndent();
 
+                fout.println();
                 fout.println("Network to interfaces:");
                 fout.increaseIndent();
                 for (int i = 0; i < mNetworkToIfaces.size(); ++i) {
@@ -4255,6 +4257,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     fout.println(key + ": " + mNetworkToIfaces.get(key));
                 }
                 fout.decreaseIndent();
+
+                fout.println();
+                fout.print("Active notifications: ");
+                fout.println(mActiveNotifs);
 
                 fout.println();
                 mStatLogger.dump(fout);
@@ -7022,7 +7028,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
          * Build unique tag that identifies an active {@link NetworkPolicy}
          * notification of a specific type, like {@link #TYPE_LIMIT}.
          */
-        private String buildNotificationTag(NetworkPolicy policy, int type) {
+        private static String buildNotificationTag(NetworkPolicy policy, int type) {
             return TAG + ":" + policy.template.hashCode() + ":" + type;
         }
 
@@ -7032,6 +7038,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         public int getId() {
             return mId;
+        }
+
+        @Override
+        public String toString() {
+            return mTag;
         }
     }
 }

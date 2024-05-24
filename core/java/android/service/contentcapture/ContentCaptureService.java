@@ -53,7 +53,6 @@ import android.view.contentcapture.ContentCaptureSessionId;
 import android.view.contentcapture.DataRemovalRequest;
 import android.view.contentcapture.DataShareRequest;
 import android.view.contentcapture.IContentCaptureDirectManager;
-import android.view.contentcapture.MainContentCaptureSession;
 
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.FrameworkStatsLog;
@@ -724,7 +723,7 @@ public abstract class ContentCaptureService extends Service {
             final Bundle extras;
             if (binder != null) {
                 extras = new Bundle();
-                extras.putBinder(MainContentCaptureSession.EXTRA_BINDER, binder);
+                extras.putBinder(ContentCaptureSession.EXTRA_BINDER, binder);
             } else {
                 extras = null;
             }

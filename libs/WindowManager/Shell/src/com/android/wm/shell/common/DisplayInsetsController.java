@@ -277,8 +277,7 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
          *
          * @param types {@link InsetsType} to show
          * @param fromIme true if this request originated from IME (InputMethodService).
-         * @param statsToken the token tracking the current IME show request
-         *                   or {@code null} otherwise.
+         * @param statsToken the token tracking the current IME request or {@code null} otherwise.
          */
         default void showInsets(@InsetsType int types, boolean fromIme,
                 @Nullable ImeTracker.Token statsToken) {}
@@ -288,8 +287,7 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
          *
          * @param types {@link InsetsType} to hide
          * @param fromIme true if this request originated from IME (InputMethodService).
-         * @param statsToken the token tracking the current IME hide request
-         *                   or {@code null} otherwise.
+         * @param statsToken the token tracking the current IME request or {@code null} otherwise.
          */
         default void hideInsets(@InsetsType int types, boolean fromIme,
                 @Nullable ImeTracker.Token statsToken) {}

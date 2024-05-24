@@ -113,8 +113,22 @@ public class UserAspectRatioSettingsWindowManagerTest extends ShellTestCase {
         mExecutor = new TestShellExecutor();
         mTaskInfo = createTaskInfo(/* eligibleForUserAspectRatioButton= */
                 false, /* topActivityBoundsLetterboxed */ true, ACTION_MAIN, CATEGORY_LAUNCHER);
+        final DisplayInfo displayInfo = new DisplayInfo();
+        final int displayWidth = 1000;
+        final int displayHeight = 1200;
+        displayInfo.logicalWidth = displayWidth;
+        displayInfo.logicalHeight = displayHeight;
+        final DisplayLayout displayLayout = new DisplayLayout(displayInfo,
+                mContext.getResources(), /* hasNavigationBar= */ true, /* hasStatusBar= */ false);
+        InsetsState insetsState = new InsetsState();
+        insetsState.setDisplayFrame(new Rect(0, 0, displayWidth, displayHeight));
+        InsetsSource insetsSource = new InsetsSource(
+                InsetsSource.createId(null, 0, navigationBars()), navigationBars());
+        insetsSource.setFrame(0, displayHeight - 200, displayWidth, displayHeight);
+        insetsState.addSource(insetsSource);
+        displayLayout.setInsets(mContext.getResources(), insetsState);
         mWindowManager = new UserAspectRatioSettingsWindowManager(mContext, mTaskInfo,
-                mSyncTransactionQueue, mTaskListener, new DisplayLayout(), new CompatUIHintsState(),
+                mSyncTransactionQueue, mTaskListener, displayLayout, new CompatUIHintsState(),
                 mOnUserAspectRatioSettingsButtonClicked, mExecutor, flags -> 0,
                 mUserAspectRatioButtonShownChecker, s -> {});
         spyOn(mWindowManager);
@@ -247,6 +261,31 @@ public class UserAspectRatioSettingsWindowManagerTest extends ShellTestCase {
         clearInvocations(mWindowManager);
         taskInfo = createTaskInfo(/* eligibleForUserAspectRatioButton= */
                 true, /* topActivityBoundsLetterboxed */ true, ACTION_MAIN, CATEGORY_LAUNCHER);
+        mWindowManager.updateCompatInfo(taskInfo, mTaskListener, /* canShow= */ true);
+
+        verify(mWindowManager).inflateLayout();
+    }
+
+    @Test
+    public void testEligibleButtonHiddenIfLetterboxBoundsEqualToStableBounds() {
+        TaskInfo taskInfo = createTaskInfo(/* eligibleForUserAspectRatioButton= */
+                true, /* topActivityBoundsLetterboxed */ true, ACTION_MAIN, CATEGORY_LAUNCHER);
+
+        final Rect stableBounds = mWindowManager.getTaskStableBounds();
+        final int stableHeight = stableBounds.height();
+
+        // Letterboxed activity bounds equal to stable bounds, layout shouldn't be inflated
+        taskInfo.appCompatTaskInfo.topActivityLetterboxHeight = stableHeight;
+        taskInfo.appCompatTaskInfo.topActivityLetterboxWidth = stableBounds.width();
+
+        mWindowManager.updateCompatInfo(taskInfo, mTaskListener, /* canShow= */ true);
+
+        verify(mWindowManager, never()).inflateLayout();
+
+        // Letterboxed activity bounds smaller than stable bounds, layout should be inflated
+        taskInfo.appCompatTaskInfo.topActivityLetterboxHeight = stableHeight - 100;
+
+        clearInvocations(mWindowManager);
         mWindowManager.updateCompatInfo(taskInfo, mTaskListener, /* canShow= */ true);
 
         verify(mWindowManager).inflateLayout();

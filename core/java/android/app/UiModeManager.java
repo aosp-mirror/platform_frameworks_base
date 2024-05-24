@@ -16,7 +16,10 @@
 
 package android.app;
 
+import static android.app.Flags.enableNightModeBinderCache;
+
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -30,6 +33,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Binder;
+import android.os.IpcDataCache;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
@@ -264,6 +268,60 @@ public class UiModeManager {
      * always run in night mode.
      */
     public static final int MODE_NIGHT_YES = 2;
+
+    /** @hide */
+    @IntDef(prefix = { "MODE_ATTENTION_THEME_OVERLAY_" }, value = {
+            MODE_ATTENTION_THEME_OVERLAY_OFF,
+            MODE_ATTENTION_THEME_OVERLAY_NIGHT,
+            MODE_ATTENTION_THEME_OVERLAY_DAY
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AttentionModeThemeOverlayType {}
+
+    /** @hide */
+    @IntDef(prefix = { "MODE_ATTENTION_THEME_OVERLAY_" }, value = {
+            MODE_ATTENTION_THEME_OVERLAY_OFF,
+            MODE_ATTENTION_THEME_OVERLAY_NIGHT,
+            MODE_ATTENTION_THEME_OVERLAY_DAY,
+            MODE_ATTENTION_THEME_OVERLAY_UNKNOWN
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AttentionModeThemeOverlayReturnType {}
+
+    /**
+     * Constant for {@link #setAttentionModeThemeOverlay(int)} (int)} and {@link
+     * #getAttentionModeThemeOverlay()}: Keeps night mode as set by {@link #setNightMode(int)}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    @TestApi
+    public static final int MODE_ATTENTION_THEME_OVERLAY_OFF = 1000;
+
+    /**
+     * Constant for {@link #setAttentionModeThemeOverlay(int)} (int)} and {@link
+     * #getAttentionModeThemeOverlay()}: Maintains night mode always on.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    @TestApi
+    public static final int MODE_ATTENTION_THEME_OVERLAY_NIGHT = 1001;
+
+    /**
+     * Constant for {@link #setAttentionModeThemeOverlay(int)} (int)} and {@link
+     * #getAttentionModeThemeOverlay()}: Maintains night mode always off (Light).
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    @TestApi
+    public static final int MODE_ATTENTION_THEME_OVERLAY_DAY = 1002;
+
+    /**
+     * Constant for {@link #getAttentionModeThemeOverlay()}: Error communication with server.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    @TestApi
+    public static final int MODE_ATTENTION_THEME_OVERLAY_UNKNOWN = -1;
 
     /**
      * Granular types for {@link #setNightModeCustomType(int)}
@@ -733,6 +791,55 @@ public class UiModeManager {
     }
 
     /**
+     * Overlays current Attention mode Night Mode overlay.
+     * {@code attentionModeThemeOverlayType}.
+     *
+     * @throws IllegalArgumentException if passed an unsupported type to
+     *                                  {@code AttentionModeThemeOverlayType}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
+    public void setAttentionModeThemeOverlay(
+            @AttentionModeThemeOverlayType int attentionModeThemeOverlayType) {
+        if (sGlobals != null) {
+            try {
+                sGlobals.mService.setAttentionModeThemeOverlay(attentionModeThemeOverlayType);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns the currently configured Attention Mode theme overlay.
+     * <p>
+     * May be one of:
+     *   <ul>
+     *     <li>{@link #MODE_ATTENTION_THEME_OVERLAY_OFF}</li>
+     *     <li>{@link #MODE_ATTENTION_THEME_OVERLAY_NIGHT}</li>
+     *     <li>{@link #MODE_ATTENTION_THEME_OVERLAY_DAY}</li>
+     *     <li>{@link #MODE_ATTENTION_THEME_OVERLAY_UNKNOWN}</li>
+     *   </ul>
+     * </p>
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
+    public @AttentionModeThemeOverlayReturnType int getAttentionModeThemeOverlay() {
+        if (sGlobals != null) {
+            try {
+                return sGlobals.mService.getAttentionModeThemeOverlay();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return MODE_ATTENTION_THEME_OVERLAY_UNKNOWN;
+    }
+
+    /**
      * Sets and persist the night mode for this application.
      * <p>
      * The mode can be one of:
@@ -770,6 +877,51 @@ public class UiModeManager {
         }
     }
 
+    private Integer getNightModeFromServer() {
+        try {
+            if (sGlobals != null) {
+                return sGlobals.mService.getNightMode();
+            }
+            return -1;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
+    /**
+     * Retrieve the night mode for the user.
+     */
+    private final IpcDataCache.QueryHandler<Void, Integer> mNightModeQuery =
+            new IpcDataCache.QueryHandler<>() {
+
+                @Override
+                @NonNull
+                public Integer apply(Void query) {
+                    return getNightModeFromServer();
+                }
+            };
+
+    private static final String NIGHT_MODE_API = "getNightMode";
+
+    /**
+     * Cache the night mode for a user.
+     */
+    private final IpcDataCache<Void, Integer> mNightModeCache =
+            new IpcDataCache<>(1, IpcDataCache.MODULE_SYSTEM,
+                    NIGHT_MODE_API, /* cacheName= */ "NightModeCache", mNightModeQuery);
+
+    /**
+     * Invalidate the night mode cache.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NIGHT_MODE_BINDER_CACHE)
+    public static void invalidateNightModeCache() {
+        IpcDataCache.invalidateCache(IpcDataCache.MODULE_SYSTEM,
+                NIGHT_MODE_API);
+    }
+
     /**
      * Returns the currently configured night mode.
      * <p>
@@ -786,14 +938,11 @@ public class UiModeManager {
      * @see #setNightMode(int)
      */
     public @NightMode int getNightMode() {
-        if (sGlobals != null) {
-            try {
-                return sGlobals.mService.getNightMode();
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        if (enableNightModeBinderCache()) {
+            return mNightModeCache.query(null);
+        } else {
+            return getNightModeFromServer();
         }
-        return -1;
     }
 
     /**

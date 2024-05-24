@@ -19,6 +19,7 @@ package com.android.keyguard;
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
+import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISSIBLE_KEYGUARD;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_BIOMETRIC;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_EXTENDED_ACCESS;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_NONE_SECURITY;
@@ -31,12 +32,12 @@ import static com.android.keyguard.KeyguardSecurityModel.SecurityMode.SimPin;
 import static com.android.keyguard.KeyguardSecurityModel.SecurityMode.SimPuk;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
-import static com.android.systemui.flags.Flags.REVAMPED_BOUNCER_MESSAGES;
 
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.hardware.biometrics.BiometricRequestConstants;
 import android.media.AudioManager;
@@ -79,10 +80,11 @@ import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
+import com.android.systemui.keyguard.KeyguardWmStateRefactor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.ActivityStarter;
@@ -99,8 +101,6 @@ import com.android.systemui.util.ViewController;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.GlobalSettings;
 
-import dagger.Lazy;
-
 import java.io.File;
 import java.util.Arrays;
 import java.util.Optional;
@@ -108,6 +108,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
+import dagger.Lazy;
 import kotlinx.coroutines.Job;
 
 /** Controller for {@link KeyguardSecurityContainer} */
@@ -136,7 +137,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final SessionTracker mSessionTracker;
     private final Optional<SideFpsController> mSideFpsController;
     private final FalsingA11yDelegate mFalsingA11yDelegate;
-    private final KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
+    private final DeviceEntryFaceAuthInteractor mDeviceEntryFaceAuthInteractor;
     private final BouncerMessageInteractor mBouncerMessageInteractor;
     private int mTranslationY;
     private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
@@ -217,7 +218,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         @Override
         public void onUserInput() {
             mBouncerMessageInteractor.onPrimaryBouncerUserInput();
-            mKeyguardFaceAuthInteractor.onPrimaryBouncerUserInput();
+            mDeviceEntryFaceAuthInteractor.onPrimaryBouncerUserInput();
         }
 
         @Override
@@ -329,7 +330,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 }
             }
 
-            if (mFeatureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+            if (KeyguardWmStateRefactor.isEnabled()) {
                 mKeyguardTransitionInteractor.startDismissKeyguardTransition();
             }
         }
@@ -348,11 +349,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final SwipeListener mSwipeListener = new SwipeListener() {
         @Override
         public void onSwipeUp() {
-            if (mKeyguardFaceAuthInteractor.canFaceAuthRun()) {
+            if (mDeviceEntryFaceAuthInteractor.canFaceAuthRun()) {
                 mKeyguardSecurityCallback.userActivity();
             }
-            mKeyguardFaceAuthInteractor.onSwipeUpOnBouncer();
-            if (mKeyguardFaceAuthInteractor.isFaceAuthEnabledAndEnrolled()) {
+            mDeviceEntryFaceAuthInteractor.onSwipeUpOnBouncer();
+            if (mDeviceEntryFaceAuthInteractor.isFaceAuthEnabledAndEnrolled()) {
                 mUpdateMonitor.requestActiveUnlock(
                         ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT,
                         "swipeUpOnBouncer");
@@ -389,6 +390,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                         boolean useSplitBouncer = orientation == ORIENTATION_LANDSCAPE;
                         mSecurityViewFlipperController.updateConstraints(useSplitBouncer);
                     }
+                }
+
+                @Override
+                public void onConfigChanged(Configuration newConfig) {
+                    configureMode();
                 }
             };
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
@@ -457,7 +463,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             TelephonyManager telephonyManager,
             ViewMediatorCallback viewMediatorCallback,
             AudioManager audioManager,
-            KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
+            DeviceEntryFaceAuthInteractor deviceEntryFaceAuthInteractor,
             BouncerMessageInteractor bouncerMessageInteractor,
             Provider<JavaAdapter> javaAdapter,
             SelectedUserInteractor selectedUserInteractor,
@@ -496,7 +502,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mTelephonyManager = telephonyManager;
         mViewMediatorCallback = viewMediatorCallback;
         mAudioManager = audioManager;
-        mKeyguardFaceAuthInteractor = keyguardFaceAuthInteractor;
+        mDeviceEntryFaceAuthInteractor = deviceEntryFaceAuthInteractor;
         mBouncerMessageInteractor = bouncerMessageInteractor;
         mSelectedUserInteractor = selectedUserInteractor;
         mDeviceEntryInteractor = deviceEntryInteractor;
@@ -863,7 +869,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         boolean finish = false;
         int eventSubtype = -1;
         BouncerUiEvent uiEvent = BouncerUiEvent.UNKNOWN;
-        if (mUpdateMonitor.getUserHasTrust(targetUserId)) {
+        if (mUpdateMonitor.forceIsDismissibleIsKeepingDeviceUnlocked()) {
+            finish = true;
+            eventSubtype = BOUNCER_DISMISSIBLE_KEYGUARD;
+            // TODO: b/308417021 add UI event
+        } else if (mUpdateMonitor.getUserHasTrust(targetUserId)) {
             finish = true;
             eventSubtype = BOUNCER_DISMISS_EXTENDED_ACCESS;
             uiEvent = BouncerUiEvent.BOUNCER_DISMISS_EXTENDED_ACCESS;
@@ -1107,7 +1117,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     }
 
     private boolean canDisplayUserSwitcher() {
-        return mFeatureFlags.isEnabled(Flags.BOUNCER_USER_SWITCHER);
+        return getContext().getResources().getBoolean(R.bool.config_enableBouncerUserSwitcher);
     }
 
     private void configureMode() {
@@ -1164,7 +1174,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mLockPatternUtils.reportFailedPasswordAttempt(userId);
         if (timeoutMs > 0) {
             mLockPatternUtils.reportPasswordLockout(timeoutMs, userId);
-            if (!mFeatureFlags.isEnabled(REVAMPED_BOUNCER_MESSAGES)) {
+            if (!com.android.systemui.Flags.revampedBouncerMessages()) {
                 mView.showTimeoutDialog(userId, timeoutMs, mLockPatternUtils,
                         mSecurityModel.getSecurityMode(userId));
             }

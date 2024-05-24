@@ -71,6 +71,13 @@ public class Interpolators {
      */
     public static final Interpolator EMPHASIZED_DECELERATE = new PathInterpolator(
             0.05f, 0.7f, 0.1f, 1f);
+
+    /**
+     * The standard decelerating interpolator that should be used on every regular movement of
+     * content that is appearing e.g. when coming from off screen.
+     */
+    public static final Interpolator STANDARD_DECELERATE = new PathInterpolator(0f, 0f, 0f, 1f);
+
     /**
      * Interpolator to be used when animating a move based on a click. Pair with enough duration.
      */

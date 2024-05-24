@@ -16,6 +16,7 @@
 
 package com.android.systemui.haptics.slider
 
+import android.view.MotionEvent
 import androidx.annotation.FloatRange
 
 /** Configuration parameters of a [SliderHapticFeedbackProvider] */
@@ -38,6 +39,8 @@ data class SliderHapticFeedbackConfig(
     val numberOfLowTicks: Int = 5,
     /** Maximum velocity allowed for vibration scaling. This is not expected to change. */
     val maxVelocityToScale: Float = 2000f, /* In pixels/sec */
+    /** Axis to use when computing velocity. Must be the same as the slider's axis of movement */
+    val velocityAxis: Int = MotionEvent.AXIS_X,
     /** Vibration scale at the upper bookend of the slider */
     @FloatRange(from = 0.0, to = 1.0) val upperBookendScale: Float = 1f,
     /** Vibration scale at the lower bookend of the slider */

@@ -27,6 +27,7 @@ import android.media.ISoundDose;
 import android.media.ISoundDoseCallback;
 import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioMixingRule;
+import android.media.audiopolicy.Flags;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -42,6 +43,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -549,6 +551,11 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
         return AudioSystem.setStreamVolumeIndexAS(stream, index, device);
     }
 
+    /** Same as {@link AudioSystem#setVolumeIndexForAttributes(AudioAttributes, int, int)} */
+    public int setVolumeIndexForAttributes(AudioAttributes attributes, int index, int device) {
+        return AudioSystem.setVolumeIndexForAttributes(attributes, index, device);
+    }
+
     /**
      * Same as {@link AudioSystem#setPhoneState(int, int)}
      * @param state
@@ -599,6 +606,23 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
     public int registerPolicyMixes(ArrayList<AudioMix> mixes, boolean register) {
         invalidateRoutingCache();
         return AudioSystem.registerPolicyMixes(mixes, register);
+    }
+
+    /**
+     * @return a list of AudioMixes that are registered in the audio policy manager.
+     */
+    public List<AudioMix> getRegisteredPolicyMixes() {
+        if (!Flags.audioMixTestApi()) {
+            return Collections.emptyList();
+        }
+
+        List<AudioMix> audioMixes = new ArrayList<>();
+        int result = AudioSystem.getRegisteredPolicyMixes(audioMixes);
+        if (result != AudioSystem.SUCCESS) {
+            throw new IllegalStateException(
+                    "Cannot fetch registered policy mixes. Result: " + result);
+        }
+        return Collections.unmodifiableList(audioMixes);
     }
 
     /**

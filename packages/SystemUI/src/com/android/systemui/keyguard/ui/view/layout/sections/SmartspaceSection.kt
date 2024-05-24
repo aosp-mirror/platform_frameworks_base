@@ -18,44 +18,50 @@ package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.content.Context
 import android.view.View
+import android.view.View.GONE
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
+import androidx.constraintlayout.widget.Barrier
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
-import androidx.constraintlayout.widget.ConstraintSet.END
-import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
-import androidx.constraintlayout.widget.ConstraintSet.START
-import androidx.constraintlayout.widget.ConstraintSet.TOP
-import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
 import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
+import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardSmartspaceInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.KeyguardSmartspaceViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
-import com.android.systemui.res.R
+import com.android.systemui.res.R as R
+import com.android.systemui.shared.R as sharedR
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
+import dagger.Lazy
 import javax.inject.Inject
 
-class SmartspaceSection
+open class SmartspaceSection
 @Inject
 constructor(
+    val context: Context,
     val keyguardClockViewModel: KeyguardClockViewModel,
     val keyguardSmartspaceViewModel: KeyguardSmartspaceViewModel,
-    private val context: Context,
+    val keyguardSmartspaceInteractor: KeyguardSmartspaceInteractor,
     val smartspaceController: LockscreenSmartspaceController,
     val keyguardUnlockAnimationController: KeyguardUnlockAnimationController,
+    val blueprintInteractor: Lazy<KeyguardBlueprintInteractor>,
 ) : KeyguardSection() {
     private var smartspaceView: View? = null
     private var weatherView: View? = null
     private var dateView: View? = null
 
+    private var smartspaceVisibilityListener: OnGlobalLayoutListener? = null
+    private var pastVisibility: Int = -1
+
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!migrateClocksToBlueprint()) {
-            return
-        }
+        if (!migrateClocksToBlueprint()) return
+        if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) return
         smartspaceView = smartspaceController.buildAndConnectView(constraintLayout)
         weatherView = smartspaceController.buildAndConnectWeatherView(constraintLayout)
         dateView = smartspaceController.buildAndConnectDateView(constraintLayout)
+        pastVisibility = smartspaceView?.visibility ?: View.GONE
         if (keyguardSmartspaceViewModel.isSmartspaceEnabled) {
             constraintLayout.addView(smartspaceView)
             if (keyguardSmartspaceViewModel.isDateWeatherDecoupled) {
@@ -64,108 +70,161 @@ constructor(
             }
         }
         keyguardUnlockAnimationController.lockscreenSmartspace = smartspaceView
+        smartspaceVisibilityListener = OnGlobalLayoutListener {
+            smartspaceView?.let {
+                val newVisibility = it.visibility
+                if (pastVisibility != newVisibility) {
+                    keyguardSmartspaceInteractor.setBcSmartspaceVisibility(newVisibility)
+                    pastVisibility = newVisibility
+                }
+            }
+        }
+        smartspaceView?.viewTreeObserver?.addOnGlobalLayoutListener(smartspaceVisibilityListener)
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        KeyguardSmartspaceViewBinder.bind(this, constraintLayout, keyguardClockViewModel)
+        if (!migrateClocksToBlueprint()) return
+        if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) return
+        KeyguardSmartspaceViewBinder.bind(
+            constraintLayout,
+            keyguardClockViewModel,
+            keyguardSmartspaceViewModel,
+            blueprintInteractor.get(),
+        )
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        // Generally, weather should be next to dateView
-        // smartspace should be below date & weather views
+        if (!migrateClocksToBlueprint()) return
+        if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) return
+        val horizontalPaddingStart =
+            context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_start) +
+                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
+        val horizontalPaddingEnd =
+            context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_end) +
+                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
         constraintSet.apply {
             // migrate addDateWeatherView, addWeatherView from KeyguardClockSwitchController
-            dateView?.let { dateView ->
-                constrainHeight(dateView.id, WRAP_CONTENT)
-                constrainWidth(dateView.id, WRAP_CONTENT)
-                connect(
-                    dateView.id,
-                    START,
-                    PARENT_ID,
-                    START,
-                    context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_start)
-                )
-            }
-            weatherView?.let {
-                constrainWidth(it.id, WRAP_CONTENT)
-                dateView?.let { dateView ->
-                    connect(it.id, TOP, dateView.id, TOP)
-                    connect(it.id, BOTTOM, dateView.id, BOTTOM)
-                    connect(it.id, START, dateView.id, END, 4)
-                }
-            }
+            constrainHeight(sharedR.id.date_smartspace_view, ConstraintSet.WRAP_CONTENT)
+            constrainWidth(sharedR.id.date_smartspace_view, ConstraintSet.WRAP_CONTENT)
+            connect(
+                sharedR.id.date_smartspace_view,
+                ConstraintSet.START,
+                ConstraintSet.PARENT_ID,
+                ConstraintSet.START,
+                horizontalPaddingStart
+            )
+            constrainWidth(sharedR.id.weather_smartspace_view, ConstraintSet.WRAP_CONTENT)
+            connect(
+                sharedR.id.weather_smartspace_view,
+                ConstraintSet.TOP,
+                sharedR.id.date_smartspace_view,
+                ConstraintSet.TOP
+            )
+            connect(
+                sharedR.id.weather_smartspace_view,
+                ConstraintSet.BOTTOM,
+                sharedR.id.date_smartspace_view,
+                ConstraintSet.BOTTOM
+            )
+            connect(
+                sharedR.id.weather_smartspace_view,
+                ConstraintSet.START,
+                sharedR.id.date_smartspace_view,
+                ConstraintSet.END,
+                4
+            )
+
             // migrate addSmartspaceView from KeyguardClockSwitchController
-            smartspaceView?.let {
-                constrainHeight(it.id, WRAP_CONTENT)
-                connect(
-                    it.id,
-                    START,
-                    PARENT_ID,
-                    START,
-                    context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_start)
-                )
-                connect(
-                    it.id,
-                    END,
-                    PARENT_ID,
-                    END,
-                    context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_end)
-                )
-            }
+            constrainHeight(sharedR.id.bc_smartspace_view, ConstraintSet.WRAP_CONTENT)
+            connect(
+                sharedR.id.bc_smartspace_view,
+                ConstraintSet.START,
+                ConstraintSet.PARENT_ID,
+                ConstraintSet.START,
+                horizontalPaddingStart
+            )
+            connect(
+                sharedR.id.bc_smartspace_view,
+                ConstraintSet.END,
+                if (keyguardClockViewModel.clockShouldBeCentered.value) ConstraintSet.PARENT_ID
+                else R.id.split_shade_guideline,
+                ConstraintSet.END,
+                horizontalPaddingEnd
+            )
 
             if (keyguardClockViewModel.hasCustomWeatherDataDisplay.value) {
-                dateView?.let { dateView ->
-                    smartspaceView?.let { smartspaceView ->
-                        connect(dateView.id, BOTTOM, smartspaceView.id, TOP)
-                    }
-                }
+                clear(sharedR.id.date_smartspace_view, ConstraintSet.TOP)
+                connect(
+                    sharedR.id.date_smartspace_view,
+                    ConstraintSet.BOTTOM,
+                    sharedR.id.bc_smartspace_view,
+                    ConstraintSet.TOP
+                )
             } else {
-                dateView?.let { dateView ->
-                    clear(dateView.id, BOTTOM)
-                    connect(dateView.id, TOP, R.id.lockscreen_clock_view, BOTTOM)
-                    constrainHeight(dateView.id, WRAP_CONTENT)
-                    smartspaceView?.let { smartspaceView ->
-                        clear(smartspaceView.id, TOP)
-                        connect(smartspaceView.id, TOP, dateView.id, BOTTOM)
-                    }
-                }
+                clear(sharedR.id.date_smartspace_view, ConstraintSet.BOTTOM)
+                connect(
+                    sharedR.id.date_smartspace_view,
+                    ConstraintSet.TOP,
+                    R.id.lockscreen_clock_view,
+                    ConstraintSet.BOTTOM
+                )
+                connect(
+                    sharedR.id.bc_smartspace_view,
+                    ConstraintSet.TOP,
+                    sharedR.id.date_smartspace_view,
+                    ConstraintSet.BOTTOM
+                )
             }
-            updateVisibility(constraintSet)
-        }
-    }
 
-    private fun updateVisibility(constraintSet: ConstraintSet) {
-        constraintSet.apply {
-            weatherView?.let {
-                setVisibility(
-                    it.id,
-                    when (keyguardClockViewModel.hasCustomWeatherDataDisplay.value) {
-                        true -> ConstraintSet.GONE
-                        false ->
-                            when (keyguardSmartspaceViewModel.isWeatherEnabled) {
-                                true -> ConstraintSet.VISIBLE
-                                false -> ConstraintSet.GONE
-                            }
-                    }
+            createBarrier(
+                R.id.smart_space_barrier_bottom,
+                Barrier.BOTTOM,
+                0,
+                *intArrayOf(
+                    sharedR.id.bc_smartspace_view,
+                    sharedR.id.date_smartspace_view,
+                    sharedR.id.weather_smartspace_view,
                 )
-            }
-            dateView?.let {
-                setVisibility(
-                    it.id,
-                    if (keyguardClockViewModel.hasCustomWeatherDataDisplay.value) ConstraintSet.GONE
-                    else ConstraintSet.VISIBLE
-                )
-            }
+            )
         }
+        updateVisibility(constraintSet)
     }
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
+        if (!migrateClocksToBlueprint()) return
+        if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) return
         listOf(smartspaceView, dateView, weatherView).forEach {
             it?.let {
                 if (it.parent == constraintLayout) {
                     constraintLayout.removeView(it)
                 }
             }
+        }
+        smartspaceView?.viewTreeObserver?.removeOnGlobalLayoutListener(smartspaceVisibilityListener)
+        smartspaceVisibilityListener = null
+    }
+
+    private fun updateVisibility(constraintSet: ConstraintSet) {
+        // This may update the visibility of the smartspace views
+        smartspaceController.requestSmartspaceUpdate()
+
+        constraintSet.apply {
+            setVisibility(
+                sharedR.id.weather_smartspace_view,
+                when (keyguardClockViewModel.hasCustomWeatherDataDisplay.value) {
+                    true -> ConstraintSet.GONE
+                    false ->
+                        when (keyguardSmartspaceViewModel.isWeatherEnabled) {
+                            true -> ConstraintSet.VISIBLE
+                            false -> ConstraintSet.GONE
+                        }
+                }
+            )
+            setVisibility(
+                sharedR.id.date_smartspace_view,
+                if (keyguardClockViewModel.hasCustomWeatherDataDisplay.value) ConstraintSet.GONE
+                else ConstraintSet.VISIBLE
+            )
         }
     }
 }

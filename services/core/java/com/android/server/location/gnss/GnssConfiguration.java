@@ -17,6 +17,7 @@
 package com.android.server.location.gnss;
 
 import android.content.Context;
+import android.location.flags.Flags;
 import android.os.PersistableBundle;
 import android.os.SystemProperties;
 import android.telephony.CarrierConfigManager;
@@ -36,6 +37,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -275,6 +277,11 @@ public class GnssConfiguration {
         }
         loadPropertiesFromCarrierConfig(inEmergency, activeSubId);
 
+        if (Flags.gnssConfigurationFromResource()) {
+            // Overlay carrier properties from resources.
+            loadPropertiesFromResource(mContext, mProperties);
+        }
+
         if (isSimAbsent(mContext)) {
             // Use the default SIM's LPP profile when SIM is absent.
             String lpp_prof = SystemProperties.get(LPP_PROFILE);
@@ -382,7 +389,7 @@ public class GnssConfiguration {
             if (configKey != null && configKey.startsWith(CarrierConfigManager.Gps.KEY_PREFIX)) {
                 String key = configKey
                         .substring(CarrierConfigManager.Gps.KEY_PREFIX.length())
-                        .toUpperCase();
+                        .toUpperCase(Locale.ROOT);
                 Object value = configs.get(configKey);
                 if (DEBUG) Log.d(TAG, "Gps config: " + key + " = " + value);
                 if (value instanceof String) {
@@ -407,6 +414,24 @@ public class GnssConfiguration {
             }
         } catch (IOException e) {
             if (DEBUG) Log.d(TAG, "Could not open GPS configuration file " + filePath);
+        }
+    }
+
+    private void loadPropertiesFromResource(Context context,
+            Properties properties) {
+        String[] configValues = context.getResources().getStringArray(
+                com.android.internal.R.array.config_gnssParameters);
+        for (String item : configValues) {
+            if (DEBUG) Log.d(TAG, "GnssParamsResource: " + item);
+            // We need to support "KEY =", but not "=VALUE".
+            int index = item.indexOf("=");
+            if (index > 0 && index + 1 < item.length()) {
+                String key = item.substring(0, index);
+                String value = item.substring(index + 1);
+                properties.setProperty(key.trim().toUpperCase(Locale.ROOT), value);
+            } else {
+                Log.w(TAG, "malformed contents: " + item);
+            }
         }
     }
 

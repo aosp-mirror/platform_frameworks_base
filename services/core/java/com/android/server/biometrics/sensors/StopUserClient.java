@@ -30,7 +30,10 @@ import java.util.function.Supplier;
 
 /**
  * Abstract class for stopping a user.
- * @param <T> Interface for stopping the user.
+ *
+ * @param <T> Session for stopping the user. It should be either an instance of
+ *            {@link com.android.server.biometrics.sensors.fingerprint.aidl.AidlSession} or
+ *            {@link com.android.server.biometrics.sensors.face.aidl.AidlSession}.
  */
 public abstract class StopUserClient<T> extends HalClientMonitor<T> {
 

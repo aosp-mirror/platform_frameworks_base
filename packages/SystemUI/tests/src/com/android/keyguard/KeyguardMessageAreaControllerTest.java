@@ -19,11 +19,14 @@ package com.android.keyguard;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.hardware.biometrics.BiometricSourceType;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -118,5 +121,52 @@ public class KeyguardMessageAreaControllerTest extends SysuiTestCase {
         String msg = "abc";
         when(mKeyguardMessageArea.getText()).thenReturn(msg);
         assertThat(mMessageAreaController.getMessage()).isEqualTo(msg);
+    }
+
+    @Test
+    public void testFingerprintMessageUpdate() {
+        String msg = "fpMessage";
+        mMessageAreaController.setMessage(
+                msg, BiometricSourceType.FINGERPRINT
+        );
+        verify(mKeyguardMessageArea).setMessage(msg, /* animate= */ true);
+
+        String msg2 = "fpMessage2";
+        mMessageAreaController.setMessage(
+                msg2, BiometricSourceType.FINGERPRINT
+        );
+        verify(mKeyguardMessageArea).setMessage(msg2, /* animate= */ true);
+    }
+
+    @Test
+    public void testFaceMessageDroppedWhileFingerprintMessageShowing() {
+        String fpMsg = "fpMessage";
+        mMessageAreaController.setMessage(
+                fpMsg, BiometricSourceType.FINGERPRINT
+        );
+        verify(mKeyguardMessageArea).setMessage(eq(fpMsg), /* animate= */ anyBoolean());
+
+        String faceMessage = "faceMessage";
+        mMessageAreaController.setMessage(
+                faceMessage, BiometricSourceType.FACE
+        );
+        verify(mKeyguardMessageArea, never())
+                .setMessage(eq(faceMessage), /* animate= */ anyBoolean());
+    }
+
+    @Test
+    public void testGenericMessageShowsAfterFingerprintMessageShowing() {
+        String fpMsg = "fpMessage";
+        mMessageAreaController.setMessage(
+                fpMsg, BiometricSourceType.FINGERPRINT
+        );
+        verify(mKeyguardMessageArea).setMessage(eq(fpMsg), /* animate= */ anyBoolean());
+
+        String genericMessage = "genericMessage";
+        mMessageAreaController.setMessage(
+                genericMessage, null
+        );
+        verify(mKeyguardMessageArea)
+                .setMessage(eq(genericMessage), /* animate= */ anyBoolean());
     }
 }

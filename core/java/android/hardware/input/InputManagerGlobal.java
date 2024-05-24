@@ -27,6 +27,7 @@ import android.hardware.input.InputManager.InputDeviceBatteryListener;
 import android.hardware.input.InputManager.InputDeviceListener;
 import android.hardware.input.InputManager.KeyboardBacklightListener;
 import android.hardware.input.InputManager.OnTabletModeChangedListener;
+import android.hardware.input.InputManager.StickyModifierStateListener;
 import android.hardware.lights.Light;
 import android.hardware.lights.LightState;
 import android.hardware.lights.LightsManager;
@@ -52,6 +53,7 @@ import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputMonitor;
 import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 import android.view.PointerIcon;
 
 import com.android.internal.annotations.GuardedBy;
@@ -99,6 +101,14 @@ public final class InputManagerGlobal {
     @Nullable private ArrayList<KeyboardBacklightListenerDelegate> mKeyboardBacklightListeners;
     @GuardedBy("mKeyboardBacklightListenerLock")
     @Nullable private IKeyboardBacklightListener mKeyboardBacklightListener;
+
+    private final Object mStickyModifierStateListenerLock = new Object();
+    @GuardedBy("mStickyModifierStateListenerLock")
+    @Nullable
+    private ArrayList<StickyModifierStateListenerDelegate> mStickyModifierStateListeners;
+    @GuardedBy("mStickyModifierStateListenerLock")
+    @Nullable
+    private IStickyModifierStateListener mStickyModifierStateListener;
 
     // InputDeviceSensorManager gets notified synchronously from the binder thread when input
     // devices change, so it must be synchronized with the input device listeners.
@@ -901,6 +911,158 @@ public final class InputManagerGlobal {
                 }
                 mKeyboardBacklightListeners = null;
                 mKeyboardBacklightListener = null;
+            }
+        }
+    }
+
+    private static final class StickyModifierStateListenerDelegate {
+        final InputManager.StickyModifierStateListener mListener;
+        final Executor mExecutor;
+
+        StickyModifierStateListenerDelegate(StickyModifierStateListener listener,
+                Executor executor) {
+            mListener = listener;
+            mExecutor = executor;
+        }
+
+        void notifyStickyModifierStateChange(int modifierState, int lockedModifierState) {
+            mExecutor.execute(() ->
+                    mListener.onStickyModifierStateChanged(
+                            new LocalStickyModifierState(modifierState, lockedModifierState)));
+        }
+    }
+
+    private class LocalStickyModifierStateListener extends IStickyModifierStateListener.Stub {
+
+        @Override
+        public void onStickyModifierStateChanged(int modifierState, int lockedModifierState) {
+            synchronized (mStickyModifierStateListenerLock) {
+                if (mStickyModifierStateListeners == null) return;
+                final int numListeners = mStickyModifierStateListeners.size();
+                for (int i = 0; i < numListeners; i++) {
+                    mStickyModifierStateListeners.get(i)
+                            .notifyStickyModifierStateChange(modifierState, lockedModifierState);
+                }
+            }
+        }
+    }
+
+    // Implementation of the android.hardware.input.StickyModifierState interface used to report
+    // the sticky modifier state via the StickyModifierStateListener interfaces.
+    private static final class LocalStickyModifierState extends StickyModifierState {
+
+        private final int mModifierState;
+        private final int mLockedModifierState;
+
+        LocalStickyModifierState(int modifierState, int lockedModifierState) {
+            mModifierState = modifierState;
+            mLockedModifierState = lockedModifierState;
+        }
+
+        @Override
+        public boolean isShiftModifierOn() {
+            return (mModifierState & KeyEvent.META_SHIFT_ON) != 0;
+        }
+
+        @Override
+        public boolean isShiftModifierLocked() {
+            return (mLockedModifierState & KeyEvent.META_SHIFT_ON) != 0;
+        }
+
+        @Override
+        public boolean isCtrlModifierOn() {
+            return (mModifierState & KeyEvent.META_CTRL_ON) != 0;
+        }
+
+        @Override
+        public boolean isCtrlModifierLocked() {
+            return (mLockedModifierState & KeyEvent.META_CTRL_ON) != 0;
+        }
+
+        @Override
+        public boolean isMetaModifierOn() {
+            return (mModifierState & KeyEvent.META_META_ON) != 0;
+        }
+
+        @Override
+        public boolean isMetaModifierLocked() {
+            return (mLockedModifierState & KeyEvent.META_META_ON) != 0;
+        }
+
+        @Override
+        public boolean isAltModifierOn() {
+            return (mModifierState & KeyEvent.META_ALT_LEFT_ON) != 0;
+        }
+
+        @Override
+        public boolean isAltModifierLocked() {
+            return (mLockedModifierState & KeyEvent.META_ALT_LEFT_ON) != 0;
+        }
+
+        @Override
+        public boolean isAltGrModifierOn() {
+            return (mModifierState & KeyEvent.META_ALT_RIGHT_ON) != 0;
+        }
+
+        @Override
+        public boolean isAltGrModifierLocked() {
+            return (mLockedModifierState & KeyEvent.META_ALT_RIGHT_ON) != 0;
+        }
+    }
+
+    /**
+     * @see InputManager#registerStickyModifierStateListener(Executor, StickyModifierStateListener)
+     */
+    @RequiresPermission(Manifest.permission.MONITOR_STICKY_MODIFIER_STATE)
+    void registerStickyModifierStateListener(@NonNull Executor executor,
+            @NonNull StickyModifierStateListener listener) throws IllegalArgumentException {
+        Objects.requireNonNull(executor, "executor should not be null");
+        Objects.requireNonNull(listener, "listener should not be null");
+
+        synchronized (mStickyModifierStateListenerLock) {
+            if (mStickyModifierStateListener == null) {
+                mStickyModifierStateListeners = new ArrayList<>();
+                mStickyModifierStateListener = new LocalStickyModifierStateListener();
+
+                try {
+                    mIm.registerStickyModifierStateListener(mStickyModifierStateListener);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+            final int numListeners = mStickyModifierStateListeners.size();
+            for (int i = 0; i < numListeners; i++) {
+                if (mStickyModifierStateListeners.get(i).mListener == listener) {
+                    throw new IllegalArgumentException("Listener has already been registered!");
+                }
+            }
+            StickyModifierStateListenerDelegate delegate =
+                    new StickyModifierStateListenerDelegate(listener, executor);
+            mStickyModifierStateListeners.add(delegate);
+        }
+    }
+
+    /**
+     * @see InputManager#unregisterStickyModifierStateListener(StickyModifierStateListener)
+     */
+    @RequiresPermission(Manifest.permission.MONITOR_STICKY_MODIFIER_STATE)
+    void unregisterStickyModifierStateListener(
+            @NonNull StickyModifierStateListener listener) {
+        Objects.requireNonNull(listener, "listener should not be null");
+
+        synchronized (mStickyModifierStateListenerLock) {
+            if (mStickyModifierStateListeners == null) {
+                return;
+            }
+            mStickyModifierStateListeners.removeIf((delegate) -> delegate.mListener == listener);
+            if (mStickyModifierStateListeners.isEmpty()) {
+                try {
+                    mIm.unregisterStickyModifierStateListener(mStickyModifierStateListener);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+                mStickyModifierStateListeners = null;
+                mStickyModifierStateListener = null;
             }
         }
     }

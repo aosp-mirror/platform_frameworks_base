@@ -16,45 +16,26 @@
 
 package com.android.credentialmanager.ui.components
 
-import androidx.annotation.DrawableRes
+import android.graphics.drawable.Drawable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
-import androidx.wear.compose.material.MaterialTheme
+import androidx.core.graphics.drawable.toBitmap
 import androidx.wear.compose.material.Text
-import com.android.credentialmanager.R
-import com.google.android.horologist.annotations.ExperimentalHorologistApi
-import com.google.android.horologist.compose.material.Icon
-import com.google.android.horologist.compose.material.util.DECORATIVE_ELEMENT_CONTENT_DESCRIPTION
-import com.google.android.horologist.compose.tools.WearPreview
+import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.Icon
+import androidx.wear.compose.material.MaterialTheme as WearMaterialTheme
+import androidx.compose.ui.text.style.TextAlign
 
-@OptIn(ExperimentalHorologistApi::class)
+/* Used as header across Credential Selector screens. */
 @Composable
 fun SignInHeader(
-    @DrawableRes icon: Int,
-    title: String,
-    modifier: Modifier = Modifier,
-) {
-    SignInHeader(
-        iconContent = {
-            Icon(
-                id = icon,
-                contentDescription = DECORATIVE_ELEMENT_CONTENT_DESCRIPTION
-            )
-        },
-        title = title,
-        modifier = modifier,
-    )
-}
-
-@Composable
-fun SignInHeader(
-    iconContent: @Composable ColumnScope.() -> Unit,
+    icon: Drawable?,
     title: String,
     modifier: Modifier = Modifier,
 ) {
@@ -62,22 +43,24 @@ fun SignInHeader(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        iconContent()
+        if (icon != null) {
+            Icon(
+                bitmap = icon.toBitmap().asImageBitmap(),
+                modifier = Modifier.size(32.dp),
+                // Decorative purpose only.
+                contentDescription = null,
+                tint = Color.Unspecified,
+
+            )
+        }
+
         Text(
             text = title,
+            textAlign = TextAlign.Center,
             modifier = Modifier
                 .padding(top = 6.dp)
                 .padding(horizontal = 10.dp),
-            style = MaterialTheme.typography.title3
+            style = WearMaterialTheme.typography.title3
         )
     }
-}
-
-@WearPreview
-@Composable
-fun SignInHeaderPreview() {
-    SignInHeader(
-        icon = R.drawable.passkey_icon,
-        title = stringResource(R.string.use_passkey_title)
-    )
 }

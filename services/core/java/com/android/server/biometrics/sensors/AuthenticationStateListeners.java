@@ -18,6 +18,8 @@ package com.android.server.biometrics.sensors;
 
 import android.annotation.NonNull;
 import android.hardware.biometrics.AuthenticationStateListener;
+import android.hardware.biometrics.BiometricFingerprintConstants;
+import android.hardware.biometrics.BiometricSourceType;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -84,6 +86,61 @@ public class AuthenticationStateListeners implements IBinder.DeathRecipient {
         for (AuthenticationStateListener listener: mAuthenticationStateListeners) {
             try {
                 listener.onAuthenticationStopped();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception in notifying listener that authentication "
+                        + "stopped", e);
+            }
+        }
+    }
+
+    /**
+     * Defines behavior in response to a successful authentication
+     * @param requestReason Reason from [BiometricRequestConstants.RequestReason] for the requested
+     *                      authentication
+     * @param userId The user Id for the requested authentication
+     */
+    public void onAuthenticationSucceeded(int requestReason, int userId) {
+        for (AuthenticationStateListener listener: mAuthenticationStateListeners) {
+            try {
+                listener.onAuthenticationSucceeded(requestReason, userId);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception in notifying listener that authentication "
+                        + "succeeded", e);
+            }
+        }
+    }
+
+    /**
+     * Defines behavior in response to a failed authentication
+     * @param requestReason Reason from [BiometricRequestConstants.RequestReason] for the requested
+     *                      authentication
+     * @param userId The user Id for the requested authentication
+     */
+    public void onAuthenticationFailed(int requestReason, int userId) {
+        for (AuthenticationStateListener listener : mAuthenticationStateListeners) {
+            try {
+                listener.onAuthenticationFailed(requestReason, userId);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception in notifying listener that authentication "
+                        + "failed", e);
+            }
+        }
+    }
+
+    /**
+     * Defines behavior in response to biometric being acquired.
+     * @param biometricSourceType identifies [BiometricSourceType] biometric was acquired for
+     * @param requestReason reason from [BiometricRequestConstants.RequestReason] for authentication
+     * @param acquiredInfo [BiometricFingerprintConstants.FingerprintAcquired] int corresponding to
+     *                     a known acquired message.
+     */
+    public void onAuthenticationAcquired(
+            BiometricSourceType biometricSourceType, int requestReason,
+            @BiometricFingerprintConstants.FingerprintAcquired int acquiredInfo
+    ) {
+        for (AuthenticationStateListener listener: mAuthenticationStateListeners) {
+            try {
+                listener.onAuthenticationAcquired(biometricSourceType, requestReason, acquiredInfo);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception in notifying listener that authentication "
                         + "stopped", e);

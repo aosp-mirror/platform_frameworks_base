@@ -16,6 +16,8 @@
 
 package com.android.systemui.unfold.progress
 
+import android.os.Handler
+import android.os.HandlerThread
 import android.os.Looper
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
@@ -24,6 +26,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.unfold.TestUnfoldTransitionProvider
 import com.android.systemui.utils.os.FakeHandler
 import kotlin.test.Test
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 
 @RunWith(AndroidTestingRunner::class)
@@ -92,5 +95,14 @@ class MainThreadUnfoldTransitionProgressProviderTest : SysuiTestCase() {
         fakeHandler.dispatchQueuedMessages()
 
         listener.assertNotStarted()
+    }
+
+    @Test
+    fun addCallback_fromBackgroundThread_succeeds() = runTest {
+        val bgHandler = Handler(HandlerThread("TestBgThread").apply { start() }.looper)
+        bgHandler.runWithScissors({ progressProvider.addCallback(listener) }, 5000L)
+
+        wrappedProgressProvider.onTransitionStarted()
+        listener.assertStarted()
     }
 }

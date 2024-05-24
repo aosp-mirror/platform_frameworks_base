@@ -34,6 +34,8 @@ import com.android.internal.widget.ConversationLayout;
 import com.android.internal.widget.ImageFloatingTextView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationContentView;
+import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
+import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -253,7 +255,8 @@ public class NotificationGroupingUtil {
         }
 
         public void init() {
-            View header = mParentRow.getNotificationViewWrapper().getNotificationHeader();
+            NotificationViewWrapper wrapper = mParentRow.getNotificationViewWrapper();
+            View header = wrapper == null ? null : wrapper.getNotificationHeader();
             mParentView = header == null ? null : header.findViewById(mId);
             mParentData = mExtractor == null ? null : mExtractor.extractData(mParentRow);
             mApply = !mComparator.isEmpty(mParentView);
@@ -326,6 +329,9 @@ public class NotificationGroupingUtil {
 
         @Override
         public boolean isEmpty(View view) {
+            if (AsyncGroupHeaderViewInflation.isEnabled() && view == null) {
+                return true;
+            }
             if (view instanceof ImageView) {
                 return ((ImageView) view).getDrawable() == null;
             }

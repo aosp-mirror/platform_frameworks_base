@@ -23,6 +23,7 @@ import android.app.AppGlobals;
 import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -31,6 +32,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.permission.PermissionManager;
+import android.provider.Settings;
 import android.speech.IModelDownloadListener;
 import android.speech.IRecognitionListener;
 import android.speech.IRecognitionService;
@@ -311,9 +313,22 @@ final class SpeechRecognitionManagerServiceImpl extends
                 return null;
             }
 
+            final boolean isPrivileged;
+            if (serviceComponent == null) {
+                isPrivileged = false;
+            } else {
+                // Only certain privileged recognition service can obtain process capabilities
+                // from persistent process to hold while-in-use permission in the background.
+                isPrivileged = checkPrivilege(serviceComponent);
+            }
+
             RemoteSpeechRecognitionService service =
                     new RemoteSpeechRecognitionService(
-                            getContext(), serviceComponent, getUserId(), callingUid);
+                            getContext(),
+                            serviceComponent,
+                            getUserId(),
+                            callingUid,
+                            isPrivileged);
 
             Set<RemoteSpeechRecognitionService> valuesByCaller =
                     mRemoteServicesByUid.computeIfAbsent(callingUid, key -> new HashSet<>());
@@ -326,6 +341,53 @@ final class SpeechRecognitionManagerServiceImpl extends
             incrementSessionCountForUidLocked(callingUid);
             return service;
         }
+    }
+
+    /**
+     * Checks if the given service component should have privileged binding flags when created. Only
+     * a service component that matches with any of the following condition would be granted:
+     *
+     * <ul>
+     *     <li>A default recognition service component.</li>
+     *     <li>An on-device recognition service component.</li>
+     *     <li>A pre-installed recognition service component.</li>
+     * </ul>
+     */
+    @GuardedBy("mLock")
+    private boolean checkPrivilege(@NonNull ComponentName serviceComponent) {
+        final ComponentName defaultComponent = getDefaultRecognitionServiceComponent();
+        final ComponentName onDeviceComponent = getOnDeviceComponentNameLocked();
+        final boolean preinstalled = isPreinstalledApp(serviceComponent);
+        return serviceComponent.equals(defaultComponent)
+                || serviceComponent.equals(onDeviceComponent)
+                || preinstalled;
+    }
+
+    private boolean isPreinstalledApp(@NonNull ComponentName serviceComponent) {
+        PackageManager pm = getContext().getPackageManager();
+        if (pm == null) {
+            return false;
+        }
+
+        try {
+            ApplicationInfo info = pm.getApplicationInfoAsUser(serviceComponent.getPackageName(),
+                    PackageManager.MATCH_SYSTEM_ONLY, getUserId());
+            return (info.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    @Nullable
+    private ComponentName getDefaultRecognitionServiceComponent() {
+        String componentName = Settings.Secure.getStringForUser(
+                getContext().getContentResolver(),
+                Settings.Secure.VOICE_RECOGNITION_SERVICE,
+                getUserId());
+        if (componentName == null) {
+            return null;
+        }
+        return ComponentName.unflattenFromString(componentName);
     }
 
     private boolean componentMapsToRecognitionService(@NonNull ComponentName serviceComponent) {

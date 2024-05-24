@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -37,6 +38,7 @@ import android.media.PlaybackParams;
 import android.media.tv.TvInputManager.Session;
 import android.media.tv.TvInputManager.Session.FinishedInputEventCallback;
 import android.media.tv.TvInputManager.SessionCallback;
+import android.media.tv.flags.Flags;
 import android.media.tv.interactive.TvInteractiveAppService;
 import android.net.Uri;
 import android.os.Bundle;
@@ -650,10 +652,10 @@ public class TvView extends ViewGroup {
      * <p>The metadata that will continue to be filtered includes the PSI
      * (Program specific information) and SI (Service Information), part of ISO/IEC 13818-1.
      *
-     * <p> Note that this is different form {@link #timeShiftPause()} as this completely drops
+     * <p> Note that this is different from {@link #timeShiftPause()} as this completely drops
      * the stream, making it impossible to resume from this position again.
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
     public void stopPlayback(@TvInteractiveAppService.PlaybackCommandStopMode int mode) {
         if (mSession != null) {
             mSession.stopPlayback(mode);
@@ -661,16 +663,38 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Starts playback of the Audio, Video, and CC streams.
+     * Resumes playback of the Audio, Video, and CC streams.
      *
-     * <p> Note that this is different form {@link #timeShiftResume()} as this is intended to be
-     * used after stopping playback. This is used to restart playback from the current position
-     * in the live broadcast.
-     * @hide
+     * <p> Note that this is different from {@link #timeShiftResume()} as this is intended to
+     * be used after {@link #stopPlayback(int)} has been called. This is used to resume
+     * playback from the current position in the live broadcast.
+
+     * <p> If this is the first time playback should begin, you will need to use
+     * {@link #tune(String, Uri, Bundle)} to begin playback.
      */
-    public void startPlayback() {
+    @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+    public void resumePlayback() {
         if (mSession != null) {
-            mSession.startPlayback();
+            mSession.resumePlayback();
+        }
+    }
+
+    /**
+     * Sets whether or not the video is frozen. While the video is frozen, audio playback will
+     * continue.
+     *
+     * <p>This should be invoked after a {@link TvInteractiveAppService.Session#requestCommand} is
+     * received with the command to freeze the video.
+     *
+     * <p>This will freeze the video to the last frame when the state is set to {@code true}.
+     *
+     * @see TvView.TvInputCallback#setVideoFrozen(boolean)
+     * @param isFrozen whether or not the video is frozen.
+     */
+    @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+    public void setVideoFrozen(boolean isFrozen) {
+        if (mSession != null) {
+            mSession.setVideoFrozen(isFrozen);
         }
     }
 
@@ -1303,6 +1327,16 @@ public class TvView extends ViewGroup {
         public void onTvMessage(@NonNull String inputId,
                 @TvInputManager.TvMessageType int type, @NonNull Bundle data) {
         }
+
+        /**
+         * This is called when the video freeze status is updated.
+         *
+         * @see #setVideoFrozen(boolean)
+         * @param inputId The ID of the TV input bound to this view.
+         * @param isFrozen Whether or not the video is currently frozen on the las
+         */
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+        public void onVideoFreezeUpdated(@NonNull String inputId, boolean isFrozen) {}
     }
 
     /**
@@ -1729,6 +1763,20 @@ public class TvView extends ViewGroup {
             }
             if (mCallback != null) {
                 mCallback.onTvMessage(mInputId, type, data);
+            }
+        }
+
+        @Override
+        public void onVideoFreezeUpdated(Session session, boolean isFrozen) {
+            if (DEBUG) {
+                Log.d(TAG, "onVideoFreezeUpdated(isFrozen=" + isFrozen + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onVideoFreezeUpdated - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onVideoFreezeUpdated(mInputId, isFrozen);
             }
         }
     }

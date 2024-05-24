@@ -14,3 +14,20 @@ flag {
   description: "Enable adapter conversion to RemoteCollectionItemsAdapter"
   bug: "245950570"
 }
+
+flag {
+  name: "remove_app_widget_service_io_from_critical_path"
+  namespace: "app_widgets"
+  description: "Move state file IO to non-critical path"
+  bug: "312949280"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "draw_data_parcel"
+  namespace: "app_widgets"
+  description: "Enable support for transporting draw instructions as data parcel"
+  bug: "286130467"
+}
