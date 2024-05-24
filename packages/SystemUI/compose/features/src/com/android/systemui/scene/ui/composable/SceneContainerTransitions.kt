@@ -9,6 +9,7 @@ import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShad
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.scene.ui.composable.transitions.bouncerToGoneTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToNotificationsShadeTransition
+import com.android.systemui.scene.ui.composable.transitions.goneToQuickSettingsShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToQuickSettingsTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToSplitShadeTransition
@@ -16,6 +17,7 @@ import com.android.systemui.scene.ui.composable.transitions.lockscreenToBouncerT
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToCommunalTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToGoneTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToNotificationsShadeTransition
+import com.android.systemui.scene.ui.composable.transitions.lockscreenToQuickSettingsShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToQuickSettingsTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToSplitShadeTransition
@@ -56,10 +58,14 @@ val SceneContainerTransitions = transitions {
         goneToShadeTransition(durationScale = 0.9)
     }
     from(Scenes.Gone, to = Scenes.QuickSettings) { goneToQuickSettingsTransition() }
+    from(Scenes.Gone, to = Scenes.QuickSettingsShade) { goneToQuickSettingsShadeTransition() }
     from(Scenes.Lockscreen, to = Scenes.Bouncer) { lockscreenToBouncerTransition() }
     from(Scenes.Lockscreen, to = Scenes.Communal) { lockscreenToCommunalTransition() }
     from(Scenes.Lockscreen, to = Scenes.NotificationsShade) {
         lockscreenToNotificationsShadeTransition()
+    }
+    from(Scenes.Lockscreen, to = Scenes.QuickSettingsShade) {
+        lockscreenToQuickSettingsShadeTransition()
     }
     from(Scenes.Lockscreen, to = Scenes.Shade) { lockscreenToShadeTransition() }
     from(
