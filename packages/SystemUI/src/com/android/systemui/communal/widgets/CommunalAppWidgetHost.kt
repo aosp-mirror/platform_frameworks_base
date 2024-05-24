@@ -83,7 +83,9 @@ class CommunalAppWidgetHost(
     override fun allocateAppWidgetId(): Int {
         return super.allocateAppWidgetId().also { appWidgetId ->
             backgroundScope.launch {
-                observers.forEach { observer -> observer.onAllocateAppWidgetId(appWidgetId) }
+                synchronized(observers) {
+                    observers.forEach { observer -> observer.onAllocateAppWidgetId(appWidgetId) }
+                }
             }
         }
     }
@@ -91,18 +93,28 @@ class CommunalAppWidgetHost(
     override fun deleteAppWidgetId(appWidgetId: Int) {
         super.deleteAppWidgetId(appWidgetId)
         backgroundScope.launch {
-            observers.forEach { observer -> observer.onDeleteAppWidgetId(appWidgetId) }
+            synchronized(observers) {
+                observers.forEach { observer -> observer.onDeleteAppWidgetId(appWidgetId) }
+            }
         }
     }
 
     override fun startListening() {
         super.startListening()
-        backgroundScope.launch { observers.forEach { observer -> observer.onHostStartListening() } }
+        backgroundScope.launch {
+            synchronized(observers) {
+                observers.forEach { observer -> observer.onHostStartListening() }
+            }
+        }
     }
 
     override fun stopListening() {
         super.stopListening()
-        backgroundScope.launch { observers.forEach { observer -> observer.onHostStopListening() } }
+        backgroundScope.launch {
+            synchronized(observers) {
+                observers.forEach { observer -> observer.onHostStopListening() }
+            }
+        }
     }
 
     fun addObserver(observer: Observer) {
