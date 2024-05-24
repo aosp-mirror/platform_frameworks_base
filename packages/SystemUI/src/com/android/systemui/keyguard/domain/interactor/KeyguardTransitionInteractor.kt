@@ -413,10 +413,6 @@ constructor(
     /** Whether we've currently STARTED a transition and haven't yet FINISHED it. */
     val isInTransitionToAnyState = isInTransitionWhere({ true }, { true })
 
-    fun transitionStepsToState(toState: KeyguardState): Flow<TransitionStep> {
-        return transition(Edge.create(from = null, to = toState))
-    }
-
     /**
      * Called to start a transition that will ultimately dismiss the keyguard from the current
      * state.

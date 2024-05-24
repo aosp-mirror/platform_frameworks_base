@@ -441,7 +441,7 @@ constructor(
                     anyOf(
                             *toFlowArray(statesForHiddenKeyguard) { state ->
                                 keyguardTransitionInteractor
-                                    .transitionStepsToState(state)
+                                    .transition(Edge.create(to = state))
                                     .map { it.value > 0f && it.transitionState == RUNNING }
                                     .onStart { emit(false) }
                             }
