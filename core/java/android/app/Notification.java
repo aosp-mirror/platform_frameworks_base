@@ -8924,10 +8924,9 @@ public class Notification implements Parcelable
                 sender = stripStyling(sender);
             }
 
-            final boolean showOnlySenderName = showOnlySenderName();
-
             final CharSequence title;
-            boolean isConversationTitleAvailable = !showOnlySenderName && conversationTitle != null;
+            final boolean isConversationTitleAvailable = showConversationTitle()
+                    && conversationTitle != null;
             if (isConversationTitleAvailable) {
                 title = conversationTitle;
             } else {
@@ -8947,10 +8946,10 @@ public class Notification implements Parcelable
             }
         }
 
-        /** developer settings to always show sender name */
-        private boolean showOnlySenderName() {
+        /** (b/342370742) Developer settings to show conversation title. */
+        private boolean showConversationTitle() {
             return SystemProperties.getBoolean(
-                    "persist.compact_heads_up_notification.show_only_sender_name",
+                    "persist.compact_heads_up_notification.show_conversation_title_for_group",
                     false);
         }
 
