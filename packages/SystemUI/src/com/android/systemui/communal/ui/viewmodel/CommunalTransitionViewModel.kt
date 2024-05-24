@@ -21,12 +21,14 @@ import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToGlanceableHubTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToDreamingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToGlanceableHubTransitionViewModel
+import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -53,7 +55,7 @@ constructor(
     // Show UMO on glanceable hub immediately on transition into glanceable hub
     private val showUmoFromOccludedToGlanceableHub: Flow<Boolean> =
         keyguardTransitionInteractor
-            .transitionStepsFromState(KeyguardState.OCCLUDED)
+            .transition(Edge.create(from = KeyguardState.OCCLUDED))
             .filter {
                 it.to == KeyguardState.GLANCEABLE_HUB &&
                     (it.transitionState == TransitionState.STARTED ||
@@ -63,7 +65,10 @@ constructor(
 
     private val showUmoFromGlanceableHubToOccluded: Flow<Boolean> =
         keyguardTransitionInteractor
-            .transitionStepsFromState(KeyguardState.GLANCEABLE_HUB)
+            .transition(
+                edge = Edge.create(from = Scenes.Communal),
+                edgeWithoutSceneContainer = Edge.create(from = KeyguardState.GLANCEABLE_HUB)
+            )
             .filter {
                 it.to == KeyguardState.OCCLUDED &&
                     (it.transitionState == TransitionState.FINISHED ||
@@ -91,11 +96,12 @@ constructor(
     val showCommunalFromOccluded: Flow<Boolean> = communalInteractor.showCommunalFromOccluded
 
     val transitionFromOccludedEnded =
-        keyguardTransitionInteractor.transitionStepsFromState(KeyguardState.OCCLUDED).filter { step
-            ->
-            step.transitionState == TransitionState.FINISHED ||
-                step.transitionState == TransitionState.CANCELED
-        }
+        keyguardTransitionInteractor
+            .transition(Edge.create(from = KeyguardState.OCCLUDED))
+            .filter { step ->
+                step.transitionState == TransitionState.FINISHED ||
+                    step.transitionState == TransitionState.CANCELED
+            }
 
     val recentsBackgroundColor: Flow<Color?> =
         combine(showCommunalFromOccluded, communalColors.backgroundColor) {

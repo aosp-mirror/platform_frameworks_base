@@ -413,10 +413,6 @@ constructor(
     /** Whether we've currently STARTED a transition and haven't yet FINISHED it. */
     val isInTransitionToAnyState = isInTransitionWhere({ true }, { true })
 
-    fun transitionStepsFromState(fromState: KeyguardState): Flow<TransitionStep> {
-        return transition(Edge.create(from = fromState, to = null))
-    }
-
     fun transitionStepsToState(toState: KeyguardState): Flow<TransitionStep> {
         return transition(Edge.create(from = null, to = toState))
     }
@@ -554,10 +550,6 @@ constructor(
 
     fun getCurrentState(): KeyguardState {
         return currentKeyguardState.replayCache.last()
-    }
-
-    fun getStartedState(): KeyguardState {
-        return startedKeyguardState.replayCache.last()
     }
 
     fun getStartedFromState(): KeyguardState {
