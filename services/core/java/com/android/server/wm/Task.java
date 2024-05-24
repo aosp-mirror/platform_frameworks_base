@@ -1931,6 +1931,9 @@ class Task extends TaskFragment {
             if (td.getSystemBarsAppearance() == 0) {
                 td.setSystemBarsAppearance(atd.getSystemBarsAppearance());
             }
+            if (td.getTopOpaqueSystemBarsAppearance() == 0 && r.fillsParent()) {
+                td.setTopOpaqueSystemBarsAppearance(atd.getSystemBarsAppearance());
+            }
             if (td.getNavigationBarColor() == 0) {
                 td.setNavigationBarColor(atd.getNavigationBarColor());
                 td.setEnsureNavigationBarContrastWhenTransparent(
