@@ -5153,6 +5153,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
         // Okay to proceed
         synchronized (mLock) {
+            assertCallerIsOwnerOrRoot();
+            assertPreparedAndNotSealedLocked("setPreVerifiedDomains");
             mPreVerifiedDomains = preVerifiedDomains;
         }
     }
