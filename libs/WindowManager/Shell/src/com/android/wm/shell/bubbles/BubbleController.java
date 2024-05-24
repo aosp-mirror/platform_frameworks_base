@@ -1772,7 +1772,7 @@ public class BubbleController implements ConfigurationChangeListener,
         if (groupKey == null) {
             return bubbleChildren;
         }
-        for (Bubble bubble : mBubbleData.getActiveBubbles()) {
+        for (Bubble bubble : mBubbleData.getBubbles()) {
             if (bubble.getGroupKey() != null && groupKey.equals(bubble.getGroupKey())) {
                 bubbleChildren.add(bubble);
             }

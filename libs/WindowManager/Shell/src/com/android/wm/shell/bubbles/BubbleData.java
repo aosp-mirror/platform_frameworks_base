@@ -339,11 +339,6 @@ public class BubbleData {
         return mOverflow;
     }
 
-    /** Return a read-only current active bubble lists. */
-    public List<Bubble> getActiveBubbles() {
-        return Collections.unmodifiableList(mBubbles);
-    }
-
     public void setExpanded(boolean expanded) {
         setExpandedInternal(expanded);
         dispatchPendingChanges();
