@@ -21,12 +21,17 @@ import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED
+import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BIOMETRIC_MESSAGE
+import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP
+import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRUST
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
@@ -61,6 +66,33 @@ class KeyguardIndicationControllerWithCoroutinesTest : KeyguardIndicationControl
             // THEN indication area is set visible
             verify(mIndicationArea, times(3)).visibility = View.VISIBLE
         }
+
+    @Test
+    fun onTrustAgentErrorMessageDelayed_fingerprintEngaged() {
+        createController()
+        mController.setVisible(true)
+
+        // GIVEN fingerprint is engaged
+        whenever(mDeviceEntryFingerprintAuthInteractor.isEngaged).thenReturn(MutableStateFlow(true))
+
+        // WHEN a trust agent error message arrives
+        mKeyguardUpdateMonitorCallback.onTrustAgentErrorMessage("testMessage")
+        mExecutor.runAllReady()
+
+        // THEN no message shows immediately since fingerprint is engaged
+        verifyNoMessage(INDICATION_TYPE_TRUST)
+        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE)
+        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP)
+
+        // WHEN fingerprint is no longer engaged
+        whenever(mDeviceEntryFingerprintAuthInteractor.isEngaged)
+            .thenReturn(MutableStateFlow(false))
+        mController.mIsFingerprintEngagedCallback.accept(false)
+        mExecutor.runAllReady()
+
+        // THEN the message will show
+        verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE, "testMessage")
+    }
 
     companion object {
         private val IMMEDIATE = Dispatchers.Main.immediate
