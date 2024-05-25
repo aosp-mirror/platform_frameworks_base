@@ -309,7 +309,7 @@
          fresh, it will be used as the current location by Telephony to decide whether satellite
          services should be allowed.
          -->
-    <integer name="config_oem_enabled_satellite_location_fresh_duration">600</integer>
+    <integer name="config_oem_enabled_satellite_location_fresh_duration">300</integer>
     <java-symbol type="integer" name="config_oem_enabled_satellite_location_fresh_duration" />
 
     <!-- Whether enhanced IWLAN handover check is enabled. If enabled, telephony frameworks
