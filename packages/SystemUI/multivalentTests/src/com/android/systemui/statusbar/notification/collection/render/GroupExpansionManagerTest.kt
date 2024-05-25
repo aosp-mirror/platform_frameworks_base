@@ -118,8 +118,6 @@ class GroupExpansionManagerTest : SysuiTestCase() {
         underTest.setGroupExpanded(summary1, false)
 
         // Expanding again should throw.
-        // TODO(b/320238410): Remove this check when robolectric supports wtf assertions.
-        Assume.assumeFalse(Build.FINGERPRINT.contains("robolectric"))
         assertLogsWtf { underTest.setGroupExpanded(summary1, true) }
     }
 
