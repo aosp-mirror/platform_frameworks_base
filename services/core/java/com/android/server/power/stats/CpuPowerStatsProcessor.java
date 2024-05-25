@@ -138,7 +138,7 @@ public class CpuPowerStatsProcessor extends PowerStatsProcessor {
     }
 
     @Override
-    public void finish(PowerComponentAggregatedPowerStats stats) {
+    public void finish(PowerComponentAggregatedPowerStats stats, long timestampMs) {
         if (stats.getPowerStatsDescriptor() == null) {
             return;
         }

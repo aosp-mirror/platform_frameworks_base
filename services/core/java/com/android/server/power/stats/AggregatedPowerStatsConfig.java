@@ -205,7 +205,7 @@ public class AggregatedPowerStatsConfig {
 
     private static final PowerStatsProcessor NO_OP_PROCESSOR = new PowerStatsProcessor() {
         @Override
-        void finish(PowerComponentAggregatedPowerStats stats) {
+        void finish(PowerComponentAggregatedPowerStats stats, long timestampMs) {
         }
     };
 }

@@ -31,6 +31,7 @@ public class PowerStatsLayout {
     private static final String EXTRA_DEVICE_DURATION_POSITION = "dd";
     private static final String EXTRA_DEVICE_ENERGY_CONSUMERS_POSITION = "de";
     private static final String EXTRA_DEVICE_ENERGY_CONSUMERS_COUNT = "dec";
+    private static final String EXTRA_UID_DURATION_POSITION = "ud";
     private static final String EXTRA_UID_POWER_POSITION = "up";
 
     protected static final int UNSUPPORTED = -1;
@@ -51,6 +52,7 @@ public class PowerStatsLayout {
     private int mDeviceEnergyConsumerPosition;
     private int mDeviceEnergyConsumerCount;
     private int mDevicePowerEstimatePosition = UNSUPPORTED;
+    private int mUidDurationPosition = UNSUPPORTED;
     private int mUidPowerEstimatePosition = UNSUPPORTED;
 
     public PowerStatsLayout() {
@@ -158,7 +160,8 @@ public class PowerStatsLayout {
      * PowerStatsService.
      */
     public void addDeviceSectionEnergyConsumers(int energyConsumerCount) {
-        mDeviceEnergyConsumerPosition = addDeviceSection(energyConsumerCount, "energy");
+        mDeviceEnergyConsumerPosition = addDeviceSection(energyConsumerCount, "energy",
+                FLAG_OPTIONAL);
         mDeviceEnergyConsumerCount = energyConsumerCount;
     }
 
@@ -206,6 +209,13 @@ public class PowerStatsLayout {
     }
 
     /**
+     * Declare that the UID stats array has a section capturing usage duration
+     */
+    public void addUidSectionUsageDuration() {
+        mUidDurationPosition = addUidSection(1, "time");
+    }
+
+    /**
      * Declare that the UID stats array has a section capturing a power estimate
      */
     public void addUidSectionPowerEstimate() {
@@ -217,6 +227,20 @@ public class PowerStatsLayout {
      */
     public boolean isUidPowerAttributionSupported() {
         return mUidPowerEstimatePosition != UNSUPPORTED;
+    }
+
+    /**
+     * Saves usage duration it in the corresponding element of <code>stats</code>.
+     */
+    public void setUidUsageDuration(long[] stats, long durationMs) {
+        stats[mUidDurationPosition] = durationMs;
+    }
+
+    /**
+     * Extracts the usage duration from a UID stats array.
+     */
+    public long getUidUsageDuration(long[] stats) {
+        return stats[mUidDurationPosition];
     }
 
     /**
@@ -244,6 +268,7 @@ public class PowerStatsLayout {
         extras.putInt(EXTRA_DEVICE_ENERGY_CONSUMERS_COUNT,
                 mDeviceEnergyConsumerCount);
         extras.putInt(EXTRA_DEVICE_POWER_POSITION, mDevicePowerEstimatePosition);
+        extras.putInt(EXTRA_UID_DURATION_POSITION, mUidDurationPosition);
         extras.putInt(EXTRA_UID_POWER_POSITION, mUidPowerEstimatePosition);
         extras.putString(PowerStats.Descriptor.EXTRA_DEVICE_STATS_FORMAT, mDeviceFormat.toString());
         extras.putString(PowerStats.Descriptor.EXTRA_STATE_STATS_FORMAT, mStateFormat.toString());
@@ -258,6 +283,7 @@ public class PowerStatsLayout {
         mDeviceEnergyConsumerPosition = extras.getInt(EXTRA_DEVICE_ENERGY_CONSUMERS_POSITION);
         mDeviceEnergyConsumerCount = extras.getInt(EXTRA_DEVICE_ENERGY_CONSUMERS_COUNT);
         mDevicePowerEstimatePosition = extras.getInt(EXTRA_DEVICE_POWER_POSITION);
+        mUidDurationPosition = extras.getInt(EXTRA_UID_DURATION_POSITION);
         mUidPowerEstimatePosition = extras.getInt(EXTRA_UID_POWER_POSITION);
     }
 
