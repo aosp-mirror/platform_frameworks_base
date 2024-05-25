@@ -375,6 +375,8 @@ public class SQLiteDatabaseTest {
                 assertEquals(3, s.getColumnInt(0));
             }
 
+            mDatabase.execSQL("DROP TABLE t1");
+
         } catch (SQLiteException e) {
             allowed = false;
         } finally {
