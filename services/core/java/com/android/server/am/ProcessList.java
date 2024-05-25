@@ -37,6 +37,7 @@ import static android.os.Process.startWebView;
 import static android.system.OsConstants.EAGAIN;
 
 import static com.android.sdksandbox.flags.Flags.selinuxSdkSandboxAudit;
+import static com.android.sdksandbox.flags.Flags.selinuxSdkSandboxInputSelector;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LRU;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_NETWORK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
@@ -2066,10 +2067,15 @@ public final class ProcessList {
             }
         }
 
-        return app.info.seInfo
-                + (TextUtils.isEmpty(app.info.seInfoUser) ? "" : app.info.seInfoUser) + extraInfo;
+        // The order of selectors in seInfo matters, the string is terminated by the word complete.
+        if (selinuxSdkSandboxInputSelector()) {
+            return app.info.seInfo + extraInfo + TextUtils.emptyIfNull(app.info.seInfoUser);
+        } else {
+            return app.info.seInfo
+                    + (TextUtils.isEmpty(app.info.seInfoUser) ? "" : app.info.seInfoUser)
+                    + extraInfo;
+        }
     }
-
 
     @GuardedBy("mService")
     boolean startProcessLocked(HostingRecord hostingRecord, String entryPoint, ProcessRecord app,
