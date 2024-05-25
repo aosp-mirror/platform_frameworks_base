@@ -79,7 +79,8 @@ constructor(
             runnable.run()
             return
         }
-        val fn = "[$label] => AvalancheController.update [${getKey(entry)}]"
+        log { "\n "}
+        val fn = "$label => AvalancheController.update ${getKey(entry)}"
         if (entry == null) {
             log { "Entry is NULL, stop update." }
             return
@@ -88,13 +89,13 @@ constructor(
             debugRunnableLabelMap[runnable] = label
         }
         if (isShowing(entry)) {
-            log { "\n$fn => [update showing]" }
+            log { "\n$fn => update showing" }
             runnable.run()
         } else if (entry in nextMap) {
-            log { "\n$fn => [update next]" }
+            log { "\n$fn => update next" }
             nextMap[entry]?.add(runnable)
         } else if (headsUpEntryShowing == null) {
-            log { "\n$fn => [showNow]" }
+            log { "\n$fn => showNow" }
             showNow(entry, arrayListOf(runnable))
         } else {
             // Clean up invalid state when entry is in list but not map and vice versa
@@ -133,20 +134,22 @@ constructor(
             runnable.run()
             return
         }
-        val fn = "[$label] => AvalancheController.delete " + getKey(entry)
+        log { "\n "}
+        val fn = "$label => AvalancheController.delete " + getKey(entry)
         if (entry == null) {
-            log { "$fn => cannot remove NULL entry" }
+            log { "$fn => entry NULL, running runnable" }
+            runnable.run()
             return
         }
         if (entry in nextMap) {
-            log { "$fn => [remove from next]" }
+            log { "$fn => remove from next" }
             if (entry in nextMap) nextMap.remove(entry)
             if (entry in nextList) nextList.remove(entry)
         } else if (entry in debugDropSet) {
-            log { "$fn => [remove from dropset]" }
+            log { "$fn => remove from dropset" }
             debugDropSet.remove(entry)
         } else if (isShowing(entry)) {
-            log { "$fn => [remove showing ${getKey(entry)}]" }
+            log { "$fn => remove showing ${getKey(entry)}" }
             previousHunKey = getKey(headsUpEntryShowing)
             // Show the next HUN before removing this one, so that we don't tell listeners
             // onHeadsUpPinnedModeChanged, which causes
@@ -155,7 +158,7 @@ constructor(
             showNext()
             runnable.run()
         } else {
-            log { "$fn => [removing untracked ${getKey(entry)}]" }
+            log { "$fn => removing untracked ${getKey(entry)}" }
         }
         logState("after $fn")
     }
@@ -237,6 +240,18 @@ constructor(
             entry.mEntry?.let { keyList.add(entry.mEntry!!.key) }
         }
         return keyList
+    }
+
+    fun getWaitingEntry(key: String): HeadsUpEntry? {
+        if (!NotificationThrottleHun.isEnabled) {
+            return null
+        }
+        for (headsUpEntry in nextMap.keys) {
+            if (headsUpEntry.mEntry?.key.equals(key)) {
+                return headsUpEntry
+            }
+        }
+        return null
     }
 
     private fun isShowing(entry: HeadsUpEntry): Boolean {

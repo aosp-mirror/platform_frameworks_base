@@ -249,7 +249,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
             for (NotificationEntry entry : mEntriesToRemoveAfterExpand) {
                 if (isHeadsUpEntry(entry.getKey())) {
                     // Maybe the heads-up was removed already
-                    removeEntry(entry.getKey());
+                    removeEntry(entry.getKey(), "onExpandingFinished");
                 }
             }
         }
@@ -381,7 +381,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         for (NotificationEntry entry : mEntriesToRemoveWhenReorderingAllowed) {
             if (isHeadsUpEntry(entry.getKey())) {
                 // Maybe the heads-up was removed already
-                removeEntry(entry.getKey());
+                removeEntry(entry.getKey(), "mOnReorderingAllowedListener");
             }
         }
         mEntriesToRemoveWhenReorderingAllowed.clear();
@@ -572,7 +572,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
                 } else if (mTrackingHeadsUp) {
                     mEntriesToRemoveAfterExpand.add(entry);
                 } else {
-                    removeEntry(entry.getKey());
+                    removeEntry(entry.getKey(), "createRemoveRunnable");
                 }
             };
         }
@@ -661,7 +661,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
                     }
                 }
                 for (String key : keysToRemove) {
-                    removeEntry(key);
+                    removeEntry(key, "mStatusBarStateListener");
                 }
             }
         }
