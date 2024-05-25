@@ -278,3 +278,13 @@ flag {
     }
 }
 
+flag {
+    name: "offload_doze_override_holds_wakelock"
+    namespace: "display_manager"
+    description: "DisplayPowerController holds a suspend-blocker while changing the display state on behalf of offload doze override."
+    bug: "338403827"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
