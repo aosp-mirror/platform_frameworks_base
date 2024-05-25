@@ -553,6 +553,25 @@
     <!-- The corner radius of a task that was dragged from fullscreen. -->
     <dimen name="desktop_mode_dragged_task_radius">28dp</dimen>
 
+    <!-- The corner radius of the app chip, maximize and close button's ripple drawable -->
+    <dimen name="desktop_mode_header_buttons_ripple_radius">16dp</dimen>
+    <!-- The vertical inset to apply to the app chip's ripple drawable -->
+    <dimen name="desktop_mode_header_app_chip_ripple_inset_vertical">4dp</dimen>
+
+    <!-- The corner radius of the maximize button's ripple drawable -->
+    <dimen name="desktop_mode_header_maximize_ripple_radius">18dp</dimen>
+    <!-- The vertical inset to apply to the maximize button's ripple drawable -->
+    <dimen name="desktop_mode_header_maximize_ripple_inset_vertical">4dp</dimen>
+    <!-- The horizontal inset to apply to the maximize button's ripple drawable -->
+    <dimen name="desktop_mode_header_maximize_ripple_inset_horizontal">6dp</dimen>
+
+    <!-- The corner radius of the close button's ripple drawable -->
+    <dimen name="desktop_mode_header_close_ripple_radius">18dp</dimen>
+    <!-- The vertical inset to apply to the close button's ripple drawable -->
+    <dimen name="desktop_mode_header_close_ripple_inset_vertical">4dp</dimen>
+    <!-- The horizontal inset to apply to the close button's ripple drawable -->
+    <dimen name="desktop_mode_header_close_ripple_inset_horizontal">6dp</dimen>
+
     <!-- The acceptable area ratio of fg icon area/bg icon area, i.e. (72 x 72) / (108 x 108) -->
     <item type="dimen" format="float" name="splash_icon_enlarge_foreground_threshold">0.44</item>
     <!-- Scaling factor applied to splash icons without provided background i.e. (192 / 160) -->

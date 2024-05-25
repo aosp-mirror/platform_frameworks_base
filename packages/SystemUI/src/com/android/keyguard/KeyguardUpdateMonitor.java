@@ -1384,7 +1384,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     @Deprecated
     public boolean getIsFaceAuthenticated() {
-        return getFaceAuthInteractor() != null && getFaceAuthInteractor().isAuthenticated();
+        return getFaceAuthInteractor() != null
+                && getFaceAuthInteractor().isAuthenticated().getValue();
     }
 
     public boolean getUserCanSkipBouncer(int userId) {
@@ -1426,7 +1427,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     @Deprecated
     public boolean isCurrentUserUnlockedWithFace() {
-        return getFaceAuthInteractor() != null && getFaceAuthInteractor().isAuthenticated();
+        return getFaceAuthInteractor() != null
+                && getFaceAuthInteractor().isAuthenticated().getValue();
     }
 
     /**
@@ -1516,7 +1518,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             return false;
         }
         boolean isFaceLockedOut =
-                getFaceAuthInteractor() != null && getFaceAuthInteractor().isLockedOut();
+                getFaceAuthInteractor() != null && getFaceAuthInteractor().isLockedOut().getValue();
         boolean isFaceAuthStrong =
                 getFaceAuthInteractor() != null && getFaceAuthInteractor().isFaceAuthStrong();
         boolean isFingerprintLockedOut = isFingerprintLockedOut();
@@ -2967,7 +2969,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     @Deprecated
     public boolean isFaceLockedOut() {
-        return getFaceAuthInteractor() != null && getFaceAuthInteractor().isLockedOut();
+        return getFaceAuthInteractor() != null && getFaceAuthInteractor().isLockedOut().getValue();
     }
 
     /**

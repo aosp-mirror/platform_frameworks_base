@@ -56,10 +56,51 @@ java_library {
     visibility: ["//visibility:public"],
 }
 
+// This and the next module contain the same classes with different implementations.
+// "ravenwood-runtime-common-device" will be statically linked in device side tests.
+// "ravenwood-runtime-common-ravenwood" will only exist in ravenwood-runtime, which will take
+// precedence even if the test jar (accidentally) contains "ravenwood-runtime-common-device".
+// "ravenwood-runtime-common" uses it to detect if the rutime is Ravenwood or not.
+java_library {
+    name: "ravenwood-runtime-common-ravenwood",
+    host_supported: true,
+    sdk_version: "core_current",
+    srcs: [
+        "runtime-common-ravenwood-src/**/*.java",
+    ],
+    visibility: ["//frameworks/base"],
+}
+
+java_library {
+    name: "ravenwood-runtime-common-device",
+    host_supported: true,
+    sdk_version: "core_current",
+    srcs: [
+        "runtime-common-device-src/**/*.java",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+java_library {
+    name: "ravenwood-runtime-common",
+    host_supported: true,
+    sdk_version: "core_current",
+    srcs: [
+        "runtime-common-src/**/*.java",
+    ],
+    libs: [
+        "ravenwood-runtime-common-ravenwood",
+    ],
+    visibility: ["//visibility:private"],
+}
+
 java_library_host {
     name: "ravenwood-helper-libcore-runtime.host",
     srcs: [
         "runtime-helper-src/libcore-fake/**/*.java",
+    ],
+    static_libs: [
+        "ravenwood-runtime-common",
     ],
     visibility: ["//visibility:private"],
 }
@@ -76,6 +117,9 @@ java_library {
     name: "ravenwood-helper-framework-runtime",
     srcs: [
         "runtime-helper-src/framework/**/*.java",
+    ],
+    static_libs: [
+        "ravenwood-runtime-common",
     ],
     libs: [
         "framework-minus-apex.ravenwood",
@@ -105,6 +149,7 @@ java_library {
     ],
     static_libs: [
         "androidx.test.monitor-for-device",
+        "ravenwood-runtime-common",
     ],
     libs: [
         "android.test.mock",
@@ -145,6 +190,10 @@ java_library {
         "junit-flag-src/**/*.java",
     ],
     sdk_version: "test_current",
+    static_libs: [
+        "ravenwood-runtime-common",
+        "ravenwood-runtime-common-device",
+    ],
     libs: [
         "junit",
         "flag-junit",
@@ -199,7 +248,7 @@ cc_library_shared {
     ],
 
     srcs: [
-        "runtime-helper-src/jni/*.cpp",
+        "runtime-jni/*.cpp",
     ],
 
     shared_libs: [

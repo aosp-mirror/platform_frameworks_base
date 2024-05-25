@@ -28,6 +28,9 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import com.android.systemui.util.time.SystemClock
@@ -60,6 +63,7 @@ constructor(
     private val deviceEntryFingerprintAuthInteractor: Lazy<DeviceEntryFingerprintAuthInteractor>,
     private val keyguardInteractor: Lazy<KeyguardInteractor>,
     keyguardTransitionInteractor: Lazy<KeyguardTransitionInteractor>,
+    sceneInteractor: Lazy<SceneInteractor>,
     @Application scope: CoroutineScope,
 ) {
     var receivedDownTouch = false
@@ -96,30 +100,42 @@ constructor(
         alternateBouncerSupported
             .flatMapLatest { alternateBouncerSupported ->
                 if (alternateBouncerSupported) {
-                    keyguardTransitionInteractor.get().currentKeyguardState.flatMapLatest {
-                        currentKeyguardState ->
-                        if (currentKeyguardState == KeyguardState.GONE) {
-                            flowOf(false)
-                        } else {
-                            combine(
-                                deviceEntryFingerprintAuthInteractor
-                                    .get()
-                                    .isFingerprintAuthCurrentlyAllowed,
-                                keyguardInteractor.get().isKeyguardDismissible,
-                                bouncerRepository.primaryBouncerShow,
-                                isDozingOrAod
+                    combine(
+                            keyguardTransitionInteractor.get().currentKeyguardState,
+                            if (SceneContainerFlag.isEnabled) {
+                                sceneInteractor.get().currentScene
+                            } else {
+                                flowOf(Scenes.Lockscreen)
+                            },
+                            ::Pair
+                        )
+                        .flatMapLatest { (currentKeyguardState, transitionState) ->
+                            if (currentKeyguardState == KeyguardState.GONE) {
+                                flowOf(false)
+                            } else if (
+                                SceneContainerFlag.isEnabled && transitionState == Scenes.Gone
                             ) {
-                                fingerprintAllowed,
-                                keyguardDismissible,
-                                primaryBouncerShowing,
-                                dozing ->
-                                fingerprintAllowed &&
-                                    !keyguardDismissible &&
-                                    !primaryBouncerShowing &&
-                                    !dozing
+                                flowOf(false)
+                            } else {
+                                combine(
+                                    deviceEntryFingerprintAuthInteractor
+                                        .get()
+                                        .isFingerprintAuthCurrentlyAllowed,
+                                    keyguardInteractor.get().isKeyguardDismissible,
+                                    bouncerRepository.primaryBouncerShow,
+                                    isDozingOrAod
+                                ) {
+                                    fingerprintAllowed,
+                                    keyguardDismissible,
+                                    primaryBouncerShowing,
+                                    dozing ->
+                                    fingerprintAllowed &&
+                                        !keyguardDismissible &&
+                                        !primaryBouncerShowing &&
+                                        !dozing
+                                }
                             }
                         }
-                    }
                 } else {
                     flowOf(false)
                 }

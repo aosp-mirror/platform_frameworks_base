@@ -314,9 +314,9 @@ public class GnssManagerService {
             ipw.decreaseIndent();
         }
 
-        GnssPowerStats powerStats = mGnssNative.getPowerStats();
+        GnssPowerStats powerStats = mGnssNative.getLastKnownPowerStats();
         if (powerStats != null) {
-            ipw.println("Last Power Stats:");
+            ipw.println("Last Known Power Stats:");
             ipw.increaseIndent();
             powerStats.dump(fd, ipw, args, mGnssNative.getCapabilities());
             ipw.decreaseIndent();

@@ -32,6 +32,8 @@ import com.android.systemui.util.EventLog
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SystemSettings
 import com.android.systemui.util.time.SystemClock
+import com.android.wm.shell.bubbles.Bubbles
+import java.util.Optional
 
 object VisualInterruptionDecisionProviderTestUtil {
     fun createProviderByFlag(
@@ -55,6 +57,7 @@ object VisualInterruptionDecisionProviderTestUtil {
         avalancheProvider: AvalancheProvider,
         systemSettings: SystemSettings,
         packageManager: PackageManager,
+        bubbles: Optional<Bubbles>,
     ): VisualInterruptionDecisionProvider {
         return if (VisualInterruptionRefactor.isEnabled) {
             VisualInterruptionDecisionProviderImpl(
@@ -75,7 +78,8 @@ object VisualInterruptionDecisionProviderTestUtil {
                 userTracker,
                 avalancheProvider,
                 systemSettings,
-                packageManager
+                packageManager,
+                bubbles
             )
         } else {
             NotificationInterruptStateProviderWrapper(
@@ -95,7 +99,8 @@ object VisualInterruptionDecisionProviderTestUtil {
                     deviceProvisionedController,
                     systemClock,
                     globalSettings,
-                    eventLog
+                    eventLog,
+                    bubbles
                 )
             )
         }

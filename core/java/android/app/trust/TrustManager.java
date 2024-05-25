@@ -299,6 +299,20 @@ public class TrustManager {
         }
     }
 
+    /**
+     * Returns true if the device is currently in a significant place, and false in all other
+     * circumstances.
+     *
+     * @hide
+     */
+    public boolean isInSignificantPlace() {
+        try {
+            return mService.isInSignificantPlace();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {

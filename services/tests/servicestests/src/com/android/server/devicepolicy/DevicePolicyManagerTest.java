@@ -7631,6 +7631,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         addManagedProfile(admin1, managedProfileAdminUid, admin1);
         mContext.binder.callingUid = managedProfileAdminUid;
+        when(getServices().userManager.isManagedProfile()).thenReturn(true);
 
         final Set<Integer> allowedModes = Set.of(PASSWORD_COMPLEXITY_NONE, PASSWORD_COMPLEXITY_LOW,
                 PASSWORD_COMPLEXITY_MEDIUM, PASSWORD_COMPLEXITY_HIGH);

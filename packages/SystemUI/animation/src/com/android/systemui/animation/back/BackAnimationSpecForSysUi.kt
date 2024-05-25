@@ -73,3 +73,11 @@ fun BackAnimationSpec.Companion.floatingSystemSurfacesForSysUi(
         maxMarginYdp = 8f,
         minScale = 0.9f,
     )
+
+/**
+ * SysUI transitions - Bottomsheet (AT3)
+ * https://carbon.googleplex.com/predictive-back-for-apps/pages/at-3-bottom-sheets
+ */
+fun BackAnimationSpec.Companion.bottomSheetForSysUi(
+    displayMetricsProvider: () -> DisplayMetrics,
+): BackAnimationSpec = BackAnimationSpec.createBottomsheetAnimationSpec(displayMetricsProvider)

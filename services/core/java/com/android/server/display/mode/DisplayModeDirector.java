@@ -1116,6 +1116,9 @@ public class DisplayModeDirector {
             if (mIsLowPower) {
                 for (int i = 0; i < mDisplayDeviceConfigByDisplay.size(); i++) {
                     DisplayDeviceConfig config = mDisplayDeviceConfigByDisplay.valueAt(i);
+                    if (config == null) {
+                        continue;
+                    }
                     List<SupportedModeData> supportedModes = config
                             .getRefreshRateData().lowPowerSupportedModes;
                     mVotesStorage.updateVote(

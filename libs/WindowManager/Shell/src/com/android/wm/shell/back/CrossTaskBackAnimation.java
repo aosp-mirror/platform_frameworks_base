@@ -48,6 +48,7 @@ import android.window.BackProgressAnimator;
 import android.window.IOnBackInvokedCallback;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
+import com.android.internal.policy.SystemBarUtils;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
@@ -82,6 +83,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
 
     private final Rect mStartTaskRect = new Rect();
     private float mCornerRadius;
+    private int mStatusbarHeight;
 
     // The closing window properties.
     private final Rect mClosingStartRect = new Rect();
@@ -114,16 +116,21 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
 
     @Inject
     public CrossTaskBackAnimation(Context context, BackAnimationBackground background) {
-        mCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context);
         mBackAnimationRunner = new BackAnimationRunner(
                 new Callback(), new Runner(), context, CUJ_PREDICTIVE_BACK_CROSS_TASK);
         mBackground = background;
         mContext = context;
+        loadResources();
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
+        loadResources();
+    }
+
+    private void loadResources() {
         mCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(mContext);
+        mStatusbarHeight = SystemBarUtils.getStatusBarHeight(mContext);
     }
 
     private static float mapRange(float value, float min, float max) {
@@ -149,7 +156,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
 
         // Draw background.
         mBackground.ensureBackground(mClosingTarget.windowConfiguration.getBounds(),
-                BACKGROUNDCOLOR, mTransaction);
+                BACKGROUNDCOLOR, mTransaction, mStatusbarHeight);
         mInterWindowMargin = mContext.getResources()
                 .getDimension(R.dimen.cross_task_back_inter_window_margin);
         mVerticalMargin = mContext.getResources()
@@ -201,7 +208,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
         applyTransform(mEnteringTarget.leash, mEnteringCurrentRect, mCornerRadius);
         applyTransaction();
 
-        mBackground.onBackProgressed(progress);
+        mBackground.customizeStatusBarAppearance((int) scaledTop);
     }
 
     private void updatePostCommitClosingAnimation(float progress) {

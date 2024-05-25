@@ -48,6 +48,9 @@ import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SystemSettings
 import com.android.systemui.util.time.SystemClock
+import com.android.wm.shell.bubbles.Bubbles
+import java.util.Optional
+import kotlin.jvm.optionals.getOrElse
 
 class PeekDisabledSuppressor(
     private val globalSettings: GlobalSettings,
@@ -119,12 +122,18 @@ class PeekPackageSnoozedSuppressor(private val headsUpManager: HeadsUpManager) :
         }
 }
 
-class PeekAlreadyBubbledSuppressor(private val statusBarStateController: StatusBarStateController) :
-    VisualInterruptionFilter(types = setOf(PEEK), reason = "already bubbled") {
+class PeekAlreadyBubbledSuppressor(
+    private val statusBarStateController: StatusBarStateController,
+    private val bubbles: Optional<Bubbles>
+) : VisualInterruptionFilter(types = setOf(PEEK), reason = "already bubbled") {
     override fun shouldSuppress(entry: NotificationEntry) =
         when {
             statusBarStateController.state != SHADE -> false
-            else -> entry.isBubble
+            else -> {
+                val bubblesCanShowNotification =
+                    bubbles.map { it.canShowBubbleNotification() }.getOrElse { false }
+                entry.isBubble && bubblesCanShowNotification
+            }
         }
 }
 

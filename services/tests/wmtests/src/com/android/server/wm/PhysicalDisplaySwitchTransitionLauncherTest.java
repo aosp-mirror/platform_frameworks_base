@@ -273,7 +273,7 @@ public class PhysicalDisplaySwitchTransitionLauncherTest extends WindowTestsBase
         if (enabled) {
             mTransitionController.registerTransitionPlayer(mPlayer, null /* proc */);
         } else {
-            mTransitionController.detachPlayer();
+            mTransitionController.unregisterTransitionPlayer(mPlayer);
         }
     }
 

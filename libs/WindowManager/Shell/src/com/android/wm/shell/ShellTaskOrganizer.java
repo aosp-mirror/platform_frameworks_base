@@ -552,10 +552,12 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
                 // Notify the compat UI if the listener or task info changed.
                 notifyCompatUI(taskInfo, newListener);
             }
-            if (data.getTaskInfo().getWindowingMode() != taskInfo.getWindowingMode()) {
-                // Notify the recent tasks when a task changes windowing modes
+            final boolean windowModeChanged =
+                    data.getTaskInfo().getWindowingMode() != taskInfo.getWindowingMode();
+            final boolean visibilityChanged = data.getTaskInfo().isVisible != taskInfo.isVisible;
+            if (windowModeChanged || visibilityChanged) {
                 mRecentTasks.ifPresent(recentTasks ->
-                        recentTasks.onTaskWindowingModeChanged(taskInfo));
+                        recentTasks.onTaskRunningInfoChanged(taskInfo));
             }
             // TODO (b/207687679): Remove check for HOME once bug is fixed
             final boolean isFocusedOrHome = taskInfo.isFocused

@@ -60,4 +60,16 @@ class BouncerLogger @Inject constructor(@BouncerLog private val buffer: LogBuffe
     fun bindingBouncerMessageView() {
         buffer.log(TAG, LogLevel.DEBUG, "Binding BouncerMessageView")
     }
+
+    fun interestedStateChanged(whatChanged: String, newValue: Boolean) {
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = whatChanged
+                bool1 = newValue
+            },
+            { "state changed: $str1: $bool1" }
+        )
+    }
 }

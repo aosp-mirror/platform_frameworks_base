@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.pipeline.satellite.data.prod
 
 import android.os.OutcomeReceiver
 import android.os.Process
+import android.telephony.TelephonyCallback
+import android.telephony.TelephonyManager
 import android.telephony.satellite.NtnSignalStrength
 import android.telephony.satellite.NtnSignalStrengthCallback
 import android.telephony.satellite.SatelliteManager
@@ -36,6 +38,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.log.core.FakeLogBuffer
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.MobileTelephonyHelpers
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.DeviceBasedSatelliteRepositoryImpl.Companion.MIN_UPTIME
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.DeviceBasedSatelliteRepositoryImpl.Companion.POLLING_INTERVAL_MS
 import com.android.systemui.statusbar.pipeline.satellite.shared.model.SatelliteConnectionState
@@ -59,6 +62,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.never
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -69,6 +73,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
     private lateinit var underTest: DeviceBasedSatelliteRepositoryImpl
 
     @Mock private lateinit var satelliteManager: SatelliteManager
+    @Mock private lateinit var telephonyManager: TelephonyManager
 
     private val systemClock = FakeSystemClock()
     private val dispatcher = StandardTestDispatcher()
@@ -86,6 +91,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
             underTest =
                 DeviceBasedSatelliteRepositoryImpl(
                     Optional.empty(),
+                    telephonyManager,
                     dispatcher,
                     testScope.backgroundScope,
                     FakeLogBuffer.Factory.create(),
@@ -362,6 +368,68 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
             verify(satelliteManager).registerForModemStateChanged(any(), any())
         }
 
+    @Test
+    fun telephonyCrash_repoReregistersConnectionStateListener() =
+        testScope.runTest {
+            setupDefaultRepo()
+
+            // GIVEN connection state is requested
+            val connectionState by collectLastValue(underTest.connectionState)
+
+            runCurrent()
+
+            val telephonyCallback =
+                MobileTelephonyHelpers.getTelephonyCallbackForType<
+                    TelephonyCallback.RadioPowerStateListener
+                >(
+                    telephonyManager
+                )
+
+            // THEN listener is registered once
+            verify(satelliteManager, times(1)).registerForModemStateChanged(any(), any())
+
+            // WHEN a crash event happens (detected by radio state change)
+            telephonyCallback.onRadioPowerStateChanged(TelephonyManager.RADIO_POWER_ON)
+            runCurrent()
+            telephonyCallback.onRadioPowerStateChanged(TelephonyManager.RADIO_POWER_OFF)
+            runCurrent()
+
+            // THEN listeners are unregistered and re-registered
+            verify(satelliteManager, times(1)).unregisterForModemStateChanged(any())
+            verify(satelliteManager, times(2)).registerForModemStateChanged(any(), any())
+        }
+
+    @Test
+    fun telephonyCrash_repoReregistersSignalStrengthListener() =
+        testScope.runTest {
+            setupDefaultRepo()
+
+            // GIVEN signal strength is requested
+            val signalStrength by collectLastValue(underTest.signalStrength)
+
+            runCurrent()
+
+            val telephonyCallback =
+                MobileTelephonyHelpers.getTelephonyCallbackForType<
+                    TelephonyCallback.RadioPowerStateListener
+                >(
+                    telephonyManager
+                )
+
+            // THEN listeners are registered the first time
+            verify(satelliteManager, times(1)).registerForNtnSignalStrengthChanged(any(), any())
+
+            // WHEN a crash event happens (detected by radio state change)
+            telephonyCallback.onRadioPowerStateChanged(TelephonyManager.RADIO_POWER_ON)
+            runCurrent()
+            telephonyCallback.onRadioPowerStateChanged(TelephonyManager.RADIO_POWER_OFF)
+            runCurrent()
+
+            // THEN listeners are unregistered and re-registered
+            verify(satelliteManager, times(1)).unregisterForNtnSignalStrengthChanged(any())
+            verify(satelliteManager, times(2)).registerForNtnSignalStrengthChanged(any(), any())
+        }
+
     private fun setUpRepo(
         uptime: Long = MIN_UPTIME,
         satMan: SatelliteManager? = satelliteManager,
@@ -380,6 +448,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
         underTest =
             DeviceBasedSatelliteRepositoryImpl(
                 if (satMan != null) Optional.of(satMan) else Optional.empty(),
+                telephonyManager,
                 dispatcher,
                 testScope.backgroundScope,
                 FakeLogBuffer.Factory.create(),

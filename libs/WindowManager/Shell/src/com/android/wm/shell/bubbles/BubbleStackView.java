@@ -145,6 +145,15 @@ public class BubbleStackView extends FrameLayout
      */
     private static final int ANIMATE_TEMPORARILY_INVISIBLE_DELAY = 1000;
 
+    /**
+     * Percent of the bubble that is hidden while stashed.
+     */
+    private static final float PERCENT_HIDDEN_WHEN_STASHED = 0.55f;
+    /**
+     * How long to wait to animate the stack for stashing.
+     */
+    private static final int ANIMATE_STASH_DELAY = 700;
+
     private static final PhysicsAnimator.SpringConfig FLYOUT_IME_ANIMATION_SPRING_CONFIG =
             new PhysicsAnimator.SpringConfig(
                     StackAnimationController.IME_ANIMATION_STIFFNESS,
@@ -725,6 +734,13 @@ public class BubbleStackView extends FrameLayout
 
             // Hide the stack after a delay, if needed.
             updateTemporarilyInvisibleAnimation(false /* hideImmediately */);
+            animateStashedState(false /* stashImmediately */);
+        }
+
+        @Override
+        public void onCancel(@NonNull View v, @NonNull MotionEvent ev, float viewInitialX,
+                float viewInitialY) {
+            animateStashedState(false /* stashImmediately */);
         }
     };
 
@@ -1213,6 +1229,46 @@ public class BubbleStackView extends FrameLayout
             }
         } else {
             mBubbleContainer.animate().translationX(0).start();
+        }
+    };
+
+    /**
+     * Animates the bubble stack to stash along the edge of the screen.
+     *
+     * @param stashImmediately whether the stash should happen immediately or without delay.
+     */
+    private void animateStashedState(boolean stashImmediately) {
+        if (!Flags.enableBubbleStashing()) return;
+
+        removeCallbacks(mAnimateStashedState);
+
+        postDelayed(mAnimateStashedState, stashImmediately ? 0 : ANIMATE_STASH_DELAY);
+    }
+
+    private final Runnable mAnimateStashedState = () -> {
+        if (mFlyout.getVisibility() != View.VISIBLE
+                && !mIsDraggingStack
+                && !isExpansionAnimating()
+                && !isExpanded()
+                && !isStackEduVisible()) {
+            // To calculate a distance, bubble stack needs to be moved to become stashed,
+            // we need to take into account that the bubble stack is positioned on the edge
+            // of the available screen rect, which can be offset by system bars and cutouts.
+            final float amountOffscreen = mBubbleSize - (mBubbleSize * PERCENT_HIDDEN_WHEN_STASHED);
+            if (mStackAnimationController.isStackOnLeftSide()) {
+                int availableRectOffsetX =
+                        mPositioner.getAvailableRect().left - mPositioner.getScreenRect().left;
+                mBubbleContainer
+                        .animate()
+                        .translationX(-(amountOffscreen + availableRectOffsetX))
+                        .start();
+            } else {
+                int availableRectOffsetX =
+                        mPositioner.getAvailableRect().right - mPositioner.getScreenRect().right;
+                mBubbleContainer.animate()
+                        .translationX(amountOffscreen - availableRectOffsetX)
+                        .start();
+            }
         }
     };
 
@@ -2385,6 +2441,9 @@ public class BubbleStackView extends FrameLayout
         updateBadges(false /* setBadgeForCollapsedStack */);
         updateOverflowVisibility();
         updatePointerPosition(false /* forIme */);
+        if (Flags.enableBubbleStashing()) {
+            mBubbleContainer.animate().translationX(0).start();
+        }
         mExpandedAnimationController.expandFromStack(() -> {
             if (mIsExpanded && mExpandedBubble != null
                     && mExpandedBubble.getExpandedView() != null) {
@@ -2550,6 +2609,7 @@ public class BubbleStackView extends FrameLayout
                 previouslySelected.setTaskViewVisibility(false);
             }
             mExpandedViewAnimationController.reset();
+            animateStashedState(false /* stashImmediately */);
         };
         mExpandedViewAnimationController.animateCollapse(collapseBackToStack, after,
                 collapsePosition);
@@ -2952,6 +3012,7 @@ public class BubbleStackView extends FrameLayout
             }
             // Hide the stack after a delay, if needed.
             updateTemporarilyInvisibleAnimation(false /* hideImmediately */);
+            animateStashedState(true /* stashImmediately */);
         };
 
         // Suppress the dot when we are animating the flyout.
@@ -3044,6 +3105,13 @@ public class BubbleStackView extends FrameLayout
                 outRect.left -= mBubbleTouchPadding;
                 outRect.right += mBubbleTouchPadding;
                 outRect.bottom += mBubbleTouchPadding;
+                if (Flags.enableBubbleStashing()) {
+                    if (mStackOnLeftOrWillBe) {
+                        outRect.right += mBubbleTouchPadding;
+                    } else {
+                        outRect.left -= mBubbleTouchPadding;
+                    }
+                }
             }
         } else {
             mBubbleContainer.getBoundsOnScreen(outRect);
@@ -3473,7 +3541,7 @@ public class BubbleStackView extends FrameLayout
      */
     int getBubbleIndex(@Nullable BubbleViewProvider provider) {
         if (provider == null) {
-            return 0;
+            return -1;
         }
         return mBubbleContainer.indexOfChild(provider.getIconView());
     }

@@ -370,18 +370,18 @@ public final class ProfcollectForwardingService extends SystemService {
     }
 
     private static void createAndUploadReport(ProfcollectForwardingService pfs) {
+        String reportName;
+        try {
+            reportName = pfs.mIProfcollect.report(pfs.mUsageSetting) + ".zip";
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Failed to create report: " + e.getMessage());
+            return;
+        }
+        if (!pfs.mUploadEnabled) {
+            Log.i(LOG_TAG, "Upload is not enabled.");
+            return;
+        }
         BackgroundThread.get().getThreadHandler().post(() -> {
-            String reportName;
-            try {
-                reportName = pfs.mIProfcollect.report(pfs.mUsageSetting) + ".zip";
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, "Failed to create report: " + e.getMessage());
-                return;
-            }
-            if (!pfs.mUploadEnabled) {
-                Log.i(LOG_TAG, "Upload is not enabled.");
-                return;
-            }
             Intent intent = new Intent()
                     .setPackage("com.android.shell")
                     .setAction("com.android.shell.action.PROFCOLLECT_UPLOAD")

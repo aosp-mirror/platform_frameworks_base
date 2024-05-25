@@ -660,4 +660,18 @@ public class HdmiCecNetworkTest {
         assertThat(mHdmiCecNetwork.getLocalDeviceList().get(0)).isInstanceOf(
                 HdmiCecLocalDeviceTv.class);
     }
+
+    @Test
+    public void portInfoInitiated_getPhysicalAddressCalled_readsFromHalOnFirstCallOnly() {
+        mNativeWrapper.clearGetPhysicalAddressCallHistory();
+        mNativeWrapper.setPhysicalAddress(0x0000);
+        mHdmiCecNetwork.initPortInfo();
+
+        assertThat(mHdmiCecNetwork.getPhysicalAddress()).isEqualTo(0x0000);
+        assertThat(mNativeWrapper.getPhysicalAddressCalled()).isTrue();
+
+        mNativeWrapper.clearGetPhysicalAddressCallHistory();
+        assertThat(mHdmiCecNetwork.getPhysicalAddress()).isEqualTo(0x0000);
+        assertThat(mNativeWrapper.getPhysicalAddressCalled()).isFalse();
+    }
 }

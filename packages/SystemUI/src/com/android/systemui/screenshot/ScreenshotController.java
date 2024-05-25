@@ -223,7 +223,8 @@ public class ScreenshotController {
     private Bitmap mScreenBitmap;
     private SaveImageInBackgroundTask mSaveInBgTask;
     private boolean mScreenshotTakenInPortrait;
-    private boolean mBlockAttach;
+    private boolean mAttachRequested;
+    private boolean mDetachRequested;
     private Animator mScreenshotAnimation;
     private RequestCallback mCurrentRequestCallback;
     private ScreenshotActionsProvider mActionsProvider;
@@ -672,7 +673,7 @@ public class ScreenshotController {
                 () -> {
                     final Intent intent = ActionIntentCreator.INSTANCE.createLongScreenshotIntent(
                             owner, mContext);
-                    mActionIntentExecutor.launchIntentAsync(intent, owner, true, null, null);
+                    mContext.startActivity(intent);
                 },
                 mViewProxy::restoreNonScrollingUi,
                 mViewProxy::startLongScreenshotTransition);
@@ -687,7 +688,7 @@ public class ScreenshotController {
                     new ViewTreeObserver.OnWindowAttachListener() {
                         @Override
                         public void onWindowAttached() {
-                            mBlockAttach = false;
+                            mAttachRequested = false;
                             decorView.getViewTreeObserver().removeOnWindowAttachListener(this);
                             action.run();
                         }
@@ -703,13 +704,13 @@ public class ScreenshotController {
     @MainThread
     private void attachWindow() {
         View decorView = mWindow.getDecorView();
-        if (decorView.isAttachedToWindow() || mBlockAttach) {
+        if (decorView.isAttachedToWindow() || mAttachRequested) {
             return;
         }
         if (DEBUG_WINDOW) {
             Log.d(TAG, "attachWindow");
         }
-        mBlockAttach = true;
+        mAttachRequested = true;
         mWindowManager.addView(decorView, mWindowLayoutParams);
         decorView.requestApplyInsets();
 
@@ -727,6 +728,11 @@ public class ScreenshotController {
                 Log.d(TAG, "Removing screenshot window");
             }
             mWindowManager.removeViewImmediate(decorView);
+            mDetachRequested = false;
+        }
+        if (mAttachRequested && !mDetachRequested) {
+            mDetachRequested = true;
+            withWindowAttached(this::removeWindow);
         }
 
         mViewProxy.stopInputListening();

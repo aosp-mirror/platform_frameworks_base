@@ -172,7 +172,6 @@ import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.interruption.AvalancheProvider;
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionLogger;
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider;
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProviderTestUtil;
@@ -189,7 +188,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
-import com.android.systemui.util.EventLog;
 import com.android.systemui.util.FakeEventLog;
 import com.android.systemui.util.WallpaperController;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -197,10 +195,8 @@ import com.android.systemui.util.concurrency.MessageRouterImpl;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.FakeGlobalSettings;
 import com.android.systemui.util.settings.FakeSettings;
-import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.settings.SystemSettings;
 import com.android.systemui.util.time.FakeSystemClock;
-import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.startingsurface.StartingSurface;
@@ -374,6 +370,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         mFakeGlobalSettings.putInt(HEADS_UP_NOTIFICATIONS_ENABLED, HEADS_UP_ON);
 
+        when(mBubbles.canShowBubbleNotification()).thenReturn(true);
+
         mVisualInterruptionDecisionProvider =
                 VisualInterruptionDecisionProviderTestUtil.INSTANCE.createProviderByFlag(
                         mAmbientDisplayConfiguration,
@@ -395,7 +393,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                         mUserTracker,
                         mAvalancheProvider,
                         mSystemSettings,
-                        mPackageManager);
+                        mPackageManager,
+                        Optional.of(mBubbles));
         mVisualInterruptionDecisionProvider.start();
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
@@ -1417,47 +1416,5 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(StatusBarStateController.StateListener.class);
         verify(mStatusBarStateController).addCallback(callbackCaptor.capture(), anyInt());
         callbackCaptor.getValue().onDozingChanged(isDozing);
-    }
-
-    public static class TestableNotificationInterruptStateProviderImpl extends
-            NotificationInterruptStateProviderImpl {
-
-        TestableNotificationInterruptStateProviderImpl(
-                PowerManager powerManager,
-                AmbientDisplayConfiguration ambientDisplayConfiguration,
-                StatusBarStateController controller,
-                KeyguardStateController keyguardStateController,
-                BatteryController batteryController,
-                HeadsUpManager headsUpManager,
-                NotificationInterruptLogger logger,
-                Handler mainHandler,
-                NotifPipelineFlags flags,
-                KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider,
-                UiEventLogger uiEventLogger,
-                UserTracker userTracker,
-                DeviceProvisionedController deviceProvisionedController,
-                SystemClock systemClock,
-                GlobalSettings globalSettings,
-                EventLog eventLog) {
-            super(
-                    powerManager,
-                    ambientDisplayConfiguration,
-                    batteryController,
-                    controller,
-                    keyguardStateController,
-                    headsUpManager,
-                    logger,
-                    mainHandler,
-                    flags,
-                    keyguardNotificationVisibilityProvider,
-                    uiEventLogger,
-                    userTracker,
-                    deviceProvisionedController,
-                    systemClock,
-                    globalSettings,
-                    eventLog
-            );
-            mUseHeadsUp = true;
-        }
     }
 }

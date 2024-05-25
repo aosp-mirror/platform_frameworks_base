@@ -26,15 +26,15 @@ import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInterac
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.statusBarStateController
-import com.android.systemui.statusbar.policy.KeyguardStateControllerImpl
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.statusbar.policy.keyguardStateController
 import com.android.systemui.util.time.systemClock
 
-var Kosmos.alternateBouncerInteractor by
+val Kosmos.alternateBouncerInteractor: AlternateBouncerInteractor by
     Kosmos.Fixture {
         AlternateBouncerInteractor(
             statusBarStateController = statusBarStateController,
-            keyguardStateController = mock<KeyguardStateControllerImpl>(),
+            keyguardStateController = keyguardStateController,
             bouncerRepository = keyguardBouncerRepository,
             fingerprintPropertyRepository = fingerprintPropertyRepository,
             biometricSettingsRepository = biometricSettingsRepository,
@@ -44,5 +44,6 @@ var Kosmos.alternateBouncerInteractor by
             keyguardInteractor = { keyguardInteractor },
             keyguardTransitionInteractor = { keyguardTransitionInteractor },
             scope = testScope.backgroundScope,
+            sceneInteractor = { sceneInteractor },
         )
     }

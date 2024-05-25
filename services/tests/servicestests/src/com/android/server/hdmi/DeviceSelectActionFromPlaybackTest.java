@@ -137,6 +137,7 @@ public class DeviceSelectActionFromPlaybackTest {
         mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
         mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
         mNativeWrapper = new FakeNativeWrapper();
+        mNativeWrapper.setPhysicalAddress(0x0000);
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
@@ -150,7 +151,7 @@ public class DeviceSelectActionFromPlaybackTest {
 
         mHdmiControlService.initService();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
-        mNativeWrapper.setPhysicalAddress(0x0000);
+
         mPowerManager = new FakePowerManagerWrapper(context);
         mHdmiControlService.setPowerManager(mPowerManager);
         mTestLooper.dispatchAll();

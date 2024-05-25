@@ -210,7 +210,7 @@ public class PowerAllowlistBackend {
                     mAppContext.getSystemService(ActivityManager.class).noteAppRestrictionEnabled(
                             pkg, uid, ActivityManager.RESTRICTION_LEVEL_EXEMPTED,
                             true, ActivityManager.RESTRICTION_REASON_USER,
-                            "settings", 0);
+                            "settings", ActivityManager.RESTRICTION_SOURCE_USER, 0);
                 }
             }
 
@@ -251,7 +251,7 @@ public class PowerAllowlistBackend {
                     mAppContext.getSystemService(ActivityManager.class).noteAppRestrictionEnabled(
                             pkg, uid, ActivityManager.RESTRICTION_LEVEL_EXEMPTED,
                             false, ActivityManager.RESTRICTION_REASON_USER,
-                            "settings", 0);
+                            "settings", ActivityManager.RESTRICTION_SOURCE_USER, 0L);
                 }
             }
 

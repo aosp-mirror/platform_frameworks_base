@@ -77,6 +77,7 @@ import com.android.internal.policy.IKeyguardStateCallback;
 import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.dagger.qualifiers.Application;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindParamsApplier;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindViewBinder;
@@ -101,6 +102,7 @@ import kotlinx.coroutines.CoroutineScope;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -116,6 +118,7 @@ public class KeyguardService extends Service {
     private final DisplayTracker mDisplayTracker;
     private final PowerInteractor mPowerInteractor;
     private final Lazy<SceneInteractor> mSceneInteractorLazy;
+    private final Executor mMainExecutor;
 
     private static RemoteAnimationTarget[] wrap(TransitionInfo info, boolean wallpapers,
             SurfaceControl.Transaction t, ArrayMap<SurfaceControl, SurfaceControl> leashMap,
@@ -331,7 +334,8 @@ public class KeyguardService extends Service {
             FeatureFlags featureFlags,
             PowerInteractor powerInteractor,
             WindowManagerOcclusionManager windowManagerOcclusionManager,
-            Lazy<SceneInteractor> sceneInteractorLazy) {
+            Lazy<SceneInteractor> sceneInteractorLazy,
+            @Main Executor mainExecutor) {
         super();
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;
@@ -341,6 +345,7 @@ public class KeyguardService extends Service {
         mFlags = featureFlags;
         mPowerInteractor = powerInteractor;
         mSceneInteractorLazy = sceneInteractorLazy;
+        mMainExecutor = mainExecutor;
 
         if (KeyguardWmStateRefactor.isEnabled()) {
             WindowManagerLockscreenVisibilityViewBinder.bind(
@@ -619,8 +624,8 @@ public class KeyguardService extends Service {
             mKeyguardViewMediator.showDismissibleKeyguard();
 
             if (SceneContainerFlag.isEnabled() && mFoldGracePeriodProvider.get().isEnabled()) {
-                mSceneInteractorLazy.get().changeScene(
-                        Scenes.Lockscreen, "KeyguardService.showDismissibleKeyguard");
+                mMainExecutor.execute(() -> mSceneInteractorLazy.get().changeScene(
+                        Scenes.Lockscreen, "KeyguardService.showDismissibleKeyguard"));
             }
         }
 

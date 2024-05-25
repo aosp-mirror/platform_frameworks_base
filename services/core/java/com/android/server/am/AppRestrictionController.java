@@ -31,11 +31,10 @@ import static android.app.ActivityManager.RESTRICTION_LEVEL_UNRESTRICTED;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_USER_LAUNCH_ONLY;
 import static android.app.ActivityManager.RESTRICTION_REASON_DEFAULT;
 import static android.app.ActivityManager.RESTRICTION_REASON_DORMANT;
-import static android.app.ActivityManager.RESTRICTION_REASON_REMOTE_TRIGGER;
+import static android.app.ActivityManager.RESTRICTION_REASON_POLICY;
 import static android.app.ActivityManager.RESTRICTION_REASON_SYSTEM_HEALTH;
 import static android.app.ActivityManager.RESTRICTION_REASON_USAGE;
 import static android.app.ActivityManager.RESTRICTION_REASON_USER;
-import static android.app.ActivityManager.RESTRICTION_REASON_USER_NUDGED;
 import static android.app.ActivityManager.RESTRICTION_SUBREASON_MAX_LENGTH;
 import static android.app.ActivityManager.UID_OBSERVER_ACTIVE;
 import static android.app.ActivityManager.UID_OBSERVER_GONE;
@@ -103,6 +102,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RestrictionLevel;
 import android.app.ActivityManager.RestrictionReason;
+import android.app.ActivityManager.RestrictionSource;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.AppBackgroundRestrictionListener;
 import android.app.AppOpsManager;
@@ -2378,7 +2378,8 @@ public final class AppRestrictionController {
      */
     public void noteAppRestrictionEnabled(String packageName, int uid,
             @RestrictionLevel int restrictionType, boolean enabled,
-            @RestrictionReason int reason, String subReason, long threshold) {
+            @RestrictionReason int reason, String subReason, @RestrictionSource int source,
+            long threshold) {
         if (DEBUG_BG_RESTRICTION_CONTROLLER) {
             Slog.i(TAG, (enabled ? "restricted " : "unrestricted ") + packageName + " to "
                     + restrictionType + " reason=" + reason + ", subReason=" + subReason
@@ -2397,7 +2398,8 @@ public final class AppRestrictionController {
                 enabled,
                 getRestrictionChangeReasonStatsd(reason, subReason),
                 subReason,
-                threshold);
+                threshold,
+                source);
     }
 
     private int getRestrictionTypeStatsd(@RestrictionLevel int level) {
@@ -2433,12 +2435,10 @@ public final class AppRestrictionController {
                     FrameworkStatsLog.APP_RESTRICTION_STATE_CHANGED__MAIN_REASON__REASON_USAGE;
             case RESTRICTION_REASON_USER ->
                     FrameworkStatsLog.APP_RESTRICTION_STATE_CHANGED__MAIN_REASON__REASON_USER;
-            case RESTRICTION_REASON_USER_NUDGED ->
-                    FrameworkStatsLog.APP_RESTRICTION_STATE_CHANGED__MAIN_REASON__REASON_USER_NUDGED;
             case RESTRICTION_REASON_SYSTEM_HEALTH ->
                     FrameworkStatsLog.APP_RESTRICTION_STATE_CHANGED__MAIN_REASON__REASON_SYSTEM_HEALTH;
-            case RESTRICTION_REASON_REMOTE_TRIGGER ->
-                    FrameworkStatsLog.APP_RESTRICTION_STATE_CHANGED__MAIN_REASON__REASON_REMOTE_TRIGGER;
+            case RESTRICTION_REASON_POLICY ->
+                    FrameworkStatsLog.APP_RESTRICTION_STATE_CHANGED__MAIN_REASON__REASON_POLICY;
             default ->
                     FrameworkStatsLog.APP_RESTRICTION_STATE_CHANGED__MAIN_REASON__REASON_OTHER;
         };

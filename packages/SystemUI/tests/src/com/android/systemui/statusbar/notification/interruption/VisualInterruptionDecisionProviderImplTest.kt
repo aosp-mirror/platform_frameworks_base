@@ -28,6 +28,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.BUBBLE
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PEEK
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PULSE
+import java.util.Optional
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.anyString
@@ -56,7 +57,8 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
             userTracker,
             avalancheProvider,
             systemSettings,
-            packageManager
+            packageManager,
+            Optional.of(bubbles)
         )
     }
 

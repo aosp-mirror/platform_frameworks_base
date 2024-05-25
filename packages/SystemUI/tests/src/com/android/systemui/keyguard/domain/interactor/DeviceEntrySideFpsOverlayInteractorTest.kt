@@ -115,6 +115,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
                 { mock(DeviceEntryFingerprintAuthInteractor::class.java) },
                 { mock(KeyguardInteractor::class.java) },
                 { mock(KeyguardTransitionInteractor::class.java) },
+                { kosmos.sceneInteractor },
                 testScope.backgroundScope,
             )
 

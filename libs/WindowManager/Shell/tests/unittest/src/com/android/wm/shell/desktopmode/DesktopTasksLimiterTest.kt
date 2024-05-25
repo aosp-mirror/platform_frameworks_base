@@ -298,7 +298,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         val task = createFreeformTask(displayId)
         `when`(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
         desktopTaskRepo.addActiveTask(displayId, task.taskId)
-        desktopTaskRepo.addOrMoveFreeformTaskToTop(task.taskId)
+        desktopTaskRepo.addOrMoveFreeformTaskToTop(displayId, task.taskId)
         return task
     }
 

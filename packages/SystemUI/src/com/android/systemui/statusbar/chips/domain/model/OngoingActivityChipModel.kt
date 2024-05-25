@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.chips.ui.model
+package com.android.systemui.statusbar.chips.domain.model
 
 import android.view.View
 import com.android.systemui.common.shared.model.Icon

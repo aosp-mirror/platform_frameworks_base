@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<app-ops v="1">
+    <pkg n="com.android.servicestests.apps.testapp">
+        <uid n="10001">
+            <op n="26">
+                <st id="attribution.tag.test.1" n="429496729601" t="1710799464518" d="2963" />
+                <st n="1073741824008" dv="companion:1" t="1712610342977" d="7596" pp="com.android.servicestests.apps.proxy" pc="com.android.servicestests.apps.proxy.attrtag" pu="10002" pdv="companion:2" />
+            </op>
+        </uid>
+    </pkg>
+</app-ops>

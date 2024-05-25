@@ -964,6 +964,9 @@ flag {
   namespace: "systemui"
   description: "Only dismiss media notifications when the control was removed by the user."
   bug: "335875159"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {

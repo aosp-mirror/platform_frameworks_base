@@ -683,7 +683,9 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * <p>
      * Read-only transactions may run concurrently with other read-only transactions, and if the
      * database is in WAL mode, they may also run concurrently with IMMEDIATE or EXCLUSIVE
-     * transactions.
+     * transactions. The {@code temp} schema may be modified during a read-only transaction;
+     * if the transaction is {@link #setTransactionSuccessful}, modifications to temp tables may
+     * be visible to some subsequent transactions.
      * <p>
      * Transactions can be nested.  However, the behavior of the transaction is not altered by
      * nested transactions.  A nested transaction may be any of the three transaction types but if

@@ -20,14 +20,19 @@ import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
 
 import static com.android.systemui.flags.Flags.KEYGUARD_TALKBACK_FIX;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
+import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRANSIENT;
 import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_ON;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -65,6 +70,8 @@ import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.deviceentry.domain.interactor.BiometricMessageInteractor;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFingerprintAuthInteractor;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.KeyguardIndication;
@@ -149,6 +156,10 @@ public class KeyguardIndicationControllerBaseTest extends SysuiTestCase {
     protected AlternateBouncerInteractor mAlternateBouncerInteractor;
     @Mock
     protected BiometricMessageInteractor mBiometricMessageInteractor;
+    @Mock
+    protected DeviceEntryFaceAuthInteractor mDeviceEntryFaceAuthInteractor;
+    @Mock
+    protected DeviceEntryFingerprintAuthInteractor mDeviceEntryFingerprintAuthInteractor;
     @Mock
     protected ScreenLifecycle mScreenLifecycle;
     @Mock
@@ -237,6 +248,7 @@ public class KeyguardIndicationControllerBaseTest extends SysuiTestCase {
                 .thenReturn(mock(StateFlow.class));
 
         when(mFaceHelpMessageDeferralFactory.create()).thenReturn(mFaceHelpMessageDeferral);
+        when(mDeviceEntryFingerprintAuthInteractor.isEngaged()).thenReturn(mock(StateFlow.class));
 
         mIndicationHelper = new IndicationHelper(mKeyguardUpdateMonitor);
 
@@ -279,7 +291,9 @@ public class KeyguardIndicationControllerBaseTest extends SysuiTestCase {
                 mFlags,
                 mIndicationHelper,
                 KeyguardInteractorFactory.create(mFlags).getKeyguardInteractor(),
-                mBiometricMessageInteractor
+                mBiometricMessageInteractor,
+                mDeviceEntryFingerprintAuthInteractor,
+                mDeviceEntryFaceAuthInteractor
         );
         mController.init();
         mController.setIndicationArea(mIndicationArea);
@@ -305,5 +319,23 @@ public class KeyguardIndicationControllerBaseTest extends SysuiTestCase {
 
         mExecutor.runAllReady();
         reset(mRotateTextViewController);
+    }
+
+    void verifyNoMessage(int type) {
+        if (type == INDICATION_TYPE_TRANSIENT) {
+            verify(mRotateTextViewController, never()).showTransient(anyString());
+        } else {
+            verify(mRotateTextViewController, never()).updateIndication(eq(type),
+                    any(KeyguardIndication.class), anyBoolean());
+        }
+    }
+
+    void verifyIndicationShown(int indicationType, String message) {
+        verify(mRotateTextViewController)
+                .updateIndication(eq(indicationType),
+                        mKeyguardIndicationCaptor.capture(),
+                        eq(true));
+        assertThat(mKeyguardIndicationCaptor.getValue().getMessage().toString())
+                .isEqualTo(message);
     }
 }
