@@ -56,7 +56,7 @@
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Каб выйсці, правядзіце па экране пальцам знізу ўверх або націсніце ў любым месцы над праграмай"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Запусціць рэжым кіравання адной рукой"</string>
     <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Выйсці з рэжыму кіравання адной рукой"</string>
-    <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Налады ўсплывальных апавяшчэнняў у праграме \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Налады ўсплывальных чатаў у праграме \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Дадатковае меню"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Зноў дадаць у стос"</string>
     <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ад праграмы \"<xliff:g id="APP_NAME">%2$s</xliff:g>\""</string>
@@ -70,16 +70,16 @@
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Налады \"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>\""</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Адхіліць апавяшчэнне"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Не паказваць размову ў выглядзе ўсплывальных апавяшчэнняў"</string>
-    <string name="bubbles_user_education_title" msgid="2112319053732691899">"Усплывальныя апавяшчэнні"</string>
-    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Новыя размовы будуць паказвацца як рухомыя значкі ці ўсплывальныя апавяшчэнні. Націсніце, каб адкрыць усплывальнае апавяшчэнне. Перацягніце яго, каб перамясціць."</string>
-    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Кіруйце ўсплывальнымі апавяшчэннямі ў любы час"</string>
-    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Каб выключыць усплывальныя апавяшчэнні з гэтай праграмы, націсніце \"Кіраваць\""</string>
+    <string name="bubbles_user_education_title" msgid="2112319053732691899">"Усплывальныя чаты"</string>
+    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Новыя размовы будуць паказвацца як рухомыя значкі ці ўсплывальныя чаты. Націсніце, каб адкрыць усплывальны чат. Перацягніце яго, каб перамясціць."</string>
+    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Кіруйце ўсплывальнымі чатамі"</string>
+    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Каб выключыць усплывальныя чаты з гэтай праграмы, націсніце \"Кіраваць\""</string>
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Зразумела"</string>
-    <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Няма нядаўніх усплывальных апавяшчэнняў"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Нядаўнія і адхіленыя ўсплывальныя апавяшчэнні будуць паказаны тут"</string>
-    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Чат з выкарыстаннем усплывальных апавяшчэнняў"</string>
+    <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Няма нядаўніх усплывальных чатаў"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Нядаўнія і адхіленыя ўсплывальныя чаты будуць паказаны тут"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Усплывальныя чаты"</string>
     <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Новыя размовы паказваюцца ў выглядзе значкоў у ніжнім вугле экрана. Націсніце на іх, каб разгарнуць. Перацягніце іх, калі хочаце закрыць."</string>
-    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Кіруйце наладамі ўсплывальных апавяшчэнняў у любы час"</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Кіруйце наладамі ўсплывальных чатаў у любы час"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Каб кіраваць усплывальнымі апавяшчэннямі для праграм і размоў, націсніце тут"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Усплывальнае апавяшчэнне"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Кіраваць"</string>
