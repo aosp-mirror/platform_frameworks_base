@@ -458,7 +458,7 @@ public class LogModule {
     @SysUISingleton
     @CarrierTextManagerLog
     public static LogBuffer provideCarrierTextManagerLog(LogBufferFactory factory) {
-        return factory.create("CarrierTextManagerLog", 100);
+        return factory.create("CarrierTextManagerLog", 400);
     }
 
     /**
