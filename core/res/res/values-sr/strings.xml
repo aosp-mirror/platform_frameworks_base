@@ -806,11 +806,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Надзор покушаја откључавања екрана"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Прати број нетачно унетих лозинки приликом откључавања екрана и закључава таблет или брише податке са таблета ако је нетачна лозинка унета превише пута."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава Android TV уређај или брише све податке са Android TV уређаја ако се унесе превише нетачних лозинки."</string>
-    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Прати број нетачно унетих лозинки при откључавању екрана и закључава систем за инфо-забаву или брише све податке са система за инфо-забаву ако је нетачна лозинка унета превише пута."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Прати број нетачно унетих лозинки при откључавању екрана и закључава систем за информације и забаву или брише све податке са система за информације и забаву ако је нетачна лозинка унета превише пута."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Прати број нетачно унетих лозинки при откључавању екрана и закључава телефон или брише све податке са телефона ако је нетачна лозинка унета превише пута."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава таблет или брише све податке овог корисника ако се унесе превише нетачних лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава Android TV уређај или брише све податке овог корисника ако се унесе превише нетачних лозинки."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава систем за инфо-забаву или брише све податке овог профила ако се унесе превише нетачних лозинки."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава систем за информације и забаву или брише све податке овог профила ако се унесе превише нетачних лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава телефон или брише све податке овог корисника ако се унесе превише нетачних лозинки."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Промена закључавања екрана"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Мења откључавање екрана."</string>
@@ -819,13 +819,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Брисање свих података"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Брисање података на таблету без упозорења ресетовањем на фабричка подешавања."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Брише податке Android TV уређаја без упозорења помоћу ресетовања на фабричка подешавања."</string>
-    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Брише податке на систему за инфо-забаву без упозорења ресетовањем на фабричка подешавања."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Брише податке на систему за информације и забаву без упозорења ресетовањем на фабричка подешавања."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Брисање података на телефону без упозорења ресетовањем на фабричка подешавања."</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Брисање података профила"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Обриши податке корисника"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Брише податке овог корисника на овом таблету без упозорења."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Брише податке овог корисника на овом Android TV уређају без упозорења."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Брише податке овог профила на овом систему за инфо-забаву без упозорења."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Брише податке овог профила на овом систему за информације и забаву без упозорења."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Брише податке овог корисника на овом телефону без упозорења."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Подесите глобални прокси сервер уређаја"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Подешава глобални прокси уређаја који ће се користити док су смернице омогућене. Само власник уређаја може да подеси глобални прокси."</string>
