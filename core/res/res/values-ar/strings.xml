@@ -2343,9 +2343,9 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"تم ضبط تنسيق لوحة المفاتيح على <xliff:g id="LAYOUT_1">%1$s</xliff:g> و<xliff:g id="LAYOUT_2">%2$s</xliff:g> و<xliff:g id="LAYOUT_3">%3$s</xliff:g>… انقر لتغييره."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"تم إعداد لوحات المفاتيح الخارجية"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"انقر لعرض لوحات المفاتيح."</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"ملف شخصي خاص"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"المساحة الخاصة"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"نسخة طبق الأصل"</string>
-    <string name="profile_label_work" msgid="3495359133038584618">"ملف العمل"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"مساحة العمل"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"ملف العمل 2"</string>
     <string name="profile_label_work_3" msgid="4834572253956798917">"ملف العمل 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"ملف شخصي تجريبي"</string>
