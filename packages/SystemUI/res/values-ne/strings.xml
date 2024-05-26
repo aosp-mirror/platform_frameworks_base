@@ -344,7 +344,7 @@
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"परिदृश्य टगल गर्नुहोस्"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"तपाईंलाई अलार्म, रिमाइन्डर, कार्यक्रम र तपाईंले निर्दिष्ट गर्नुभएका कलरहरू बाहेकका ध्वनि र कम्पनहरूले बाधा पुऱ्याउने छैनन्। तपाईंले अझै सङ्गीत, भिडियो र खेलहरू लगायत आफूले प्ले गर्न छनौट गरेका जुनसुकै कुरा सुन्न सक्नुहुनेछ।"</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"तपाईंलाई अलार्महरू बाहेकका ध्वनि र कम्पनहरूले बाधा पुऱ्याउने छैनन्। तपाईंले अझै सङ्गीत, भिडियो र खेलहरू लगायत आफूले प्ले गर्न छनौट गरेका जुनसुकै कुरा सुन्न सक्नुहुनेछ।"</string>
-    <string name="zen_priority_customize_button" msgid="4119213187257195047">"आफू अनुकूल बनाउनुहोस्"</string>
+    <string name="zen_priority_customize_button" msgid="4119213187257195047">" कस्टम बनाउनुहोस्"</string>
     <string name="zen_silence_introduction_voice" msgid="853573681302712348">"यसले अलार्म, सङ्गीत, भिडियो, र खेलहरू लगायत सबैका ध्वनि र कम्पनहरूमाथि रोक लगाउँछ। तपाईं अझै पनि फोन कलहरू गर्न सक्नुहुनेछ।"</string>
     <string name="zen_silence_introduction" msgid="6117517737057344014">"यसले अलार्म, सङ्गीत, भिडियोहरू र खेलहरूसहित सबै ध्वनिहरू र कम्पनहरूलाई रोक्छ।"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"खोल्न पुनः ट्याप गर्नुहोस्"</string>
@@ -373,7 +373,7 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"पूरै\nशान्त"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"प्राथमिकता \nमात्र"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"अलार्महरू \nमात्र"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • तारविनै चार्ज हुँदै छ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मा पूरै चार्ज हुन्छ"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • वायरलेस तरिकाले चार्ज हुँदै छ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मा पूरा चार्ज हुन्छ"</string>
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • चार्ज हुँदै छ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मा पूरै चार्ज हुन्छ"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • छिटो चार्ज हुँदै छ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मा पूरै चार्ज हुन्छ"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • बिस्तारै चार्ज हुँदै छ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मा पूरै चार्ज हुन्छ"</string>
@@ -547,7 +547,7 @@
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"कार्य प्रोफाइल"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"केहीका लागि रमाइलो हुन्छ तर सबैका लागि होइन"</string>
-    <string name="tuner_warning" msgid="1861736288458481650">"सिस्टम UI ट्युनरले तपाईँलाई Android प्रयोगकर्ता इन्टरफेस आफू अनुकूल गर्न र ट्विक गर्न थप तरिकाहरू प्रदान गर्छ। यी प्रयोगात्मक सुविधाहरू भावी विमोचनमा परिवर्तन हुन, बिग्रिन वा हराउन सक्ने छन्। सावधानीपूर्वक अगाडि बढ्नुहोस्।"</string>
+    <string name="tuner_warning" msgid="1861736288458481650">"सिस्टम UI ट्युनरले तपाईँलाई Android प्रयोगकर्ता इन्टरफेस  कस्टम गर्न र ट्विक गर्न थप तरिकाहरू प्रदान गर्छ। यी प्रयोगात्मक सुविधाहरू भावी विमोचनमा परिवर्तन हुन, बिग्रिन वा हराउन सक्ने छन्। सावधानीपूर्वक अगाडि बढ्नुहोस्।"</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"यी प्रयोगात्मक सुविधाहरू भावी विमोचनहरूमा परिवर्तन हुन, बिग्रन वा  हराउन सक्छन्। सावधानीपूर्वक अगाडि बढ्नुहोस्।"</string>
     <string name="got_it" msgid="477119182261892069">"बुझेँ"</string>
     <string name="tuner_toast" msgid="3812684836514766951">"बधाईँ छ! सेटिङहरूमा सिस्टम UI ट्युनर थप गरिएको छ"</string>
@@ -594,7 +594,7 @@
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> का सूचना सम्बन्धी नियन्त्रणहरूलाई खोलियो"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"<xliff:g id="APP_NAME">%1$s</xliff:g> का सूचना सम्बन्धी नियन्त्रणहरूलाई बन्द गरियो"</string>
     <string name="notification_more_settings" msgid="4936228656989201793">"थप सेटिङहरू"</string>
-    <string name="notification_app_settings" msgid="8963648463858039377">"आफू अनुकूल पार्नुहोस्"</string>
+    <string name="notification_app_settings" msgid="8963648463858039377">" कस्टम पार्नुहोस्"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"बबल देखाउनुहोस्"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"बबलहरू हटाउनुहोस्"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>

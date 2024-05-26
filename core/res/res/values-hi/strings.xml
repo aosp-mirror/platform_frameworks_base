@@ -2339,7 +2339,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"कीबोर्ड का लेआउट <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… पर सेट कर दिया गया है. इसे बदलने के लिए टैप करें."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"फ़िज़िकल कीबोर्ड कॉन्फ़िगर किए गए"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"कीबोर्ड देखने के लिए टैप करें"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"निजी"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"प्राइवेट"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"क्लोन"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"ऑफ़िस"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"ऑफ़िस 2"</string>

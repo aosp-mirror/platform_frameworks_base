@@ -23,7 +23,7 @@
     <string name="add_alarm_text" msgid="3545497316166999225">"अलार्म थप्नुहोस्"</string>
     <string name="add_notification_text" msgid="4431129543300614788">"सूचना थप्नुहोस्"</string>
     <string name="delete_ringtone_text" msgid="201443984070732499">"मेट्नुहोस्"</string>
-    <string name="unable_to_add_ringtone" msgid="4583511263449467326">"आफू अनुकूल रिङटोन थप्न सकिएन"</string>
-    <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"आफू अनुकूल रिङटोनलाई मेट्न सकिएन"</string>
+    <string name="unable_to_add_ringtone" msgid="4583511263449467326">" कस्टम रिङटोन थप्न सकिएन"</string>
+    <string name="unable_to_delete_ringtone" msgid="6792301380142859496">" कस्टम रिङटोनलाई मेट्न सकिएन"</string>
     <string name="app_label" msgid="3091611356093417332">"ध्वनिहरू"</string>
 </resources>
