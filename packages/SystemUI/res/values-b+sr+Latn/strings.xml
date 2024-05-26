@@ -147,7 +147,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Lice je prepoznato. Pritisnite da biste nastavili."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Lice prepoznato. Pritisnite ikonu otključavanja za nastavak."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Identitet je potvrđen"</string>
-    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Koristite PIN"</string>
+    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Koristi PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Koristite šablon"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Koristite lozinku"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"Pogrešan PIN"</string>
