@@ -43,7 +43,7 @@
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Ez a felhasználó nem telepíthet alkalmazásokat"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
     <string name="update_anyway" msgid="8792432341346261969">"Frissítés"</string>
-    <string name="manage_applications" msgid="5400164782453975580">"Alkalmazáskezelés"</string>
+    <string name="manage_applications" msgid="5400164782453975580">"Appok kezelése"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Nincs elég hely"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazást nem lehet telepíteni. Szabadítson fel egy kis helyet, és próbálkozzon újra."</string>
     <string name="app_not_found_dlg_title" msgid="5107924008597470285">"Az alkalmazás nem található"</string>
