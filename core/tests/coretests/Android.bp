@@ -103,6 +103,7 @@ android_test {
     sdk_version: "core_platform",
     test_suites: [
         "device-tests",
+        "device-platinum-tests",
         "automotive-tests",
     ],
 
@@ -211,6 +212,8 @@ android_ravenwood_test {
         "src/com/android/internal/util/**/*.java",
         "src/com/android/internal/power/EnergyConsumerStatsTest.java",
         ":FrameworksCoreTests{.aapt.srcjar}",
+        "src/com/android/internal/ravenwood/**/*.java",
+
         ":FrameworksCoreTests-aidl",
         ":FrameworksCoreTests-helpers",
         ":FrameworksCoreTestDoubles-sources",

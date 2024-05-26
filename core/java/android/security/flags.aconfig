@@ -79,8 +79,15 @@ flag {
 }
 
 flag {
-  name: "report_primary_auth_attempts"
-  namespace: "biometrics"
-  description: "Report primary auth attempts from LockSettingsService"
-  bug: "285053096"
+    name: "report_primary_auth_attempts"
+    namespace: "biometrics"
+    description: "Report primary auth attempts from LockSettingsService"
+    bug: "285053096"
+}
+
+flag {
+    name: "dump_attestation_verifications"
+    namespace: "hardware_backed_security"
+    description: "Add a dump capability for attestation_verification service"
+    bug: "335498868"
 }
