@@ -501,7 +501,7 @@
     <string name="screen_zoom_summary_large" msgid="4706951482598978984">"ठुलो"</string>
     <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"अझ ठुलो"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"सबैभन्दा ठुलो"</string>
-    <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"आफू अनुकूल (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <string name="screen_zoom_summary_custom" msgid="3468154096832912210">" कस्टम (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="6254844309171779931">"मेनु"</string>
     <string name="retail_demo_reset_message" msgid="5392824901108195463">"डेमो मोडमा फ्याक्ट्री रिसेट गर्न पासवर्ड प्रविष्टि गर्नुहोस्"</string>
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"अर्को"</string>
