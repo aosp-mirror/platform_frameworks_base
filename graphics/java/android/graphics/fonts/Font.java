@@ -787,7 +787,7 @@ public final class Font {
             return false;
         }
 
-        // ByteBuffer#equals compares all bytes which is not performant for e.g HashMap. Since
+        // ByteBuffer#equals compares all bytes which is not performant for e.g. HashMap. Since
         // underlying native font object holds buffer address, check if this buffer points exactly
         // the same address as a shortcut of equality. For being compatible with of API30 or before,
         // check buffer position even if the buffer points the same address.

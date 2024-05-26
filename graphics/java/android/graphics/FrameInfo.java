@@ -24,7 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Class that contains all the timing information for the current frame. This
  * is used in conjunction with the hardware renderer to provide
- * continous-monitoring jank events
+ * continuous-monitoring jank events
  *
  * All times in nanoseconds from CLOCK_MONOTONIC/System.nanoTime()
  *

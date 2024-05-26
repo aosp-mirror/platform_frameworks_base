@@ -137,7 +137,7 @@ public final class PositionedGlyphs {
      * Returns the glyph ID used for drawing the glyph at the given index.
      *
      * @param index the glyph index
-     * @return An glyph ID of the font.
+     * @return A glyph ID of the font.
      */
     @IntRange(from = 0)
     public int getGlyphId(@IntRange(from = 0) int index) {
