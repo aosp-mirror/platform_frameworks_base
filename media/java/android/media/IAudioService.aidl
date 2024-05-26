@@ -142,7 +142,7 @@ interface IAudioService {
     @UnsupportedAppUsage
     int getStreamMaxVolume(int streamType);
 
-    @EnforcePermission("MODIFY_AUDIO_ROUTING")
+    @EnforcePermission(anyOf={"MODIFY_AUDIO_SETTINGS_PRIVILEGED", "MODIFY_AUDIO_ROUTING"})
     List<AudioVolumeGroup> getAudioVolumeGroups();
 
     @EnforcePermission(anyOf={"MODIFY_AUDIO_SETTINGS_PRIVILEGED", "MODIFY_AUDIO_ROUTING"})
