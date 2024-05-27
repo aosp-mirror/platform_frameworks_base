@@ -196,7 +196,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(false)
         MediaPlayerData.clear()
         verify(globalSettings)
-            .registerContentObserver(
+            .registerContentObserverSync(
                 eq(Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE)),
                 capture(settingsObserverCaptor)
             )

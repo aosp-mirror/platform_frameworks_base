@@ -77,8 +77,8 @@ public class ReduceBrightColorsControllerImpl implements
             public void onUserChanged(int newUser, Context userContext) {
                 synchronized (mListeners) {
                     if (mListeners.size() > 0) {
-                        mSecureSettings.unregisterContentObserver(mContentObserver);
-                        mSecureSettings.registerContentObserverForUser(
+                        mSecureSettings.unregisterContentObserverSync(mContentObserver);
+                        mSecureSettings.registerContentObserverForUserSync(
                                 Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
                                 false, mContentObserver, newUser);
                     }
@@ -94,7 +94,7 @@ public class ReduceBrightColorsControllerImpl implements
             if (!mListeners.contains(listener)) {
                 mListeners.add(listener);
                 if (mListeners.size() == 1) {
-                    mSecureSettings.registerContentObserverForUser(
+                    mSecureSettings.registerContentObserverForUserSync(
                             Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
                             false, mContentObserver, mUserTracker.getUserId());
                 }
@@ -106,7 +106,7 @@ public class ReduceBrightColorsControllerImpl implements
     public void removeCallback(@androidx.annotation.NonNull Listener listener) {
         synchronized (mListeners) {
             if (mListeners.remove(listener) && mListeners.size() == 0) {
-                mSecureSettings.unregisterContentObserver(mContentObserver);
+                mSecureSettings.unregisterContentObserverSync(mContentObserver);
             }
         }
     }

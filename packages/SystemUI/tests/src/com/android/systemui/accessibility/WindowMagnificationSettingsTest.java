@@ -393,7 +393,7 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
 
         mWindowMagnificationSettings.showSettingPanel();
 
-        verify(mSecureSettings).registerContentObserverForUser(
+        verify(mSecureSettings).registerContentObserverForUserSync(
                 eq(ACCESSIBILITY_MAGNIFICATION_CAPABILITY),
                 any(ContentObserver.class),
                 eq(UserHandle.USER_CURRENT));
@@ -408,7 +408,7 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
         mWindowMagnificationSettings.showSettingPanel();
         mWindowMagnificationSettings.hideSettingPanel();
 
-        verify(mSecureSettings).unregisterContentObserver(any(ContentObserver.class));
+        verify(mSecureSettings).unregisterContentObserverSync(any(ContentObserver.class));
     }
 
     @Test

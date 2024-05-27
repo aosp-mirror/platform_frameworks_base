@@ -175,7 +175,7 @@ public class QSTileHostTest extends SysuiTestCase {
                 mTileLifecycleManagerFactory, mUserFileManager, mQSPipelineFlagsRepository);
         mMainExecutor.runAllReady();
 
-        mSecureSettings.registerContentObserverForUser(SETTING, new ContentObserver(null) {
+        mSecureSettings.registerContentObserverForUserSync(SETTING, new ContentObserver(null) {
             @Override
             public void onChange(boolean selfChange) {
                 super.onChange(selfChange);
