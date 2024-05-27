@@ -371,96 +371,57 @@ private fun prepareInterruption(
     transition: TransitionState.Transition,
     previousTransition: TransitionState.Transition,
 ) {
-    val previousUniqueState = reconcileStates(element, previousTransition)
-    if (previousUniqueState == null) {
-        reconcileStates(element, transition)
-        return
-    }
+    val sceneStates = element.sceneStates
+    sceneStates[previousTransition.fromScene]?.selfUpdateValuesBeforeInterruption()
+    sceneStates[previousTransition.toScene]?.selfUpdateValuesBeforeInterruption()
+    sceneStates[transition.fromScene]?.selfUpdateValuesBeforeInterruption()
+    sceneStates[transition.toScene]?.selfUpdateValuesBeforeInterruption()
 
-    val fromSceneState = element.sceneStates[transition.fromScene]
-    val toSceneState = element.sceneStates[transition.toScene]
-
-    if (
-        fromSceneState == null ||
-            toSceneState == null ||
-            sharedElementTransformation(element.key, transition)?.enabled != false
-    ) {
-        // If there is only one copy of the element or if the element is shared, animate deltas in
-        // both scenes.
-        fromSceneState?.updateValuesBeforeInterruption(previousUniqueState)
-        toSceneState?.updateValuesBeforeInterruption(previousUniqueState)
-    }
+    reconcileStates(element, previousTransition)
+    reconcileStates(element, transition)
 }
 
 /**
  * Reconcile the state of [element] in the fromScene and toScene of [transition] so that the values
  * before interruption have their expected values, taking shared transitions into account.
- *
- * If the element had a unique state, i.e. it is shared in [transition] or it is only present in one
- * of the scenes, return it.
  */
 private fun reconcileStates(
     element: Element,
     transition: TransitionState.Transition,
-): Element.SceneState? {
-    val fromSceneState = element.sceneStates[transition.fromScene]
-    val toSceneState = element.sceneStates[transition.toScene]
-    when {
-        // Element is in both scenes.
-        fromSceneState != null && toSceneState != null -> {
-            val isSharedTransformationDisabled =
-                sharedElementTransformation(element.key, transition)?.enabled == false
-            when {
-                // Element shared transition is disabled so the element is placed in both scenes.
-                isSharedTransformationDisabled -> {
-                    fromSceneState.updateValuesBeforeInterruption(fromSceneState)
-                    toSceneState.updateValuesBeforeInterruption(toSceneState)
-                    return null
-                }
+) {
+    val fromSceneState = element.sceneStates[transition.fromScene] ?: return
+    val toSceneState = element.sceneStates[transition.toScene] ?: return
+    if (!isSharedElementEnabled(element.key, transition)) {
+        return
+    }
 
-                // Element is shared and placed in fromScene only.
-                fromSceneState.lastOffset != Offset.Unspecified -> {
-                    fromSceneState.updateValuesBeforeInterruption(fromSceneState)
-                    toSceneState.updateValuesBeforeInterruption(fromSceneState)
-                    return fromSceneState
-                }
-
-                // Element is shared and placed in toScene only.
-                toSceneState.lastOffset != Offset.Unspecified -> {
-                    fromSceneState.updateValuesBeforeInterruption(toSceneState)
-                    toSceneState.updateValuesBeforeInterruption(toSceneState)
-                    return toSceneState
-                }
-
-                // Element is in none of the scenes.
-                else -> {
-                    fromSceneState.updateValuesBeforeInterruption(null)
-                    toSceneState.updateValuesBeforeInterruption(null)
-                    return null
-                }
-            }
-        }
-
-        // Element is only in fromScene.
-        fromSceneState != null -> {
-            fromSceneState.updateValuesBeforeInterruption(fromSceneState)
-            return fromSceneState
-        }
-
-        // Element is only in toScene.
-        toSceneState != null -> {
-            toSceneState.updateValuesBeforeInterruption(toSceneState)
-            return toSceneState
-        }
-        else -> return null
+    if (
+        fromSceneState.offsetBeforeInterruption != Offset.Unspecified &&
+            toSceneState.offsetBeforeInterruption == Offset.Unspecified
+    ) {
+        // Element is shared and placed in fromScene only.
+        toSceneState.updateValuesBeforeInterruption(fromSceneState)
+    } else if (
+        toSceneState.offsetBeforeInterruption != Offset.Unspecified &&
+            fromSceneState.offsetBeforeInterruption == Offset.Unspecified
+    ) {
+        // Element is shared and placed in toScene only.
+        fromSceneState.updateValuesBeforeInterruption(toSceneState)
     }
 }
 
-private fun Element.SceneState.updateValuesBeforeInterruption(lastState: Element.SceneState?) {
-    offsetBeforeInterruption = lastState?.lastOffset ?: Offset.Unspecified
-    sizeBeforeInterruption = lastState?.lastSize ?: Element.SizeUnspecified
-    scaleBeforeInterruption = lastState?.lastScale ?: Scale.Unspecified
-    alphaBeforeInterruption = lastState?.lastAlpha ?: Element.AlphaUnspecified
+private fun Element.SceneState.selfUpdateValuesBeforeInterruption() {
+    offsetBeforeInterruption = lastOffset
+    sizeBeforeInterruption = lastSize
+    scaleBeforeInterruption = lastScale
+    alphaBeforeInterruption = lastAlpha
+}
+
+private fun Element.SceneState.updateValuesBeforeInterruption(lastState: Element.SceneState) {
+    offsetBeforeInterruption = lastState.offsetBeforeInterruption
+    sizeBeforeInterruption = lastState.sizeBeforeInterruption
+    scaleBeforeInterruption = lastState.scaleBeforeInterruption
+    alphaBeforeInterruption = lastState.alphaBeforeInterruption
 
     clearInterruptionDeltas()
 }
