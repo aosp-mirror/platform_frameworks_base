@@ -636,6 +636,33 @@ class Owners {
         }
     }
 
+    boolean isRequiredPasswordComplexityMigrated() {
+        synchronized (mData) {
+            return mData.mRequiredPasswordComplexityMigrated;
+        }
+    }
+
+    void markRequiredPasswordComplexityMigrated() {
+        synchronized (mData) {
+            mData.mRequiredPasswordComplexityMigrated = true;
+            mData.writeDeviceOwner();
+        }
+
+    }
+
+    boolean isSuspendedPackagesMigrated() {
+        synchronized (mData) {
+            return mData.mSuspendedPackagesMigrated;
+        }
+    }
+
+    void markSuspendedPackagesMigrated() {
+        synchronized (mData) {
+            mData.mSuspendedPackagesMigrated = true;
+            mData.writeDeviceOwner();
+        }
+    }
+
     boolean isMigratedPostUpdate() {
         synchronized (mData) {
             return mData.mPoliciesMigratedPostUpdate;
