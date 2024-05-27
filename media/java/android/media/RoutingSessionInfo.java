@@ -904,7 +904,11 @@ public final class RoutingSessionInfo implements Parcelable {
         // The UserHandleName warning suggests the name should be "doFooAsUser". But the UserHandle
         // parameter of this function is stored in a field, and not used to execute an operation on
         // a specific user.
-        @SuppressWarnings("UserHandleName")
+        // The MissingGetterMatchingBuilder requires a getTransferInitiator function. But said
+        // getter is not included because the returned package name and user handle is always either
+        // null or the values that correspond to the calling app, and that information is obtainable
+        // via RoutingController#wasTransferInitiatedBySelf.
+        @SuppressWarnings({"UserHandleName", "MissingGetterMatchingBuilder"})
         @NonNull
         @FlaggedApi(FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES)
         public Builder setTransferInitiator(
