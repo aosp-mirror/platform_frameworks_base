@@ -36,8 +36,8 @@ import static android.os.Process.killProcessQuiet;
 import static android.os.Process.startWebView;
 import static android.system.OsConstants.EAGAIN;
 
+import static com.android.sdksandbox.flags.Flags.selinuxInputSelector;
 import static com.android.sdksandbox.flags.Flags.selinuxSdkSandboxAudit;
-import static com.android.sdksandbox.flags.Flags.selinuxSdkSandboxInputSelector;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LRU;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_NETWORK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
@@ -2068,7 +2068,7 @@ public final class ProcessList {
         }
 
         // The order of selectors in seInfo matters, the string is terminated by the word complete.
-        if (selinuxSdkSandboxInputSelector()) {
+        if (selinuxInputSelector()) {
             return app.info.seInfo + extraInfo + TextUtils.emptyIfNull(app.info.seInfoUser);
         } else {
             return app.info.seInfo
