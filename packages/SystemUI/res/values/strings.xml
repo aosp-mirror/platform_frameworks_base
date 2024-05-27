@@ -1947,15 +1947,15 @@
     <!-- Name used to refer to the "Back" key on the keyboard. -->
     <string name="keyboard_key_back">Back</string>
     <!-- Name used to refer to the "Up" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_up">Up arrow</string>
+    <string name="keyboard_key_dpad_up" translatable="false">Up arrow</string>
     <!-- Name used to refer to the "Down" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_down">Down arrow</string>
+    <string name="keyboard_key_dpad_down" translatable="false">Down arrow</string>
     <!-- Name used to refer to the "Left" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_left">Left arrow</string>
+    <string name="keyboard_key_dpad_left" translatable="false">Left arrow</string>
     <!-- Name used to refer to the "Right" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_right">Right arrow</string>
+    <string name="keyboard_key_dpad_right" translatable="false">Right arrow</string>
     <!-- Name used to refer to the "Center" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_center">Center</string>
+    <string name="keyboard_key_dpad_center" translatable="false">Center</string>
     <!-- Name used to refer to the "Tab" key on the keyboard. -->
     <string name="keyboard_key_tab">Tab</string>
     <!-- Name used to refer to the "Space" key on the keyboard. -->
