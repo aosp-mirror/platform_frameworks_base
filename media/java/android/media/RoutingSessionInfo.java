@@ -901,6 +901,10 @@ public final class RoutingSessionInfo implements Parcelable {
          * <p>By default the transfer initiation user handle and package name are set to {@code
          * null}.
          */
+        // The UserHandleName warning suggests the name should be "doFooAsUser". But the UserHandle
+        // parameter of this function is stored in a field, and not used to execute an operation on
+        // a specific user.
+        @SuppressWarnings("UserHandleName")
         @NonNull
         @FlaggedApi(FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES)
         public Builder setTransferInitiator(
