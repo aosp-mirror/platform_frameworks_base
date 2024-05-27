@@ -18,8 +18,8 @@ package com.android.server.wm;
 
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.LaunchParamsModifierUtils.applyLayoutGravity;
-import static com.android.server.wm.LaunchParamsModifierUtils.calculateLayoutBounds;
+import static com.android.server.wm.LaunchParamsUtil.applyLayoutGravity;
+import static com.android.server.wm.LaunchParamsUtil.calculateLayoutBounds;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
