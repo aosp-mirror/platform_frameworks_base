@@ -16,6 +16,7 @@
 
 package com.android.server.devicepolicy;
 
+import static android.app.admin.DevicePolicyIdentifiers.PACKAGES_SUSPENDED_POLICY;
 import static android.app.admin.DevicePolicyIdentifiers.USER_CONTROL_DISABLED_PACKAGES_POLICY;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_TARGET_USER_ID;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_UPDATE_RESULT_KEY;
@@ -78,6 +79,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -260,9 +265,7 @@ final class DevicePolicyEngine {
                 boolean policyEnforced = Objects.equals(
                         localPolicyState.getCurrentResolvedPolicy(), value);
                 // TODO(b/285532044): remove hack and handle properly
-                if (!policyEnforced
-                        && policyDefinition.getPolicyKey().getIdentifier().equals(
-                        USER_CONTROL_DISABLED_PACKAGES_POLICY)) {
+                if (!policyEnforced && shouldApplyPackageSetUnionPolicyHack(policyDefinition)) {
                     PolicyValue<Set<String>> parsedValue = (PolicyValue<Set<String>>) value;
                     PolicyValue<Set<String>> parsedResolvedValue =
                             (PolicyValue<Set<String>>) localPolicyState.getCurrentResolvedPolicy();
@@ -528,8 +531,7 @@ final class DevicePolicyEngine {
                         globalPolicyState.getCurrentResolvedPolicy(), value);
                 // TODO(b/285532044): remove hack and handle properly
                 if (!policyAppliedGlobally
-                        && policyDefinition.getPolicyKey().getIdentifier().equals(
-                        USER_CONTROL_DISABLED_PACKAGES_POLICY)) {
+                        && shouldApplyPackageSetUnionPolicyHack(policyDefinition)) {
                     PolicyValue<Set<String>> parsedValue = (PolicyValue<Set<String>>) value;
                     PolicyValue<Set<String>> parsedResolvedValue =
                             (PolicyValue<Set<String>>) globalPolicyState.getCurrentResolvedPolicy();
@@ -666,8 +668,7 @@ final class DevicePolicyEngine {
 
             }
             // TODO(b/285532044): remove hack and handle properly
-            if (policyDefinition.getPolicyKey().getIdentifier().equals(
-                    USER_CONTROL_DISABLED_PACKAGES_POLICY)) {
+            if (shouldApplyPackageSetUnionPolicyHack(policyDefinition)) {
                 if (!Objects.equals(value, localPolicyState.getCurrentResolvedPolicy())) {
                     PolicyValue<Set<String>> parsedValue = (PolicyValue<Set<String>>) value;
                     PolicyValue<Set<String>> parsedResolvedValue =
@@ -688,6 +689,12 @@ final class DevicePolicyEngine {
      */
     @Nullable
     <V> V getResolvedPolicy(@NonNull PolicyDefinition<V> policyDefinition, int userId) {
+        PolicyValue<V> resolvedValue = getResolvedPolicyValue(policyDefinition, userId);
+        return resolvedValue == null ? null : resolvedValue.getValue();
+    }
+
+    private <V> PolicyValue<V> getResolvedPolicyValue(@NonNull PolicyDefinition<V> policyDefinition,
+            int userId) {
         Objects.requireNonNull(policyDefinition);
 
         synchronized (mLock) {
@@ -699,8 +706,36 @@ final class DevicePolicyEngine {
                 resolvedValue = getGlobalPolicyStateLocked(
                         policyDefinition).getCurrentResolvedPolicy();
             }
-            return resolvedValue == null ? null : resolvedValue.getValue();
+            return resolvedValue;
         }
+    }
+
+    /**
+     * Retrieves resolved policy for the provided {@code policyDefinition} and a list of
+     * users.
+     */
+    @Nullable
+    <V> V getResolvedPolicyAcrossUsers(@NonNull PolicyDefinition<V> policyDefinition,
+            List<Integer> users) {
+        Objects.requireNonNull(policyDefinition);
+
+        List<PolicyValue<V>> adminPolicies = new ArrayList<>();
+        synchronized (mLock) {
+            for (int userId : users) {
+                PolicyValue<V> resolvedValue = getResolvedPolicyValue(policyDefinition, userId);
+                if (resolvedValue != null) {
+                    adminPolicies.add(resolvedValue);
+                }
+            }
+        }
+        // We will be aggregating PolicyValue across multiple admins across multiple users,
+        // including different policies set by the same admin on different users. This is
+        // not supported by ResolutionMechanism generically, instead we need to call the special
+        // resolve() method that doesn't care about admins who set the policy. Note that not every
+        // ResolutionMechanism supports this.
+        PolicyValue<V> resolvedValue =
+                policyDefinition.getResolutionMechanism().resolve(adminPolicies);
+        return resolvedValue == null ? null : resolvedValue.getValue();
     }
 
     /**
@@ -1743,6 +1778,18 @@ final class DevicePolicyEngine {
         }
     }
 
+    /**
+     * Create a backup of the policy engine XML file, so that we can recover previous state
+     * in case some data-loss bug is triggered e.g. during migration.
+     *
+     * Backup is only created if one with the same ID does not exist yet.
+     */
+    void createBackup(String backupId) {
+        synchronized (mLock) {
+            DevicePoliciesReaderWriter.createBackup(backupId);
+        }
+    }
+
     <V> void reapplyAllPoliciesOnBootLocked() {
         for (PolicyKey policy : mGlobalPolicies.keySet()) {
             PolicyState<?> policyState = mGlobalPolicies.get(policy);
@@ -1820,8 +1867,22 @@ final class DevicePolicyEngine {
         return false;
     }
 
+    /**
+     * For PackageSetUnion policies, we can't simply compare the resolved policy against the admin's
+     * policy for equality to determine if the admin has applied the policy successfully, instead
+     * the admin's policy should be considered applied successfully as long as its policy is subset
+     * of the resolved policy. This method controls which policies should use this special logic.
+     */
+    private <V> boolean shouldApplyPackageSetUnionPolicyHack(PolicyDefinition<V> policy) {
+        String policyKey =  policy.getPolicyKey().getIdentifier();
+        return policyKey.equals(USER_CONTROL_DISABLED_PACKAGES_POLICY)
+                || policyKey.equals(PACKAGES_SUSPENDED_POLICY);
+    }
+
     private class DevicePoliciesReaderWriter {
         private static final String DEVICE_POLICIES_XML = "device_policy_state.xml";
+        private static final String BACKUP_DIRECTORY = "device_policy_backups";
+        private static final String BACKUP_FILENAME = "device_policy_state.%s.xml";
         private static final String TAG_LOCAL_POLICY_ENTRY = "local-policy-entry";
         private static final String TAG_GLOBAL_POLICY_ENTRY = "global-policy-entry";
         private static final String TAG_POLICY_STATE_ENTRY = "policy-state-entry";
@@ -1836,8 +1897,30 @@ final class DevicePolicyEngine {
 
         private final File mFile;
 
+        private static File getFileName() {
+            return new File(Environment.getDataSystemDirectory(), DEVICE_POLICIES_XML);
+        }
         private DevicePoliciesReaderWriter() {
-            mFile = new File(Environment.getDataSystemDirectory(), DEVICE_POLICIES_XML);
+            mFile = getFileName();
+        }
+
+        public static void createBackup(String backupId) {
+            try {
+                File backupDirectory = new File(Environment.getDataSystemDirectory(),
+                        BACKUP_DIRECTORY);
+                backupDirectory.mkdir();
+                Path backupPath = Path.of(backupDirectory.getPath(),
+                        BACKUP_FILENAME.formatted(backupId));
+                if (backupPath.toFile().exists()) {
+                    Log.w(TAG, "Backup already exist: " + backupPath);
+                } else {
+                    Files.copy(getFileName().toPath(), backupPath,
+                            StandardCopyOption.REPLACE_EXISTING);
+                    Log.i(TAG, "Backup created at " + backupPath);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Cannot create backup " + backupId, e);
+            }
         }
 
         void writeToFileLocked() {

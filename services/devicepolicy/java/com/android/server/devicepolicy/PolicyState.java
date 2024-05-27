@@ -200,7 +200,7 @@ final class PolicyState<V> {
         pw.println(mPolicyDefinition.getPolicyKey());
         pw.increaseIndent();
 
-        pw.println("Per-admin Policy");
+        pw.println("Per-admin Policy:");
         pw.increaseIndent();
         if (mPoliciesSetByAdmins.size() == 0) {
             pw.println("null");

@@ -33,7 +33,7 @@ import com.android.server.wm.LaunchParamsController.LaunchParams;
 import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
 
 /** Common base class for launch param modifier unit test classes. */
-public class LaunchParamsModifierTestsBase extends WindowTestsBase{
+public class LaunchParamsModifierTestsBase<T extends LaunchParamsModifier> extends WindowTestsBase {
 
     static final Rect DISPLAY_BOUNDS = new Rect(/* left */ 0, /* top */ 0,
             /* right */ 1920, /* bottom */ 1080);
@@ -42,7 +42,7 @@ public class LaunchParamsModifierTestsBase extends WindowTestsBase{
 
     ActivityRecord mActivity;
 
-    LaunchParamsModifier mTarget;
+    T mTarget;
 
     LaunchParams mCurrent;
     LaunchParams mResult;

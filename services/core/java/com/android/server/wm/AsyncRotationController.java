@@ -505,10 +505,10 @@ class AsyncRotationController extends FadeAnimationController implements Consume
      */
     boolean shouldFreezeInsetsPosition(WindowState w) {
         // Non-change transition (OP_APP_SWITCH) and METHOD_BLAST don't use screenshot so the
-        // insets should keep original position before the start transaction is applied.
+        // insets should keep original position before the window is done with new rotation.
         return mTransitionOp != OP_LEGACY && (isSeamlessTransition()
                 || TransitionController.SYNC_METHOD == BLASTSyncEngine.METHOD_BLAST)
-                && !mIsStartTransactionCommitted && canBeAsync(w.mToken) && isTargetToken(w.mToken);
+                && canBeAsync(w.mToken) && isTargetToken(w.mToken);
     }
 
     /** Returns true if there won't be a screen rotation animation (screenshot-based). */

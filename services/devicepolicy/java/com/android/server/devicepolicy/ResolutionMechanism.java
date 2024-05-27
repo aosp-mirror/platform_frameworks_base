@@ -20,9 +20,24 @@ import android.annotation.Nullable;
 import android.app.admin.PolicyValue;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 
 abstract class ResolutionMechanism<V> {
+    /**
+     * The most generic resolution logic where we know both the policy value and the admin who
+     * sets it.
+     */
     @Nullable
     abstract PolicyValue<V> resolve(LinkedHashMap<EnforcingAdmin, PolicyValue<V>> adminPolicies);
+
+    /**
+     * A special resolution logic that does not care about admins who set them. Only applicable to
+     * a subset of ResolutionMechanism.
+     */
+    @Nullable
+    PolicyValue<V> resolve(List<PolicyValue<V>> adminPolicies) {
+        throw new UnsupportedOperationException();
+    }
+
     abstract android.app.admin.ResolutionMechanism<V> getParcelableResolutionMechanism();
 }
