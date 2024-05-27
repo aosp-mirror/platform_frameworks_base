@@ -290,7 +290,7 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         }
         // The insets position may be frozen by shouldFreezeInsetsPosition(), so refresh the
         // position to the latest state when it is ready to show in new rotation.
-        if (mTransitionOp == OP_APP_SWITCH) {
+        if (isSeamlessTransition()) {
             for (int i = windowToken.getChildCount() - 1; i >= 0; i--) {
                 final WindowState w = windowToken.getChildAt(i);
                 final InsetsSourceProvider insetsProvider = w.getControllableInsetProvider();
@@ -505,10 +505,15 @@ class AsyncRotationController extends FadeAnimationController implements Consume
      */
     boolean shouldFreezeInsetsPosition(WindowState w) {
         // Non-change transition (OP_APP_SWITCH) and METHOD_BLAST don't use screenshot so the
-        // insets should keep original position before the start transaction is applied.
-        return mTransitionOp != OP_LEGACY && (mTransitionOp == OP_APP_SWITCH
+        // insets should keep original position before the window is done with new rotation.
+        return mTransitionOp != OP_LEGACY && (isSeamlessTransition()
                 || TransitionController.SYNC_METHOD == BLASTSyncEngine.METHOD_BLAST)
-                && !mIsStartTransactionCommitted && canBeAsync(w.mToken) && isTargetToken(w.mToken);
+                && canBeAsync(w.mToken) && isTargetToken(w.mToken);
+    }
+
+    /** Returns true if there won't be a screen rotation animation (screenshot-based). */
+    private boolean isSeamlessTransition() {
+        return mTransitionOp == OP_APP_SWITCH || mTransitionOp == OP_CHANGE_MAY_SEAMLESS;
     }
 
     /**
