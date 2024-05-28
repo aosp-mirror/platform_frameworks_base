@@ -212,22 +212,7 @@ internal fun <T> animateSharedValueAsState(
     SideEffect { sceneToValueMap<T>(layoutImpl, key, element)[scene] = value }
 
     return remember(layoutImpl, scene, element, lerp, canOverflow) {
-        object : AnimatedState<T> {
-            override val value: T
-                get() = value(layoutImpl, scene, element, key, lerp, canOverflow)
-
-            @Composable
-            override fun unsafeCompositionState(initialValue: T): State<T> {
-                val state = remember { mutableStateOf(initialValue) }
-
-                val animatedState = this
-                LaunchedEffect(animatedState) {
-                    snapshotFlow { animatedState.value }.collect { state.value = it }
-                }
-
-                return state
-            }
-        }
+        AnimatedStateImpl(layoutImpl, scene, element, key, lerp, canOverflow)
     }
 }
 
@@ -245,81 +230,83 @@ private fun valueReadTooEarlyMessage(key: ValueKey) =
         "means that you are reading it during composition, which you should not do. See the " +
         "documentation of AnimatedState for more information."
 
-private fun <T> value(
-    layoutImpl: SceneTransitionLayoutImpl,
-    scene: SceneKey,
-    element: ElementKey?,
-    key: ValueKey,
-    lerp: (T, T, Float) -> T,
-    canOverflow: Boolean,
-): T {
-    return valueOrNull(layoutImpl, scene, element, key, lerp, canOverflow)
-        ?: error(valueReadTooEarlyMessage(key))
-}
+private class AnimatedStateImpl<T>(
+    private val layoutImpl: SceneTransitionLayoutImpl,
+    private val scene: SceneKey,
+    private val element: ElementKey?,
+    private val key: ValueKey,
+    private val lerp: (T, T, Float) -> T,
+    private val canOverflow: Boolean,
+) : AnimatedState<T> {
+    override val value: T
+        get() = valueOrNull() ?: error(valueReadTooEarlyMessage(key))
 
-private fun <T> valueOrNull(
-    layoutImpl: SceneTransitionLayoutImpl,
-    scene: SceneKey,
-    element: ElementKey?,
-    key: ValueKey,
-    lerp: (T, T, Float) -> T,
-    canOverflow: Boolean,
-): T? {
-    val sceneToValueMap = sceneToValueMap<T>(layoutImpl, key, element)
-    fun sceneValue(scene: SceneKey): T? = sceneToValueMap[scene]
+    private fun valueOrNull(): T? {
+        val sceneToValueMap = sceneToValueMap<T>(layoutImpl, key, element)
+        fun sceneValue(scene: SceneKey): T? = sceneToValueMap[scene]
 
-    val transition =
-        transition(layoutImpl, element, sceneToValueMap)
-            ?: return sceneValue(layoutImpl.state.transitionState.currentScene)
+        val transition =
+            transition(sceneToValueMap)
+                ?: return sceneValue(layoutImpl.state.transitionState.currentScene)
+                    // TODO(b/311600838): Remove this. We should not have to fallback to the current
+                    // scene value, but we have to because code of removed nodes can still run if
+                    // they are placed with a graphics layer.
+                    ?: sceneValue(scene)
+
+        val fromValue = sceneValue(transition.fromScene)
+        val toValue = sceneValue(transition.toScene)
+        return if (fromValue != null && toValue != null) {
+            if (fromValue == toValue) {
+                // Optimization: avoid reading progress if the values are the same, so we don't
+                // relayout/redraw for nothing.
+                fromValue
+            } else {
+                // In the case of bouncing, if the value remains constant during the overscroll, we
+                // should use the value of the scene we are bouncing around.
+                if (!canOverflow && transition is TransitionState.HasOverscrollProperties) {
+                    val bouncingScene = transition.bouncingScene
+                    if (bouncingScene != null) {
+                        return sceneValue(bouncingScene)
+                    }
+                }
+
+                val progress =
+                    if (canOverflow) transition.progress
+                    else transition.progress.fastCoerceIn(0f, 1f)
+                lerp(fromValue, toValue, progress)
+            }
+        } else
+            fromValue
+                ?: toValue
                 // TODO(b/311600838): Remove this. We should not have to fallback to the current
                 // scene value, but we have to because code of removed nodes can still run if they
                 // are placed with a graphics layer.
                 ?: sceneValue(scene)
+    }
 
-    val fromValue = sceneValue(transition.fromScene)
-    val toValue = sceneValue(transition.toScene)
-    return if (fromValue != null && toValue != null) {
-        if (fromValue == toValue) {
-            // Optimization: avoid reading progress if the values are the same, so we don't
-            // relayout/redraw for nothing.
-            fromValue
-        } else {
-            // In the case of bouncing, if the value remains constant during the overscroll,
-            // we should use the value of the scene we are bouncing around.
-            if (!canOverflow && transition is TransitionState.HasOverscrollProperties) {
-                val bouncingScene = transition.bouncingScene
-                if (bouncingScene != null) {
-                    return sceneValue(bouncingScene)
+    private fun transition(sceneToValueMap: Map<SceneKey, *>): TransitionState.Transition? {
+        return if (element != null) {
+            layoutImpl.elements[element]?.sceneStates?.let { sceneStates ->
+                layoutImpl.state.currentTransitions.fastLastOrNull { transition ->
+                    transition.fromScene in sceneStates || transition.toScene in sceneStates
                 }
             }
-
-            val progress =
-                if (canOverflow) transition.progress else transition.progress.fastCoerceIn(0f, 1f)
-            lerp(fromValue, toValue, progress)
-        }
-    } else
-        fromValue
-            ?: toValue
-            // TODO(b/311600838): Remove this. We should not have to fallback to the current scene
-            // value, but we have to because code of removed nodes can still run if they are placed
-            // with a graphics layer.
-            ?: sceneValue(scene)
-}
-
-private fun transition(
-    layoutImpl: SceneTransitionLayoutImpl,
-    element: ElementKey?,
-    sceneToValueMap: Map<SceneKey, *>,
-): TransitionState.Transition? {
-    return if (element != null) {
-        layoutImpl.elements[element]?.sceneStates?.let { sceneStates ->
+        } else {
             layoutImpl.state.currentTransitions.fastLastOrNull { transition ->
-                transition.fromScene in sceneStates || transition.toScene in sceneStates
+                transition.fromScene in sceneToValueMap || transition.toScene in sceneToValueMap
             }
         }
-    } else {
-        layoutImpl.state.currentTransitions.fastLastOrNull { transition ->
-            transition.fromScene in sceneToValueMap || transition.toScene in sceneToValueMap
+    }
+
+    @Composable
+    override fun unsafeCompositionState(initialValue: T): State<T> {
+        val state = remember { mutableStateOf(initialValue) }
+
+        val animatedState = this
+        LaunchedEffect(animatedState) {
+            snapshotFlow { animatedState.value }.collect { state.value = it }
         }
+
+        return state
     }
 }
