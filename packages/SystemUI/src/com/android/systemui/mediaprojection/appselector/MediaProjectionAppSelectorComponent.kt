@@ -65,7 +65,7 @@ import kotlinx.coroutines.SupervisorJob
     subcomponents = [MediaProjectionAppSelectorComponent::class],
     includes = [MediaProjectionDevicePolicyModule::class]
 )
-interface MediaProjectionModule {
+interface MediaProjectionActivitiesModule {
     @Binds
     @IntoMap
     @ClassKey(MediaProjectionAppSelectorActivity::class)

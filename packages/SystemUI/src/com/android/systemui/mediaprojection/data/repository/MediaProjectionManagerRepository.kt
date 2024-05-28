@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.mediaprojection.taskswitcher.data.repository
+package com.android.systemui.mediaprojection.data.repository
 
 import android.app.ActivityManager.RunningTaskInfo
 import android.media.projection.MediaProjectionInfo
@@ -24,20 +24,21 @@ import android.util.Log
 import android.view.ContentRecordingSession
 import android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.mediaprojection.MediaProjectionServiceHelper
-import com.android.systemui.mediaprojection.taskswitcher.data.model.MediaProjectionState
+import com.android.systemui.mediaprojection.data.model.MediaProjectionState
+import com.android.systemui.mediaprojection.taskswitcher.data.repository.TasksRepository
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -88,7 +89,11 @@ constructor(
                 mediaProjectionManager.addCallback(callback, handler)
                 awaitClose { mediaProjectionManager.removeCallback(callback) }
             }
-            .shareIn(scope = applicationScope, started = SharingStarted.Lazily, replay = 1)
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Lazily,
+                initialValue = MediaProjectionState.NotProjecting,
+            )
 
     private suspend fun stateForSession(session: ContentRecordingSession?): MediaProjectionState {
         if (session == null) {
