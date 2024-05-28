@@ -341,10 +341,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int SHORT_PRESS_SLEEP_GO_TO_SLEEP = 0;
     static final int SHORT_PRESS_SLEEP_GO_TO_SLEEP_AND_GO_HOME = 1;
 
-    // must match: config_shortPressOnSettingsBehavior in config.xml
-    static final int SHORT_PRESS_SETTINGS_NOTHING = 0;
-    static final int SHORT_PRESS_SETTINGS_NOTIFICATION_PANEL = 1;
-    static final int LAST_SHORT_PRESS_SETTINGS_BEHAVIOR = SHORT_PRESS_SETTINGS_NOTIFICATION_PANEL;
+    // must match: config_settingsKeyBehavior in config.xml
+    static final int SETTINGS_KEY_BEHAVIOR_SETTINGS_ACTIVITY = 0;
+    static final int SETTINGS_KEY_BEHAVIOR_NOTIFICATION_PANEL = 1;
+    static final int SETTINGS_KEY_BEHAVIOR_NOTHING = 2;
+    static final int LAST_SETTINGS_KEY_BEHAVIOR = SETTINGS_KEY_BEHAVIOR_NOTHING;
 
     static final int PENDING_KEY_NULL = -1;
 
@@ -370,8 +371,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int TRIPLE_PRESS_PRIMARY_TOGGLE_ACCESSIBILITY = 1;
 
     // Must match: config_searchKeyBehavior in config.xml
-    static final int SEARCH_BEHAVIOR_DEFAULT_SEARCH = 0;
-    static final int SEARCH_BEHAVIOR_TARGET_ACTIVITY = 1;
+    static final int SEARCH_KEY_BEHAVIOR_DEFAULT_SEARCH = 0;
+    static final int SEARCH_KEY_BEHAVIOR_TARGET_ACTIVITY = 1;
 
     static public final String SYSTEM_DIALOG_REASON_KEY = "reason";
     static public final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
@@ -643,8 +644,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // What we do when the user double-taps on home
     int mDoubleTapOnHomeBehavior;
 
-    // What we do when the user presses on settings
-    int mShortPressOnSettingsBehavior;
+    // What we do when the user presses the settings key
+    int mSettingsKeyBehavior;
 
     // Must match config_primaryShortPressTargetActivity in config.xml
     ComponentName mPrimaryShortPressTargetActivity;
@@ -2858,11 +2859,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mShortPressOnWindowBehavior = SHORT_PRESS_WINDOW_PICTURE_IN_PICTURE;
         }
 
-        mShortPressOnSettingsBehavior = res.getInteger(
-                com.android.internal.R.integer.config_shortPressOnSettingsBehavior);
-        if (mShortPressOnSettingsBehavior < SHORT_PRESS_SETTINGS_NOTHING
-                || mShortPressOnSettingsBehavior > LAST_SHORT_PRESS_SETTINGS_BEHAVIOR) {
-            mShortPressOnSettingsBehavior = SHORT_PRESS_SETTINGS_NOTHING;
+        mSettingsKeyBehavior = res.getInteger(
+                com.android.internal.R.integer.config_settingsKeyBehavior);
+        if (mSettingsKeyBehavior < SETTINGS_KEY_BEHAVIOR_SETTINGS_ACTIVITY
+                || mSettingsKeyBehavior > LAST_SETTINGS_KEY_BEHAVIOR) {
+            mSettingsKeyBehavior = SETTINGS_KEY_BEHAVIOR_SETTINGS_ACTIVITY;
         }
     }
 
@@ -3694,12 +3695,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_SEARCH:
                 if (firstDown && !keyguardOn) {
                     switch (mSearchKeyBehavior) {
-                        case SEARCH_BEHAVIOR_TARGET_ACTIVITY: {
+                        case SEARCH_KEY_BEHAVIOR_TARGET_ACTIVITY: {
                             launchTargetSearchActivity();
                             logKeyboardSystemsEvent(event, KeyboardLogEvent.LAUNCH_SEARCH);
                             return true;
                         }
-                        case SEARCH_BEHAVIOR_DEFAULT_SEARCH:
+                        case SEARCH_KEY_BEHAVIOR_DEFAULT_SEARCH:
                         default:
                             break;
                     }
@@ -3778,14 +3779,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         + " interceptKeyBeforeQueueing");
                 return true;
             case KeyEvent.KEYCODE_SETTINGS:
-                if (mShortPressOnSettingsBehavior == SHORT_PRESS_SETTINGS_NOTIFICATION_PANEL) {
-                    if (!down) {
+                if (firstDown) {
+                    if (mSettingsKeyBehavior == SETTINGS_KEY_BEHAVIOR_NOTIFICATION_PANEL) {
                         toggleNotificationPanel();
                         logKeyboardSystemsEvent(event, KeyboardLogEvent.TOGGLE_NOTIFICATION_PANEL);
+                    } else if (mSettingsKeyBehavior == SETTINGS_KEY_BEHAVIOR_SETTINGS_ACTIVITY) {
+                        showSystemSettings();
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.LAUNCH_SYSTEM_SETTINGS);
                     }
-                    return true;
                 }
-                break;
+                return true;
             case KeyEvent.KEYCODE_STEM_PRIMARY:
                 if (prepareToSendSystemKeyToApplication(focusedToken, event)) {
                     // Send to app.
@@ -6563,8 +6566,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print("mLongPressOnPowerBehavior=");
                 pw.println(longPressOnPowerBehaviorToString(mLongPressOnPowerBehavior));
         pw.print(prefix);
-        pw.print("mShortPressOnSettingsBehavior=");
-        pw.println(shortPressOnSettingsBehaviorToString(mShortPressOnSettingsBehavior));
+        pw.print("mSettingsKeyBehavior=");
+        pw.println(settingsKeyBehaviorToString(mSettingsKeyBehavior));
         pw.print(prefix);
         pw.print("mLongPressOnPowerAssistantTimeoutMs=");
         pw.println(mLongPressOnPowerAssistantTimeoutMs);
@@ -6766,12 +6769,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private static String shortPressOnSettingsBehaviorToString(int behavior) {
+    private static String settingsKeyBehaviorToString(int behavior) {
         switch (behavior) {
-            case SHORT_PRESS_SETTINGS_NOTHING:
-                return "SHORT_PRESS_SETTINGS_NOTHING";
-            case SHORT_PRESS_SETTINGS_NOTIFICATION_PANEL:
-                return "SHORT_PRESS_SETTINGS_NOTIFICATION_PANEL";
+            case SETTINGS_KEY_BEHAVIOR_SETTINGS_ACTIVITY:
+                return "SETTINGS_KEY_BEHAVIOR_SETTINGS_ACTIVITY";
+            case SETTINGS_KEY_BEHAVIOR_NOTIFICATION_PANEL:
+                return "SETTINGS_KEY_BEHAVIOR_NOTIFICATION_PANEL";
+            case SETTINGS_KEY_BEHAVIOR_NOTHING:
+                return "SETTINGS_KEY_BEHAVIOR_NOTHING";
             default:
                 return Integer.toString(behavior);
         }

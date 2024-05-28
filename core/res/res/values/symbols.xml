@@ -1861,7 +1861,7 @@
   <java-symbol type="integer" name="config_lidNavigationAccessibility" />
   <java-symbol type="integer" name="config_lidOpenRotation" />
   <java-symbol type="integer" name="config_longPressOnHomeBehavior" />
-  <java-symbol type="integer" name="config_shortPressOnSettingsBehavior" />
+  <java-symbol type="integer" name="config_settingsKeyBehavior" />
   <java-symbol type="layout" name="global_actions" />
   <java-symbol type="layout" name="global_actions_item" />
   <java-symbol type="layout" name="global_actions_silent_mode" />

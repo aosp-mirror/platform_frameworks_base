@@ -496,8 +496,8 @@ class TestPhoneWindowManager {
         mPhoneWindowManager.mDoubleTapOnHomeBehavior = behavior;
     }
 
-    void overrideShortPressOnSettingsBehavior(int behavior) {
-        mPhoneWindowManager.mShortPressOnSettingsBehavior = behavior;
+    void overrideSettingsKeyBehavior(int behavior) {
+        mPhoneWindowManager.mSettingsKeyBehavior = behavior;
     }
 
     void overrideCanStartDreaming(boolean canDream) {
