@@ -180,7 +180,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"Unele valori prestabilite sunt configurate"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Nu este configurată nicio valoare prestabilită"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Setări redare vocală a textului"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Rezultatul redării vocale a textului"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Setări pentru redarea vocală a textului"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Ritmul vorbirii"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Viteza cu care este vorbit textul"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Înălțime"</string>
