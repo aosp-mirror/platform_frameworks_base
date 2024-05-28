@@ -2150,7 +2150,7 @@
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Konversation"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Gruppkonversation"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
-    <string name="resolver_personal_tab" msgid="2051260504014442073">"Privat"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Personlig"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Jobb"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Personlig vy"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Jobbvy"</string>

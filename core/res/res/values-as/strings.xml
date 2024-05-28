@@ -2339,7 +2339,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"কীব’ৰ্ডৰ লে’আউট <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> হিচাপে ছেট কৰা হৈছে… সলনি কৰিবলৈ টিপক।"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"ভৌতিক কীব’ৰ্ড কনফিগাৰ কৰা হৈছে"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"কীব’ৰ্ড চাবলৈ টিপক"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"ব্যক্তিগত"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"প্ৰাইভেট"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"ক্ল’ন"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"কৰ্মস্থান"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"কৰ্মস্থান ২"</string>
