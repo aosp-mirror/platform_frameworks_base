@@ -90,9 +90,19 @@ constructor(
         val closingAlpha = max(1f - linearProgress * 5, 0f)
         val progress = postCommitInterpolator.getInterpolation(linearProgress)
         currentClosingRect.setInterpolatedRectF(startClosingRect, targetClosingRect, progress)
-        applyTransform(closingTarget?.leash, currentClosingRect, closingAlpha)
+        applyTransform(
+            closingTarget?.leash,
+            currentClosingRect,
+            closingAlpha,
+            flingMode = FlingMode.FLING_BOUNCE
+        )
         currentEnteringRect.setInterpolatedRectF(startEnteringRect, targetEnteringRect, progress)
-        applyTransform(enteringTarget?.leash, currentEnteringRect, 1f)
+        applyTransform(
+            enteringTarget?.leash,
+            currentEnteringRect,
+            1f,
+            flingMode = FlingMode.FLING_BOUNCE
+        )
         applyTransaction()
     }
 
