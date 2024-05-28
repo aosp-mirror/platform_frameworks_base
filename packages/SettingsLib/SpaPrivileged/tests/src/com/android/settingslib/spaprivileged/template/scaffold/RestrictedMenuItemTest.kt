@@ -49,6 +49,15 @@ class RestrictedMenuItemTest {
     private var menuItemOnClickIsCalled = false
 
     @Test
+    fun whenDisabled() {
+        val restrictions = Restrictions(userId = USER_ID, keys = emptyList())
+
+        setContent(restrictions, enabled = false)
+
+        composeTestRule.onNodeWithText(TEXT).assertIsDisplayed().assertIsNotEnabled()
+    }
+
+    @Test
     fun whenRestrictionsKeysIsEmpty_enabled() {
         val restrictions = Restrictions(userId = USER_ID, keys = emptyList())
 
@@ -153,13 +162,14 @@ class RestrictedMenuItemTest {
         assertThat(menuItemOnClickIsCalled).isFalse()
     }
 
-    private fun setContent(restrictions: Restrictions) {
+    private fun setContent(restrictions: Restrictions, enabled: Boolean = true) {
         val fakeMoreOptionsScope = object : MoreOptionsScope() {
             override fun dismiss() {}
         }
         composeTestRule.setContent {
             fakeMoreOptionsScope.RestrictedMenuItemImpl(
                 text = TEXT,
+                enabled = enabled,
                 restrictions = restrictions,
                 onClick = { menuItemOnClickIsCalled = true },
                 restrictionsProviderFactory = { _, _ -> fakeRestrictionsProvider },

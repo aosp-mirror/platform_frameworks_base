@@ -20,6 +20,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -67,7 +69,18 @@ class SettingsAlertDialogTest {
             rememberAlertDialogPresenter(confirmButton = AlertDialogButton(CONFIRM_TEXT))
         }
 
-        composeTestRule.onDialogText(CONFIRM_TEXT).assertIsDisplayed()
+        composeTestRule.onDialogText(CONFIRM_TEXT).assertIsDisplayed().assertIsEnabled()
+    }
+
+    @Test
+    fun confirmButton_disabled() {
+        setAndOpenDialog {
+            rememberAlertDialogPresenter(
+                confirmButton = AlertDialogButton(text = CONFIRM_TEXT, enabled = false)
+            )
+        }
+
+        composeTestRule.onDialogText(CONFIRM_TEXT).assertIsDisplayed().assertIsNotEnabled()
     }
 
     @Test
@@ -90,7 +103,18 @@ class SettingsAlertDialogTest {
             rememberAlertDialogPresenter(dismissButton = AlertDialogButton(DISMISS_TEXT))
         }
 
-        composeTestRule.onDialogText(DISMISS_TEXT).assertIsDisplayed()
+        composeTestRule.onDialogText(DISMISS_TEXT).assertIsDisplayed().assertIsEnabled()
+    }
+
+    @Test
+    fun dismissButton_disabled() {
+        setAndOpenDialog {
+            rememberAlertDialogPresenter(
+                dismissButton = AlertDialogButton(text = DISMISS_TEXT, enabled = false)
+            )
+        }
+
+        composeTestRule.onDialogText(DISMISS_TEXT).assertIsDisplayed().assertIsNotEnabled()
     }
 
     @Test
