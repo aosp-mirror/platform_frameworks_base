@@ -27,6 +27,7 @@ import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.RectF
 import android.os.RemoteException
+import android.util.TimeUtils
 import android.view.Choreographer
 import android.view.Display
 import android.view.IRemoteAnimationFinishedCallback
@@ -259,6 +260,8 @@ abstract class CrossActivityBackAnimation(
             .setStartValue(SPRING_SCALE)
             .setSpring(postCommitFlingSpring)
         flingAnimation.start()
+        // do an animation-frame immediately to prevent idle frame
+        flingAnimation.doAnimationFrame(choreographer.lastFrameTimeNanos / TimeUtils.NANOS_PER_MS)
 
         val valueAnimator = ValueAnimator.ofFloat(1f, 0f).setDuration(POST_COMMIT_DURATION)
         valueAnimator.addUpdateListener { animation: ValueAnimator ->
