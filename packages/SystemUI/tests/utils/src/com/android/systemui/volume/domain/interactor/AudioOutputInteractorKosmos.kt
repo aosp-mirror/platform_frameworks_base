@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume.domain.interactor
 
+import android.content.applicationContext
 import com.android.systemui.bluetooth.bluetoothAdapter
 import com.android.systemui.bluetooth.localBluetoothManager
 import com.android.systemui.kosmos.Kosmos
@@ -27,6 +28,7 @@ import com.android.systemui.volume.mediaOutputInteractor
 val Kosmos.audioOutputInteractor by
     Kosmos.Fixture {
         AudioOutputInteractor(
+            applicationContext,
             audioRepository,
             audioModeInteractor,
             testScope.backgroundScope,

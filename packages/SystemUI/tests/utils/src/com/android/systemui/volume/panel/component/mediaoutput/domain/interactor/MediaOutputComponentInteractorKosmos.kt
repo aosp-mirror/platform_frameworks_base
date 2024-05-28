@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.component.mediaoutput.ui.viewmodel
+package com.android.systemui.volume.panel.component.mediaoutput.domain.interactor
 
-import android.content.applicationContext
-import com.android.internal.logging.uiEventLogger
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.volume.mediaOutputActionsInteractor
-import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.mediaOutputComponentInteractor
+import com.android.systemui.volume.domain.interactor.audioModeInteractor
+import com.android.systemui.volume.domain.interactor.audioOutputInteractor
+import com.android.systemui.volume.mediaDeviceSessionInteractor
+import com.android.systemui.volume.mediaOutputInteractor
 
-var Kosmos.mediaOutputViewModel by
+val Kosmos.mediaOutputComponentInteractor by
     Kosmos.Fixture {
-        MediaOutputViewModel(
-            applicationContext,
+        MediaOutputComponentInteractor(
             testScope.backgroundScope,
-            mediaOutputActionsInteractor,
-            mediaOutputComponentInteractor,
-            uiEventLogger,
+            mediaDeviceSessionInteractor,
+            audioOutputInteractor,
+            audioModeInteractor,
+            mediaOutputInteractor,
         )
     }
