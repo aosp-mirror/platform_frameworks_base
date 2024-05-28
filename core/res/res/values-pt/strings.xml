@@ -2397,10 +2397,8 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Abrir o app Mensagens"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Como funciona"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Configurar o Desbloqueio por impressão digital de novo"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"A impressão digital <xliff:g id="FINGERPRINT">%s</xliff:g> não estava funcionando bem e foi excluída"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"As impressões digitais <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> não estavam funcionando bem e foram excluídas"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"A impressão digital <xliff:g id="FINGERPRINT">%s</xliff:g> não estava funcionando bem e foi excluída. Configure de novo para desbloquear o smartphone com a impressão digital."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"As impressões digitais <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> não estavam funcionando bem e foram excluídas. Configure de novo para desbloquear o smartphone com a impressão digital."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Configure o Desbloqueio facial de novo"</string>

@@ -2396,10 +2396,8 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"A Messages megnyitása"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Hogyan működik?"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"A Feloldás ujjlenyomattal funkció újbóli beállítása"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"A(z) <xliff:g id="FINGERPRINT">%s</xliff:g> nem működött megfelelően, ezért törölve lett"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"A(z) <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> és a(z) <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nem működtek megfelelően, ezért törölve lettek"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"A(z) <xliff:g id="FINGERPRINT">%s</xliff:g> nem működött megfelelően, ezért törölve lett. Állítsa be újra, hogy feloldhassa a telefonját az ujjlenyomata segítségével."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"A(z) <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> és a(z) <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nem működtek megfelelően, ezért törölve lettek. Állítsa be őket újra, hogy feloldhassa a telefonját az ujjlenyomata segítségével."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Állítsa be újra az Arcalapú feloldást"</string>

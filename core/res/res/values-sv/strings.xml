@@ -2396,10 +2396,8 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Öppna Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Så fungerar det"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Konfigurera fingeravtryckslås igen"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> fungerade inte bra och har raderats"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> och <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> fungerade inte bra och har raderats"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> fungerade inte bra och har raderats. Konfigurera det igen för att låsa upp telefonen med fingeravtryck."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> och <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> fungerade inte bra och har raderats. Konfigurera dem igen för att låsa upp telefonen med fingeravtryck."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Konfigurera ansiktslås igen"</string>

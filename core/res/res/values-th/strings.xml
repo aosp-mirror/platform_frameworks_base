@@ -2191,7 +2191,7 @@
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"การสนทนา"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"บทสนทนากลุ่ม"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
-    <string name="resolver_personal_tab" msgid="2051260504014442073">"ส่วนตัว"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"ส่วนบุคคล"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"งาน"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"มุมมองส่วนตัว"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"ดูงาน"</string>
@@ -2396,10 +2396,8 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"เปิด Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"วิธีการทำงาน"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ตั้งค่าการปลดล็อกด้วยลายนิ้วมืออีกครั้ง"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> ทำงานได้ไม่ดีและถูกลบออกไปแล้ว"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> และ <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ทำงานได้ไม่ดีและถูกลบออกไปแล้ว"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g>ทำงานได้ไม่ดีและถูกลบออกไปแล้ว ตั้งค่าอีกครั้งเพื่อปลดล็อกโทรศัพท์ด้วยลายนิ้วมือ"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> และ <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ทำงานได้ไม่ดีและถูกลบออกไปแล้ว ตั้งค่าอีกครั้งเพื่อปลดล็อกโทรศัพท์ด้วยลายนิ้วมือ"</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"ตั้งค่าการปลดล็อกด้วยใบหน้าอีกครั้ง"</string>

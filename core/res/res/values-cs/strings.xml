@@ -1629,7 +1629,7 @@
     <string name="issued_by" msgid="7872459822431585684">"Vydal:"</string>
     <string name="validity_period" msgid="1717724283033175968">"Platnost:"</string>
     <string name="issued_on" msgid="5855489688152497307">"Datum vydání:"</string>
-    <string name="expires_on" msgid="1623640879705103121">"Platnost vyprší:"</string>
+    <string name="expires_on" msgid="1623640879705103121">"Platnost skončí:"</string>
     <string name="serial_number" msgid="3479576915806623429">"Sériové číslo:"</string>
     <string name="fingerprints" msgid="148690767172613723">"Digitální otisky:"</string>
     <string name="sha256_fingerprint" msgid="7103976380961964600">"Digitální otisk SHA-256"</string>
@@ -2398,10 +2398,8 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otevřít Zprávy"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Jak to funguje"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Opětovné nastavení odemknutí otiskem prstu"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> nefungoval správně a byl vymazán"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> a <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nefungovaly správně a byly vymazány"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> nefungoval správně a byl vymazán. Pokud chcete telefon odemykat otiskem prstu, nastavte jej znovu."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> a <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nefungovaly správně a byly vymazány. Pokud chcete telefon odemykat otiskem prstu, nastavte je znovu."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Nastavte odemknutí obličejem znovu"</string>

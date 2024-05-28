@@ -2396,10 +2396,8 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages उघडा"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ते कसे काम करते"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"फिंगरप्रिंट अनलॉक पुन्हा सेट करा"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> योग्यरीत्या काम करत नव्हती, त्यामुळे ती हटवली आहे"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> आणि <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> योग्यरीत्या काम करत नव्हत्या, त्यामुळे त्या हटवल्या आहेत"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"योग्यरीत्या काम करत नसल्यामुळे <xliff:g id="FINGERPRINT">%s</xliff:g> हटवले गेले आहे. तुमचे फिंगरप्रिंट वापरून फोन अनलॉक करण्यासाठी ते पुन्हा सेट करा."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"परफॉर्मन्समध्ये सुधारणा करण्यासाठी आणि योग्यरीत्या काम करत नसल्यामुळे <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> व <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> हटवली गेली आहेत. तुमचे फिंगरप्रिंट वापरून फोन अनलॉक करण्यासाठी ते पुन्हा सेट करा."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"फेस अनलॉक पुन्हा सेट करा"</string>

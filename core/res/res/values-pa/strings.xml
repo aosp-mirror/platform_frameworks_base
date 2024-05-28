@@ -2396,10 +2396,8 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ਐਪ ਖੋਲ੍ਹੋ"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ਇਹ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਅਣਲਾਕ ਦਾ ਦੁਬਾਰਾ ਸੈੱਟਅੱਪ ਕਰੋ"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> ਚੰਗੀ ਤਰ੍ਹਾਂ ਕੰਮ ਨਹੀਂ ਕਰ ਰਿਹਾ ਸੀ ਅਤੇ ਉਸਨੂੰ ਮਿਟਾਇਆ ਗਿਆ ਸੀ"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ਅਤੇ <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ਚੰਗੀ ਤਰ੍ਹਾਂ ਕੰਮ ਨਹੀਂ ਕਰ ਰਹੇ ਸਨ ਅਤੇ ਉਨ੍ਹਾਂ ਨੂੰ ਮਿਟਾਇਆ ਗਿਆ ਸੀ"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ਚੰਗੀ ਤਰ੍ਹਾਂ ਕੰਮ ਨਹੀਂ ਕਰ ਰਿਹਾ ਸੀ ਅਤੇ ਉਸਨੂੰ ਮਿਟਾਇਆ ਗਿਆ ਸੀ। ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਫਿੰਗਰਪ੍ਰਿੰਟ ਨਾਲ ਅਣਲਾਕ ਕਰਨ ਲਈ ਇਸਦਾ ਦੁਬਾਰਾ ਸੈੱਟਅੱਪ ਕਰੋ।"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ਅਤੇ <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ਚੰਗੀ ਤਰ੍ਹਾਂ ਕੰਮ ਨਹੀਂ ਕਰ ਰਹੇ ਸੀ ਅਤੇ ਉਨ੍ਹਾਂ ਨੂੰ ਮਿਟਾਇਆ ਗਿਆ ਸੀ। ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਆਪਣੇ ਫਿੰਗਰਪ੍ਰਿੰਟ ਨਾਲ ਅਣਲਾਕ ਕਰਨ ਲਈ ਇਨ੍ਹਾਂ ਦਾ ਦੁਬਾਰਾ ਸੈੱਟਅੱਪ ਕਰੋ।"</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"ਫ਼ੇਸ ਅਣਲਾਕ ਦਾ ਦੁਬਾਰਾ ਸੈੱਟਅੱਪ ਕਰੋ"</string>

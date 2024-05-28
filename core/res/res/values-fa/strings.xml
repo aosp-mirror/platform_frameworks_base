@@ -601,8 +601,8 @@
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"به برنامه اجازه می‌دهد به دستگاه‌های بلوتوث مرتبط‌شده متصل شود"</string>
     <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"تبلیغ در دستگاه‌های بلوتوث اطراف"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"برنامه مجاز می‌شود در دستگاه‌های بلوتوث اطراف تبلیغ کند."</string>
-    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"مشخص کردن موقعیت نسبی بین دستگاه‌های باند فوق‌وسیع اطراف"</string>
-    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"به برنامه اجازه داده می‌شود موقعیت نسبی بین دستگاه‌های باند فوق‌وسیع اطراف را مشخص کند"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"مشخص کردن موقعیت نسبی بین دستگاه‌های «فراپهن‌باند» اطراف"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"به برنامه اجازه داده می‌شود موقعیت نسبی بین دستگاه‌های «فراپهن‌باند» اطراف را مشخص کند"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"‏برقراری تعامل با دستگاه‌های Wi-Fi اطراف"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"‏به برنامه اجازه می‌دهد در دستگاه‌های Wi-Fi اطراف تبلیغ کند، به آن‌ها متصل شود، و موقعیت نسبی آن‌ها را تشخیص دهد"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏اطلاعات ترجیحی سرویس پولی NFC"</string>
@@ -2396,10 +2396,8 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"باز کردن «پیام‌ها»"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"روش کار"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"راه‌اندازی مجدد «قفل‌گشایی با اثر انگشت»"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"‫<xliff:g id="FINGERPRINT">%s</xliff:g> خوب کار نمی‌کرد و حذف شد"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"‫<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> و <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> خوب کار نمی‌کردند و حذف شدند"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> خوب کار نمی‌کرد و حذف شد. برای باز کردن قفل تلفن با اثر انگشت، آن را دوباره راه‌اندازی کنید."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"‫<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> و <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> خوب کار نمی‌کرد و حذف شد. برای باز کردن قفل تلفن با اثر انگشت، آن‌ها را دوباره راه‌اندازی کنید."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"راه‌اندازی مجدد «قفل‌گشایی با چهره»"</string>
