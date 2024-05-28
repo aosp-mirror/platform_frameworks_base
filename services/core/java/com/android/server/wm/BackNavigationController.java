@@ -1270,6 +1270,8 @@ class BackNavigationController {
                         .setContainerLayer()
                         .setHidden(false)
                         .setParent(task.getSurfaceControl())
+                        .setCallsite(
+                                "BackWindowAnimationAdaptorWrapper.getOrCreateAnimationTarget")
                         .build();
                 mCloseTransaction = new SurfaceControl.Transaction();
                 mCloseTransaction.reparent(leashSurface, null);

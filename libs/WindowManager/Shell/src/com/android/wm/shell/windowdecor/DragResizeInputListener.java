@@ -132,6 +132,7 @@ class DragResizeInputListener implements AutoCloseable {
                 .setName("TaskInputSink of " + decorationSurface)
                 .setContainerLayer()
                 .setParent(mDecorationSurface)
+                .setCallsite("DragResizeInputListener.constructor")
                 .build();
         mSurfaceControlTransactionSupplier.get()
                 .setLayer(mInputSinkSurface, WindowDecoration.INPUT_SINK_Z_ORDER)
