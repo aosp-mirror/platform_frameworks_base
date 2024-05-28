@@ -8518,8 +8518,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final int parentWindowingMode =
                 newParentConfiguration.windowConfiguration.getWindowingMode();
 
-        applySizeOverrideIfNeeded(newParentConfiguration, parentWindowingMode, resolvedConfig);
-
         final boolean isFixedOrientationLetterboxAllowed =
                 parentWindowingMode == WINDOWING_MODE_MULTI_WINDOW
                         || parentWindowingMode == WINDOWING_MODE_FULLSCREEN
@@ -8618,6 +8616,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             resolvedConfig.windowConfiguration.setMaxBounds(mTmpBounds);
         }
 
+        applySizeOverrideIfNeeded(newParentConfiguration, parentWindowingMode, resolvedConfig);
+
         logAppCompatState();
     }
 
@@ -8642,8 +8642,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             rotation = mDisplayContent.getRotation();
         }
         if (!mResolveConfigHint.mUseOverrideInsetsForStableBounds
-                || getCompatDisplayInsets() != null || isFloating(parentWindowingMode)
-                || rotation == ROTATION_UNDEFINED) {
+                || getCompatDisplayInsets() != null || shouldCreateCompatDisplayInsets()
+                || isFloating(parentWindowingMode) || rotation == ROTATION_UNDEFINED) {
             // If the insets configuration decoupled logic is not enabled for the app, or the app
             // already has a compat override, or the context doesn't contain enough info to
             // calculate the override, skip the override.
