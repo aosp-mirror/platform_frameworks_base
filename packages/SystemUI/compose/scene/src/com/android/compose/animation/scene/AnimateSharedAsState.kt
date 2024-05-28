@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.util.fastCoerceIn
+import androidx.compose.ui.util.fastLastOrNull
 import androidx.compose.ui.util.lerp
 
 /**
@@ -267,39 +268,58 @@ private fun <T> valueOrNull(
     val sceneToValueMap = sceneToValueMap<T>(layoutImpl, key, element)
     fun sceneValue(scene: SceneKey): T? = sceneToValueMap[scene]
 
-    return when (val transition = layoutImpl.state.transitionState) {
-        is TransitionState.Idle -> sceneValue(transition.currentScene)
-        is TransitionState.Transition -> {
-            // Note: no need to check for transition ready here given that all target values are
-            // defined during composition, we should already have the correct values to interpolate
-            // between here.
-            val fromValue = sceneValue(transition.fromScene)
-            val toValue = sceneValue(transition.toScene)
-            if (fromValue != null && toValue != null) {
-                if (fromValue == toValue) {
-                    // Optimization: avoid reading progress if the values are the same, so we don't
-                    // relayout/redraw for nothing.
-                    fromValue
-                } else {
-                    // In the case of bouncing, if the value remains constant during the overscroll,
-                    // we should use the value of the scene we are bouncing around.
-                    if (!canOverflow && transition is TransitionState.HasOverscrollProperties) {
-                        val bouncingScene = transition.bouncingScene
-                        if (bouncingScene != null) {
-                            return sceneValue(bouncingScene)
-                        }
-                    }
+    val transition =
+        transition(layoutImpl, element, sceneToValueMap)
+            ?: return sceneValue(layoutImpl.state.transitionState.currentScene)
+                // TODO(b/311600838): Remove this. We should not have to fallback to the current
+                // scene value, but we have to because code of removed nodes can still run if they
+                // are placed with a graphics layer.
+                ?: sceneValue(scene)
 
-                    val progress =
-                        if (canOverflow) transition.progress
-                        else transition.progress.fastCoerceIn(0f, 1f)
-                    lerp(fromValue, toValue, progress)
+    val fromValue = sceneValue(transition.fromScene)
+    val toValue = sceneValue(transition.toScene)
+    return if (fromValue != null && toValue != null) {
+        if (fromValue == toValue) {
+            // Optimization: avoid reading progress if the values are the same, so we don't
+            // relayout/redraw for nothing.
+            fromValue
+        } else {
+            // In the case of bouncing, if the value remains constant during the overscroll,
+            // we should use the value of the scene we are bouncing around.
+            if (!canOverflow && transition is TransitionState.HasOverscrollProperties) {
+                val bouncingScene = transition.bouncingScene
+                if (bouncingScene != null) {
+                    return sceneValue(bouncingScene)
                 }
-            } else fromValue ?: toValue
+            }
+
+            val progress =
+                if (canOverflow) transition.progress else transition.progress.fastCoerceIn(0f, 1f)
+            lerp(fromValue, toValue, progress)
+        }
+    } else
+        fromValue
+            ?: toValue
+            // TODO(b/311600838): Remove this. We should not have to fallback to the current scene
+            // value, but we have to because code of removed nodes can still run if they are placed
+            // with a graphics layer.
+            ?: sceneValue(scene)
+}
+
+private fun transition(
+    layoutImpl: SceneTransitionLayoutImpl,
+    element: ElementKey?,
+    sceneToValueMap: Map<SceneKey, *>,
+): TransitionState.Transition? {
+    return if (element != null) {
+        layoutImpl.elements[element]?.sceneStates?.let { sceneStates ->
+            layoutImpl.state.currentTransitions.fastLastOrNull { transition ->
+                transition.fromScene in sceneStates || transition.toScene in sceneStates
+            }
+        }
+    } else {
+        layoutImpl.state.currentTransitions.fastLastOrNull { transition ->
+            transition.fromScene in sceneToValueMap || transition.toScene in sceneToValueMap
         }
     }
-    // TODO(b/311600838): Remove this. We should not have to fallback to the current scene value,
-    // but we have to because code of removed nodes can still run if they are placed with a graphics
-    // layer.
-    ?: sceneValue(scene)
 }
