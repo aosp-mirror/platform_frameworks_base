@@ -30,7 +30,8 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.core.MessageInitializer
 import com.android.systemui.log.core.MessagePrinter
-import com.android.systemui.statusbar.pipeline.dagger.OemSatelliteInputLog
+import com.android.systemui.statusbar.pipeline.dagger.DeviceBasedSatelliteInputLog
+import com.android.systemui.statusbar.pipeline.dagger.VerboseDeviceBasedSatelliteInputLog
 import com.android.systemui.statusbar.pipeline.satellite.data.DeviceBasedSatelliteRepository
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.SatelliteSupport.Companion.whenSupported
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.SatelliteSupport.NotSupported
@@ -132,7 +133,8 @@ constructor(
     satelliteManagerOpt: Optional<SatelliteManager>,
     @Background private val bgDispatcher: CoroutineDispatcher,
     @Application private val scope: CoroutineScope,
-    @OemSatelliteInputLog private val logBuffer: LogBuffer,
+    @DeviceBasedSatelliteInputLog private val logBuffer: LogBuffer,
+    @VerboseDeviceBasedSatelliteInputLog private val verboseLogBuffer: LogBuffer,
     private val systemClock: SystemClock,
 ) : DeviceBasedSatelliteRepository {
 
@@ -233,7 +235,7 @@ constructor(
     private fun signalStrengthFlow(sm: SupportedSatelliteManager) =
         conflatedCallbackFlow {
                 val cb = NtnSignalStrengthCallback { signalStrength ->
-                    logBuffer.i({ int1 = signalStrength.level }) {
+                    verboseLogBuffer.i({ int1 = signalStrength.level }) {
                         "onNtnSignalStrengthChanged: level=$int1"
                     }
                     trySend(signalStrength.level)

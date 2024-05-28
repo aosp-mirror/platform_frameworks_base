@@ -274,9 +274,16 @@ abstract class StatusBarPipelineModule {
 
         @Provides
         @SysUISingleton
-        @OemSatelliteInputLog
-        fun provideOemSatelliteInputLog(factory: LogBufferFactory): LogBuffer {
-            return factory.create("DeviceBasedSatelliteInputLog", 150)
+        @DeviceBasedSatelliteInputLog
+        fun provideDeviceBasedSatelliteInputLog(factory: LogBufferFactory): LogBuffer {
+            return factory.create("DeviceBasedSatelliteInputLog", 200)
+        }
+
+        @Provides
+        @SysUISingleton
+        @VerboseDeviceBasedSatelliteInputLog
+        fun provideVerboseDeviceBasedSatelliteInputLog(factory: LogBufferFactory): LogBuffer {
+            return factory.create("VerboseDeviceBasedSatelliteInputLog", 200)
         }
 
         const val FIRST_MOBILE_SUB_SHOWING_NETWORK_TYPE_ICON =
