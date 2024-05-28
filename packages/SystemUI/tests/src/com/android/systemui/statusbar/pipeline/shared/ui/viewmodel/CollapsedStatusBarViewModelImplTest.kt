@@ -32,9 +32,12 @@ import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.assertLogsWtf
+import com.android.systemui.mediaprojection.data.model.MediaProjectionState
+import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
 import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.assertIsMediaProjectionChip
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.assertIsScreenRecordChip
 import com.android.systemui.statusbar.chips.ui.viewmodel.ongoingActivityChipsViewModel
 import com.android.systemui.statusbar.data.model.StatusBarMode
@@ -400,6 +403,11 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
             kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.DoingNothing
 
             assertThat(latest).isEqualTo(OngoingActivityChipModel.Hidden)
+
+            kosmos.fakeMediaProjectionRepository.mediaProjectionState.value =
+                MediaProjectionState.EntireScreen
+
+            assertIsMediaProjectionChip(latest)
         }
 
     private fun activeNotificationsStore(notifications: List<ActiveNotificationModel>) =

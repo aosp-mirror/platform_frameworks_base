@@ -28,7 +28,6 @@ import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager
 import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createToken
 import com.android.systemui.mediaprojection.taskswitcher.fakeActivityTaskManager
 import com.android.systemui.mediaprojection.taskswitcher.fakeMediaProjectionManager
-import com.android.systemui.mediaprojection.taskswitcher.mediaProjectionManagerRepository
 import com.android.systemui.mediaprojection.taskswitcher.taskSwitcherKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -45,7 +44,7 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
     private val fakeMediaProjectionManager = kosmos.fakeMediaProjectionManager
     private val fakeActivityTaskManager = kosmos.fakeActivityTaskManager
 
-    private val repo = kosmos.mediaProjectionManagerRepository
+    private val repo = kosmos.realMediaProjectionRepository
 
     @Test
     fun switchProjectedTask_stateIsUpdatedWithNewTask() =
