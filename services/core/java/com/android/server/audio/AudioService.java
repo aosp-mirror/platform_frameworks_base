@@ -1888,7 +1888,6 @@ public class AudioService extends IAudioService.Stub
         }
 
         mSpatializerHelper.reset(/* featureEnabled */ mHasSpatializerEffect);
-        mSoundDoseHelper.reset();
 
         // Restore rotation information.
         if (mMonitorRotation) {
@@ -1898,6 +1897,8 @@ public class AudioService extends IAudioService.Stub
         onIndicateSystemReady();
         // indicate the end of reconfiguration phase to audio HAL
         AudioSystem.setParameters("restarting=false");
+
+        mSoundDoseHelper.reset(/*resetISoundDose=*/true);
 
         sendMsg(mAudioHandler, MSG_DISPATCH_AUDIO_SERVER_STATE,
                 SENDMSG_QUEUE, 1, 0, null, 0);
