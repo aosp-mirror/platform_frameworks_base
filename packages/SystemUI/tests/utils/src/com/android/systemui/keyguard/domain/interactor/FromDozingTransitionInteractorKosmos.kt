@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.deviceentry.data.repository.deviceEntryRepository
 import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
@@ -36,5 +37,6 @@ var Kosmos.fromDozingTransitionInteractor by
             communalInteractor = communalInteractor,
             powerInteractor = powerInteractor,
             keyguardOcclusionInteractor = keyguardOcclusionInteractor,
+            deviceEntryRepository = deviceEntryRepository,
         )
     }

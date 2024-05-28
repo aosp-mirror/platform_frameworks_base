@@ -281,21 +281,16 @@ class NightDisplayTileMapperTest : SysuiTestCase() {
         secondaryLabel: String?
     ): QSTileState {
         val label = context.getString(R.string.quick_settings_night_display_label)
-
+        val iconRes =
+            if (activationState == QSTileState.ActivationState.ACTIVE)
+                R.drawable.qs_nightlight_icon_on
+            else R.drawable.qs_nightlight_icon_off
         val contentDescription =
             if (TextUtils.isEmpty(secondaryLabel)) label
             else TextUtils.concat(label, ", ", secondaryLabel)
         return QSTileState(
-            {
-                Icon.Loaded(
-                    context.getDrawable(
-                        if (activationState == QSTileState.ActivationState.ACTIVE)
-                            R.drawable.qs_nightlight_icon_on
-                        else R.drawable.qs_nightlight_icon_off
-                    )!!,
-                    null
-                )
-            },
+            { Icon.Loaded(context.getDrawable(iconRes)!!, null) },
+            iconRes,
             label,
             activationState,
             secondaryLabel,

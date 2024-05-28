@@ -176,7 +176,8 @@ constructor(
 
                     if (!returningToGoneAfterCancellation) {
                         // By default, apply the lockscreen visibility of the current state.
-                        KeyguardState.lockscreenVisibleInState(currentState)
+                        deviceEntryInteractor.get().isLockscreenEnabled() &&
+                            KeyguardState.lockscreenVisibleInState(currentState)
                     } else {
                         // If we're transitioning to GONE after a prior canceled transition from
                         // GONE, then this is the camera launch transition from an asleep state back

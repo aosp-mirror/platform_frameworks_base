@@ -167,3 +167,10 @@ flag {
   description: "[Minimal HUN] Enables the compact heads up notification reply capability for Conversation Notifications"
   bug: "336229954"
 }
+
+flag {
+  name: "remove_remote_views"
+  namespace: "systemui"
+  description: "Removes all custom views"
+  bug: "342602960"
+}

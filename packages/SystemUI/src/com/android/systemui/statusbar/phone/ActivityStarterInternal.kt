@@ -34,6 +34,7 @@ interface ActivityStarterInternal {
      */
     fun startPendingIntentDismissingKeyguard(
         intent: PendingIntent,
+        dismissShade: Boolean,
         intentSentUiThreadCallback: Runnable? = null,
         associatedView: View? = null,
         animationController: ActivityTransitionAnimator.Controller? = null,

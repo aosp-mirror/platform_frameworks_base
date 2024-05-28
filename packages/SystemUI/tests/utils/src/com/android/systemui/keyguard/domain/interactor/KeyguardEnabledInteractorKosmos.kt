@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.communal.data.repository
+package com.android.systemui.keyguard.domain.interactor
 
+import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
 
-val Kosmos.fakeCommunalRepository by Fixture {
-    FakeCommunalRepository(applicationScope = applicationCoroutineScope)
-}
-
-val Kosmos.communalRepository by Fixture<CommunalRepository> { fakeCommunalRepository }
+val Kosmos.keyguardEnabledInteractor by
+    Kosmos.Fixture {
+        KeyguardEnabledInteractor(
+            applicationCoroutineScope,
+            keyguardRepository,
+            biometricSettingsRepository,
+            keyguardTransitionInteractor,
+        )
+    }

@@ -27,7 +27,7 @@ import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
 import com.android.systemui.classifier.falsingCollector
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.common.ui.domain.interactor.configurationInteractor
-import com.android.systemui.communal.data.repository.fakeCommunalRepository
+import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
@@ -86,7 +86,7 @@ class KosmosJavaAdapter() {
     val configurationRepository by lazy { kosmos.fakeConfigurationRepository }
     val configurationInteractor by lazy { kosmos.configurationInteractor }
     val bouncerRepository by lazy { kosmos.bouncerRepository }
-    val communalRepository by lazy { kosmos.fakeCommunalRepository }
+    val communalRepository by lazy { kosmos.fakeCommunalSceneRepository }
     val headsUpNotificationInteractor by lazy { kosmos.headsUpNotificationInteractor }
     val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
     val keyguardBouncerRepository by lazy { kosmos.fakeKeyguardBouncerRepository }

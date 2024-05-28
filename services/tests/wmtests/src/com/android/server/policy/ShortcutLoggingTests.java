@@ -20,7 +20,7 @@ import static com.android.server.policy.PhoneWindowManager.DOUBLE_TAP_HOME_RECEN
 import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_HOME_ALL_APPS;
 import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_HOME_ASSIST;
 import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_HOME_NOTIFICATION_PANEL;
-import static com.android.server.policy.PhoneWindowManager.SHORT_PRESS_SETTINGS_NOTIFICATION_PANEL;
+import static com.android.server.policy.PhoneWindowManager.SETTINGS_KEY_BEHAVIOR_NOTIFICATION_PANEL;
 
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
@@ -288,12 +288,12 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
     }
 
     @Keep
-    private static Object[][] shortPressOnSettingsTestArguments() {
-        // testName, testKeys, shortPressOnSettingsBehavior, expectedLogEvent, expectedKey,
+    private static Object[][] settingsKeyTestArguments() {
+        // testName, testKeys, settingsKeyBehavior, expectedLogEvent, expectedKey,
         // expectedModifierState
         return new Object[][]{
                 {"SETTINGS key -> Toggle Notification panel", new int[]{KeyEvent.KEYCODE_SETTINGS},
-                        SHORT_PRESS_SETTINGS_NOTIFICATION_PANEL,
+                        SETTINGS_KEY_BEHAVIOR_NOTIFICATION_PANEL,
                         KeyboardLogEvent.TOGGLE_NOTIFICATION_PANEL, KeyEvent.KEYCODE_SETTINGS, 0}};
     }
 
@@ -303,7 +303,7 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
         mPhoneWindowManager.overrideKeyEventSource(VENDOR_ID, PRODUCT_ID, DEVICE_BUS);
         mPhoneWindowManager.overrideLaunchHome();
         mPhoneWindowManager.overrideSearchKeyBehavior(
-                PhoneWindowManager.SEARCH_BEHAVIOR_TARGET_ACTIVITY);
+                PhoneWindowManager.SEARCH_KEY_BEHAVIOR_TARGET_ACTIVITY);
         mPhoneWindowManager.overrideEnableBugReportTrigger(true);
         mPhoneWindowManager.overrideStatusBarManagerInternal();
         mPhoneWindowManager.overrideStartActivity();
@@ -349,11 +349,11 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
     }
 
     @Test
-    @Parameters(method = "shortPressOnSettingsTestArguments")
-    public void testShortPressOnSettings(String testName, int[] testKeys,
-            int shortPressOnSettingsBehavior, KeyboardLogEvent expectedLogEvent, int expectedKey,
+    @Parameters(method = "settingsKeyTestArguments")
+    public void testSettingsKey(String testName, int[] testKeys,
+            int settingsKeyBehavior, KeyboardLogEvent expectedLogEvent, int expectedKey,
             int expectedModifierState) {
-        mPhoneWindowManager.overrideShortPressOnSettingsBehavior(shortPressOnSettingsBehavior);
+        mPhoneWindowManager.overrideSettingsKeyBehavior(settingsKeyBehavior);
         sendKeyCombination(testKeys, 0 /* duration */);
         mPhoneWindowManager.assertShortcutLogged(VENDOR_ID, PRODUCT_ID, expectedLogEvent,
                 expectedKey, expectedModifierState, DEVICE_BUS,

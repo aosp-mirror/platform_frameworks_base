@@ -5637,6 +5637,10 @@ public class Notification implements Parcelable
                     contentView.setDrawableTint(R.id.profile_badge, false,
                             getPrimaryTextColor(p), PorterDuff.Mode.SRC_ATOP);
                 }
+                contentView.setContentDescription(
+                        R.id.profile_badge,
+                        mContext.getSystemService(UserManager.class)
+                                .getProfileAccessibilityString(mContext.getUserId()));
             }
         }
 

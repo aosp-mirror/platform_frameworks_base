@@ -39,15 +39,16 @@ import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryImpl
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
 import com.android.systemui.communal.data.repository.FakeCommunalPrefsRepository
-import com.android.systemui.communal.data.repository.FakeCommunalRepository
+import com.android.systemui.communal.data.repository.FakeCommunalSceneRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
 import com.android.systemui.communal.data.repository.fakeCommunalMediaRepository
 import com.android.systemui.communal.data.repository.fakeCommunalPrefsRepository
-import com.android.systemui.communal.data.repository.fakeCommunalRepository
+import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.data.repository.fakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.domain.model.CommunalTransitionProgressModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
@@ -111,7 +112,7 @@ class CommunalInteractorTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
 
     private lateinit var tutorialRepository: FakeCommunalTutorialRepository
-    private lateinit var communalRepository: FakeCommunalRepository
+    private lateinit var communalRepository: FakeCommunalSceneRepository
     private lateinit var mediaRepository: FakeCommunalMediaRepository
     private lateinit var widgetRepository: FakeCommunalWidgetRepository
     private lateinit var smartspaceRepository: FakeSmartspaceRepository
@@ -131,7 +132,7 @@ class CommunalInteractorTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         tutorialRepository = kosmos.fakeCommunalTutorialRepository
-        communalRepository = kosmos.fakeCommunalRepository
+        communalRepository = kosmos.fakeCommunalSceneRepository
         mediaRepository = kosmos.fakeCommunalMediaRepository
         widgetRepository = kosmos.fakeCommunalWidgetRepository
         smartspaceRepository = kosmos.fakeSmartspaceRepository
@@ -508,30 +509,6 @@ class CommunalInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun desiredScene_communalNotAvailable_returnsBlank() =
-        testScope.runTest {
-            kosmos.setCommunalAvailable(true)
-            runCurrent()
-
-            val desiredScene by collectLastValue(underTest.desiredScene)
-
-            underTest.changeScene(CommunalScenes.Communal)
-            assertThat(desiredScene).isEqualTo(CommunalScenes.Communal)
-
-            kosmos.setCommunalAvailable(false)
-            runCurrent()
-
-            // Scene returns blank when communal is not available.
-            assertThat(desiredScene).isEqualTo(CommunalScenes.Blank)
-
-            kosmos.setCommunalAvailable(true)
-            runCurrent()
-
-            // After re-enabling, scene goes back to Communal.
-            assertThat(desiredScene).isEqualTo(CommunalScenes.Communal)
-        }
-
-    @Test
     fun transitionProgress_onTargetScene_fullProgress() =
         testScope.runTest {
             val targetScene = CommunalScenes.Blank
@@ -545,7 +522,8 @@ class CommunalInteractorTest : SysuiTestCase() {
             underTest.setTransitionState(transitionState)
 
             // We're on the target scene.
-            assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.Idle(targetScene))
+            assertThat(transitionProgress)
+                .isEqualTo(CommunalTransitionProgressModel.Idle(targetScene))
         }
 
     @Test
@@ -563,7 +541,8 @@ class CommunalInteractorTest : SysuiTestCase() {
             underTest.setTransitionState(transitionState)
 
             // Transition progress is still idle, but we're not on the target scene.
-            assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.Idle(currentScene))
+            assertThat(transitionProgress)
+                .isEqualTo(CommunalTransitionProgressModel.Idle(currentScene))
         }
 
     @Test
@@ -581,7 +560,8 @@ class CommunalInteractorTest : SysuiTestCase() {
             underTest.setTransitionState(transitionState)
 
             // Progress starts at 0.
-            assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.Idle(currentScene))
+            assertThat(transitionProgress)
+                .isEqualTo(CommunalTransitionProgressModel.Idle(currentScene))
 
             val progress = MutableStateFlow(0f)
             transitionState =
@@ -599,16 +579,18 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             // Partially transition.
             progress.value = .4f
-            assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.Transition(.4f))
+            assertThat(transitionProgress)
+                .isEqualTo(CommunalTransitionProgressModel.Transition(.4f))
 
             // Transition is at full progress.
             progress.value = 1f
-            assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.Transition(1f))
+            assertThat(transitionProgress).isEqualTo(CommunalTransitionProgressModel.Transition(1f))
 
             // Transition finishes.
             transitionState = MutableStateFlow(ObservableTransitionState.Idle(targetScene))
             underTest.setTransitionState(transitionState)
-            assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.Idle(targetScene))
+            assertThat(transitionProgress)
+                .isEqualTo(CommunalTransitionProgressModel.Idle(targetScene))
         }
 
     @Test
@@ -626,7 +608,8 @@ class CommunalInteractorTest : SysuiTestCase() {
             underTest.setTransitionState(transitionState)
 
             // Progress starts at 0.
-            assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.Idle(currentScene))
+            assertThat(transitionProgress)
+                .isEqualTo(CommunalTransitionProgressModel.Idle(currentScene))
 
             val progress = MutableStateFlow(0f)
             transitionState =
@@ -646,16 +629,19 @@ class CommunalInteractorTest : SysuiTestCase() {
             progress.value = .4f
 
             // This is a transition we don't care about the progress of.
-            assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.OtherTransition)
+            assertThat(transitionProgress)
+                .isEqualTo(CommunalTransitionProgressModel.OtherTransition)
 
             // Transition is at full progress.
             progress.value = 1f
-            assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.OtherTransition)
+            assertThat(transitionProgress)
+                .isEqualTo(CommunalTransitionProgressModel.OtherTransition)
 
             // Transition finishes.
             transitionState = MutableStateFlow(ObservableTransitionState.Idle(targetScene))
             underTest.setTransitionState(transitionState)
-            assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.Idle(targetScene))
+            assertThat(transitionProgress)
+                .isEqualTo(CommunalTransitionProgressModel.Idle(targetScene))
         }
 
     @Test

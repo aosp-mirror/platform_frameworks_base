@@ -20,8 +20,8 @@ import android.os.Handler
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.mediaprojection.data.repository.MediaProjectionManagerRepository
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.ActivityTaskManagerTasksRepository
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.MediaProjectionManagerRepository
 import com.android.systemui.mediaprojection.taskswitcher.domain.interactor.TaskSwitchInteractor
 import com.android.systemui.mediaprojection.taskswitcher.ui.viewmodel.TaskSwitcherNotificationViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi

@@ -22,6 +22,7 @@ import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode.Companion.isWakeAndUnlock
@@ -50,6 +51,7 @@ constructor(
     powerInteractor: PowerInteractor,
     private val communalInteractor: CommunalInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
+    val deviceEntryRepository: DeviceEntryRepository,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.DOZING,
@@ -99,7 +101,9 @@ constructor(
                         canTransitionToGoneOnWake,
                         primaryBouncerShowing) ->
                     startTransitionTo(
-                        if (isWakeAndUnlock(biometricUnlockState.mode)) {
+                        if (!deviceEntryRepository.isLockscreenEnabled()) {
+                            KeyguardState.GONE
+                        } else if (isWakeAndUnlock(biometricUnlockState.mode)) {
                             KeyguardState.GONE
                         } else if (canTransitionToGoneOnWake) {
                             KeyguardState.GONE
@@ -145,7 +149,12 @@ constructor(
                             !isWakeAndUnlock(biometricUnlockState.mode)
                     ) {
                         startTransitionTo(
-                            if (canDismissLockscreen) {
+                            if (!KeyguardWmStateRefactor.isEnabled && canDismissLockscreen) {
+                                KeyguardState.GONE
+                            } else if (
+                                KeyguardWmStateRefactor.isEnabled &&
+                                    !deviceEntryRepository.isLockscreenEnabled()
+                            ) {
                                 KeyguardState.GONE
                             } else if (primaryBouncerShowing) {
                                 KeyguardState.PRIMARY_BOUNCER
@@ -153,7 +162,8 @@ constructor(
                                 KeyguardState.GLANCEABLE_HUB
                             } else {
                                 KeyguardState.LOCKSCREEN
-                            }
+                            },
+                            ownerReason = "waking from dozing"
                         )
                     }
                 }

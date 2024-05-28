@@ -162,7 +162,7 @@
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Connecté au réseau chiffré <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"La connexion à la carte SIM <xliff:g id="NETWORK_NAME">%1$s</xliff:g> est désormais plus sécurisée"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"Connecté à un réseau non chiffré"</string>
-    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Les appels, les messages et les données sont actuellement plus vulnérables lorsque vous utilisez votre carte SIM <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Appels, messages et données sont plus vulnérables si vous utilisez votre carte SIM <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
     <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"Les appels, les messages et les données sont actuellement plus vulnérables lorsque vous utilisez votre carte SIM <xliff:g id="NETWORK_NAME">%1$s</xliff:g>.\n\nLorsque votre connexion sera à nouveau chiffrée, vous recevrez une nouvelle notification."</string>
     <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"Paramètres de sécurité du réseau mobile"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"En savoir plus"</string>
@@ -202,6 +202,10 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Votre profil professionnel n\'est plus disponible sur cet appareil"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Trop de tentatives de saisie du mot de passe"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"L\'administrateur a mis l\'appareil à disposition pour un usage personnel"</string>
+    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
+    <skip />
+    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"L\'appareil est géré"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Votre organisation gère cet appareil et peut surveiller le trafic réseau. Appuyez ici pour obtenir plus d\'informations."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Des applications peuvent accéder à votre position"</string>
@@ -2416,14 +2420,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Fonctionnement"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"En attente…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Reconfigurer le déverrouillage par empreinte digitale"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ne fonctionnait pas correctement et a été supprimée. Configurez-la à nouveau pour déverrouiller votre téléphone à l\'aide votre empreinte digitale."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> ne fonctionnait pas correctement et a été supprimée"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> et <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ne fonctionnaient pas correctement et ont été supprimées"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ne fonctionnait pas correctement et a été supprimée. Configurez-la à nouveau pour déverrouiller votre téléphone à l\'aide de votre empreinte digitale."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> et <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ne fonctionnaient pas correctement et ont été supprimées. Configurez-les à nouveau pour déverrouiller votre téléphone à l\'aide de votre empreinte digitale."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Reconfigurer le déverrouillage par reconnaissance faciale"</string>
-    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Votre empreinte faciale ne fonctionnait pas correctement et a été supprimée. Configurez-la à nouveau pour déverrouiller votre téléphone à l\'aide votre visage."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Votre empreinte faciale ne fonctionnait pas correctement et a été supprimée. Configurez-la à nouveau pour déverrouiller votre téléphone à l\'aide de votre visage."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Configuration"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Pas maintenant"</string>
 </resources>

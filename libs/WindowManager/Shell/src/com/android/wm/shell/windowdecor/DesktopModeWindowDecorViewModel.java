@@ -278,11 +278,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             public void onTaskStageChanged(int taskId, @StageType int stage, boolean visible) {
                 if (visible && stage != STAGE_TYPE_UNDEFINED) {
                     DesktopModeWindowDecoration decor = mWindowDecorByTaskId.get(taskId);
-                    if (decor == null || !DesktopModeStatus.canEnterDesktopMode(mContext)
-                            || decor.mTaskInfo.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
-                        return;
+                    if (decor != null && DesktopModeStatus.canEnterDesktopMode(mContext)) {
+                        mDesktopTasksController.moveToSplit(decor.mTaskInfo);
                     }
-                    mDesktopTasksController.moveToSplit(decor.mTaskInfo);
                 }
             }
         });

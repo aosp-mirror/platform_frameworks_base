@@ -201,6 +201,10 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"آپ کا دفتری پروفائل اس آلہ پر مزید دستیاب نہیں ہے"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"پاس ورڈ کی بہت ساری کوششیں"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"منتظم نے ذاتی استعمال کے لیے آلہ کو دستبردار کیا ہے"</string>
+    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
+    <skip />
+    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"آلہ زیر انتظام ہے"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"آپ کی تنظیم اس آلے کا نظم کرتی ہے اور وہ نیٹ ورک ٹریفک کی نگرانی کر سکتی ہے۔ تفاصیل کیلئے تھپتھپائیں۔"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ایپس آپ کے مقام تک رسائی حاصل کر سکتی ہیں"</string>
@@ -2415,10 +2419,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"اس کے کام کرنے کا طریقہ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"زیر التواء..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"فنگر پرنٹ اَن لاک کو دوبارہ سیٹ اپ کریں"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"‫<xliff:g id="FINGERPRINT">%s</xliff:g> اچھی طرح کام نہیں کر رہا تھا اور حذف کر دیا گیا تھا"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"‫<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> اور <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> اچھی طرح کام نہیں کر رہے تھے اور انہیں حذف کر دیا گیا تھا"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> اچھی طرح کام نہیں کر رہا تھا اور حذف کر دیا گیا تھا۔ اپنے فون کو فنگر پرنٹ سے غیر مقفل کرنے کے لیے، اسے دوبارہ سیٹ اپ کریں۔"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> اور <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> اچھی طرح کام نہیں کر رہے تھے اور انہیں حذف کر دیا گیا تھا۔ اپنے فون کو اپنے فنگر پرنٹ سے غیر مقفل کرنے کے لیے انہیں دوبارہ سیٹ اپ کریں۔"</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"فیس اَن لاک کو دوبارہ سیٹ اپ کریں"</string>

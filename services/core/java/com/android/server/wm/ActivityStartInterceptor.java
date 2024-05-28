@@ -56,6 +56,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Pair;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -75,6 +76,7 @@ import com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptResult
  * is no guarantee that other system services are already present.
  */
 class ActivityStartInterceptor {
+    private static final String TAG = "ActivityStartInterceptor";
 
     private final ActivityTaskManagerService mService;
     private final ActivityTaskSupervisor mSupervisor;
@@ -284,6 +286,8 @@ class ActivityStartInterceptor {
         if (!mUserManager.isQuietModeEnabled(UserHandle.of(mUserId))) {
             return false;
         }
+        Slog.i(TAG, "Intent : " + mIntent + " intercepted for user: " + mUserId
+                + " because quiet mode is enabled.");
 
         IntentSender target = createIntentSenderForOriginalIntent(mCallingUid,
                 FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT);

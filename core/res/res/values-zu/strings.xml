@@ -201,6 +201,10 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Iphrofayela yakho yomsebenzi ayisatholakali kule divayisi"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Imizamo yamaphasiwedi eminingi kakhulu"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Umphathi udedela idivayisi ngokusetshenziswa komuntu siqu"</string>
+    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
+    <skip />
+    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"Idivayisi iphethwe"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Inhlangano yakho iphethe le divayisi futhi kungenzeka ingaqaphi ithrafikhi yenethiwekhi. Thephela imininingwane."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Izinhlelo zokusebenza zingakwazi ukufinyelela endaweni yakho"</string>
@@ -283,8 +287,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Isisekeli sezwi"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"Khiya"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
-    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
-    <skip />
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"Phendula"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Isaziso esisha"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Ikhibhodi ephathekayo"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Ukuphepha"</string>
@@ -2416,10 +2419,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Indlela esebenza ngayo"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Ilindile..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Setha Ukuvula ngesigxivizo somunwe futhi"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"I-<xliff:g id="FINGERPRINT">%s</xliff:g> ibingasebenzi kahle futhi isuliwe"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"I-<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> kanye ne-<xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ibingasebenzi kahle futhi isuliwe"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"I-<xliff:g id="FINGERPRINT">%s</xliff:g> ibingasebenzi kahle futhi isuliwe. Phinde uyisethe ukuze uvule ifoni yakho ngesigxivizo somunwe."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"I-<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> kanye ne-<xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ibingasebenzi kahle futhi isuliwe. Phinde uyisethe ukuze uvule ifoni yakho ngesigxivizo somunwe wakho"</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Setha Ukuvula Ngobuso futhi"</string>

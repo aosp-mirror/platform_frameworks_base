@@ -20,9 +20,7 @@ import com.android.internal.util.FrameworkStatsLog
 import com.android.wm.shell.protolog.ShellProtoLogGroup
 import com.android.wm.shell.util.KtProtoLog
 
-/**
- * Event logger for logging desktop mode session events
- */
+/** Event logger for logging desktop mode session events */
 class DesktopModeEventLogger {
     /**
      * Logs the enter of desktop mode having session id [sessionId] and the reason [enterReason] for
@@ -32,13 +30,16 @@ class DesktopModeEventLogger {
         KtProtoLog.v(
             ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging session enter, session: %s reason: %s",
-            sessionId, enterReason.name
+            sessionId,
+            enterReason.name
         )
-        FrameworkStatsLog.write(DESKTOP_MODE_ATOM_ID,
+        FrameworkStatsLog.write(
+            DESKTOP_MODE_ATOM_ID,
             /* event */ FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EVENT__ENTER,
             /* enterReason */ enterReason.reason,
             /* exitReason */ 0,
-            /* session_id */ sessionId)
+            /* session_id */ sessionId
+        )
     }
 
     /**
@@ -49,13 +50,16 @@ class DesktopModeEventLogger {
         KtProtoLog.v(
             ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging session exit, session: %s reason: %s",
-            sessionId, exitReason.name
+            sessionId,
+            exitReason.name
         )
-        FrameworkStatsLog.write(DESKTOP_MODE_ATOM_ID,
+        FrameworkStatsLog.write(
+            DESKTOP_MODE_ATOM_ID,
             /* event */ FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EVENT__EXIT,
             /* enterReason */ 0,
             /* exitReason */ exitReason.reason,
-            /* session_id */ sessionId)
+            /* session_id */ sessionId
+        )
     }
 
     /**
@@ -66,9 +70,11 @@ class DesktopModeEventLogger {
         KtProtoLog.v(
             ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task added, session: %s taskId: %s",
-            sessionId, taskUpdate.instanceId
+            sessionId,
+            taskUpdate.instanceId
         )
-        FrameworkStatsLog.write(DESKTOP_MODE_TASK_UPDATE_ATOM_ID,
+        FrameworkStatsLog.write(
+            DESKTOP_MODE_TASK_UPDATE_ATOM_ID,
             /* task_event */
             FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_ADDED,
             /* instance_id */
@@ -84,7 +90,8 @@ class DesktopModeEventLogger {
             /* task_y */
             taskUpdate.taskY,
             /* session_id */
-            sessionId)
+            sessionId
+        )
     }
 
     /**
@@ -95,9 +102,11 @@ class DesktopModeEventLogger {
         KtProtoLog.v(
             ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task remove, session: %s taskId: %s",
-            sessionId, taskUpdate.instanceId
+            sessionId,
+            taskUpdate.instanceId
         )
-        FrameworkStatsLog.write(DESKTOP_MODE_TASK_UPDATE_ATOM_ID,
+        FrameworkStatsLog.write(
+            DESKTOP_MODE_TASK_UPDATE_ATOM_ID,
             /* task_event */
             FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_REMOVED,
             /* instance_id */
@@ -113,7 +122,8 @@ class DesktopModeEventLogger {
             /* task_y */
             taskUpdate.taskY,
             /* session_id */
-            sessionId)
+            sessionId
+        )
     }
 
     /**
@@ -124,9 +134,11 @@ class DesktopModeEventLogger {
         KtProtoLog.v(
             ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task info changed, session: %s taskId: %s",
-            sessionId, taskUpdate.instanceId
+            sessionId,
+            taskUpdate.instanceId
         )
-        FrameworkStatsLog.write(DESKTOP_MODE_TASK_UPDATE_ATOM_ID,
+        FrameworkStatsLog.write(
+            DESKTOP_MODE_TASK_UPDATE_ATOM_ID,
             /* task_event */
             FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_INFO_CHANGED,
             /* instance_id */
@@ -142,7 +154,8 @@ class DesktopModeEventLogger {
             /* task_y */
             taskUpdate.taskY,
             /* session_id */
-            sessionId)
+            sessionId
+        )
     }
 
     companion object {
@@ -160,12 +173,8 @@ class DesktopModeEventLogger {
          * stats/atoms/desktopmode/desktopmode_extensions_atoms.proto
          */
         enum class EnterReason(val reason: Int) {
-            UNKNOWN_ENTER(
-                FrameworkStatsLog.DESKTOP_MODE_UICHANGED__ENTER_REASON__UNKNOWN_ENTER
-            ),
-            OVERVIEW(
-                FrameworkStatsLog.DESKTOP_MODE_UICHANGED__ENTER_REASON__OVERVIEW
-            ),
+            UNKNOWN_ENTER(FrameworkStatsLog.DESKTOP_MODE_UICHANGED__ENTER_REASON__UNKNOWN_ENTER),
+            OVERVIEW(FrameworkStatsLog.DESKTOP_MODE_UICHANGED__ENTER_REASON__OVERVIEW),
             APP_HANDLE_DRAG(
                 FrameworkStatsLog.DESKTOP_MODE_UICHANGED__ENTER_REASON__APP_HANDLE_DRAG
             ),
@@ -178,9 +187,7 @@ class DesktopModeEventLogger {
             KEYBOARD_SHORTCUT_ENTER(
                 FrameworkStatsLog.DESKTOP_MODE_UICHANGED__ENTER_REASON__KEYBOARD_SHORTCUT_ENTER
             ),
-            SCREEN_ON(
-                FrameworkStatsLog.DESKTOP_MODE_UICHANGED__ENTER_REASON__SCREEN_ON
-            );
+            SCREEN_ON(FrameworkStatsLog.DESKTOP_MODE_UICHANGED__ENTER_REASON__SCREEN_ON)
         }
 
         /**
@@ -188,12 +195,8 @@ class DesktopModeEventLogger {
          * stats/atoms/desktopmode/desktopmode_extensions_atoms.proto
          */
         enum class ExitReason(val reason: Int) {
-            UNKNOWN_EXIT(
-                FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EXIT_REASON__UNKNOWN_EXIT
-            ),
-            DRAG_TO_EXIT(
-                FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EXIT_REASON__DRAG_TO_EXIT
-            ),
+            UNKNOWN_EXIT(FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EXIT_REASON__UNKNOWN_EXIT),
+            DRAG_TO_EXIT(FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EXIT_REASON__DRAG_TO_EXIT),
             APP_HANDLE_MENU_BUTTON_EXIT(
                 FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EXIT_REASON__APP_HANDLE_MENU_BUTTON_EXIT
             ),
@@ -203,12 +206,8 @@ class DesktopModeEventLogger {
             RETURN_HOME_OR_OVERVIEW(
                 FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME
             ),
-            TASK_FINISHED(
-                FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EXIT_REASON__TASK_FINISHED
-            ),
-            SCREEN_OFF(
-                FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EXIT_REASON__SCREEN_OFF
-            )
+            TASK_FINISHED(FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EXIT_REASON__TASK_FINISHED),
+            SCREEN_OFF(FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EXIT_REASON__SCREEN_OFF)
         }
 
         private const val DESKTOP_MODE_ATOM_ID = FrameworkStatsLog.DESKTOP_MODE_UI_CHANGED

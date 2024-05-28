@@ -20,7 +20,6 @@ import android.os.userManager
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.communal.data.repository.communalMediaRepository
 import com.android.systemui.communal.data.repository.communalPrefsRepository
-import com.android.systemui.communal.data.repository.communalRepository
 import com.android.systemui.communal.data.repository.communalWidgetRepository
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.flags.Flags
@@ -45,7 +44,7 @@ val Kosmos.communalInteractor by Fixture {
         applicationScope = applicationCoroutineScope,
         bgDispatcher = testDispatcher,
         broadcastDispatcher = broadcastDispatcher,
-        communalRepository = communalRepository,
+        communalSceneInteractor = communalSceneInteractor,
         widgetRepository = communalWidgetRepository,
         communalPrefsRepository = communalPrefsRepository,
         mediaRepository = communalMediaRepository,

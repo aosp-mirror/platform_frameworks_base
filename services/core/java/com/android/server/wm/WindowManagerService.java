@@ -8619,8 +8619,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     return true;
                 }
                 // For a task session, find the activity identified by the launch cookie.
-                final WindowContainerInfo wci = getTaskWindowContainerInfoForLaunchCookie(
-                        incomingSession.getTokenToRecord());
+                final WindowContainerInfo wci =
+                        getTaskWindowContainerInfoForRecordingSession(incomingSession);
                 if (wci == null) {
                     Slog.w(TAG, "Handling a new recording session; unable to find the "
                             + "WindowContainerToken");
@@ -9082,35 +9082,58 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * Retrieve the {@link WindowContainerInfo} of the task that contains the activity started with
-     * the given launch cookie.
+     * Retrieve the {@link WindowContainerInfo} of the task that was launched for MediaProjection.
      *
-     * @param launchCookie the launch cookie set on the {@link ActivityOptions} when starting an
-     *     activity
+     * @param session the {@link ContentRecordingSession} containing the launch cookie and/or
+     *     task id of the Task started for capture.
      * @return a token representing the task containing the activity started with the given launch
      *     cookie, or {@code null} if the token couldn't be found.
      */
     @VisibleForTesting
     @Nullable
-    WindowContainerInfo getTaskWindowContainerInfoForLaunchCookie(@NonNull IBinder launchCookie) {
-        // Find the activity identified by the launch cookie.
-        final ActivityRecord targetActivity =
-                mRoot.getActivity(activity -> activity.mLaunchCookie == launchCookie);
-        if (targetActivity == null) {
-            Slog.w(TAG, "Unable to find the activity for this launch cookie");
-            return null;
+    WindowContainerInfo getTaskWindowContainerInfoForRecordingSession(
+            @NonNull ContentRecordingSession session) {
+        WindowContainerToken taskWindowContainerToken = null;
+        ActivityRecord targetActivity = null;
+        Task targetTask = null;
+
+        // First attempt to find the launched task by looking for the launched activity with the
+        // matching launch cookie.
+        if (session.getTokenToRecord() != null) {
+            IBinder launchCookie = session.getTokenToRecord();
+            targetActivity = mRoot.getActivity(activity -> activity.mLaunchCookie == launchCookie);
+            if (targetActivity == null) {
+                Slog.w(TAG, "Unable to find the activity for this launch cookie");
+            } else {
+                if (targetActivity.getTask() == null) {
+                    Slog.w(TAG, "Unable to find the task for this launch cookie");
+                } else {
+                    targetTask = targetActivity.getTask();
+                    taskWindowContainerToken = targetTask.mRemoteToken.toWindowContainerToken();
+                }
+            }
         }
-        if (targetActivity.getTask() == null) {
-            Slog.w(TAG, "Unable to find the task for this launch cookie");
-            return null;
+
+        // In the case we can't find an activity with a matching launch cookie, it could be due to
+        // the launched activity being closed, but the launched task is still open, so now attempt
+        // to look for the task directly.
+        if (taskWindowContainerToken == null && session.getTaskId() != -1) {
+            int targetTaskId = session.getTaskId();
+            targetTask = mRoot.getTask(task -> task.isTaskId(targetTaskId));
+            if (targetTask == null) {
+                Slog.w(TAG, "Unable to find the task for this projection");
+            } else {
+                taskWindowContainerToken = targetTask.mRemoteToken.toWindowContainerToken();
+            }
         }
-        WindowContainerToken taskWindowContainerToken =
-                targetActivity.getTask().mRemoteToken.toWindowContainerToken();
+
+        // If we were unable to find the launched task in either fashion, then something must have
+        // wrong (i.e. the task was closed before capture started).
         if (taskWindowContainerToken == null) {
-            Slog.w(TAG, "Unable to find the WindowContainerToken for " + targetActivity.getName());
+            Slog.w(TAG, "Unable to find the WindowContainerToken for ContentRecordingSession");
             return null;
         }
-        return new WindowContainerInfo(targetActivity.getUid(), taskWindowContainerToken);
+        return new WindowContainerInfo(targetTask.effectiveUid, taskWindowContainerToken);
     }
 
     /**

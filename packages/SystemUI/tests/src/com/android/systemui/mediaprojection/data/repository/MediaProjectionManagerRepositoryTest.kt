@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.mediaprojection.taskswitcher.data.repository
+package com.android.systemui.mediaprojection.data.repository
 
 import android.os.Binder
 import android.testing.AndroidTestingRunner
@@ -23,9 +23,9 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
 import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createToken
-import com.android.systemui.mediaprojection.taskswitcher.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.taskswitcher.fakeActivityTaskManager
 import com.android.systemui.mediaprojection.taskswitcher.fakeMediaProjectionManager
 import com.android.systemui.mediaprojection.taskswitcher.mediaProjectionManagerRepository

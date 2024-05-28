@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.mediaprojection.taskswitcher.data.repository
+package com.android.systemui.mediaprojection.data.repository
 
 import android.app.ActivityManager.RunningTaskInfo
-import com.android.systemui.mediaprojection.taskswitcher.data.model.MediaProjectionState
+import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import kotlinx.coroutines.flow.Flow
 
 /** Represents a repository to retrieve and change data related to media projection. */

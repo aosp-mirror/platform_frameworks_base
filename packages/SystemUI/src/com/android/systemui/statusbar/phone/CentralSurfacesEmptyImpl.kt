@@ -39,6 +39,7 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun updateIsKeyguard(forceStateChange: Boolean) = false
     override fun getKeyguardMessageArea(): AuthKeyguardMessageArea? = null
     override fun isLaunchingActivityOverLockscreen() = false
+    override fun isDismissingShadeForActivityLaunch() = false
     override fun onKeyguardViewManagerStatesUpdated() {}
     override fun getCommandQueuePanelsEnabled() = false
     override fun showWirelessChargingAnimation(batteryLevel: Int) {}
@@ -96,7 +97,10 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun setLaunchEmergencyActionOnFinishedWaking(launch: Boolean) {}
     override fun getQSPanelController(): QSPanelController? = null
     override fun getDisplayDensity() = 0f
-    override fun setIsLaunchingActivityOverLockscreen(isLaunchingActivityOverLockscreen: Boolean) {}
+    override fun setIsLaunchingActivityOverLockscreen(
+        isLaunchingActivityOverLockscreen: Boolean,
+        dismissShade: Boolean,
+    ) {}
     override fun getAnimatorControllerFromNotification(
         associatedView: ExpandableNotificationRow?,
     ): ActivityTransitionAnimator.Controller? = null

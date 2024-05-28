@@ -29,13 +29,10 @@ import androidx.core.util.valueIterator
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.util.KtProtoLog
 import java.io.PrintWriter
-import java.util.ArrayList;
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 
-/**
- * Keeps track of task data related to desktop mode.
- */
+/** Keeps track of task data related to desktop mode. */
 class DesktopModeTaskRepository {
 
     /** Task data that is tracked per display */
@@ -85,13 +82,8 @@ class DesktopModeTaskRepository {
         activeTasksListeners.add(activeTasksListener)
     }
 
-    /**
-     * Add a [VisibleTasksListener] to be notified when freeform tasks are visible or not.
-     */
-    fun addVisibleTasksListener(
-        visibleTasksListener: VisibleTasksListener,
-        executor: Executor
-    ) {
+    /** Add a [VisibleTasksListener] to be notified when freeform tasks are visible or not. */
+    fun addVisibleTasksListener(visibleTasksListener: VisibleTasksListener, executor: Executor) {
         visibleTasksListeners[visibleTasksListener] = executor
         displayData.keyIterator().forEach { displayId ->
             val visibleTasksCount = getVisibleTaskCount(displayId)
@@ -113,9 +105,7 @@ class DesktopModeTaskRepository {
         }
     }
 
-    /**
-     * Create a new merged region representative of all exclusion regions in all desktop tasks.
-     */
+    /** Create a new merged region representative of all exclusion regions in all desktop tasks. */
     private fun calculateDesktopExclusionRegion(): Region {
         val desktopExclusionRegion = Region()
         desktopExclusionRegions.valueIterator().forEach { taskExclusionRegion ->
@@ -124,16 +114,12 @@ class DesktopModeTaskRepository {
         return desktopExclusionRegion
     }
 
-    /**
-     * Remove a previously registered [ActiveTasksListener]
-     */
+    /** Remove a previously registered [ActiveTasksListener] */
     fun removeActiveTasksListener(activeTasksListener: ActiveTasksListener) {
         activeTasksListeners.remove(activeTasksListener)
     }
 
-    /**
-     * Remove a previously registered [VisibleTasksListener]
-     */
+    /** Remove a previously registered [VisibleTasksListener] */
     fun removeVisibleTasksListener(visibleTasksListener: VisibleTasksListener) {
         visibleTasksListeners.remove(visibleTasksListener)
     }
@@ -183,18 +169,14 @@ class DesktopModeTaskRepository {
         return result
     }
 
-    /**
-     * Check if a task with the given [taskId] was marked as an active task
-     */
+    /** Check if a task with the given [taskId] was marked as an active task */
     fun isActiveTask(taskId: Int): Boolean {
         return displayData.valueIterator().asSequence().any { data ->
             data.activeTasks.contains(taskId)
         }
     }
 
-    /**
-     * Whether a task is visible.
-     */
+    /** Whether a task is visible. */
     fun isVisibleTask(taskId: Int): Boolean {
         return displayData.valueIterator().asSequence().any { data ->
             data.visibleTasks.contains(taskId)
@@ -208,18 +190,14 @@ class DesktopModeTaskRepository {
         }
     }
 
-    /**
-     *  Check if a task with the given [taskId] is the only active task on its display
-     */
+    /** Check if a task with the given [taskId] is the only active task on its display */
     fun isOnlyActiveTask(taskId: Int): Boolean {
         return displayData.valueIterator().asSequence().any { data ->
             data.activeTasks.singleOrNull() == taskId
         }
     }
 
-    /**
-     * Get a set of the active tasks for given [displayId]
-     */
+    /** Get a set of the active tasks for given [displayId] */
     fun getActiveTasks(displayId: Int): ArraySet<Int> {
         return ArraySet(displayData[displayId]?.activeTasks)
     }
@@ -238,14 +216,12 @@ class DesktopModeTaskRepository {
         val activeTasks = getActiveTasks(displayId)
         val allTasksInZOrder = getFreeformTasksInZOrder(displayId)
         return activeTasks
-                // Don't show already minimized Tasks
-                .filter { taskId -> !isMinimizedTask(taskId) }
-                .sortedBy { taskId -> allTasksInZOrder.indexOf(taskId) }
+            // Don't show already minimized Tasks
+            .filter { taskId -> !isMinimizedTask(taskId) }
+            .sortedBy { taskId -> allTasksInZOrder.indexOf(taskId) }
     }
 
-    /**
-     * Get a list of freeform tasks, ordered from top-bottom (top at index 0).
-     */
+    /** Get a list of freeform tasks, ordered from top-bottom (top at index 0). */
     fun getFreeformTasksInZOrder(displayId: Int): ArrayList<Int> =
         ArrayList(displayData[displayId]?.freeformTasksInZOrder ?: emptyList())
 
@@ -261,8 +237,10 @@ class DesktopModeTaskRepository {
             val otherDisplays = displayData.keyIterator().asSequence().filter { it != displayId }
             for (otherDisplayId in otherDisplays) {
                 if (displayData[otherDisplayId].visibleTasks.remove(taskId)) {
-                    notifyVisibleTaskListeners(otherDisplayId,
-                        displayData[otherDisplayId].visibleTasks.size)
+                    notifyVisibleTaskListeners(
+                        otherDisplayId,
+                        displayData[otherDisplayId].visibleTasks.size
+                    )
                 }
             }
         } else if (displayId == INVALID_DISPLAY) {
@@ -309,9 +287,7 @@ class DesktopModeTaskRepository {
         }
     }
 
-    /**
-     * Get number of tasks that are marked as visible on given [displayId]
-     */
+    /** Get number of tasks that are marked as visible on given [displayId] */
     fun getVisibleTaskCount(displayId: Int): Int {
         KtProtoLog.d(
             WM_SHELL_DESKTOP_MODE,
@@ -321,16 +297,15 @@ class DesktopModeTaskRepository {
         return displayData[displayId]?.visibleTasks?.size ?: 0
     }
 
-    /**
-     * Add (or move if it already exists) the task to the top of the ordered list.
-     */
-     // TODO(b/342417921): Identify if there is additional checks needed to move tasks for
-     // multi-display scenarios.
+    /** Add (or move if it already exists) the task to the top of the ordered list. */
+    // TODO(b/342417921): Identify if there is additional checks needed to move tasks for
+    // multi-display scenarios.
     fun addOrMoveFreeformTaskToTop(displayId: Int, taskId: Int) {
         KtProtoLog.d(
             WM_SHELL_DESKTOP_MODE,
             "DesktopTaskRepo: add or move task to top: display=%d, taskId=%d",
-            displayId, taskId
+            displayId,
+            taskId
         )
         displayData[displayId]?.freeformTasksInZOrder?.remove(taskId)
         displayData.getOrCreate(displayId).freeformTasksInZOrder.add(0, taskId)
@@ -339,29 +314,32 @@ class DesktopModeTaskRepository {
     /** Mark a Task as minimized. */
     fun minimizeTask(displayId: Int, taskId: Int) {
         KtProtoLog.v(
-                WM_SHELL_DESKTOP_MODE,
-                "DesktopModeTaskRepository: minimize Task: display=%d, task=%d",
-                displayId, taskId)
+            WM_SHELL_DESKTOP_MODE,
+            "DesktopModeTaskRepository: minimize Task: display=%d, task=%d",
+            displayId,
+            taskId
+        )
         displayData.getOrCreate(displayId).minimizedTasks.add(taskId)
     }
 
     /** Mark a Task as non-minimized. */
     fun unminimizeTask(displayId: Int, taskId: Int) {
         KtProtoLog.v(
-                WM_SHELL_DESKTOP_MODE,
-                "DesktopModeTaskRepository: unminimize Task: display=%d, task=%d",
-                displayId, taskId)
+            WM_SHELL_DESKTOP_MODE,
+            "DesktopModeTaskRepository: unminimize Task: display=%d, task=%d",
+            displayId,
+            taskId
+        )
         displayData[displayId]?.minimizedTasks?.remove(taskId)
     }
 
-    /**
-     * Remove the task from the ordered list.
-     */
+    /** Remove the task from the ordered list. */
     fun removeFreeformTask(displayId: Int, taskId: Int) {
         KtProtoLog.d(
             WM_SHELL_DESKTOP_MODE,
             "DesktopTaskRepo: remove freeform task from ordered list: display=%d, taskId=%d",
-            displayId, taskId
+            displayId,
+            taskId
         )
         displayData[displayId]?.freeformTasksInZOrder?.remove(taskId)
         boundsBeforeMaximizeByTaskId.remove(taskId)
@@ -374,8 +352,7 @@ class DesktopModeTaskRepository {
 
     /**
      * Updates the active desktop gesture exclusion regions; if desktopExclusionRegions has been
-     * accepted by desktopGestureExclusionListener, it will be updated in the
-     * appropriate classes.
+     * accepted by desktopGestureExclusionListener, it will be updated in the appropriate classes.
      */
     fun updateTaskExclusionRegions(taskId: Int, taskExclusionRegions: Region) {
         desktopExclusionRegions.put(taskId, taskExclusionRegions)
@@ -385,9 +362,9 @@ class DesktopModeTaskRepository {
     }
 
     /**
-     * Removes the desktop gesture exclusion region for the specified task; if exclusionRegion
-     * has been accepted by desktopGestureExclusionListener, it will be updated in the
-     * appropriate classes.
+     * Removes the desktop gesture exclusion region for the specified task; if exclusionRegion has
+     * been accepted by desktopGestureExclusionListener, it will be updated in the appropriate
+     * classes.
      */
     fun removeExclusionRegion(taskId: Int) {
         desktopExclusionRegions.delete(taskId)
@@ -396,16 +373,12 @@ class DesktopModeTaskRepository {
         }
     }
 
-    /**
-     * Removes and returns the bounds saved before maximizing the given task.
-     */
+    /** Removes and returns the bounds saved before maximizing the given task. */
     fun removeBoundsBeforeMaximize(taskId: Int): Rect? {
         return boundsBeforeMaximizeByTaskId.removeReturnOld(taskId)
     }
 
-    /**
-     * Saves the bounds of the given task before maximizing.
-     */
+    /** Saves the bounds of the given task before maximizing. */
     fun saveBoundsBeforeMaximize(taskId: Int, bounds: Rect) {
         boundsBeforeMaximizeByTaskId.set(taskId, Rect(bounds))
     }
@@ -424,7 +397,9 @@ class DesktopModeTaskRepository {
             pw.println("${prefix}Display $displayId:")
             pw.println("${innerPrefix}activeTasks=${data.activeTasks.toDumpString()}")
             pw.println("${innerPrefix}visibleTasks=${data.visibleTasks.toDumpString()}")
-            pw.println("${innerPrefix}freeformTasksInZOrder=${data.freeformTasksInZOrder.toDumpString()}")
+            pw.println(
+                "${innerPrefix}freeformTasksInZOrder=${data.freeformTasksInZOrder.toDumpString()}"
+            )
         }
     }
 
@@ -432,9 +407,7 @@ class DesktopModeTaskRepository {
      * Defines interface for classes that can listen to changes for active tasks in desktop mode.
      */
     interface ActiveTasksListener {
-        /**
-         * Called when the active tasks change in desktop mode.
-         */
+        /** Called when the active tasks change in desktop mode. */
         fun onActiveTasksChanged(displayId: Int) {}
     }
 
@@ -442,9 +415,7 @@ class DesktopModeTaskRepository {
      * Defines interface for classes that can listen to changes for visible tasks in desktop mode.
      */
     interface VisibleTasksListener {
-        /**
-         * Called when the desktop changes the number of visible freeform tasks.
-         */
+        /** Called when the desktop changes the number of visible freeform tasks. */
         fun onTasksVisibilityChanged(displayId: Int, visibleTasksCount: Int) {}
     }
 }

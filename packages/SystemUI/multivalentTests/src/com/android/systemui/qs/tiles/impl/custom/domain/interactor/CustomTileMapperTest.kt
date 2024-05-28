@@ -245,6 +245,7 @@ class CustomTileMapperTest : SysuiTestCase() {
     ): QSTileState {
         return QSTileState(
             { icon?.let { com.android.systemui.common.shared.model.Icon.Loaded(icon, null) } },
+            null,
             "test label",
             activationState,
             "test subtitle",

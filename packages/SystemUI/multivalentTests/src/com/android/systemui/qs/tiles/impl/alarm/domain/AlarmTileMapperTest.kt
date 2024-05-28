@@ -179,6 +179,7 @@ class AlarmTileMapperTest : SysuiTestCase() {
         val label = context.getString(R.string.status_bar_alarm)
         return QSTileState(
             { Icon.Loaded(context.getDrawable(R.drawable.ic_alarm)!!, null) },
+            R.drawable.ic_alarm,
             label,
             activationState,
             secondaryLabel,

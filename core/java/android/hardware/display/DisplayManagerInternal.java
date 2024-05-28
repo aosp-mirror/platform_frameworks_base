@@ -739,6 +739,9 @@ public abstract class DisplayManagerInternal {
          *                  on is done.
          */
         void onBlockingScreenOn(Runnable unblocker);
+
+        /** Whether auto brightness update in doze is allowed */
+        boolean allowAutoBrightnessInDoze();
     }
 
     /** A session token that associates a internal display with a {@link DisplayOffloader}. */
@@ -748,6 +751,9 @@ public abstract class DisplayManagerInternal {
 
         /** Whether the session is active. */
         boolean isActive();
+
+        /** Whether auto brightness update in doze is allowed */
+        boolean allowAutoBrightnessInDoze();
 
         /**
          * Update the brightness from the offload chip.

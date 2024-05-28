@@ -18,6 +18,7 @@ package com.android.systemui.volume.panel.component.mediaoutput.data.repository
 import com.android.settingslib.volume.data.repository.LocalMediaRepository
 import com.android.settingslib.volume.data.repository.LocalMediaRepositoryImpl
 import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.media.controls.util.LocalMediaManagerFactory
 import javax.inject.Inject
@@ -28,6 +29,7 @@ interface LocalMediaRepositoryFactory {
     fun create(packageName: String?): LocalMediaRepository
 }
 
+@SysUISingleton
 class LocalMediaRepositoryFactoryImpl
 @Inject
 constructor(

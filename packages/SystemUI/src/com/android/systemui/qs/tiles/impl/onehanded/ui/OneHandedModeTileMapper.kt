@@ -38,15 +38,8 @@ constructor(
         QSTileState.build(resources, theme, config.uiConfig) {
             val subtitleArray = resources.getStringArray(R.array.tile_states_onehanded)
             label = resources.getString(R.string.quick_settings_onehanded_label)
-            icon = {
-                Icon.Loaded(
-                    resources.getDrawable(
-                        com.android.internal.R.drawable.ic_qs_one_handed_mode,
-                        theme
-                    ),
-                    null
-                )
-            }
+            iconRes = com.android.internal.R.drawable.ic_qs_one_handed_mode
+            icon = { Icon.Loaded(resources.getDrawable(iconRes!!, theme), null) }
             if (data.isEnabled) {
                 activationState = QSTileState.ActivationState.ACTIVE
                 secondaryLabel = subtitleArray[2]

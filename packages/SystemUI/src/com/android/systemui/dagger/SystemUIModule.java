@@ -75,7 +75,8 @@ import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSectionsMod
 import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.log.dagger.MonitorLog;
 import com.android.systemui.log.table.TableLogBuffer;
-import com.android.systemui.mediaprojection.appselector.MediaProjectionModule;
+import com.android.systemui.mediaprojection.MediaProjectionModule;
+import com.android.systemui.mediaprojection.appselector.MediaProjectionActivitiesModule;
 import com.android.systemui.mediaprojection.taskswitcher.MediaProjectionTaskSwitcherModule;
 import com.android.systemui.model.SceneContainerPlugin;
 import com.android.systemui.model.SysUiState;
@@ -225,6 +226,7 @@ import javax.inject.Named;
         KeyguardSectionsModule.class,
         LetterboxModule.class,
         LogModule.class,
+        MediaProjectionActivitiesModule.class,
         MediaProjectionModule.class,
         MediaProjectionTaskSwitcherModule.class,
         MotionToolModule.class,

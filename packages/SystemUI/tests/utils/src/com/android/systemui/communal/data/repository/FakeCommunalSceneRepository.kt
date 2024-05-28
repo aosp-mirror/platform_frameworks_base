@@ -14,14 +14,17 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
-/** Fake implementation of [CommunalRepository]. */
+/** Fake implementation of [CommunalSceneRepository]. */
 @OptIn(ExperimentalCoroutinesApi::class)
-class FakeCommunalRepository(
+class FakeCommunalSceneRepository(
     applicationScope: CoroutineScope,
     override val currentScene: MutableStateFlow<SceneKey> =
         MutableStateFlow(CommunalScenes.Default),
-) : CommunalRepository {
-    override fun changeScene(toScene: SceneKey, transitionKey: TransitionKey?) {
+) : CommunalSceneRepository {
+    override fun changeScene(toScene: SceneKey, transitionKey: TransitionKey?) =
+        snapToScene(toScene)
+
+    override fun snapToScene(toScene: SceneKey) {
         this.currentScene.value = toScene
         this._transitionState.value = flowOf(ObservableTransitionState.Idle(toScene))
     }

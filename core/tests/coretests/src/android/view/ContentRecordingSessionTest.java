@@ -18,6 +18,7 @@ package android.view;
 
 import static android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
+import static android.view.ContentRecordingSession.TASK_ID_UNKNOWN;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -45,6 +46,7 @@ import org.junit.runner.RunWith;
 @Presubmit
 public class ContentRecordingSessionTest {
     private static final int DISPLAY_ID = 1;
+    private static final int TASK_ID = 123;
     private static final IBinder WINDOW_TOKEN = new Binder("DisplayContentWindowToken");
 
     @Test
@@ -65,6 +67,16 @@ public class ContentRecordingSessionTest {
         ContentRecordingSession session = ContentRecordingSession.createTaskSession(WINDOW_TOKEN);
         assertThat(session.getContentToRecord()).isEqualTo(RECORD_CONTENT_TASK);
         assertThat(session.getTokenToRecord()).isEqualTo(WINDOW_TOKEN);
+        assertThat(session.getTaskId()).isEqualTo(TASK_ID_UNKNOWN);
+    }
+
+    @Test
+    public void testSecondaryTaskConstructor() {
+        ContentRecordingSession session =
+                ContentRecordingSession.createTaskSession(WINDOW_TOKEN, TASK_ID);
+        assertThat(session.getContentToRecord()).isEqualTo(RECORD_CONTENT_TASK);
+        assertThat(session.getTokenToRecord()).isEqualTo(WINDOW_TOKEN);
+        assertThat(session.getTaskId()).isEqualTo(TASK_ID);
     }
 
     @Test
@@ -73,6 +85,7 @@ public class ContentRecordingSessionTest {
                 DEFAULT_DISPLAY);
         assertThat(session.getContentToRecord()).isEqualTo(RECORD_CONTENT_DISPLAY);
         assertThat(session.getTokenToRecord()).isNull();
+        assertThat(session.getTaskId()).isEqualTo(TASK_ID_UNKNOWN);
     }
 
     @Test

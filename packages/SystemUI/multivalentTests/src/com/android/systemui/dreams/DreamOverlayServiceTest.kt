@@ -45,8 +45,8 @@ import com.android.systemui.ambient.touch.scrim.ScrimController
 import com.android.systemui.ambient.touch.scrim.ScrimManager
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
-import com.android.systemui.communal.data.repository.FakeCommunalRepository
-import com.android.systemui.communal.data.repository.fakeCommunalRepository
+import com.android.systemui.communal.data.repository.FakeCommunalSceneRepository
+import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
@@ -79,7 +79,6 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.isNull
-import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -156,7 +155,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
     @Mock lateinit var mDreamOverlayCallbackController: DreamOverlayCallbackController
 
     private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
-    private lateinit var communalRepository: FakeCommunalRepository
+    private lateinit var communalRepository: FakeCommunalSceneRepository
 
     @Captor var mViewCaptor: ArgumentCaptor<View>? = null
     private lateinit var mService: DreamOverlayService
@@ -167,7 +166,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
         lifecycleRegistry = FakeLifecycleRegistry(mLifecycleOwner)
         bouncerRepository = kosmos.fakeKeyguardBouncerRepository
-        communalRepository = kosmos.fakeCommunalRepository
+        communalRepository = kosmos.fakeCommunalSceneRepository
 
         whenever(mDreamOverlayComponent.getDreamOverlayContainerViewController())
             .thenReturn(mDreamOverlayContainerViewController)

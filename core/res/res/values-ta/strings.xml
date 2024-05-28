@@ -201,6 +201,10 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"இந்தச் சாதனத்தில் இனி பணிக் கணக்கு கிடைக்காது"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"கடவுச்சொல்லை அதிக முறை தவறாக முயற்சித்துவிட்டீர்கள்"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"நிர்வாகியால் தனிப்பட்ட உபயோகத்திற்காக ஒதுக்கப்பட்ட சாதனம்"</string>
+    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
+    <skip />
+    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"சாதனம் நிர்வகிக்கப்படுகிறது"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"உங்கள் நிறுவனம் இந்தச் சாதனத்தை நிர்வகிக்கும், அத்துடன் அது நெட்வொர்க் ட்ராஃபிக்கைக் கண்காணிக்கலாம். விவரங்களுக்கு, தட்டவும்."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ஆப்ஸ் உங்கள் இருப்பிடத்தை அணுக முடியும்"</string>
@@ -283,8 +287,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"குரல் உதவி"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"பூட்டு"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
-    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
-    <skip />
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"பதிலளி"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"புதிய அறிவிப்பு"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"கைமுறை கீபோர்டு"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"பாதுகாப்பு"</string>

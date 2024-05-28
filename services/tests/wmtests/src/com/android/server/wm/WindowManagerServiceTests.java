@@ -795,39 +795,55 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     }
 
     @Test
-    public void testGetTaskWindowContainerTokenForLaunchCookie_nullCookie() {
-        WindowContainerInfo wci = mWm.getTaskWindowContainerInfoForLaunchCookie(null);
-        assertThat(wci).isNull();
-    }
-
-    @Test
-    public void testGetTaskWindowContainerTokenForLaunchCookie_invalidCookie() {
+    public void testGetTaskWindowContainerTokenForRecordingSession_invalidCookie() {
         Binder cookie = new Binder("test cookie");
-        WindowContainerInfo wci = mWm.getTaskWindowContainerInfoForLaunchCookie(cookie);
+        WindowContainerInfo wci = mWm.getTaskWindowContainerInfoForRecordingSession(
+                ContentRecordingSession.createTaskSession(cookie));
         assertThat(wci).isNull();
 
         final ActivityRecord testActivity = new ActivityBuilder(mAtm)
                 .setCreateTask(true)
                 .build();
 
-        wci = mWm.getTaskWindowContainerInfoForLaunchCookie(cookie);
+        wci = mWm.getTaskWindowContainerInfoForRecordingSession(
+                ContentRecordingSession.createTaskSession(cookie));
         assertThat(wci).isNull();
     }
 
     @Test
-    public void testGetTaskWindowContainerTokenForLaunchCookie_validCookie() {
+    public void testGetTaskWindowContainerTokenForRecordingSession_validCookie() {
         final Binder cookie = new Binder("ginger cookie");
         final WindowContainerToken launchRootTask = mock(WindowContainerToken.class);
         final int uid = 123;
         setupActivityWithLaunchCookie(cookie, launchRootTask, uid);
 
-        WindowContainerInfo wci = mWm.getTaskWindowContainerInfoForLaunchCookie(cookie);
+        WindowContainerInfo wci = mWm.getTaskWindowContainerInfoForRecordingSession(
+                ContentRecordingSession.createTaskSession(cookie));
         mExpect.that(wci.getToken()).isEqualTo(launchRootTask);
         mExpect.that(wci.getUid()).isEqualTo(uid);
     }
 
     @Test
-    public void testGetTaskWindowContainerTokenForLaunchCookie_multipleCookies() {
+    public void testGetTaskWindowContainerTokenForRecordingSession_validTaskId() {
+        final WindowContainerToken launchRootTask = mock(WindowContainerToken.class);
+        final WindowContainer.RemoteToken remoteToken = mock(WindowContainer.RemoteToken.class);
+        when(remoteToken.toWindowContainerToken()).thenReturn(launchRootTask);
+
+        final int uid = 123;
+        final ActivityRecord testActivity =
+                new ActivityBuilder(mAtm).setCreateTask(true).setUid(uid).build();
+        testActivity.mLaunchCookie = null;
+        testActivity.getTask().mRemoteToken = remoteToken;
+
+        WindowContainerInfo wci = mWm.getTaskWindowContainerInfoForRecordingSession(
+                ContentRecordingSession.createTaskSession(
+                        new Binder("cookie"), testActivity.getTask().mTaskId));
+        mExpect.that(wci.getToken()).isEqualTo(launchRootTask);
+        mExpect.that(wci.getUid()).isEqualTo(uid);
+    }
+
+    @Test
+    public void testGetTaskWindowContainerTokenForRecordingSession_multipleCookies() {
         final Binder cookie1 = new Binder("ginger cookie");
         final WindowContainerToken launchRootTask1 = mock(WindowContainerToken.class);
         final int uid1 = 123;
@@ -839,13 +855,14 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         setupActivityWithLaunchCookie(new Binder("peanut butter cookie"),
                 mock(WindowContainerToken.class), /* uid= */ 789);
 
-        WindowContainerInfo wci = mWm.getTaskWindowContainerInfoForLaunchCookie(cookie1);
+        WindowContainerInfo wci = mWm.getTaskWindowContainerInfoForRecordingSession(
+                ContentRecordingSession.createTaskSession(cookie1));
         mExpect.that(wci.getToken()).isEqualTo(launchRootTask1);
         mExpect.that(wci.getUid()).isEqualTo(uid1);
     }
 
     @Test
-    public void testGetTaskWindowContainerTokenForLaunchCookie_multipleCookies_noneValid() {
+    public void testGetTaskWindowContainerTokenForRecordingSession_multipleCookies_noneValid() {
         setupActivityWithLaunchCookie(new Binder("ginger cookie"),
                 mock(WindowContainerToken.class), /* uid= */ 123);
 
@@ -855,8 +872,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         setupActivityWithLaunchCookie(new Binder("peanut butter cookie"),
                 mock(WindowContainerToken.class), /* uid= */ 789);
 
-        WindowContainerInfo wci = mWm.getTaskWindowContainerInfoForLaunchCookie(
-                new Binder("some other cookie"));
+        WindowContainerInfo wci = mWm.getTaskWindowContainerInfoForRecordingSession(
+                ContentRecordingSession.createTaskSession(new Binder("some other cookie")));
         assertThat(wci).isNull();
     }
 
@@ -895,6 +912,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     public void setContentRecordingSession_sessionContentTask_matchingTask_returnsTrue() {
         WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
         ActivityRecord activityRecord = createActivityRecord(createTask(mDefaultDisplay));
+        activityRecord.mLaunchCookie = new Binder();
         ContentRecordingSession session = ContentRecordingSession.createTaskSession(
                 activityRecord.mLaunchCookie);
 
@@ -908,6 +926,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
         Task task = createTask(mDefaultDisplay);
         ActivityRecord activityRecord = createActivityRecord(task);
+        activityRecord.mLaunchCookie = new Binder();
         ContentRecordingSession session =
                 ContentRecordingSession.createTaskSession(activityRecord.mLaunchCookie);
 
@@ -915,7 +934,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
         mExpect.that(session.getTokenToRecord())
                 .isEqualTo(task.mRemoteToken.toWindowContainerToken().asBinder());
-        mExpect.that(session.getTargetUid()).isEqualTo(activityRecord.getUid());
+        mExpect.that(session.getTargetUid()).isEqualTo(task.effectiveUid);
     }
 
     @Test

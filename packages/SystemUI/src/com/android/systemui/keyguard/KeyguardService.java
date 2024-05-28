@@ -79,6 +79,7 @@ import com.android.systemui.SystemUIApplication;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindParamsApplier;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindViewBinder;
 import com.android.systemui.keyguard.ui.binder.WindowManagerLockscreenVisibilityViewBinder;
@@ -311,6 +312,7 @@ public class KeyguardService extends Service {
     }
 
     private final WindowManagerOcclusionManager mWmOcclusionManager;
+    private final KeyguardEnabledInteractor mKeyguardEnabledInteractor;
 
     private final Lazy<FoldGracePeriodProvider> mFoldGracePeriodProvider = new Lazy<>() {
         @Override
@@ -335,7 +337,8 @@ public class KeyguardService extends Service {
             PowerInteractor powerInteractor,
             WindowManagerOcclusionManager windowManagerOcclusionManager,
             Lazy<SceneInteractor> sceneInteractorLazy,
-            @Main Executor mainExecutor) {
+            @Main Executor mainExecutor,
+            KeyguardEnabledInteractor keyguardEnabledInteractor) {
         super();
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;
@@ -360,6 +363,7 @@ public class KeyguardService extends Service {
         }
 
         mWmOcclusionManager = windowManagerOcclusionManager;
+        mKeyguardEnabledInteractor = keyguardEnabledInteractor;
     }
 
     @Override
@@ -598,6 +602,7 @@ public class KeyguardService extends Service {
         public void setKeyguardEnabled(boolean enabled) {
             trace("setKeyguardEnabled enabled" + enabled);
             checkPermission();
+            mKeyguardEnabledInteractor.notifyKeyguardEnabled(enabled);
             mKeyguardViewMediator.setKeyguardEnabled(enabled);
         }
 

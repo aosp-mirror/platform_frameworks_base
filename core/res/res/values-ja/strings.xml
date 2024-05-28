@@ -201,6 +201,10 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"お使いの仕事用プロファイルはこのデバイスで使用できなくなりました"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"パスワード入力回数が上限に達しました"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"管理者により、デバイスの個人使用が許可されました"</string>
+    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
+    <skip />
+    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"管理対象のデバイス"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"このデバイスは組織によって管理され、ネットワーク トラフィックが監視される場合があります。詳しくはタップしてください。"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"アプリに位置情報へのアクセスを許可しました"</string>
@@ -2395,7 +2399,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"キーボードのレイアウトは<xliff:g id="LAYOUT_1">%1$s</xliff:g>、<xliff:g id="LAYOUT_2">%2$s</xliff:g>、<xliff:g id="LAYOUT_3">%3$s</xliff:g>などに設定されています。タップで変更できます。"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"物理キーボードの設定完了"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"タップするとキーボードを表示できます"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"非公開"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"プライベート"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"複製"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"仕事用"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"仕事用 2"</string>
@@ -2415,10 +2419,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"仕組み"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"保留中..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"指紋認証をもう一度設定してください"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> は正常に機能せず、削除されました"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> と <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> は正常に機能せず、削除されました"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> が正常に機能せず、削除されました。指紋認証でスマートフォンのロックを解除するには、設定し直してください。"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> と <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> が正常に機能せず、削除されました。指紋認証でスマートフォンのロックを解除するには、設定し直してください。"</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"顔認証をもう一度設定してください"</string>

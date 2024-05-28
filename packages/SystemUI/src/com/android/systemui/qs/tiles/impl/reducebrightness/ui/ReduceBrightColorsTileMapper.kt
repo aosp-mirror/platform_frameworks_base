@@ -39,27 +39,22 @@ constructor(
         QSTileState.build(resources, theme, config.uiConfig) {
             if (data.isEnabled) {
                 activationState = QSTileState.ActivationState.ACTIVE
-                icon = {
-                    Icon.Loaded(
-                        drawable = resources.getDrawable(R.drawable.qs_extra_dim_icon_on, theme),
-                        contentDescription = null
-                    )
-                }
-
+                iconRes = R.drawable.qs_extra_dim_icon_on
                 secondaryLabel =
                     resources
                         .getStringArray(R.array.tile_states_reduce_brightness)[Tile.STATE_ACTIVE]
             } else {
                 activationState = QSTileState.ActivationState.INACTIVE
-                icon = {
-                    Icon.Loaded(
-                        drawable = resources.getDrawable(R.drawable.qs_extra_dim_icon_off, theme),
-                        contentDescription = null
-                    )
-                }
+                iconRes = R.drawable.qs_extra_dim_icon_off
                 secondaryLabel =
                     resources
                         .getStringArray(R.array.tile_states_reduce_brightness)[Tile.STATE_INACTIVE]
+            }
+            icon = {
+                Icon.Loaded(
+                    drawable = resources.getDrawable(iconRes!!, theme),
+                    contentDescription = null
+                )
             }
             label =
                 resources.getString(com.android.internal.R.string.reduce_bright_colors_feature_name)

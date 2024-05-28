@@ -7774,24 +7774,44 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void checkRemoteViews(String pkg, String tag, int id, Notification notification) {
-        if (removeRemoteView(pkg, tag, id, notification.contentView)) {
+        if (android.app.Flags.removeRemoteViews()) {
+            if (notification.contentView != null || notification.bigContentView != null
+                    ||  notification.headsUpContentView != null
+                    || (notification.publicVersion != null
+                    && (notification.publicVersion.contentView != null
+                    || notification.publicVersion.bigContentView != null
+                    || notification.publicVersion.headsUpContentView != null))) {
+                Slog.i(TAG, "Removed customViews for " + pkg);
+                mUsageStats.registerImageRemoved(pkg);
+            }
             notification.contentView = null;
-        }
-        if (removeRemoteView(pkg, tag, id, notification.bigContentView)) {
             notification.bigContentView = null;
-        }
-        if (removeRemoteView(pkg, tag, id, notification.headsUpContentView)) {
             notification.headsUpContentView = null;
-        }
-        if (notification.publicVersion != null) {
-            if (removeRemoteView(pkg, tag, id, notification.publicVersion.contentView)) {
+            if (notification.publicVersion != null) {
                 notification.publicVersion.contentView = null;
-            }
-            if (removeRemoteView(pkg, tag, id, notification.publicVersion.bigContentView)) {
                 notification.publicVersion.bigContentView = null;
-            }
-            if (removeRemoteView(pkg, tag, id, notification.publicVersion.headsUpContentView)) {
                 notification.publicVersion.headsUpContentView = null;
+            }
+        } else {
+            if (removeRemoteView(pkg, tag, id, notification.contentView)) {
+                notification.contentView = null;
+            }
+            if (removeRemoteView(pkg, tag, id, notification.bigContentView)) {
+                notification.bigContentView = null;
+            }
+            if (removeRemoteView(pkg, tag, id, notification.headsUpContentView)) {
+                notification.headsUpContentView = null;
+            }
+            if (notification.publicVersion != null) {
+                if (removeRemoteView(pkg, tag, id, notification.publicVersion.contentView)) {
+                    notification.publicVersion.contentView = null;
+                }
+                if (removeRemoteView(pkg, tag, id, notification.publicVersion.bigContentView)) {
+                    notification.publicVersion.bigContentView = null;
+                }
+                if (removeRemoteView(pkg, tag, id, notification.publicVersion.headsUpContentView)) {
+                    notification.publicVersion.headsUpContentView = null;
+                }
             }
         }
     }
