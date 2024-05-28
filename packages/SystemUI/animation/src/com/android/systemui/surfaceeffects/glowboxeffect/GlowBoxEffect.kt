@@ -25,8 +25,9 @@ import com.android.systemui.surfaceeffects.utils.MathUtils.lerp
 
 /** Glow box effect where the box moves from start to end positions defined in the [config]. */
 class GlowBoxEffect(
-    private val config: GlowBoxConfig,
-    private val paintDrawCallback: PaintDrawCallback
+    private var config: GlowBoxConfig,
+    private val paintDrawCallback: PaintDrawCallback,
+    private val stateChangedCallback: AnimationStateChangedCallback? = null
 ) {
     private val glowBoxShader =
         GlowBoxShader().apply {
@@ -39,6 +40,17 @@ class GlowBoxEffect(
     @VisibleForTesting var state: AnimationState = AnimationState.NOT_PLAYING
     private val paint = Paint().apply { shader = glowBoxShader }
 
+    fun updateConfig(newConfig: GlowBoxConfig) {
+        this.config = newConfig
+
+        with(glowBoxShader) {
+            setSize(config.width, config.height)
+            setCenter(config.startCenterX, config.startCenterY)
+            setBlur(config.blurAmount)
+            setColor(config.color)
+        }
+    }
+
     fun play() {
         if (state != AnimationState.NOT_PLAYING) {
             return
@@ -47,13 +59,24 @@ class GlowBoxEffect(
         playEaseIn()
     }
 
-    fun finish() {
-        if (state == AnimationState.NOT_PLAYING || state == AnimationState.EASE_OUT) {
+    /** Finishes the animation with ease out. */
+    fun finish(force: Boolean = false) {
+        // If it's playing ease out, cancel immediately.
+        if (force && state == AnimationState.EASE_OUT) {
+            animator?.cancel()
             return
         }
 
-        animator?.pause()
-        playEaseOut()
+        // If it's playing either ease in or main, fast-forward to ease out.
+        if (state == AnimationState.EASE_IN || state == AnimationState.MAIN) {
+            animator?.pause()
+            playEaseOut()
+        }
+
+        // At this point, animation state should be ease out. Cancel it if force is true.
+        if (force) {
+            animator?.cancel()
+        }
     }
 
     private fun playEaseIn() {
@@ -61,6 +84,7 @@ class GlowBoxEffect(
             return
         }
         state = AnimationState.EASE_IN
+        stateChangedCallback?.onStart()
 
         animator =
             ValueAnimator.ofFloat(0f, 1f).apply {
@@ -124,6 +148,7 @@ class GlowBoxEffect(
                 doOnEnd {
                     animator = null
                     state = AnimationState.NOT_PLAYING
+                    stateChangedCallback?.onEnd()
                 }
 
                 start()
@@ -143,5 +168,18 @@ class GlowBoxEffect(
         MAIN,
         EASE_OUT,
         NOT_PLAYING,
+    }
+
+    interface AnimationStateChangedCallback {
+        /**
+         * Triggered when the animation starts, specifically when the states goes from
+         * [AnimationState.NOT_PLAYING] to [AnimationState.EASE_IN].
+         */
+        fun onStart()
+        /**
+         * Triggered when the animation ends, specifically when the states goes from
+         * [AnimationState.EASE_OUT] to [AnimationState.NOT_PLAYING].
+         */
+        fun onEnd()
     }
 }
