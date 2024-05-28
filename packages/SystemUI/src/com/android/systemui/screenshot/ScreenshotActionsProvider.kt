@@ -29,10 +29,10 @@ import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_EDIT_TAPPED
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_PREVIEW_TAPPED
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_SHARE_TAPPED
 import com.android.systemui.screenshot.ui.viewmodel.ActionButtonAppearance
-import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import java.util.UUID
 
 /**
  * Provides actions for screenshots. This class can be overridden by a vendor-specific SysUI
@@ -51,9 +51,10 @@ interface ScreenshotActionsProvider {
 
     interface Factory {
         fun create(
+            requestId: UUID,
             request: ScreenshotData,
-            requestId: String,
             actionExecutor: ActionExecutor,
+            actionsCallback: ScreenshotActionsController.ActionsCallback,
         ): ScreenshotActionsProvider
     }
 }
@@ -62,11 +63,11 @@ class DefaultScreenshotActionsProvider
 @AssistedInject
 constructor(
     private val context: Context,
-    private val viewModel: ScreenshotViewModel,
     private val uiEventLogger: UiEventLogger,
+    @Assisted val requestId: UUID,
     @Assisted val request: ScreenshotData,
-    @Assisted val requestId: String,
     @Assisted val actionExecutor: ActionExecutor,
+    @Assisted val actionsCallback: ScreenshotActionsController.ActionsCallback,
 ) : ScreenshotActionsProvider {
     private var addedScrollChip = false
     private var onScrollClick: Runnable? = null
@@ -74,7 +75,7 @@ constructor(
     private var result: ScreenshotSavedResult? = null
 
     init {
-        viewModel.setPreviewAction {
+        actionsCallback.providePreviewAction {
             debugLog(LogConfig.DEBUG_ACTIONS) { "Preview tapped" }
             uiEventLogger.log(SCREENSHOT_PREVIEW_TAPPED, 0, request.packageNameString)
             onDeferrableActionTapped { result ->
@@ -85,26 +86,8 @@ constructor(
                 )
             }
         }
-        viewModel.addAction(
-            ActionButtonAppearance(
-                AppCompatResources.getDrawable(context, R.drawable.ic_screenshot_edit),
-                context.resources.getString(R.string.screenshot_edit_label),
-                context.resources.getString(R.string.screenshot_edit_description),
-            ),
-            showDuringEntrance = true,
-        ) {
-            debugLog(LogConfig.DEBUG_ACTIONS) { "Edit tapped" }
-            uiEventLogger.log(SCREENSHOT_EDIT_TAPPED, 0, request.packageNameString)
-            onDeferrableActionTapped { result ->
-                actionExecutor.startSharedTransition(
-                    createEdit(result.uri, context),
-                    result.user,
-                    true
-                )
-            }
-        }
 
-        viewModel.addAction(
+        actionsCallback.provideActionButton(
             ActionButtonAppearance(
                 AppCompatResources.getDrawable(context, R.drawable.ic_screenshot_share),
                 context.resources.getString(R.string.screenshot_share_label),
@@ -122,12 +105,31 @@ constructor(
                 )
             }
         }
+
+        actionsCallback.provideActionButton(
+            ActionButtonAppearance(
+                AppCompatResources.getDrawable(context, R.drawable.ic_screenshot_edit),
+                context.resources.getString(R.string.screenshot_edit_label),
+                context.resources.getString(R.string.screenshot_edit_description),
+            ),
+            showDuringEntrance = true,
+        ) {
+            debugLog(LogConfig.DEBUG_ACTIONS) { "Edit tapped" }
+            uiEventLogger.log(SCREENSHOT_EDIT_TAPPED, 0, request.packageNameString)
+            onDeferrableActionTapped { result ->
+                actionExecutor.startSharedTransition(
+                    createEdit(result.uri, context),
+                    result.user,
+                    true
+                )
+            }
+        }
     }
 
     override fun onScrollChipReady(onClick: Runnable) {
         onScrollClick = onClick
         if (!addedScrollChip) {
-            viewModel.addAction(
+            actionsCallback.provideActionButton(
                 ActionButtonAppearance(
                     AppCompatResources.getDrawable(context, R.drawable.ic_screenshot_scroll),
                     context.resources.getString(R.string.screenshot_scroll_label),
@@ -161,9 +163,10 @@ constructor(
     @AssistedFactory
     interface Factory : ScreenshotActionsProvider.Factory {
         override fun create(
+            requestId: UUID,
             request: ScreenshotData,
-            requestId: String,
             actionExecutor: ActionExecutor,
+            actionsCallback: ScreenshotActionsController.ActionsCallback,
         ): DefaultScreenshotActionsProvider
     }
 
