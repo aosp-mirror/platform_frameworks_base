@@ -414,6 +414,13 @@ flag {
 }
 
 flag {
+   name: "clock_reactive_variants"
+   namespace: "systemui"
+   description: "Add reactive variant fonts to some clocks"
+   bug: "343495953"
+}
+
+flag {
    name: "fast_unlock_transition"
    namespace: "systemui"
    description: "Faster wallpaper unlock transition"
