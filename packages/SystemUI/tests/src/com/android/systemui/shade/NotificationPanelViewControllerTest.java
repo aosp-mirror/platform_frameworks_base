@@ -387,6 +387,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     public void testOnTouchEvent_expansionResumesAfterBriefTouch() {
         mFalsingManager.setIsClassifierEnabled(true);
         mFalsingManager.setIsFalseTouch(false);
+        mNotificationPanelViewController.setForceFlingAnimationForTest(true);
         // Start shade collapse with swipe up
         onTouchEvent(MotionEvent.obtain(0L /* downTime */,
                 0L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 0f /* y */,
@@ -415,6 +416,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         // fling should still be called after a touch that does not exceed touch slop
         assertThat(mNotificationPanelViewController.isClosing()).isTrue();
         assertThat(mNotificationPanelViewController.isFlinging()).isTrue();
+        mNotificationPanelViewController.setForceFlingAnimationForTest(false);
     }
 
     @Test
