@@ -4098,17 +4098,17 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (additionalSubtypeMap != newAdditionalSubtypeMap) {
                 AdditionalSubtypeMapRepository.putAndSave(userId, newAdditionalSubtypeMap,
                         settings.getMethodMap());
-                final InputMethodSettings newSettings = queryInputMethodServicesInternal(mContext,
-                        userId, AdditionalSubtypeMapRepository.get(userId),
-                        DirectBootAwareness.AUTO);
-                InputMethodSettingsRepository.put(userId, newSettings);
-                if (isCurrentUser) {
-                    final long ident = Binder.clearCallingIdentity();
-                    try {
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    final InputMethodSettings newSettings = queryInputMethodServicesInternal(
+                            mContext, userId, AdditionalSubtypeMapRepository.get(userId),
+                            DirectBootAwareness.AUTO);
+                    InputMethodSettingsRepository.put(userId, newSettings);
+                    if (isCurrentUser) {
                         postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */);
-                    } finally {
-                        Binder.restoreCallingIdentity(ident);
                     }
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
                 }
             }
         }
@@ -4969,6 +4969,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final int flags = PackageManager.GET_META_DATA
                 | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
                 | directBootAwarenessFlags;
+
+        // Beware that package visibility filtering will be enforced based on the effective calling
+        // identity (Binder.getCallingUid()), but our use case always expect Binder.getCallingUid()
+        // to return Process.SYSTEM_UID here. The actual filtering is implemented separately with
+        // canCallerAccessInputMethod().
+        // TODO(b/343108534): Use PackageManagerInternal#queryIntentServices() to pass SYSTEM_UID.
         final List<ResolveInfo> services = userAwareContext.getPackageManager().queryIntentServices(
                 new Intent(InputMethod.SERVICE_INTERFACE),
                 PackageManager.ResolveInfoFlags.of(flags));
