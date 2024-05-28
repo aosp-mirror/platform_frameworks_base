@@ -2385,9 +2385,9 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Rozloženie klávesnice je nastavené na jazyky <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> a <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Môžete to zmeniť klepnutím."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Fyzické klávesnice sú nakonfigurované"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Klávesnice si zobrazíte klepnutím"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Súkromný"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Súkromné"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Klon"</string>
-    <string name="profile_label_work" msgid="3495359133038584618">"Pracovný"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Pracovné"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"2. pracovný"</string>
     <string name="profile_label_work_3" msgid="4834572253956798917">"3. pracovný"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Testovací"</string>
@@ -2398,10 +2398,8 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otvoriť Správy"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ako to funguje"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Znova nastavte odomknutie odtlačkom prsta"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"Odtlačok <xliff:g id="FINGERPRINT">%s</xliff:g> nefungoval správne a bol odstránený"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"Odtlačky <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> a <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nefungovali správne a boli odstránené"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"Odtlačok <xliff:g id="FINGERPRINT">%s</xliff:g> nefungoval správne a bol odstránený. Ak chcete odomykať telefón odtlačkom prsta, nastavte ho znova."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"Odtlačky <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> a <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nefungovali správne a boli odstránené. Ak chcete odomykať telefón odtlačkom prsta, nastavte ich znova."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Znova nastavte odomknutie tvárou"</string>

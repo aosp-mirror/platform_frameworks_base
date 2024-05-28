@@ -70,7 +70,7 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         return switch (mType) {
-            case TYPE_DISPLAY_AND_SPLIT_CHANGE -> false;
+            case TYPE_DISPLAY_AND_SPLIT_CHANGE, TYPE_ENTER_PIP_WITH_DISPLAY_CHANGE -> false;
             case TYPE_ENTER_PIP_FROM_ACTIVITY_EMBEDDING ->
                     animateEnterPipFromActivityEmbedding(
                             info, startTransaction, finishTransaction, finishCallback);
@@ -253,6 +253,7 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         switch (mType) {
             case TYPE_DISPLAY_AND_SPLIT_CHANGE:
+            case TYPE_ENTER_PIP_WITH_DISPLAY_CHANGE:
                 // queue since no actual animation.
                 return;
             case TYPE_ENTER_PIP_FROM_ACTIVITY_EMBEDDING:

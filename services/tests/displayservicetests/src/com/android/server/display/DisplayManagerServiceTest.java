@@ -2429,9 +2429,8 @@ public class DisplayManagerServiceTest {
         LogicalDisplay display =
                 logicalDisplayMapper.getDisplayLocked(displayDevice, /* includeDisabled= */ true);
         assertThat(display.isEnabledLocked()).isFalse();
-        // TODO(b/332711269) make sure only one DISPLAY_GROUP_EVENT_ADDED sent.
         assertThat(callback.receivedEvents()).containsExactly(DISPLAY_GROUP_EVENT_ADDED,
-                DISPLAY_GROUP_EVENT_ADDED, EVENT_DISPLAY_CONNECTED).inOrder();
+                EVENT_DISPLAY_CONNECTED).inOrder();
     }
 
     @Test
@@ -3138,8 +3137,11 @@ public class DisplayManagerServiceTest {
         }
         displayDeviceInfo.address = new TestUtils.TestDisplayAddress();
         displayDevice.setDisplayDeviceInfo(displayDeviceInfo);
-        displayManager.getDisplayDeviceRepository()
-                .onDisplayDeviceEvent(displayDevice, DisplayAdapter.DISPLAY_DEVICE_EVENT_ADDED);
+
+        displayManager.getDisplayHandler().runWithScissors(() -> {
+            displayManager.getDisplayDeviceRepository()
+                    .onDisplayDeviceEvent(displayDevice, DisplayAdapter.DISPLAY_DEVICE_EVENT_ADDED);
+        }, 0 /* now */);
         return displayDevice;
     }
 

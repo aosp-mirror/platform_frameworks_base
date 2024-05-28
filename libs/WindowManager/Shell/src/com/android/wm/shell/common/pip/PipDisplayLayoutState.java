@@ -115,6 +115,12 @@ public class PipDisplayLayoutState {
         mDisplayLayout.rotateTo(mContext.getResources(), targetRotation);
     }
 
+    /** Returns the current display rotation of this layout state. */
+    @Surface.Rotation
+    public int getRotation() {
+        return mDisplayLayout.rotation();
+    }
+
     /** Get the current display id */
     public int getDisplayId() {
         return mDisplayId;

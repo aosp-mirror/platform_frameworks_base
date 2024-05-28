@@ -620,10 +620,15 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     }
 
     /** Fling divider from current position to center position. */
-    public void flingDividerToCenter() {
+    public void flingDividerToCenter(@Nullable Runnable finishCallback) {
         final int pos = mDividerSnapAlgorithm.getMiddleTarget().position;
         flingDividePosition(getDividePosition(), pos, FLING_ENTER_DURATION,
-                () -> setDividePosition(pos, true /* applyLayoutChange */));
+                () -> {
+                    setDividePosition(pos, true /* applyLayoutChange */);
+                    if (finishCallback != null) {
+                        finishCallback.run();
+                    }
+                });
     }
 
     @VisibleForTesting

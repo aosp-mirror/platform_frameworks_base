@@ -77,7 +77,7 @@ public class QuickStepContract {
     // settings is expanded.
     public static final int SYSUI_STATE_QUICK_SETTINGS_EXPANDED = 1 << 11;
     // Winscope tracing is enabled
-    public static final int SYSUI_STATE_TRACING_ENABLED = 1 << 12;
+    public static final int SYSUI_STATE_DISABLE_GESTURE_SPLIT_INVOCATION = 1 << 12;
     // The Assistant gesture should be constrained. It is up to the launcher implementation to
     // decide how to constrain it
     public static final int SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED = 1 << 13;
@@ -148,7 +148,7 @@ public class QuickStepContract {
             SYSUI_STATE_OVERVIEW_DISABLED,
             SYSUI_STATE_HOME_DISABLED,
             SYSUI_STATE_SEARCH_DISABLED,
-            SYSUI_STATE_TRACING_ENABLED,
+            SYSUI_STATE_DISABLE_GESTURE_SPLIT_INVOCATION,
             SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED,
             SYSUI_STATE_BUBBLES_EXPANDED,
             SYSUI_STATE_DIALOG_SHOWING,
@@ -211,8 +211,8 @@ public class QuickStepContract {
         if ((flags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0) {
             str.add("a11y_long_click");
         }
-        if ((flags & SYSUI_STATE_TRACING_ENABLED) != 0) {
-            str.add("tracing");
+        if ((flags & SYSUI_STATE_DISABLE_GESTURE_SPLIT_INVOCATION) != 0) {
+            str.add("disable_gesture_split_invocation");
         }
         if ((flags & SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED) != 0) {
             str.add("asst_gesture_constrain");

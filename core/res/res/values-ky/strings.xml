@@ -2396,10 +2396,8 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Жазышуулар колдонмосун ачуу"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ал кантип иштейт"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Манжа изи менен ачуу функциясын кайра тууралаңыз"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> ойдогудай иштебегендиктен өчүрүлдү"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> жана <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ойдогудай иштебегендиктен өчүрүлдү"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ойдогудай иштебегендиктен, жок кылынды. Телефондо Манжа изи менен ачуу функциясын колдонуу үчүн аны кайра тууралаңыз."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> жана <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ойдогудай иштебегендиктен, жок кылынды. Телефонду манжа изи менен ачуу үчүн аларды кайра тууралаңыз."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Жүзүнөн таанып ачуу функциясын кайрадан тууралаңыз"</string>
