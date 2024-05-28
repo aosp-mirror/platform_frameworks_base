@@ -41,6 +41,11 @@
  */
 namespace android {
 
+// A zero-length byte array that can be returned by getColumnBlob().  The theory is that
+// zero-length blobs are common enough that it is worth having a single, global instance. The
+// object is created in the jni registration function.  It is never destroyed.
+static jbyteArray emptyArray = nullptr;
+
 // Helper functions.
 static sqlite3 *db(long statementPtr) {
     return sqlite3_db_handle(reinterpret_cast<sqlite3_stmt*>(statementPtr));
@@ -226,7 +231,7 @@ static jbyteArray columnBlob(JNIEnv* env, jclass, jlong stmtPtr, jint col) {
     throwIfInvalidColumn(env, stmtPtr, col);
     const void* blob = sqlite3_column_blob(stmt(stmtPtr), col);
     if (blob == nullptr) {
-        return NULL;
+        return (sqlite3_column_type(stmt(stmtPtr), col) == SQLITE_NULL) ? NULL : emptyArray;
     }
     size_t size = sqlite3_column_bytes(stmt(stmtPtr), col);
     jbyteArray result = env->NewByteArray(size);
@@ -316,8 +321,10 @@ static const JNINativeMethod sStatementMethods[] =
 
 int register_android_database_SQLiteRawStatement(JNIEnv *env)
 {
-    return RegisterMethodsOrDie(env, "android/database/sqlite/SQLiteRawStatement",
-                                sStatementMethods, NELEM(sStatementMethods));
+    RegisterMethodsOrDie(env, "android/database/sqlite/SQLiteRawStatement",
+                         sStatementMethods, NELEM(sStatementMethods));
+    emptyArray = MakeGlobalRefOrDie(env, env->NewByteArray(0));
+    return 0;
 }
 
 } // namespace android
