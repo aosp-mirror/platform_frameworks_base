@@ -26,4 +26,5 @@ android_robolectric_test {
     instrumentation_for: "SettingsLibDataStoreShell",
     coverage_libs: ["SettingsLibDataStore"],
     upstream: true,
+    strict_mode: false,
 }
