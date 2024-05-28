@@ -136,6 +136,11 @@
        <item>@color/search_url_text_material_light</item>
     </array>
 
+   <array name="preloaded_freeform_multi_window_drawables">
+      <item>@drawable/decor_maximize_button_dark</item>
+      <item>@drawable/decor_maximize_button_light</item>
+   </array>
+
     <!-- Used in LocalePicker -->
     <string-array translatable="false" name="special_locale_codes">
         <!-- http://b/17150708 - ensure that the list of languages says "Arabic"
