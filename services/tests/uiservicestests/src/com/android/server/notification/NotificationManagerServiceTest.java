@@ -10696,6 +10696,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    @DisableFlags(android.app.Flags.FLAG_REMOVE_REMOTE_VIEWS)
     public void testRemoveLargeRemoteViews() throws Exception {
         int removeSize = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_notificationStripRemoteViewSizeBytes);
@@ -10755,6 +10756,46 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertNull(n.publicVersion.headsUpContentView);
 
         verify(mUsageStats, times(5)).registerImageRemoved(mPkg);
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_REMOVE_REMOTE_VIEWS)
+    public void testRemoveRemoteViews() throws Exception {
+        Notification np = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setContentText("test")
+                .setCustomContentView(mock(RemoteViews.class))
+                .setCustomBigContentView(mock(RemoteViews.class))
+                .setCustomHeadsUpContentView(mock(RemoteViews.class))
+                .build();
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setContentText("test")
+                .setCustomContentView(mock(RemoteViews.class))
+                .setCustomBigContentView(mock(RemoteViews.class))
+                .setCustomHeadsUpContentView(mock(RemoteViews.class))
+                .setPublicVersion(np)
+                .build();
+
+        assertNotNull(n.contentView);
+        assertNotNull(n.bigContentView);
+        assertNotNull(n.headsUpContentView);
+
+        assertTrue(np.extras.containsKey(Notification.EXTRA_CONTAINS_CUSTOM_VIEW));
+        assertNotNull(np.contentView);
+        assertNotNull(np.bigContentView);
+        assertNotNull(np.headsUpContentView);
+
+        mService.fixNotification(n, mPkg, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
+
+        assertNull(n.contentView);
+        assertNull(n.bigContentView);
+        assertNull(n.headsUpContentView);
+        assertNull(n.publicVersion.contentView);
+        assertNull(n.publicVersion.bigContentView);
+        assertNull(n.publicVersion.headsUpContentView);
+
+        verify(mUsageStats, times(1)).registerImageRemoved(mPkg);
     }
 
     @Test
