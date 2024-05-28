@@ -2065,6 +2065,24 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/PhysicalDisplaySwitchTransitionLauncher.java"
     },
+    "-1640401313436844534": {
+      "message": "Resetting frozen recents task list reason=app touch win=%s x=%d y=%d insetFrame=%s",
+      "level": "INFO",
+      "group": "WM_DEBUG_TASKS",
+      "at": "com\/android\/server\/wm\/RecentTasks.java"
+    },
+    "-8803811426486764449": {
+      "message": "Setting frozen recents task list",
+      "level": "INFO",
+      "group": "WM_DEBUG_TASKS",
+      "at": "com\/android\/server\/wm\/RecentTasks.java"
+    },
+    "4040735335719974079": {
+      "message": "Resetting frozen recents task list reason=timeout",
+      "level": "INFO",
+      "group": "WM_DEBUG_TASKS",
+      "at": "com\/android\/server\/wm\/RecentTasks.java"
+    },
     "3308140128142966415": {
       "message": "remove RecentTask %s when finishing user %d",
       "level": "INFO",
