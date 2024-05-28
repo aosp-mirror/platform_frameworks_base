@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import com.android.systemui.deviceentry.data.repository.deviceEntryRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
@@ -34,5 +35,6 @@ val Kosmos.fromAodTransitionInteractor by
             keyguardInteractor = keyguardInteractor,
             powerInteractor = powerInteractor,
             keyguardOcclusionInteractor = keyguardOcclusionInteractor,
+            deviceEntryRepository = deviceEntryRepository,
         )
     }

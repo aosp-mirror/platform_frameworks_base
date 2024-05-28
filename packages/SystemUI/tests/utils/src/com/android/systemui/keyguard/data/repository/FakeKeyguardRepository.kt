@@ -125,6 +125,9 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     private val _isEncryptedOrLockdown = MutableStateFlow(true)
     override val isEncryptedOrLockdown: Flow<Boolean> = _isEncryptedOrLockdown
 
+    private val _isKeyguardEnabled = MutableStateFlow(true)
+    override val isKeyguardEnabled: StateFlow<Boolean> = _isKeyguardEnabled.asStateFlow()
+
     override val topClippingBounds = MutableStateFlow<Int?>(null)
 
     override fun setQuickSettingsVisible(isVisible: Boolean) {
@@ -182,6 +185,10 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override fun setClockShouldBeCentered(shouldBeCentered: Boolean) {
         _clockShouldBeCentered.value = shouldBeCentered
+    }
+
+    override fun setKeyguardEnabled(enabled: Boolean) {
+        _isKeyguardEnabled.value = enabled
     }
 
     fun dozeTimeTick(millis: Long) {

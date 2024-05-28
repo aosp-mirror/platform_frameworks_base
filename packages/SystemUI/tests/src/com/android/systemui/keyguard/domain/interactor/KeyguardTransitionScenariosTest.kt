@@ -30,6 +30,7 @@ import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepositor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.dock.fakeDockManager
 import com.android.systemui.flags.BrokenWithSceneContainer
 import com.android.systemui.flags.DisableSceneContainer
@@ -511,7 +512,6 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
                 .startedTransition(
                     to = KeyguardState.LOCKSCREEN,
                     from = KeyguardState.DOZING,
-                    ownerName = "FromDozingTransitionInteractor",
                     animatorAssertion = { it.isNotNull() }
                 )
 
@@ -600,7 +600,6 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
                 .startedTransition(
                     to = KeyguardState.PRIMARY_BOUNCER,
                     from = KeyguardState.DOZING,
-                    ownerName = "FromDozingTransitionInteractor",
                     animatorAssertion = { it.isNotNull() }
                 )
 
@@ -618,6 +617,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
             // WHEN the device wakes up without a keyguard
             keyguardRepository.setKeyguardShowing(false)
             keyguardRepository.setKeyguardDismissible(true)
+            kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(false)
             powerInteractor.setAwakeForTest()
             advanceTimeBy(60L)
 
@@ -625,7 +625,6 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
                 .startedTransition(
                     to = KeyguardState.GONE,
                     from = KeyguardState.DOZING,
-                    ownerName = "FromDozingTransitionInteractor",
                     animatorAssertion = { it.isNotNull() }
                 )
 
@@ -683,7 +682,6 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
                 .startedTransition(
                     to = KeyguardState.GLANCEABLE_HUB,
                     from = KeyguardState.DOZING,
-                    ownerName = FromDozingTransitionInteractor::class.simpleName,
                     animatorAssertion = { it.isNotNull() }
                 )
 
