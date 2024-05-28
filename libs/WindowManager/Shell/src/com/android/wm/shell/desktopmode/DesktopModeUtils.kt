@@ -28,13 +28,11 @@ import android.os.SystemProperties
 import android.util.Size
 import com.android.wm.shell.common.DisplayLayout
 
+val DESKTOP_MODE_INITIAL_BOUNDS_SCALE: Float =
+    SystemProperties.getInt("persist.wm.debug.desktop_mode_initial_bounds_scale", 75) / 100f
 
-val DESKTOP_MODE_INITIAL_BOUNDS_SCALE: Float = SystemProperties
-        .getInt("persist.wm.debug.desktop_mode_initial_bounds_scale", 75) / 100f
-
-val DESKTOP_MODE_LANDSCAPE_APP_PADDING: Int = SystemProperties
-        .getInt("persist.wm.debug.desktop_mode_landscape_app_padding", 25)
-
+val DESKTOP_MODE_LANDSCAPE_APP_PADDING: Int =
+    SystemProperties.getInt("persist.wm.debug.desktop_mode_landscape_app_padding", 25)
 
 /**
  * Calculates the initial bounds required for an application to fill a scale of the display bounds
@@ -52,51 +50,53 @@ fun calculateInitialBounds(
     val idealSize = calculateIdealSize(screenBounds, scale)
     // If no top activity exists, apps fullscreen bounds and aspect ratio cannot be calculated.
     // Instead default to the desired initial bounds.
-    val topActivityInfo = taskInfo.topActivityInfo
-        ?: return positionInScreen(idealSize, screenBounds)
+    val topActivityInfo =
+        taskInfo.topActivityInfo ?: return positionInScreen(idealSize, screenBounds)
 
-    val initialSize: Size = when (taskInfo.configuration.orientation) {
-        ORIENTATION_LANDSCAPE -> {
-            if (taskInfo.isResizeable) {
-                if (isFixedOrientationPortrait(topActivityInfo.screenOrientation)) {
-                    // Respect apps fullscreen width
-                    Size(taskInfo.appCompatTaskInfo.topActivityLetterboxWidth, idealSize.height)
+    val initialSize: Size =
+        when (taskInfo.configuration.orientation) {
+            ORIENTATION_LANDSCAPE -> {
+                if (taskInfo.isResizeable) {
+                    if (isFixedOrientationPortrait(topActivityInfo.screenOrientation)) {
+                        // Respect apps fullscreen width
+                        Size(taskInfo.appCompatTaskInfo.topActivityLetterboxWidth, idealSize.height)
+                    } else {
+                        idealSize
+                    }
                 } else {
-                    idealSize
-                }
-            } else {
-                maximumSizeMaintainingAspectRatio(taskInfo, idealSize,
-                    appAspectRatio)
-            }
-        }
-        ORIENTATION_PORTRAIT -> {
-            val customPortraitWidthForLandscapeApp = screenBounds.width() -
-                    (DESKTOP_MODE_LANDSCAPE_APP_PADDING * 2)
-            if (taskInfo.isResizeable) {
-                if (isFixedOrientationLandscape(topActivityInfo.screenOrientation)) {
-                    // Respect apps fullscreen height and apply custom app width
-                    Size(customPortraitWidthForLandscapeApp,
-                        taskInfo.appCompatTaskInfo.topActivityLetterboxHeight)
-                } else {
-                    idealSize
-                }
-            } else {
-                if (isFixedOrientationLandscape(topActivityInfo.screenOrientation)) {
-                    // Apply custom app width and calculate maximum size
-                    maximumSizeMaintainingAspectRatio(
-                        taskInfo,
-                        Size(customPortraitWidthForLandscapeApp, idealSize.height),
-                        appAspectRatio)
-                } else {
-                    maximumSizeMaintainingAspectRatio(taskInfo, idealSize,
-                        appAspectRatio)
+                    maximumSizeMaintainingAspectRatio(taskInfo, idealSize, appAspectRatio)
                 }
             }
+            ORIENTATION_PORTRAIT -> {
+                val customPortraitWidthForLandscapeApp =
+                    screenBounds.width() - (DESKTOP_MODE_LANDSCAPE_APP_PADDING * 2)
+                if (taskInfo.isResizeable) {
+                    if (isFixedOrientationLandscape(topActivityInfo.screenOrientation)) {
+                        // Respect apps fullscreen height and apply custom app width
+                        Size(
+                            customPortraitWidthForLandscapeApp,
+                            taskInfo.appCompatTaskInfo.topActivityLetterboxHeight
+                        )
+                    } else {
+                        idealSize
+                    }
+                } else {
+                    if (isFixedOrientationLandscape(topActivityInfo.screenOrientation)) {
+                        // Apply custom app width and calculate maximum size
+                        maximumSizeMaintainingAspectRatio(
+                            taskInfo,
+                            Size(customPortraitWidthForLandscapeApp, idealSize.height),
+                            appAspectRatio
+                        )
+                    } else {
+                        maximumSizeMaintainingAspectRatio(taskInfo, idealSize, appAspectRatio)
+                    }
+                }
+            }
+            else -> {
+                idealSize
+            }
         }
-        else -> {
-            idealSize
-        }
-    }
 
     return positionInScreen(initialSize, screenBounds)
 }
@@ -136,19 +136,17 @@ private fun maximumSizeMaintainingAspectRatio(
     return Size(finalWidth, finalHeight)
 }
 
-/**
- * Calculates the aspect ratio of an activity from its fullscreen bounds.
- */
+/** Calculates the aspect ratio of an activity from its fullscreen bounds. */
 private fun calculateAspectRatio(taskInfo: RunningTaskInfo): Float {
     if (taskInfo.appCompatTaskInfo.topActivityBoundsLetterboxed) {
         val appLetterboxWidth = taskInfo.appCompatTaskInfo.topActivityLetterboxWidth
         val appLetterboxHeight = taskInfo.appCompatTaskInfo.topActivityLetterboxHeight
         return maxOf(appLetterboxWidth, appLetterboxHeight) /
-                minOf(appLetterboxWidth, appLetterboxHeight).toFloat()
+            minOf(appLetterboxWidth, appLetterboxHeight).toFloat()
     }
     val appBounds = taskInfo.configuration.windowConfiguration.appBounds ?: return 1f
     return maxOf(appBounds.height(), appBounds.width()) /
-                minOf(appBounds.height(), appBounds.width()).toFloat()
+        minOf(appBounds.height(), appBounds.width()).toFloat()
 }
 
 /**
@@ -161,13 +159,15 @@ private fun calculateIdealSize(screenBounds: Rect, scale: Float): Size {
     return Size(width, height)
 }
 
-/**
- * Adjusts bounds to be positioned in the middle of the screen.
- */
+/** Adjusts bounds to be positioned in the middle of the screen. */
 private fun positionInScreen(desiredSize: Size, screenBounds: Rect): Rect {
     // TODO(b/325240051): Position apps with bottom heavy offset
     val heightOffset = (screenBounds.height() - desiredSize.height) / 2
     val widthOffset = (screenBounds.width() - desiredSize.width) / 2
-    return Rect(widthOffset, heightOffset,
-        desiredSize.width + widthOffset, desiredSize.height + heightOffset)
+    return Rect(
+        widthOffset,
+        heightOffset,
+        desiredSize.width + widthOffset,
+        desiredSize.height + heightOffset
+    )
 }
