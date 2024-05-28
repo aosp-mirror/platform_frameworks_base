@@ -36,7 +36,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates the state of communal mode. */
-interface CommunalRepository {
+interface CommunalSceneRepository {
     /**
      * Target scene as requested by the underlying [SceneTransitionLayout] or through [changeScene].
      */
@@ -48,6 +48,9 @@ interface CommunalRepository {
     /** Updates the requested scene. */
     fun changeScene(toScene: SceneKey, transitionKey: TransitionKey? = null)
 
+    /** Immediately snaps to the desired scene. */
+    fun snapToScene(toScene: SceneKey)
+
     /**
      * Updates the transition state of the hub [SceneTransitionLayout].
      *
@@ -58,12 +61,12 @@ interface CommunalRepository {
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
-class CommunalRepositoryImpl
+class CommunalSceneRepositoryImpl
 @Inject
 constructor(
     @Background backgroundScope: CoroutineScope,
     @Communal private val sceneDataSource: SceneDataSource,
-) : CommunalRepository {
+) : CommunalSceneRepository {
 
     override val currentScene: StateFlow<SceneKey> = sceneDataSource.currentScene
 
@@ -80,6 +83,10 @@ constructor(
 
     override fun changeScene(toScene: SceneKey, transitionKey: TransitionKey?) {
         sceneDataSource.changeScene(toScene, transitionKey)
+    }
+
+    override fun snapToScene(toScene: SceneKey) {
+        sceneDataSource.snapToScene(toScene)
     }
 
     /**

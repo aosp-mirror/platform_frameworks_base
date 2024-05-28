@@ -29,7 +29,6 @@ import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.communal.data.repository.CommunalMediaRepository
 import com.android.systemui.communal.data.repository.CommunalPrefsRepository
-import com.android.systemui.communal.data.repository.CommunalRepository
 import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.domain.model.CommunalContentModel.WidgetContent
@@ -97,7 +96,6 @@ constructor(
     @Application val applicationScope: CoroutineScope,
     @Background val bgDispatcher: CoroutineDispatcher,
     broadcastDispatcher: BroadcastDispatcher,
-    private val communalRepository: CommunalRepository,
     private val widgetRepository: CommunalWidgetRepository,
     private val communalPrefsRepository: CommunalPrefsRepository,
     mediaRepository: CommunalMediaRepository,
@@ -110,6 +108,7 @@ constructor(
     private val userTracker: UserTracker,
     private val activityStarter: ActivityStarter,
     private val userManager: UserManager,
+    private val communalSceneInteractor: CommunalSceneInteractor,
     sceneInteractor: SceneInteractor,
     @CommunalLog logBuffer: LogBuffer,
     @CommunalTableLog tableLogBuffer: TableLogBuffer,
@@ -174,15 +173,19 @@ constructor(
      *
      * If [isCommunalAvailable] is false, will return [CommunalScenes.Blank]
      */
-    val desiredScene: Flow<SceneKey> =
-        communalRepository.currentScene.combine(isCommunalAvailable) { scene, available ->
-            if (available) scene else CommunalScenes.Blank
-        }
+    @Deprecated(
+        "Use com.android.systemui.communal.domain.interactor.CommunalSceneInteractor instead"
+    )
+    val desiredScene: Flow<SceneKey> = communalSceneInteractor.currentScene
 
     /** Transition state of the hub mode. */
-    val transitionState: StateFlow<ObservableTransitionState> = communalRepository.transitionState
+    @Deprecated(
+        "Use com.android.systemui.communal.domain.interactor.CommunalSceneInteractor instead"
+    )
+    val transitionState: StateFlow<ObservableTransitionState> =
+        communalSceneInteractor.transitionState
 
-    val _userActivity: MutableSharedFlow<Unit> =
+    private val _userActivity: MutableSharedFlow<Unit> =
         MutableSharedFlow(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     val userActivity: Flow<Unit> = _userActivity.asSharedFlow()
 
@@ -212,32 +215,18 @@ constructor(
      *
      * Note that you must call is with `null` when the UI is done or risk a memory leak.
      */
-    fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
-        communalRepository.setTransitionState(transitionState)
-    }
+    @Deprecated(
+        "Use com.android.systemui.communal.domain.interactor.CommunalSceneInteractor instead"
+    )
+    fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) =
+        communalSceneInteractor.setTransitionState(transitionState)
 
     /** Returns a flow that tracks the progress of transitions to the given scene from 0-1. */
+    @Deprecated(
+        "Use com.android.systemui.communal.domain.interactor.CommunalSceneInteractor instead"
+    )
     fun transitionProgressToScene(targetScene: SceneKey) =
-        transitionState
-            .flatMapLatest { state ->
-                when (state) {
-                    is ObservableTransitionState.Idle ->
-                        flowOf(CommunalTransitionProgress.Idle(state.currentScene))
-                    is ObservableTransitionState.Transition ->
-                        if (state.toScene == targetScene) {
-                            state.progress.map {
-                                CommunalTransitionProgress.Transition(
-                                    // Clamp the progress values between 0 and 1 as actual progress
-                                    // values can be higher than 0 or lower than 1 due to a fling.
-                                    progress = it.coerceIn(0.0f, 1.0f)
-                                )
-                            }
-                        } else {
-                            flowOf(CommunalTransitionProgress.OtherTransition)
-                        }
-                }
-            }
-            .distinctUntilChanged()
+        communalSceneInteractor.transitionProgressToScene(targetScene)
 
     /**
      * Flow that emits a boolean if the communal UI is the target scene, ie. the [desiredScene] is
@@ -283,34 +272,30 @@ constructor(
      * This will not be true while transitioning to the hub and will turn false immediately when a
      * swipe to exit the hub starts.
      */
-    val isIdleOnCommunal: StateFlow<Boolean> =
-        communalRepository.transitionState
-            .map {
-                it is ObservableTransitionState.Idle && it.currentScene == CommunalScenes.Communal
-            }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.Eagerly,
-                initialValue = false,
-            )
+    @Deprecated(
+        "Use com.android.systemui.communal.domain.interactor.CommunalSceneInteractor instead"
+    )
+    val isIdleOnCommunal: StateFlow<Boolean> = communalSceneInteractor.isIdleOnCommunal
 
     /**
      * Flow that emits a boolean if any portion of the communal UI is visible at all.
      *
      * This flow will be true during any transition and when idle on the communal scene.
      */
-    val isCommunalVisible: Flow<Boolean> =
-        communalRepository.transitionState.map {
-            !(it is ObservableTransitionState.Idle && it.currentScene == CommunalScenes.Blank)
-        }
+    @Deprecated(
+        "Use com.android.systemui.communal.domain.interactor.CommunalSceneInteractor instead"
+    )
+    val isCommunalVisible: Flow<Boolean> = communalSceneInteractor.isCommunalVisible
 
     /**
      * Asks for an asynchronous scene witch to [newScene], which will use the corresponding
      * installed transition or the one specified by [transitionKey], if provided.
      */
-    fun changeScene(newScene: SceneKey, transitionKey: TransitionKey? = null) {
-        communalRepository.changeScene(newScene, transitionKey)
-    }
+    @Deprecated(
+        "Use com.android.systemui.communal.domain.interactor.CommunalSceneInteractor instead"
+    )
+    fun changeScene(newScene: SceneKey, transitionKey: TransitionKey? = null) =
+        communalSceneInteractor.changeScene(newScene, transitionKey)
 
     fun setEditModeOpen(isOpen: Boolean) {
         _editModeOpen.value = isOpen
@@ -578,18 +563,4 @@ constructor(
             )
         }
     }
-}
-
-/** Simplified transition progress data class for tracking a single transition between scenes. */
-sealed class CommunalTransitionProgress {
-    /** No transition/animation is currently running. */
-    data class Idle(val scene: SceneKey) : CommunalTransitionProgress()
-
-    /** There is a transition animating to the expected scene. */
-    data class Transition(
-        val progress: Float,
-    ) : CommunalTransitionProgress()
-
-    /** There is a transition animating to a scene other than the expected scene. */
-    data object OtherTransition : CommunalTransitionProgress()
 }

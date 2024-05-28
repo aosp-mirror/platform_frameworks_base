@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.communal.shared.model
+package com.android.systemui.communal.domain.interactor
 
-import com.android.compose.animation.scene.TransitionKey
+import com.android.systemui.communal.data.repository.communalSceneRepository
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
 
-/**
- * Defines all known named transitions for [CommunalScenes].
- *
- * These transitions can be referenced by key when changing scenes programmatically.
- */
-object CommunalTransitionKeys {
-    /** Fades the glanceable hub without any translation */
-    val SimpleFade = TransitionKey("SimpleFade")
-    /** Immediately transitions without any delay */
-    val Immediately = TransitionKey("Immediately")
-}
+val Kosmos.communalSceneInteractor: CommunalSceneInteractor by
+    Kosmos.Fixture {
+        CommunalSceneInteractor(
+            applicationScope = applicationCoroutineScope,
+            communalSceneRepository = communalSceneRepository,
+        )
+    }

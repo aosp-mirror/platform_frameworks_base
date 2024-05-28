@@ -26,7 +26,7 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.Flags.FLAG_NEW_AOD_TRANSITION
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.communal.data.repository.communalRepository
+import com.android.systemui.communal.data.repository.communalSceneRepository
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
@@ -71,7 +71,7 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
     private val testScope = kosmos.testScope
     private val keyguardTransitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
     private val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
-    private val communalRepository by lazy { kosmos.communalRepository }
+    private val communalRepository by lazy { kosmos.communalSceneRepository }
     private val screenOffAnimationController by lazy { kosmos.screenOffAnimationController }
     private val deviceEntryRepository by lazy { kosmos.fakeDeviceEntryRepository }
     private val notificationsKeyguardInteractor by lazy { kosmos.notificationsKeyguardInteractor }

@@ -35,7 +35,7 @@ import com.android.systemui.ambient.touch.TouchHandler
 import com.android.systemui.ambient.touch.TouchMonitor
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
-import com.android.systemui.communal.data.repository.FakeCommunalRepository
+import com.android.systemui.communal.data.repository.FakeCommunalSceneRepository
 import com.android.systemui.communal.data.repository.fakeCommunalRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
@@ -92,7 +92,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     private lateinit var containerView: View
     private lateinit var testableLooper: TestableLooper
 
-    private lateinit var communalRepository: FakeCommunalRepository
+    private lateinit var communalRepository: FakeCommunalSceneRepository
     private lateinit var underTest: GlanceableHubContainerController
 
     @Before
