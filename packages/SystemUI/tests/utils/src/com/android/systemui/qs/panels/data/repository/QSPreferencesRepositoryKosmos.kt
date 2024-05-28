@@ -17,5 +17,9 @@
 package com.android.systemui.qs.panels.data.repository
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.settings.userFileManager
+import com.android.systemui.user.data.repository.userRepository
 
-val Kosmos.iconLabelVisibilityRepository by Kosmos.Fixture { IconLabelVisibilityRepository() }
+val Kosmos.qsPreferencesRepository by
+    Kosmos.Fixture { QSPreferencesRepository(userFileManager, userRepository, testDispatcher) }
