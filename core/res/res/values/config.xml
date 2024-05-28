@@ -4200,6 +4200,13 @@
          automatically try to pair with it when the device exits tablet mode. -->
     <string translatable="false" name="config_packagedKeyboardName"></string>
 
+    <!-- The device supports freeform window management. Windows have title bars and can be moved
+         and resized. If you set this to true, you also need to add
+         PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT feature to your device specification.
+         The duplication is necessary, because this information is used before the features are
+         available to the system.-->
+    <bool name="config_freeformWindowManagement">false</bool>
+
     <!-- If set, this will force all windows to draw the status bar background, including the apps
          that have not requested doing so (via the WindowManager.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
          flag). -->
