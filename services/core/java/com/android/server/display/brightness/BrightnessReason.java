@@ -40,8 +40,8 @@ public final class BrightnessReason {
     public static final int REASON_SCREEN_OFF_BRIGHTNESS_SENSOR = 9;
     public static final int REASON_FOLLOWER = 10;
     public static final int REASON_OFFLOAD = 11;
-    public static final int REASON_DOZE_INITIAL = 12;
-    public static final int REASON_MAX = REASON_DOZE_INITIAL;
+    public static final int REASON_DOZE_MANUAL = 12;
+    public static final int REASON_MAX = REASON_DOZE_MANUAL;
 
     public static final int MODIFIER_DIMMED = 0x1;
     public static final int MODIFIER_LOW_POWER = 0x2;
@@ -208,8 +208,8 @@ public final class BrightnessReason {
                 return "follower";
             case REASON_OFFLOAD:
                 return "offload";
-            case REASON_DOZE_INITIAL:
-                return "doze_initial";
+            case REASON_DOZE_MANUAL:
+                return "doze_manual";
             default:
                 return Integer.toString(reason);
         }

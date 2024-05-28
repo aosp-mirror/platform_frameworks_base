@@ -52,6 +52,14 @@ public class DisplayOffloadSessionImpl implements DisplayManagerInternal.Display
     }
 
     @Override
+    public boolean allowAutoBrightnessInDoze() {
+        if (mDisplayOffloader == null) {
+            return false;
+        }
+        return mDisplayOffloader.allowAutoBrightnessInDoze();
+    }
+
+    @Override
     public void updateBrightness(float brightness) {
         if (mIsActive) {
             mDisplayPowerController.setBrightnessFromOffload(brightness);

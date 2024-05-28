@@ -1115,7 +1115,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     screenBrightnessThresholdsIdle, mContext, mBrightnessRangeController,
                     mBrightnessThrottler, mDisplayDeviceConfig.getAmbientHorizonShort(),
                     mDisplayDeviceConfig.getAmbientHorizonLong(), userLux, userNits,
-                    mBrightnessClamperController);
+                    mBrightnessClamperController, mFlags);
             mDisplayBrightnessController.setUpAutoBrightness(
                     mAutomaticBrightnessController, mSensorManager, mDisplayDeviceConfig, mHandler,
                     defaultModeBrightnessMapper, mIsEnabled, mLeadDisplayId);
@@ -1185,7 +1185,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             @AutomaticBrightnessController.AutomaticBrightnessMode int mode) {
         boolean isIdle = mode == AUTO_BRIGHTNESS_MODE_IDLE;
         if (mAutomaticBrightnessController != null) {
-            mAutomaticBrightnessController.switchMode(mode);
+            // Set sendUpdate to true to make sure that updatePowerState() gets called
+            mAutomaticBrightnessController.switchMode(mode, /* sendUpdate= */ true);
             setAnimatorRampSpeeds(isIdle);
         }
         Message msg = mHandler.obtainMessage();
@@ -1334,7 +1335,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mDisplayStateController.shouldPerformScreenOffTransition());
         state = mPowerState.getScreenState();
 
-
         DisplayBrightnessState displayBrightnessState = mDisplayBrightnessController
                 .updateBrightness(mPowerRequest, state);
         float brightnessState = displayBrightnessState.getBrightness();
@@ -1366,17 +1366,26 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // request changes.
         final boolean wasShortTermModelActive =
                 mAutomaticBrightnessStrategy.isShortTermModelActive();
+        boolean allowAutoBrightnessWhileDozing =
+                mDisplayBrightnessController.isAllowAutoBrightnessWhileDozingConfig();
+        if (mFlags.offloadControlsDozeAutoBrightness() && mFlags.isDisplayOffloadEnabled()
+                && mDisplayOffloadSession != null) {
+            allowAutoBrightnessWhileDozing &= mDisplayOffloadSession.allowAutoBrightnessInDoze();
+        }
         if (!mFlags.isRefactorDisplayPowerControllerEnabled()) {
             // Switch to doze auto-brightness mode if needed
             if (mFlags.areAutoBrightnessModesEnabled() && mAutomaticBrightnessController != null
                     && !mAutomaticBrightnessController.isInIdleMode()) {
+                // Set sendUpdate to false, we're already in updatePowerState() so there's no need
+                // to trigger it again
                 mAutomaticBrightnessController.switchMode(Display.isDozeState(state)
-                        ? AUTO_BRIGHTNESS_MODE_DOZE : AUTO_BRIGHTNESS_MODE_DEFAULT);
+                        ? AUTO_BRIGHTNESS_MODE_DOZE : AUTO_BRIGHTNESS_MODE_DEFAULT,
+                        /* sendUpdate= */ false);
             }
 
             mAutomaticBrightnessStrategy.setAutoBrightnessState(state,
-                    mDisplayBrightnessController.isAllowAutoBrightnessWhileDozingConfig(),
-                    mBrightnessReasonTemp.getReason(), mPowerRequest.policy,
+                    allowAutoBrightnessWhileDozing, mBrightnessReasonTemp.getReason(),
+                    mPowerRequest.policy,
                     mDisplayBrightnessController.getLastUserSetScreenBrightness(),
                     userSetBrightnessChanged);
         }
@@ -1443,47 +1452,27 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
 
         if (Display.isDozeState(state)) {
-            // If there's an offload session, we need to set the initial doze brightness before
-            // the offload session starts controlling the brightness.
-            // During the transition DOZE_SUSPEND -> DOZE -> DOZE_SUSPEND, this brightness strategy
-            // will be selected again, meaning that no new brightness will be sent to the hardware
-            // and the display will stay at the brightness level set by the offload session.
+            // TODO(b/329676661): Introduce a config property to choose between this brightness
+            //  strategy and DOZE_DEFAULT
+            // On some devices, when auto-brightness is disabled and the device is dozing, we use
+            // the current brightness setting scaled by the doze scale factor
             if ((Float.isNaN(brightnessState)
                     || displayBrightnessState.getDisplayBrightnessStrategyName()
                     .equals(DisplayBrightnessStrategyConstants.FALLBACK_BRIGHTNESS_STRATEGY_NAME))
                     && mFlags.isDisplayOffloadEnabled()
-                    && mDisplayOffloadSession != null) {
-                if (mAutomaticBrightnessController != null
-                        && mAutomaticBrightnessStrategy.shouldUseAutoBrightness()) {
-                    // Use the auto-brightness curve and the last observed lux
-                    rawBrightnessState = mAutomaticBrightnessController
-                            .getAutomaticScreenBrightnessBasedOnLastUsedLux(
-                                    mTempBrightnessEvent);
-                } else {
-                    rawBrightnessState = getDozeBrightnessForOffload();
-                    mTempBrightnessEvent.setFlags(mTempBrightnessEvent.getFlags()
-                            | BrightnessEvent.FLAG_DOZE_SCALE);
-                }
-
-                if (BrightnessUtils.isValidBrightnessValue(rawBrightnessState)) {
-                    brightnessState = clampScreenBrightness(rawBrightnessState);
-                    mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_INITIAL);
-
-                    if (mAutomaticBrightnessController != null
-                            && mAutomaticBrightnessStrategy.shouldUseAutoBrightness()) {
-                        // Keep the brightness in the setting so that we can use it after the screen
-                        // turns on, until a lux sample becomes available. We don't do this when
-                        // auto-brightness is disabled - in that situation we still want to use
-                        // the last brightness from when the screen was on.
-                        updateScreenBrightnessSetting = currentBrightnessSetting != brightnessState;
-                    }
-                }
+                    && mDisplayOffloadSession != null
+                    && (mAutomaticBrightnessController == null
+                    || !mAutomaticBrightnessStrategy.shouldUseAutoBrightness())) {
+                rawBrightnessState = getDozeBrightnessForOffload();
+                brightnessState = clampScreenBrightness(rawBrightnessState);
+                mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_MANUAL);
+                mTempBrightnessEvent.setFlags(
+                        mTempBrightnessEvent.getFlags() | BrightnessEvent.FLAG_DOZE_SCALE);
             }
 
             // Use default brightness when dozing unless overridden.
-            if (Float.isNaN(brightnessState)
-                    || displayBrightnessState.getDisplayBrightnessStrategyName()
-                    .equals(DisplayBrightnessStrategyConstants.FALLBACK_BRIGHTNESS_STRATEGY_NAME)) {
+            if (Float.isNaN(brightnessState) && Display.isDozeState(state)
+                    && !mDisplayBrightnessController.isAllowAutoBrightnessWhileDozingConfig()) {
                 rawBrightnessState = mScreenBrightnessDozeConfig;
                 brightnessState = clampScreenBrightness(rawBrightnessState);
                 mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_DEFAULT);
@@ -3169,7 +3158,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 BrightnessRangeController brightnessModeController,
                 BrightnessThrottler brightnessThrottler, int ambientLightHorizonShort,
                 int ambientLightHorizonLong, float userLux, float userNits,
-                BrightnessClamperController brightnessClamperController) {
+                BrightnessClamperController brightnessClamperController,
+                DisplayManagerFlags displayManagerFlags) {
 
             return new AutomaticBrightnessController(callbacks, looper, sensorManager, lightSensor,
                     brightnessMappingStrategyMap, lightSensorWarmUpTime, brightnessMin,
@@ -3180,7 +3170,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     screenBrightnessThresholds, ambientBrightnessThresholdsIdle,
                     screenBrightnessThresholdsIdle, context, brightnessModeController,
                     brightnessThrottler, ambientLightHorizonShort, ambientLightHorizonLong, userLux,
-                    userNits, brightnessClamperController);
+                    userNits, brightnessClamperController, displayManagerFlags);
         }
 
         BrightnessMappingStrategy getDefaultModeBrightnessMapper(Context context,
