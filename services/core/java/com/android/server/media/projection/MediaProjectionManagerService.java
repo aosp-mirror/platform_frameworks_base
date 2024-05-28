@@ -553,7 +553,8 @@ public final class MediaProjectionManagerService extends SystemService
                             mProjectionGrant.getLaunchCookie() == null ? null
                                     : mProjectionGrant.getLaunchCookie().binder;
                     setReviewedConsentSessionLocked(
-                            ContentRecordingSession.createTaskSession(taskWindowContainerToken));
+                            ContentRecordingSession.createTaskSession(
+                                    taskWindowContainerToken, mProjectionGrant.mTaskId));
                     break;
             }
         }
@@ -977,6 +978,7 @@ public final class MediaProjectionManagerService extends SystemService
         private IBinder mToken;
         private IBinder.DeathRecipient mDeathEater;
         private boolean mRestoreSystemAlertWindow;
+        private int mTaskId = -1;
         private LaunchCookie mLaunchCookie = null;
 
         // Values for tracking token validity.
@@ -1197,9 +1199,23 @@ public final class MediaProjectionManagerService extends SystemService
 
         @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
         @Override // Binder call
+        public void setTaskId(int taskId) {
+            setTaskId_enforcePermission();
+            mTaskId = taskId;
+        }
+
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
+        @Override // Binder call
         public LaunchCookie getLaunchCookie() {
             getLaunchCookie_enforcePermission();
             return mLaunchCookie;
+        }
+
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
+        @Override // Binder call
+        public int getTaskId() {
+            getTaskId_enforcePermission();
+            return mTaskId;
         }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)

@@ -372,8 +372,8 @@ public class MediaProjectionManagerServiceTest {
         doReturn(true)
                 .when(mWindowManagerInternal)
                 .setContentRecordingSession(any(ContentRecordingSession.class));
-        ContentRecordingSession taskSession =
-                createTaskSession(mock(IBinder.class), targetUid);
+        ContentRecordingSession taskSession = createTaskSession(mock(IBinder.class));
+        taskSession.setTargetUid(targetUid);
         service.setContentRecordingSession(taskSession);
 
         projection.stop();
@@ -708,8 +708,8 @@ public class MediaProjectionManagerServiceTest {
         mService =
                 new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
 
-        ContentRecordingSession taskSession =
-                createTaskSession(mock(IBinder.class), targetUid);
+        ContentRecordingSession taskSession = createTaskSession(mock(IBinder.class));
+        taskSession.setTargetUid(targetUid);
         mService.setContentRecordingSession(taskSession);
 
         MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
@@ -915,8 +915,8 @@ public class MediaProjectionManagerServiceTest {
                 .setContentRecordingSession(any(ContentRecordingSession.class));
         int targetUid = 123455;
 
-        ContentRecordingSession taskSession =
-                createTaskSession(mock(IBinder.class), targetUid);
+        ContentRecordingSession taskSession = createTaskSession(mock(IBinder.class));
+        taskSession.setTargetUid(targetUid);
         service.setContentRecordingSession(taskSession);
 
         verify(mMediaProjectionMetricsLogger).logInProgress(projection.uid, targetUid);
