@@ -1604,7 +1604,7 @@
     <string name="issued_by" msgid="7872459822431585684">"Vydal:"</string>
     <string name="validity_period" msgid="1717724283033175968">"Platnost:"</string>
     <string name="issued_on" msgid="5855489688152497307">"Datum vydání:"</string>
-    <string name="expires_on" msgid="1623640879705103121">"Platnost vyprší:"</string>
+    <string name="expires_on" msgid="1623640879705103121">"Platnost skončí:"</string>
     <string name="serial_number" msgid="3479576915806623429">"Sériové číslo:"</string>
     <string name="fingerprints" msgid="148690767172613723">"Digitální otisky:"</string>
     <string name="sha256_fingerprint" msgid="7103976380961964600">"Digitální otisk SHA-256"</string>
