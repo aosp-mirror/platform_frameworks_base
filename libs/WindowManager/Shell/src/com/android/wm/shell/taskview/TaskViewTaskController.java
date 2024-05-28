@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
 import android.graphics.Rect;
+import android.gui.TrustedOverlay;
 import android.os.Binder;
 import android.util.CloseGuard;
 import android.util.Slog;
@@ -448,6 +449,14 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         mSurfaceCreated = true;
         mIsInitialized = true;
         mSurfaceControl = surfaceControl;
+        // SurfaceControl is expected to be null only in the case of unit tests. Guard against it
+        // to avoid runtime exception in SurfaceControl.Transaction.
+        if (surfaceControl != null) {
+            // TaskView is meant to contain app activities which shouldn't have trusted overlays
+            // flag set even when itself reparented in a window which is trusted.
+            mTransaction.setTrustedOverlay(surfaceControl, TrustedOverlay.DISABLED)
+                    .apply();
+        }
         notifyInitialized();
         mShellExecutor.execute(() -> {
             if (mTaskToken == null) {
