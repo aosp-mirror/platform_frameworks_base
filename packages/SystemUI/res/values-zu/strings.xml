@@ -264,7 +264,7 @@
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Thepha ukuze uxhumae noma ungaxhumi idivaysi"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Bhangqa idivayisi entsha"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Buka konke"</string>
-    <string name="turn_on_bluetooth" msgid="5681370462180289071">"Sebenzisa i-Bluetooth"</string>
+    <string name="turn_on_bluetooth" msgid="5681370462180289071">"Sebenzisa iBluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Ixhunyiwe"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Ilondoloziwe"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"nqamula"</string>
