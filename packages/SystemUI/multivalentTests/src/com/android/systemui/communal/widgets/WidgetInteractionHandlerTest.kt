@@ -72,6 +72,7 @@ class WidgetInteractionHandlerTest : SysuiTestCase() {
         verify(activityStarter)
             .startPendingIntentMaybeDismissingKeyguard(
                 eq(testIntent),
+                eq(false),
                 isNull(),
                 notNull(),
                 refEq(fillInIntent),
@@ -91,6 +92,7 @@ class WidgetInteractionHandlerTest : SysuiTestCase() {
         verify(activityStarter)
             .startPendingIntentMaybeDismissingKeyguard(
                 eq(testIntent),
+                eq(false),
                 isNull(),
                 isNull(),
                 refEq(fillInIntent),

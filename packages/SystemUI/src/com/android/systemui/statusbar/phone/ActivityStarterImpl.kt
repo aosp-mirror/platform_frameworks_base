@@ -42,7 +42,10 @@ constructor(
     private val activityStarterInternal: ActivityStarterInternal = legacyActivityStarter.get()
 
     override fun startPendingIntentDismissingKeyguard(intent: PendingIntent) {
-        activityStarterInternal.startPendingIntentDismissingKeyguard(intent = intent)
+        activityStarterInternal.startPendingIntentDismissingKeyguard(
+            intent = intent,
+            dismissShade = true
+        )
     }
 
     override fun startPendingIntentDismissingKeyguard(
@@ -52,6 +55,7 @@ constructor(
         activityStarterInternal.startPendingIntentDismissingKeyguard(
             intent = intent,
             intentSentUiThreadCallback = intentSentUiThreadCallback,
+            dismissShade = true,
         )
     }
 
@@ -64,6 +68,7 @@ constructor(
             intent = intent,
             intentSentUiThreadCallback = intentSentUiThreadCallback,
             associatedView = associatedView,
+            dismissShade = true,
         )
     }
 
@@ -76,6 +81,7 @@ constructor(
             intent = intent,
             intentSentUiThreadCallback = intentSentUiThreadCallback,
             animationController = animationController,
+            dismissShade = true,
         )
     }
 
@@ -89,11 +95,13 @@ constructor(
             intentSentUiThreadCallback = intentSentUiThreadCallback,
             animationController = animationController,
             showOverLockscreen = true,
+            dismissShade = true,
         )
     }
 
     override fun startPendingIntentMaybeDismissingKeyguard(
         intent: PendingIntent,
+        dismissShade: Boolean,
         intentSentUiThreadCallback: Runnable?,
         animationController: ActivityTransitionAnimator.Controller?,
         fillInIntent: Intent?,
@@ -104,6 +112,7 @@ constructor(
             intentSentUiThreadCallback = intentSentUiThreadCallback,
             animationController = animationController,
             showOverLockscreen = true,
+            dismissShade = dismissShade,
             fillInIntent = fillInIntent,
             extraOptions = extraOptions,
         )
@@ -179,6 +188,7 @@ constructor(
             showOverLockscreenWhenLocked = showOverLockscreenWhenLocked,
         )
     }
+
     override fun startActivity(
         intent: Intent,
         dismissShade: Boolean,
@@ -199,6 +209,7 @@ constructor(
         postOnUiThread {
             activityStarterInternal.startPendingIntentDismissingKeyguard(
                 intent = intent,
+                dismissShade = true,
             )
         }
     }
@@ -211,6 +222,7 @@ constructor(
             activityStarterInternal.startPendingIntentDismissingKeyguard(
                 intent = intent,
                 animationController = animationController,
+                dismissShade = true,
             )
         }
     }

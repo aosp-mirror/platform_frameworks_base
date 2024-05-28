@@ -33,6 +33,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.LaunchableView
 import com.android.systemui.assist.AssistManager
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
@@ -94,6 +95,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
     @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var activityIntentHelper: ActivityIntentHelper
+    @Mock private lateinit var communalSceneInteractor: CommunalSceneInteractor
     private lateinit var underTest: LegacyActivityStarterInternalImpl
     private val mainExecutor = FakeExecutor(FakeSystemClock())
     private val shadeAnimationInteractor =
@@ -127,6 +129,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
                 userTracker = userTracker,
                 activityIntentHelper = activityIntentHelper,
                 mainExecutor = mainExecutor,
+                communalSceneInteractor = communalSceneInteractor,
             )
         whenever(userTracker.userHandle).thenReturn(UserHandle.OWNER)
     }
@@ -138,7 +141,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
         whenever(keyguardStateController.isShowing).thenReturn(true)
         whenever(deviceProvisionedController.isDeviceProvisioned).thenReturn(true)
 
-        underTest.startPendingIntentDismissingKeyguard(pendingIntent)
+        underTest.startPendingIntentDismissingKeyguard(intent = pendingIntent, dismissShade = true)
         mainExecutor.runAllReady()
 
         verify(statusBarKeyguardViewManager)
@@ -232,6 +235,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
 
         underTest.startPendingIntentDismissingKeyguard(
             intent = pendingIntent,
+            dismissShade = true,
             intentSentUiThreadCallback = null,
             associatedView = associatedView,
         )
@@ -344,6 +348,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
     ) {
         underTest.startPendingIntentDismissingKeyguard(
             intent = intent,
+            dismissShade = true,
             intentSentUiThreadCallback = intentSentUiThreadCallback,
             animationController = animationController,
             showOverLockscreen = true,
