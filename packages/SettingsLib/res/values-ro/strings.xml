@@ -103,10 +103,8 @@
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"Nivelul bateriei din stânga: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, dreapta: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"Nivelul bateriei din stânga: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"Nivelul bateriei din dreapta:<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <!-- no translation found for tv_bluetooth_battery_level_untethered_left (337629670583744410) -->
-    <skip />
-    <!-- no translation found for tv_bluetooth_battery_level_untethered_right (8610019317279155595) -->
-    <skip />
+    <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"Stânga: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_right" msgid="8610019317279155595">"Dreapta: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Activ"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Salvat"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Activ (numai stânga)"</string>
@@ -198,7 +196,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"Unele valori prestabilite sunt configurate"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Nu este configurată nicio valoare prestabilită"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Setări redare vocală a textului"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Rezultatul redării vocale a textului"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Setări pentru redarea vocală a textului"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Ritmul vorbirii"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Viteza cu care este vorbit textul"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Înălțime"</string>
