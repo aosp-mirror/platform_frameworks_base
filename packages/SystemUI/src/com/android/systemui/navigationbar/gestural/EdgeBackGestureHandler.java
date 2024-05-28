@@ -15,6 +15,7 @@
  */
 package com.android.systemui.navigationbar.gestural;
 
+import static android.content.pm.ActivityInfo.CONFIG_FONT_SCALE;
 import static android.view.InputDevice.SOURCE_MOUSE;
 import static android.view.InputDevice.SOURCE_TOUCHPAD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
@@ -30,6 +31,7 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
@@ -1180,6 +1182,10 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         // TODO(b/332635834): Disable this logging once b/332635834 is fixed.
         Log.i(DEBUG_MISSING_GESTURE_TAG, "Config changed: newConfig=" + newConfig
                 + " lastReportedConfig=" + mLastReportedConfig);
+        final int diff = newConfig.diff(mLastReportedConfig);
+        if ((diff & CONFIG_FONT_SCALE) != 0 || (diff & ActivityInfo.CONFIG_DENSITY) != 0) {
+            updateCurrentUserResources();
+        }
         mLastReportedConfig.updateFrom(newConfig);
         updateDisplaySize();
     }
