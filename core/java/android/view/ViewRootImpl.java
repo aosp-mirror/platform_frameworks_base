@@ -7273,7 +7273,8 @@ public final class ViewRootImpl implements ViewParent,
             if (dispatcher.isBackGestureInProgress()) {
                 return FINISH_NOT_HANDLED;
             }
-            if (topCallback instanceof OnBackAnimationCallback) {
+            if (topCallback instanceof OnBackAnimationCallback
+                    && !(topCallback instanceof ImeBackAnimationController)) {
                 final OnBackAnimationCallback animationCallback =
                         (OnBackAnimationCallback) topCallback;
                 switch (keyEvent.getAction()) {
