@@ -131,6 +131,11 @@ abstract class CrossActivityBackAnimation(
     abstract fun preparePreCommitEnteringRectMovement()
 
     /**
+     * Subclasses must provide a duration (in ms) for the post-commit part of the animation
+     */
+    abstract fun getPostCommitAnimationDuration(): Long
+
+    /**
      * Returns a base transformation to apply to the entering target during pre-commit. The system
      * will apply the default animation on top of it.
      */
@@ -259,7 +264,8 @@ abstract class CrossActivityBackAnimation(
             .setSpring(postCommitFlingSpring)
         flingAnimation.start()
 
-        val valueAnimator = ValueAnimator.ofFloat(1f, 0f).setDuration(POST_COMMIT_DURATION)
+        val valueAnimator =
+            ValueAnimator.ofFloat(1f, 0f).setDuration(getPostCommitAnimationDuration())
         valueAnimator.addUpdateListener { animation: ValueAnimator ->
             val progress = animation.animatedFraction
             onPostCommitProgress(progress)
@@ -522,7 +528,6 @@ abstract class CrossActivityBackAnimation(
         internal const val MAX_SCALE = 0.9f
         private const val MAX_SCRIM_ALPHA_DARK = 0.8f
         private const val MAX_SCRIM_ALPHA_LIGHT = 0.2f
-        private const val POST_COMMIT_DURATION = 300L
         private const val SPRING_SCALE = 100f
         private const val MAX_FLING_SCALE = 0.6f
     }

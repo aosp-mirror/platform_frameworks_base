@@ -71,6 +71,8 @@ constructor(
         targetEnteringRect.scaleCentered(MAX_SCALE)
     }
 
+    override fun getPostCommitAnimationDuration() = POST_COMMIT_DURATION
+
     override fun onGestureCommitted(velocity: Float) {
         // We enter phase 2 of the animation, the starting coordinates for phase 2 are the current
         // coordinate of the gesture driven phase. Let's update the start and target rects and kick
@@ -92,5 +94,10 @@ constructor(
         currentEnteringRect.setInterpolatedRectF(startEnteringRect, targetEnteringRect, progress)
         applyTransform(enteringTarget?.leash, currentEnteringRect, 1f)
         applyTransaction()
+    }
+
+
+    companion object {
+        private const val POST_COMMIT_DURATION = 300L
     }
 }
