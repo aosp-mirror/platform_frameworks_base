@@ -461,7 +461,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void togglePanel();
   }
 
-  public static final class StatusBarManager.DisableInfo implements android.os.Parcelable {
+  public static final class StatusBarManager.DisableInfo {
     method public boolean isRotationSuggestionDisabled();
   }
 
@@ -1547,10 +1547,6 @@ package android.hardware.biometrics {
     method public boolean isAllowBackgroundAuthentication();
   }
 
-  public abstract static class BiometricPrompt.AuthenticationCallback {
-    method @FlaggedApi("android.hardware.biometrics.face_background_authentication") public void onAuthenticationAcquired(int);
-  }
-
   public static class BiometricPrompt.Builder {
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.TEST_BIOMETRIC, "android.permission.USE_BIOMETRIC_INTERNAL"}) public android.hardware.biometrics.BiometricPrompt.Builder setAllowBackgroundAuthentication(boolean);
     method @FlaggedApi("android.multiuser.enable_biometrics_to_unlock_private_space") @NonNull @RequiresPermission(anyOf={android.Manifest.permission.TEST_BIOMETRIC, "android.permission.USE_BIOMETRIC_INTERNAL"}) public android.hardware.biometrics.BiometricPrompt.Builder setAllowBackgroundAuthentication(boolean, boolean);
@@ -1569,7 +1565,6 @@ package android.hardware.biometrics {
   }
 
   public class SensorProperties {
-    ctor @FlaggedApi("android.hardware.biometrics.face_background_authentication") public SensorProperties(int, int, @NonNull java.util.List<android.hardware.biometrics.SensorProperties.ComponentInfo>);
     method @NonNull public java.util.List<android.hardware.biometrics.SensorProperties.ComponentInfo> getComponentInfo();
     method public int getSensorId();
     method public int getSensorStrength();
@@ -1710,18 +1705,6 @@ package android.hardware.display {
     field public static final int VIRTUAL_DISPLAY_FLAG_OWN_FOCUS = 16384; // 0x4000
     field public static final int VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 512; // 0x200
     field public static final int VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH = 64; // 0x40
-  }
-
-}
-
-package android.hardware.face {
-
-  @FlaggedApi("android.hardware.biometrics.face_background_authentication") public class FaceManager {
-    method @FlaggedApi("android.hardware.biometrics.face_background_authentication") @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public android.hardware.biometrics.BiometricTestSession createTestSession(int);
-    method @FlaggedApi("android.hardware.biometrics.face_background_authentication") @NonNull public java.util.List<android.hardware.face.FaceSensorProperties> getSensorProperties();
-  }
-
-  @FlaggedApi("android.hardware.biometrics.face_background_authentication") public class FaceSensorProperties extends android.hardware.biometrics.SensorProperties {
   }
 
 }
@@ -3946,6 +3929,7 @@ package android.view.inputmethod {
   }
 
   public final class InputMethodInfo implements android.os.Parcelable {
+    ctor public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, boolean, @NonNull String);
     ctor public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, @NonNull String, boolean, @NonNull String);
     ctor @FlaggedApi("android.view.inputmethod.connectionless_handwriting") public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, @NonNull String, boolean, boolean, @NonNull String);
     ctor public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, int);

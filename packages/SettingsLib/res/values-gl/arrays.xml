@@ -153,13 +153,13 @@
     <item msgid="1333279807604675720">"Estéreo"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="1241278021345116816">"Optimizado para a calidade do audio (990 kb/s ou 909 kb/s)"</item>
+    <item msgid="1241278021345116816">"Optimizado para a calidade de audio (990 kb/s ou 909 kb/s)"</item>
     <item msgid="3523665555859696539">"Calidade equilibrada do audio e da conexión (660 kb/s ou 606 kb/s)"</item>
     <item msgid="886408010459747589">"Optimizado para a calidade da conexión (330 kb/s ou 303 kb/s)"</item>
     <item msgid="3808414041654351577">"Máxima (taxa de bits adaptable)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="804499336721569838">"Optimizado para a calidade do audio"</item>
+    <item msgid="804499336721569838">"Optimizado para a calidade de audio"</item>
     <item msgid="7451422070435297462">"Calidade equilibrada do audio e da conexión"</item>
     <item msgid="6173114545795428901">"Optimizado para a calidade da conexión"</item>
     <item msgid="4349908264188040530">"Máxima (taxa de bits adaptable)"</item>

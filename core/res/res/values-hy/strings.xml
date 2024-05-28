@@ -1628,7 +1628,7 @@
     <string name="validity_period" msgid="1717724283033175968">"Վավերականություն`"</string>
     <string name="issued_on" msgid="5855489688152497307">"Թողարկվել է`"</string>
     <string name="expires_on" msgid="1623640879705103121">"Սպառվում է`"</string>
-    <string name="serial_number" msgid="3479576915806623429">"Հերթական համարը`"</string>
+    <string name="serial_number" msgid="3479576915806623429">"Հերթական համար`"</string>
     <string name="fingerprints" msgid="148690767172613723">"Մատնահետքերը`"</string>
     <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256 մատնահետք`"</string>
     <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1 մատնահետք`"</string>
@@ -1965,7 +1965,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Չդասակարգված"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Դուք սահմանել եք այս ծանուցումների կարևորությունը:"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Կարևոր է, քանի որ որոշակի մարդիկ են ներգրավված:"</string>
-    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Հավելվածի հատուկ ծանուցում"</string>
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Հատուկ հավելվածի ծանուցում"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Թույլատրե՞լ <xliff:g id="APP">%1$s</xliff:g> հավելվածին <xliff:g id="ACCOUNT">%2$s</xliff:g> հաշվով նոր Օգտատեր ստեղծել (նման հաշվով Օգտատեր արդեն գոյություն ունի):"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Թույլատրե՞լ <xliff:g id="APP">%1$s</xliff:g> հավելվածին <xliff:g id="ACCOUNT">%2$s</xliff:g> հաշվով նոր Օգտատեր ստեղծել:"</string>
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"Ավելացնել վերահսկվող օգտատեր"</string>

@@ -979,7 +979,13 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         // cache current min/max size
         Point minSize = mPipBoundsState.getMinSize();
         Point maxSize = mPipBoundsState.getMaxSize();
-        mPipBoundsState.updateMinMaxSize(pictureInPictureParams.getAspectRatioFloat());
+        final float aspectRatioFloat;
+        if (pictureInPictureParams.hasSetAspectRatio()) {
+            aspectRatioFloat = pictureInPictureParams.getAspectRatioFloat();
+        } else {
+            aspectRatioFloat = mPipBoundsAlgorithm.getDefaultAspectRatio();
+        }
+        mPipBoundsState.updateMinMaxSize(aspectRatioFloat);
         final Rect entryBounds = mPipTaskOrganizer.startSwipePipToHome(componentName, activityInfo,
                 pictureInPictureParams);
         // restore min/max size, as this is referenced later in OnDisplayChangingListener and needs

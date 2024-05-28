@@ -357,7 +357,7 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"표준"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"보통"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"높음"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"기기 마이크를 &amp;#173;차단 해제하시겠습니까?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"기기 마이크를 차단 해제하시겠습니까?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"기기 카메라를 차단 해제하시겠습니까?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"기기 카메라 및 마이크를 차단 해제하시겠습니까?"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"마이크를 사용할 수 있는 모든 앱 및 서비스에 대해 액세스가 차단 해제됩니다."</string>
@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"더 많은 위젯 추가"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"위젯을 맞춤설정하려면 길게 누르기"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"위젯 맞춤설정"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"사용 중지된 위젯의 앱 아이콘"</string>
     <string name="edit_widget" msgid="9030848101135393954">"위젯 수정"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"삭제"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"위젯 추가"</string>
@@ -588,7 +587,7 @@
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"음소거 해제"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"진동"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s 볼륨 컨트롤"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"전화 및 알림이 오면 벨소리가 울림(<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"전화 및 알림이 오면 벨소리가 울립니다(<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)."</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> 재생 위치:"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"오디오 재생 위치:"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"시스템 UI 튜너"</string>
@@ -719,7 +718,7 @@
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"단축키 없음"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"시스템"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"입력"</string>
-    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"열린 앱"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"앱 열기"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"현재 앱"</string>
     <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"검색 결과 표시"</string>
     <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"시스템 바로가기 표시"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"최근 앱 간 앞으로 순환"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"최근 앱 간 뒤로 순환"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"앱 목록 열기"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"태스크 바 표시"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"설정 열기"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"어시스턴트 열기"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"잠금 화면"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"전원 메뉴"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g>페이지 중 <xliff:g id="ID_1">%1$d</xliff:g>페이지"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"잠금 화면"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"전원이 꺼져 있을 때도 내 기기 찾기로 이 휴대전화를 찾을 수 있습니다."</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"종료 중…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"해결 방법 확인하기"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"해결 방법 확인하기"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"기기 분리하기"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"해상도를 높이려면 후면 카메라를 사용하세요."</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"폴더블 기기를 펼치는 모습"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"폴더블 기기를 뒤집는 모습"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"접은 상태"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"펼친 상태"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"배터리 <xliff:g id="PERCENTAGE">%s</xliff:g> 남음"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"스타일러스를 충전기에 연결하세요"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"스타일러스 배터리 부족"</string>

@@ -255,18 +255,23 @@ final class AutofillManagerServiceImpl
             throws NameNotFoundException {
         final List<ResolveInfo> resolveInfos =
                 getContext().getPackageManager().queryIntentServicesAsUser(
-                        new Intent(AutofillService.SERVICE_INTERFACE),
-                        PackageManager.GET_META_DATA,
-                        mUserId);
-        boolean currentPackageStillHasAutofillIntentFilter = false;
+                    new Intent(AutofillService.SERVICE_INTERFACE),
+                    // The MATCH_INSTANT flag is added because curret autofill CTS module is
+                    // defined in one apk, which makes the test autofill service installed in a
+                    // instant app when the CTS tests are running in instant app mode.
+                    // TODO: Remove MATCH_INSTANT flag after completing refactoring the CTS module
+                    //       to make the test autofill service a separate apk.
+                    PackageManager.GET_META_DATA | PackageManager.MATCH_INSTANT,
+                    mUserId);
+        boolean serviceHasAutofillIntentFilter = false;
         for (ResolveInfo resolveInfo : resolveInfos) {
             final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
             if (serviceInfo.getComponentName().equals(serviceComponent)) {
-                currentPackageStillHasAutofillIntentFilter = true;
+                serviceHasAutofillIntentFilter = true;
                 break;
             }
         }
-        if (!currentPackageStillHasAutofillIntentFilter) {
+        if (!serviceHasAutofillIntentFilter) {
             Slog.w(TAG,
                     "Autofill service from '" + serviceComponent.getPackageName() + "' does"
                             + "not have intent filter " + AutofillService.SERVICE_INTERFACE);

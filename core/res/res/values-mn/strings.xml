@@ -1971,7 +1971,7 @@
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"Хяналттай хэрэглэгч нэмэх"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Хэл нэмэх"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Бүс нутгийн тохиргоо"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"Улсын хэлийг бичнэ үү"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"Хэлний нэрийг бичнэ үү"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Санал болгосон"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Санал болгосон"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Санал болгосон хэл"</string>

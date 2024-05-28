@@ -828,14 +828,14 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"パスワードルールの設定"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"画面ロックのパスワードとPINの長さと使用できる文字を制御します。"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"画面ロック解除試行の監視"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"画面のロック解除に正しくないパスワードを入力した回数を監視し、回数が多すぎる場合はタブレットをロックするかタブレットのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合は Android TV デバイスをロックするか Android TV デバイスのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"画面のロック解除に正しくないパスワードを入力した回数を監視し、回数が多すぎる場合はインフォテインメント システムをロックするかインフォテインメント システムのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"画面のロック解除に正しくないパスワードを入力した回数を監視し、回数が多すぎる場合はモバイルデバイスをロックするかモバイルデバイスのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合はタブレットをロックするかこのユーザーのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合は Android TV デバイスをロックするかこのユーザーのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"画面のロック解除に正しくないパスワードを入力した回数を監視し、回数が多すぎる場合はインフォテインメント システムをロックするかこのプロファイルのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合はスマートフォンをロックするかこのユーザーのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"画面のロック解除に失敗した回数を監視し、多すぎる場合はタブレットをロックするかタブレットのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"画面のロック解除に失敗した回数を監視し、多すぎる場合は Android TV デバイスをロックするか Android TV デバイスのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"画面のロック解除に失敗した回数を監視し、多すぎる場合はインフォテインメント システムをロックするかインフォテインメント システムのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"画面のロック解除に失敗した回数を監視し、多すぎる場合はモバイルデバイスをロックするかモバイルデバイスのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"画面のロック解除に失敗した回数を監視し、多すぎる場合はタブレットをロックするかこのユーザーのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"画面のロック解除に失敗した回数を監視し、多すぎる場合は Android TV デバイスをロックするかこのユーザーのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"画面のロック解除に失敗した回数を監視し、多すぎる場合はインフォテインメント システムをロックするかこのプロファイルのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"画面のロック解除に失敗した回数を監視し、多すぎる場合はスマートフォンをロックするかこのユーザーのデータをすべて消去します。"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"画面ロックの変更"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"画面ロックを変更します。"</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"画面のロック"</string>
@@ -1418,7 +1418,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"共有しない"</string>
     <string name="select_input_method" msgid="3971267998568587025">"入力方法の選択"</string>
     <string name="show_ime" msgid="6406112007347443383">"物理キーボードが有効になっていても画面に表示させます"</string>
-    <string name="hardware" msgid="3611039921284836033">"画面キーボードの使用"</string>
+    <string name="hardware" msgid="3611039921284836033">"画面キーボードを使用"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g>の設定"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"物理キーボードの設定"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"タップして言語とレイアウトを選択してください"</string>
@@ -2175,7 +2175,7 @@
     <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"ヘッドセット: フック"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"画面上のユーザー補助機能のショートカット"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"画面上のユーザー補助機能のショートカットの選択メニュー"</string>
-    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ユーザー補助機能のショートカット"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ユーザー補助のショートカット"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"通知シェードを閉じる"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"D-pad: 上"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"D-pad: 下"</string>
@@ -2368,8 +2368,8 @@
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"デュアル スクリーン"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"デュアル スクリーン: ON"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>は 2 画面でコンテンツを表示しています"</string>
-    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"デバイスが熱くなりすぎています"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"スマートフォンが熱くなりすぎているため、デュアル スクリーンを使用できません"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"デバイスが熱くなっています"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"スマートフォンが熱いため、デュアル スクリーンを使用できません"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"デュアル スクリーンを使用できません"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"バッテリー セーバーが ON のため、デュアル スクリーンを使用できません。この動作は設定で OFF にできます。"</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"設定に移動"</string>

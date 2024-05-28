@@ -468,7 +468,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Hauria de durar aproximadament fins a les <xliff:g id="TIME">%1$s</xliff:g> segons l\'ús que en facis"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"Hauria de durar aproximadament fins a les <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Hauria de durar aproximadament fins a les <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Fins a les <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"fins a les <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"És possible que la bateria s\'esgoti a les <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Temps restant inferior a <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Temps restant inferior a <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -481,9 +481,9 @@
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g>: s\'està carregant"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Desconegut"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"S\'està carregant"</string>
-    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Carregant ràpidament"</string>
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Càrrega ràpida"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Carregant lentament"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Carregant sense fil"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Càrrega sense fil"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"S\'està carregant"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"No s\'està carregant"</string>
     <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Connectat, però sense carregar"</string>
@@ -491,11 +491,11 @@
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Totalment carregada"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Càrrega en espera"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlat per l\'administrador"</string>
-    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Controlat per la configuració restringida"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Controlat per l\'opció de configuració restringida"</string>
     <string name="disabled" msgid="8017887509554714950">"Desactivat"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Amb permís"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Sense permís"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Instal·lar aplicacions desconegudes"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Instal·la aplicacions desconegudes"</string>
     <string name="home" msgid="973834627243661438">"Pàgina d\'inici de configuració"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>

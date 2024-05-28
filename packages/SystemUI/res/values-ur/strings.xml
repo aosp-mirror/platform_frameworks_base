@@ -263,7 +263,7 @@
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"کسی آلے کو منسلک یا غیر منسلک کرنے کے لیے تھپتھپائیں"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"نئے آلے کا جوڑا بنائیں"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"سبھی دیکھیں"</string>
-    <string name="turn_on_bluetooth" msgid="5681370462180289071">"استعمال کریں"</string>
+    <string name="turn_on_bluetooth" msgid="5681370462180289071">"بلوٹوتھ استعمال کریں"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"منسلک ہے"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"محفوظ ہے"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"غیر منسلک کریں"</string>
@@ -589,7 +589,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"‏‎%s والیوم کے کنٹرولز"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"کالز اور اطلاعات موصول ہونے پر گھنٹی بجے گی (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> پر چل رہی ہے"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"آڈیو چلتی رہے گی"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"آڈیو اس پر چلے گی"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"‏سسٹم UI ٹیونر"</string>
     <string name="status_bar" msgid="4357390266055077437">"اسٹیٹس بار"</string>
     <string name="demo_mode" msgid="263484519766901593">"‏سسٹم UI ڈیمو موڈ"</string>
@@ -734,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"حالیہ ایپس کے ذریعے آگے کی طرف سائیکل کریں"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"حالیہ ایپس کے ذریعے پیچھے کی طرف سائیکل کریں"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"ایپس کی فہرست کھولیں"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"ٹاسک بار دکھائیں"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"ترتیبات کھولیں"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"اسسٹنٹ کھولیں"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"مقفل اسکرین"</string>
@@ -1091,7 +1090,7 @@
     <string name="build_number_copy_toast" msgid="877720921605503046">"بلڈ نمبر کلپ بورڈ میں کاپی ہو گیا۔"</string>
     <string name="basic_status" msgid="2315371112182658176">"گفتگو کھولیں"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"گفتگو ویجیٹس"</string>
-    <string name="select_conversation_text" msgid="3376048251434956013">"اسے اپنے ہوم اسکرین پر شامل کرنے کے لیے گفتگو پر تھپتھپائیں"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"اسے اپنی ہوم اسکرین پر شامل کرنے کے لیے گفتگو پر تھپتھپائیں"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"آپ کی حالیہ گفتگوئیں یہاں دکھائی دیں گی"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"ترجیحی گفتگوئیں"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"حالیہ گفتگوئیں"</string>
@@ -1223,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"زیادہ ریزولوشن کے لیے، فون پلٹائیں"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"فولڈ ہونے والے آلے کو کھولا جا رہا ہے"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"فولڈ ہونے والے آلے کو گھمایا جا رہا ہے"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"فولڈ کردہ"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"اَن فولڈ کردہ"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> بیٹری باقی ہے"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"اپنے اسٹائلس کو چارجر منسلک کریں"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"اسٹائلس بیٹری کم ہے"</string>

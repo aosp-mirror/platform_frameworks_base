@@ -117,7 +117,7 @@
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Teksboodskappe"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM-toegang"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-oudio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
-    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD oudio"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-oudio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="2607867572569689732">"Gehoortoestelle"</string>
     <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE-oudio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="5757754050938807276">"Gekoppel aan gehoortoestelle"</string>
@@ -265,7 +265,7 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Wys \'n knoppie in die kragkieslys om \'n foutverslag te doen"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Bly wakker"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Skerm sal nooit slaap terwyl dit laai nie"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Aktiveer Bluetooth HCI-loerloglêer"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Aktiveer Bluetooth HCI-snuffelloglêer"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Vang Bluetooth-pakkette vas. (Wissel Bluetooth nadat jy hierdie instelling verander het)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM-ontsluit"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Laat toe dat die selflaaiprogram ontsluit word"</string>
@@ -313,8 +313,8 @@
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Wanneer hierdie modus geaktiveer is, kan hierdie toestel se MAC-adres verander elke keer wanneer dit aan \'n netwerk koppel waarvoor MAC-verewekansiging geaktiveer is."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Beperk"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Onbeperk"</string>
-    <string name="select_logd_size_title" msgid="1604578195914595173">"Loggerbuffer se groottes"</string>
-    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Kies loggergroottes per logbuffer"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"Logskepperbuffer se groottes"</string>
+    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Kies logskeppergroottes per logbuffer"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Maak logskrywer se aanhoudende berging skoon?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Wanneer ons nie meer monitering met die aanhoudende logskrywer uitvoer nie, word ons vereis om die logskrywerdata wat op jou toestel is, uit te vee."</string>
     <string name="select_logpersist_title" msgid="447071974007104196">"Berg logskrywerdata aanhoudend op toestel"</string>
@@ -389,14 +389,14 @@
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Ontfout nie-reghoekige knipbedrywighede"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Profiel-HWUI-lewering"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Aktiveer GPU-ontfoutlae"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Laat laai van GPU-ontfoutlae vir ontfoutprogramme toe"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Laat laai van GPU-ontfoutlae vir ontfoutapps toe"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Aktiveer woordryke verkoperloginskrywing"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Sluit bykomende toestelspesifieke verkoperloglêers by foutverslae in, wat privaat inligting kan bevat, meer batterykrag kan gebruik, en/of meer berging kan gebruik."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Vensteranimasieskaal"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Oorganganimasieskaal"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animator-tydsduurskaal"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simuleer sekondêre uitstallings"</string>
-    <string name="debug_applications_category" msgid="5394089406638954196">"Programme"</string>
+    <string name="debug_applications_category" msgid="5394089406638954196">"Apps"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Moenie aktiwiteite behou nie"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Vernietig elke aktiwiteit sodra die gebruiker dit verlaat"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Agtergrondproseslimiet"</string>
@@ -495,7 +495,7 @@
     <string name="disabled" msgid="8017887509554714950">"Gedeaktiveer"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Toegelaat"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Nie toegelaat nie"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Installeer onbekende programme"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Installeer onbekende apps"</string>
     <string name="home" msgid="973834627243661438">"Instellingstuisblad"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -518,7 +518,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Gebruik stelseltale"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Kon nie instellings vir <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> oopmaak nie"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Die invoermetode kan dalk alle teks wat jy invoer, versamel, insluitend persoonlike data soos wagwoorde en kredietkaartnommers. Dit kom van die program <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Wil jy dié invoermetode gebruik?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Let wel: Ná \'n herselflaai kan hierdie program nie begin voordat jy jou foon ontsluit het nie"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Let wel: Ná \'n herselflaai kan hierdie app nie begin voordat jy jou foon ontsluit het nie"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS-registrasiestaat"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Geregistreer"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Nie geregistreer nie"</string>
@@ -630,7 +630,7 @@
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Verwyder"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Stel tans gassessie terug …"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Stel gastesessie terug?"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Dit sal ’n nuwe gastesessie begin en alle programme en data van die huidige sessie uitvee"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Dit sal ’n nuwe gastesessie begin en alle apps en data van die huidige sessie uitvee"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Verlaat gasmodus?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Dit sal programme en data in die huidige gastesessie uitvee"</string>
     <string name="grant_admin" msgid="4323199171790522574">"Ja, maak hulle ’n admin"</string>
@@ -657,7 +657,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Gedeaktiveer"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Geaktiveer"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Jou toestel moet herselflaai om hierdie verandering toe te pas. Herselflaai nou of kanselleer."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Bedraade oorfoon"</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Bedrade oorfone"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Aan"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Af"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Diensverskaffernetwerk verander tans"</string>
@@ -694,7 +694,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Verstek"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Skakel skerm aan"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Laat toe dat die skerm aangeskakel word"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Laat ’n program toe om die skerm aan te skakel. As jy toestemming gee, kan die program die skerm enige tyd sonder jou uitdruklike bedoeling aanskakel."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Laat ’n app toe om die skerm aan te skakel. As jy toestemming gee, kan die app die skerm enige tyd sonder jou uitdruklike bedoeling aanskakel."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Hou op om <xliff:g id="APP_NAME">%1$s</xliff:g> uit te saai?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"As jy <xliff:g id="SWITCHAPP">%1$s</xliff:g> uitsaai of die uitvoer verander, sal jou huidige uitsending stop"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Saai <xliff:g id="SWITCHAPP">%1$s</xliff:g> uit"</string>

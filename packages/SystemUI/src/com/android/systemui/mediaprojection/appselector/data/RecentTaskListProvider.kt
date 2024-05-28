@@ -65,7 +65,7 @@ constructor(
                         it.topActivity,
                         it.baseIntent?.component,
                         it.taskDescription?.backgroundColor,
-                        isForegroundTask = it.taskId in foregroundTaskIds
+                        isForegroundTask = it.taskId in foregroundTaskIds && it.isVisible
                     )
                 }
         }

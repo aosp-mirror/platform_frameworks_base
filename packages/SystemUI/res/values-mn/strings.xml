@@ -113,7 +113,7 @@
     <string name="screenrecord_continue" msgid="4055347133700593164">"Эхлүүлэх"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Дэлгэцийг бичиж байна"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Дэлгэц болон аудиог бичиж байна"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Дэлгэц дээр мэдрэгчийг харуулах"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Дэлгэц дээр хүрэхийг харуулах"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Зогсоох"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Хуваалцах"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Дэлгэцийн бичлэгийг хадгалсан"</string>
@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Илүү олон виджет нэмэх"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Виджетүүдийг өөрчлөхийн тулд удаан дарна уу"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Виджетүүдийг өөрчлөх"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Идэвхгүй болгосон виджетийн аппын дүрс тэмдэг"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Виджетийг засах"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Хасах"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Виджет нэмэх"</string>
@@ -647,7 +646,7 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Төлөв:&lt;/b&gt; Доогуур зэрэглэл хийсэн"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Харилцан ярианы дээд талд болон түгжигдсэн дэлгэц дээр профайл зураг байдлаар харуулна"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Харилцан ярианы мэдэгдлийн дээд талд болон түгжигдсэн дэлгэц дээр профайл зураг байдлаар харуулах бөгөөд бөмбөлөг хэлбэрээр харагдана"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Харилцан ярианы мэдэгдлийн дээд талд болон түгжигдсэн дэлгэц дээр профайл зураг байдлаар харуулах бөгөөд Бүү саад бол горимыг тасалдуулна"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Харилцан ярианы мэдэгдлийн дээд талд болон түгжээтэй дэлгэц дээр профайл зураг байдлаар харуулах бөгөөд Бүү саад бол горимыг тасалдуулна"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Харилцан ярианы мэдэгдлийн дээд талд болон түгжигдсэн дэлгэц дээр профайл зураг байдлаар харуулах бөгөөд бөмбөлөг хэлбэрээр харагдана. Бүү саад бол горимыг тасалдуулна"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Чухал"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> нь харилцан ярианы онцлогуудыг дэмждэггүй"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Саяхны аппуудаар урагш гүйлгэх"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Саяхны аппуудаар арагш гүйлгэх"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Аппуудын жагсаалтыг нээх"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Ажлын хэсгийг харуулах"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Тохиргоог нээх"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Туслахыг нээх"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Түгжээтэй дэлгэц"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Асаах/унтраах цэс"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g>-н <xliff:g id="ID_1">%1$d</xliff:g>-р хуудас"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Түгжээтэй дэлгэц"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"Та энэ утсыг унтраалттай байсан ч Миний төхөөрөмжийг олохоор байршлыг нь тогтоох боломжтой"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Унтрааж байна…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Хянамж болгоомжийн алхмыг харах"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Хянамж болгоомжийн алхмыг харах"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Төхөөрөмжөө салгана уу"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Илүү өндөр нягтрал авах бол утсыг хөнтөрнө үү"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Эвхэгддэг төхөөрөмжийг дэлгэж байна"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Эвхэгддэг төхөөрөмжийг хөнтөрч байна"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"эвхсэн"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"дэлгэсэн"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> батарей үлдлээ"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Мэдрэгч үзгээ цэнэглэгчтэй холбоорой"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Мэдрэгч үзэгний батарей бага байна"</string>
@@ -1235,7 +1234,7 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Ажлын профайл руу сэлгэх"</string>
     <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Ажлын гар утасны апп суулгах"</string>
     <string name="call_from_work_profile_close" msgid="5830072964434474143">"Цуцлах"</string>
-    <string name="lock_screen_settings" msgid="6152703934761402399">"Түгжигдсэн дэлгэцийг өөрчлөх"</string>
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Түгжээтэй дэлгэцийг өөрчлөх"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Түгжээтэй дэлгэцийг өөрчлөхийн тулд түгжээг тайлна уу"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi боломжгүй байна"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камерыг блоклосон"</string>

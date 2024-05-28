@@ -16,14 +16,18 @@
 
 package com.android.server.input;
 
-import static java.lang.annotation.RetentionPolicy.SOURCE;
+import static android.hardware.input.KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_USER;
+import static android.hardware.input.KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_DEVICE;
+import static android.hardware.input.KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD;
+import static android.hardware.input.KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_DEFAULT;
+import static android.hardware.input.KeyboardLayoutSelectionResult.layoutSelectionCriteriaToString;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.role.RoleManager;
 import android.content.Intent;
 import android.hardware.input.KeyboardLayout;
+import android.hardware.input.KeyboardLayoutSelectionResult.LayoutSelectionCriteria;
 import android.icu.util.ULocale;
 import android.text.TextUtils;
 import android.util.Log;
@@ -40,7 +44,6 @@ import com.android.internal.os.KeyboardConfiguredProto.RepeatedKeyboardLayoutCon
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.policy.ModifierShortcutManager;
 
-import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,32 +59,6 @@ public final class KeyboardMetricsCollector {
     // To enable these logs, run: 'adb shell setprop log.tag.KeyboardMetricCollector DEBUG'
     // (requires restart)
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-
-    @Retention(SOURCE)
-    @IntDef(prefix = {"LAYOUT_SELECTION_CRITERIA_"}, value = {
-            LAYOUT_SELECTION_CRITERIA_UNSPECIFIED,
-            LAYOUT_SELECTION_CRITERIA_USER,
-            LAYOUT_SELECTION_CRITERIA_DEVICE,
-            LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD,
-            LAYOUT_SELECTION_CRITERIA_DEFAULT
-    })
-    public @interface LayoutSelectionCriteria {
-    }
-
-    /** Unspecified layout selection criteria */
-    public static final int LAYOUT_SELECTION_CRITERIA_UNSPECIFIED = 0;
-
-    /** Manual selection by user */
-    public static final int LAYOUT_SELECTION_CRITERIA_USER = 1;
-
-    /** Auto-detection based on device provided language tag and layout type */
-    public static final int LAYOUT_SELECTION_CRITERIA_DEVICE = 2;
-
-    /** Auto-detection based on IME provided language tag and layout type */
-    public static final int LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD = 3;
-
-    /** Default selection */
-    public static final int LAYOUT_SELECTION_CRITERIA_DEFAULT = 4;
 
     @VisibleForTesting
     static final String DEFAULT_LAYOUT_NAME = "Default";
@@ -629,30 +606,16 @@ public final class KeyboardMetricsCollector {
 
         @Override
         public String toString() {
-            return "{keyboardLanguageTag = " + keyboardLanguageTag + " keyboardLayoutType = "
+            return "{keyboardLanguageTag = " + keyboardLanguageTag
+                    + " keyboardLayoutType = "
                     + KeyboardLayout.LayoutType.getLayoutNameFromValue(keyboardLayoutType)
-                    + " keyboardLayoutName = " + keyboardLayoutName + " layoutSelectionCriteria = "
-                    + getStringForSelectionCriteria(layoutSelectionCriteria)
-                    + "imeLanguageTag = " + imeLanguageTag + " imeLayoutType = "
-                    + KeyboardLayout.LayoutType.getLayoutNameFromValue(imeLayoutType) + "}";
-        }
-    }
-
-    private static String getStringForSelectionCriteria(
-            @LayoutSelectionCriteria int layoutSelectionCriteria) {
-        switch (layoutSelectionCriteria) {
-            case LAYOUT_SELECTION_CRITERIA_UNSPECIFIED:
-                return "LAYOUT_SELECTION_CRITERIA_UNSPECIFIED";
-            case LAYOUT_SELECTION_CRITERIA_USER:
-                return "LAYOUT_SELECTION_CRITERIA_USER";
-            case LAYOUT_SELECTION_CRITERIA_DEVICE:
-                return "LAYOUT_SELECTION_CRITERIA_DEVICE";
-            case LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD:
-                return "LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD";
-            case LAYOUT_SELECTION_CRITERIA_DEFAULT:
-                return "LAYOUT_SELECTION_CRITERIA_DEFAULT";
-            default:
-                return "INVALID_CRITERIA";
+                    + " keyboardLayoutName = " + keyboardLayoutName
+                    + " layoutSelectionCriteria = "
+                    + layoutSelectionCriteriaToString(layoutSelectionCriteria)
+                    + " imeLanguageTag = " + imeLanguageTag
+                    + " imeLayoutType = " + KeyboardLayout.LayoutType.getLayoutNameFromValue(
+                    imeLayoutType)
+                    + "}";
         }
     }
 

@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"கூடுதல் விட்ஜெட்களைச் சேருங்கள்"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"விட்ஜெட்களைப் பிரத்தியேகமாக்க நீண்ட நேரம் அழுத்துக"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"விட்ஜெட்களைப் பிரத்தியேகமாக்குங்கள்"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"முடக்கப்பட்ட விட்ஜெட்டுக்கான ஆப்ஸ் ஐகான்"</string>
     <string name="edit_widget" msgid="9030848101135393954">"விட்ஜெட்டைத் திருத்து"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"அகற்றும்"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"விட்ஜெட்டைச் சேர்"</string>
@@ -565,7 +564,7 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"ஆப்ஸ் பின்னிலிருந்து அகற்றப்பட்டது"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"அழைப்பு"</string>
     <string name="stream_system" msgid="7663148785370565134">"சிஸ்டம்"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"ரிங் செய்"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"அழைப்பு ஒலி"</string>
     <string name="stream_music" msgid="2188224742361847580">"மீடியா"</string>
     <string name="stream_alarm" msgid="16058075093011694">"அலாரம்"</string>
     <string name="stream_notification" msgid="7930294049046243939">"அறிவிப்பு"</string>
@@ -590,7 +589,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s ஒலியளவுக் கட்டுப்பாடுகள்"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"அழைப்புகளும் அறிவிப்புகளும் வரும்போது ஒலிக்கச் செய்யும் (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"இதில் <xliff:g id="LABEL">%s</xliff:g> பிளே ஆகிறது"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"இல் ஆடியோ பிளே ஆகும்"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"ஆடியோ இதில் பிளே ஆகும்"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"நிலைப் பட்டி"</string>
     <string name="demo_mode" msgid="263484519766901593">"சிஸ்டம் பயனர் இடைமுக டெமோ பயன்முறை"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"சமீபத்திய ஆப்ஸுக்கு முன்னோக்கிச் செல்லுதல்"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"சமீபத்திய ஆப்ஸுக்குப் பின்னோக்கிச் செல்லுதல்"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"ஆப்ஸ் பட்டியலைத் திறத்தல்"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"செயல் பட்டியைக் காட்டுதல்"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"அமைப்புகளைத் திறத்தல்"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistantடைத் திறத்தல்"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"பூட்டுத் திரை"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"பவர் மெனு"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"பக்கம் <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"லாக் ஸ்கிரீன்"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"மொபைல் பவர் ஆஃப் செய்யப்பட்டிருக்கும்போதும் Find My Device மூலம் அதன் இருப்பிடத்தைக் கண்டறியலாம்"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"ஷட் டவுன் ஆகிறது…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"மேலும் விவரங்களுக்கு இதைப் பார்க்கவும்"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"மேலும் விவரங்களுக்கு இதைப் பார்க்கவும்"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"சாதன இணைப்பைத் துண்டித்தல்"</string>
@@ -1066,7 +1062,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> சாதனங்கள் தேர்ந்தெடுக்கப்பட்டுள்ளன"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(துண்டிக்கப்பட்டது)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"இணைக்க முடியவில்லை. மீண்டும் முயல தட்டவும்."</string>
-    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"சாதனத்தை இணைத்தல்"</string>
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"சாதனத்தை இணை"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"இந்த அமர்வை அலைபரப்ப ஆப்ஸைத் திறங்கள்."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"அறியப்படாத ஆப்ஸ்"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"அலைபரப்புவதை நிறுத்து"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"உயர் தெளிவுத்திறனுக்கு, மொபைலை ஃபிளிப் செய்யுங்கள்"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"மடக்கத்தக்க சாதனம் திறக்கப்படுகிறது"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"மடக்கத்தக்க சாதனம் ஃபிளிப் செய்யப்பட்டு திருப்பப்படுகிறது"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"மடக்கப்பட்டது"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"விரிக்கப்பட்டது"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> பேட்டரி மீதமுள்ளது"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"உங்கள் ஸ்டைலஸைச் சார்ஜருடன் இணையுங்கள்"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"ஸ்டைலஸின் பேட்டரி குறைவாக உள்ளது"</string>

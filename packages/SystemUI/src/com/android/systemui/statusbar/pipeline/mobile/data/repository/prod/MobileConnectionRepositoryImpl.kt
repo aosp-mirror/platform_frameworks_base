@@ -302,8 +302,10 @@ class MobileConnectionRepositoryImpl(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), UnknownNetworkType)
 
+    override val inflateSignalStrength = systemUiCarrierConfig.shouldInflateSignalStrength
+
     override val numberOfLevels =
-        systemUiCarrierConfig.shouldInflateSignalStrength
+        inflateSignalStrength
             .map { shouldInflate ->
                 if (shouldInflate) {
                     DEFAULT_NUM_LEVELS + 1
@@ -358,7 +360,13 @@ class MobileConnectionRepositoryImpl(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), telephonyManager.simCarrierId)
 
-    /** BroadcastDispatcher does not handle sticky broadcasts, so we can't use it here */
+    /**
+     * BroadcastDispatcher does not handle sticky broadcasts, so we can't use it here. Note that we
+     * now use the [SharingStarted.Eagerly] strategy, because there have been cases where the sticky
+     * broadcast does not represent the correct state.
+     *
+     * See b/322432056 for context.
+     */
     @SuppressLint("RegisterReceiverViaContext")
     override val networkName: StateFlow<NetworkNameModel> =
         conflatedCallbackFlow {
@@ -388,7 +396,7 @@ class MobileConnectionRepositoryImpl(
                 awaitClose { context.unregisterReceiver(receiver) }
             }
             .flowOn(bgDispatcher)
-            .stateIn(scope, SharingStarted.WhileSubscribed(), defaultNetworkName)
+            .stateIn(scope, SharingStarted.Eagerly, defaultNetworkName)
 
     override val dataEnabled = run {
         val initial = telephonyManager.isDataConnectionAllowed

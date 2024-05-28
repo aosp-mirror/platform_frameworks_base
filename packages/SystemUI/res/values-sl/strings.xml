@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Dodajte več pripomočkov"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Pridržite za prilagajanje pripomočkov"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Prilagajanje pripomočkov"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Ikona aplikacije za onemogočen pripomoček"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Urejanje pripomočka"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Odstrani"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Dodajanje pripomočka"</string>
@@ -463,7 +462,7 @@
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Začni"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> je onemogočila to možnost"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Želite začeti predvajati?"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Pri predvajanju ima Android dostop do vsega, kar je prikazano na zaslonu ali se predvaja v napravi. Zato bodite previdni z gesli, podatki za plačilo, sporočili, fotografijami ter z zvokom in videom."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Pri predvajanju ima Android dostop do vsega, kar je prikazano na zaslonu ali se predvaja v napravi, zato bodite previdni z gesli, podatki za plačilo, sporočili, fotografijami ter z zvokom in videom."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Pri predvajanju aplikacije ima Android dostop do vsega, kar je prikazano ali predvajano v tej aplikaciji, zato bodite previdni z gesli, podatki za plačilo, sporočili, fotografijami ter z zvokom in videom."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Začni predvajanje"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Želite začeti deliti?"</string>
@@ -719,7 +718,7 @@
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Ni najdenih bližnjic."</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Sistem"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Vnos"</string>
-    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Odprte aplikacije"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Odpiranje aplikacij"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"Trenutna aplikacija"</string>
     <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"Prikaz rezultatov iskanja"</string>
     <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"Prikaz sistemskih bližnjic"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Pomikanje naprej po nedavnih aplikacijah"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Pomikanje nazaj po nedavnih aplikacijah"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Odpiranje seznama aplikacij"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Prikaz opravilne vrstice"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Odpiranje nastavitev"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Odpiranje Pomočnika"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Zaklepanje zaslona"</string>
@@ -745,7 +743,7 @@
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Vklop razdeljenega zaslona s trenutno aplikacijo na levi"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Preklop iz razdeljenega zaslona v celozaslonski način"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Pri razdeljenem zaslonu: medsebojna zamenjava aplikacij"</string>
-    <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Vnosna naprava"</string>
+    <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Vnos"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Preklop na naslednji jezik"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Preklop na prejšnji jezik"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Dostop do emodžijev"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Meni za vklop/izklop"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g>. stran od <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Zaklenjen zaslon"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"S storitvijo Poišči mojo napravo lahko ta telefon poiščete, tudi če je izklopljen"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Zaustavljanje …"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Oglejte si navodila za ukrepanje"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Oglejte si navodila za ukrepanje"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Odklopite napravo"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Za višjo ločljivost obrnite telefon"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Razpiranje zložljive naprave"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Obračanje zložljive naprave"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"zaprto"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"razprto"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Preostanek energije baterije: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Povežite pisalo s polnilnikom."</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Skoraj prazna baterija pisala"</string>

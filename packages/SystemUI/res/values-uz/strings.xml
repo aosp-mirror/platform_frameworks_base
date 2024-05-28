@@ -264,7 +264,7 @@
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Yangi qurilmani ulash"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Hammasi"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth ishlatish"</string>
-    <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Ulandi"</string>
+    <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Ulangan"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Saqlangan"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"uzish"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"faollashtirish"</string>
@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Koʻproq vidjetlar qoʻshish"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Vidjetlarni sozlash uchun bosib turing"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Vidjetlarni moslashtirish"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Faolsizlantirilgan vidjet uchun ilova belgisi"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Vidjetni tahrirlash"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Olib tashlash"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Vidjet kiritish"</string>
@@ -601,7 +600,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Telefonda tezroq va xavfsizroq xarid qilish uchun sozlang"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Hammasi"</string>
-    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Ochish uchun ustiga bosing"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Ochish uchun bosing"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Yangilanmoqda"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Foydalanish uchun qulfdan chiqarish"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Bildirgilarni yuklashda xatolik yuz berdi, keyinroq qaytadan urining"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Oxirgi ilovalarni oldinga varaqlash"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Oxirgi ilovalarni orqaga varaqlash"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Ilovalar roʻyxatini ochish"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Vazifalar panelini chiqarish"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Sozlamalarni ochish"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistentni ochish"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Ekran qulfi"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Quvvat menyusi"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g>-sahifa, jami: <xliff:g id="ID_2">%2$d</xliff:g> ta sahifa"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Ekran qulfi"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"Oʻchiq boʻlsa ham “Qurilmani top” funksiyasi yordamida bu telefonni topish mumkin"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Oʻchirilmoqda…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Batafsil axborot"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Batafsil axborot"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Qurilmani uzing"</string>
@@ -1140,7 +1136,7 @@
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Joriy telefon chaqiruvi"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobil internet"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
-    <string name="mobile_data_connection_active" msgid="944490013299018227">"Ulandi"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"Ulangan"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Vaqtincha ulangan"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Aloqa beqaror"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"Mobil internetga avtomatik ulanmaydi"</string>
@@ -1217,7 +1213,7 @@
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• Kamida bitta qurilma yoki qurilma paneli mavjud"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Qayd yozish yorligʻidan foydalanish uchun birlamchi qayd ilovasini tanlang"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Ilovani tanlang"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Bosib turish yorligʻi"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Yorliqni bosib turing"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Bekor qilish"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Ekranlarni hozir almashtirish"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Telefonni yoying"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Yuqori aniqlik uchun telefonni aylantiring"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Buklanadigan qurilma ochilmoqda"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Buklanadigan qurilma aylantirilmoqda"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"buklangan"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"buklanmagan"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Batareya quvvati: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Stilusni quvvat manbaiga ulang"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Stilus batareyasi kam"</string>

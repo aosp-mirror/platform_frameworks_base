@@ -85,6 +85,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginBottom="8dp"
+            android:focusable="false"
             androidprv:layout_constraintVertical_bias="1.0"
             androidprv:layout_constraintDimensionRatio="1.0"
             androidprv:layout_constraintStart_toStartOf="parent"

@@ -24,7 +24,7 @@
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"輸入 PIN 碼"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"畫出解鎖圖案"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"畫出解鎖圖案"</string>
-    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"輸入密碼"</string>
+    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"請輸入密碼"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"輸入密碼"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"卡片無效。"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"充電完成"</string>

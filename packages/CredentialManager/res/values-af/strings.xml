@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Wagwoorde sal steeds saam met toegangsleutels beskikbaar wees terwyl ons na ’n wagwoordlose toekoms beweeg."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Kies waar om jou <xliff:g id="CREATETYPES">%1$s</xliff:g> te stoor"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Kies ’n wagwoordbestuurder om jou inligting te stoor en volgende keer vinniger aan te meld"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Wil jy toegangsleutel skep om by <xliff:g id="APPNAME">%1$s</xliff:g> aan te meld?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Wil jy wagwoord stoor om by <xliff:g id="APPNAME">%1$s</xliff:g> aan te meld?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Stoor aanmeldinligting vir <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"toegangsleutel"</string>
     <string name="password" msgid="6738570945182936667">"wagwoord"</string>

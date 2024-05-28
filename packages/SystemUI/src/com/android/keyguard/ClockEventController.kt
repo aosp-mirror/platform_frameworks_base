@@ -404,7 +404,9 @@ constructor(
                             if (nextAlarmMillis > 0) nextAlarmMillis else null,
                             SysuiR.string::status_bar_alarm.name
                         )
-                        .also { data -> clock?.run { events.onAlarmDataChanged(data) } }
+                        .also { data ->
+                            mainExecutor.execute { clock?.run { events.onAlarmDataChanged(data) } }
+                        }
             }
         }
 

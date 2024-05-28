@@ -323,7 +323,7 @@
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"אפליקציות לעבודה"</string>
     <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"בהשהיה"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"תאורת לילה"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"התכונה מופעלת בשקיעה"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"מופעלת בשקיעה"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"עד הזריחה"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"תופעל בשעה <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"עד <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"הוספת ווידג\'טים"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"לוחצים לחיצה ארוכה כדי להתאים אישית את הווידג\'טים"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"התאמה אישית של ווידג\'טים"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"סמל האפליקציה לווידג\'ט שהושבת"</string>
     <string name="edit_widget" msgid="9030848101135393954">"עריכת הווידג\'ט"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"הסרה"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"הוספת ווידג\'ט"</string>
@@ -582,7 +581,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"‏%1$s. יש להקיש כדי להשתיק. ייתכן ששירותי הנגישות יושתקו."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"‏%1$s. יש להקיש כדי להעביר למצב רטט."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"‏%1$s. יש להקיש כדי להשתיק."</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"בקרת הרעש"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"בקרת רעש"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"יש להקיש כדי לשנות את מצב תוכנת הצלצול"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"השתקה"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ביטול ההשתקה"</string>
@@ -726,7 +725,7 @@
     <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"מוצגים: קיצורי הדרך של הקלט"</string>
     <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"מוצגים: קיצורי הדרך לפתיחת אפליקציות"</string>
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"מוצגים: קיצורי הדרך של האפליקציה הנוכחית"</string>
-    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"הצגת הודעות"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"הצגת התראות"</string>
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"צילום המסך"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"הצגת מקשי הקיצור"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"חזרה"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"דפדוף קדימה באפליקציות האחרונות"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"דפדוף אחורה באפליקציות האחרונות"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"פתיחה של רשימת האפליקציות"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"הצגת סרגל האפליקציות"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"פתיחת ההגדרות"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"‏לפתיחת Google Assistant"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"מסך הנעילה"</string>
@@ -815,15 +813,15 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"הצגת סמלי התראות בעדיפות נמוכה"</string>
     <string name="other" msgid="429768510980739978">"אחר"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"הסרת האריח"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"הוספת האריח בסוף הרשימה"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"העברת האריח"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"הוספת אריח"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"הסרת הלחצן"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"הוספת הלחצן בסוף הרשימה"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"העברת הלחצן"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"הוספת לחצן"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"העברה למיקום <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"הוספה למיקום <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"מיקום <xliff:g id="POSITION">%1$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"האריח נוסף"</string>
-    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"האריח הוסר"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"הלחצן נוסף"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"הלחצן הוסר"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"עורך הגדרות מהירות."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"התראות <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"פתיחת הגדרות."</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"תפריט הפעלה"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"דף <xliff:g id="ID_1">%1$d</xliff:g> מתוך <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"מסך נעילה"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"אפשר לאתר את הטלפון הזה עם שירות \'איפה המכשיר שלי\' גם כשהוא כבוי"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"בתהליך כיבוי…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"לצפייה בשלבי הטיפול"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"לצפייה בשלבי הטיפול"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"ניתוק המכשיר"</string>
@@ -1157,9 +1153,9 @@
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"כדי לעבור בין רשתות, צריך לנתק את האתרנט"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"‏כדי לשפר את חוויית השימוש במכשיר, אפליקציות ושירותים יוכלו לחפש רשתות Wi-Fi בכל שלב, גם כאשר ה-Wi-Fi כבוי. אפשר לשנות זאת בהגדרות של חיפוש נקודות Wi-Fi. "<annotation id="link">"שינוי"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"השבתה של מצב טיסה"</string>
-    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"האפליקציה <xliff:g id="APPNAME">%1$s</xliff:g> מבקשת להוסיף להגדרות המהירות את האריח הבא"</string>
-    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"הוספת אריח"</string>
-    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"לא להוסיף אריח"</string>
+    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"אפליקציית <xliff:g id="APPNAME">%1$s</xliff:g> מבקשת להוסיף להגדרות המהירות את הלחצן הבא"</string>
+    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"להוסיף לחצן"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"לא להוסיף לחצן"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"בחירת משתמש"</string>
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{אפליקציה אחת (#) פעילה}one{# אפליקציות פעילות}two{# אפליקציות פעילות}other{# אפליקציות פעילות}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"מידע חדש"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"כדי לצלם תמונה ברזולוציה גבוהה יותר, כדאי להפוך את הטלפון"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"מכשיר מתקפל עובר למצב לא מקופל"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"מכשיר מתקפל עובר למצב מהופך"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"מצב מקופל"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"מצב לא מקופל"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"‏%1$s‏ / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"רמת הטעינה שנותרה בסוללה: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"כדאי לחבר את הסטיילוס למטען"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"הסוללה של הסטיילוס חלשה"</string>

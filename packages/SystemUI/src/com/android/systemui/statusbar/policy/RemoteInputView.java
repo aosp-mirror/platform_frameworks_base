@@ -454,6 +454,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                         setTopMargin(0);
                         if (grandParent != null) grandParent.setClipChildren(true);
                         setVisibility(GONE);
+                        setAlpha(1f);
                         if (mWrapper != null) {
                             mWrapper.setRemoteInputVisible(false);
                         }

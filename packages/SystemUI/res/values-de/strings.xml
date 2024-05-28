@@ -323,7 +323,7 @@
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Geschäftliche Apps"</string>
     <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"Pausiert"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Nachtlicht"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"An bei Sonnenuntergang"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"An: Sonnenuntergang"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Bis Sonnenaufgang"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"An um <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Bis <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Weitere Widgets hinzufügen"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Lange drücken, um Widgets anzupassen"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Widgets anpassen"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"App-Symbol für deaktiviertes Widget"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Widget bearbeiten"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Entfernen"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Widget hinzufügen"</string>
@@ -563,7 +562,7 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Nein danke"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Bildschirm wurde fixiert"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"App vom Bildschirm losgelöst"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"Anruf"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"Anrufen"</string>
     <string name="stream_system" msgid="7663148785370565134">"System"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Klingelton"</string>
     <string name="stream_music" msgid="2188224742361847580">"Medien"</string>
@@ -582,7 +581,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Zum Stummschalten tippen. Bedienungshilfen werden unter Umständen stummgeschaltet."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Zum Aktivieren der Vibration tippen."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Zum Stummschalten tippen."</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Geräuschunterdrückung"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Geräusch­unterdrückung"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Zum Ändern des Klingeltonmodus tippen"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"Stummschalten"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"Aufheben der Stummschaltung"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Zuletzt verwendete Apps vorwärts durchgehen"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Zuletzt verwendete Apps rückwärts durchgehen"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Liste der Apps öffnen"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Taskleiste anzeigen"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Einstellungen öffnen"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistant öffnen"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Sperrbildschirm"</string>
@@ -747,7 +745,7 @@
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Im Splitscreen: eine App durch eine andere ersetzen"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Eingabe"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Zur nächsten Sprache wechseln"</string>
-    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Zu vorheriger Sprache wechseln"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Zur vorherigen Sprache wechseln"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Auf Emoji zugreifen"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Auf Spracheingabe zugreifen"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Apps"</string>
@@ -759,7 +757,7 @@
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Musik"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Kalender"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Rechner"</string>
-    <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Karten"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Bitte nicht stören"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Tastenkombination für Lautstärketasten"</string>
     <string name="battery" msgid="769686279459897127">"Akku"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Ein-/Aus-Menü"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Seite <xliff:g id="ID_1">%1$d</xliff:g> von <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Sperrbildschirm"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"Du kannst dieses Smartphone über „Mein Gerät finden“ orten, auch wenn es ausgeschaltet ist"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Wird heruntergefahren…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Schritte zur Abkühlung des Geräts ansehen"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Schritte zur Abkühlung des Geräts ansehen"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Gerät vom Stromnetz trennen"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Für höhere Auflösung Smartphone umdrehen"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Faltbares Gerät wird geöffnet"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Faltbares Gerät wird umgeklappt"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"zugeklappt"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"aufgeklappt"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Akku bei <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Schließe deinen Eingabestift an ein Ladegerät an"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Stylus-Akkustand niedrig"</string>

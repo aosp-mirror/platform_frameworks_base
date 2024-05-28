@@ -95,8 +95,6 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
                         new int[]{KeyEvent.KEYCODE_NOTIFICATION},
                         KeyboardLogEvent.TOGGLE_NOTIFICATION_PANEL, KeyEvent.KEYCODE_NOTIFICATION,
                         0},
-                {"Meta + T -> Toggle Taskbar", new int[]{META_KEY, KeyEvent.KEYCODE_T},
-                        KeyboardLogEvent.TOGGLE_TASKBAR, KeyEvent.KEYCODE_T, META_ON},
                 {"Meta + Ctrl + S -> Take Screenshot",
                         new int[]{META_KEY, CTRL_KEY, KeyEvent.KEYCODE_S},
                         KeyboardLogEvent.TAKE_SCREENSHOT, KeyEvent.KEYCODE_S, META_ON | CTRL_ON},

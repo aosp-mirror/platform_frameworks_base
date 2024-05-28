@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"మనం భవిష్యత్తులో పాస్‌వర్డ్ రహిత టెక్నాలజీని ఉపయోగించినా, పాస్‌కీలతో పాటు పాస్‌వర్డ్‌లు కూడా అందుబాటులో ఉంటాయి."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"మీ <xliff:g id="CREATETYPES">%1$s</xliff:g> ఎక్కడ సేవ్ చేయాలో ఎంచుకోండి"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"తర్వాతిసారి మరింత వేగంగా సైన్ ఇన్ చేసేందుకు వీలుగా మీ సమాచారాన్ని సేవ్ చేయడం కోసం ఒక పాస్‌వర్డ్ మేనేజర్‌ను ఎంచుకోండి"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"<xliff:g id="APPNAME">%1$s</xliff:g>‌కు సైన్ ఇన్ చేయడానికి పాస్-కీని క్రియేట్ చేయాలా?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"<xliff:g id="APPNAME">%1$s</xliff:g>‌కు సైన్ ఇన్ చేయడానికి పాస్‌వర్డ్‌ను సేవ్ చేయాలా?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> కోసం సైన్ ఇన్ సమాచారాన్ని సేవ్ చేయాలా?"</string>
     <string name="passkey" msgid="632353688396759522">"పాస్-కీ"</string>
     <string name="password" msgid="6738570945182936667">"పాస్‌వర్డ్"</string>

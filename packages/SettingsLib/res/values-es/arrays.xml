@@ -186,11 +186,11 @@
   </string-array>
   <string-array name="select_logd_size_summaries">
     <item msgid="409235464399258501">"Desactivado"</item>
-    <item msgid="4195153527464162486">"64 K/búfer registro"</item>
-    <item msgid="7464037639415220106">"256 K/búfer registro"</item>
-    <item msgid="8539423820514360724">"1 M/búfer registro"</item>
-    <item msgid="1984761927103140651">"4 M/búfer registro"</item>
-    <item msgid="2983219471251787208">"8 MB por búfer de registro"</item>
+    <item msgid="4195153527464162486">"64 K/búfer de registro"</item>
+    <item msgid="7464037639415220106">"256 K/búfer de registro"</item>
+    <item msgid="8539423820514360724">"1 M/búfer de registro"</item>
+    <item msgid="1984761927103140651">"4 M/búfer de registro"</item>
+    <item msgid="2983219471251787208">"8 MB/búfer de registro"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"Desactivado"</item>

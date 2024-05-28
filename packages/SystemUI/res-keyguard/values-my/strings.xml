@@ -108,7 +108,7 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"စက်ကို ပြန်စပြီးနောက် ပုံဖော်ခြင်းလိုအပ်သည်"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"စက်ကို ပြန်စပြီးနောက် ပင်နံပါတ်လိုအပ်သည်"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"စက်ကို ပြန်စပြီးနောက် စကားဝှက်လိုအပ်သည်"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"ထပ်ဆောင်းလုံခြုံရေးအတွက် ၎င်းအစား ပုံစံသုံးပါ"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"ထပ်ဆောင်းလုံခြုံရေးအတွက် ပုံစံကို အစားထိုးသုံးပါ"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"ထပ်ဆောင်းလုံခြုံရေးအတွက် ၎င်းအစား ပင်နံပါတ်သုံးပါ"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"ထပ်ဆောင်းလုံခြုံရေးအတွက် ၎င်းအစား စကားဝှက်သုံးပါ"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"စက်ပစ္စည်းကို စီမံခန့်ခွဲသူက လော့ခ်ချထားပါသည်"</string>

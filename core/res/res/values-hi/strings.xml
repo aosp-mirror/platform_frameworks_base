@@ -256,7 +256,7 @@
     <string name="global_action_power_off" msgid="4404936470711393203">"बंद करें"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"पावर"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"रीस्टार्ट करें"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"आपातकालीन"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"आपातकालीन सुविधाएं देखें"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"गड़बड़ी की रिपोर्ट"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"सत्र खत्म करें"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"स्क्रीनशॉट"</string>
@@ -278,7 +278,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"सेटिंग"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"सहायता"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"आवाज़ से डिवाइस का इस्तेमाल"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"फ़ाेन लॉक करें"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"लॉकडाउन"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"नई सूचना"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"सामान्य कीबोर्ड"</string>
@@ -1923,7 +1923,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"हफ़्ते की रात"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"सप्ताहांत"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"इवेंट"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"सोते समय"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"सोने का समय"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"मैनेज करने वाला ऐप्लिकेशन: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"चालू है"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"बंद है"</string>

@@ -828,7 +828,7 @@
     <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Dozvoljava aplikaciji da ažurira stanja potvrđivanja E2EE kontaktnih ključeva u vlasništvu drugih aplikacija"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Postavljanje pravila za lozinke"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrolira dužinu i znakove koji su dozvoljeni u lozinkama za zaključavanje ekrana i PIN-ovima."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"Prati pokušaje otključavanja ekrana"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"Praćenje pokušaja otključavanja ekrana"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Prati broj pogrešno unijetih lozinki prilikom otključavanja ekrana i zaključava tablet ili briše sve podatke s njega ukoliko se previše puta unese pogrešna lozinka."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Praćenje broja unosa netačnih lozinki pri otključavanju ekrana i zaključavanje Android TV uređaja ili brisanje svih podataka Android TV uređaja u slučaju prevelikog broja unosa netačnih lozinki."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Prati koliko puta je lozinka neispravno unijeta prilikom otključavanja ekrana i zaključava informativno-zabavni sistem ili briše sve podatke informativno-zabavnog sistema ako se lozinka neispravno unese previše puta."</string>
@@ -1989,7 +1989,7 @@
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Hitan slučaj"</string>
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Postavite zaključavanje ekrana"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Postavite zaključavanje ekrana"</string>
-    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Da koristite privatni prostor, postavite zaklj. ekr. na ur."</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Za upotrebu privatnog prostora postavite zaključavanje ekrana na uređaju"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacija nije dostupna"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> trenutno nije dostupna."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Nedostupno: <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>

@@ -351,6 +351,9 @@ public class SystemConfig {
     // marked as stopped by the system
     @NonNull private final Set<String> mInitialNonStoppedSystemPackages = new ArraySet<>();
 
+    // Which packages (key) are allowed to join particular SharedUid (value).
+    @NonNull private final Map<String, String> mPackageToSharedUidAllowList = new ArrayMap<>();
+
     // A map of preloaded package names and the path to its app metadata file path.
     private final ArrayMap<String, String> mAppMetadataFilePaths = new ArrayMap<>();
 
@@ -568,6 +571,11 @@ public class SystemConfig {
 
     public Set<String> getInitialNonStoppedSystemPackages() {
         return mInitialNonStoppedSystemPackages;
+    }
+
+    @NonNull
+    public Map<String, String> getPackageToSharedUidAllowList() {
+        return mPackageToSharedUidAllowList;
     }
 
     public ArrayMap<String, String> getAppMetadataFilePaths() {
@@ -1577,6 +1585,19 @@ public class SystemConfig {
                             mInitialNonStoppedSystemPackages.add(pkgName);
                         }
                     } break;
+                    case "allow-package-shareduid": {
+                        String pkgName = parser.getAttributeValue(null, "package");
+                        String sharedUid = parser.getAttributeValue(null, "shareduid");
+                        if (TextUtils.isEmpty(pkgName)) {
+                            Slog.w(TAG, "<" + name + "> without package in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else if (TextUtils.isEmpty(sharedUid)) {
+                            Slog.w(TAG, "<" + name + "> without shareduid in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else {
+                            mPackageToSharedUidAllowList.put(pkgName, sharedUid);
+                        }
+                    }
                     case "asl-file": {
                         String packageName = parser.getAttributeValue(null, "package");
                         String path = parser.getAttributeValue(null, "path");

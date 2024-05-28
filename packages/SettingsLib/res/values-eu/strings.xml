@@ -403,7 +403,7 @@
     <string name="show_all_anrs" msgid="9160563836616468726">"Erakutsi atzeko planoko ANRak"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Erakutsi aplikazioak ez erantzutearen (ANR) leihoa atzeko planoan dabiltzan aplikazioen kasuan"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Erakutsi jakinarazpenen kanalen abisuak"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Bistaratu abisuak aplikazioek baliozko kanalik gabeko jakinarazpenak argitaratzean"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Bistaratu abisuak aplikazioek kanal baliodunik gabeko jakinarazpenak argitaratzean"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Behartu aplikazioak onartzera kanpoko memorian"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Aplikazioek kanpoko memorian idatz dezakete, ezarritako balioak kontuan izan gabe"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Behartu jardueren tamaina doitu ahal izatera"</string>

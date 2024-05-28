@@ -278,7 +278,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"Ezarpenak"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Lagundu"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Ahots-laguntza"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"Blokeoa"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"Blokeatu"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Jakinarazpen berria"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Teklatu fisikoa"</string>

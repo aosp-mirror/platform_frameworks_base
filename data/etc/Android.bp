@@ -72,6 +72,12 @@ prebuilt_etc {
     src: "enhanced-confirmation.xml",
 }
 
+prebuilt_etc {
+    name: "package-shareduid-allowlist.xml",
+    sub_dir: "sysconfig",
+    src: "package-shareduid-allowlist.xml",
+}
+
 // Privapp permission whitelist files
 
 prebuilt_etc {

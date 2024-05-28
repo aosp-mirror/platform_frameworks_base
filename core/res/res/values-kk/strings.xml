@@ -831,7 +831,7 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Экран бекітпесін ашқан кезде терілген қате құпия сөздердің санын бақылау және планшетті бекіту немесе тым көп қате құпия сөздер терілген болса, планшеттің бүкіл деректерін өшіру."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Экранның құлпын ашу кезінде қате енгізілген құпия сөздердің санын бақылау, құпия сөз тым көп қате енгізілген жағдайда, Android TV құрылғысын құлыптау және Android TV құрылғыңыздың барлық деректерінен тазарту."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Экран құлпын ашқан кезде, терілген қате құпия сөздердің саны бақыланады, сондай-ақ құпия сөздер бірнеше рет қате терілсе, ақпараттық-сауықтық жүйе құлыпталады немесе оның барлық дерегі жойылады."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Экран бекітпесін ашқан кезде терілген қате құпия сөздердің санын бақылау және телефонды бекіту немесе тым көп қате құпия сөздер терілген болса, телефонның бүкіл деректерін өшіру."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Экран құлпын ашқан кезде терілген қате құпия сөздердің санын бақылау және құпия сөз тым көп рет қате терілгенде, телефонды құлыптау немесе оның бүкіл деректерін өшіру."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Экран бекітпесін ашқанда терілген қате құпия сөздердің санын бақылау және тым көп қате құпия сөздер терілсе, планшетті бекіту немесе осы пайдаланушының барлық деректерін өшіру."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Экранның құлпын ашу кезінде қате енгізілген құпия сөздердің санын бақылау, құпия сөз тым көп қате енгізілген жағдайда, Android TV құрылғысын құлыптау және барлық пайдаланушы деректерінен тазарту."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Экран құлпын ашқан кезде, терілген қате құпия сөздердің саны бақыланады, сондай-ақ құпия сөздер бірнеше рет қате терілсе, ақпараттық-сауықтық жүйе құлыпталады немесе осы профильдің барлық дерегі жойылады."</string>
@@ -1281,7 +1281,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Қолданбалар іске қосылуда."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Қосуды аяқтауда."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Қуат түймесін бастыңыз. Бұл әдетте экранды өшіреді.\n\nСаусақ ізін реттеу үшін, оны жайлап түртіп көріңіз."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Реттеуді аяқтау үшін экранды өшіріңіз"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Реттеуді аяқтау үшін экранды өшіріңіз."</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Өшіру"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Саусақ ізін растауды жалғастырасыз ба?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Қуат түймесін бастыңыз. Бұл әдетте экранды өшіреді.\n\nСаусақ ізін растау үшін, оны жайлап түртіп көріңіз."</string>
@@ -1559,7 +1559,7 @@
     <string name="sync_really_delete" msgid="5657871730315579051">"Бұл нәрселер жойылсын"</string>
     <string name="sync_undo_deletes" msgid="5786033331266418896">"Жойылғандарды кері орындау"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"Қазір ешқандай әрекет жасамаңыз"</string>
-    <string name="choose_account_label" msgid="5557833752759831548">"Аккаунт таңдау"</string>
+    <string name="choose_account_label" msgid="5557833752759831548">"Аккаунт таңдаңыз"</string>
     <string name="add_account_label" msgid="4067610644298737417">"Аккаунт қосу"</string>
     <string name="add_account_button_label" msgid="322390749416414097">"Аккаунт қосу."</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Арттыру"</string>
@@ -1965,7 +1965,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Санатқа жатқызылмаған"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Сіз осы хабарландырулардың маңыздылығын орнатасыз."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Қатысты адамдарға байланысты бұл маңызды."</string>
-    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Арнаулы хабар хабарландыруы"</string>
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Арнаулы қолданба хабарландыруы"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g> қолданбасына <xliff:g id="ACCOUNT">%2$s</xliff:g> аккаунты бар жаңа пайдаланушы (мұндай аккаунтқа ие пайдаланушы бұрыннан бар) жасауға рұқсат етілсін бе?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g> қолданбасына <xliff:g id="ACCOUNT">%2$s</xliff:g> аккаунты бар жаңа пайдаланушы жасауға рұқсат етілсін бе?"</string>
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"Бақыланатын пайдаланушыны қосу"</string>

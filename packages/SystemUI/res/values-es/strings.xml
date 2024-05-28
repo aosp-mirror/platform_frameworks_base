@@ -261,7 +261,7 @@
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"No hay dispositivos vinculados disponibles"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Toca para conectar o desconectar un dispositivo"</string>
-    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Emparejar un nuevo dispositivo"</string>
+    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Emparejar nuevo dispositivo"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Ver todos"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Usar Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Conectado"</string>
@@ -281,7 +281,7 @@
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Ubicación"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Salvapantallas"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Acceso a cámara"</string>
-    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Acceso al micro"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Acceso a micro"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Disponible"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bloqueado"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Dispositivo multimedia"</string>
@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Añade más widgets"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Mantén pulsado para personalizar los widgets"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Personalizar widgets"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Icono de la aplicación de widget inhabilitado"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Editar widget"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Quitar"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Añadir widget"</string>
@@ -683,8 +682,8 @@
     <string name="keyboard_key_back" msgid="4185420465469481999">"Atrás"</string>
     <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"Flecha hacia arriba"</string>
     <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"Flecha hacia abajo"</string>
-    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"Flecha hacia la izquierda"</string>
-    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Flecha hacia la derecha"</string>
+    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"Flecha izquierda"</string>
+    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Flecha derecha"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Centro"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tabulador"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Espacio"</string>
@@ -730,24 +729,23 @@
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"Hacer captura de pantalla"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Mostrar accesos directos"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"Volver"</string>
-    <string name="group_system_access_home_screen" msgid="4130366993484706483">"Ir a la pantalla de inicio"</string>
+    <string name="group_system_access_home_screen" msgid="4130366993484706483">"Ir a pantalla de inicio"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Ver aplicaciones recientes"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Desplazarse por las aplicaciones recientes (adelante)"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"Desplazarse por las aplicaciones recientes (atrás)"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Desplazarse por aplicaciones recientes (adelante)"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Desplazarse por aplicaciones recientes (atrás)"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Abrir lista de aplicaciones"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Mostrar la barra de tareas"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Abrir ajustes"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Abrir el Asistente"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Pantalla de bloqueo"</string>
-    <string name="group_system_quick_memo" msgid="3764560265935722903">"Escribe una nota"</string>
+    <string name="group_system_quick_memo" msgid="3764560265935722903">"Escribir una nota"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Función multitarea del sistema"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Iniciar pantalla dividida con esta aplicación en el lado derecho"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Iniciar pantalla dividida con esta aplicación en el lado izquierdo"</string>
+    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Iniciar pantalla dividida con la aplicación actual en el lado derecho"</string>
+    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Iniciar pantalla dividida con la aplicación actual en el lado izquierdo"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Cambiar de pantalla dividida a pantalla completa"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Con pantalla dividida: reemplazar una aplicación por otra"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Entrada"</string>
-    <string name="input_switch_input_language_next" msgid="3782155659868227855">"Cambiar al siguiente idioma"</string>
-    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Cambiar al idioma anterior"</string>
+    <string name="input_switch_input_language_next" msgid="3782155659868227855">"Cambiar a siguiente idioma"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Cambiar a idioma anterior"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Acceder a los emojis"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Acceder a Escribir por voz"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Aplicaciones"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menú de encendido"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Página <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Pantalla de bloqueo"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"Puedes localizar este teléfono con Encontrar mi dispositivo, aunque esté apagado"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Apagando…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Ver pasos de mantenimiento"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Ver pasos de mantenimiento"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Desenchufa tu dispositivo"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Para una mayor resolución, gira el teléfono"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Dispositivo plegable desplegándose"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Dispositivo plegable mostrado desde varios ángulos"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"plegado"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"desplegado"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Batería restante: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Conecta tu lápiz óptico a un cargador"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Batería del lápiz óptico baja"</string>

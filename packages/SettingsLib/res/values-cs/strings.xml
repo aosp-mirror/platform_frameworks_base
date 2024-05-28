@@ -300,8 +300,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Kodek Bluetooth Audio LDAC: Kvalita přehrávání"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Spustit zvukový kodek Bluetooth LDAC\nVýběr kodeku: kvalita přehrávání"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Streamování: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
-    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Soukromé DNS"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Vyberte soukromý režim DNS"</string>
+    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Soukromý DNS"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Režim výběru soukromého DNS"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Vypnuto"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automaticky"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Název hostitele poskytovatele soukromého DNS"</string>
@@ -555,7 +555,7 @@
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Tento tablet"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dok s reproduktorem"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Reproduktor doku"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Externí zařízení"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Připojené zařízení"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Tento telefon"</string>
@@ -694,7 +694,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Výchozí"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Zapínání obrazovky"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Povolit zapínání obrazovky"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Povolte aplikaci zapínat obrazovku. Pokud aplikace bude mít toto oprávnění, může kdykoli zapnout obrazovku bez požadavku uživatele."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Aplikaci můžete povolit zapínat obrazovku. Pokud bude mít toto oprávnění, může kdykoli zapnout obrazovku bez požadavku uživatele."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Zastavit vysílání v aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Pokud budete vysílat v aplikaci <xliff:g id="SWITCHAPP">%1$s</xliff:g> nebo změníte výstup, aktuální vysílání se zastaví"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Vysílat v aplikaci <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

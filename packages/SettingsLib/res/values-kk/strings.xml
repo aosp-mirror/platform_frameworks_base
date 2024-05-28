@@ -106,10 +106,10 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Тек сол жағы қосулы"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Тек оң жағы қосулы"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Екеуі де қосулы"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Meдиа аудиосы"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Mультимeдиа дыбысы"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Телефон қоңыраулары"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Файл жіберу"</string>
-    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Кіріс құрылғысы"</string>
+    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Енгізу құрылғысы"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Интернетке қосылу"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Контакт пен қоңырау тарихына рұқсат беру"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Ақпарат қоңырау туралы хабарландыру, т.б. үшін қолданылады."</string>
@@ -483,7 +483,7 @@
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Зарядталуда"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Жылдам зарядтау"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Баяу зарядталуда"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Сымсыз зарядталуда"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Сымсыз зарядталып жатыр"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Зарядталып жатыр."</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Зарядталу орындалып жатқан жоқ"</string>
     <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Құрылғы жалғанған, бірақ зарядталып жатқан жоқ."</string>
@@ -518,7 +518,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Жүйелік тілдерді пайдалану"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> қолданбасы үшін параметрлерді ашу орындалмады"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Бұл енгізу әдісі сіз терген барлық мәтінді, кілтсөз және кредит карта нөмірлері сияқты жеке ақпаратты қоса, жинауы мүмкін. Бұл <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> қолданбасы арқылы жасалады. Осы әдіс қолданылсын ба?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Ескертпе: қайта жүктегеннен кейін, телефонның құлпын ашпайынша, бұл қолданба іске қосылмайды"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Ескертпе: қайта жүктегеннен кейін, телефонның құлпын ашпайынша, бұл қолданба іске қосылмайды."</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS тіркеу күйі"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Тіркелген"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Тіркелмеген"</string>
@@ -555,7 +555,7 @@
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Осы планшет"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Қондыру динамигі"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Динамигі бар қондыру станциясы"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Сыртқы құрылғы"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Жалғанған құрылғы"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Осы телефон"</string>
@@ -641,7 +641,7 @@
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Жою"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Сақтау"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Қонақ режимінен шығу"</string>
-    <string name="guest_reset_button" msgid="2515069346223503479">"Қонақ режимін қалпына келтіру"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Қонақ режимін бастапқы күйге қайтару"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Қонақ режимінен шығу"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Шыққанда барлық әрекет жойылады."</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Шыққанда барлық әрекетті сақтай немесе жоя аласыз."</string>

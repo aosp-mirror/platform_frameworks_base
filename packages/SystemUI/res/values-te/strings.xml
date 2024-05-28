@@ -103,7 +103,7 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"స్క్రీన్ రికార్డ్ సెషన్ కోసం ఆన్‌గోయింగ్ నోటిఫికేషన్"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"రికార్డింగ్‌ను ప్రారంభించాలా?"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"మీరు రికార్డ్ చేసేటప్పుడు, మీ స్క్రీన్‌పై కనిపించే దేనికైనా లేదా మీ పరికరంలో ప్లే అయిన దేనికైనా Androidకు యాక్సెస్ ఉంటుంది. కాబట్టి పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, మెసేజ్‌లు, ఫోటోలు, ఆడియో, ఇంకా వీడియో వంటి విషయాల్లో జాగ్రత్త వహించండి."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"మీరు ఏదైనా యాప్‌ను రికార్డ్ చేసేటప్పుడు, ఆ యాప్‌లో చూపబడిన దేనికైనా లేదా ప్లే అయిన దేనికైనా Androidకు యాక్సెస్ ఉంటుంది. కాబట్టి పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, మెసేజ్‌లు, ఫోటోలు, ఆడియో, ఇంకా వీడియో వంటి విషయాల్లో జాగ్రత్త వహించండి."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"మీరు ఏదైనా యాప్‌ను రికార్డ్ చేసేటప్పుడు, ఆ యాప్‌లో చూపబడిన లేదా ప్లే అవుతున్న దేనినైనా Android యాక్సెస్ చేయగలదు. కాబట్టి పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, మెసేజ్‌లు, ఫోటోలు, ఆడియో, వీడియో వంటి విషయాల్లో జాగ్రత్త వహించండి."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"రికార్డింగ్‌ను ప్రారంభించండి"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ఆడియోను రికార్డ్ చేయండి"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"పరికరం ఆడియో"</string>
@@ -115,7 +115,7 @@
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"స్క్రీన్, ఆడియో రికార్డింగ్ చేయబడుతున్నాయి"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"స్క్రీన్‌పై తాకే స్థానాలను చూపండి"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"ఆపివేయి"</string>
-    <string name="screenrecord_share_label" msgid="5025590804030086930">"షేర్ చేయి"</string>
+    <string name="screenrecord_share_label" msgid="5025590804030086930">"షేర్ చేయండి"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"స్క్రీన్ రికార్డింగ్ సేవ్ చేయబడింది"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"చూడటానికి ట్యాప్ చేయండి"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"స్క్రీన్ రికార్డింగ్‌ను సేవ్ చేయడంలో ఎర్రర్ ఏర్పడింది"</string>
@@ -303,7 +303,7 @@
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"ఫాంట్ సైజ్"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"యూజర్‌లను మేనేజ్ చేయండి"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"పూర్తయింది"</string>
-    <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"మూసివేయి"</string>
+    <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"మూసివేయండి"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"కనెక్ట్ చేయబడినది"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"కనెక్ట్ చేయబడింది, బ్యాటరీ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"కనెక్ట్ అవుతోంది..."</string>
@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"మరిన్ని విడ్జెట్‌లను జోడించండి"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"విడ్జెట్‌లను అనుకూలీకరించడానికి, నొక్కి, ఉంచండి"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"విడ్జెట్‌లను అనుకూలంగా మార్చండి"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"డిజేబుల్ చేయబడిన విడ్జెట్ కోసం యాప్ చిహ్నం"</string>
     <string name="edit_widget" msgid="9030848101135393954">"విడ్జెట్‌ను ఎడిట్ చేయండి"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"తీసివేయండి"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"విడ్జెట్‌ను జోడించండి"</string>
@@ -647,7 +646,7 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;స్టేటస్:&lt;/b&gt; తక్కువ ర్యాంక్‌కు సర్దుబాటు చేయబడింది"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"సంభాషణ నోటిఫికేషన్‌ల ఎగువున, లాక్ స్క్రీన్‌లో ప్రొఫైల్ ఫోటో‌గా చూపిస్తుంది"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"సంభాషణ నోటిఫికేషన్‌ల ఎగువున, లాక్ స్క్రీన్‌లో ప్రొఫైల్ ఫోటో‌గా చూపిస్తుంది, బబుల్‌గా కనిపిస్తుంది"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"సంభాషణ నోటిఫికేషన్‌ల ఎగువున, లాక్ స్క్రీన్‌లో ప్రొఫైల్ ఫోటో‌గా చూపిస్తుంది, \'అంతరాయం కలిగించవద్దు\'ను అంతరాయం కలిగిస్తుంది"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"సంభాషణ నోటిఫికేషన్‌ల ఎగువున, అలాగే లాక్ స్క్రీన్‌లో ప్రొఫైల్ ఫోటో‌ రూపంలో కనబడుతుంది. \'అంతరాయం కలిగించవద్దు\' మోడ్‌లో ఉన్నా దాన్ని అధిగమిస్తుంది"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"సంభాషణ నోటిఫికేషన్‌ల ఎగువున, లాక్ స్క్రీన్‌లో ప్రొఫైల్ ఫోటో‌గా చూపిస్తుంది, బబుల్‌గా కనిపిస్తుంది, \'అంతరాయం కలిగించవద్దు\'ను అంతరాయం కలిగిస్తుంది"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ప్రాధాన్యత"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> సంభాషణ ఫీచర్‌లను సపోర్ట్ చేయదు"</string>
@@ -687,7 +686,7 @@
     <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"కుడి వైపు బాణం"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"మధ్య"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
-    <string name="keyboard_key_space" msgid="6980847564173394012">"అంతరం"</string>
+    <string name="keyboard_key_space" msgid="6980847564173394012">"Space"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"ప్లే చేయి/పాజ్ చేయి"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"ఇటీవల ఉపయోగించిన యాప్‌ల తదుపరి పేజీకి వెళ్లండి"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"ఇటీవల ఉపయోగించిన యాప్‌ల మునుపటి పేజీకి వెళ్లండి"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"యాప్‌ల లిస్ట్‌ను తెరవండి"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"టాస్క్‌బార్‌ను చూపండి"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"సెట్టింగ్‌లను తెరవండి"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"అసిస్టెంట్‌ను తెరవండి"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"లాక్ స్క్రీన్"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"పవర్ మెనూ"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g>లో <xliff:g id="ID_1">%1$d</xliff:g>వ పేజీ"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"లాక్ స్క్రీన్"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"పవర్ ఆఫ్‌లో ఉన్నప్పుడు కూడా మీరు Find My Deviceతో ఈ ఫోన్‌ను గుర్తించవచ్చు"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"షట్ డౌన్ చేయబడుతోంది…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"తీసుకోవాల్సిన జాగ్రత్తలు ఏమిటో చూడండి"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"తీసుకోవాల్సిన జాగ్రత్తలు ఏమిటో చూడండి"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"మీ పరికరాన్ని అన్‌ప్లగ్ చేయండి"</string>
@@ -1164,7 +1160,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# యాప్ యాక్టివ్‌గా ఉంది}other{# యాప్‌లు యాక్టివ్‌గా ఉన్నాయి}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"కొత్త సమాచారం"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"యాక్టివ్‌గా ఉన్న యాప్‌లు"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"మీరు ఈ యాప్‌లను ఉపయోగించపోయినా కూడా అవి యాక్టివ్‌గా ఉండి, రన్ అవుతూ ఉంటాయి. దీని వల్ల వాటి ఫంక్షనాలిటీ మెరుగవుతుంది. అయితే ఇది బ్యాటరీ లైఫ్‌ను కూడా ప్రభావితం చేయవచ్చు."</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"మీరు ఈ యాప్‌లను ఉపయోగించపోయినా కూడా అవి యాక్టివ్‌గా ఉండి, రన్ అవుతూ ఉంటాయి. తద్వారా వాటి ఫంక్షనాలిటీ మెరుగవుతుంది. అయితే దీనివల్ల బ్యాటరీ లైఫ్ ప్రభావితం అయ్యే అవకాశం ఉంది."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"ఆపివేయండి"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"ఆపివేయబడింది"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"పూర్తయింది"</string>
@@ -1217,7 +1213,7 @@
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• కనీసం ఒక పరికరం లేదా పరికర ప్యానెల్ అందుబాటులో ఉండాలి"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"నోట్‌టేకింగ్ షార్ట్‌కట్‌ను ఉపయోగించడానికి ఆటోమేటిక్ సెట్టింగ్ నోట్స్ యాప్‌ను ఎంచుకోండి"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"యాప్‌ను ఎంచుకోండి"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"షార్ట్‌కట్‌ను తాకి, నొక్కి ఉంచు"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"షార్ట్‌కట్‌ను నొక్కి, పట్టుకోండి"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"రద్దు చేయండి"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"ఇప్పుడే స్క్రీన్‌లను మార్చండి"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"ఫోన్‌ను అన్‌ఫోల్డ్ చేయండి"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"అధిక రిజల్యూషన్ కోసం, ఫోన్‌ను తిప్పండి"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"మడవగల పరికరం విప్పబడుతోంది"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"మడవగల పరికరం చుట్టూ తిప్పబడుతోంది"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"మడిచే సదుపాయం గల పరికరం"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"మడిచే సదుపాయం లేని పరికరం"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> బ్యాటరీ మిగిలి ఉంది"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"మీ స్టైలస్‌ను ఛార్జర్‌కి కనెక్ట్ చేయండి"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"తక్కువ స్టైలస్ బ్యాటరీ"</string>
@@ -1235,7 +1234,7 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"వర్క్ ప్రొఫైల్‌కు మారండి"</string>
     <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"ఆఫీస్ ఫోన్ యాప్‌ను ఇన్‌స్టాల్ చేయండి"</string>
     <string name="call_from_work_profile_close" msgid="5830072964434474143">"రద్దు చేయండి"</string>
-    <string name="lock_screen_settings" msgid="6152703934761402399">"లాక్ స్క్రీన్‌ను అనుకూలీకరించండి"</string>
+    <string name="lock_screen_settings" msgid="6152703934761402399">"లాక్ స్క్రీన్ అనుకూలంగా మార్చండి"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"లాక్ స్క్రీన్‌ను అనుకూలంగా మార్చుకోవడానికి అన్‌లాక్ చేయండి"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi అందుబాటులో లేదు"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"కెమెరా బ్లాక్ చేయబడింది"</string>

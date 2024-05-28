@@ -107,9 +107,9 @@
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Почати записування"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Записувати звук"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Звук із пристрою"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Звук із пристрою, зокрема музика, виклики та сигнали дзвінка"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Звук із пристрою, зокрема музика, виклики й сигнали дзвінка"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Мікрофон"</string>
-    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Звук із пристрою та мікрофона"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Звук із пристрою і мікрофона"</string>
     <string name="screenrecord_continue" msgid="4055347133700593164">"Почати"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Запис екрана"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Запис екрана та звуку"</string>
@@ -360,9 +360,9 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Надати доступ до мікрофона?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Надати доступ до камери пристрою?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Надати доступ до камери й мікрофона?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Усі додатки та сервіси, яким дозволено користуватися вашим мікрофоном, отримають доступ."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Усі додатки та сервіси, яким дозволено користуватися вашою камерою, отримають доступ."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Усі додатки та сервіси, яким дозволено користуватися вашою камерою чи мікрофоном, отримають доступ."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Усі додатки й сервіси, яким дозволено користуватися вашим мікрофоном, отримають доступ."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Усі додатки й сервіси, яким дозволено користуватися вашою камерою, отримають доступ."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Усі додатки й сервіси, яким дозволено користуватися вашою камерою чи мікрофоном, отримають доступ."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Мікрофон заблоковано"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Камеру заблоковано"</string>
     <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Мікрофон і камеру заблоковано"</string>
@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Додати більше віджетів"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Утримуйте, щоб налаштувати віджети"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Налаштувати віджети"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Значок додатка для вимкненого віджета"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Редагувати віджет"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Видалити"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Додати віджет"</string>
@@ -645,10 +644,10 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Статус&lt;/b&gt;: знижено до \"Без звуку\""</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Статус&lt;/b&gt;: пріоритет підвищено"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Статус&lt;/b&gt;: пріоритет знижено"</string>
-    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані"</string>
-    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані, показується у вигляді спливаючої підказки"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані, показується навіть у режимі \"Не турбувати\""</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані, відображається як спливаючий чат, перериває режим \"Не турбувати\""</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"З’являється вгорі сповіщень про розмови і як зображення профілю на заблокованому екрані"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"З’являється вгорі сповіщень про розмови і як зображення профілю на заблокованому екрані, показується у вигляді спливаючої підказки"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"З’являється вгорі сповіщень про розмови і як зображення профілю на заблокованому екрані, показується навіть у режимі \"Не турбувати\""</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"З’являється вгорі сповіщень про розмови і як зображення профілю на заблокованому екрані, відображається як спливаючий чат, перериває режим \"Не турбувати\""</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Пріоритет"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не підтримує функції розмов"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ці сповіщення не можна змінити."</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Перемикатися між нещодавніми додатками вперед"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Перемикатися між нещодавніми додатками назад"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Відкрити список додатків"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Показати панель завдань"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Відкрити налаштування"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Відкрити додаток Асистент"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Заблокувати екран"</string>
@@ -752,7 +750,7 @@
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Відкрити голосовий ввід"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Додатки"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Асистент"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Веб-переглядач"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Вебпереглядач"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Контакти"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Електронна пошта"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Меню кнопки живлення"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Сторінка <xliff:g id="ID_1">%1$d</xliff:g> з <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Заблокований екран"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"Ви зможете визначити місцеположення цього телефона, навіть коли його вимкнено, за допомогою сервісу Знайти пристрій"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Вимкнення…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Переглянути запобіжні заходи"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Переглянути запобіжні заходи"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Від’єднайте пристрій"</string>
@@ -873,7 +869,7 @@
     <string name="instant_apps_message" msgid="6112428971833011754">"Додаток відкрито без встановлення."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Додаток відкрито без встановлення. Торкніться, щоб дізнатися більше."</string>
     <string name="app_info" msgid="5153758994129963243">"Про додаток"</string>
-    <string name="go_to_web" msgid="636673528981366511">"Веб-переглядач"</string>
+    <string name="go_to_web" msgid="636673528981366511">"Вебпереглядач"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Мобільний трафік"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Для вищої роздільної здатності переверніть телефон"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Розкладний пристрій у розкладеному стані"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Розкладний пристрій обертається"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"складений"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"розкладений"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Заряд акумулятора: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Підключіть стилус до зарядного пристрою"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Низький заряд акумулятора стилуса"</string>

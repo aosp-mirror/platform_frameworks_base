@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Tilføj flere widgets"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Hold fingeren nede for at tilpasse widgets"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Tilpas widgets"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Appikon for deaktiveret widget"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Rediger widget"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Fjern"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Tilføj widget"</string>
@@ -565,14 +564,14 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Appen er frigjort"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Ring op"</string>
     <string name="stream_system" msgid="7663148785370565134">"System"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Ring"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Ringetone"</string>
     <string name="stream_music" msgid="2188224742361847580">"Medie"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Alarm"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Notifikation"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Tonesignalfrekvens (DTMF)"</string>
     <string name="stream_accessibility" msgid="3873610336741987152">"Hjælpefunktioner"</string>
-    <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Ring"</string>
+    <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Ringetone"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Vibration"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Slå lyden fra"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"Cast"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Gå frem i dine seneste apps"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Gå tilbage i dine seneste apps"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Åbn appfortegnelse"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Vis proceslinje"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Åbn indstillinger"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Åbn Assistent"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Lås skærm"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu for afbryderknappen"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Side <xliff:g id="ID_1">%1$d</xliff:g> af <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Låseskærm"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"Du kan finde denne telefon med Find min enhed, også selvom den er slukket"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Lukker ned…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Se håndteringsvejledning"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Se håndteringsvejledning"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Træk stikket ud af din enhed"</string>
@@ -982,12 +978,12 @@
     <string name="controls_removed" msgid="3731789252222856959">"Fjernet"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Vil du tilføje <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> kan vælge, hvilke styringselementer og hvilket indhold der skal vises her."</string>
-    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Vil du fjerne styringselementerne for <xliff:g id="APPNAME">%s</xliff:g>?"</string>
+    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Vil du fjerne sty­rings­ele­men­ter­ne for <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Angivet som favorit"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Angivet som favorit. Position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Fjernet fra favoritter"</string>
-    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"markér som favorit"</string>
-    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"fjern fra favoritter"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"markere som favorit"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"fjerne som favorit"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Flyt til position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Betjeningselementer"</string>
     <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Vælg, hvilke enhedsindstillinger du vil have hurtig adgang til"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Vend telefonen for at få højere opløsning"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Foldbar enhed foldes ud"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Foldbar enhed vendes om"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"foldet"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"foldet ud"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> batteri tilbage"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Slut din styluspen til en oplader"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Lavt batteriniveau på styluspen"</string>

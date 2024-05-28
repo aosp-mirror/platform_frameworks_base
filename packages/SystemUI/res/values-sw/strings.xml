@@ -358,7 +358,7 @@
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Wastani"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Juu"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Ungependa kuwacha kuzuia maikrofoni ya kifaa?"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Ungependa kuwacha kuzuia kamera ya kifaa?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Ungependa kuacha kuzuia kamera ya kifaa?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Ungependa kuwacha kuzuia kamera na maikrofoni ya kifaa?"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Hatua hii huruhusu programu na huduma zote zenye idhini zitumie maikrofoni yako."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Hatua hii huruhusu programu na huduma zote zenye idhini zitumie kamera yako."</string>
@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Weka wijeti zingine"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Bonyeza kwa muda mrefu uweke mapendeleo ya wijeti"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Badilisha wijeti upendavyo"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Aikoni ya programu ya wijeti iliyozimwa"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Badilisha wijeti"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Ondoa"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Ongeza wijeti"</string>
@@ -689,7 +688,7 @@
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Space"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
-    <string name="keyboard_key_backspace" msgid="4095278312039628074">"Nafasinyuma"</string>
+    <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Cheza/Sitisha"</string>
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Simamisha"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Inayofuata"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Nenda mbele kwenye programu ulizofungua awali"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Rudi nyuma kwenye programu ulizofungua awali"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Fungua orodha ya programu"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Onyesha upauzana"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Fungua mipangilio"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Fungua programu ya Mratibu wa Google"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Funga skrini"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menyu ya kuzima/kuwasha"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Ukurasa wa <xliff:g id="ID_1">%1$d</xliff:g> kati ya <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Skrini iliyofungwa"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"Unaweza kutambua mahali ilipo simu hii ukitumia programu ya Tafuta Kifaa Changu hata kama simu hiyo imezimwa"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Inazima…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Angalia hatua za utunzaji"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Angalia hatua za utunzaji"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Chomoa kifaa chako"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Kwa ubora wa juu, geuza simu"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Kifaa kinachokunjwa kikikunjuliwa"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Kifaa kinachokunjwa kikigeuzwa"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"kimekunjwa"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"kimefunguliwa"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Chaji ya betri imesalia <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Unganisha stylus yako kwenye chaja"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Chaji ya betri ya Stylus imepungua"</string>

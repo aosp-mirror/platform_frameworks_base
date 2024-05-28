@@ -106,7 +106,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktivno, samo lijevo"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktivno, samo desno"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktivno, lijevo i desno"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Medijski zvuk"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Zvuk medija"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonski pozivi"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Prijenos datoteke"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Ulazni uređaj"</string>
@@ -518,7 +518,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Upotrijebi jezike sustava"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Otvaranje postavki za aplikaciju <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> nije uspjelo"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Ovaj način unosa možda može prikupljati sav tekst koji unosite, uključujući osobne podatke poput zaporki i brojeva kreditnih kartica. To omogućuje aplikacija <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Upotrijebiti taj način unosa?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Napomena: ova se aplikacija ne može pokrenuti nakon ponovnog pokretanja dok ne otključate telefon"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Napomena: nakon ponovnog pokretanja, ovu aplikaciju ne možete pokrenuti dok ne otključate telefon"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"Stanje registracije IMS-a"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Registrirano"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Nije registrirano"</string>
@@ -640,10 +640,10 @@
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Možete spremiti aktivnosti iz ove sesije ili izbrisati sve aplikacije i podatke"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Izbriši"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Spremi"</string>
-    <string name="guest_exit_button" msgid="5774985819191803960">"Izlaz iz načina rada za goste"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Izađi iz načina rada za goste"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Poništi gostujuću sesiju"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Izlaz iz gostujuće sesije"</string>
-    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Sve će se aktivnosti izbrisati na izlasku"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Sve će se aktivnosti izbrisati po izlasku"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Svoje aktivnosti možete spremiti ili izbrisati na izlasku"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Poništite da odmah izbrišete aktivnost sesije. Inače je možete spremiti ili izbrisati na izlasku."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Fotografiraj"</string>

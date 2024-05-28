@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"បញ្ចូលធាតុ​ក្រាហ្វិកច្រើនទៀត"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ចុច​ឱ្យ​យូរ ដើម្បីប្ដូរធាតុ​ក្រាហ្វិកតាមបំណង"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"ប្ដូរ​ធាតុ​ក្រាហ្វិកតាម​បំណង"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"រូបកម្មវិធីសម្រាប់ធាតុ​ក្រាហ្វិកដែលបានបិទ"</string>
     <string name="edit_widget" msgid="9030848101135393954">"កែធាតុ​ក្រាហ្វិក"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ដកចេញ"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"បញ្ចូលធាតុ​ក្រាហ្វិក"</string>
@@ -735,12 +734,11 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"រុករកទៅមុខ ដើម្បីមើលកម្មវិធីថ្មីៗ"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"រុករកថយក្រោយ ដើម្បីមើលកម្មវិធីថ្មីៗ"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"បើកបញ្ជីកម្មវិធី"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"បង្ហាញរបារកិច្ចការ"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"បើកការកំណត់"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"បើក​ជំនួយការ"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ចាក់​សោ​អេក្រង់"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"កត់​ចំណាំ"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"ការដំណើរការបានច្រើននៃប្រព័ន្ធ"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"ការដំណើរការច្រើនរបស់ប្រព័ន្ធ"</string>
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"ចូលក្នុងមុខងារបំបែកអេក្រង់ដោយប្រើកម្មវិធីបច្ចុប្បន្ននៅខាងស្ដាំដៃ"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"ចូលក្នុងមុខងារ​បំបែកអេក្រង់ដោយប្រើកម្មវិធីបច្ចុប្បន្ននៅខាងឆ្វេងដៃ"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"ប្ដូរពីមុខងារ​បំបែកអេក្រង់ទៅជាអេក្រង់ពេញ"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ម៉ឺនុយ​ថាមពល"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"ទំព័រ <xliff:g id="ID_1">%1$d</xliff:g> នៃ <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"អេក្រង់​ចាក់សោ"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"អ្នកអាចកំណត់ទីតាំងទូរសព្ទនេះដោយប្រើ \"រកឧបករណ៍របស់ខ្ញុំ\" សូម្បីនៅពេលបិទថាមពល"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"កំពុង​បិទ…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"មើលជំហាន​ថែទាំ"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"មើលជំហាន​ថែទាំ"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"ដកឧបករណ៍របស់អ្នក"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"សម្រាប់កម្រិតគុណភាពកាន់តែខ្ពស់ សូមត្រឡប់ទូរសព្ទ"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ឧបករណ៍អាច​បត់បានកំពុងត្រូវបានលា"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ឧបករណ៍អាច​បត់បានកំពុងត្រូវបានលា"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"បត់"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"លា"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"ថ្មនៅសល់ <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"ភ្ជាប់ប៊ិករបស់អ្នកជាមួយឆ្នាំងសាក"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"ថ្មប៊ិកនៅសល់តិច"</string>

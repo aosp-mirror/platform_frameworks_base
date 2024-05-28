@@ -833,7 +833,7 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Sledovať počet nesprávnych hesiel zadaných pri odomykaní obrazovky a zamknúť tablet alebo vymazať všetky údaje tabletu v prípade príliš veľkého počtu neplatných pokusov o zadanie hesla."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Sledovanie počtu nesprávnych hesiel zadaných pri odomykaní obrazovky a v prípade, že ich je zadaných príliš mnoho, uzamknutie zariadenia Android TV alebo vymazanie všetkých jeho údajov."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Sledujte počet nesprávnych hesiel zadaných pri odomykaní obrazovky a uzamknite palubný systém alebo vymažte všetky údaje v palubnom systéme v prípade príliš veľkého počtu neplatných pokusov o zadanie hesla."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Sledovať počet nesprávnych hesiel zadaných pri odomykaní obrazovky a zamknúť telefón alebo vymazať všetky údaje v telefóne v prípade príliš veľkého počtu neplatných pokusov o zadanie hesla."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Sleduje počet nesprávnych hesiel zadaných pri odomykaní obrazovky a uzamkne telefón alebo vymaže z telefónu všetky dáta, ak bolo zadaných príliš veľa nesprávnych hesiel."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Sledujte počet nesprávnych hesiel zadaných pri odomykaní obrazovky a v prípade, že ich je zadaných príliš mnoho, uzamknite tablet alebo vymažte všetky údaje tohto používateľa."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Sledovanie počtu nesprávnych hesiel zadaných pri odomykaní obrazovky a ak je ich zadaných príliš mnoho, uzamknutie zariadenia Android TV alebo vymazanie všetkých údajov tohto používateľa."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Sledujte počet nesprávnych hesiel zadaných pri odomykaní obrazovky a v prípade, že ich je zadaných príliš mnoho, uzamknite palubný systém alebo vymažte všetky údaje tohto profilu."</string>
@@ -846,7 +846,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Bez predchádzajúceho upozornenia vymazať všetky dáta obnovením výrobných nastavení tabletu."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Vymazanie údajov v zariadení Android TV bez upozornenia obnovením výrobných nastavení."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Vymažte údaje palubného systému bez upozornenia obnovením výrobných nastavení."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Bez predchádzajúceho upozornenia vymazať všetky dáta obnovením výrobných nastavení telefónu."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Bez predchádzajúceho upozornenia vymaže všetky dáta obnovením výrobných nastavení telefónu."</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Vymazanie údajov profilu"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Vymazať údaje používateľa"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Vymažte bez upozornenia údaje tohto používateľa na tomto tablete."</string>
@@ -1169,7 +1169,7 @@
     <string name="elapsed_time_short_format_h_mm_ss" msgid="2302144714803345056">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="1532369154488982046">"Vybrať všetko"</string>
     <string name="cut" msgid="2561199725874745819">"Vystrihnúť"</string>
-    <string name="copy" msgid="5472512047143665218">"Kopírovať"</string>
+    <string name="copy" msgid="5472512047143665218">"Skopírovať"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"Nepodarilo sa skopírovať do schránky"</string>
     <string name="paste" msgid="461843306215520225">"Prilepiť"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"Prilepiť ako obyčajný text"</string>
@@ -1989,7 +1989,7 @@
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Zrušiť pozastavenie"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Tiesňová linka"</string>
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Nastavte zámku obrazovky"</string>
-    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Nastavte zámku obrazovky"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Nastaviť zámku obrazovky"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Ak chcete používať súkromný priestor, nastavte v tomto zariadení zámku obrazovky"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikácia nie je dostupná"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> nie je teraz dostupná."</string>

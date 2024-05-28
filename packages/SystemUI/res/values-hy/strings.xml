@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Ավելացնել վիջեթներ"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Երկար սեղմեք՝ վիջեթները հարմարեցնելու համար"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Հարմարեցնել վիջեթները"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Հավելվածի պատկերակ անջատված վիջեթի համար"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Փոփոխել վիջեթը"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Հեռացնել"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Ավելացնել վիջեթ"</string>
@@ -689,7 +688,7 @@
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Բացատ"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Մուտք"</string>
-    <string name="keyboard_key_backspace" msgid="4095278312039628074">"Հետշարժ"</string>
+    <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Նվագարկում/դադար"</string>
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Կանգնեցնել"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Հաջորդը"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Առաջ անցնել վերջին հավելվածների միջով"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Հետ անցնել վերջին հավելվածների միջով"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Բացել հավելվածների ցանկը"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Ցուցադրել հավելվածների վահանակը"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Բացել կարգավորումները"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Բացել Օգնականը"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Կողպէկրան"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Սնուցման կոճակի ընտրացանկ"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Էջ <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Կողպէկրան"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"«Գտնել իմ սարքը» ծառայության օգնությամբ դուք կարող եք տեղորոշել այս հեռախոսը, նույնիսկ եթե այն անջատված է"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Անջատվում է…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Քայլեր գերտաքացման ահազանգի դեպքում"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Քայլեր գերտաքացման ահազանգի դեպքում"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Անջատեք սարքը"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Ավելի մեծ լուծաչափի համար շրջեք հեռախոսը"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Ծալովի սարք՝ բացված վիճակում"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Ծալովի սարք՝ շրջված վիճակում"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"ծալված"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"բացված"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Մարտկոցի լիցքը՝ <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Ձեր ստիլուսը միացրեք լիցքավորիչի"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Ստիլուսի մարտկոցի լիցքի ցածր մակարդակ"</string>

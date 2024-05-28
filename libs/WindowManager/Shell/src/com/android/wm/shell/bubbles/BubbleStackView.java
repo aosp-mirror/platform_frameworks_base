@@ -717,11 +717,6 @@ public class BubbleStackView extends FrameLayout
 
             // Hide the stack after a delay, if needed.
             updateTemporarilyInvisibleAnimation(false /* hideImmediately */);
-
-            if (mShouldReorderBubblesAfterGestureCompletes) {
-                mShouldReorderBubblesAfterGestureCompletes = false;
-                updateBubbleOrderInternal(mBubbleData.getBubbles(), true);
-            }
         }
     };
 
@@ -2731,6 +2726,12 @@ public class BubbleStackView extends FrameLayout
         mIsGestureInProgress =
                 ev.getAction() != MotionEvent.ACTION_UP
                         && ev.getAction() != MotionEvent.ACTION_CANCEL;
+
+        // If there is a deferred reorder action, and the gesture is over, run it now.
+        if (mShouldReorderBubblesAfterGestureCompletes && !mIsGestureInProgress) {
+            mShouldReorderBubblesAfterGestureCompletes = false;
+            updateBubbleOrderInternal(mBubbleData.getBubbles(), false);
+        }
 
         return dispatched;
     }

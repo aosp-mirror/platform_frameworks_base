@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Pridėkite daugiau valdiklių"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Ilgai paspauskite, kad tinkintumėte valdiklius"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Tinkinti valdiklius"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Išjungto valdiklio programos piktograma"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Redaguoti valdiklį"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Pašalinti"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Pridėti valdiklį"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Pereiti į priekį per naujausias programas"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Pereiti atgal per naujausias programas"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Atidaryti programų sąrašą"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Rodyti užduočių juostą"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Atidaryti nustatymus"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Atidaryti Padėjėją"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Užrakinti ekraną"</string>
@@ -747,7 +745,7 @@
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Išskaidyto ekrano režimu: pakeisti iš vienos programos į kitą"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Įvestis"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Perjungti į kitą kalbą"</string>
-    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Perjungti ankstesnę kalbą"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Perjungti į ankstesnę kalbą"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Pasiekti jaustuką"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Pasiekti rašymą balsu"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Programos"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Įjungimo meniu"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g> psl. iš <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Užrakinimo ekranas"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"Šį telefoną galite rasti naudodami programą „Rasti įrenginį“, net jei jis išjungtas"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Išjungiama…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Žr. priežiūros veiksmus"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Žr. priežiūros veiksmus"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Atjunkite įrenginį"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Kad raiška būtų geresnė, apverskite telefoną"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Lankstomasis įrenginys išlankstomas"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Lankstomasis įrenginys apverčiamas"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"sulenkta"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"nesulenkta"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Liko akumuliatoriaus įkrovos: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Prijunkite rašiklį prie kroviklio"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Senka rašiklio akumuliatorius"</string>
@@ -1264,7 +1263,7 @@
     <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"Naudotojo telefono skambučio programa"</string>
     <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"Neseniai naudojo telefono skambučio programa"</string>
     <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"Naudoja <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Neseniai naudojo „<xliff:g id="APP_NAME">%1$s</xliff:g>“"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Neseniai naudojo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"Naudoja <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Neseniai naudojo „<xliff:g id="APP_NAME">%1$s</xliff:g>“ (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Naudoja <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>

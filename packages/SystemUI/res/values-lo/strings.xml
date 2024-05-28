@@ -621,7 +621,7 @@
     <string name="tuner_warning_title" msgid="7721976098452135267">"ມ່ວນຊື່ນສຳລັບບາງຄົນ ແຕ່ບໍ່ແມ່ນສຳລັບທຸກຄົນ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner ໃຫ້ທ່ານມີວິທີພິເສດຕື່ມອີກໃນການປັບປ່ຽນ ແລະຕົບແຕ່ງສ່ວນຕໍ່ປະສານຜູ້ໃຊ້ຂອງ Android. ຄຸນສົມບັດທົດລອງໃຊ້ເຫຼົ່ານີ້ອາດຈະປ່ຽນແປງ, ຢຸດເຊົາ ຫຼືຫາຍໄປໃນການວາງຈຳໜ່າຍໃນອະນາຄົດ. ຈົ່ງດຳເນີນຕໍ່ດ້ວຍຄວາມລະມັດລະວັງ."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"ຄຸນສົມບັດທົດລອງໃຊ້ງານເຫຼົ່ານີ້ອາດຈະປ່ຽນແປງ, ຢຸດເຊົາ ຫຼືຫາຍໄປໃນການອອກຈຳໜ່າຍໃນອະນາຄົດ. ຈົ່ງສືບຕໍ່ດ້ວຍຄວາມລະມັດລະວັງ."</string>
-    <string name="got_it" msgid="477119182261892069">"ໄດ້​ແລ້ວ"</string>
+    <string name="got_it" msgid="477119182261892069">"ເຂົ້າ​ໃຈ​ແລ້ວ"</string>
     <string name="tuner_toast" msgid="3812684836514766951">"ຍິນດີດ້ວຍ! System UI Tuner ໄດ້ຖືກເພີ່ມໃສ່ການຕັ້ງຄ່າແລ້ວ"</string>
     <string name="remove_from_settings" msgid="633775561782209994">"ເອົາອອກ​ຈາກ​ການ​ຕັ້ງ​ຄ່າ"</string>
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"ເອົາ System UI Tuner ອອກຈາກການຕັ້ງຄ່າ ແລະຢຸດການໃຊ້ທຸກຄຸນສົມບັດໃຊ້ງານຂອງມັນ?"</string>
@@ -734,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"ສະຫຼັບລະຫວ່າງແອັບຫຼ້າສຸດແບບໄປໜ້າ"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"ສະຫຼັບລະຫວ່າງແອັບຫຼ້າສຸດແບບກັບຫຼັງ"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"ເປີດລາຍຊື່ແອັບ"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"ສະແດງແຖບໜ້າວຽກ"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"ເປີດການຕັ້ງຄ່າ"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"ເປີດຜູ້ຊ່ວຍ"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ໜ້າຈໍລັອກ"</string>
@@ -766,7 +765,7 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"ເປີດການຕັ້ງຄ່າ"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"ເຊື່ອມຕໍ່ຊຸດຫູຟັງແລ້ວ"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"ເຊື່ອມ​ຕໍ່ຊຸດ​ຫູ​ຟັງແລ້ວ"</string>
-    <string name="data_saver" msgid="3484013368530820763">"ຕົວປະຢັດອິນເຕີເນັດ"</string>
+    <string name="data_saver" msgid="3484013368530820763">"ຕົວປະຢັດຂໍ້ມູນ"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"ເປີດຕົວປະຢັດອິນເຕີເນັດຢູ່"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"ເປີດ"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"ປິດ"</string>
@@ -1223,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"ເພື່ອຄວາມລະອຽດທີ່ສູງຂຶ້ນ, ໃຫ້ປີ້ນໂທລະສັບ"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ອຸປະກອນທີ່ພັບໄດ້ກຳລັງກາງອອກ"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ອຸປະກອນທີ່ພັກໄດ້ກຳລັງປີ້ນໄປມາ"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"ພັບແລ້ວ"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"ກາງອອກແລ້ວ"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"ແບັດເຕີຣີເຫຼືອ <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"ເຊື່ອມຕໍ່ປາກກາຂອງທ່ານກັບສາຍສາກ"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"ແບັດເຕີຣີປາກກາເຫຼືອໜ້ອຍ"</string>

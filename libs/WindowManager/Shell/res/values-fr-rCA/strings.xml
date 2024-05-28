@@ -109,7 +109,7 @@
     <string name="app_icon_text" msgid="2823268023931811747">"Icône de l\'application"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Plein écran"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Mode Bureau"</string>
-    <string name="split_screen_text" msgid="1396336058129570886">"Écran partagé"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Écran divisé"</string>
     <string name="more_button_text" msgid="3655388105592893530">"Plus"</string>
     <string name="float_button_text" msgid="9221657008391364581">"Flottant"</string>
     <string name="select_text" msgid="5139083974039906583">"Sélectionner"</string>

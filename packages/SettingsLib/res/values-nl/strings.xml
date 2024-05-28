@@ -112,10 +112,10 @@
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Invoerapparaat"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Internettoegang"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Toegang geven tot contacten en gespreksgeschiedenis"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"De informatie wordt onder andere gebruikt voor gespreksaankondigingen"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Deze informatie wordt o.a. gebruikt voor gespreksaankondigingen"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Internetverbinding delen"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Sms-berichten"</string>
-    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Sim-toegang"</string>
+    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Simtoegang"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="2607867572569689732">"Hoortoestellen"</string>
@@ -133,7 +133,7 @@
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="3744773111299503493">"Lokale internetverbinding delen met apparaat"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="7422039765025340313">"Gebruik voor internettoegang"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="4453622103977592583">"Gebruiken voor kaart"</string>
-    <string name="bluetooth_sap_profile_summary_use_for" msgid="6204902866176714046">"Gebruiken voor sim-toegang"</string>
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="6204902866176714046">"Gebruiken voor simtoegang"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="7324694226276491807">"Gebruiken voor audio van medium"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"Gebruiken voor audio van telefoon"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Gebruiken voor bestandsoverdracht"</string>
@@ -180,7 +180,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"Enkele standaardwaarden ingesteld"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Geen standaardwaarden ingesteld"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Instellingen tekst-naar-spraak"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Tekst-naar-spraakuitvoer"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Tekst-naar-spraak-uitvoer"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Spreeksnelheid"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Snelheid waarmee de tekst wordt gesproken"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Toonhoogte"</string>
@@ -305,7 +305,7 @@
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Uit"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automatisch"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Hostnaam van privé-DNS-provider"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Geef hostnaam van DNS-provider op"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Voer de hostnaam van de DNS-provider in"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Kan geen verbinding maken"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Toon opties voor certificering van draadloze weergave"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Verhoog het logniveau voor wifi, toon per SSID RSSI in wifi-kiezer"</string>
@@ -453,7 +453,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalie (rood-groen)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalie (blauw-geel)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Kleurcorrectie"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Kleurcorrectie kan handig zijn in de volgende situaties:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Je wilt kleuren nauwkeuriger zien.&lt;/li&gt; &lt;li&gt;&amp;nbsp;Je wilt kleuren verwijderen zodat je je beter kunt focussen.&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Kleurcorrectie kan handig zijn in de volgende situaties:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Je wilt kleuren nauwkeuriger zien.&lt;/li&gt; &lt;li&gt;&amp;nbsp;Je wilt kleuren verwijderen zodat je je beter kunt concentreren.&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Overschreven door <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g>: opladen is in de wacht gezet om de batterij te beschermen"</string>
@@ -518,7 +518,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Gebruik systeemtalen"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Instellingen openen voor <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> mislukt"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Deze invoermethode verzamelt mogelijk alle tekst die je typt, inclusief persoonsgegevens zoals wachtwoorden en creditcardnummers. De methode is afkomstig uit de app <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Deze invoermethode aanzetten?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Opmerking: Wanneer je telefoon opnieuw is opgestart, kan deze app pas worden gestart nadat je je telefoon hebt ontgrendeld"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Opmerking: Nadat je de telefoon opnieuw opstart, wordt deze app pas gestart nadat je de telefoon ontgrendelt"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS-registratiestatus"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Geregistreerd"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Niet geregistreerd"</string>
@@ -534,7 +534,7 @@
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Klaar"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Wekkers en herinneringen"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Wekkers en herinneringen laten instellen"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Instellen van wekkers en herinneringen toestaan"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Wekkers en herinneringen"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Sta toe dat deze app wekkers zet en tijdgevoelige acties plant. De app kan hierdoor op de achtergrond worden uitgevoerd, waardoor je misschien meer batterijlading verbruikt.\n\nAls dit recht uitstaat, werken door deze app geplande bestaande wekkers en tijdgebaseerde afspraken niet."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"plannen, schema, wekker, alarm, herinnering, klok"</string>
@@ -596,7 +596,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Gebruiker"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Beperkt profiel"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Nieuwe gebruiker toevoegen?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Je kunt dit apparaat met anderen delen door extra gebruikers toe te voegen. Elke gebruiker heeft een eigen profiel met zelf gekozen apps, achtergrond, enzovoort. Gebruikers kunnen ook apparaatinstellingen aanpassen die van invloed zijn op alle gebruikers, zoals wifi.\n\nWanneer je een nieuwe gebruiker toevoegt, moet die persoon een eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers. Toegankelijkheidsinstellingen en -services worden mogelijk niet overgezet naar de nieuwe gebruiker."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Je kunt dit apparaat met anderen delen door extra gebruikers toe te voegen. Elke gebruiker heeft een eigen profiel met zelf gekozen apps, achtergrond, enzovoort. Gebruikers kunnen ook apparaatinstellingen aanpassen die van invloed zijn op alle gebruikers, zoals wifi.\n\nWanneer je een nieuwe gebruiker toevoegt, moet die persoon een eigen ruimte instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers. Toegankelijkheidsinstellingen en -services worden mogelijk niet overgezet naar de nieuwe gebruiker."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Wanneer je een nieuwe gebruiker toevoegt, moet die persoon een eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Deze gebruiker beheerder maken?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Beheerders hebben speciale rechten die andere gebruikers niet hebben. Een beheerder kan alle gebruikers beheren, dit apparaat updaten of resetten, instellingen wijzigen, alle geïnstalleerde apps bekijken en beheerdersrechten toekennen of intrekken voor anderen."</string>
@@ -657,7 +657,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Uit"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aan"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Je apparaat moet opnieuw worden opgestart om deze wijziging toe te passen. Start nu opnieuw op of annuleer de wijziging."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Bedrade hoofdtelefoon"</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Bedrade koptelefoon"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Aan"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Uit"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Netwerk van provider wordt gewijzigd"</string>
@@ -694,7 +694,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Standaard"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Scherm aanzetten"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Scherm aanzetten toestaan"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Toestaan dat een app het scherm aanzet. Indien toegestaan, kan de app het scherm op elk moment aanzetten zonder jouw expliciete intentie."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Sta toe dat een app het scherm aanzet. Indien toegestaan, kan de app het scherm op elk moment aanzetten zonder jouw expliciete intentie."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Uitzending van <xliff:g id="APP_NAME">%1$s</xliff:g> stopzetten?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Als je <xliff:g id="SWITCHAPP">%1$s</xliff:g> uitzendt of de uitvoer wijzigt, wordt je huidige uitzending gestopt"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> uitzenden"</string>

@@ -186,8 +186,8 @@
     <string name="contentServiceSyncNotificationTitle" msgid="5766411446676388623">"Αδυναμία συγχρονισμού"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4562226280528716090">"Επιχειρήθηκε η διαγραφή πάρα πολλών <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="5557552311566179924">"Ο αποθηκευτικός χώρος του tablet είναι πλήρης. Διαγράψτε μερικά αρχεία για να δημιουργήσετε ελεύθερο χώρο."</string>
-    <string name="low_memory" product="watch" msgid="3479447988234030194">"Ο αποθηκευτικός χώρος παρακολούθησης είναι πλήρης! Διαγράψτε μερικά αρχεία για να απελευθερώσετε χώρο."</string>
-    <string name="low_memory" product="tv" msgid="6663680413790323318">"Ο αποθηκευτικός χώρος της συσκευής Android TV είναι πλήρης. Διαγράψτε μερικά αρχεία για να απελευθερώσετε χώρο."</string>
+    <string name="low_memory" product="watch" msgid="3479447988234030194">"Ο αποθηκευτικός χώρος παρακολούθησης είναι πλήρης! Διαγράψτε μερικά αρχεία για να αποδεσμεύσετε χώρο."</string>
+    <string name="low_memory" product="tv" msgid="6663680413790323318">"Ο αποθηκευτικός χώρος της συσκευής Android TV είναι πλήρης. Διαγράψτε μερικά αρχεία για να αποδεσμεύσετε χώρο."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"Ο αποθηκευτικός χώρος του τηλεφώνου είναι πλήρης. Διαγράψτε μερικά αρχεία για να δημιουργήσετε ελεύθερο χώρο."</string>
     <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{Η αρχή έκδοσης πιστοποιητικών εγκαταστάθηκε}other{Οι αρχές έκδοσης πιστοποιητικών εγκαταστάθηκαν}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Από ένα άγνωστο τρίτο μέρος"</string>
@@ -1756,7 +1756,7 @@
     <string name="user_switched" msgid="7249833311585228097">"Τρέχων χρήστης <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Εναλλαγή σε <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Αποσύνδεση <xliff:g id="NAME">%1$s</xliff:g>…"</string>
-    <string name="owner_name" msgid="8713560351570795743">"Κάτοχο"</string>
+    <string name="owner_name" msgid="8713560351570795743">"Κάτοχος"</string>
     <string name="guest_name" msgid="8502103277839834324">"Επισκέπτης"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Σφάλμα"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Αυτή η αλλαγή δεν επιτρέπεται από το διαχειριστή σας"</string>
@@ -1900,7 +1900,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Η Εξοικονόμηση μπαταρίας ενεργοποιεί το Σκούρο θέμα και περιορίζει ή απενεργοποιεί τη δραστηριότητα στο παρασκήνιο, ορισμένα οπτικά εφέ, συγκεκριμένες λειτουργίες και κάποιες συνδέσεις δικτύου."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Η Εξοικονόμηση μπαταρίας ενεργοποιεί το Σκούρο θέμα και περιορίζει ή απενεργοποιεί τη δραστηριότητα στο παρασκήνιο, ορισμένα οπτικά εφέ, συγκεκριμένες λειτουργίες και ορισμένες συνδέσεις δικτύου."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Προκειμένου να μειωθεί η χρήση δεδομένων, η Εξοικονόμηση δεδομένων αποτρέπει την αποστολή ή λήψη δεδομένων από ορισμένες εφαρμογές στο παρασκήνιο. Μια εφαρμογή που χρησιμοποιείτε αυτήν τη στιγμή μπορεί να χρησιμοποιήσει δεδομένα αλλά με μικρότερη συχνότητα. Για παράδειγμα, οι εικόνες μπορεί να μην εμφανίζονται μέχρι να τις πατήσετε."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Προκειμένου να μειωθεί η χρήση δεδομένων, η Εξοικονόμηση δεδομένων αποτρέπει την αποστολή ή λήψη δεδομένων από ορισμένες εφαρμογές στο παρασκήνιο. Μια εφαρμογή που χρησιμοποιείτε αυτή τη στιγμή μπορεί να χρησιμοποιήσει δεδομένα αλλά με μικρότερη συχνότητα. Για παράδειγμα, οι εικόνες μπορεί να μην εμφανίζονται μέχρι να τις πατήσετε."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ενεργ. Εξοικονόμησης δεδομένων;"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ενεργοποίηση"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Για ένα λεπτό (μέχρι τις {formattedTime})}other{Για # λεπτά (μέχρι τις {formattedTime})}}"</string>

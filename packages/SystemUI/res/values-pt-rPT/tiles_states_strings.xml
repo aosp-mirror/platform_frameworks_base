@@ -63,8 +63,8 @@
   </string-array>
   <string-array name="tile_states_rotation">
     <item msgid="4578491772376121579">"Indisponível"</item>
-    <item msgid="5776427577477729185">"Desligado"</item>
-    <item msgid="7105052717007227415">"Ligado"</item>
+    <item msgid="5776427577477729185">"Desligada"</item>
+    <item msgid="7105052717007227415">"Ligada"</item>
   </string-array>
   <string-array name="tile_states_bt">
     <item msgid="5330252067413512277">"Indisponível"</item>
@@ -118,7 +118,7 @@
   </string-array>
   <string-array name="tile_states_night">
     <item msgid="7857498964264855466">"Indisponível"</item>
-    <item msgid="2744885441164350155">"Desligado"</item>
+    <item msgid="2744885441164350155">"Desligada"</item>
     <item msgid="151121227514952197">"Ligado"</item>
   </string-array>
   <string-array name="tile_states_screenrecord">
@@ -126,9 +126,11 @@
     <item msgid="8259411607272330225">"Desligado"</item>
     <item msgid="578444932039713369">"Ligado"</item>
   </string-array>
-    <!-- no translation found for tile_states_record_issue:0 (1727196795383575383) -->
-    <!-- no translation found for tile_states_record_issue:1 (9061144428113385092) -->
-    <!-- no translation found for tile_states_record_issue:2 (2984256114867200368) -->
+  <string-array name="tile_states_record_issue">
+    <item msgid="1727196795383575383">"Indisponível"</item>
+    <item msgid="9061144428113385092">"Desativado"</item>
+    <item msgid="2984256114867200368">"Ativado"</item>
+  </string-array>
   <string-array name="tile_states_reverse">
     <item msgid="3574611556622963971">"Indisponível"</item>
     <item msgid="8707481475312432575">"Desligado"</item>

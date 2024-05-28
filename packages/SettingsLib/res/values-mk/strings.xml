@@ -179,7 +179,7 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Корисник: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Поставени се некои стандардни вредности"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Нема поставено стандардни вредности"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"Поставки на текст-во-говор"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"Поставки за „Од текст во говор“"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Претворање текст во говор"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Брзина на говорот"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Брзина со која се кажува текстот"</string>
@@ -455,9 +455,9 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Корекција на боите"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Корекцијата на боите може да биде корисна кога сакате:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;да ги гледате боите попрецизно&lt;/li&gt; &lt;li&gt;&amp;nbsp;да ги отстраните боите за полесно да се концентрирате&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Прескокнато според <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
-    <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - полнењето е паузирано за да се заштити батеријата"</string>
-    <string name="power_incompatible_charging_settings_home_page" msgid="1322050766135126880">"<xliff:g id="LEVEL">%1$s</xliff:g> - Проверете го додатокот за полнење"</string>
+    <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> – полнењето е паузирано за да се заштити батеријата"</string>
+    <string name="power_incompatible_charging_settings_home_page" msgid="1322050766135126880">"<xliff:g id="LEVEL">%1$s</xliff:g> – Проверете го додатокот за полнење"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Уште околу <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"Уште околу <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"Уште околу <xliff:g id="TIME_REMAINING">%1$s</xliff:g> според вашето користење"</string>
@@ -477,8 +477,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> до полна батерија"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> до полна батерија"</string>
-    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Полнењето е оптимизирано"</string>
-    <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> ‑ се полни"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – полнењето е оптимизирано"</string>
+    <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – се полни"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Непознато"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Се полни"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Брзо полнење"</string>
@@ -498,9 +498,9 @@
     <string name="install_other_apps" msgid="3232595082023199454">"Непознати апликации"</string>
     <string name="home" msgid="973834627243661438">"Почетна страница за поставки"</string>
   <string-array name="battery_labels">
-    <item msgid="7878690469765357158">"0%"</item>
-    <item msgid="8894873528875953317">"50%"</item>
-    <item msgid="7529124349186240216">"100%"</item>
+    <item msgid="7878690469765357158">"0 %"</item>
+    <item msgid="8894873528875953317">"50 %"</item>
+    <item msgid="7529124349186240216">"100 %"</item>
   </string-array>
     <string name="charge_length_format" msgid="6941645744588690932">"Пред <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="4310625772926171089">"Преостануваат <xliff:g id="ID_1">%1$s</xliff:g>"</string>
@@ -619,7 +619,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Не успеа да создаде нов корисник"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Не успеа создавањето нов гостин"</string>
     <string name="user_nickname" msgid="262624187455825083">"Прекар"</string>
-    <string name="edit_user_info_message" msgid="5199468585059260053">"Вашите име и слика ќе бидат видливи за секој што го користи уредов."</string>
+    <string name="edit_user_info_message" msgid="5199468585059260053">"Вашето име и слика ќе бидат видливи за секој што го користи уредов."</string>
     <string name="user_add_user" msgid="7876449291500212468">"Додајте корисник"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Додајте гостин"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Отстрани гостин"</string>

@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Njengoba sibhekela kwikusasa elingenaphasiwedi, amagama ayimfihlo asazotholakala eceleni kokhiye bokudlula."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Khetha lapho ongagcina khona i-<xliff:g id="CREATETYPES">%1$s</xliff:g> yakho"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Khetha isiphathi sephasiwedi ukuze ulondoloze ulwazi lwakho futhi ungene ngemvume ngokushesha ngesikhathi esizayo."</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Sungula ukhiye wokudlula ukuze ungene ngemvume ku-<xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Londoloza iphasiwedi ukuze ungene ngemvume ku-<xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Londoloza ulwazi lokungena lwe-<xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"ukhiye wokudlula"</string>
     <string name="password" msgid="6738570945182936667">"iphasiwedi"</string>

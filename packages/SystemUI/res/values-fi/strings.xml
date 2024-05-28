@@ -117,7 +117,7 @@
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Lopeta"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Jaa"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Näyttötallenne tallennettu"</string>
-    <string name="screenrecord_save_text" msgid="3008973099800840163">"Napauta näyttääksesi"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"Katso napauttamalla"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Virhe näyttötallenteen tallentamisessa"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Virhe näytön tallennuksen aloituksessa"</string>
     <string name="issuerecord_title" msgid="286627115110121849">"Ongelman tallentaja"</string>
@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Lisää widgetejä"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Yksilöi widgetit pitkällä painalluksella"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Muokkaa widgettejä"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Käytöstä poistetun widgetin sovelluskuvake"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Muokkaa widgetiä"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Poista"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Lisää widget"</string>
@@ -735,20 +734,19 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Siirry eteenpäin viimeaikaisten sovellusten kautta"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Siirry takaisin viimeaikaisten sovellusten kautta"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Avaa sovelluslista"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Näytä tehtäväpalkki"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Avaa asetukset"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Avaa Assistant"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Lukitusnäyttö"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Tee muistiinpano"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Järjestelmän monikäyttö"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Siirry jaettuun näyttöön (sovellus oikeanpuoleiseen näyttöön)"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Siirry jaettuun näyttöön (sovellus vasemmanpuoleiseen näyttöön)"</string>
+    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Siirry jaettuun näyttöön (tämä sovellus oikealle)"</string>
+    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Siirry jaettuun näyttöön (tämä sovellus vasemmalle)"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Vaihda jaetusta näytöstä koko näyttöön"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Jaetun näytön aikana: korvaa sovellus toisella"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Syöttötapa"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Vaihda seuraavaan kieleen"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Vaihda aiempaan kieleen"</string>
-    <string name="input_access_emoji" msgid="8105642858900406351">"Emojin käyttö"</string>
+    <string name="input_access_emoji" msgid="8105642858900406351">"Emojien käyttö"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Puhekirjoituksen käyttö"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Sovellukset"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Assistant"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Virtavalikko"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Sivu <xliff:g id="ID_1">%1$d</xliff:g>/<xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Lukitusnäyttö"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"Voit löytää tämän puhelimen Paikanna laite ‑sovelluksella, vaikka se olisi sammutettuna"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Sammutetaan…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Katso huoltovaiheet"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Katso huoltovaiheet"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Irrota laite"</string>
@@ -1164,7 +1160,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# sovellus on aktiivinen}other{# sovellusta aktiivisena}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Uutta tietoa"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktiiviset sovellukset"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Nämä sovellukset ovat aktiivisia ja ne ovat käynnissä, vaikka et käyttäisi niitä. Näin sovellusten toimivuus paranee, mutta se voi vaikutta akunkestoon."</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Nämä sovellukset ovat aktiivisia ja käynnissä, vaikka et käyttäisi niitä. Näin sovellusten toimivuus paranee, mutta ne voivat vaikuttaa akunkestoon."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Pysäytä"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Pysäytetty"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Valmis"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Resoluutio on parempi, kun käännät puhelimen"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Taitettava laite taitetaan"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Taitettava laite käännetään ympäri"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"taitettu"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"taittamaton"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Akkua jäljellä <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Yhdistä näyttökynä laturiin"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Näyttökynän akku vähissä"</string>
@@ -1236,7 +1235,7 @@
     <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Asenna työpuhelinsovellus"</string>
     <string name="call_from_work_profile_close" msgid="5830072964434474143">"Peruuta"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Muokkaa lukitusnäyttöä"</string>
-    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Avaa lukitus muokataksesi lukitusnäyttöä"</string>
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Voit muokata lukitusnäyttöä, kun avaat lukituksen"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi-yhteys ei ole käytettävissä"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera estetty"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Kamera ja mikrofoni estetty"</string>

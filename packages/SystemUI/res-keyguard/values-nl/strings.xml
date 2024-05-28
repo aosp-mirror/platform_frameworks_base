@@ -21,10 +21,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Geef je pincode op"</string>
-    <string name="keyguard_enter_pin" msgid="8114529922480276834">"Geef de pincode op"</string>
-    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Geef je patroon op"</string>
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"Voer pincode in"</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Voer je patroon in"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Teken het patroon"</string>
-    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Geef je wachtwoord op"</string>
+    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Voer je wachtwoord in"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"Geef het wachtwoord op"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Ongeldige kaart."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Opgeladen"</string>
@@ -108,9 +108,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Patroon is vereist na opnieuw opstarten apparaat"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"Pincode is vereist na opnieuw opstarten apparaat"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Wachtwoord is vereist na opnieuw opstarten apparaat"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Gebruik in plaats daarvan het patroon voor extra beveiliging"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Gebruik het patroon voor extra beveiliging"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Gebruik de pincode voor extra beveiliging"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Gebruik in plaats daarvan het wachtwoord voor extra beveiliging"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Gebruik het wachtwoord voor extra beveiliging"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Apparaat vergrendeld door beheerder"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Apparaat is handmatig vergrendeld"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Niet herkend"</string>

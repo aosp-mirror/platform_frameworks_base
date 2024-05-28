@@ -57,7 +57,7 @@
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Hiniling ng ibang device na palitan ang wika ng system"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Palitan ang wika"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"Huwag palitan ang wika"</string>
-    <string name="share_wifi_button_text" msgid="1285273973812029240">"Ibahagi ang Wi‑Fi"</string>
+    <string name="share_wifi_button_text" msgid="1285273973812029240">"I-share ang Wi‑Fi"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Payagan ang wireless na pag-debug sa network na ito?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Pangalan ng Network (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nAddress ng Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Palaging payagan sa network na ito"</string>
@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Magdagdag ng higit pang widget"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Pindutin nang matagal para i-customize ang mga widget"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"I-customize ang mga widget"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Icon ng app para sa na-disable na widget"</string>
     <string name="edit_widget" msgid="9030848101135393954">"I-edit ang widget"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Alisin"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Magdagdag ng widget"</string>
@@ -456,7 +455,7 @@
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Ang serbisyong nagbibigay ng function na ito ay magkakaroon ng access sa lahat ng impormasyong nakikita sa iyong screen o pine-play mula sa device mo habang nagre-record o nagka-cast. Kasama rito ang impormasyong tulad ng mga password, detalye ng pagbabayad, larawan, mensahe, at audio na pine-play mo."</string>
     <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Buong screen"</string>
     <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Isang app"</string>
-    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Ibahagi o i-record ang isang app"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"I-share o i-record ang isang app"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Simulang mag-record o mag-cast gamit ang <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Kapag nagbabahagi, nagre-record, o nagka-cast ka, may access ang <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sa kahit anong nakikita sa iyong screen o pine-play sa device mo. Kaya mag-ingat sa mga bagay-bagay tulad ng mga password, detalye ng pagbabayad, mensahe, larawan, at audio at video."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Kapag nagbabahagi, nagre-record, o nagka-cast ka ng app, may access ang <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sa kahit anong ipinapakita o pine-play sa app na iyon. Kaya mag-ingat sa mga bagay-bagay tulad ng mga password, detalye ng pagbabayad, mensahe, larawan, at audio at video."</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Mag-cycle pasulong sa mga kamakailang app"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Mag-cycle pabalik sa mga kamakailang app"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Buksan ang listahan ng mga app"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Ipakita ang taskbar"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Buksan ang mga setting"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Buksan ang assistant"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"I-lock ang screen"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Power menu"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Page <xliff:g id="ID_1">%1$d</xliff:g> ng <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Lock screen"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"Puwede mong hanapin ang teleponong ito gamit ang Hanapin ang Aking Device kahit kapag naka-off ito"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Nagsa-shut down…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Tingnan ang mga hakbang sa pangangalaga"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Tingnan ang mga hakbang sa pangangalaga"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Bunutin sa saksakan ang device"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Para sa mas mataas na resolution, i-flip ang telepono"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Ina-unfold na foldable na device"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Fini-flip na foldable na device"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"naka-fold"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"hindi naka-fold"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> baterya na lang ang natitira"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Ikonekta sa charger ang iyong stylus"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Paubos na ang baterya ng stylus"</string>

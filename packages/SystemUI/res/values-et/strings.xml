@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Lisage rohkem vidinaid"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Vajutage pikalt vidinate kohandamiseks"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Kohanda vidinaid"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Keelatud vidina rakenduseikoon"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Muuda vidinat"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Eemalda"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Lisa vidin"</string>
@@ -590,7 +589,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"Helitugevuse juhtnupud: %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Kõnede ja märguannete puhul telefon heliseb (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"Esitamine jätkub seadmes <xliff:g id="LABEL">%s</xliff:g>"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Heli esitamine jätkub"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Heli esitatakse seadmes"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Süsteemi kasutajaliidese tuuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"Olekuriba"</string>
     <string name="demo_mode" msgid="263484519766901593">"Süsteemi kasutajaliidese demorežiim"</string>
@@ -735,11 +734,10 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Hiljutiste rakenduste hulgas edasi liikumine"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Hiljutiste rakenduste hulgas tagasi liikumine"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Rakenduste loendi avamine"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Tegumiriba kuvamine"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Seadete avamine"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistendi avamine"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Lukustuskuva"</string>
-    <string name="group_system_quick_memo" msgid="3764560265935722903">"Kirjuta märkus"</string>
+    <string name="group_system_quick_memo" msgid="3764560265935722903">"Märkme tegemine"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Süsteemi multitegumtöö"</string>
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Ekraanikuva jagamine, nii et praegune rakendus on paremal"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Ekraanikuva jagamine, nii et praegune rakendus on vasakul"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Toitemenüü"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Leht <xliff:g id="ID_1">%1$d</xliff:g>/<xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Lukustuskuva"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"Saate selle telefoni funktsiooniga Leia mu seade leida ka siis, kui see on välja lülitatud"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Väljalülitamine …"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Vaadake hooldusjuhiseid"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Vaadake hooldusjuhiseid"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Eemaldage seade"</string>
@@ -1156,7 +1152,7 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Kuva kõik"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Võrkude vahetamiseks katkestage Etherneti-ühendus"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Seadme kasutuskogemuse parandamiseks võivad rakendused ja teenused siiski alati otsida WiFi-võrke isegi siis, kui WiFi on väljas. Seda saab muuta WiFi-skannimise seadetes. "<annotation id="link">"Muuda"</annotation></string>
-    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Lennureżiimi väljalülitamine"</string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Lülita lennukireżiim välja"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> soovib kiirseadetesse lisada järgmise paani"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Lisa paan"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ära lisa paani"</string>
@@ -1217,7 +1213,7 @@
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• Vähemalt üks seade või seadmepaneel on saadaval"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Valige märkmete tegemise vaikerakendus, et kasutada märkmete tegemise otseteed"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Valige rakendus"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Pikalt puudutamise otsetee"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Puudutage otseteed pikalt"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Tühista"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Vaheta ekraane kohe"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Telefoni lahtivoltimine"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Suurema eraldusvõime saavutamiseks pöörake telefon ümber"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Volditava seadme lahtivoltimine"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Volditava seadme ümberpööramine"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"kokku volditud"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"lahti volditud"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Akutase on <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Ühendage elektronpliiats laadijaga"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Elektronpliiatsi akutase on madal"</string>

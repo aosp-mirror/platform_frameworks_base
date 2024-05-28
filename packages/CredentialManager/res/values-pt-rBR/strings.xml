@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Estamos avançando em direção a um futuro sem senhas, mas elas ainda vão estar disponíveis junto às chaves de acesso."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Escolha onde salvar suas <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecione um gerenciador de senhas para salvar suas informações e fazer login mais rapidamente na próxima vez"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Criar chave de acesso para fazer login no app <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Salvar senha para fazer login no app <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Salvar informações de login do app <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"chave de acesso"</string>
     <string name="password" msgid="6738570945182936667">"senha"</string>

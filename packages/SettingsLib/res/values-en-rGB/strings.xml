@@ -619,7 +619,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Failed to create a new user"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Failed to create a new guest"</string>
     <string name="user_nickname" msgid="262624187455825083">"Nickname"</string>
-    <string name="edit_user_info_message" msgid="5199468585059260053">"Your name and picture will be visible to anyone that uses this device."</string>
+    <string name="edit_user_info_message" msgid="5199468585059260053">"Your name and picture will be visible to anyone who uses this device."</string>
     <string name="user_add_user" msgid="7876449291500212468">"Add user"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Add guest"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Remove guest"</string>

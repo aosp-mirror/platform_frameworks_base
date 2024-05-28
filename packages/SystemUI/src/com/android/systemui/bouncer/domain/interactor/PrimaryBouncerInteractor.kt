@@ -93,6 +93,8 @@ constructor(
     val keyguardAuthenticatedPrimaryAuth: Flow<Int> = repository.keyguardAuthenticatedPrimaryAuth
     val keyguardAuthenticatedBiometrics: Flow<Boolean> =
         repository.keyguardAuthenticatedBiometrics.filterNotNull()
+    val keyguardAuthenticatedBiometricsHandled: Flow<Unit> =
+        repository.keyguardAuthenticatedBiometrics.filter { it == null }.map {}
     val userRequestedBouncerWhenAlreadyAuthenticated: Flow<Int> =
         repository.userRequestedBouncerWhenAlreadyAuthenticated.filterNotNull()
     val isShowing: StateFlow<Boolean> = repository.primaryBouncerShow

@@ -352,7 +352,7 @@
     <item msgid="1627504621139124393">"Interface do usuário"</item>
     <item msgid="8309220355268900335">"Bateria"</item>
   </string-array>
-    <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modo para uma mão"</string>
+    <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modo uma mão"</string>
     <string name="quick_settings_contrast_label" msgid="988087460210159123">"Contraste"</string>
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Padrão"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Médio"</string>
@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Adicione mais widgets"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Mantenha pressionado para personalizar widgets"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Personalizar widgets"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Ícone do app para widget desativado"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Editar widget"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Remover"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Adicionar widget"</string>
@@ -576,7 +575,7 @@
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Vibrar"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Desativar som"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"Transmitir"</string>
-    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Indisponível com o toque foi silenciado"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Indisponível com o toque silenciado"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Toque para ativar o som."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Toque para configurar para vibrar. É possível que os serviços de acessibilidade sejam silenciados."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Toque para silenciar. É possível que os serviços de acessibilidade sejam silenciados."</string>
@@ -735,11 +734,10 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Avançar pela lista de apps recentes"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Voltar pela lista de apps recentes"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Abrir lista de apps"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Mostrar a Barra de tarefas"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Abrir configurações"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Abrir o Google Assistente"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Tela de bloqueio"</string>
-    <string name="group_system_quick_memo" msgid="3764560265935722903">"Crie uma nota"</string>
+    <string name="group_system_quick_memo" msgid="3764560265935722903">"Criar nota"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Multitarefa do sistema"</string>
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Usar a tela dividida com o app atual à direita"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Usar a tela dividida com o app atual à esquerda"</string>
@@ -798,7 +796,7 @@
     <string name="left_icon" msgid="5036278531966897006">"Ícone à esquerda"</string>
     <string name="right_icon" msgid="1103955040645237425">"Ícone à direita"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mantenha pressionado e arraste para adicionar blocos"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Para reorganizar, toque no bloco sem soltar e arraste."</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Para reorganizar, toque no bloco sem soltar e arraste"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Arraste aqui para remover"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"É preciso haver pelo menos <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> blocos"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Editar"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu liga/desliga"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Página <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Tela de bloqueio"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"Localize o smartphone com o Encontre Meu Dispositivo mesmo se ele estiver desligado"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Desligando…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Ver etapas de cuidado"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Ver etapas de cuidado"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Desconecte seu dispositivo"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Para uma resolução maior, vire o smartphone"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Dispositivo dobrável sendo aberto"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Dispositivo dobrável sendo virado"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"fechado"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"aberto"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Bateria restante: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Conecte sua stylus a um carregador"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Bateria da stylus fraca"</string>
@@ -1264,7 +1263,7 @@
     <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"Em uso pela ligação telefônica"</string>
     <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"Usado recentemente em uma ligação telefônica"</string>
     <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"Em uso pelo app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Usado recentemente pelo app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Uso recente pelo app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"Em uso pelo app <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Usado recentemente pelo app <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Em uso pelo app <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>

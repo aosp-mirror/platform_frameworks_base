@@ -280,6 +280,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                 quickAffordanceInteractor =
                     KeyguardQuickAffordanceInteractor(
                         keyguardInteractor = keyguardInteractor,
+                        shadeInteractor = shadeInteractor,
                         lockPatternUtils = lockPatternUtils,
                         keyguardStateController = keyguardStateController,
                         userTracker = userTracker,
@@ -643,7 +644,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
 
             val testConfig =
                 TestConfig(
-                    isVisible = true,
+                    isVisible = false,
                     isClickable = false,
                     icon = mock(),
                     canShowWhileLocked = false,
@@ -673,7 +674,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
 
             val testConfig =
                 TestConfig(
-                    isVisible = true,
+                    isVisible = false,
                     isClickable = false,
                     icon = mock(),
                     canShowWhileLocked = false,

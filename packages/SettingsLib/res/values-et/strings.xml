@@ -486,7 +486,7 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Juhtmevaba laadimine"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Laadimine"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Ei lae"</string>
-    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Ühendatud, kuid ei laadita"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Ühendatud, kuid ei laeta"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Laetud"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Täielikult laetud"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Laadimine on ootele pandud"</string>

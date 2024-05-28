@@ -609,7 +609,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"Qo‘shish"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Yangi foydalanuvchi"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Yangi profil"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Foydalanuvchi ma‘lumoti"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Foydalanuvchi haqida"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Profil haqida axborot"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Cheklangan profil yaratish uchun, shaxsiy ilovlar va ma‘lumotlarni himoyalash maqsadida avval ekran qulfini yaratish lozim."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Qulf o‘rnatish"</string>

@@ -282,7 +282,7 @@
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Заставка"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Доступ к камере"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Доступ к микрофону"</string>
-    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Доступно"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Есть"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Заблокировано"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Режим медиа"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Пользователь"</string>
@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Добавить виджеты"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Нажмите и удерживайте, чтобы настроить виджеты."</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Настроить виджеты"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Значок приложения для отключенного виджета"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Изменить виджет"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Удалить"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Добавить виджет"</string>
@@ -576,7 +575,7 @@
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Вибрация"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Без звука"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"Трансляция"</string>
-    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Недоступно, когда отключен звук вызовов"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Недоступно в беззвучном режиме"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Нажмите, чтобы включить звук."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Нажмите, чтобы включить вибрацию. Специальные возможности могут прекратить работу."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Нажмите, чтобы выключить звук. Специальные возможности могут прекратить работу."</string>
@@ -647,7 +646,7 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Статус:&lt;/b&gt; уровень важности понижен"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Появляется в верхней части уведомлений о сообщениях, а также в качестве фото профиля на заблокированном экране"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Появляется в верхней части уведомлений о сообщениях, в виде всплывающего чата, а также в качестве фото профиля на заблокированном экране."</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Появляется в верхней части уведомлений о сообщениях, а также в качестве фото профиля на заблокированном экране, прерывает режим \"Не беспокоить\"."</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Появляется в верхней части уведомлений о сообщениях, а также в виде фото профиля на заблокированном экране, прерывает режим \"Не беспокоить\"."</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Появляется в верхней части уведомлений о сообщениях, в виде всплывающего чата, а также в качестве фото профиля на заблокированном экране, прерывает режим \"Не беспокоить\"."</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" не поддерживает функции разговоров."</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Прокрутить вперед список недавних приложений"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Прокрутить назад список недавних приложений"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Открыть список приложений"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Показать панель задач"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Открыть настройки"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Открыть Ассистента"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Заблокировать экран"</string>
@@ -751,7 +749,7 @@
     <string name="input_access_emoji" msgid="8105642858900406351">"Открыть список эмодзи"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Активировать голосовой ввод"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Приложения"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Открыть Ассистента"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Ассистент"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Браузер"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Контакты"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Эл. почта"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Меню кнопки питания"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Страница <xliff:g id="ID_1">%1$d</xliff:g> из <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Заблокированный экран"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"С помощью приложения \"Найти устройство\" вы можете узнать местоположение телефона, даже когда он выключен."</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Выключение…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Подробнее о действиях при перегреве…"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Подробнее о действиях при перегреве…"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Отключите устройство"</string>
@@ -1093,8 +1089,8 @@
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Номер сборки"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Номер сборки скопирован в буфер обмена."</string>
     <string name="basic_status" msgid="2315371112182658176">"Открытый чат"</string>
-    <string name="select_conversation_title" msgid="6716364118095089519">"Виджеты чатов"</string>
-    <string name="select_conversation_text" msgid="3376048251434956013">"Нажмите на чат, чтобы добавить его на главный экран"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Виджеты разговоров"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Нажмите на разговор, чтобы добавить его на главный экран"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Здесь появятся ваши недавние разговоры."</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Важные разговоры"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Недавние разговоры"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Переверните телефон и используйте основную камеру, чтобы делать снимки с более высоким разрешением."</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Складное устройство в разложенном виде"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Перевернутое складное устройство"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"устройство сложено"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"устройство разложено"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Уровень заряда батареи: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Поставьте стилус на зарядку."</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Низкий заряд батареи стилуса"</string>
@@ -1258,7 +1257,7 @@
     <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"Развернуть и показать параметры"</string>
     <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"Свернуть"</string>
     <string name="privacy_dialog_close_app_button" msgid="8006250171305878606">"Закрыть это приложение"</string>
-    <string name="privacy_dialog_close_app_message" msgid="1316408652526310985">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" закрыто."</string>
+    <string name="privacy_dialog_close_app_message" msgid="1316408652526310985">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" закрыто"</string>
     <string name="privacy_dialog_manage_service" msgid="8320590856621823604">"Настроить сервис"</string>
     <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"Настроить доступ"</string>
     <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"Сейчас используется для телефонного звонка"</string>

@@ -322,7 +322,7 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ਚਿਤਾਵਨੀ"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"ਕੰਮ ਸੰਬੰਧੀ ਐਪਾਂ"</string>
     <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"ਰੋਕਿਆ ਗਿਆ"</string>
-    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"ਰਾਤ ਦੀ ਰੋਸ਼ਨੀ"</string>
+    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"ਨਾਈਟ ਲਾਈਟ"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"ਸੂਰਜ ਛਿਪਣ \'ਤੇ ਚਾਲੂ"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"ਸੂਰਜ ਚੜ੍ਹਨ ਤੱਕ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g> ਵਜੇ ਚਾਲੂ"</string>
@@ -429,15 +429,14 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"ਹੋਰ ਵਿਜੇਟ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ਵਿਜੇਟਾਂ ਨੂੰ ਵਿਉਂਤਬੱਧ ਕਰਨ ਲਈ ਦਬਾਈ ਰੱਖੋ"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"ਵਿਜੇਟ ਵਿਉਂਤਬੱਧ ਕਰੋ"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"ਬੰਦ ਵਿਜੇਟ ਲਈ ਐਪ ਪ੍ਰਤੀਕ"</string>
     <string name="edit_widget" msgid="9030848101135393954">"ਵਿਜੇਟ ਦਾ ਸੰਪਾਦਨ ਕਰੋ"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ਹਟਾਓ"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ਵਿਜੇਟ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"ਹੋ ਗਿਆ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ਵਰਤੋਂਕਾਰ ਸਵਿੱਚ ਕਰੋ"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ਪੁੱਲਡਾਊਨ ਮੀਨੂ"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ਇਸ ਸੈਸ਼ਨ ਵਿਚਲੀਆਂ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਨੂੰ ਮਿਟਾ ਦਿੱਤਾ ਜਾਏਗਾ।"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ਇਸ ਸੈਸ਼ਨ ਵਿਚਲੀਆਂ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟੇ ਨੂੰ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ਮਹਿਮਾਨ, ਫਿਰ ਤੁਹਾਡਾ ਸੁਆਗਤ ਹੈ!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"ਕੀ ਤੁਸੀਂ ਆਪਣਾ ਸੈਸ਼ਨ ਜਾਰੀ ਰੱਖਣਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ਮੁੜ-ਸ਼ੁਰੂ ਕਰੋ"</string>
@@ -464,7 +463,7 @@
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਨੇ ਇਸ ਵਿਕਲਪ ਨੂੰ ਬੰਦ ਕਰ ਦਿੱਤਾ ਹੈ"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"ਕੀ ਕਾਸਟ ਕਰਨਾ ਸ਼ੁਰੂ ਕਰਨਾ ਹੈ?"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਕਾਸਟ ਕਰਨ \'ਤੇ, Android ਕੋਲ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਦਿਸਣ ਵਾਲੀ ਜਾਂ ਤੁਹਾਡੇ ਡੀਵਾਈਸ \'ਤੇ ਚਲਾਈ ਜਾਣ ਵਾਲੀ ਹਰੇਕ ਚੀਜ਼ ਤੱਕ ਪਹੁੰਚ ਹੁੰਦੀ ਹੈ। ਇਸ ਲਈ ਪਾਸਵਰਡਾਂ, ਭੁਗਤਾਨ ਵੇਰਵਿਆਂ, ਸੁਨੇਹਿਆਂ, ਫ਼ੋਟੋਆਂ ਅਤੇ ਆਡੀਓ ਅਤੇ ਵੀਡੀਓ ਵਰਗੀਆਂ ਚੀਜ਼ਾਂ ਵਾਸਤੇ ਸਾਵਧਾਨ ਰਹੋ।"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਕਾਸਟ ਕਰਨ \'ਤੇ, Android ਕੋਲ ਉਸ ਐਪ \'ਤੇ ਦਿਖਾਈ ਗਈ ਜਾਂ ਚਲਾਈ ਗਈ ਹਰੇਕ ਚੀਜ਼ ਤੱਕ ਪਹੁੰਚ ਹੁੰਦੀ ਹੈ। ਇਸ ਲਈ ਪਾਸਵਰਡਾਂ, ਭੁਗਤਾਨ ਵੇਰਵਿਆਂ, ਸੁਨੇਹਿਆਂ, ਫ਼ੋਟੋਆਂ ਅਤੇ ਆਡੀਓ ਅਤੇ ਵੀਡੀਓ ਵਰਗੀਆਂ ਚੀਜ਼ਾਂ ਸੰਬੰਧੀ ਸਾਵਧਾਨ ਰਹੋ।"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਕਿਸੇ ਐਪ ਨੂੰ ਕਾਸਟ ਕਰਨ \'ਤੇ, Android ਕੋਲ ਉਸ ਐਪ \'ਤੇ ਦਿਖਾਈ ਗਈ ਜਾਂ ਚਲਾਈ ਗਈ ਹਰੇਕ ਚੀਜ਼ ਤੱਕ ਪਹੁੰਚ ਹੁੰਦੀ ਹੈ। ਇਸ ਲਈ ਪਾਸਵਰਡਾਂ, ਭੁਗਤਾਨ ਵੇਰਵਿਆਂ, ਸੁਨੇਹਿਆਂ, ਫ਼ੋਟੋਆਂ ਅਤੇ ਆਡੀਓ ਅਤੇ ਵੀਡੀਓ ਵਰਗੀਆਂ ਚੀਜ਼ਾਂ ਸੰਬੰਧੀ ਸਾਵਧਾਨ ਰਹੋ।"</string>
     <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"ਕਾਸਟ ਕਰਨਾ ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"ਕੀ ਸਾਂਝਾਕਰਨ ਸ਼ੁਰੂ ਕਰਨਾ ਹੈ?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਸਾਂਝਾ ਕਰਨ, ਰਿਕਾਰਡ ਕਰਨ, ਜਾਂ ਕਾਸਟ ਕਰਨ \'ਤੇ, Android ਕੋਲ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਦਿਸਦੀ ਜਾਂ ਤੁਹਾਡੇ ਡੀਵਾਈਸ \'ਤੇ ਚਲਾਈ ਗਈ ਹਰੇਕ ਚੀਜ਼ ਤੱਕ ਪਹੁੰਚ ਹੁੰਦੀ ਹੈ। ਇਸ ਲਈ ਪਾਸਵਰਡਾਂ, ਭੁਗਤਾਨ ਵੇਰਵਿਆਂ, ਸੁਨੇਹਿਆਂ, ਫ਼ੋਟੋਆਂ ਅਤੇ ਆਡੀਓ ਅਤੇ ਵੀਡੀਓ ਵਰਗੀਆਂ ਚੀਜ਼ਾਂ ਵਾਸਤੇ ਸਾਵਧਾਨ ਰਹੋ।"</string>
@@ -486,7 +485,7 @@
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ਸਾਰੀਆਂ ਸ਼ਾਂਤ ਸੂਚਨਾਵਾਂ ਕਲੀਅਰ ਕਰੋ"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਵੱਲੋਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਰੋਕਿਆ ਗਿਆ"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ਹੁਣੇ ਸ਼ੁਰੂ ਕਰੋ"</string>
-    <string name="empty_shade_text" msgid="8935967157319717412">"ਕੋਈ ਸੂਚਨਾਵਾਂ ਨਹੀਂ"</string>
+    <string name="empty_shade_text" msgid="8935967157319717412">"ਕੋਈ ਸੂਚਨਾ ਨਹੀਂ"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"ਕੋਈ ਨਵੀਂ ਸੂਚਨਾ ਨਹੀਂ ਹੈ"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"ਪੁਰਾਣੀਆਂ ਸੂਚਨਾਵਾਂ ਦੇਖਣ ਲਈ ਅਣਲਾਕ ਕਰੋ"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ਇਸ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਬੰਧਨ ਤੁਹਾਡੇ ਮਾਂ-ਪਿਓ ਵੱਲੋਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ"</string>
@@ -582,7 +581,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s। ਮਿਊਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ। ਪਹੁੰਚਯੋਗਤਾ ਸੇਵਾਵਾਂ ਮਿਊਟ ਹੋ ਸਕਦੀਆਂ ਹਨ।"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s। ਥਰਥਰਾਹਟ \'ਤੇ ਸੈੱਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s। ਮਿਊਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"ਸ਼ੋਰ ਨੂੰ ਕੰਟਰੋਲ ਕਰੋ"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"ਨੋਇਸ ਕੰਟਰੋਲ"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"ਰਿੰਗਰ ਮੋਡ ਨੂੰ ਬਦਲਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"ਮਿਊਟ ਕਰੋ"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ਅਣਮਿਊਟ ਕਰੋ"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"ਹਾਲ ਹੀ ਵਿੱਚ ਖੋਲ੍ਹੀਆਂ ਗਈਆਂ ਐਪਾਂ \'ਤੇ ਅੱਗੇ ਜਾਓ"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"ਹਾਲ ਹੀ ਵਿੱਚ ਖੋਲ੍ਹੀਆਂ ਗਈਆਂ ਐਪਾਂ \'ਤੇ ਵਾਪਸ ਜਾਓ"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"ਐਪਾਂ ਦੀ ਸੂਚੀ ਖੋਲ੍ਹੋ"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"ਟਾਸਕਬਾਰ ਦਿਖਾਓ"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"ਸੈਟਿੰਗਾਂ ਖੋਲ੍ਹੋ"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistant ਖੋਲ੍ਹੋ"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ਲਾਕ ਸਕ੍ਰੀਨ"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ਪਾਵਰ ਮੀਨੂ"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> ਦਾ <xliff:g id="ID_1">%1$d</xliff:g> ਪੰਨਾ"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">" ਲਾਕ  ਸਕ੍ਰੀਨ"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"ਬੰਦ ਹੋਣ \'ਤੇ ਵੀ, ਤੁਸੀਂ ਇਸ ਫ਼ੋਨ ਨੂੰ Find My Device ਦੀ ਮਦਦ ਨਾਲ ਲੱਭ ਸਕਦੇ ਹੋ"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"ਬੰਦ ਹੋ ਰਿਹਾ ਹੈ…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ਦੇਖਭਾਲ ਦੇ ਪੜਾਅ ਦੇਖੋ"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ਦੇਖਭਾਲ ਦੇ ਪੜਾਅ ਦੇਖੋ"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"ਆਪਣਾ ਡੀਵਾਈਸ ਅਣਪਲੱਗ ਕਰੋ"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"ਉੱਚ ਰੈਜ਼ੋਲਿਊਸ਼ਨ ਲਈ, ਫ਼ੋਨ ਨੂੰ ਫਲਿੱਪ ਕਰੋ"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ਮੋੜਨਯੋਗ ਡੀਵਾਈਸ ਨੂੰ ਖੋਲ੍ਹਿਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ਮੋੜਨਯੋਗ ਡੀਵਾਈਸ ਨੂੰ ਆਲੇ-ਦੁਆਲੇ ਫਲਿੱਪ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"ਫੋਲਡਯੋਗ ਡੀਵਾਈਸ"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"ਅਣਫੋਲਡਯੋਗ ਡੀਵਾਈਸ"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> ਬੈਟਰੀ ਬਾਕੀ"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"ਆਪਣੇ ਸਟਾਈਲਸ ਨੂੰ ਚਾਰਜਰ ਨਾਲ ਕਨੈਕਟ ਕਰੋ"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"ਸਟਾਈਲਸ ਦੀ ਬੈਟਰੀ ਘੱਟ ਹੈ"</string>

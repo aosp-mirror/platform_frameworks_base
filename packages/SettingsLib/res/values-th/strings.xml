@@ -112,7 +112,7 @@
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"อุปกรณ์อินพุต"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"การเข้าถึงอินเทอร์เน็ต"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"ให้เข้าถึงรายชื่อติดต่อและประวัติการโทร"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"จะมีการใช้ข้อมูลเพื่อประกาศการติดต่อและอื่นๆ"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"จะมีการใช้ข้อมูลเพื่อประกาศการโทรและอื่นๆ"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"การแชร์การเชื่อมต่ออินเทอร์เน็ต"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"ข้อความ"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"การเข้าถึงซิม"</string>
@@ -239,7 +239,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"การแก้ไขข้อบกพร่องผ่าน Wi-Fi"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"หากต้องการดูและใช้อุปกรณ์ที่มีอยู่ ให้เปิดการแก้ไขข้อบกพร่องผ่าน Wi-Fi"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"จับคู่อุปกรณ์ด้วยคิวอาร์โค้ด"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"จับคู่อุปกรณ์เครื่องใหม่โดยใช้เครื่องมือสแกนคิวอาร์โค้ด"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"จับคู่อุปกรณ์เครื่องใหม่โดยใช้แอปสแกนคิวอาร์โค้ด"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"จับคู่อุปกรณ์ด้วยรหัสการจับคู่"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"จับคู่อุปกรณ์เครื่องใหม่โดยใช้รหัสตัวเลข 6 หลัก"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"อุปกรณ์ที่จับคู่"</string>
@@ -263,9 +263,9 @@
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, แก้ไขข้อบกพร่อง, พัฒนา"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ทางลัดรายงานข้อบกพร่อง"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"แสดงปุ่มในเมนูเปิด/ปิดสำหรับการใช้รายงานข้อบกพร่อง"</string>
-    <string name="keep_screen_on" msgid="1187161672348797558">"เปิดหน้าจอค้าง"</string>
+    <string name="keep_screen_on" msgid="1187161672348797558">"เปิดหน้าจอค้างไว้"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"หน้าจอจะไม่เข้าสู่โหมดสลีปขณะชาร์จ"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"เปิดใช้งานบันทึก HCI Snoop ของบลูทูธ"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"เปิดใช้บันทึก HCI Snoop ของบลูทูธ"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"บันทึกแพ็กเก็ตบลูทูธ (ปิด-เปิดบลูทูธหลังจากเปลี่ยนการตั้งค่านี้)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"การปลดล็อก OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"อนุญาตให้ปลดล็อกตัวโหลดการเปิดเครื่อง"</string>
@@ -518,7 +518,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"ใช้ภาษาของระบบ"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"ไม่สามารถเปิดการตั้งค่าสำหรับ <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"วิธีการป้อนข้อมูลนี้อาจเก็บข้อความทั้งหมดที่คุณพิมพ์ รวมถึงข้อมูลส่วนบุคคล เช่น รหัสผ่านและหมายเลขบัตรเครดิต โดยมาจากแอปพลิเคชัน <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ใช้วิธีการป้อนข้อมูลนี้หรือไม่"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"หมายเหตุ: หลังจากเริ่มต้นใหม่ แอปนี้จะไม่สามารถเริ่มการทำงานได้จนกว่าคุณจะปลดล็อกโทรศัพท์"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"หมายเหตุ: หลังจากรีบูต แอปนี้จะไม่สามารถเริ่มการทำงานได้จนกว่าคุณจะปลดล็อกโทรศัพท์"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"สถานะการลงทะเบียน IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"ลงทะเบียนแล้ว"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"ไม่ได้ลงทะเบียน"</string>
@@ -555,7 +555,7 @@
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"แท็บเล็ตเครื่องนี้"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"แท่นวางลำโพง"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"แท่นชาร์จที่มีลำโพง"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"อุปกรณ์ภายนอก"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"อุปกรณ์ที่เชื่อมต่อ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"โทรศัพท์เครื่องนี้"</string>

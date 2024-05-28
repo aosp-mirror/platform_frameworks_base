@@ -844,7 +844,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ਇੱਕ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਟੈਬਲੈੱਟ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਬਿਨਾਂ ਚਿਤਾਵਨੀ ਦੇ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ ਦਾ ਡਾਟਾ ਮਿਟਾ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ।"</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਵਾਹਨ ਆਡੀਓ ਸਿਸਟਮ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ਇੱਕ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਫ਼ੋਨ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰ ਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਫ਼ੋਨ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"ਪ੍ਰੋਫਾਈਲ ਡਾਟਾ ਮਿਟਾਓ"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"ਉਪਭੋਗਤਾ  ਡਾਟਾ  ਮਿਟਾਓ"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"ਬਿਨਾਂ ਚਿਤਾਵਨੀ ਦੇ ਇਸ ਟੈਬਲੈੱਟ ਤੇ ਮੌਜੂਦ ਇਸ ਵਰਤੋਂਕਾਰ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
@@ -1559,7 +1559,7 @@
     <string name="sync_really_delete" msgid="5657871730315579051">"ਆਈਟਮਾਂ ਹਟਾਓ"</string>
     <string name="sync_undo_deletes" msgid="5786033331266418896">"ਮਿਟਾਏ ਗਏ ਨੂੰ ਅਣਕੀਤਾ ਕਰੋ"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"ਹੁਣ ਕੁਝ ਨਾ ਕਰੋ"</string>
-    <string name="choose_account_label" msgid="5557833752759831548">"ਇੱਕ ਖਾਤਾ ਚੁਣੋ"</string>
+    <string name="choose_account_label" msgid="5557833752759831548">"ਕੋਈ ਖਾਤਾ ਚੁਣੋ"</string>
     <string name="add_account_label" msgid="4067610644298737417">"ਇੱਕ ਖਾਤਾ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="add_account_button_label" msgid="322390749416414097">"ਖਾਤਾ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"ਵਧਾਓ"</string>
@@ -1900,7 +1900,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ਠੀਕ ਹੈ"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"ਬੈਟਰੀ ਸੇਵਰ ਗੂੜ੍ਹੇ ਥੀਮ ਨੂੰ ਚਾਲੂ ਕਰਦਾ ਹੈ ਅਤੇ ਬੈਕਗ੍ਰਾਊਂਡ ਸਰਗਰਮੀ, ਕੁਝ ਦ੍ਰਿਸ਼ਟੀਗਤ ਪ੍ਰਭਾਵਾਂ, ਕੁਝ ਖਾਸ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਅਤੇ ਕੁਝ ਨੈੱਟਵਰਕ ਕਨੈਕਸ਼ਨਾਂ ਨੂੰ ਸੀਮਤ ਜਾਂ ਬੰਦ ਕਰਦਾ ਹੈ।"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"ਬੈਟਰੀ ਸੇਵਰ ਗੂੜ੍ਹੇ ਥੀਮ ਨੂੰ ਚਾਲੂ ਕਰਦਾ ਹੈ ਅਤੇ ਬੈਕਗ੍ਰਾਊਂਡ ਸਰਗਰਮੀ, ਕੁਝ ਦ੍ਰਿਸ਼ਟੀਗਤ ਪ੍ਰਭਾਵਾਂ, ਕੁਝ ਖਾਸ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਅਤੇ ਕੁਝ ਨੈੱਟਵਰਕ ਕਨੈਕਸ਼ਨਾਂ ਨੂੰ ਸੀਮਤ ਜਾਂ ਬੰਦ ਕਰਦਾ ਹੈ।"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"ਡਾਟਾ ਵਰਤੋਂ ਘਟਾਉਣ ਵਿੱਚ ਮਦਦ ਕਰਨ ਲਈ, ਡਾਟਾ ਸੇਵਰ ਕੁਝ ਐਪਾਂ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਡਾਟਾ ਭੇਜਣ ਜਾਂ ਪ੍ਰਾਪਤ ਕਰਨ ਤੋਂ ਰੋਕਦਾ ਹੈ। ਤੁਹਾਡੇ ਵੱਲੋਂ ਵਰਤਮਾਨ ਤੌਰ \'ਤੇ ਵਰਤੀ ਜਾ ਰਹੀ ਐਪ ਡਾਟਾ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਉਹ ਇੰਝ ਕਦੇ-ਕਦਾਈਂ ਕਰ ਸਕਦੀ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਸ ਦਾ ਮਤਲਬ ਇਹ ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਚਿੱਤਰ ਉਦੋਂ ਤੱਕ ਨਹੀਂ ਦਿਖਾਏ ਜਾਂਦੇ, ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਨ੍ਹਾਂ \'ਤੇ ਟੈਪ ਨਹੀਂ ਕਰਦੇ।"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"ਡਾਟਾ ਵਰਤੋਂ ਘਟਾਉਣ ਵਿੱਚ ਮਦਦ ਕਰਨ ਲਈ, ਡਾਟਾ ਸੇਵਰ ਵਿਸ਼ੇਸ਼ਤਾ ਕੁਝ ਐਪਾਂ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਡਾਟਾ ਭੇਜਣ ਜਾਂ ਪ੍ਰਾਪਤ ਕਰਨ ਤੋਂ ਰੋਕਦੀ ਹੈ। ਤੁਹਾਡੇ ਵੱਲੋਂ ਮੌਜੂਦਾ ਤੌਰ \'ਤੇ ਵਰਤੀ ਜਾ ਰਹੀ ਐਪ ਡਾਟਾ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਉਹ ਇੰਝ ਕਦੇ-ਕਦਾਈਂ ਕਰ ਸਕਦੀ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਸ ਦਾ ਮਤਲਬ ਇਹ ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਚਿੱਤਰ ਉਦੋਂ ਤੱਕ ਨਹੀਂ ਦਿਖਾਏ ਜਾਂਦੇ, ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਨ੍ਹਾਂ \'ਤੇ ਟੈਪ ਨਹੀਂ ਕਰਦੇ।"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ਕੀ ਡਾਟਾ ਸੇਵਰ ਚਾਲੂ ਕਰਨਾ ਹੈ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ਚਾਲੂ ਕਰੋ"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{ਇੱਕ ਮਿੰਟ ਲਈ ({formattedTime} ਤੱਕ)}one{# ਮਿੰਟ ਲਈ ({formattedTime} ਤੱਕ)}other{# ਮਿੰਟਾਂ ਲਈ ({formattedTime} ਤੱਕ)}}"</string>

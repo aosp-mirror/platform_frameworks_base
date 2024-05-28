@@ -50,7 +50,7 @@
       <item quantity="other">Du har <xliff:g id="NUMBER_1">%d</xliff:g> försök kvar innan SIM-kortet låses.</item>
       <item quantity="one">Du har <xliff:g id="NUMBER_0">%d</xliff:g> försök kvar innan SIM-kortet låses.</item>
     </plurals>
-    <string name="imei" msgid="2157082351232630390">"IMEI-kod"</string>
+    <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"Nummerpresentatör för inkommande samtal"</string>
     <string name="ClirMmi" msgid="6752346475055446417">"Dölj nummerpresentatör för utgående samtal"</string>
@@ -831,7 +831,7 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Övervaka antalet felaktiga lösenord som angetts för skärmlåset och lås surfplattan eller ta bort alla data från surfplattan om för många felaktiga försök görs."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Övervaka antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och lås Android TV-enheten eller rensa all data på Android TV-enheten om för många felaktiga lösenord har skrivits in."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Övervaka antalet felaktiga lösenord som angetts för skärmlåset och lås infotainmentsystemet eller rensa all data från infotainmentsystemet om för många felaktiga försök görs."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Övervaka antalet felaktiga lösenord som angivits för skärmlåset och lås mobilen eller ta bort alla data från mobilen om för många felaktiga försök görs."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Övervaka antalet felaktiga lösenord som angivits för skärmlåset och lås telefonen eller ta bort alla data från telefonen om för många felaktiga försök görs."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Övervaka antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och lås surfplattan eller rensa alla uppgifter för den här användaren om för många felaktiga lösenord har skrivits in."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Övervaka antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och lås Android TV-enheten eller rensa alla uppgifter för den här användaren om för många felaktiga lösenord har skrivits in."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Övervaka antalet felaktiga lösenord som angetts för skärmlåset och lås infotainmentsystemet eller rensa all data från profilen om för många felaktiga lösenord har skrivits in."</string>
@@ -844,7 +844,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Ta bort data från surfplattan utan förvarning genom att återställa standardinställningarna."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Radera data på Android TV-enheten utan förvarning genom att återställa standardinställningarna."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Rensa data från infotainmentsystemet utan förvarning genom att återställa standardinställningarna."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Ta bort data från mobilen utan förvarning genom att återställa standardinställningarna."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Ta bort data från telefonen utan förvarning genom att återställa standardinställningarna."</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Rensa profildata"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Radera användaruppgifter"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Rensa användarens uppgifter på den här surfplattan utan förvarning."</string>
@@ -1271,7 +1271,7 @@
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Mobilen uppdateras …"</string>
     <string name="android_upgrading_title" product="tablet" msgid="4268417249079938805">"Surfplattan uppdateras …"</string>
     <string name="android_upgrading_title" product="device" msgid="6774767702998149762">"Enheten uppdateras …"</string>
-    <string name="android_start_title" product="default" msgid="4036708252778757652">"Mobilen startar …"</string>
+    <string name="android_start_title" product="default" msgid="4036708252778757652">"Telefonen startar …"</string>
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android startar …"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Surfplattan startar …"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Enheten startar …"</string>
@@ -1525,10 +1525,10 @@
     <string name="vpn_title_long" msgid="6834144390504619998">"VPN aktiveras av <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="2275388920267251078">"Knacka lätt för att hantera nätverket."</string>
     <string name="vpn_text_long" msgid="278540576806169831">"Ansluten till <xliff:g id="SESSION">%s</xliff:g>. Knacka lätt för att hantera nätverket."</string>
-    <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"Ansluter till Always-on VPN ..."</string>
-    <string name="vpn_lockdown_connected" msgid="2853127976590658469">"Ansluten till Always-on VPN"</string>
-    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Frånkopplad från Always-on VPN"</string>
-    <string name="vpn_lockdown_error" msgid="4453048646854247947">"Det gick inte att ansluta till Always-on VPN"</string>
+    <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"Ansluter till Alltid på-VPN ..."</string>
+    <string name="vpn_lockdown_connected" msgid="2853127976590658469">"Ansluten till Alltid på-VPN"</string>
+    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Frånkopplad från Alltid på-VPN"</string>
+    <string name="vpn_lockdown_error" msgid="4453048646854247947">"Det gick inte att ansluta till Alltid på-VPN"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Ändra inställningarna för nätverk eller VPN"</string>
     <string name="upload_file" msgid="8651942222301634271">"Välj fil"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Ingen fil har valts"</string>

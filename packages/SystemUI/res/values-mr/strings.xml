@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"आणखी विजेट जोडा"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"विजेट कस्टमाइझ करण्यासाठी प्रेस करून ठेवा"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"विजेट कस्टमाइझ करा"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"बंद केलेल्या विजेटच्या अ‍ॅपचे आयकन"</string>
     <string name="edit_widget" msgid="9030848101135393954">"विजेट संपादित करा"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"काढून टाका"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"विजेट जोडा"</string>
@@ -647,7 +646,7 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;स्थिती&lt;/b&gt; ला थोडी कमी म्हणून रँक केले गेले"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"संभाषण सूचनांच्या वरती आणि लॉक स्क्रीनवरील प्रोफाइल फोटो म्हणून दिसते"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"संभाषण सूचनांच्या वरती आणि लॉक स्क्रीनवरील प्रोफाइल फोटो म्हणून दिसते, बबल म्हणून दिसते"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"संभाषण सूचनांच्या वरती आणि लॉक स्क्रीनवरील प्रोफाइल फोटो म्हणून दिसते, व्यत्यय आणू नका यामध्ये अडथळा आणते"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"संभाषण नोटिफिकेशनच्या वरती आणि लॉक स्क्रीनवरील प्रोफाइल फोटो म्हणून दिसते, व्यत्यय आणू नका यामध्ये अडथळा आणते"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"संभाषण सूचनांच्या वरती आणि लॉक स्क्रीनवरील प्रोफाइल फोटो म्हणून दिसते, बबल म्हणून दिसते, व्यत्यय आणू नका यामध्ये अडथळा आणते"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राधान्य"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> हे संभाषण वैशिष्ट्यांना सपोर्ट करत नाही"</string>
@@ -726,7 +725,7 @@
     <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"इनपुट शॉर्टकट दाखवत आहे"</string>
     <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"ॲप्स उघडणारे शॉर्टकट दाखवत आहे"</string>
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"सद्य अ‍ॅपसाठी शॉर्टकट दाखवत आहे"</string>
-    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"सूचना पहा"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"नोटिफिकेशन पहा"</string>
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"स्क्रीनशॉट घ्या"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"शॉर्टकट दाखवा"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"मागे जा"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"अलीकडील ॲप्सवरून पुढे जा"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"अलीकडील ॲप्सवरून मागे जा"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"ॲप्सची सूची उघडा"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"टास्कबार दाखवा"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"सेटिंग्ज उघडा"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistant उघडा"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"लॉक स्क्रीन"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"पॉवर मेनू"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> पैकी <xliff:g id="ID_1">%1$d</xliff:g> पेज"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"लॉक स्‍क्रीन"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"तुम्ही हा फोन बंद असतानादेखील Find My Device वापरून तो शोधू शकता"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"बंद होत आहे…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"काय काळजी घ्यावी ते पहा"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"काय काळजी घ्यावी ते पहा"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"तुमचे डिव्हाइस अनप्लग करा"</string>
@@ -920,7 +916,7 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"स्क्रीन रेकॉर्डिंग"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"शीर्षक नाही"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्टँडबाय"</string>
-    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"फॉंट आकार"</string>
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"फॉंटचा आकार"</string>
     <string name="font_scaling_smaller" msgid="1012032217622008232">"आणखी लहान करा"</string>
     <string name="font_scaling_larger" msgid="5476242157436806760">"आणखी मोठे करा"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"मॅग्निफिकेशन विंडो"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"उच्च रेझोल्यूशनसाठी, फोन फ्लिप करा"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"फोल्ड करता येण्यासारखे डिव्हाइस अनफोल्ड केले जात आहे"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"फोल्ड करता येण्यासारखे डिव्हाइस आजूबाजूला फ्लिप केले जात आहे"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"फोल्ड केलेले"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"फोल्ड न केलेले"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> बॅटरी शिल्लक आहे"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"तुमचे स्टायलस चार्जरशी कनेक्ट करा"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"स्टायलस बॅटरी कमी आहे"</string>
