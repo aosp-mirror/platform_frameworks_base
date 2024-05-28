@@ -24,7 +24,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.platform.testTag
@@ -69,7 +68,6 @@ internal class Scene(
     }
 
     @Composable
-    @OptIn(ExperimentalComposeUiApi::class)
     fun Content(modifier: Modifier = Modifier) {
         Box(
             modifier
@@ -125,7 +123,7 @@ internal class SceneScopeImpl(
     override fun <T> animateSceneValueAsState(
         value: T,
         key: ValueKey,
-        lerp: (T, T, Float) -> T,
+        type: SharedValueType<T, *>,
         canOverflow: Boolean
     ): AnimatedState<T> {
         return animateSharedValueAsState(
@@ -134,7 +132,7 @@ internal class SceneScopeImpl(
             element = null,
             key = key,
             value = value,
-            lerp = lerp,
+            type = type,
             canOverflow = canOverflow,
         )
     }
