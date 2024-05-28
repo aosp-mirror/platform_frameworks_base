@@ -76,6 +76,7 @@
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"đã gửi hình ảnh"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Đang lưu ảnh chụp màn hình..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Đang lưu ảnh chụp màn hình vào hồ sơ công việc…"</string>
+    <string name="screenshot_saving_private_profile" msgid="8934706048497093297">"Đang lưu ảnh chụp màn hình vào hồ sơ riêng tư"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Đã lưu ảnh chụp màn hình"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Không thể lưu ảnh chụp màn hình"</string>
     <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"Màn hình bên ngoài"</string>
@@ -371,6 +372,8 @@
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Ghép nối thiết bị mới"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Nhấp để ghép nối thiết bị mới"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Không cập nhật được giá trị đặt trước"</string>
+    <!-- no translation found for hearing_devices_preset_label (7878267405046232358) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Bỏ chặn micrô của thiết bị?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Bỏ chặn camera của thiết bị?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Bỏ chặn máy ảnh và micrô của thiết bị?"</string>
