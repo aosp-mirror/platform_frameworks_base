@@ -293,6 +293,7 @@ public class AudioDeviceInventory {
             Iterator<Entry<Pair<Integer, String>, AdiDeviceState>> iterator =
                     mDeviceInventory.entrySet().iterator();
             if (iterator.hasNext()) {
+                iterator.next();
                 iterator.remove();
             }
         }
