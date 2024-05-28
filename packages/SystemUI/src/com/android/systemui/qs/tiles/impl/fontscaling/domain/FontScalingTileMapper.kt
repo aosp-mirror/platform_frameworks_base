@@ -36,10 +36,11 @@ constructor(
 
     override fun map(config: QSTileConfig, data: FontScalingTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
+            iconRes = R.drawable.ic_qs_font_scaling
             val icon =
                 Icon.Loaded(
                     resources.getDrawable(
-                        R.drawable.ic_qs_font_scaling,
+                        iconRes!!,
                         theme,
                     ),
                     contentDescription = null

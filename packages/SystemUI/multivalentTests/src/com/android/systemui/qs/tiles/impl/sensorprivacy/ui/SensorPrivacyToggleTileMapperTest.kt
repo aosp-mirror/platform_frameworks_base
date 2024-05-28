@@ -147,6 +147,7 @@ class SensorPrivacyToggleTileMapperTest : SysuiTestCase() {
 
         return QSTileState(
             { Icon.Loaded(context.getDrawable(iconRes)!!, null) },
+            iconRes,
             label,
             activationState,
             secondaryLabel,

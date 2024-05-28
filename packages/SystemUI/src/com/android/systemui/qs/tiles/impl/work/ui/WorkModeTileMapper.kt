@@ -41,15 +41,9 @@ constructor(
         QSTileState.build(resources, theme, config.uiConfig) {
             label = getTileLabel()!!
             contentDescription = label
-
+            iconRes = com.android.internal.R.drawable.stat_sys_managed_profile_status
             icon = {
-                Icon.Loaded(
-                    resources.getDrawable(
-                        com.android.internal.R.drawable.stat_sys_managed_profile_status,
-                        theme
-                    ),
-                    contentDescription = null
-                )
+                Icon.Loaded(resources.getDrawable(iconRes!!, theme), contentDescription = null)
             }
 
             when (data) {

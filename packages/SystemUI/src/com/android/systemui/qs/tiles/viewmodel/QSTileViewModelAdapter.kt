@@ -28,6 +28,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIcon
+import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIconWithRes
 import com.android.systemui.qs.tileimpl.QSTileImpl.ResourceIcon
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -241,7 +242,9 @@ constructor(
 
                 iconSupplier = Supplier {
                     when (val stateIcon = viewModelState.icon()) {
-                        is Icon.Loaded -> DrawableIcon(stateIcon.drawable)
+                        is Icon.Loaded ->
+                            if (viewModelState.iconRes == null) DrawableIcon(stateIcon.drawable)
+                            else DrawableIconWithRes(stateIcon.drawable, viewModelState.iconRes)
                         is Icon.Resource -> ResourceIcon.get(stateIcon.res)
                         null -> null
                     }

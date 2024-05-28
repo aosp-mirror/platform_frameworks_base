@@ -116,6 +116,7 @@ class QSTileViewModelImplTest : SysuiTestCase() {
                     "test_spec:\n" +
                         "    QSTileState(" +
                         "icon=() -> com.android.systemui.common.shared.model.Icon?, " +
+                        "iconRes=null, " +
                         "label=test_data, " +
                         "activationState=INACTIVE, " +
                         "secondaryLabel=null, " +

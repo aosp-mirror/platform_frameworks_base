@@ -97,6 +97,7 @@ class OneHandedModeTileMapperTest : SysuiTestCase() {
         val label = context.getString(R.string.quick_settings_onehanded_label)
         return QSTileState(
             { Icon.Loaded(context.getDrawable(iconRes)!!, null) },
+            iconRes,
             label,
             activationState,
             secondaryLabel,
