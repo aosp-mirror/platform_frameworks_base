@@ -650,6 +650,7 @@
         <!-- started from MediaProjectionManager -->
         <activity
             android:name=".mediaprojection.permission.MediaProjectionPermissionActivity"
+            android:showForAllUsers="true"
             android:exported="true"
             android:theme="@style/Theme.SystemUI.MediaProjectionAlertDialog"
             android:finishOnCloseSystemDialogs="true"
@@ -660,6 +661,7 @@
         <activity
             android:name=".mediaprojection.appselector.MediaProjectionAppSelectorActivity"
             android:theme="@style/Theme.SystemUI.MediaProjectionAppSelector"
+            android:showForAllUsers="true"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true"
             android:documentLaunchMode="never"
