@@ -26,9 +26,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.panels.domain.interactor.IconTilesInteractor
-import com.android.systemui.qs.panels.domain.interactor.InfiniteGridSizeInteractor
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.InfiniteGridSizeViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.res.R
@@ -38,8 +38,8 @@ import javax.inject.Inject
 class InfiniteGridLayout
 @Inject
 constructor(
-    private val iconTilesInteractor: IconTilesInteractor,
-    private val gridSizeInteractor: InfiniteGridSizeInteractor
+    private val iconTilesViewModel: IconTilesViewModel,
+    private val gridSizeViewModel: InfiniteGridSizeViewModel,
 ) : GridLayout {
 
     @Composable
@@ -52,8 +52,8 @@ constructor(
             tiles.forEach { it.startListening(token) }
             onDispose { tiles.forEach { it.stopListening(token) } }
         }
-        val iconTilesSpecs by iconTilesInteractor.iconTilesSpecs.collectAsStateWithLifecycle()
-        val columns by gridSizeInteractor.columns.collectAsStateWithLifecycle()
+        val iconTilesSpecs by iconTilesViewModel.iconTilesSpecs.collectAsStateWithLifecycle()
+        val columns by gridSizeViewModel.columns.collectAsStateWithLifecycle()
 
         TileLazyGrid(modifier = modifier, columns = GridCells.Fixed(columns)) {
             items(
@@ -68,9 +68,9 @@ constructor(
                 }
             ) { index ->
                 Tile(
-                    tiles[index],
-                    iconTilesSpecs.contains(tiles[index].spec),
-                    Modifier.height(dimensionResource(id = R.dimen.qs_tile_height))
+                    tile = tiles[index],
+                    iconOnly = iconTilesSpecs.contains(tiles[index].spec),
+                    modifier = Modifier.height(dimensionResource(id = R.dimen.qs_tile_height))
                 )
             }
         }
@@ -83,8 +83,8 @@ constructor(
         onAddTile: (TileSpec, Int) -> Unit,
         onRemoveTile: (TileSpec) -> Unit,
     ) {
-        val iconOnlySpecs by iconTilesInteractor.iconTilesSpecs.collectAsStateWithLifecycle()
-        val columns by gridSizeInteractor.columns.collectAsStateWithLifecycle()
+        val iconOnlySpecs by iconTilesViewModel.iconTilesSpecs.collectAsStateWithLifecycle()
+        val columns by gridSizeViewModel.columns.collectAsStateWithLifecycle()
 
         DefaultEditTileGrid(
             tiles = tiles,

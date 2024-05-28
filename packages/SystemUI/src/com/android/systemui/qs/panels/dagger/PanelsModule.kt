@@ -28,6 +28,7 @@ import com.android.systemui.qs.panels.domain.interactor.InfiniteGridConsistencyI
 import com.android.systemui.qs.panels.domain.interactor.NoopGridConsistencyInteractor
 import com.android.systemui.qs.panels.shared.model.GridConsistencyLog
 import com.android.systemui.qs.panels.shared.model.GridLayoutType
+import com.android.systemui.qs.panels.shared.model.IconLabelVisibilityLog
 import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
 import com.android.systemui.qs.panels.shared.model.PartitionedGridLayoutType
 import com.android.systemui.qs.panels.shared.model.StretchedGridLayoutType
@@ -35,6 +36,12 @@ import com.android.systemui.qs.panels.ui.compose.GridLayout
 import com.android.systemui.qs.panels.ui.compose.InfiniteGridLayout
 import com.android.systemui.qs.panels.ui.compose.PartitionedGridLayout
 import com.android.systemui.qs.panels.ui.compose.StretchedGridLayout
+import com.android.systemui.qs.panels.ui.viewmodel.IconLabelVisibilityViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.IconLabelVisibilityViewModelImpl
+import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModelImpl
+import com.android.systemui.qs.panels.ui.viewmodel.InfiniteGridSizeViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.InfiniteGridSizeViewModelImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -53,6 +60,15 @@ interface PanelsModule {
         impl: NoopGridConsistencyInteractor
     ): GridTypeConsistencyInteractor
 
+    @Binds fun bindIconTilesViewModel(impl: IconTilesViewModelImpl): IconTilesViewModel
+
+    @Binds fun bindGridSizeViewModel(impl: InfiniteGridSizeViewModelImpl): InfiniteGridSizeViewModel
+
+    @Binds
+    fun bindIconLabelVisibilityViewModel(
+        impl: IconLabelVisibilityViewModelImpl
+    ): IconLabelVisibilityViewModel
+
     @Binds @Named("Default") fun bindDefaultGridLayout(impl: PartitionedGridLayout): GridLayout
 
     companion object {
@@ -61,6 +77,13 @@ interface PanelsModule {
         @GridConsistencyLog
         fun providesGridConsistencyLog(factory: LogBufferFactory): LogBuffer {
             return factory.create("GridConsistencyLog", 50)
+        }
+
+        @Provides
+        @SysUISingleton
+        @IconLabelVisibilityLog
+        fun providesIconTileLabelVisibilityLog(factory: LogBufferFactory): LogBuffer {
+            return factory.create("IconLabelVisibilityLog", 50)
         }
 
         @Provides

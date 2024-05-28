@@ -17,8 +17,15 @@
 package com.android.systemui.qs.panels.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.compose.PartitionedGridLayout
-import com.android.systemui.qs.panels.ui.viewmodel.partitionedGridViewModel
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.log.core.FakeLogBuffer
+import com.android.systemui.qs.panels.data.repository.iconLabelVisibilityRepository
 
-val Kosmos.partitionedGridLayout by
-    Kosmos.Fixture { PartitionedGridLayout(partitionedGridViewModel) }
+val Kosmos.iconLabelVisibilityInteractor by
+    Kosmos.Fixture {
+        IconLabelVisibilityInteractor(
+            iconLabelVisibilityRepository,
+            FakeLogBuffer.Factory.create(),
+            applicationCoroutineScope
+        )
+    }

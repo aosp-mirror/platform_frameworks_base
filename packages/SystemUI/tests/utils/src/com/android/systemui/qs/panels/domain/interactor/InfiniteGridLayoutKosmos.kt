@@ -18,6 +18,8 @@ package com.android.systemui.qs.panels.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.qs.panels.ui.compose.InfiniteGridLayout
+import com.android.systemui.qs.panels.ui.viewmodel.iconTilesViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.infiniteGridSizeViewModel
 
 val Kosmos.infiniteGridLayout by
-    Kosmos.Fixture { InfiniteGridLayout(iconTilesInteractor, infiniteGridSizeInteractor) }
+    Kosmos.Fixture { InfiniteGridLayout(iconTilesViewModel, infiniteGridSizeViewModel) }
