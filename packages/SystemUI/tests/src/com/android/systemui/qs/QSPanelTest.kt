@@ -275,6 +275,19 @@ class QSPanelTest : SysuiTestCase() {
         ViewUtils.detachView(panel)
     }
 
+    @Test
+    fun setRowColumnLayout() {
+        qsPanel.setColumnRowLayout(/* withMedia= */ false)
+
+        assertThat(qsPanel.tileLayout!!.minRows).isEqualTo(1)
+        assertThat(qsPanel.tileLayout!!.maxColumns).isEqualTo(4)
+
+        qsPanel.setColumnRowLayout(/* withMedia= */ true)
+
+        assertThat(qsPanel.tileLayout!!.minRows).isEqualTo(2)
+        assertThat(qsPanel.tileLayout!!.maxColumns).isEqualTo(2)
+    }
+
     private infix fun View.isLeftOf(other: View): Boolean {
         val rect = Rect()
         getBoundsOnScreen(rect)

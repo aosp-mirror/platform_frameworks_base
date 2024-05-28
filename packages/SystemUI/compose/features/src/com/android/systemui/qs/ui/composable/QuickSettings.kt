@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.ui.composable
 
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +26,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
@@ -164,11 +167,8 @@ private fun QuickSettingsContent(
     state: () -> QSSceneAdapter.State,
     modifier: Modifier = Modifier,
 ) {
-    val qsView by qsSceneAdapter.qsView.collectAsStateWithLifecycle(null)
-    val isCustomizing by
-        qsSceneAdapter.isCustomizerShowing.collectAsStateWithLifecycle(
-            qsSceneAdapter.isCustomizerShowing.value
-        )
+    val qsView by qsSceneAdapter.qsView.collectAsStateWithLifecycle()
+    val isCustomizing by qsSceneAdapter.isCustomizerShowing.collectAsStateWithLifecycle()
     QuickSettingsTheme {
         val context = LocalContext.current
 
@@ -180,15 +180,34 @@ private fun QuickSettingsContent(
         qsView?.let { view ->
             Box(
                 modifier =
-                    modifier.fillMaxWidth().thenIf(isCustomizing) { Modifier.fillMaxHeight() }
+                    modifier
+                        .fillMaxWidth()
+                        .thenIf(isCustomizing) { Modifier.fillMaxHeight() }
+                        .drawWithContent {
+                            qsSceneAdapter.applyLatestExpansionAndSquishiness()
+                            drawContent()
+                        }
             ) {
                 AndroidView(
                     modifier = Modifier.fillMaxWidth(),
-                    factory = { _ ->
+                    factory = { context ->
                         qsSceneAdapter.setState(state())
-                        view
+                        FrameLayout(context).apply {
+                            (view.parent as? ViewGroup)?.removeView(view)
+                            addView(view)
+                        }
                     },
-                    update = { qsSceneAdapter.setState(state()) }
+                    // When the view changes (e.g. due to a theme change), this will be recomposed
+                    // if needed and the new view will be attached to the FrameLayout here.
+                    update = {
+                        qsSceneAdapter.setState(state())
+                        if (view.parent != it) {
+                            it.removeAllViews()
+                            (view.parent as? ViewGroup)?.removeView(view)
+                            it.addView(view)
+                        }
+                    },
+                    onRelease = { it.removeAllViews() }
                 )
             }
         }

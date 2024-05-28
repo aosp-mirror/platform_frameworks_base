@@ -19,8 +19,8 @@ package com.android.systemui.qs.ui.adapter
 import android.content.Context
 import android.view.View
 import com.android.systemui.settings.brightness.MirrorController
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 
@@ -41,7 +41,7 @@ class FakeQSSceneAdapter(
     override val customizerAnimationDuration = _animationDuration.asStateFlow()
 
     private val _view = MutableStateFlow<View?>(null)
-    override val qsView: Flow<View> = _view.filterNotNull()
+    override val qsView: StateFlow<View?> = _view.asStateFlow()
 
     private val _state = MutableStateFlow<QSSceneAdapter.State?>(null)
     val state = _state.filterNotNull()
@@ -63,6 +63,8 @@ class FakeQSSceneAdapter(
             _state.value = state
         }
     }
+
+    override fun applyLatestExpansionAndSquishiness() {}
 
     fun setCustomizing(value: Boolean) {
         updateCustomizerFlows(if (value) CustomizerState.Showing else CustomizerState.Hidden)
