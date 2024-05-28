@@ -103,10 +103,8 @@
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"Akkumulátorok töltöttségi szintje: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> (bal) és <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> (jobb)."</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"Akkumulátor töltöttségi szintje: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> (bal)."</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"Akkumulátor töltöttségi szintje: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> (jobb)."</string>
-    <!-- no translation found for tv_bluetooth_battery_level_untethered_left (337629670583744410) -->
-    <skip />
-    <!-- no translation found for tv_bluetooth_battery_level_untethered_right (8610019317279155595) -->
-    <skip />
+    <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"Bal: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_right" msgid="8610019317279155595">"Jobb: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktív"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Mentve"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktív (csak bal)"</string>

@@ -103,10 +103,8 @@
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"ግ፦ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>፣ ቀ፦ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ባትሪ።"</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"ግራ፦ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ባትሪ"</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"ቀኝ፦ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ባትሪ"</string>
-    <!-- no translation found for tv_bluetooth_battery_level_untethered_left (337629670583744410) -->
-    <skip />
-    <!-- no translation found for tv_bluetooth_battery_level_untethered_right (8610019317279155595) -->
-    <skip />
+    <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"ግራ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_right" msgid="8610019317279155595">"ቀኝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"ንቁ"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"ተቀምጧል"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"ገቢር (ግራ ብቻ)"</string>
