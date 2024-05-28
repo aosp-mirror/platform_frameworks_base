@@ -201,6 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"तपाईंको कार्य प्रोफाइल अब उप्रान्त यस डिभाइसमा उपलब्ध छैन"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"पासवर्ड प्रविष्ट गर्ने अत्यधिक गलत प्रयासहरू भए"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"व्यवस्थापकले यन्त्रलाई व्यक्तिगत प्रयोगका लागि अस्वीकार गर्नुभयो"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"निजी स्पेस हटाइएको छ"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"तपाईंको सङ्गठन आफूले व्यवस्थापन गरेको यो डिभाइसमा निजी स्पेस राख्ने अनुमति दिँदैन।"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"यन्त्र व्यवस्थित गरिएको छ"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"तपाईंको संगठनले यस डिभाइसको व्यवस्थापन गर्दछ र नेटवर्क ट्राफिकको अनुगमन गर्न सक्छ। विवरणहरूका लागि ट्याप गर्नुहोस्।"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"एपहरूले तपाईंको स्थान प्रयोग गर्न सक्छन्"</string>
@@ -1171,7 +1173,7 @@
     <string name="elapsed_time_short_format_mm_ss" msgid="8689459651807876423">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="2302144714803345056">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="1532369154488982046">"सबैलाई चयन गर्नुहोस्"</string>
-    <string name="cut" msgid="2561199725874745819">"काट्नुहोस्"</string>
+    <string name="cut" msgid="2561199725874745819">"कट् गर्नुहोस्"</string>
     <string name="copy" msgid="5472512047143665218">"कपी गर्नुहोस्"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"क्लिपबोर्डमा कपी गर्न सकिएन"</string>
     <string name="paste" msgid="461843306215520225">"टाँस्नुहोस्"</string>
@@ -2415,10 +2417,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"यसले काम गर्ने तरिका"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"विचाराधीन..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"फिंगरप्रिन्ट अनलक फेरि सेटअप गर्नुहोस्"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"राम्ररी काम नगरिरहेको हुनाले <xliff:g id="FINGERPRINT">%s</xliff:g> मेटाइएको छ"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"राम्ररी काम नगरिरहेका हुनाले <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> र <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> मेटाइएका छन्"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ले काम गरिरहेको थिएन र त्यसलाई मेटाइयो। फिंगरप्रिन्ट प्रयोग गरी आफ्नो फोन अनलक गर्न त्यसलाई फेरि सेट अप गर्नुहोस्।"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> र <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ले राम्ररी काम गरिरहेका थिएनन् र तिनलाई मेटाइयो। फिंगरप्रिन्ट प्रयोग गरी आफ्नो फोन अनलक गर्न तिनलाई फेरि सेट अप गर्नुहोस्।"</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"फेस अनलक फेरि सेटअप गर्नुहोस्"</string>

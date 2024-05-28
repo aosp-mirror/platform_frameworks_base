@@ -201,6 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Hồ sơ công việc của bạn không có sẵn trên thiết bị này nữa"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Quá nhiều lần nhập mật khẩu"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Quản trị viên đã từ bỏ quyền sở hữu thiết bị để cho phép dùng vào mục đích cá nhân"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Đã xoá không gian riêng tư"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Tổ chức của bạn không cho phép tạo không gian riêng tư trên thiết bị được quản lý này."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Thiết bị được quản lý"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Tổ chức của bạn sẽ quản lý thiết bị này và có thể theo dõi lưu lượng truy cập mạng. Nhấn để biết chi tiết."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Ứng dụng có thể truy cập vào thông tin vị trí của bạn"</string>
@@ -2415,10 +2417,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cách hoạt động"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Đang chờ xử lý..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Thiết lập lại tính năng Mở khoá bằng vân tay"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> không dùng được và đã bị xoá"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> và <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> không dùng được và đã bị xoá"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> không dùng được và đã bị xoá. Hãy thiết lập lại để mở khoá điện thoại bằng vân tay."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> và <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> không dùng được và đã bị xoá. Hãy thiết lập lại để mở khoá điện thoại bằng vân tay."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Thiết lập lại tính năng Mở khoá bằng khuôn mặt"</string>

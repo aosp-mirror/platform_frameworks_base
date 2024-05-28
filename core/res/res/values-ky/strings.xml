@@ -201,6 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Жумуш профилиңиз бул түзмөктөн өчүрүлдү"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Өтө көп жолу сырсөздү киргизүү аракети жасалды"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Админ түзмөктөн жеке колдонуу үчүн баш тартты"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Жеке мейкиндик өчүрүлдү"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Уюмуңуз бул көзөмөлдөнгөн түзмөктө жеке мейкиндиктерди колдонууга тыюу салат."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Түзмөктү ишкана башкарат"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Ишканаңыз бул түзмөктү башкарат жана тармак трафигин көзөмөлдөшү мүмкүн. Чоо-жайын билгиңиз келсе, таптап коюңуз."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Колдонмолор кайда жүргөнүңүздү көрө алат"</string>
@@ -283,8 +285,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Үн жардамчысы"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"Бекем кулпулоо"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
-    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
-    <skip />
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"Жооп берүү"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Жаңы эскертме"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Аппараттык баскычтоп"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Коопсуздук"</string>
@@ -1189,8 +1190,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Өчүрүү"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Киргизүү ыкмасы"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Текст боюнча иштер"</string>
-    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"Бул талаада жазып киргизүү колдоого алынбайт"</string>
-    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Сырсөз талаасында жазып киргизүү колдоого алынбайт"</string>
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"Бул жерге кол менен жазганга болбойт"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Сырсөз киргизилүүчү жерге кол менен жаза албайсыз"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Артка"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Киргизүү ыкмасын өзгөртүү"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Сактагычта орун калбай баратат"</string>
@@ -2416,10 +2417,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ал кантип иштейт"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Кезекте турат..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Манжа изи менен ачуу функциясын кайра тууралаңыз"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> ойдогудай иштебегендиктен өчүрүлдү"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> жана <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ойдогудай иштебегендиктен өчүрүлдү"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ойдогудай иштебегендиктен, жок кылынды. Телефондо Манжа изи менен ачуу функциясын колдонуу үчүн аны кайра тууралаңыз."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> жана <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ойдогудай иштебегендиктен, жок кылынды. Телефонду манжа изи менен ачуу үчүн аларды кайра тууралаңыз."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Жүзүнөн таанып ачуу функциясын кайрадан тууралаңыз"</string>

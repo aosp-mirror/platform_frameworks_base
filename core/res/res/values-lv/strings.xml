@@ -202,6 +202,10 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Jūsu darba profils šai ierīcē vairs nav pieejams."</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Veikts pārāk daudz paroles ievadīšanas mēģinājumu."</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administrators atteicās no tādas ierīces pārvaldības, ko var izmantot personiskām vajadzībām"</string>
+    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
+    <skip />
+    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"Ierīce tiek pārvaldīta"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Jūsu organizācija pārvalda šo ierīci un var uzraudzīt tīkla datplūsmu. Pieskarieties, lai saņemtu detalizētu informāciju."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Lietotne var piekļūt jūsu atrašanās vietas datiem"</string>
@@ -284,8 +288,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Balss palīgs"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"Bloķēšana"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"Pārsniedz"</string>
-    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
-    <skip />
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"Atbildēt"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Jauns paziņojums"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Fiziskā tastatūra"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Drošība"</string>
@@ -2417,10 +2420,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Darbības principi"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Gaida…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Vēlreiz iestatiet autorizāciju ar pirksta nospiedumu"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> nedarbojās pareizi un tika izdzēsts"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> un <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nedarbojās pareizi un tika izdzēsti"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> nedarbojās pareizi un tika izdzēsts. Iestatiet to atkal, lai varētu atbloķēt tālruni ar pirksta nospiedumu."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> un <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nedarbojās pareizi un tika izdzēsti. Iestatiet tos atkal, lai varētu atbloķētu tālruni ar pirksta nospiedumu."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Vēlreiz iestatiet autorizāciju pēc sejas"</string>
