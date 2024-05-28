@@ -514,7 +514,12 @@ class DividerPresenter implements View.OnTouchListener {
                         mProperties.mDividerAttributes, mProperties.mIsVerticalSplit,
                         calculateMinPosition(), calculateMaxPosition());
                 mRenderer.setDividerPosition(mDividerPosition);
-                switch (event.getAction()) {
+
+                // Convert to use screen-based coordinates to prevent lost track of motion events
+                // while moving divider bar and calculating dragging velocity.
+                event.setLocation(event.getRawX(), event.getRawY());
+                final int action = event.getAction() & MotionEvent.ACTION_MASK;
+                switch (action) {
                     case MotionEvent.ACTION_DOWN:
                         onStartDragging(event);
                         break;
@@ -713,9 +718,9 @@ class DividerPresenter implements View.OnTouchListener {
             return snap(dividerPosition, possiblePositions);
         }
         if (velocity < 0) {
-            return 0;
+            return minPosition;
         } else {
-            return fullyExpandedPosition;
+            return maxPosition;
         }
     }
 
