@@ -2397,10 +2397,8 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otvori Poruke"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Kako to funkcionira"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Ponovno postavite otključavanje otiskom prsta"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"Otisak prsta <xliff:g id="FINGERPRINT">%s</xliff:g> nije dobro funkcionirao i izbrisan je"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"Otisci prstiju <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> i <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nisu dobro funkcionirali i izbrisani su"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"Otisak prsta <xliff:g id="FINGERPRINT">%s</xliff:g> nije dobro funkcionirao i izbrisan je. Ponovno ga postavite da biste otključali telefon otiskom prsta."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"Otisci prstiju <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> i <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nisu dobro funkcionirali i izbrisani su. Ponovno ih postavite da biste otključali telefon otiskom prsta."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Ponovno postavite otključavanje licem"</string>

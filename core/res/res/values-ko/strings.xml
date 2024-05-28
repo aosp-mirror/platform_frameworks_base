@@ -2396,10 +2396,8 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"메시지 열기"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"작동 방식"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"지문 잠금 해제 다시 설정"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> 지문이 제대로 작동하지 않아 삭제되었습니다."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> 및 <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> 지문이 제대로 작동하지 않아 삭제되었습니다."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g>이(가) 제대로 작동하지 않아 삭제되었습니다. 지문으로 휴대전화를 잠금 해제하려면 다시 설정하세요."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> 및 <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>이(가) 제대로 작동하지 않아 삭제되었습니다. 지문으로 휴대전화를 잠금 해제하려면 다시 설정하세요."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"얼굴 인식 잠금 해제 다시 설정"</string>
