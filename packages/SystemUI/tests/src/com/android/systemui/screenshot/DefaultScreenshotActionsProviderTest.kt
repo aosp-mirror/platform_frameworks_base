@@ -21,41 +21,38 @@ import android.net.Uri
 import android.os.Process
 import android.os.UserHandle
 import android.testing.AndroidTestingRunner
-import android.view.accessibility.AccessibilityManager
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel
-import com.android.systemui.util.mockito.argumentCaptor
-import com.android.systemui.util.mockito.capture
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
+import java.util.UUID
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.mockito.Mockito.verifyNoMoreInteractions
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
     private val actionExecutor = mock<ActionExecutor>()
-    private val accessibilityManager = mock<AccessibilityManager>()
     private val uiEventLogger = mock<UiEventLogger>()
+    private val actionsCallback = mock<ScreenshotActionsController.ActionsCallback>()
 
     private val request = ScreenshotData.forTesting()
     private val validResult = ScreenshotSavedResult(Uri.EMPTY, Process.myUserHandle(), 0)
 
-    private lateinit var viewModel: ScreenshotViewModel
     private lateinit var actionsProvider: ScreenshotActionsProvider
 
     @Before
     fun setUp() {
-        viewModel = ScreenshotViewModel(accessibilityManager)
         request.userHandle = UserHandle.OWNER
     }
 
@@ -63,8 +60,9 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
     fun previewActionAccessed_beforeScreenshotCompleted_doesNothing() {
         actionsProvider = createActionsProvider()
 
-        assertNotNull(viewModel.previewAction.value)
-        viewModel.previewAction.value!!.invoke()
+        val previewActionCaptor = argumentCaptor<() -> Unit>()
+        verify(actionsCallback).providePreviewAction(previewActionCaptor.capture())
+        previewActionCaptor.firstValue.invoke()
         verifyNoMoreInteractions(actionExecutor)
     }
 
@@ -72,13 +70,13 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
     fun actionButtonsAccessed_beforeScreenshotCompleted_doesNothing() {
         actionsProvider = createActionsProvider()
 
-        assertThat(viewModel.actions.value.size).isEqualTo(2)
-        val firstAction = viewModel.actions.value[0]
-        assertThat(firstAction.onClicked).isNotNull()
-        val secondAction = viewModel.actions.value[1]
-        assertThat(secondAction.onClicked).isNotNull()
-        firstAction.onClicked!!.invoke()
-        secondAction.onClicked!!.invoke()
+        val actionButtonCaptor = argumentCaptor<() -> Unit>()
+        verify(actionsCallback, times(2))
+            .provideActionButton(any(), any(), actionButtonCaptor.capture())
+        val firstAction = actionButtonCaptor.firstValue
+        val secondAction = actionButtonCaptor.secondValue
+        firstAction.invoke()
+        secondAction.invoke()
         verifyNoMoreInteractions(actionExecutor)
     }
 
@@ -87,29 +85,39 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
         actionsProvider = createActionsProvider()
 
         actionsProvider.setCompletedScreenshot(validResult)
-        viewModel.actions.value[0].onClicked!!.invoke()
 
-        verify(uiEventLogger).log(eq(ScreenshotEvent.SCREENSHOT_EDIT_TAPPED), eq(0), eq(""))
+        val actionButtonCaptor = argumentCaptor<() -> Unit>()
+        verify(actionsCallback, times(2))
+            .provideActionButton(any(), any(), actionButtonCaptor.capture())
+        actionButtonCaptor.firstValue.invoke()
+
+        verify(uiEventLogger).log(eq(ScreenshotEvent.SCREENSHOT_SHARE_TAPPED), eq(0), eq(""))
         val intentCaptor = argumentCaptor<Intent>()
         verify(actionExecutor)
-            .startSharedTransition(capture(intentCaptor), eq(Process.myUserHandle()), eq(true))
-        assertThat(intentCaptor.value.action).isEqualTo(Intent.ACTION_EDIT)
+            .startSharedTransition(intentCaptor.capture(), eq(Process.myUserHandle()), eq(false))
+        assertThat(intentCaptor.firstValue.action).isEqualTo(Intent.ACTION_CHOOSER)
     }
 
     @Test
     fun actionAccessed_whilePending_launchesMostRecentAction() = runTest {
         actionsProvider = createActionsProvider()
 
-        viewModel.actions.value[0].onClicked!!.invoke()
-        viewModel.previewAction.value!!.invoke()
-        viewModel.actions.value[1].onClicked!!.invoke()
+        val previewActionCaptor = argumentCaptor<() -> Unit>()
+        verify(actionsCallback).providePreviewAction(previewActionCaptor.capture())
+        val actionButtonCaptor = argumentCaptor<() -> Unit>()
+        verify(actionsCallback, times(2))
+            .provideActionButton(any(), any(), actionButtonCaptor.capture())
+
+        actionButtonCaptor.firstValue.invoke()
+        previewActionCaptor.firstValue.invoke()
+        actionButtonCaptor.secondValue.invoke()
         actionsProvider.setCompletedScreenshot(validResult)
 
-        verify(uiEventLogger).log(eq(ScreenshotEvent.SCREENSHOT_SHARE_TAPPED), eq(0), eq(""))
+        verify(uiEventLogger).log(eq(ScreenshotEvent.SCREENSHOT_EDIT_TAPPED), eq(0), eq(""))
         val intentCaptor = argumentCaptor<Intent>()
         verify(actionExecutor)
-            .startSharedTransition(capture(intentCaptor), eq(Process.myUserHandle()), eq(false))
-        assertThat(intentCaptor.value.action).isEqualTo(Intent.ACTION_CHOOSER)
+            .startSharedTransition(intentCaptor.capture(), eq(Process.myUserHandle()), eq(true))
+        assertThat(intentCaptor.firstValue.action).isEqualTo(Intent.ACTION_EDIT)
     }
 
     @Test
@@ -117,9 +125,12 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
         actionsProvider = createActionsProvider()
 
         val onScrollClick = mock<Runnable>()
-        val numActions = viewModel.actions.value.size
         actionsProvider.onScrollChipReady(onScrollClick)
-        viewModel.actions.value[numActions].onClicked!!.invoke()
+        val actionButtonCaptor = argumentCaptor<() -> Unit>()
+        // share, edit, scroll
+        verify(actionsCallback, times(3))
+            .provideActionButton(any(), any(), actionButtonCaptor.capture())
+        actionButtonCaptor.thirdValue.invoke()
 
         verify(onScrollClick).run()
     }
@@ -129,10 +140,13 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
         actionsProvider = createActionsProvider()
 
         val onScrollClick = mock<Runnable>()
-        val numActions = viewModel.actions.value.size
         actionsProvider.onScrollChipReady(onScrollClick)
+        val actionButtonCaptor = argumentCaptor<() -> Unit>()
         actionsProvider.onScrollChipInvalidated()
-        viewModel.actions.value[numActions].onClicked!!.invoke()
+        // share, edit, scroll
+        verify(actionsCallback, times(3))
+            .provideActionButton(any(), any(), actionButtonCaptor.capture())
+        actionButtonCaptor.thirdValue.invoke()
 
         verify(onScrollClick, never()).run()
     }
@@ -143,11 +157,15 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
 
         val onScrollClick = mock<Runnable>()
         val onScrollClick2 = mock<Runnable>()
-        val numActions = viewModel.actions.value.size
+
         actionsProvider.onScrollChipReady(onScrollClick)
         actionsProvider.onScrollChipInvalidated()
         actionsProvider.onScrollChipReady(onScrollClick2)
-        viewModel.actions.value[numActions].onClicked!!.invoke()
+        val actionButtonCaptor = argumentCaptor<() -> Unit>()
+        // share, edit, scroll
+        verify(actionsCallback, times(3))
+            .provideActionButton(any(), any(), actionButtonCaptor.capture())
+        actionButtonCaptor.thirdValue.invoke()
 
         verify(onScrollClick2).run()
         verify(onScrollClick, never()).run()
@@ -156,11 +174,11 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
     private fun createActionsProvider(): ScreenshotActionsProvider {
         return DefaultScreenshotActionsProvider(
             context,
-            viewModel,
             uiEventLogger,
+            UUID.randomUUID(),
             request,
-            "testid",
-            actionExecutor
+            actionExecutor,
+            actionsCallback,
         )
     }
 }
