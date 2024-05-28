@@ -98,6 +98,7 @@ import org.mockito.junit.MockitoRule;
 
 import java.time.Clock;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -607,6 +608,45 @@ public class FingerprintAuthenticationClientTest {
     }
 
     @Test
+    public void testResetLockoutOnAuthSuccess_nonBiometricPrompt() throws RemoteException {
+        final FingerprintAuthenticationClient client = createClient(1 /* version */,
+                true /* allowBackgroundAuthentication */, false /* isBiometricPrompt */,
+                mClientMonitorCallbackConverter, mLockoutTracker);
+        client.start(mCallback);
+        client.onAuthenticated(new Fingerprint("friendly", 1 /* fingerId */,
+                2 /* deviceId */), true /* authenticated */, createHardwareAuthToken());
+
+        verify(mBiometricManager).resetLockoutTimeBound(eq(mToken), eq(mContext.getOpPackageName()),
+                anyInt(), anyInt(), any());
+    }
+
+    @Test
+    public void testNoResetLockoutOnAuthFailure_nonBiometricPrompt() throws RemoteException {
+        final FingerprintAuthenticationClient client = createClient(1 /* version */,
+                true /* allowBackgroundAuthentication */, false /* isBiometricPrompt */,
+                mClientMonitorCallbackConverter, mLockoutTracker);
+        client.start(mCallback);
+        client.onAuthenticated(new Fingerprint("friendly", 1 /* fingerId */,
+                2 /* deviceId */), false /* authenticated */, createHardwareAuthToken());
+
+        verify(mBiometricManager, never()).resetLockoutTimeBound(eq(mToken),
+                eq(mContext.getOpPackageName()), anyInt(), anyInt(), any());
+    }
+
+    @Test
+    public void testNoResetLockoutOnAuthSuccess_BiometricPrompt() throws RemoteException {
+        final FingerprintAuthenticationClient client = createClient(1 /* version */,
+                true /* allowBackgroundAuthentication */, true /* isBiometricPrompt */,
+                mClientMonitorCallbackConverter, mLockoutTracker);
+        client.start(mCallback);
+        client.onAuthenticated(new Fingerprint("friendly", 1 /* fingerId */,
+                2 /* deviceId */), true /* authenticated */, createHardwareAuthToken());
+
+        verify(mBiometricManager, never()).resetLockoutTimeBound(eq(mToken),
+                eq(mContext.getOpPackageName()), anyInt(), anyInt(), any());
+    }
+
+    @Test
     public void testOnAuthenticatedFalseWhenListenerIsNull() throws RemoteException {
         final FingerprintAuthenticationClient client = createClientWithNullListener();
         client.start(mCallback);
@@ -629,11 +669,11 @@ public class FingerprintAuthenticationClientTest {
     @Test
     public void testLockoutTracker_authSuccess() throws RemoteException {
         final FingerprintAuthenticationClient client = createClient(1 /* version */,
-                true /* allowBackgroundAuthentication */, mClientMonitorCallbackConverter,
-                mLockoutTracker);
+                true /* allowBackgroundAuthentication */, false /* isBiometricPrompt */,
+                mClientMonitorCallbackConverter, mLockoutTracker);
         client.start(mCallback);
         client.onAuthenticated(new Fingerprint("friendly", 1 /* fingerId */,
-                2 /* deviceId */), true /* authenticated */, new ArrayList<>());
+                2 /* deviceId */), true /* authenticated */, createHardwareAuthToken());
 
         verify(mLockoutTracker).resetFailedAttemptsForUser(true, USER_ID);
         verify(mLockoutTracker, never()).addFailedAttemptForUser(anyInt());
@@ -642,11 +682,11 @@ public class FingerprintAuthenticationClientTest {
     @Test
     public void testLockoutTracker_authFailed() throws RemoteException {
         final FingerprintAuthenticationClient client = createClient(1 /* version */,
-                true /* allowBackgroundAuthentication */, mClientMonitorCallbackConverter,
-                mLockoutTracker);
+                true /* allowBackgroundAuthentication */, false /* isBiometricPrompt */,
+                mClientMonitorCallbackConverter, mLockoutTracker);
         client.start(mCallback);
         client.onAuthenticated(new Fingerprint("friendly", 1 /* fingerId */,
-                2 /* deviceId */), false /* authenticated */, new ArrayList<>());
+                2 /* deviceId */), false /* authenticated */, createHardwareAuthToken());
 
         verify(mLockoutTracker, never()).resetFailedAttemptsForUser(anyBoolean(), anyInt());
         verify(mLockoutTracker).addFailedAttemptForUser(USER_ID);
@@ -654,27 +694,31 @@ public class FingerprintAuthenticationClientTest {
 
     private FingerprintAuthenticationClient createClient() throws RemoteException {
         return createClient(100 /* version */, true /* allowBackgroundAuthentication */,
+                true /* isBiometricPrompt */,
                 mClientMonitorCallbackConverter, null);
     }
 
     private FingerprintAuthenticationClient createClientWithoutBackgroundAuth()
             throws RemoteException {
         return createClient(100 /* version */, false /* allowBackgroundAuthentication */,
-                mClientMonitorCallbackConverter, null);
+                true /* isBiometricPrompt */, mClientMonitorCallbackConverter, null);
     }
 
     private FingerprintAuthenticationClient createClient(int version) throws RemoteException {
         return createClient(version, true /* allowBackgroundAuthentication */,
+                true /* isBiometricPrompt */,
                 mClientMonitorCallbackConverter, null);
     }
 
     private FingerprintAuthenticationClient createClientWithNullListener() throws RemoteException {
         return createClient(100 /* version */, true /* allowBackgroundAuthentication */,
-                null, /* listener */null);
+                true /* isBiometricPrompt */,
+                /* listener */null, null);
     }
 
     private FingerprintAuthenticationClient createClient(int version,
-            boolean allowBackgroundAuthentication, ClientMonitorCallbackConverter listener,
+            boolean allowBackgroundAuthentication, boolean isBiometricPrompt,
+            ClientMonitorCallbackConverter listener,
             LockoutTracker lockoutTracker)
             throws RemoteException {
         when(mHal.getInterfaceVersion()).thenReturn(version);
@@ -686,7 +730,8 @@ public class FingerprintAuthenticationClientTest {
                 .setSensorId(SENSOR_ID)
                 .build();
         return new FingerprintAuthenticationClient(mContext, () -> aidl, mToken, REQUEST_ID,
-                listener, OP_ID, false /* restricted */, options, 4 /* cookie */,
+                listener, OP_ID, false /* restricted */, options,
+                isBiometricPrompt ? 4 : 0 /* cookie */,
                 false /* requireConfirmation */, mBiometricLogger, mBiometricContext,
                 true /* isStrongBiometric */, null /* taskStackListener */, mUdfpsOverlayController,
                 mAuthenticationStateListeners, allowBackgroundAuthentication, mSensorProps,
@@ -696,5 +741,9 @@ public class FingerprintAuthenticationClientTest {
                 return mActivityTaskManager;
             }
         };
+    }
+
+    private ArrayList<Byte> createHardwareAuthToken() {
+        return new ArrayList<>(Collections.nCopies(69, Byte.valueOf("0")));
     }
 }

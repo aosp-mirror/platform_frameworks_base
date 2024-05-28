@@ -230,7 +230,6 @@ constructor(
     val fingerprintStartMode: Flow<FingerprintStartMode> = _fingerprintStartMode.asStateFlow()
 
     /** Whether a finger has been acquired by the sensor */
-    // TODO(b/331948073): Add support for detecting SFPS finger without authentication running
     val hasFingerBeenAcquired: Flow<Boolean> =
         combine(biometricStatusInteractor.fingerprintAcquiredStatus, modalities) {
                 status,
@@ -569,7 +568,8 @@ constructor(
         }
 
     /** If the icon can be used as a confirmation button. */
-    val isIconConfirmButton: Flow<Boolean> = size.map { it.isNotSmall }.distinctUntilChanged()
+    val isIconConfirmButton: Flow<Boolean> =
+        combine(modalities, size) { modalities, size -> modalities.hasUdfps && size.isNotSmall }
 
     /** If the negative button should be shown. */
     val isNegativeButtonVisible: Flow<Boolean> =
@@ -652,6 +652,9 @@ constructor(
         failedModality: BiometricModality = BiometricModality.None,
     ) = coroutineScope {
         if (_isAuthenticated.value.isAuthenticated) {
+            if (_isAuthenticated.value.needsUserConfirmation && hapticFeedback) {
+                vibrateOnError()
+            }
             return@coroutineScope
         }
 
@@ -775,6 +778,14 @@ constructor(
         helpMessage: String = "",
     ) {
         if (_isAuthenticated.value.isAuthenticated) {
+            // Treat second authentication with a different modality as confirmation for the first
+            if (
+                _isAuthenticated.value.needsUserConfirmation &&
+                    modality != _isAuthenticated.value.authenticatedModality
+            ) {
+                confirmAuthenticated()
+                return
+            }
             // TODO(jbolinger): convert to go/tex-apc?
             Log.w(TAG, "Cannot show authenticated after authenticated")
             return
