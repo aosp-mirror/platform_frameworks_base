@@ -32,7 +32,7 @@ import com.android.systemui.communal.data.repository.FakeCommunalSceneRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
 import com.android.systemui.communal.data.repository.fakeCommunalMediaRepository
-import com.android.systemui.communal.data.repository.fakeCommunalRepository
+import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.data.repository.fakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
@@ -127,7 +127,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         mediaRepository = kosmos.fakeCommunalMediaRepository
         userRepository = kosmos.fakeUserRepository
         shadeTestUtil = kosmos.shadeTestUtil
-        communalRepository = kosmos.fakeCommunalRepository
+        communalRepository = kosmos.fakeCommunalSceneRepository
 
         kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
         mSetFlagsRule.enableFlags(FLAG_COMMUNAL_HUB)

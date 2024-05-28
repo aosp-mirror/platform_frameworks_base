@@ -36,7 +36,7 @@ import com.android.systemui.ambient.touch.TouchMonitor
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.communal.data.repository.FakeCommunalSceneRepository
-import com.android.systemui.communal.data.repository.fakeCommunalRepository
+import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
@@ -99,7 +99,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        communalRepository = kosmos.fakeCommunalRepository
+        communalRepository = kosmos.fakeCommunalSceneRepository
 
         ambientTouchComponentFactory =
             object : AmbientTouchComponent.Factory {

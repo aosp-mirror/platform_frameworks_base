@@ -44,7 +44,7 @@ import com.android.systemui.communal.data.repository.FakeCommunalTutorialReposit
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
 import com.android.systemui.communal.data.repository.fakeCommunalMediaRepository
 import com.android.systemui.communal.data.repository.fakeCommunalPrefsRepository
-import com.android.systemui.communal.data.repository.fakeCommunalRepository
+import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.data.repository.fakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
@@ -132,7 +132,7 @@ class CommunalInteractorTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         tutorialRepository = kosmos.fakeCommunalTutorialRepository
-        communalRepository = kosmos.fakeCommunalRepository
+        communalRepository = kosmos.fakeCommunalSceneRepository
         mediaRepository = kosmos.fakeCommunalMediaRepository
         widgetRepository = kosmos.fakeCommunalWidgetRepository
         smartspaceRepository = kosmos.fakeSmartspaceRepository
