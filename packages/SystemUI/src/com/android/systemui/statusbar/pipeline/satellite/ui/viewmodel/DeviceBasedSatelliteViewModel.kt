@@ -24,7 +24,7 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepository
-import com.android.systemui.statusbar.pipeline.dagger.OemSatelliteInputLog
+import com.android.systemui.statusbar.pipeline.dagger.DeviceBasedSatelliteInputLog
 import com.android.systemui.statusbar.pipeline.satellite.domain.interactor.DeviceBasedSatelliteInteractor
 import com.android.systemui.statusbar.pipeline.satellite.shared.model.SatelliteConnectionState
 import com.android.systemui.statusbar.pipeline.satellite.ui.model.SatelliteIconModel
@@ -70,7 +70,7 @@ constructor(
     interactor: DeviceBasedSatelliteInteractor,
     @Application scope: CoroutineScope,
     airplaneModeRepository: AirplaneModeRepository,
-    @OemSatelliteInputLog logBuffer: LogBuffer,
+    @DeviceBasedSatelliteInputLog logBuffer: LogBuffer,
 ) : DeviceBasedSatelliteViewModel {
     private val shouldShowIcon: Flow<Boolean> =
         interactor.areAllConnectionsOutOfService.flatMapLatest { allOos ->

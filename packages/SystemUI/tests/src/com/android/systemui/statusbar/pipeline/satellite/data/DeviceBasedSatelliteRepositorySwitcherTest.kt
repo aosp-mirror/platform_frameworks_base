@@ -57,7 +57,8 @@ class DeviceBasedSatelliteRepositorySwitcherTest : SysuiTestCase() {
             Optional.of(satelliteManager),
             testDispatcher,
             testScope.backgroundScope,
-            FakeLogBuffer.Factory.create(),
+            logBuffer = FakeLogBuffer.Factory.create(),
+            verboseLogBuffer = FakeLogBuffer.Factory.create(),
             systemClock,
         )
     private val demoDataSource =

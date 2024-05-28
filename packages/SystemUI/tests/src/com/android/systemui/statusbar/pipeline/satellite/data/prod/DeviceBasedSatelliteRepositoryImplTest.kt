@@ -88,7 +88,8 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
                     Optional.empty(),
                     dispatcher,
                     testScope.backgroundScope,
-                    FakeLogBuffer.Factory.create(),
+                    logBuffer = FakeLogBuffer.Factory.create(),
+                    verboseLogBuffer = FakeLogBuffer.Factory.create(),
                     systemClock,
                 )
 
@@ -382,7 +383,8 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
                 if (satMan != null) Optional.of(satMan) else Optional.empty(),
                 dispatcher,
                 testScope.backgroundScope,
-                FakeLogBuffer.Factory.create(),
+                logBuffer = FakeLogBuffer.Factory.create(),
+                verboseLogBuffer = FakeLogBuffer.Factory.create(),
                 systemClock,
             )
     }

@@ -21,7 +21,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
-import com.android.systemui.statusbar.pipeline.dagger.OemSatelliteInputLog
+import com.android.systemui.statusbar.pipeline.dagger.DeviceBasedSatelliteInputLog
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.satellite.data.DeviceBasedSatelliteRepository
 import com.android.systemui.statusbar.pipeline.satellite.shared.model.SatelliteConnectionState
@@ -48,7 +48,7 @@ constructor(
     deviceProvisioningInteractor: DeviceProvisioningInteractor,
     wifiInteractor: WifiInteractor,
     @Application scope: CoroutineScope,
-    @OemSatelliteInputLog private val logBuffer: LogBuffer,
+    @DeviceBasedSatelliteInputLog private val logBuffer: LogBuffer,
 ) {
     /** Must be observed by any UI showing Satellite iconography */
     val isSatelliteAllowed =
