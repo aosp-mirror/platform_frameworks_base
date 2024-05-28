@@ -16,6 +16,10 @@
 
 package com.android.server.notification;
 
+import static android.service.notification.Condition.SOURCE_USER_ACTION;
+import static android.service.notification.Condition.STATE_FALSE;
+import static android.service.notification.Condition.STATE_TRUE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
@@ -27,16 +31,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.app.Flags;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.content.pm.IPackageManager;
 import android.net.Uri;
 import android.os.IInterface;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.service.notification.Condition;
 
 import com.android.server.UiServiceTestCase;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -51,6 +59,10 @@ public class ConditionProvidersTest extends UiServiceTestCase {
     private ManagedServices.UserProfiles mUserProfiles;
     @Mock
     private ConditionProviders.Callback mCallback;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(
+            SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT);
 
     @Before
     public void setUp() {
@@ -67,8 +79,8 @@ public class ConditionProvidersTest extends UiServiceTestCase {
         ManagedServices.ManagedServiceInfo msi = mProviders.new ManagedServiceInfo(
                 mock(IInterface.class), cn, 0, false, mock(ServiceConnection.class), 33, 100);
         Condition[] conditions = new Condition[] {
-                new Condition(Uri.parse("a"), "summary", Condition.STATE_TRUE),
-                new Condition(Uri.parse("b"), "summary2", Condition.STATE_TRUE)
+                new Condition(Uri.parse("a"), "summary", STATE_TRUE),
+                new Condition(Uri.parse("b"), "summary2", STATE_TRUE)
         };
 
         mProviders.notifyConditions("package", msi, conditions);
@@ -85,9 +97,9 @@ public class ConditionProvidersTest extends UiServiceTestCase {
                 mock(IInterface.class), new ComponentName("package", "cls"), 0, false,
                 mock(ServiceConnection.class), 33, 100);
         Condition[] conditionsToNotify = new Condition[] {
-                new Condition(Uri.parse("a"), "summary", Condition.STATE_TRUE),
-                new Condition(Uri.parse("b"), "summary2", Condition.STATE_TRUE),
-                new Condition(Uri.parse("c"), "summary3", Condition.STATE_TRUE)
+                new Condition(Uri.parse("a"), "summary", STATE_TRUE),
+                new Condition(Uri.parse("b"), "summary2", STATE_TRUE),
+                new Condition(Uri.parse("c"), "summary3", STATE_TRUE)
         };
 
         mProviders.notifyConditions("package", msi, conditionsToNotify);
@@ -104,10 +116,10 @@ public class ConditionProvidersTest extends UiServiceTestCase {
                 mock(IInterface.class), new ComponentName("package", "cls"), 0, false,
                 mock(ServiceConnection.class), 33, 100);
         Condition[] conditionsToNotify = new Condition[] {
-                new Condition(Uri.parse("a"), "summary", Condition.STATE_TRUE),
-                new Condition(Uri.parse("b"), "summary2", Condition.STATE_TRUE),
-                new Condition(Uri.parse("a"), "summary3", Condition.STATE_FALSE),
-                new Condition(Uri.parse("a"), "summary4", Condition.STATE_FALSE)
+                new Condition(Uri.parse("a"), "summary", STATE_TRUE),
+                new Condition(Uri.parse("b"), "summary2", STATE_TRUE),
+                new Condition(Uri.parse("a"), "summary3", STATE_FALSE),
+                new Condition(Uri.parse("a"), "summary4", STATE_FALSE)
         };
 
         mProviders.notifyConditions("package", msi, conditionsToNotify);
@@ -124,16 +136,67 @@ public class ConditionProvidersTest extends UiServiceTestCase {
                 mock(IInterface.class), new ComponentName("package", "cls"), 0, false,
                 mock(ServiceConnection.class), 33, 100);
         Condition[] conditionsToNotify = new Condition[] {
-                new Condition(Uri.parse("a"), "summary", Condition.STATE_TRUE),
+                new Condition(Uri.parse("a"), "summary", STATE_TRUE),
                 null,
                 null,
-                new Condition(Uri.parse("b"), "summary", Condition.STATE_TRUE)
+                new Condition(Uri.parse("b"), "summary", STATE_TRUE)
         };
 
         mProviders.notifyConditions("package", msi, conditionsToNotify);
 
         verify(mCallback).onConditionChanged(eq(Uri.parse("a")), eq(conditionsToNotify[0]));
         verify(mCallback).onConditionChanged(eq(Uri.parse("b")), eq(conditionsToNotify[3]));
+        verifyNoMoreInteractions(mCallback);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_UI)
+    public void notifyConditions_appCannotUndoUserEnablement() {
+        ManagedServices.ManagedServiceInfo msi = mProviders.new ManagedServiceInfo(
+                mock(IInterface.class), new ComponentName("package", "cls"), 0, false,
+                mock(ServiceConnection.class), 33, 100);
+        // First, user enabled mode
+        Condition[] userConditions = new Condition[] {
+                new Condition(Uri.parse("a"), "summary", STATE_TRUE, SOURCE_USER_ACTION)
+        };
+        mProviders.notifyConditions("package", msi, userConditions);
+        verify(mCallback).onConditionChanged(eq(Uri.parse("a")), eq(userConditions[0]));
+
+        // Second, app tries to disable it, but cannot
+        Condition[] appConditions = new Condition[] {
+                new Condition(Uri.parse("a"), "summary", STATE_FALSE)
+        };
+        mProviders.notifyConditions("package", msi, appConditions);
+        verify(mCallback).onConditionChanged(eq(Uri.parse("a")), eq(userConditions[0]));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_UI)
+    public void notifyConditions_appCanTakeoverUserEnablement() {
+        ManagedServices.ManagedServiceInfo msi = mProviders.new ManagedServiceInfo(
+                mock(IInterface.class), new ComponentName("package", "cls"), 0, false,
+                mock(ServiceConnection.class), 33, 100);
+        // First, user enabled mode
+        Condition[] userConditions = new Condition[] {
+                new Condition(Uri.parse("a"), "summary", STATE_TRUE, SOURCE_USER_ACTION)
+        };
+        mProviders.notifyConditions("package", msi, userConditions);
+        verify(mCallback).onConditionChanged(eq(Uri.parse("a")), eq(userConditions[0]));
+
+        // Second, app now thinks the rule should be on due it its intelligence
+        Condition[] appConditions = new Condition[] {
+                new Condition(Uri.parse("a"), "summary", STATE_TRUE)
+        };
+        mProviders.notifyConditions("package", msi, appConditions);
+        verify(mCallback).onConditionChanged(eq(Uri.parse("a")), eq(appConditions[0]));
+
+        // Lastly, app can turn rule off when its intelligence think it should be off
+        appConditions = new Condition[] {
+                new Condition(Uri.parse("a"), "summary", STATE_FALSE)
+        };
+        mProviders.notifyConditions("package", msi, appConditions);
+        verify(mCallback).onConditionChanged(eq(Uri.parse("a")), eq(appConditions[0]));
+
         verifyNoMoreInteractions(mCallback);
     }
 
