@@ -201,6 +201,10 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"আপোনাৰ কৰ্মস্থানৰ প্ৰ\'ফাইল এই ডিভাইচটোত আৰু উপলব্ধ নহয়"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"বহুতবাৰ ভুলকৈ পাছৱৰ্ড দিয়া হৈছে"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"প্ৰশাসকে ডিভাইচটো ব্যক্তিগত ব্যৱহাৰৰ বাবে বাজেয়প্ত কৰিছে"</string>
+    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
+    <skip />
+    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"পৰিচালিত ডিভাইচ"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"আপোনাৰ প্ৰতিষ্ঠানটোৱে এই ডিভাইচটো পৰিচালনা কৰে আৰু ই নেটৱৰ্কৰ ট্ৰেফিক পৰ্যবেক্ষণ কৰিব পাৰে। সবিশেষ জানিবলৈ টিপক।"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"এপ্‌সমূহে আপোনাৰ অৱস্থান এক্সেছ কৰিব পাৰে"</string>
@@ -2415,10 +2419,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ই কেনেকৈ কাম কৰে"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"বিবেচনাধীন হৈ আছে..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ফিংগাৰপ্ৰিণ্ট আনলক পুনৰ ছেট আপ কৰক"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g>এ ভালদৰে কাম কৰা নাছিল আৰু সেইটো মচি পেলোৱা হৈছে"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> আৰু <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>এ ভালদৰে কাম কৰা নাছিল আৰু সেয়া মচি পেলোৱা হৈছে"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g>এ ভালদৰে কাম কৰা নাছিল আৰু সেইটো মচি পেলোৱা হৈছে। ফিংগাৰপ্ৰিণ্টৰ জৰিয়তে আপোনাৰ ফ’নটো আনলক কৰিবলৈ এইটো পুনৰ ছেট আপ কৰক।"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> আৰু <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>এ ভালদৰে কাম কৰা নাছিল আৰু সেয়া মচি পেলোৱা হৈছে। ফিংগাৰপ্ৰিণ্টৰ জৰিয়তে আপোনাৰ ফ’নটো আনলক কৰিবলৈ সেয়া পুনৰ ছেট আপ কৰক।"</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"ফে’চ আনলক পুনৰ ছেট আপ কৰক"</string>

@@ -205,6 +205,10 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"لم يعد ملفك الشخصي للعمل متاحًا على هذا الجهاز"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"تم إجراء محاولات كثيرة جدًا لإدخال كلمة المرور"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"تنازل المشرف عن الجهاز للاستخدام الشخصي"</string>
+    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
+    <skip />
+    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"تتم إدارة الجهاز"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"تدير مؤسستك هذا الجهاز ويمكنها مراقبة حركة بيانات الشبكة. يمكنك النقر للحصول على تفاصيل."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"يمكن للتطبيقات الوصول إلى موقعك الجغرافي"</string>
@@ -2419,10 +2423,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"طريقة العمل"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"بانتظار الإزالة من الأرشيف…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"إعادة إعداد ميزة \"فتح الجهاز ببصمة الإصبع\""</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"هناك مشكلة في <xliff:g id="FINGERPRINT">%s</xliff:g> وتم حذفها"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"هناك مشكلة في <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> و<xliff:g id="FINGERPRINT_1">%2$s</xliff:g> وتم حذفهما"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"هناك مشكلة في <xliff:g id="FINGERPRINT">%s</xliff:g> وتم حذفها. يُرجى إعدادها مرة أخرى لفتح قفل هاتفك باستخدام بصمة الإصبع."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"هناك مشكلة في <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> و<xliff:g id="FINGERPRINT_1">%2$s</xliff:g> وتم حذفهما. يُرجى إعادة إعدادهما لفتح قفل هاتفك باستخدام بصمة الإصبع."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"إعادة إعداد ميزة \"فتح الجهاز بالتعرّف على الوجه\""</string>

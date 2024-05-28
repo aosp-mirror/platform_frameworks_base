@@ -201,6 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Таны ажлын профайл энэ төхөөрөмжид боломжгүй байна"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Нууц үгийг хэт олон удаа буруу оруулсан байна"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Админ хувийн хэрэглээнд зориулж төхөөрөмжийн эрхийг хассан"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Хаалттай орон зайг хассан"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Танай байгууллага энэ удирддаг төхөөрөмж дээр хаалттай орон зайг зөвшөөрдөггүй."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Төхөөрөмжийг удирдсан"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Таны байгууллага энэ төхөөрөмжийг удирдаж, сүлжээний ачааллыг хянадаг. Дэлгэрэнгүй мэдээлэл авах бол товшино уу."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Аппууд нь таны байршилд хандах боломжтой"</string>
@@ -283,8 +285,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Дуут туслах"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"Түгжих"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
-    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
-    <skip />
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"Хариу бичих"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Шинэ мэдэгдэл"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Биет гар"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Аюулгүй байдал"</string>
@@ -1190,7 +1191,7 @@
     <string name="inputMethod" msgid="1784759500516314751">"Оруулах арга"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Текст үйлдэл"</string>
     <string name="error_handwriting_unsupported" msgid="7809438534946014050">"Гараар бичихийг энэ талбарт дэмждэггүй"</string>
-    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Гараар бичихийг нууц үгний талбаруудад дэмждэггүй"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Нууц үгний талбарт гараар бичихийг дэмждэггүй"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Буцах"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Оруулах аргыг сэлгэх"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Сангийн хэмжээ дутагдаж байна"</string>
@@ -2416,10 +2417,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Энэ хэрхэн ажилладаг вэ?"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Хүлээгдэж буй..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Хурууны хээгээр түгжээ тайлахыг дахин тохируулна уу"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> сайн ажиллахгүй байсан тул хурууны хээг устгасан"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> болон <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> сайн ажиллахгүй байсан тул эдгээр хурууны хээг устгасан"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> сайн ажиллахгүй байсан тул үүнийг устгасан. Утасныхаа түгжээг хурууны хээгээр тайлахын тулд хурууны хээг дахин тохируулна уу."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> сайн ажиллахгүй байсан тул эдгээрийг устгасан. Утасныхаа түгжээг хурууныхаа хээгээр тайлахын тулд хоёр хурууны хээг дахин тохируулна уу."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Царайгаар түгжээ тайлахыг дахин тохируулна уу"</string>

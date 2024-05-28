@@ -201,6 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Bu qurilmada endi ishchi profilingiz mavjud emas"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Parol ko‘p marta xato kiritildi"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administrator shaxsiy foydalanishga qoldirilgan qurilmani rad etdi"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Maxfiy makon olib tashlandi"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Tashkilotingiz mazkur boshqaruvdagi qurilmada maxfiy makon ochishni taqiqlagan."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Bu – boshqariladigan qurilma"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Tashkilotingiz bu qurilmani boshqaradi va tarmoq trafigini nazorat qilishi mumkin. Tafsilotlar uchun bosing."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Ilovalar joylashuv axborotidan foydalana oladi"</string>
@@ -283,8 +285,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Ovozli yordam"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"Qulflash"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
-    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
-    <skip />
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"Javob berish"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Yangi bildirishnoma"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Tashqi klaviatura"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Xavfsizlik"</string>
@@ -2416,10 +2417,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ishlash tartibi"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Kutilmoqda..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Barmoq izi bilan ochish funksiyasini qayta sozlang"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> yaxshi ishlamadi va oʻchirib tashlandi."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> va <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> yaxshi ishlamadi va oʻchirib tashlandi."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> yaxshi ishlamadi va oʻchirib tashlandi. Telefonni barmoq izi bilan ochish uchun uni qayta sozlang."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> va <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> yaxshi ishlamadi va oʻchirib tashlandi. Telefonni barmoq izi bilan ochish uchun ularni qayta sozlang."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Yuz bilan ochishni qayta sozlash"</string>

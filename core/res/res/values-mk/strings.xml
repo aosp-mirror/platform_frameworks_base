@@ -201,6 +201,10 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Вашиот работен профил веќе не е достапен на уредов"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Премногу обиди за внесување лозинка"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Уред откажан од администраторот за лична употреба"</string>
+    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
+    <skip />
+    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"Некој управува со уредот"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Вашата организација управува со уредов и можно е да го следи сообраќајот на мрежата. Допрете за детали."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Апликациите може да пристапуваат до вашата локација"</string>
@@ -1188,7 +1192,7 @@
     <string name="deleteText" msgid="4200807474529938112">"Избриши"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Метод на внес"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Дејства со текст"</string>
-    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"Ракописот не е поддржан во полево"</string>
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"Ракописот не е поддржан во ова поле"</string>
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Ракописот не е поддржан во полињата за лозинка"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Назад"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Префрлете го методот за внесување"</string>
@@ -2415,10 +2419,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Дознајте како функционира"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Во фаза на чекање…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Поставете „Отклучување со отпечаток“ повторно"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> не функционираше добро, па се избриша"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> и <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> не функционираа добро, па се избришаа"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> не функционираше добро, па се избриша. Поставете го повторно за да го отклучувате телефонот со отпечаток."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> и <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> не функционираа добро, па се избришаа. Поставете ги повторно за да го отклучувате телефонот со отпечаток."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Поставете „Отклучување со лик“ повторно"</string>

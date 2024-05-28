@@ -201,6 +201,10 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"आपकी वर्क प्रोफ़ाइल अब इस डिवाइस पर उपलब्‍ध नहीं है"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"कई बार गलत पासवर्ड डाला गया"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"एडमिन ने निजी इस्तेमाल के लिए डिवाइस दे दिया है"</string>
+    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
+    <skip />
+    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"डिवाइस प्रबंधित है"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"आपका संगठन इस डिवाइस का प्रबंधन करता है और वह नेटवर्क ट्रैफ़िक की निगरानी भी कर सकता है. विवरण के लिए टैप करें."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ऐप्लिकेशन आपकी जगह की जानकारी ऐक्सेस कर सकते हैं"</string>
@@ -1188,8 +1192,8 @@
     <string name="deleteText" msgid="4200807474529938112">"मिटाएं"</string>
     <string name="inputMethod" msgid="1784759500516314751">"इनपुट विधि"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"लेख क्रियाएं"</string>
-    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"इस फ़ील्ड में हैंडराइटिंग की सुविधा मौजूद नहीं है"</string>
-    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"पासवर्ड वाले फ़ील्ड में हैंडराइटिंग की सुविधा मौजूद नहीं है"</string>
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"हैंडराइटिंग की सुविधा, इस फ़ील्ड में काम नहीं करती है"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"हैंडराइटिंग की सुविधा, पासवर्ड वाले फ़ील्ड में काम नहीं करती है"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"वापस जाएं"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"इनपुट का तरीका बदलें"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"मेमोरी में जगह नहीं बची है"</string>
@@ -2415,10 +2419,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"यह सेटिंग कैसे काम करती है"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"प्रोसेस जारी है..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"फ़िंगरप्रिंट अनलॉक की सुविधा दोबारा सेट अप करें"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"अच्छे से काम न करने की वजह से <xliff:g id="FINGERPRINT">%s</xliff:g> को मिटा दिया गया"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"अच्छे से काम न करने की वजह से, <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> और <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> को मिटा दिया गया"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"अच्छे से काम न करने की वजह से <xliff:g id="FINGERPRINT">%s</xliff:g> को मिटा दिया गया. फ़िंगरप्रिंट की मदद से फ़ोन अनलॉक करने के लिए, फ़िंगरप्रिंट अनलॉक की सुविधा को दोबारा सेट अप करें."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"अच्छे से काम न करने की वजह से, <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> और <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> को मिटा दिया गया. फ़िंगरप्रिंट की मदद से फ़ोन अनलॉक करने के लिए, फ़िंगरप्रिंट अनलॉक की सुविधा दोबारा सेट अप करें."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"फ़ेस अनलॉक की सुविधा को दोबारा सेट अप करें"</string>

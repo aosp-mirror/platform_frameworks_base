@@ -201,6 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Laneko profila ez dago erabilgarri gailu honetan"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Gehiegitan saiatu zara pasahitza idazten"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Erabilera pertsonalerako utzi du gailua administratzaileak"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Kendu egin da eremu pribatua"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Zure erakundeak ez ditu onartzen eremu pribatuak kudeatutako gailu honetan."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Jabeak kudeatzen du gailua"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Erakundeak kudeatzen du gailua eta baliteke sareko trafikoa gainbegiratzea. Sakatu hau xehetasunak ikusteko."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Aplikazioek zure kokapena atzi dezakete"</string>
@@ -283,8 +285,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Ahots-laguntza"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"Blokeatu"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
-    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
-    <skip />
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"Erantzun"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Jakinarazpen berria"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Teklatu fisikoa"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Segurtasuna"</string>
@@ -2416,10 +2417,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Nola funtzionatzen du?"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Zain…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Konfiguratu berriro hatz-marka bidez desblokeatzeko eginbidea"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> ezabatu egin da, ez zuelako ondo funtzionatzen"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> eta <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ezabatu egin dira, ez zutelako ondo funtzionatzen"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ezabatu egin da, ez zuelako ondo funtzionatzen. Telefonoa hatz-markarekin desblokeatzeko, konfigura ezazu berriro."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> eta <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ezabatu egin dira, ez zutelako ondo funtzionatzen. Telefonoa hatz-markarekin desblokeatzeko, konfigura itzazu berriro."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Konfiguratu berriro aurpegi bidez desblokeatzeko eginbidea"</string>

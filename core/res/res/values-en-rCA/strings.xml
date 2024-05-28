@@ -201,6 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Your work profile is no longer available on this device"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Too many password attempts"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Admin relinquished device for personal use"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Private space removed"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Your organisation does not allow private spaces on this managed device."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Device is managed"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Your organization manages this device and may monitor network traffic. Tap for details."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Apps can access your location"</string>
@@ -2415,10 +2417,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"How it works"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pending..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Set up Fingerprint Unlock again"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> wasn\'t working well and was deleted"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> and <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> weren\'t working well and were deleted"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> wasn\'t working well and was deleted. Set it up again to unlock your phone with fingerprint."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> and <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> weren\'t working well and were deleted. Set them up again to unlock your phone with your fingerprint."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Set up Face Unlock again"</string>
