@@ -640,11 +640,16 @@ private fun AnimatedVisibilityScope.ButtonToEditWidgets(
                         enter =
                             fadeIn(
                                 initialAlpha = 0f,
-                                animationSpec = tween(durationMillis = 500, easing = LinearEasing)
+                                animationSpec = tween(durationMillis = 83, easing = LinearEasing)
                             ),
                         exit =
                             fadeOut(
-                                animationSpec = tween(durationMillis = 500, easing = LinearEasing)
+                                animationSpec =
+                                    tween(
+                                        durationMillis = 83,
+                                        delayMillis = 167,
+                                        easing = LinearEasing
+                                    )
                             )
                     )
                     .background(colors.secondary, RoundedCornerShape(50.dp)),
@@ -658,7 +663,7 @@ private fun AnimatedVisibilityScope.ButtonToEditWidgets(
                                 animationSpec =
                                     tween(
                                         durationMillis = 167,
-                                        delayMillis = 500,
+                                        delayMillis = 83,
                                         easing = LinearEasing
                                     )
                             ),
