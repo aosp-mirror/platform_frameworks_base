@@ -950,7 +950,7 @@ flag {
 }
 
 flag {
-  name: "media_controls_user_initiated_dismiss"
+  name: "media_controls_user_initiated_deleteintent"
   namespace: "systemui"
   description: "Only dismiss media notifications when the control was removed by the user."
   bug: "335875159"

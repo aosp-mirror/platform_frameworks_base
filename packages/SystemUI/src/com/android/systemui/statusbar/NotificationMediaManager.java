@@ -15,7 +15,7 @@
  */
 package com.android.systemui.statusbar;
 
-import static com.android.systemui.Flags.mediaControlsUserInitiatedDismiss;
+import static com.android.systemui.Flags.mediaControlsUserInitiatedDeleteintent;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -178,7 +178,7 @@ public class NotificationMediaManager implements Dumpable {
 
             @Override
             public void onMediaDataRemoved(@NonNull String key, boolean userInitiated) {
-                if (mediaControlsUserInitiatedDismiss() && !userInitiated) {
+                if (mediaControlsUserInitiatedDeleteintent() && !userInitiated) {
                     // Dismissing the notification will send the app's deleteIntent, so ignore if
                     // this was an automatic removal
                     Log.d(TAG, "Not dismissing " + key + " because it was removed by the system");

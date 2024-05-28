@@ -78,7 +78,7 @@ class NotificationMediaManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_MEDIA_CONTROLS_USER_INITIATED_DISMISS)
+    @EnableFlags(Flags.FLAG_MEDIA_CONTROLS_USER_INITIATED_DELETEINTENT)
     fun mediaDataRemoved_userInitiated_dismissNotif() {
         val notifEntryCaptor = argumentCaptor<NotificationEntry>()
         val notifEntry = mock<NotificationEntry>()
@@ -93,7 +93,7 @@ class NotificationMediaManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_MEDIA_CONTROLS_USER_INITIATED_DISMISS)
+    @EnableFlags(Flags.FLAG_MEDIA_CONTROLS_USER_INITIATED_DELETEINTENT)
     fun mediaDataRemoved_notUserInitiated_doesNotDismissNotif() {
         listenerCaptor.lastValue.onMediaDataRemoved(KEY, false)
 
@@ -101,7 +101,7 @@ class NotificationMediaManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_USER_INITIATED_DISMISS)
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_USER_INITIATED_DELETEINTENT)
     fun mediaDataRemoved_notUserInitiated_flagOff_dismissNotif() {
         val notifEntryCaptor = argumentCaptor<NotificationEntry>()
         val notifEntry = mock<NotificationEntry>()
