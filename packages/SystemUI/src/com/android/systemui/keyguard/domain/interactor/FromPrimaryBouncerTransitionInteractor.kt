@@ -86,7 +86,7 @@ constructor(
                     return@combine null
                 }
 
-                fromBouncerStep.value > 0.5f
+                fromBouncerStep.value > TO_GONE_SURFACE_BEHIND_VISIBLE_THRESHOLD
             }
             .onStart {
                 // Default to null ("don't care, use a reasonable default").
@@ -232,5 +232,6 @@ constructor(
         val TO_AOD_DURATION = DEFAULT_DURATION
         val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
         val TO_DOZING_DURATION = DEFAULT_DURATION
+        val TO_GONE_SURFACE_BEHIND_VISIBLE_THRESHOLD = 0.5f
     }
 }

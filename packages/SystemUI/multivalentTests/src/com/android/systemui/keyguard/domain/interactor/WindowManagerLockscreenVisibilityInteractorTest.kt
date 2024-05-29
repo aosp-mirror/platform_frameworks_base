@@ -27,18 +27,22 @@ import com.android.systemui.coroutines.collectValues
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
+import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.data.repository.sceneContainerRepository
+import com.android.systemui.scene.data.repository.setSceneTransition
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -189,6 +193,175 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
                 ),
                 values
             )
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun surfaceBehindVisibility_fromLockscreenToGone_trueThroughout() =
+        testScope.runTest {
+            val isSurfaceBehindVisible by collectLastValue(underTest.value.surfaceBehindVisibility)
+            val currentScene by collectLastValue(kosmos.sceneInteractor.currentScene)
+
+            // Before the transition, we start on Lockscreen so the surface should start invisible.
+            kosmos.setSceneTransition(ObservableTransitionState.Idle(Scenes.Lockscreen))
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(isSurfaceBehindVisible).isFalse()
+
+            // Unlocked with fingerprint.
+            kosmos.deviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+
+            // Start the transition to Gone, the surface should become immediately visible.
+            kosmos.setSceneTransition(
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Lockscreen,
+                    toScene = Scenes.Gone,
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                    progress = flowOf(0.3f),
+                    currentScene = flowOf(Scenes.Lockscreen),
+                )
+            )
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(isSurfaceBehindVisible).isTrue()
+
+            // Towards the end of the transition, the surface should continue to be visible.
+            kosmos.setSceneTransition(
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Lockscreen,
+                    toScene = Scenes.Gone,
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                    progress = flowOf(0.9f),
+                    currentScene = flowOf(Scenes.Gone),
+                )
+            )
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(isSurfaceBehindVisible).isTrue()
+
+            // After the transition, settles on Gone. Surface behind should stay visible now.
+            kosmos.setSceneTransition(ObservableTransitionState.Idle(Scenes.Gone))
+            kosmos.sceneInteractor.changeScene(Scenes.Gone, "")
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+            assertThat(isSurfaceBehindVisible).isTrue()
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun surfaceBehindVisibility_fromBouncerToGone_becomesTrue() =
+        testScope.runTest {
+            val isSurfaceBehindVisible by collectLastValue(underTest.value.surfaceBehindVisibility)
+            val currentScene by collectLastValue(kosmos.sceneInteractor.currentScene)
+
+            // Before the transition, we start on Bouncer so the surface should start invisible.
+            kosmos.setSceneTransition(ObservableTransitionState.Idle(Scenes.Bouncer))
+            kosmos.sceneInteractor.changeScene(Scenes.Bouncer, "")
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
+            assertThat(isSurfaceBehindVisible).isFalse()
+
+            // Unlocked with fingerprint.
+            kosmos.deviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+
+            // Start the transition to Gone, the surface should remain invisible prior to hitting
+            // the
+            // threshold.
+            kosmos.setSceneTransition(
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Bouncer,
+                    toScene = Scenes.Gone,
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                    progress =
+                        flowOf(
+                            FromPrimaryBouncerTransitionInteractor
+                                .TO_GONE_SURFACE_BEHIND_VISIBLE_THRESHOLD
+                        ),
+                    currentScene = flowOf(Scenes.Bouncer),
+                )
+            )
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
+            assertThat(isSurfaceBehindVisible).isFalse()
+
+            // Once the transition passes the threshold, the surface should become visible.
+            kosmos.setSceneTransition(
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Bouncer,
+                    toScene = Scenes.Gone,
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                    progress =
+                        flowOf(
+                            FromPrimaryBouncerTransitionInteractor
+                                .TO_GONE_SURFACE_BEHIND_VISIBLE_THRESHOLD + 0.01f
+                        ),
+                    currentScene = flowOf(Scenes.Gone),
+                )
+            )
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
+            assertThat(isSurfaceBehindVisible).isTrue()
+
+            // After the transition, settles on Gone. Surface behind should stay visible now.
+            kosmos.setSceneTransition(ObservableTransitionState.Idle(Scenes.Gone))
+            kosmos.sceneInteractor.changeScene(Scenes.Gone, "")
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+            assertThat(isSurfaceBehindVisible).isTrue()
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun surfaceBehindVisibility_idleWhileUnlocked_alwaysTrue() =
+        testScope.runTest {
+            val isSurfaceBehindVisible by collectLastValue(underTest.value.surfaceBehindVisibility)
+            val currentScene by collectLastValue(kosmos.sceneInteractor.currentScene)
+
+            // Unlocked with fingerprint.
+            kosmos.deviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            kosmos.setSceneTransition(ObservableTransitionState.Idle(Scenes.Gone))
+            kosmos.sceneInteractor.changeScene(Scenes.Gone, "")
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+
+            listOf(
+                    Scenes.Shade,
+                    Scenes.QuickSettings,
+                    Scenes.Shade,
+                    Scenes.Gone,
+                )
+                .forEach { scene ->
+                    kosmos.setSceneTransition(ObservableTransitionState.Idle(scene))
+                    kosmos.sceneInteractor.changeScene(scene, "")
+                    assertThat(currentScene).isEqualTo(scene)
+                    assertWithMessage("Unexpected visibility for scene \"${scene.debugName}\"")
+                        .that(isSurfaceBehindVisible)
+                        .isTrue()
+                }
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun surfaceBehindVisibility_idleWhileLocked_alwaysFalse() =
+        testScope.runTest {
+            val isSurfaceBehindVisible by collectLastValue(underTest.value.surfaceBehindVisibility)
+            val currentScene by collectLastValue(kosmos.sceneInteractor.currentScene)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+
+            listOf(
+                    Scenes.Shade,
+                    Scenes.QuickSettings,
+                    Scenes.Shade,
+                    Scenes.Lockscreen,
+                )
+                .forEach { scene ->
+                    kosmos.setSceneTransition(ObservableTransitionState.Idle(scene))
+                    kosmos.sceneInteractor.changeScene(scene, "")
+                    assertWithMessage("Unexpected visibility for scene \"${scene.debugName}\"")
+                        .that(isSurfaceBehindVisible)
+                        .isFalse()
+                }
         }
 
     @Test
