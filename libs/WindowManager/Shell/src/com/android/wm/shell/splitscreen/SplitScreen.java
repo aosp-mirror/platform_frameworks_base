@@ -18,15 +18,10 @@ package com.android.wm.shell.splitscreen;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.graphics.Rect;
-import android.os.Bundle;
-import android.window.RemoteTransition;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
-import com.android.internal.logging.InstanceId;
-import com.android.wm.shell.common.split.SplitScreenConstants.PersistentSnapPosition;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 
 import java.util.concurrent.Executor;
@@ -78,12 +73,6 @@ public interface SplitScreen {
             return false;
         }
     }
-
-    /** Launches a pair of tasks into splitscreen */
-    void startTasks(int taskId1, @Nullable Bundle options1, int taskId2,
-            @Nullable Bundle options2, @SplitPosition int splitPosition,
-            @PersistentSnapPosition int snapPosition, @Nullable RemoteTransition remoteTransition,
-            InstanceId instanceId);
 
     /** Registers listener that gets split screen callback. */
     void registerSplitScreenListener(@NonNull SplitScreenListener listener,

@@ -18,28 +18,22 @@ package com.android.systemui.mediaprojection.appselector.view
 
 import android.app.ActivityOptions
 import android.app.IActivityTaskManager
-import android.graphics.Rect
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_PSS_APP_SELECTOR_ABRUPT_EXIT_FIX
-import com.android.systemui.Flags.FLAG_PSS_APP_SELECTOR_RECENTS_SPLIT_SCREEN
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorResultHandler
 import com.android.systemui.mediaprojection.appselector.data.RecentTask
 import com.android.systemui.util.mockito.mock
-import com.android.wm.shell.splitscreen.SplitScreen
-import com.android.wm.shell.util.SplitBounds
 import com.google.common.truth.Expect
 import com.google.common.truth.Truth.assertThat
-import java.util.Optional
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito.any
-import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.verify
 
 @SmallTest
@@ -52,10 +46,9 @@ class MediaProjectionRecentsViewControllerTest : SysuiTestCase() {
     private val taskViewSizeProvider = mock<TaskPreviewSizeProvider>()
     private val activityTaskManager = mock<IActivityTaskManager>()
     private val resultHandler = mock<MediaProjectionAppSelectorResultHandler>()
-    private val splitScreen = Optional.of(mock<SplitScreen>())
     private val bundleCaptor = ArgumentCaptor.forClass(Bundle::class.java)
 
-    private val fullScreenTask =
+    private val task =
         RecentTask(
             taskId = 123,
             displayId = 456,
@@ -64,22 +57,6 @@ class MediaProjectionRecentsViewControllerTest : SysuiTestCase() {
             baseIntentComponent = null,
             colorBackground = null,
             isForegroundTask = false
-            isForegroundTask = false,
-            userType = RecentTask.UserType.STANDARD,
-            splitBounds = null
-        )
-
-    private val splitScreenTask =
-        RecentTask(
-            taskId = 123,
-            displayId = 456,
-            userId = 789,
-            topActivityComponent = null,
-            baseIntentComponent = null,
-            colorBackground = null,
-            isForegroundTask = false,
-            userType = RecentTask.UserType.STANDARD,
-            splitBounds = SplitBounds(Rect(), Rect(), 0, 0, 0)
         )
 
     private val taskView =
@@ -92,97 +69,61 @@ class MediaProjectionRecentsViewControllerTest : SysuiTestCase() {
             tasksAdapterFactory,
             taskViewSizeProvider,
             activityTaskManager,
-            resultHandler,
-            splitScreen,
+            resultHandler
         )
 
     @Test
-    fun onRecentAppClicked_fullScreenTaskWithSameIdIsStartedFromRecents() {
-        controller.onRecentAppClicked(fullScreenTask, taskView)
+    fun onRecentAppClicked_taskWithSameIdIsStartedFromRecents() {
+        controller.onRecentAppClicked(task, taskView)
 
-        verify(activityTaskManager).startActivityFromRecents(eq(fullScreenTask.taskId), any())
-    }
-
-    @Test
-    fun onRecentAppClicked_splitScreenTaskWithSameIdIsStartedFromRecents() {
-        mSetFlagsRule.enableFlags(FLAG_PSS_APP_SELECTOR_RECENTS_SPLIT_SCREEN)
-        controller.onRecentAppClicked(splitScreenTask, taskView)
-
-        verify(splitScreen.get())
-            .startTasks(
-                eq(splitScreenTask.taskId),
-                any(),
-                anyInt(),
-                any(),
-                anyInt(),
-                anyInt(),
-                any(),
-                any()
-            )
+        verify(activityTaskManager).startActivityFromRecents(eq(task.taskId), any())
     }
 
     @Test
     fun onRecentAppClicked_launchDisplayIdIsSet() {
-        controller.onRecentAppClicked(fullScreenTask, taskView)
+        controller.onRecentAppClicked(task, taskView)
 
-        assertThat(getStartedTaskActivityOptions(fullScreenTask.taskId).launchDisplayId)
-            .isEqualTo(fullScreenTask.displayId)
+        assertThat(getStartedTaskActivityOptions().launchDisplayId).isEqualTo(task.displayId)
     }
 
     @Test
-    fun onRecentAppClicked_fullScreenTaskNotInForeground_usesScaleUpAnimation() {
-        assertThat(fullScreenTask.isForegroundTask).isFalse()
-        controller.onRecentAppClicked(fullScreenTask, taskView)
+    fun onRecentAppClicked_taskNotInForeground_usesScaleUpAnimation() {
+        controller.onRecentAppClicked(task, taskView)
 
-        assertThat(getStartedTaskActivityOptions(fullScreenTask.taskId).animationType)
+        assertThat(getStartedTaskActivityOptions().animationType)
             .isEqualTo(ActivityOptions.ANIM_SCALE_UP)
     }
 
     @Test
-    fun onRecentAppClicked_fullScreenTaskInForeground_flagOff_usesScaleUpAnimation() {
+    fun onRecentAppClicked_taskInForeground_flagOff_usesScaleUpAnimation() {
         mSetFlagsRule.disableFlags(FLAG_PSS_APP_SELECTOR_ABRUPT_EXIT_FIX)
 
-        controller.onRecentAppClicked(fullScreenTask, taskView)
+        controller.onRecentAppClicked(task, taskView)
 
-        assertThat(getStartedTaskActivityOptions(fullScreenTask.taskId).animationType)
+        assertThat(getStartedTaskActivityOptions().animationType)
             .isEqualTo(ActivityOptions.ANIM_SCALE_UP)
     }
 
     @Test
-    fun onRecentAppClicked_fullScreenTaskInForeground_flagOn_usesDefaultAnimation() {
+    fun onRecentAppClicked_taskInForeground_flagOn_usesDefaultAnimation() {
         mSetFlagsRule.enableFlags(FLAG_PSS_APP_SELECTOR_ABRUPT_EXIT_FIX)
-        assertForegroundTaskUsesDefaultCloseAnimation(fullScreenTask)
-    }
-
-    @Test
-    fun onRecentAppClicked_splitScreenTaskInForeground_flagOn_usesDefaultAnimation() {
-        mSetFlagsRule.enableFlags(
-            FLAG_PSS_APP_SELECTOR_ABRUPT_EXIT_FIX,
-            FLAG_PSS_APP_SELECTOR_RECENTS_SPLIT_SCREEN
-        )
-        assertForegroundTaskUsesDefaultCloseAnimation(splitScreenTask)
-    }
-
-    private fun assertForegroundTaskUsesDefaultCloseAnimation(task: RecentTask) {
         val foregroundTask = task.copy(isForegroundTask = true)
+
         controller.onRecentAppClicked(foregroundTask, taskView)
 
         expect
-            .that(getStartedTaskActivityOptions(foregroundTask.taskId).animationType)
+            .that(getStartedTaskActivityOptions().animationType)
             .isEqualTo(ActivityOptions.ANIM_CUSTOM)
+        expect.that(getStartedTaskActivityOptions().overrideTaskTransition).isTrue()
         expect
-            .that(getStartedTaskActivityOptions(foregroundTask.taskId).overrideTaskTransition)
-            .isTrue()
-        expect
-            .that(getStartedTaskActivityOptions(foregroundTask.taskId).customExitResId)
+            .that(getStartedTaskActivityOptions().customExitResId)
             .isEqualTo(com.android.internal.R.anim.resolver_close_anim)
-        expect
-            .that(getStartedTaskActivityOptions(foregroundTask.taskId).customEnterResId)
-            .isEqualTo(0)
+        expect.that(getStartedTaskActivityOptions().customEnterResId).isEqualTo(0)
     }
 
-    private fun getStartedTaskActivityOptions(taskId: Int): ActivityOptions {
-        verify(activityTaskManager).startActivityFromRecents(eq(taskId), bundleCaptor.capture())
+    private fun getStartedTaskActivityOptions(): ActivityOptions {
+        verify(activityTaskManager)
+            .startActivityFromRecents(eq(task.taskId), bundleCaptor.capture())
         return ActivityOptions.fromBundle(bundleCaptor.value)
     }
 }

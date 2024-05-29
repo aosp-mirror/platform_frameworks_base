@@ -55,8 +55,9 @@ constructor(
             val foregroundTaskId1 = foregroundGroup?.taskInfo1?.taskId
             val foregroundTaskId2 = foregroundGroup?.taskInfo2?.taskId
             val foregroundTaskIds = listOfNotNull(foregroundTaskId1, foregroundTaskId2)
-            groupedTasks.flatMap {
-                val task1 =
+            groupedTasks
+                .flatMap { listOfNotNull(it.taskInfo1, it.taskInfo2) }
+                .map {
                     RecentTask(
                         it.taskId,
                         it.displayId,
@@ -65,24 +66,8 @@ constructor(
                         it.baseIntent?.component,
                         it.taskDescription?.backgroundColor,
                         isForegroundTask = it.taskId in foregroundTaskIds && it.isVisible
-                        it.taskInfo1,
-                        it.taskInfo1.taskId in foregroundTaskIds && it.taskInfo1.isVisible,
-                        userManager.getUserInfo(it.taskInfo1.userId).toUserType(),
-                        it.splitBounds
                     )
-
-                val task2 =
-                    if (it.taskInfo2 != null) {
-                        RecentTask(
-                            it.taskInfo2!!,
-                            it.taskInfo2!!.taskId in foregroundTaskIds && it.taskInfo2!!.isVisible,
-                            userManager.getUserInfo(it.taskInfo2!!.userId).toUserType(),
-                            it.splitBounds
-                        )
-                    } else null
-
-                listOfNotNull(task1, task2)
-            }
+                }
         }
 
     private suspend fun RecentTasks.getTasks(): List<GroupedRecentTaskInfo> =
