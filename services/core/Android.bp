@@ -232,7 +232,6 @@ java_library_static {
         "android.hardware.rebootescrow-V1-java",
         "android.hardware.power.stats-V2-java",
         "android.hidl.manager-V1.2-java",
-        "audio-permission-aidl-java",
         "cbor-java",
         "com.android.media.audio-aconfig-java",
         "dropbox_flags_lib",
