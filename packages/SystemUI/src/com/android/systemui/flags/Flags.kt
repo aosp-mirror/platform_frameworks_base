@@ -170,12 +170,6 @@ object Flags {
     val WALLPAPER_PICKER_GRID_APPLY_BUTTON =
             unreleasedFlag("wallpaper_picker_grid_apply_button")
 
-    /** Keyguard Migration */
-
-    // TODO(b/297037052): Tracking bug.
-    @JvmField
-    val REMOVE_NPVC_BOTTOM_AREA_USAGE = unreleasedFlag("remove_npvc_bottom_area_usage")
-
     /** Flag meant to guard the talkback fix for the KeyguardIndicationTextView */
     // TODO(b/286563884): Tracking bug
     @JvmField val KEYGUARD_TALKBACK_FIX = unreleasedFlag("keyguard_talkback_fix")
