@@ -1,13 +1,6 @@
 package: "com.android.window.flags"
 
 flag {
-  name: "disable_thin_letterboxing_reachability"
-  namespace: "large_screen_experiences_app_compat"
-  description: "Whether reachability is disabled in case of thin letterboxing"
-  bug: "334077350"
-}
-
-flag {
   name: "disable_thin_letterboxing_policy"
   namespace: "large_screen_experiences_app_compat"
   description: "Whether reachability is disabled in case of thin letterboxing"
