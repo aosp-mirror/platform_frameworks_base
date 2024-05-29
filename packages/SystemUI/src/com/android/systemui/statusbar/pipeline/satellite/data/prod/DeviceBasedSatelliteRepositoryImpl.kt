@@ -23,7 +23,6 @@ import android.telephony.satellite.NtnSignalStrengthCallback
 import android.telephony.satellite.SatelliteManager
 import android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_SUCCESS
 import android.telephony.satellite.SatelliteModemStateCallback
-import android.telephony.satellite.SatelliteSupportedStateCallback
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -35,7 +34,6 @@ import com.android.systemui.log.core.MessageInitializer
 import com.android.systemui.log.core.MessagePrinter
 import com.android.systemui.statusbar.pipeline.dagger.OemSatelliteInputLog
 import com.android.systemui.statusbar.pipeline.satellite.data.RealDeviceBasedSatelliteRepository
-import com.android.systemui.statusbar.pipeline.satellite.data.prod.DeviceBasedSatelliteRepositoryImpl.Companion.POLLING_INTERVAL_MS
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.SatelliteSupport.Companion.whenSupported
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.SatelliteSupport.NotSupported
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.SatelliteSupport.Supported
@@ -162,6 +160,60 @@ constructor(
     @get:VisibleForTesting
     val satelliteSupport: MutableStateFlow<SatelliteSupport> = MutableStateFlow(Unknown)
 
+    init {
+        satelliteManager = satelliteManagerOpt.getOrNull()
+
+        isSatelliteAllowedForCurrentLocation = MutableStateFlow(false)
+
+        if (satelliteManager != null) {
+            // First, check that satellite is supported on this device
+            scope.launch {
+                val waitTime = ensureMinUptime(systemClock, MIN_UPTIME)
+                if (waitTime > 0) {
+                    logBuffer.i({ long1 = waitTime }) {
+                        "Waiting $long1 ms before checking for satellite support"
+                    }
+                    delay(waitTime)
+                }
+
+                satelliteSupport.value = satelliteManager.checkSatelliteSupported()
+
+                logBuffer.i(
+                    { str1 = satelliteSupport.value.toString() },
+                    { "Checked for system support. support=$str1" },
+                )
+
+                // We only need to check location availability if this mode is supported
+                if (satelliteSupport.value is Supported) {
+                    isSatelliteAllowedForCurrentLocation.subscriptionCount
+                        .map { it > 0 }
+                        .distinctUntilChanged()
+                        .collectLatest { hasSubscribers ->
+                            if (hasSubscribers) {
+                                /*
+                                 * As there is no listener available for checking satellite allowed,
+                                 * we must poll. Defaulting to polling at most once every hour while
+                                 * active. Subsequent OOS events will restart the job, so a flaky
+                                 * connection might cause more frequent checks.
+                                 */
+                                while (true) {
+                                    logBuffer.i {
+                                        "requestIsCommunicationAllowedForCurrentLocation"
+                                    }
+                                    checkIsSatelliteAllowed()
+                                    delay(POLLING_INTERVAL_MS)
+                                }
+                            }
+                        }
+                }
+            }
+        } else {
+            logBuffer.i { "Satellite manager is null" }
+
+            satelliteSupport.value = NotSupported
+        }
+    }
+
     /**
      * Note that we are given an "unbound" [TelephonyManager] (meaning it was not created with a
      * specific `subscriptionId`). Therefore this is the radio power state of the
@@ -214,122 +266,6 @@ constructor(
                 }
             }
             .onStart { emit(Unit) }
-
-    init {
-        satelliteManager = satelliteManagerOpt.getOrNull()
-
-        isSatelliteAllowedForCurrentLocation = MutableStateFlow(false)
-
-        if (satelliteManager != null) {
-            // Outer scope launch allows us to delay until MIN_UPTIME
-            scope.launch {
-                // First, check that satellite is supported on this device
-                satelliteSupport.value = checkSatelliteSupportAfterMinUptime(satelliteManager)
-                logBuffer.i(
-                    { str1 = satelliteSupport.value.toString() },
-                    { "Checked for system support. support=$str1" },
-                )
-
-                // Second, launch a job to poll for service availability based on location
-                scope.launch { pollForAvailabilityBasedOnLocation() }
-
-                // Third, register a listener to let us know if there are changes to support
-                scope.launch { listenForChangesToSatelliteSupport(satelliteManager) }
-            }
-        } else {
-            logBuffer.i { "Satellite manager is null" }
-            satelliteSupport.value = NotSupported
-        }
-    }
-
-    private suspend fun checkSatelliteSupportAfterMinUptime(
-        sm: SatelliteManager
-    ): SatelliteSupport {
-        val waitTime = ensureMinUptime(systemClock, MIN_UPTIME)
-        if (waitTime > 0) {
-            logBuffer.i({ long1 = waitTime }) {
-                "Waiting $long1 ms before checking for satellite support"
-            }
-            delay(waitTime)
-        }
-
-        return sm.checkSatelliteSupported()
-    }
-
-    /*
-     * As there is no listener available for checking satellite allowed, we must poll the service.
-     * Defaulting to polling at most once every 20m while active. Subsequent OOS events will restart
-     * the job, so a flaky connection might cause more frequent checks.
-     */
-    private suspend fun pollForAvailabilityBasedOnLocation() {
-        satelliteSupport
-            .whenSupported(
-                supported = ::isSatelliteAllowedHasListener,
-                orElse = flowOf(false),
-                retrySignal = telephonyProcessCrashedEvent,
-            )
-            .collectLatest { hasSubscribers ->
-                if (hasSubscribers) {
-                    while (true) {
-                        logBuffer.i { "requestIsCommunicationAllowedForCurrentLocation" }
-                        checkIsSatelliteAllowed()
-                        delay(POLLING_INTERVAL_MS)
-                    }
-                }
-            }
-    }
-
-    /**
-     * Register a callback with [SatelliteManager] to let us know if there is a change in satellite
-     * support. This job restarts if there is a crash event detected.
-     *
-     * Note that the structure of this method looks similar to [whenSupported], but since we want
-     * this callback registered even when it is [NotSupported], we just mimic the structure here.
-     */
-    private suspend fun listenForChangesToSatelliteSupport(sm: SatelliteManager) {
-        telephonyProcessCrashedEvent.collectLatest {
-            satelliteIsSupportedCallback.collect { supported ->
-                if (supported) {
-                    satelliteSupport.value = Supported(sm)
-                } else {
-                    satelliteSupport.value = NotSupported
-                }
-            }
-        }
-    }
-
-    /**
-     * Callback version of [checkSatelliteSupported]. This flow should be retried on the same
-     * [telephonyProcessCrashedEvent] signal, but does not require a [SupportedSatelliteManager],
-     * since it specifically watches for satellite support.
-     */
-    private val satelliteIsSupportedCallback: Flow<Boolean> =
-        if (satelliteManager == null) {
-            flowOf(false)
-        } else {
-            conflatedCallbackFlow {
-                val callback = SatelliteSupportedStateCallback { supported ->
-                    logBuffer.i {
-                        "onSatelliteSupportedStateChanged: " +
-                            "${if (supported) "supported" else "not supported"}"
-                    }
-                    trySend(supported)
-                }
-                satelliteManager.registerForSupportedStateChanged(
-                    bgDispatcher.asExecutor(),
-                    callback
-                )
-                awaitClose { satelliteManager.unregisterForSupportedStateChanged(callback) }
-            }
-        }
-
-    /**
-     * Signal that we should start polling [checkIsSatelliteAllowed]. We only need to poll if there
-     * are active listeners to [isSatelliteAllowedForCurrentLocation]
-     */
-    @SuppressWarnings("unused")
-    private fun isSatelliteAllowedHasListener(sm: SupportedSatelliteManager): Flow<Boolean> =
-        isSatelliteAllowedForCurrentLocation.subscriptionCount.map { it > 0 }.distinctUntilChanged()
 
     override val connectionState =
         satelliteSupport
