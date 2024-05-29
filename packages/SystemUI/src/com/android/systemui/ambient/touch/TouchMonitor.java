@@ -49,11 +49,14 @@ import com.android.systemui.util.display.DisplayHelper;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import kotlinx.coroutines.Job;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -78,15 +81,7 @@ public class TouchMonitor {
     private final Lifecycle mLifecycle;
     private Rect mExclusionRect = null;
 
-    private ISystemGestureExclusionListener mGestureExclusionListener =
-            new ISystemGestureExclusionListener.Stub() {
-                @Override
-                public void onSystemGestureExclusionChanged(int displayId,
-                        Region systemGestureExclusion,
-                        Region systemGestureExclusionUnrestricted) {
-                    mExclusionRect = systemGestureExclusion.getBounds();
-                }
-            };
+    private ISystemGestureExclusionListener mGestureExclusionListener;
 
     private Consumer<Rect> mMaxBoundsConsumer = rect -> mMaxBounds = rect;
 
@@ -274,6 +269,14 @@ public class TouchMonitor {
         if (bouncerAreaExclusion()) {
             mBackgroundExecutor.execute(() -> {
                 try {
+                    mGestureExclusionListener = new ISystemGestureExclusionListener.Stub() {
+                        @Override
+                        public void onSystemGestureExclusionChanged(int displayId,
+                                Region systemGestureExclusion,
+                                Region systemGestureExclusionUnrestricted) {
+                            mExclusionRect = systemGestureExclusion.getBounds();
+                        }
+                    };
                     mWindowManagerService.registerSystemGestureExclusionListener(
                             mGestureExclusionListener, mDisplayId);
                 } catch (RemoteException e) {
@@ -298,8 +301,11 @@ public class TouchMonitor {
         if (bouncerAreaExclusion()) {
             mBackgroundExecutor.execute(() -> {
                 try {
-                    mWindowManagerService.unregisterSystemGestureExclusionListener(
-                            mGestureExclusionListener, mDisplayId);
+                    if (mGestureExclusionListener != null) {
+                        mWindowManagerService.unregisterSystemGestureExclusionListener(
+                                mGestureExclusionListener, mDisplayId);
+                        mGestureExclusionListener = null;
+                    }
                 } catch (RemoteException e) {
                     // Handle the exception
                     Log.e(TAG, "unregisterSystemGestureExclusionListener: failed", e);
@@ -494,6 +500,10 @@ public class TouchMonitor {
 
     private Rect mMaxBounds;
 
+    private Job mBoundsFlow;
+
+    private boolean mInitialized;
+
 
     /**
      * Designated constructor for {@link TouchMonitor}
@@ -535,10 +545,35 @@ public class TouchMonitor {
      * Initializes the monitor. should only be called once after creation.
      */
     public void init() {
+        if (mInitialized) {
+            throw new IllegalStateException("TouchMonitor already initialized");
+        }
+
         mLifecycle.addObserver(mLifecycleObserver);
         if (Flags.ambientTouchMonitorListenToDisplayChanges()) {
-            collectFlow(mLifecycle, mConfigurationInteractor.getMaxBounds(), mMaxBoundsConsumer);
+            mBoundsFlow = collectFlow(mLifecycle, mConfigurationInteractor.getMaxBounds(),
+                    mMaxBoundsConsumer);
         }
+
+        mInitialized = true;
+    }
+
+    /**
+     * Called when the TouchMonitor should be discarded and will not be used anymore.
+     */
+    public void destroy() {
+        if (!mInitialized) {
+            throw new IllegalStateException("TouchMonitor not initialized");
+        }
+
+        stopMonitoring(true);
+
+        mLifecycle.removeObserver(mLifecycleObserver);
+        if (Flags.ambientTouchMonitorListenToDisplayChanges()) {
+            mBoundsFlow.cancel(new CancellationException());
+        }
+
+        mInitialized = false;
     }
 
     private void isolate(Set<TouchSessionImpl> sessions) {
