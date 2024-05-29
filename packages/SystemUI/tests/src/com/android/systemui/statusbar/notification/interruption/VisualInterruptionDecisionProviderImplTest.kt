@@ -89,7 +89,8 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager)
+            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
+                    uiEventLogger)
         ) {
             ensurePeekState()
             assertShouldHeadsUp(
@@ -108,7 +109,8 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager)
+            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
+                    uiEventLogger)
         ) {
             ensurePeekState()
             assertShouldNotHeadsUp(
@@ -127,7 +129,8 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager)
+            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
+                    uiEventLogger)
         ) {
             ensurePeekState()
             assertShouldHeadsUp(
@@ -144,7 +147,8 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager)
+            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
+                    uiEventLogger)
         ) {
             ensurePeekState()
             assertShouldHeadsUp(
@@ -161,7 +165,8 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager)
+            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
+                    uiEventLogger)
         ) {
             ensurePeekState()
             assertShouldHeadsUp(
@@ -178,7 +183,8 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager)
+            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
+                    uiEventLogger)
         ) {
             ensurePeekState()
             assertShouldHeadsUp(
@@ -195,7 +201,8 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager)
+            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
+                    uiEventLogger)
         ) {
             assertFsiNotSuppressed()
         }
@@ -206,7 +213,8 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager)
+            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
+                    uiEventLogger)
         ) {
             ensurePeekState()
             assertShouldHeadsUp(
@@ -230,7 +238,8 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         ).thenReturn(PERMISSION_GRANTED)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager)
+            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
+                    uiEventLogger)
         ) {
             ensurePeekState()
             assertShouldHeadsUp(

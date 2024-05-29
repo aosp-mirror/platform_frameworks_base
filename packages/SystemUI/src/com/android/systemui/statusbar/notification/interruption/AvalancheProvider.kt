@@ -21,9 +21,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.util.Log
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 
 // Class to track avalanche trigger event time.
@@ -33,6 +33,7 @@ class AvalancheProvider
 constructor(
         private val broadcastDispatcher: BroadcastDispatcher,
         private val logger: VisualInterruptionDecisionLogger,
+        private val uiEventLogger: UiEventLogger,
 ) {
     val TAG = "AvalancheProvider"
     val timeoutMs = 120000
@@ -56,6 +57,7 @@ constructor(
                     return
                 }
                 Log.d(TAG, "broadcastReceiver received intent.action=" + intent.action)
+                uiEventLogger.log(AvalancheSuppressor.AvalancheEvent.START);
                 startTime = System.currentTimeMillis()
             }
         }
