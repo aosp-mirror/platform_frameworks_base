@@ -8538,7 +8538,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // If activity in fullscreen mode is letterboxed because of fixed orientation then bounds
         // are already calculated in resolveFixedOrientationConfiguration.
         // Don't apply aspect ratio if app is overridden to fullscreen by device user/manufacturer.
-        if (!isLetterboxedForFixedOrientationAndAspectRatio()
+        if (Flags.immersiveAppRepositioning() && !isLetterboxedForFixedOrientationAndAspectRatio()
                 && !mLetterboxUiController.hasFullscreenOverride()) {
             resolveAspectRatioRestriction(newParentConfiguration);
         }
@@ -8554,6 +8554,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (!matchParentBounds()) {
                 computeConfigByResolveHint(resolvedConfig, newParentConfiguration);
             }
+        }
+        // If activity in fullscreen mode is letterboxed because of fixed orientation then bounds
+        // are already calculated in resolveFixedOrientationConfiguration, or if in size compat
+        // mode, it should already be calculated in resolveSizeCompatModeConfiguration.
+        // Don't apply aspect ratio if app is overridden to fullscreen by device user/manufacturer.
+        if (!Flags.immersiveAppRepositioning() && !isLetterboxedForFixedOrientationAndAspectRatio()
+                && !mInSizeCompatModeForBounds && !mLetterboxUiController.hasFullscreenOverride()) {
+            resolveAspectRatioRestriction(newParentConfiguration);
         }
 
         if (isFixedOrientationLetterboxAllowed || compatDisplayInsets != null
@@ -8880,7 +8888,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     boolean isImmersiveMode(@NonNull Rect parentBounds) {
-        if (!mResolveConfigHint.mUseOverrideInsetsForStableBounds) {
+        if (!Flags.immersiveAppRepositioning()) {
+            return false;
+        }
+        if (!mResolveConfigHint.mUseOverrideInsetsForStableBounds
+                && mWmService.mFlags.mInsetsDecoupledConfiguration) {
             return false;
         }
         final Insets navBarInsets = mDisplayContent.getInsetsStateController()
@@ -9229,10 +9241,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // orientation bounds (stored in resolved bounds) instead of parent bounds since the
         // activity will be displayed within them even if it is in size compat mode. They should be
         // saved here before resolved bounds are overridden below.
-        final Rect containerBounds = isAspectRatioApplied()
+        final boolean useResolvedBounds = Flags.immersiveAppRepositioning()
+                ? isAspectRatioApplied() : isLetterboxedForFixedOrientationAndAspectRatio();
+        final Rect containerBounds = useResolvedBounds
                 ? new Rect(resolvedBounds)
                 : newParentConfiguration.windowConfiguration.getBounds();
-        final Rect containerAppBounds = isAspectRatioApplied()
+        final Rect containerAppBounds = useResolvedBounds
                 ? new Rect(resolvedConfig.windowConfiguration.getAppBounds())
                 : newParentConfiguration.windowConfiguration.getAppBounds();
 
