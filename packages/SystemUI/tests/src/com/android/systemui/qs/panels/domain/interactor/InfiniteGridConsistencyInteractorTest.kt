@@ -25,9 +25,6 @@ import com.android.systemui.qs.panels.data.repository.iconTilesRepository
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,21 +34,20 @@ import org.junit.runner.RunWith
 class InfiniteGridConsistencyInteractorTest : SysuiTestCase() {
 
     private val iconOnlyTiles =
-        MutableStateFlow(
-            setOf(
-                TileSpec.create("smallA"),
-                TileSpec.create("smallB"),
-                TileSpec.create("smallC"),
-                TileSpec.create("smallD"),
-                TileSpec.create("smallE"),
-            )
+        setOf(
+            TileSpec.create("smallA"),
+            TileSpec.create("smallB"),
+            TileSpec.create("smallC"),
+            TileSpec.create("smallD"),
+            TileSpec.create("smallE"),
         )
     private val kosmos =
         testKosmos().apply {
             iconTilesRepository =
                 object : IconTilesRepository {
-                    override val iconTilesSpecs: StateFlow<Set<TileSpec>>
-                        get() = iconOnlyTiles.asStateFlow()
+                    override fun isIconTile(spec: TileSpec): Boolean {
+                        return iconOnlyTiles.contains(spec)
+                    }
                 }
         }
     private val underTest = with(kosmos) { infiniteGridConsistencyInteractor }

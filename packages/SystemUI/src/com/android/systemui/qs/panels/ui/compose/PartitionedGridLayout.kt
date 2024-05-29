@@ -38,7 +38,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
@@ -66,12 +65,11 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
             tiles.forEach { it.startListening(token) }
             onDispose { tiles.forEach { it.stopListening(token) } }
         }
-        val iconTilesSpecs by viewModel.iconTilesSpecs.collectAsStateWithLifecycle()
         val columns by viewModel.columns.collectAsStateWithLifecycle()
         val showLabels by viewModel.showLabels.collectAsStateWithLifecycle()
         val largeTileHeight = tileHeight()
         val iconTileHeight = tileHeight(showLabels)
-        val (smallTiles, largeTiles) = tiles.partition { iconTilesSpecs.contains(it.spec) }
+        val (smallTiles, largeTiles) = tiles.partition { viewModel.isIconTile(it.spec) }
 
         TileLazyGrid(modifier = modifier, columns = GridCells.Fixed(columns)) {
             // Large tiles
@@ -103,7 +101,6 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
         onAddTile: (TileSpec, Int) -> Unit,
         onRemoveTile: (TileSpec) -> Unit
     ) {
-        val iconOnlySpecs by viewModel.iconTilesSpecs.collectAsStateWithLifecycle()
         val columns by viewModel.columns.collectAsStateWithLifecycle()
         val showLabels by viewModel.showLabels.collectAsStateWithLifecycle()
 
@@ -111,8 +108,6 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
         val addTileToEnd: (TileSpec) -> Unit by rememberUpdatedState {
             onAddTile(it, CurrentTilesInteractor.POSITION_AT_END)
         }
-        val isIconOnly: (TileSpec) -> Boolean =
-            remember(iconOnlySpecs) { { tileSpec: TileSpec -> tileSpec in iconOnlySpecs } }
         val largeTileHeight = tileHeight()
         val iconTileHeight = tileHeight(showLabels)
         val tilePadding = dimensionResource(R.dimen.qs_tile_margin_vertical)
@@ -151,7 +146,7 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                 iconTileHeight = iconTileHeight,
                 tilePadding = tilePadding,
                 onRemoveTile = onRemoveTile,
-                isIconOnly = isIconOnly,
+                isIconOnly = viewModel::isIconTile,
                 columns = columns,
                 showLabels = showLabels,
             )
@@ -161,7 +156,7 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                 iconTileHeight = iconTileHeight,
                 tilePadding = tilePadding,
                 addTileToEnd = addTileToEnd,
-                isIconOnly = isIconOnly,
+                isIconOnly = viewModel::isIconTile,
                 showLabels = showLabels,
                 columns = columns,
             )
@@ -232,7 +227,7 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
         val largeGridHeight = gridHeight(largeTiles.size, largeTileHeight, columns / 2, tilePadding)
         val smallGridHeight = gridHeight(smallTiles.size, iconTileHeight, columns, tilePadding)
         val largeGridHeightCustom =
-            gridHeight(tilesCustom.size, largeTileHeight, columns / 2, tilePadding)
+            gridHeight(tilesCustom.size, iconTileHeight, columns, tilePadding)
 
         // Add up the height of all three grids and add padding in between
         val gridHeight =
@@ -257,8 +252,14 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                 )
                 fillUpRow(nTiles = smallTiles.size, columns = columns)
 
-                // Custom tiles, all large
-                editTiles(tilesCustom, ClickAction.ADD, addTileToEnd, isIconOnly)
+                // Custom tiles, all icons
+                editTiles(
+                    tilesCustom,
+                    ClickAction.ADD,
+                    addTileToEnd,
+                    isIconOnly,
+                    showLabels = showLabels
+                )
             }
         }
     }
