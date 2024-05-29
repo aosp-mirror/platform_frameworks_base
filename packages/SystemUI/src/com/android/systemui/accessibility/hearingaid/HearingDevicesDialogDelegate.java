@@ -25,10 +25,14 @@ import android.bluetooth.BluetoothHapClient;
 import android.bluetooth.BluetoothHapPresetInfo;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.Visibility;
@@ -36,7 +40,10 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -69,6 +76,7 @@ import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -78,12 +86,15 @@ import java.util.stream.Collectors;
  */
 public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         HearingDeviceItemCallback, BluetoothCallback {
-
+    private static final String TAG = "HearingDevicesDialogDelegate";
     @VisibleForTesting
     static final String ACTION_BLUETOOTH_DEVICE_DETAILS =
             "com.android.settings.BLUETOOTH_DEVICE_DETAIL_SETTINGS";
     private static final String EXTRA_SHOW_FRAGMENT_ARGUMENTS = ":settings:show_fragment_args";
     private static final String KEY_BLUETOOTH_ADDRESS = "device_address";
+    @VisibleForTesting
+    static final Intent LIVE_CAPTION_INTENT = new Intent(
+            "com.android.settings.action.live_caption");
     private final SystemUIDialog.Factory mSystemUIDialogFactory;
     private final DialogTransitionAnimator mDialogTransitionAnimator;
     private final ActivityStarter mActivityStarter;
@@ -102,6 +113,7 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
     private Spinner mPresetSpinner;
     private ArrayAdapter<String> mPresetInfoAdapter;
     private Button mPairButton;
+    private LinearLayout mRelatedToolsContainer;
     private final HearingDevicesPresetsController.PresetCallback mPresetCallback =
             new HearingDevicesPresetsController.PresetCallback() {
                 @Override
@@ -253,10 +265,14 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         mPairButton = dialog.requireViewById(R.id.pair_new_device_button);
         mDeviceList = dialog.requireViewById(R.id.device_list);
         mPresetSpinner = dialog.requireViewById(R.id.preset_spinner);
+        mRelatedToolsContainer = dialog.requireViewById(R.id.related_tools_container);
 
         setupDeviceListView(dialog);
         setupPresetSpinner(dialog);
         setupPairNewDeviceButton(dialog, mShowPairNewDevice ? VISIBLE : GONE);
+        if (com.android.systemui.Flags.hearingDevicesDialogRelatedTools()) {
+            setupRelatedToolsView(dialog);
+        }
     }
 
     @Override
@@ -351,6 +367,34 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         }
     }
 
+    private void setupRelatedToolsView(SystemUIDialog dialog) {
+        final Context context = dialog.getContext();
+        final List<ToolItem> toolItemList = new ArrayList<>();
+        final String[] toolNameArray;
+        final String[] toolIconArray;
+
+        ToolItem preInstalledItem = getLiveCaption(context);
+        if (preInstalledItem != null) {
+            toolItemList.add(preInstalledItem);
+        }
+        try {
+            toolNameArray = context.getResources().getStringArray(
+                    R.array.config_quickSettingsHearingDevicesRelatedToolName);
+            toolIconArray = context.getResources().getStringArray(
+                    R.array.config_quickSettingsHearingDevicesRelatedToolIcon);
+            toolItemList.addAll(
+                    HearingDevicesToolItemParser.parseStringArray(context, toolNameArray,
+                    toolIconArray));
+        } catch (Resources.NotFoundException e) {
+            Log.i(TAG, "No hearing devices related tool config resource");
+        }
+        final int listSize = toolItemList.size();
+        for (int i = 0; i < listSize; i++) {
+            View view = createHearingToolView(context, toolItemList.get(i));
+            mRelatedToolsContainer.addView(view);
+        }
+    }
+
     private void refreshPresetInfoAdapter(List<BluetoothHapPresetInfo> presetInfos,
             int activePresetIndex) {
         mPresetInfoAdapter.clear();
@@ -397,6 +441,40 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
                 return itemFactory.create(context, cachedDevice);
             }
         }
+        return null;
+    }
+
+    @NonNull
+    private View createHearingToolView(Context context, ToolItem item) {
+        View view = LayoutInflater.from(context).inflate(R.layout.hearing_tool_item,
+                mRelatedToolsContainer, false);
+        ImageView icon = view.requireViewById(R.id.tool_icon);
+        TextView text = view.requireViewById(R.id.tool_name);
+        view.setContentDescription(item.getToolName());
+        icon.setImageDrawable(item.getToolIcon());
+        text.setText(item.getToolName());
+        Intent intent = item.getToolIntent();
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        view.setOnClickListener(
+                v -> {
+                    dismissDialogIfExists();
+                    mActivityStarter.postStartActivityDismissingKeyguard(intent, /* delay= */ 0,
+                            mDialogTransitionAnimator.createActivityTransitionController(view));
+                });
+        return view;
+    }
+
+    private ToolItem getLiveCaption(Context context) {
+        final PackageManager packageManager = context.getPackageManager();
+        LIVE_CAPTION_INTENT.setPackage(packageManager.getSystemCaptionsServicePackageName());
+        final List<ResolveInfo> resolved = packageManager.queryIntentActivities(LIVE_CAPTION_INTENT,
+                /* flags= */ 0);
+        if (!resolved.isEmpty()) {
+            return new ToolItem(context.getString(R.string.live_caption_title),
+                    context.getDrawable(R.drawable.ic_volume_odi_captions),
+                    LIVE_CAPTION_INTENT);
+        }
+
         return null;
     }
 
