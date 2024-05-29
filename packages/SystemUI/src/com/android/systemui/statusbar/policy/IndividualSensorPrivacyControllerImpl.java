@@ -32,6 +32,7 @@ import android.util.SparseBooleanArray;
 import androidx.annotation.NonNull;
 
 import com.android.internal.camera.flags.Flags;
+import com.android.systemui.util.ListenerSet;
 
 import java.util.Set;
 
@@ -43,7 +44,7 @@ public class IndividualSensorPrivacyControllerImpl implements IndividualSensorPr
     private final SparseBooleanArray mSoftwareToggleState = new SparseBooleanArray();
     private final SparseBooleanArray mHardwareToggleState = new SparseBooleanArray();
     private Boolean mRequiresAuthentication;
-    private final Set<Callback> mCallbacks = new ArraySet<>();
+    private final ListenerSet<Callback> mCallbacks = new ListenerSet<>();
 
     public IndividualSensorPrivacyControllerImpl(
             @NonNull SensorPrivacyManager sensorPrivacyManager) {
@@ -115,7 +116,7 @@ public class IndividualSensorPrivacyControllerImpl implements IndividualSensorPr
 
     @Override
     public void addCallback(@NonNull Callback listener) {
-        mCallbacks.add(listener);
+        mCallbacks.addIfAbsent(listener);
     }
 
     @Override
