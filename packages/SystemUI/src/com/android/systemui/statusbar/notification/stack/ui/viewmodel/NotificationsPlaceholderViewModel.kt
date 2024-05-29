@@ -60,10 +60,6 @@ constructor(
         interactor.setConstrainedAvailableSpace(height)
     }
 
-    fun onHeadsUpTopChanged(headsUpTop: Float) {
-        interactor.setHeadsUpTop(headsUpTop)
-    }
-
     /** Sets the content alpha for the current state of the brightness mirror */
     fun setAlphaForBrightnessMirror(alpha: Float) {
         interactor.setAlphaForBrightnessMirror(alpha)
