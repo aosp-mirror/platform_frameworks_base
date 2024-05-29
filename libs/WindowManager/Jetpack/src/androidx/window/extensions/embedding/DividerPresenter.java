@@ -841,8 +841,8 @@ class DividerPresenter implements View.OnTouchListener {
     private static boolean isDraggingToFullscreenAllowed(
             @NonNull DividerAttributes dividerAttributes) {
         // TODO(b/293654166) Use DividerAttributes.isDraggingToFullscreenAllowed when extension is
-        // updated.
-        return true;
+        // updated to v7.
+        return false;
     }
 
     /**
