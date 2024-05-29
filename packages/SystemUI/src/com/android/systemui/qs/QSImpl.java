@@ -48,15 +48,12 @@ import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.media.controls.ui.view.MediaHost;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSComponent;
-import com.android.systemui.qs.footer.ui.binder.FooterActionsViewBinder;
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.res.R;
@@ -117,11 +114,9 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
     private final MediaHost mQqsMediaHost;
     private final QSDisableFlagsLogger mQsDisableFlagsLogger;
     private final LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
-    private final FeatureFlags mFeatureFlags;
     private final QSLogger mLogger;
     private final FooterActionsController mFooterActionsController;
     private final FooterActionsViewModel.Factory mFooterActionsViewModelFactory;
-    private final FooterActionsViewBinder mFooterActionsViewBinder;
     private final ListeningAndVisibilityLifecycleOwner mListeningAndVisibilityLifecycleOwner;
     private boolean mShowCollapsedOnKeyguard;
     private boolean mLastKeyguardAndExpanded;
@@ -184,23 +179,19 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
             DumpManager dumpManager, QSLogger qsLogger,
             FooterActionsController footerActionsController,
             FooterActionsViewModel.Factory footerActionsViewModelFactory,
-            FooterActionsViewBinder footerActionsViewBinder,
-            LargeScreenShadeInterpolator largeScreenShadeInterpolator,
-            FeatureFlags featureFlags) {
+            LargeScreenShadeInterpolator largeScreenShadeInterpolator) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
         mQsMediaHost = qsMediaHost;
         mQqsMediaHost = qqsMediaHost;
         mQsDisableFlagsLogger = qsDisableFlagsLogger;
         mLogger = qsLogger;
         mLargeScreenShadeInterpolator = largeScreenShadeInterpolator;
-        mFeatureFlags = featureFlags;
         mCommandQueue = commandQueue;
         mBypassController = keyguardBypassController;
         mStatusBarStateController = statusBarStateController;
         mDumpManager = dumpManager;
         mFooterActionsController = footerActionsController;
         mFooterActionsViewModelFactory = footerActionsViewModelFactory;
-        mFooterActionsViewBinder = footerActionsViewBinder;
         mListeningAndVisibilityLifecycleOwner = new ListeningAndVisibilityLifecycleOwner();
         if (SceneContainerFlag.isEnabled()) {
             mStatusBarState = StatusBarState.SHADE;
@@ -296,16 +287,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
     private void bindFooterActionsView(View root) {
         LinearLayout footerActionsView = root.findViewById(R.id.qs_footer_actions);
 
-        if (!mFeatureFlags.isEnabled(Flags.COMPOSE_QS_FOOTER_ACTIONS)) {
-            Log.d(TAG, "Binding the View implementation of the QS footer actions");
-            mFooterActionsView = footerActionsView;
-            mFooterActionsViewBinder.bind(footerActionsView, mQSFooterActionsViewModel,
-                    mListeningAndVisibilityLifecycleOwner);
-            return;
-        }
-
         // Compose is available, so let's use the Compose implementation of the footer actions.
-        Log.d(TAG, "Binding the Compose implementation of the QS footer actions");
         View composeView = QSUtils.createFooterActionsView(root.getContext(),
                 mQSFooterActionsViewModel, mListeningAndVisibilityLifecycleOwner);
         mFooterActionsView = composeView;

@@ -68,11 +68,6 @@
 
     <dimen name="qs_brightness_margin_bottom">16dp</dimen>
 
-    <!--  For large screens the security footer appears below the footer,
-    same as phones in portrait  -->
-    <dimen name="qs_security_footer_single_line_height">48dp</dimen>
-    <dimen name="qs_security_footer_background_inset">0dp</dimen>
-
     <dimen name="qs_panel_padding_top">8dp</dimen>
 
     <!-- The width of large/content heavy dialogs (e.g. Internet, Media output, etc) -->
