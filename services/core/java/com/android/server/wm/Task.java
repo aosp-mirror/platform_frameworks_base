@@ -3626,12 +3626,11 @@ class Task extends TaskFragment {
         info.taskInfo.configuration.setTo(activity.getConfiguration());
         final ActivityRecord topFullscreenActivity = getTopFullscreenActivity();
         if (topFullscreenActivity != null) {
-            final WindowState topFullscreenOpaqueWindow =
-                    topFullscreenActivity.getTopFullscreenOpaqueWindow();
-            if (topFullscreenOpaqueWindow != null) {
+            final WindowState mainWindow = topFullscreenActivity.findMainWindow(false);
+            if (mainWindow != null) {
                 info.topOpaqueWindowInsetsState =
-                        topFullscreenOpaqueWindow.getInsetsStateWithVisibilityOverride();
-                info.topOpaqueWindowLayoutParams = topFullscreenOpaqueWindow.getAttrs();
+                        mainWindow.getInsetsStateWithVisibilityOverride();
+                info.topOpaqueWindowLayoutParams = mainWindow.getAttrs();
             }
         }
         return info;
