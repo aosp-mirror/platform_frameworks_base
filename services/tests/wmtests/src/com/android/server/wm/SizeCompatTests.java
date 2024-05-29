@@ -108,6 +108,7 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
 import android.view.InsetsFrameProvider;
@@ -123,6 +124,7 @@ import com.android.internal.policy.SystemBarUtils;
 import com.android.internal.statusbar.LetterboxDetails;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wm.DeviceStateController.DeviceState;
+import com.android.window.flags.Flags;
 
 import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
 import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
@@ -187,6 +189,7 @@ public class SizeCompatTests extends WindowTestsBase {
     private void setUpApp(DisplayContent display) {
         mTask = new TaskBuilder(mSupervisor).setDisplay(display).setCreateActivity(true).build();
         mActivity = mTask.getTopNonFinishingActivity();
+        doReturn(false).when(mActivity).isImmersiveMode(any());
     }
 
     private void setUpDisplaySizeWithApp(int dw, int dh) {
@@ -393,6 +396,55 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // Check that updateInheritedLetterbox() is invoked again
         verify(translucentActivity.mLetterboxUiController).updateInheritedLetterbox();
+    }
+
+    // TODO(b/333663877): Enable test after fix
+    @Test
+    @RequiresFlagsDisabled({Flags.FLAG_INSETS_DECOUPLED_CONFIGURATION})
+    public void testRepositionLandscapeImmersiveAppWithDisplayCutout() {
+        final int dw = 2100;
+        final int dh = 2000;
+        final int cutoutHeight = 150;
+        final TestDisplayContent display = new TestDisplayContent.Builder(mAtm, dw, dh)
+                .setCanRotate(false)
+                .setNotch(cutoutHeight)
+                .build();
+        setUpApp(display);
+        display.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mWm.mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(0.5f);
+        mWm.mLetterboxConfiguration.setIsVerticalReachabilityEnabled(true);
+
+        doReturn(true).when(mActivity).isImmersiveMode(any());
+        prepareMinAspectRatio(mActivity, OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE,
+                SCREEN_ORIENTATION_LANDSCAPE);
+        addWindowToActivity(mActivity);
+        mActivity.mRootWindowContainer.performSurfacePlacement();
+
+        final Function<ActivityRecord, Rect> innerBoundsOf =
+                (ActivityRecord a) -> {
+                    final Rect bounds = new Rect();
+                    a.mLetterboxUiController.getLetterboxInnerBounds(bounds);
+                    return bounds;
+                };
+
+        final Consumer<Integer> doubleClick =
+                (Integer y) -> {
+                    mActivity.mLetterboxUiController.handleVerticalDoubleTap(y);
+                    mActivity.mRootWindowContainer.performSurfacePlacement();
+                };
+
+        final Rect bounds = mActivity.getBounds();
+        assertTrue(bounds.top > cutoutHeight && bounds.bottom < dh);
+        assertEquals(dw, bounds.width());
+
+        // Double click bottom.
+        doubleClick.accept(dh - 10);
+        assertEquals(dh, innerBoundsOf.apply(mActivity).bottom);
+
+        // Double click top.
+        doubleClick.accept(10);
+        doubleClick.accept(10);
+        assertEquals(cutoutHeight, innerBoundsOf.apply(mActivity).top);
     }
 
     @Test
@@ -3994,8 +4046,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // Prepare unresizable landscape activity
         prepareUnresizable(mActivity, SCREEN_ORIENTATION_LANDSCAPE);
-        final DisplayPolicy displayPolicy = mActivity.mDisplayContent.getDisplayPolicy();
-        doReturn(immersive).when(displayPolicy).isImmersiveMode();
+        doReturn(immersive).when(mActivity).isImmersiveMode(any());
 
         mActivity.mRootWindowContainer.performSurfacePlacement();
 
