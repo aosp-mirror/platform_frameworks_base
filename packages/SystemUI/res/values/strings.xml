@@ -319,6 +319,15 @@
     <string name="screenrecord_save_error">Error saving screen recording</string>
     <!-- A toast message shown when the screen recording cannot be started due to a generic error [CHAR LIMIT=NONE] -->
     <string name="screenrecord_start_error">Error starting screen recording</string>
+    <!-- Title for a dialog shown to the user that will let them stop recording their screen [CHAR LIMIT=50] -->
+    <string name="screenrecord_stop_dialog_title">Stop recording screen?</string>
+    <!-- Text telling a user that they will stop recording their screen if they click the "Stop recording" button [CHAR LIMIT=100] -->
+    <string name="screenrecord_stop_dialog_message">You will stop recording your screen</string>
+    <!-- Button to stop a screen recording [CHAR LIMIT=35] -->
+    <string name="screenrecord_stop_dialog_button">Stop recording</string>
+
+    <!-- Button to close a dialog without doing any action [CHAR LIMIT=20] -->
+    <string name="close_dialog_button">Close</string>
 
     <!-- Notification title displayed for issue recording [CHAR LIMIT=50]-->
     <string name="issuerecord_title">Issue Recorder</string>

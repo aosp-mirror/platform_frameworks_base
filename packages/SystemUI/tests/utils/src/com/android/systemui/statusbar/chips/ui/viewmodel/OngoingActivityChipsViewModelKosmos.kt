@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.chips.ui.viewmodel
 
 import android.content.packageManager
+import com.android.systemui.animation.mockDialogTransitionAnimator
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
@@ -24,6 +25,7 @@ import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionR
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractor
 import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.ScreenRecordChipInteractor
+import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
 import com.android.systemui.util.time.fakeSystemClock
 
 val Kosmos.screenRecordChipInteractor: ScreenRecordChipInteractor by
@@ -31,6 +33,8 @@ val Kosmos.screenRecordChipInteractor: ScreenRecordChipInteractor by
         ScreenRecordChipInteractor(
             scope = applicationCoroutineScope,
             screenRecordRepository = screenRecordRepository,
+            dialogFactory = mockSystemUIDialogFactory,
+            dialogTransitionAnimator = mockDialogTransitionAnimator,
             systemClock = fakeSystemClock,
         )
     }

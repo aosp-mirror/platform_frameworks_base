@@ -20,6 +20,7 @@ import android.content.applicationContext
 import com.android.systemui.jank.interactionJankMonitor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.util.mockito.mock
 
 val Kosmos.dialogTransitionAnimator by Fixture {
     fakeDialogTransitionAnimator(
@@ -29,3 +30,5 @@ val Kosmos.dialogTransitionAnimator by Fixture {
         interactionJankMonitor = interactionJankMonitor,
     )
 }
+
+val Kosmos.mockDialogTransitionAnimator by Fixture { mock<DialogTransitionAnimator>() }
