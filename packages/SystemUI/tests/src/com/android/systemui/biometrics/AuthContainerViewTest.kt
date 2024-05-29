@@ -18,6 +18,7 @@ package com.android.systemui.biometrics
 import android.app.ActivityTaskManager
 import android.app.admin.DevicePolicyManager
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.hardware.biometrics.BiometricAuthenticator
 import android.hardware.biometrics.BiometricConstants
 import android.hardware.biometrics.BiometricManager
@@ -386,6 +387,33 @@ open class AuthContainerViewTest : SysuiTestCase() {
 
         // Check credential view persists after new attachment
         container.onAttachedToWindow()
+
+        assertThat(container.hasCredentialView()).isTrue()
+        assertThat(container.hasBiometricPrompt()).isFalse()
+    }
+
+    @Test
+    fun testAnimateToCredentialUI_rotateCredentialUI() {
+        val container = initializeFingerprintContainer(
+            authenticators = BiometricManager.Authenticators.BIOMETRIC_WEAK or
+                    BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        )
+        container.animateToCredentialUI(false)
+        waitForIdleSync()
+
+        assertThat(container.hasCredentialView()).isTrue()
+        assertThat(container.hasBiometricPrompt()).isFalse()
+
+        // Check credential view persists after new attachment
+        container.onAttachedToWindow()
+
+        assertThat(container.hasCredentialView()).isTrue()
+        assertThat(container.hasBiometricPrompt()).isFalse()
+
+        val configuration = Configuration(context.resources.configuration)
+        configuration.orientation = Configuration.ORIENTATION_LANDSCAPE
+        container.dispatchConfigurationChanged(configuration)
+        waitForIdleSync()
 
         assertThat(container.hasCredentialView()).isTrue()
         assertThat(container.hasBiometricPrompt()).isFalse()
