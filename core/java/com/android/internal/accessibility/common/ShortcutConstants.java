@@ -16,6 +16,8 @@
 
 package com.android.internal.accessibility.common;
 
+import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_TILE_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.COLOR_INVERSION_TILE_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME;
@@ -160,6 +162,8 @@ public final class ShortcutConstants {
             DALTONIZER_COMPONENT_NAME, DALTONIZER_TILE_COMPONENT_NAME,
             ONE_HANDED_COMPONENT_NAME, ONE_HANDED_TILE_COMPONENT_NAME,
             REDUCE_BRIGHT_COLORS_COMPONENT_NAME, REDUCE_BRIGHT_COLORS_TILE_SERVICE_COMPONENT_NAME,
-            FONT_SIZE_COMPONENT_NAME, FONT_SIZE_TILE_COMPONENT_NAME
+            FONT_SIZE_COMPONENT_NAME, FONT_SIZE_TILE_COMPONENT_NAME,
+            ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME,
+            ACCESSIBILITY_HEARING_AIDS_TILE_COMPONENT_NAME
     );
 }
