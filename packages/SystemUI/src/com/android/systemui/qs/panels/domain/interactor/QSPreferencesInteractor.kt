@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.data.repository
+package com.android.systemui.qs.panels.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.panels.data.repository.QSPreferencesRepository
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.Flow
 
-/** Repository for whether to show the labels of icon tiles. */
 @SysUISingleton
-class IconLabelVisibilityRepository @Inject constructor() {
-    // TODO(b/341735914): Persist and back up showLabels
-    private val _showLabels = MutableStateFlow(false)
-    val showLabels: StateFlow<Boolean> = _showLabels.asStateFlow()
+class QSPreferencesInteractor @Inject constructor(private val repo: QSPreferencesRepository) {
+    val showLabels: Flow<Boolean> = repo.showLabels
 
     fun setShowLabels(showLabels: Boolean) {
-        _showLabels.value = showLabels
+        repo.setShowLabels(showLabels)
     }
 }
