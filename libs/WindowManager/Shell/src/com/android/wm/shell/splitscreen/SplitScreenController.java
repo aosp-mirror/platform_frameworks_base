@@ -494,6 +494,15 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         return mStageCoordinator.getActivateSplitPosition(taskInfo);
     }
 
+    /** Start two tasks in parallel as a splitscreen pair. */
+    public void startTasks(int taskId1, @Nullable Bundle options1, int taskId2,
+            @Nullable Bundle options2, @SplitPosition int splitPosition,
+            @PersistentSnapPosition int snapPosition,
+            @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
+        mStageCoordinator.startTasks(taskId1, options1, taskId2, options2, splitPosition,
+                snapPosition, remoteTransition, instanceId);
+    }
+
     /**
      * Move a task to split select
      * @param taskInfo the task being moved to split select
@@ -1104,6 +1113,15 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 }
             }
         };
+
+        @Override
+        public void startTasks(int taskId1, @Nullable Bundle options1, int taskId2,
+                @Nullable Bundle options2, int splitPosition, int snapPosition,
+                @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
+            mMainExecutor.execute(() -> SplitScreenController.this.startTasks(
+                    taskId1, options1, taskId2, options2, splitPosition, snapPosition,
+                    remoteTransition, instanceId));
+        }
 
         @Override
         public void registerSplitScreenListener(SplitScreenListener listener, Executor executor) {
