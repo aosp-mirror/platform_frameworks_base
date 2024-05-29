@@ -16,11 +16,14 @@
 
 package com.android.systemui.statusbar.pipeline.dagger
 
-import com.android.systemui.statusbar.pipeline.satellite.data.DeviceBasedSatelliteRepository
 import javax.inject.Qualifier
 
-/** Detailed [DeviceBasedSatelliteRepository] logs */
+/**
+ * Logs for device-based satellite events that are **not** that frequent/chatty.
+ *
+ * For chatty logs, use [VerboseDeviceBasedSatelliteInputLog] instead.
+ */
 @Qualifier
 @MustBeDocumented
-@kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
-annotation class OemSatelliteInputLog
+@Retention(AnnotationRetention.RUNTIME)
+annotation class DeviceBasedSatelliteInputLog
