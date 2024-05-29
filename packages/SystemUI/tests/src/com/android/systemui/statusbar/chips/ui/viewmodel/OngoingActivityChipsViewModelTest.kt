@@ -30,8 +30,11 @@ import com.android.systemui.res.R
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
 import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.NORMAL_PACKAGE
+import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.setUpPackageManagerForMediaProjection
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 
 @SmallTest
@@ -45,6 +48,11 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
     private val callState = kosmos.callChipInteractor.chip
 
     private val underTest = kosmos.ongoingActivityChipsViewModel
+
+    @Before
+    fun setUp() {
+        setUpPackageManagerForMediaProjection(kosmos)
+    }
 
     @Test
     fun chip_allHidden_hidden() =
@@ -91,7 +99,8 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
     fun chip_screenRecordShowAndMediaProjectionShow_screenRecordShown() =
         testScope.runTest {
             screenRecordState.value = ScreenRecordModel.Recording
-            mediaProjectionState.value = MediaProjectionState.EntireScreen
+            mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
             callState.value = OngoingActivityChipModel.Hidden
 
             val latest by collectLastValue(underTest.chip)
@@ -103,7 +112,8 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
     fun chip_mediaProjectionShowAndCallShow_mediaProjectionShown() =
         testScope.runTest {
             screenRecordState.value = ScreenRecordModel.DoingNothing
-            mediaProjectionState.value = MediaProjectionState.EntireScreen
+            mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
             val callChip =
                 OngoingActivityChipModel.Shown(
                     Icon.Resource(R.drawable.ic_call, ContentDescription.Loaded("icon")),
@@ -113,7 +123,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
 
             val latest by collectLastValue(underTest.chip)
 
-            assertIsMediaProjectionChip(latest)
+            assertIsShareToAppChip(latest)
         }
 
     @Test
@@ -152,10 +162,14 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
             assertThat(latest).isEqualTo(callChip)
 
             // WHEN the higher priority media projection chip is added
-            mediaProjectionState.value = MediaProjectionState.SingleTask(createTask(taskId = 1))
+            mediaProjectionState.value =
+                MediaProjectionState.Projecting.SingleTask(
+                    NORMAL_PACKAGE,
+                    createTask(taskId = 1),
+                )
 
             // THEN the higher priority media projection chip is used
-            assertIsMediaProjectionChip(latest)
+            assertIsShareToAppChip(latest)
 
             // WHEN the higher priority screen record chip is added
             screenRecordState.value = ScreenRecordModel.Recording
@@ -169,7 +183,8 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
         testScope.runTest {
             // WHEN all chips are active
             screenRecordState.value = ScreenRecordModel.Recording
-            mediaProjectionState.value = MediaProjectionState.EntireScreen
+            mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
 
             val callChip =
                 OngoingActivityChipModel.Shown(
@@ -187,7 +202,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
             screenRecordState.value = ScreenRecordModel.DoingNothing
 
             // THEN the lower priority media projection is used
-            assertIsMediaProjectionChip(latest)
+            assertIsShareToAppChip(latest)
 
             // WHEN the higher priority media projection is removed
             mediaProjectionState.value = MediaProjectionState.NotProjecting
@@ -203,10 +218,10 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
             assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.stat_sys_screen_record)
         }
 
-        fun assertIsMediaProjectionChip(latest: OngoingActivityChipModel?) {
+        fun assertIsShareToAppChip(latest: OngoingActivityChipModel?) {
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
             val icon = (latest as OngoingActivityChipModel.Shown).icon
-            assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_cast_connected)
+            assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_screenshot_share)
         }
     }
 }

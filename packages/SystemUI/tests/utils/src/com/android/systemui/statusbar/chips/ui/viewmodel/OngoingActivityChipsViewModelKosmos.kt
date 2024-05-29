@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.ui.viewmodel
 
+import android.content.packageManager
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
@@ -39,6 +40,7 @@ val Kosmos.mediaProjectionChipInteractor: MediaProjectionChipInteractor by
         MediaProjectionChipInteractor(
             scope = applicationCoroutineScope,
             mediaProjectionRepository = fakeMediaProjectionRepository,
+            packageManager = packageManager,
             systemClock = fakeSystemClock,
         )
     }

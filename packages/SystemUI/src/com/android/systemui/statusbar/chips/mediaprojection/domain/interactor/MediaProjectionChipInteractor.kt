@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.mediaprojection.domain.interactor
 
+import android.content.pm.PackageManager
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
@@ -25,6 +26,7 @@ import com.android.systemui.mediaprojection.data.repository.MediaProjectionRepos
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.chips.domain.interactor.OngoingActivityChipInteractor
 import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
+import com.android.systemui.util.Utils
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -49,31 +51,64 @@ class MediaProjectionChipInteractor
 constructor(
     @Application scope: CoroutineScope,
     mediaProjectionRepository: MediaProjectionRepository,
-    val systemClock: SystemClock,
+    private val packageManager: PackageManager,
+    private val systemClock: SystemClock,
 ) : OngoingActivityChipInteractor {
     override val chip: StateFlow<OngoingActivityChipModel> =
         mediaProjectionRepository.mediaProjectionState
             .map { state ->
                 when (state) {
                     is MediaProjectionState.NotProjecting -> OngoingActivityChipModel.Hidden
-                    is MediaProjectionState.EntireScreen,
-                    is MediaProjectionState.SingleTask -> {
-                        // TODO(b/332662551): Distinguish between cast-to-other-device and
-                        // share-to-app.
-                        OngoingActivityChipModel.Shown(
-                            icon =
-                                Icon.Resource(
-                                    R.drawable.ic_cast_connected,
-                                    ContentDescription.Resource(R.string.accessibility_casting)
-                                ),
-                            // TODO(b/332662551): See if we can use a MediaProjection API to fetch
-                            // this time.
-                            startTimeMs = systemClock.elapsedRealtime()
-                        ) {
-                            // TODO(b/332662551): Implement the pause dialog.
+                    is MediaProjectionState.Projecting -> {
+                        if (isProjectionToOtherDevice(state.hostPackage)) {
+                            createCastToOtherDeviceChip()
+                        } else {
+                            createShareToAppChip()
                         }
                     }
                 }
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden)
+
+    /**
+     * Returns true iff projecting to the given [packageName] means that we're projecting to a
+     * *different* device (as opposed to projecting to some application on *this* device).
+     */
+    private fun isProjectionToOtherDevice(packageName: String?): Boolean {
+        // The [isHeadlessRemoteDisplayProvider] check approximates whether a projection is to a
+        // different device or the same device, because headless remote display packages are the
+        // only kinds of packages that do cast-to-other-device. This isn't exactly perfect,
+        // because it means that any projection by those headless remote display packages will be
+        // marked as going to a different device, even if that isn't always true. See b/321078669.
+        return Utils.isHeadlessRemoteDisplayProvider(packageManager, packageName)
+    }
+
+    private fun createCastToOtherDeviceChip(): OngoingActivityChipModel.Shown {
+        return OngoingActivityChipModel.Shown(
+            icon =
+                Icon.Resource(
+                    R.drawable.ic_cast_connected,
+                    ContentDescription.Resource(R.string.accessibility_casting)
+                ),
+            // TODO(b/332662551): Maybe use a MediaProjection API to fetch this time.
+            startTimeMs = systemClock.elapsedRealtime()
+        ) {
+            // TODO(b/332662551): Implement the pause dialog.
+        }
+    }
+
+    private fun createShareToAppChip(): OngoingActivityChipModel.Shown {
+        return OngoingActivityChipModel.Shown(
+            icon =
+                Icon.Resource(
+                    // TODO(b/332662551): Use the right icon and content description.
+                    R.drawable.ic_screenshot_share,
+                    contentDescription = null,
+                ),
+            // TODO(b/332662551): Maybe use a MediaProjection API to fetch this time.
+            startTimeMs = systemClock.elapsedRealtime()
+        ) {
+            // TODO(b/332662551): Implement the pause dialog.
+        }
+    }
 }

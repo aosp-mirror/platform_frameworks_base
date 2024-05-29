@@ -16,7 +16,9 @@
 
 package com.android.systemui.mediaprojection.data.repository
 
+import android.media.projection.MediaProjectionInfo
 import android.os.Binder
+import android.os.UserHandle
 import android.view.ContentRecordingSession
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -26,6 +28,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
 import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createToken
+import com.android.systemui.mediaprojection.taskswitcher.FakeMediaProjectionManager.Companion.createDisplaySession
 import com.android.systemui.mediaprojection.taskswitcher.fakeActivityTaskManager
 import com.android.systemui.mediaprojection.taskswitcher.fakeMediaProjectionManager
 import com.android.systemui.mediaprojection.taskswitcher.taskSwitcherKosmos
@@ -55,7 +58,8 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
             fakeActivityTaskManager.addRunningTasks(task)
             repo.switchProjectedTask(task)
 
-            assertThat(state).isEqualTo(MediaProjectionState.SingleTask(task))
+            assertThat(state).isInstanceOf(MediaProjectionState.Projecting.SingleTask::class.java)
+            assertThat((state as MediaProjectionState.Projecting.SingleTask).task).isEqualTo(task)
         }
 
     @Test
@@ -97,7 +101,7 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
                 session = ContentRecordingSession.createDisplaySession(/* displayToMirror= */ 123)
             )
 
-            assertThat(state).isEqualTo(MediaProjectionState.EntireScreen)
+            assertThat(state).isInstanceOf(MediaProjectionState.Projecting.EntireScreen::class.java)
         }
 
     @Test
@@ -110,7 +114,27 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
                 session = ContentRecordingSession.createTaskSession(taskWindowContainerToken)
             )
 
-            assertThat(state).isEqualTo(MediaProjectionState.EntireScreen)
+            assertThat(state).isInstanceOf(MediaProjectionState.Projecting.EntireScreen::class.java)
+        }
+
+    @Test
+    fun mediaProjectionState_entireScreen_hasHostPackage() =
+        testScope.runTest {
+            val state by collectLastValue(repo.mediaProjectionState)
+
+            val info =
+                MediaProjectionInfo(
+                    /* packageName= */ "com.media.projection.repository.test",
+                    /* handle= */ UserHandle.getUserHandleForUid(UserHandle.myUserId()),
+                    /* launchCookie = */ null,
+                )
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                info = info,
+                session = createDisplaySession(),
+            )
+
+            assertThat((state as MediaProjectionState.Projecting.EntireScreen).hostPackage)
+                .isEqualTo("com.media.projection.repository.test")
         }
 
     @Test
@@ -125,6 +149,31 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
                 session = ContentRecordingSession.createTaskSession(token.asBinder())
             )
 
-            assertThat(state).isEqualTo(MediaProjectionState.SingleTask(task))
+            assertThat(state).isInstanceOf(MediaProjectionState.Projecting.SingleTask::class.java)
+            assertThat((state as MediaProjectionState.Projecting.SingleTask).task).isEqualTo(task)
+        }
+
+    @Test
+    fun mediaProjectionState_singleTask_hasHostPackage() =
+        testScope.runTest {
+            val state by collectLastValue(repo.mediaProjectionState)
+
+            val token = createToken()
+            val task = createTask(taskId = 1, token = token)
+            fakeActivityTaskManager.addRunningTasks(task)
+
+            val info =
+                MediaProjectionInfo(
+                    /* packageName= */ "com.media.projection.repository.test",
+                    /* handle= */ UserHandle.getUserHandleForUid(UserHandle.myUserId()),
+                    /* launchCookie = */ null,
+                )
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                info = info,
+                session = ContentRecordingSession.createTaskSession(token.asBinder())
+            )
+
+            assertThat((state as MediaProjectionState.Projecting.SingleTask).hostPackage)
+                .isEqualTo("com.media.projection.repository.test")
         }
 }
