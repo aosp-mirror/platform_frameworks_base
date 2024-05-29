@@ -434,7 +434,7 @@ class LocaleManagerBackupHelper {
                         ATTR_PACKAGE_NAME);
                 String languageTags = parser.getAttributeValue(/* namespace= */ null, ATTR_LOCALES);
                 boolean delegateSelector = parser.getAttributeBoolean(/* namespace= */ null,
-                        ATTR_DELEGATE_SELECTOR);
+                        ATTR_DELEGATE_SELECTOR, false);
 
                 if (!TextUtils.isEmpty(packageName) && !TextUtils.isEmpty(languageTags)) {
                     LocalesInfo localesInfo = new LocalesInfo(languageTags, delegateSelector);

@@ -25,6 +25,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -105,8 +106,11 @@ public class JetpackTaskFragmentOrganizerTest {
     @Test
     public void testExpandTaskFragment() {
         final TaskContainer taskContainer = createTestTaskContainer();
-        final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
-                new Intent(), taskContainer, mSplitController, null /* pairedPrimaryContainer */);
+        doReturn(taskContainer).when(mSplitController).getTaskContainer(anyInt());
+        final TaskFragmentContainer container =  new TaskFragmentContainer.Builder(mSplitController,
+                taskContainer.getTaskId(), null /* activityInTask */)
+                .setPendingAppearedIntent(new Intent())
+                .build();
         final TaskFragmentInfo info = createMockInfo(container);
         mOrganizer.mFragmentInfos.put(container.getTaskFragmentToken(), info);
         container.setInfo(mTransaction, info);

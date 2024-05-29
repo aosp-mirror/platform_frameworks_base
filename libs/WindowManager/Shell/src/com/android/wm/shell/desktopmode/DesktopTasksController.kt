@@ -70,6 +70,7 @@ import com.android.wm.shell.desktopmode.DesktopModeTaskRepository.VisibleTasksLi
 import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler.DragToDesktopStateListener
 import com.android.wm.shell.draganddrop.DragAndDropController
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
+import com.android.wm.shell.recents.RecentTasksController
 import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
 import com.android.wm.shell.shared.DesktopModeStatus
@@ -118,6 +119,7 @@ class DesktopTasksController(
     private val multiInstanceHelper: MultiInstanceHelper,
     @ShellMainThread private val mainExecutor: ShellExecutor,
     private val desktopTasksLimiter: Optional<DesktopTasksLimiter>,
+    private val recentTasksController: RecentTasksController?
 ) :
     RemoteCallable<DesktopTasksController>,
     Transitions.TransitionHandler,
@@ -293,24 +295,49 @@ class DesktopTasksController(
         taskId: Int,
         wct: WindowContainerTransaction = WindowContainerTransaction()
     ): Boolean {
-        shellTaskOrganizer.getRunningTaskInfo(taskId)?.let { task -> moveToDesktop(task, wct) }
-            ?: return false
+        shellTaskOrganizer.getRunningTaskInfo(taskId)?.let {
+            moveToDesktop(it, wct)
+        } ?: moveToDesktopFromNonRunningTask(taskId, wct)
         return true
     }
 
-    /** Move a task to desktop */
+    private fun moveToDesktopFromNonRunningTask(
+        taskId: Int,
+        wct: WindowContainerTransaction
+    ): Boolean {
+        recentTasksController?.findTaskInBackground(taskId)?.let {
+            KtProtoLog.v(
+                WM_SHELL_DESKTOP_MODE,
+                "DesktopTasksController: moveToDesktopFromNonRunningTask taskId=%d",
+                taskId
+            )
+            // TODO(342378842): Instead of using default display, support multiple displays
+            val taskToMinimize =
+                bringDesktopAppsToFrontBeforeShowingNewTask(DEFAULT_DISPLAY, wct, taskId)
+            addMoveToDesktopChangesNonRunningTask(wct, taskId)
+            // TODO(343149901): Add DPI changes for task launch
+            val transition = enterDesktopTaskTransitionHandler.moveToDesktop(wct)
+            addPendingMinimizeTransition(transition, taskToMinimize)
+            return true
+        } ?: return false
+    }
+
+    private fun addMoveToDesktopChangesNonRunningTask(
+        wct: WindowContainerTransaction,
+        taskId: Int
+    ) {
+        val options = ActivityOptions.makeBasic()
+        options.launchWindowingMode = WINDOWING_MODE_FREEFORM
+        wct.startTask(taskId, options.toBundle())
+    }
+
+    /**
+     * Move a task to desktop
+     */
     fun moveToDesktop(
         task: RunningTaskInfo,
         wct: WindowContainerTransaction = WindowContainerTransaction()
     ) {
-        if (!DesktopModeStatus.canEnterDesktopMode(context)) {
-            KtProtoLog.w(
-                WM_SHELL_DESKTOP_MODE,
-                "DesktopTasksController: Cannot enter desktop, " +
-                    "display does not meet minimum size requirements"
-            )
-            return
-        }
         if (Flags.enableDesktopWindowingModalsPolicy() && isSingleTopActivityTranslucent(task)) {
             KtProtoLog.w(
                 WM_SHELL_DESKTOP_MODE,

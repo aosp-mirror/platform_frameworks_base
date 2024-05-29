@@ -255,7 +255,8 @@ public class NotificationStackScrollLayout
      * The raw amount of the overScroll on the bottom, which is not rubber-banded.
      */
     private float mOverScrolledBottomPixels;
-    private ListenerSet<Runnable> mStackHeightChangedListeners = new ListenerSet<>();
+    private final ListenerSet<Runnable> mStackHeightChangedListeners = new ListenerSet<>();
+    private final ListenerSet<Runnable> mHeadsUpHeightChangedListeners = new ListenerSet<>();
     private NotificationLogger.OnChildLocationsChangedListener mListener;
     private OnNotificationLocationsChangedListener mLocationsChangedListener;
     private OnOverscrollTopChangedListener mOverscrollTopChangedListener;
@@ -1112,6 +1113,28 @@ public class NotificationStackScrollLayout
     @Override
     public void removeStackHeightChangedListener(@NonNull Runnable runnable) {
         mStackHeightChangedListeners.remove(runnable);
+    }
+
+    private void notifyHeadsUpHeightChangedForView(View view) {
+        if (mTopHeadsUpRow == view) {
+            notifyHeadsUpHeightChangedListeners();
+        }
+    }
+
+    private void notifyHeadsUpHeightChangedListeners() {
+        for (Runnable listener : mHeadsUpHeightChangedListeners) {
+            listener.run();
+        }
+    }
+
+    @Override
+    public void addHeadsUpHeightChangedListener(@NonNull Runnable runnable) {
+        mHeadsUpHeightChangedListeners.addIfAbsent(runnable);
+    }
+
+    @Override
+    public void removeHeadsUpHeightChangedListener(@NonNull Runnable runnable) {
+        mHeadsUpHeightChangedListeners.remove(runnable);
     }
 
     @Override
@@ -2442,6 +2465,11 @@ public class NotificationStackScrollLayout
     @Override
     public int getIntrinsicStackHeight() {
         return mScrollViewFields.getIntrinsicStackHeight();
+    }
+
+    @Override
+    public int getTopHeadsUpHeight() {
+        return getTopHeadsUpPinnedHeight();
     }
 
     /**
@@ -4193,12 +4221,14 @@ public class NotificationStackScrollLayout
             requestAnimationOnViewResize(row);
         }
         requestChildrenUpdate();
+        notifyHeadsUpHeightChangedForView(view);
         mAnimateStackYForContentHeightChange = previouslyNeededAnimation;
     }
 
     void onChildHeightReset(ExpandableView view) {
         updateAnimationState(view);
         updateChronometerForChild(view);
+        notifyHeadsUpHeightChangedForView(view);
     }
 
     private void updateScrollPositionOnExpandInBottom(ExpandableView view) {
@@ -5573,6 +5603,7 @@ public class NotificationStackScrollLayout
      */
     public void setTopHeadsUpRow(@Nullable ExpandableNotificationRow topHeadsUpRow) {
         mTopHeadsUpRow = topHeadsUpRow;
+        notifyHeadsUpHeightChangedListeners();
     }
 
     public boolean getIsExpanded() {

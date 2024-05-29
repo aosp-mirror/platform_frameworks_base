@@ -254,6 +254,13 @@ constructor(
         return null
     }
 
+    fun getWaitingEntryList(): List<HeadsUpEntry> {
+        if (!NotificationThrottleHun.isEnabled) {
+            return mutableListOf()
+        }
+        return nextMap.keys.toList()
+    }
+
     private fun isShowing(entry: HeadsUpEntry): Boolean {
         return headsUpEntryShowing != null && entry.mEntry?.key == headsUpEntryShowing?.mEntry?.key
     }

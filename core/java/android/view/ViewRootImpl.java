@@ -143,7 +143,7 @@ import android.app.ICompatCameraControlCallback;
 import android.app.ResourcesManager;
 import android.app.WindowConfiguration;
 import android.app.compat.CompatChanges;
-import android.app.servertransaction.WindowStateResizeItem;
+import android.app.servertransaction.WindowStateTransactionItem;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.ClipDescription;
@@ -7273,7 +7273,8 @@ public final class ViewRootImpl implements ViewParent,
             if (dispatcher.isBackGestureInProgress()) {
                 return FINISH_NOT_HANDLED;
             }
-            if (topCallback instanceof OnBackAnimationCallback) {
+            if (topCallback instanceof OnBackAnimationCallback
+                    && !(topCallback instanceof ImeBackAnimationController)) {
                 final OnBackAnimationCallback animationCallback =
                         (OnBackAnimationCallback) topCallback;
                 switch (keyEvent.getAction()) {
@@ -11201,10 +11202,10 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    static class W extends IWindow.Stub implements WindowStateResizeItem.ResizeListener {
+    static class W extends IWindow.Stub implements WindowStateTransactionItem.TransactionListener {
         private final WeakReference<ViewRootImpl> mViewAncestor;
         private final IWindowSession mWindowSession;
-        private boolean mIsFromResizeItem;
+        private boolean mIsFromTransactionItem;
 
         W(ViewRootImpl viewAncestor) {
             mViewAncestor = new WeakReference<ViewRootImpl>(viewAncestor);
@@ -11212,8 +11213,8 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
-        public void onExecutingWindowStateResizeItem() {
-            mIsFromResizeItem = true;
+        public void onExecutingWindowStateTransactionItem() {
+            mIsFromTransactionItem = true;
         }
 
         @Override
@@ -11221,8 +11222,8 @@ public final class ViewRootImpl implements ViewParent,
                 MergedConfiguration mergedConfiguration, InsetsState insetsState,
                 boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId, int syncSeqId,
                 boolean dragResizing, @Nullable ActivityWindowInfo activityWindowInfo) {
-            final boolean isFromResizeItem = mIsFromResizeItem;
-            mIsFromResizeItem = false;
+            final boolean isFromResizeItem = mIsFromTransactionItem;
+            mIsFromTransactionItem = false;
             // Although this is a AIDL method, it will only be triggered in local process through
             // either WindowStateResizeItem or WindowlessWindowManager.
             final ViewRootImpl viewAncestor = mViewAncestor.get();
@@ -11259,10 +11260,13 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void insetsControlChanged(InsetsState insetsState,
                 InsetsSourceControl.Array activeControls) {
+            final boolean isFromInsetsControlChangeItem = mIsFromTransactionItem;
+            mIsFromTransactionItem = false;
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchInsetsControlChanged(insetsState, activeControls.get());
             }
+            // TODO(b/339380439): no need to post if the call is from InsetsControlChangeItem
         }
 
         @Override
