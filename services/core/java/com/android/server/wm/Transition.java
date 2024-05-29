@@ -239,7 +239,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     ArrayList<Runnable> mTransactionCompletedListeners = null;
 
     /** Custom activity-level animation options and callbacks. */
-    private TransitionInfo.AnimationOptions mOverrideOptions;
+    private AnimationOptions mOverrideOptions;
+
     private IRemoteCallback mClientAnimationStartCallback = null;
     private IRemoteCallback mClientAnimationFinishCallback = null;
 
@@ -912,7 +913,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      * Set animation options for collecting transition by ActivityRecord.
      * @param options AnimationOptions captured from ActivityOptions
      */
-    void setOverrideAnimation(TransitionInfo.AnimationOptions options,
+    void setOverrideAnimation(@Nullable AnimationOptions options,
             @Nullable IRemoteCallback startCallback, @Nullable IRemoteCallback finishCallback) {
         if (!isCollecting()) return;
         mOverrideOptions = options;
@@ -1742,23 +1743,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 mController.mValidateDisplayVis.add(da);
             }
         }
-
-        if (mOverrideOptions != null) {
-            info.setAnimationOptions(mOverrideOptions);
-            if (mOverrideOptions.getType() == ANIM_OPEN_CROSS_PROFILE_APPS) {
-                for (int i = 0; i < mTargets.size(); ++i) {
-                    final TransitionInfo.Change c = info.getChanges().get(i);
-                    final ActivityRecord ar = mTargets.get(i).mContainer.asActivityRecord();
-                    if (ar == null || c.getMode() != TRANSIT_OPEN) continue;
-                    int flags = c.getFlags();
-                    flags |= ar.mUserId == ar.mWmService.mCurrentUserId
-                            ? TransitionInfo.FLAG_CROSS_PROFILE_OWNER_THUMBNAIL
-                            : TransitionInfo.FLAG_CROSS_PROFILE_WORK_THUMBNAIL;
-                    c.setFlags(flags);
-                    break;
-                }
-            }
-        }
+        overrideAnimationOptionsToInfoIfNecessary(info);
 
         // TODO(b/188669821): Move to animation impl in shell.
         for (int i = 0; i < mTargetDisplays.size(); ++i) {
@@ -1878,6 +1863,49 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         if (mLogger.mInfo != null) {
             mLogger.logOnSendAsync(mController.mLoggerHandler);
             mController.mTransitionTracer.logSentTransition(this, mTargets);
+        }
+    }
+
+    private void overrideAnimationOptionsToInfoIfNecessary(@NonNull TransitionInfo info) {
+        if (mOverrideOptions == null) {
+            return;
+        }
+
+        if (!Flags.moveAnimationOptionsToChange()) {
+            info.setAnimationOptions(mOverrideOptions);
+        } else {
+            final List<TransitionInfo.Change> changes = info.getChanges();
+            for (int i = changes.size() - 1; i >= 0; --i) {
+                if (mTargets.get(i).mContainer.asActivityRecord() != null) {
+                    changes.get(i).setAnimationOptions(mOverrideOptions);
+                }
+            }
+        }
+        updateActivityTargetForCrossProfileAnimation(info);
+    }
+
+    /**
+     * Updates activity open target if {@link #mOverrideOptions} is
+     * {@link ANIM_OPEN_CROSS_PROFILE_APPS}.
+     */
+    private void updateActivityTargetForCrossProfileAnimation(@NonNull TransitionInfo info) {
+        if (mOverrideOptions.getType() != ANIM_OPEN_CROSS_PROFILE_APPS) {
+            return;
+        }
+        for (int i = 0; i < mTargets.size(); ++i) {
+            final ActivityRecord activity = mTargets.get(i).mContainer
+                    .asActivityRecord();
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            if (activity == null || change.getMode() != TRANSIT_OPEN) {
+                continue;
+            }
+
+            int flags = change.getFlags();
+            flags |= activity.mUserId == activity.mWmService.mCurrentUserId
+                    ? TransitionInfo.FLAG_CROSS_PROFILE_OWNER_THUMBNAIL
+                    : TransitionInfo.FLAG_CROSS_PROFILE_WORK_THUMBNAIL;
+            change.setFlags(flags);
+            break;
         }
     }
 
