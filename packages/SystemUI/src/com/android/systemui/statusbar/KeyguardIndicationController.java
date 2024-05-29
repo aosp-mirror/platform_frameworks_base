@@ -97,7 +97,6 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.deviceentry.domain.interactor.BiometricMessageInteractor;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardIndication;
@@ -121,6 +120,7 @@ import com.android.systemui.util.wakelock.WakeLock;
 
 import java.io.PrintWriter;
 import java.text.NumberFormat;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -181,7 +181,6 @@ public class KeyguardIndicationController {
     private BroadcastReceiver mBroadcastReceiver;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private KeyguardInteractor mKeyguardInteractor;
-    private final BiometricMessageInteractor mBiometricMessageInteractor;
     private String mPersistentUnlockMessage;
     private String mAlignmentIndication;
     private boolean mForceIsDismissible;
@@ -210,7 +209,7 @@ public class KeyguardIndicationController {
     private boolean mBatteryPresent = true;
     protected long mChargingTimeRemaining;
     private Pair<String, BiometricSourceType> mBiometricErrorMessageToShowOnScreenOn;
-    private Set<Integer> mCoExFaceAcquisitionMsgIdsToShow;
+    private final Set<Integer> mCoExFaceAcquisitionMsgIdsToShow;
     private final FaceHelpMessageDeferral mFaceAcquiredMessageDeferral;
     private boolean mInited;
 
@@ -228,10 +227,6 @@ public class KeyguardIndicationController {
                 mIsActiveDreamLockscreenHosted = isLockscreenHosted;
                 updateDeviceEntryIndication(false);
             };
-    @VisibleForTesting
-    final Consumer<Set<Integer>> mCoExAcquisitionMsgIdsToShowCallback =
-            (Set<Integer> coExFaceAcquisitionMsgIdsToShow) -> mCoExFaceAcquisitionMsgIdsToShow =
-                    coExFaceAcquisitionMsgIdsToShow;
     private final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
         @Override
         public void onScreenTurnedOn() {
@@ -291,8 +286,7 @@ public class KeyguardIndicationController {
             BouncerMessageInteractor bouncerMessageInteractor,
             FeatureFlags flags,
             IndicationHelper indicationHelper,
-            KeyguardInteractor keyguardInteractor,
-            BiometricMessageInteractor biometricMessageInteractor
+            KeyguardInteractor keyguardInteractor
     ) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
@@ -321,9 +315,14 @@ public class KeyguardIndicationController {
         mFeatureFlags = flags;
         mIndicationHelper = indicationHelper;
         mKeyguardInteractor = keyguardInteractor;
-        mBiometricMessageInteractor = biometricMessageInteractor;
 
         mFaceAcquiredMessageDeferral = faceHelpMessageDeferral.create();
+        mCoExFaceAcquisitionMsgIdsToShow = new HashSet<>();
+        int[] msgIds = context.getResources().getIntArray(
+                com.android.systemui.res.R.array.config_face_help_msgs_when_fingerprint_enrolled);
+        for (int msgId : msgIds) {
+            mCoExFaceAcquisitionMsgIdsToShow.add(msgId);
+        }
 
         mHandler = new Handler(mainLooper) {
             @Override
@@ -370,7 +369,7 @@ public class KeyguardIndicationController {
         mIndicationArea = indicationArea;
         mTopIndicationView = indicationArea.findViewById(R.id.keyguard_indication_text);
         mLockScreenIndicationView = indicationArea.findViewById(
-                R.id.keyguard_indication_text_bottom);
+            R.id.keyguard_indication_text_bottom);
         mInitialTextColorState = mTopIndicationView != null
                 ? mTopIndicationView.getTextColors() : ColorStateList.valueOf(Color.WHITE);
         if (mRotateTextViewController != null) {
@@ -402,10 +401,6 @@ public class KeyguardIndicationController {
             collectFlow(mIndicationArea, mKeyguardInteractor.isActiveDreamLockscreenHosted(),
                     mIsActiveDreamLockscreenHostedCallback);
         }
-
-        collectFlow(mIndicationArea,
-                mBiometricMessageInteractor.getCoExFaceAcquisitionMsgIdsToShow(),
-                mCoExAcquisitionMsgIdsToShowCallback);
     }
 
     /**

@@ -32,8 +32,6 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import static java.util.Collections.emptySet;
-
 import android.app.AlarmManager;
 import android.app.Instrumentation;
 import android.app.admin.DevicePolicyManager;
@@ -64,7 +62,6 @@ import com.android.systemui.biometrics.FaceHelpMessageDeferralFactory;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.deviceentry.domain.interactor.BiometricMessageInteractor;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.KeyguardIndication;
@@ -83,8 +80,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.wakelock.WakeLockFake;
-
-import kotlinx.coroutines.flow.StateFlow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -147,8 +142,6 @@ public class KeyguardIndicationControllerBaseTest extends SysuiTestCase {
     protected FaceHelpMessageDeferral mFaceHelpMessageDeferral;
     @Mock
     protected AlternateBouncerInteractor mAlternateBouncerInteractor;
-    @Mock
-    protected BiometricMessageInteractor mBiometricMessageInteractor;
     @Mock
     protected ScreenLifecycle mScreenLifecycle;
     @Mock
@@ -233,8 +226,6 @@ public class KeyguardIndicationControllerBaseTest extends SysuiTestCase {
         when(mDevicePolicyResourcesManager.getString(anyString(), any(), anyString()))
                 .thenReturn(mDisclosureWithOrganization);
         when(mUserTracker.getUserId()).thenReturn(mCurrentUserId);
-        when(mBiometricMessageInteractor.getCoExFaceAcquisitionMsgIdsToShow())
-                .thenReturn(mock(StateFlow.class));
 
         when(mFaceHelpMessageDeferralFactory.create()).thenReturn(mFaceHelpMessageDeferral);
 
@@ -278,12 +269,10 @@ public class KeyguardIndicationControllerBaseTest extends SysuiTestCase {
                 mock(BouncerMessageInteractor.class),
                 mFlags,
                 mIndicationHelper,
-                KeyguardInteractorFactory.create(mFlags).getKeyguardInteractor(),
-                mBiometricMessageInteractor
+                KeyguardInteractorFactory.create(mFlags).getKeyguardInteractor()
         );
         mController.init();
         mController.setIndicationArea(mIndicationArea);
-        mController.mCoExAcquisitionMsgIdsToShowCallback.accept(emptySet());
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
         mStatusBarStateListener = mStatusBarStateListenerCaptor.getValue();
         verify(mBroadcastDispatcher).registerReceiver(mBroadcastReceiverCaptor.capture(), any());

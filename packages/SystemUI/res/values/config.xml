@@ -718,20 +718,6 @@
         <item>26</item> <!-- MOUTH_COVERING_DETECTED -->
     </integer-array>
 
-    <!-- Which face help messages to surface when fingerprint is enrolled and device is unfolded.
-     Message ids correspond with the acquired ids in BiometricFaceConstants -->
-    <integer-array name="config_face_help_msgs_when_fingerprint_enrolled_unfolded">
-        <item>3</item> <!-- TOO_DARK -->
-        <item>4</item> <!-- TOO_CLOSE -->
-        <item>5</item> <!-- TOO_FAR -->
-        <item>6</item> <!-- TOO_HIGH -->
-        <item>7</item> <!-- TOO_LOW -->
-        <item>8</item> <!-- TOO_RIGHT -->
-        <item>9</item> <!-- TOO_LEFT -->
-        <item>25</item> <!-- DARK_GLASSES -->
-        <item>26</item> <!-- MOUTH_COVERING_DETECTED -->
-    </integer-array>
-
     <!-- Which device wake-ups will trigger passive auth. These values correspond with
          PowerManager#WakeReason. -->
     <integer-array name="config_face_auth_wake_up_triggers">

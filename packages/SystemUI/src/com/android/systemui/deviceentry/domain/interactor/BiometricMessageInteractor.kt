@@ -30,20 +30,17 @@ import com.android.systemui.deviceentry.shared.model.FingerprintFailureMessage
 import com.android.systemui.deviceentry.shared.model.FingerprintLockoutMessage
 import com.android.systemui.deviceentry.shared.model.FingerprintMessage
 import com.android.systemui.deviceentry.shared.model.HelpFaceAuthenticationStatus
-import com.android.systemui.keyguard.domain.interactor.DevicePostureInteractor
-import com.android.systemui.keyguard.shared.model.DevicePosture
 import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthenticationStatus
 import com.android.systemui.res.R
+import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 
@@ -62,7 +59,6 @@ constructor(
     faceAuthInteractor: DeviceEntryFaceAuthInteractor,
     private val biometricSettingsInteractor: DeviceEntryBiometricSettingsInteractor,
     faceHelpMessageDeferralInteractor: FaceHelpMessageDeferralInteractor,
-    devicePostureInteractor: DevicePostureInteractor,
 ) {
     private val faceHelp: Flow<HelpFaceAuthenticationStatus> =
         faceAuthInteractor.authenticationStatus.filterIsInstance<HelpFaceAuthenticationStatus>()
@@ -75,17 +71,8 @@ constructor(
      * The acquisition message ids to show message when both fingerprint and face are enrolled and
      * enabled for device entry.
      */
-    private val coExFaceAcquisitionMsgIdsToShowDefault: Set<Int> =
+    private val coExFaceAcquisitionMsgIdsToShow: Set<Int> =
         resources.getIntArray(R.array.config_face_help_msgs_when_fingerprint_enrolled).toSet()
-
-    /**
-     * The acquisition message ids to show message when both fingerprint and face are enrolled and
-     * enabled for device entry and the device is unfolded.
-     */
-    private val coExFaceAcquisitionMsgIdsToShowUnfolded: Set<Int> =
-        resources
-            .getIntArray(R.array.config_face_help_msgs_when_fingerprint_enrolled_unfolded)
-            .toSet()
 
     private fun ErrorFingerprintAuthenticationStatus.shouldSuppressError(): Boolean {
         return isCancellationError() || isPowerPressedError()
@@ -135,17 +122,6 @@ constructor(
                 }
         }
 
-    val coExFaceAcquisitionMsgIdsToShow: Flow<Set<Int>> =
-        devicePostureInteractor.posture.map { devicePosture ->
-            when (devicePosture) {
-                DevicePosture.OPENED -> coExFaceAcquisitionMsgIdsToShowUnfolded
-                DevicePosture.UNKNOWN, // Devices without posture support (non-foldable) use UNKNOWN
-                DevicePosture.CLOSED,
-                DevicePosture.HALF_OPENED,
-                DevicePosture.FLIPPED -> coExFaceAcquisitionMsgIdsToShowDefault
-            }
-        }
-
     val fingerprintMessage: Flow<FingerprintMessage> =
         merge(
             fingerprintErrorMessage,
@@ -153,38 +129,25 @@ constructor(
             fingerprintHelpMessage,
         )
 
-    private val filterConditionForFaceHelpMessages:
-        Flow<(HelpFaceAuthenticationStatus) -> Boolean> =
-        combine(
-                biometricSettingsInteractor.isFingerprintAuthEnrolledAndEnabled,
-                biometricSettingsInteractor.faceAuthCurrentlyAllowed,
-                ::Pair
-            )
-            .flatMapLatest { (fingerprintEnrolled, faceAuthCurrentlyAllowed) ->
-                if (fingerprintEnrolled && faceAuthCurrentlyAllowed) {
-                    // Show only some face help messages if fingerprint is also enrolled
-                    coExFaceAcquisitionMsgIdsToShow.map { msgIdsToShow ->
-                        { helpStatus: HelpFaceAuthenticationStatus ->
-                            msgIdsToShow.contains(helpStatus.msgId)
-                        }
-                    }
-                } else if (faceAuthCurrentlyAllowed) {
-                    // Show all face help messages if only face is enrolled and currently allowed
-                    flowOf { _: HelpFaceAuthenticationStatus -> true }
-                } else {
-                    flowOf { _: HelpFaceAuthenticationStatus -> false }
-                }
-            }
-
     private val faceHelpMessage: Flow<FaceMessage> =
         faceHelp
             .filterNot {
                 // Message deferred to potentially show at face timeout error instead
                 faceHelpMessageDeferralInteractor.shouldDefer(it.msgId)
             }
-            .sample(filterConditionForFaceHelpMessages, ::Pair)
-            .filter { (helpMessage, filterCondition) -> filterCondition(helpMessage) }
-            .map { (status, _) -> FaceMessage(status.msg) }
+            .sample(biometricSettingsInteractor.fingerprintAndFaceEnrolledAndEnabled, ::Pair)
+            .filter { (faceAuthHelpStatus, fingerprintAndFaceEnrolledAndEnabled) ->
+                if (fingerprintAndFaceEnrolledAndEnabled) {
+                    // Show only some face help messages if fingerprint is also enrolled
+                    coExFaceAcquisitionMsgIdsToShow.contains(faceAuthHelpStatus.msgId)
+                } else {
+                    // Show all face help messages if only face is enrolled
+                    true
+                }
+            }
+            .sample(biometricSettingsInteractor.faceAuthCurrentlyAllowed, ::toTriple)
+            .filter { (_, _, faceAuthCurrentlyAllowed) -> faceAuthCurrentlyAllowed }
+            .map { (status, _, _) -> FaceMessage(status.msg) }
 
     private val faceFailureMessage: Flow<FaceMessage> =
         faceFailure
