@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.dagger
+package com.android.systemui.qs.panels.data.repository
 
-import com.android.systemui.statusbar.pipeline.satellite.data.DeviceBasedSatelliteRepository
-import javax.inject.Qualifier
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.settings.userFileManager
+import com.android.systemui.user.data.repository.userRepository
 
-/** Detailed [DeviceBasedSatelliteRepository] logs */
-@Qualifier
-@MustBeDocumented
-@kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
-annotation class OemSatelliteInputLog
+val Kosmos.qsPreferencesRepository by
+    Kosmos.Fixture { QSPreferencesRepository(userFileManager, userRepository, testDispatcher) }

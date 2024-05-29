@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.data.repository
+package com.android.systemui.accessibility.hearingaid
 
-import com.android.systemui.kosmos.Kosmos
+import android.content.Intent
+import android.graphics.drawable.Drawable
 
-val Kosmos.iconLabelVisibilityRepository by Kosmos.Fixture { IconLabelVisibilityRepository() }
+data class ToolItem(
+    var toolName: String = "",
+    var toolIcon: Drawable,
+    var toolIntent: Intent,
+)

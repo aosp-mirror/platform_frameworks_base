@@ -175,6 +175,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
             .setName("home_task_overlay_container")
             .setContainerLayer()
             .setHidden(false)
+            .setCallsite("ShellTaskOrganizer.mHomeTaskOverlayContainer")
             .build();
 
     /**

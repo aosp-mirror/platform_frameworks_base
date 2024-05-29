@@ -279,7 +279,6 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
      * Returns the entry if it is managed by this manager.
      * @param key key of notification
      * @return the entry
-     * TODO(b/315362456) See if caller needs to check AvalancheController waiting entries
      */
     @Nullable
     public NotificationEntry getEntry(@NonNull String key) {
@@ -294,8 +293,13 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     @NonNull
     @Override
     public Stream<NotificationEntry> getAllEntries() {
-        // TODO(b/315362456) See if callers need to check AvalancheController
-        return mHeadsUpEntryMap.values().stream().map(headsUpEntry -> headsUpEntry.mEntry);
+        return getHeadsUpEntryList().stream().map(headsUpEntry -> headsUpEntry.mEntry);
+    }
+
+    public List<HeadsUpEntry> getHeadsUpEntryList() {
+        List<HeadsUpEntry> entryList = new ArrayList<>(mHeadsUpEntryMap.values());
+        entryList.addAll(mAvalancheController.getWaitingEntryList());
+        return entryList;
     }
 
     /**
@@ -304,7 +308,8 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
      */
     @Override
     public boolean hasNotifications() {
-        return !mHeadsUpEntryMap.isEmpty();
+        return !mHeadsUpEntryMap.isEmpty()
+                || !mAvalancheController.getWaitingEntryList().isEmpty();
     }
 
     /**
@@ -507,8 +512,10 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
 
     @Nullable
     protected HeadsUpEntry getHeadsUpEntry(@NonNull String key) {
-        // TODO(b/315362456) See if callers need to check AvalancheController
-        return mHeadsUpEntryMap.get(key);
+        if (mHeadsUpEntryMap.containsKey(key)) {
+            return mHeadsUpEntryMap.get(key);
+        }
+        return mAvalancheController.getWaitingEntry(key);
     }
 
     /**
@@ -688,8 +695,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
      */
     @Override
     public boolean isSticky(String key) {
-        // TODO(b/315362456) See if callers need to check AvalancheController
-        HeadsUpEntry headsUpEntry = mHeadsUpEntryMap.get(key);
+        HeadsUpEntry headsUpEntry = getHeadsUpEntry(key);
         if (headsUpEntry != null) {
             return headsUpEntry.isSticky();
         }

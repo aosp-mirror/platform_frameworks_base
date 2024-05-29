@@ -43,6 +43,7 @@ import com.android.systemui.communal.ui.compose.CommunalContainer
 import com.android.systemui.communal.ui.compose.CommunalContent
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.CommunalColors
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -64,6 +65,7 @@ import kotlinx.coroutines.launch
  *
  * This will be used until the glanceable hub is integrated into Flexiglass.
  */
+@SysUISingleton
 class GlanceableHubContainerController
 @Inject
 constructor(

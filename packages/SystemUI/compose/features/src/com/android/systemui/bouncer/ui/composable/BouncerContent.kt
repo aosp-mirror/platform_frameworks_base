@@ -66,6 +66,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -137,7 +138,7 @@ fun BouncerContent(
         // Despite the keyboard only being part of the password bouncer, adding it at this level is
         // both necessary to properly handle the keyboard in all layouts and harmless in cases when
         // the keyboard isn't used (like the PIN or pattern auth methods).
-        modifier = modifier.imePadding(),
+        modifier = modifier.imePadding().onKeyEvent(viewModel::onKeyEvent),
     ) {
         when (layout) {
             BouncerSceneLayout.STANDARD_BOUNCER ->

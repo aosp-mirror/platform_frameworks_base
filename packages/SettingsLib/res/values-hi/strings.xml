@@ -708,7 +708,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"फ़िज़िकल कीबोर्ड"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"कीबोर्ड का लेआउट चुनें"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"डिफ़ॉल्ट"</string>
-    <string name="turn_screen_on_title" msgid="2662312432042116026">"इन ऐप के पास स्क्रीन को चालू करने का कंट्रोल है"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"इस ऐप के पास स्क्रीन को चालू करने का कंट्रोल है"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"स्क्रीन चालू करने की अनुमति दें"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"ऐप्लिकेशन को स्क्रीन चालू करने की अनुमति दें. ऐसा करने पर, ऐप्लिकेशन आपकी अनुमति लिए बिना भी, जब चाहे स्क्रीन चालू कर सकता है."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> पर ब्रॉडकास्ट करना रोकें?"</string>

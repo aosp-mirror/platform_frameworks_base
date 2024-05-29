@@ -80,7 +80,6 @@ constructor(
 
         launch { viewModel.maxAlpha.collect { view.setMaxAlpha(it) } }
         launch { viewModel.scrolledToTop.collect { view.setScrolledToTop(it) } }
-        launch { viewModel.headsUpTop.collect { view.setHeadsUpTop(it) } }
         launch { viewModel.expandFraction.collect { view.setExpandFraction(it.coerceIn(0f, 1f)) } }
         launch { viewModel.isScrollable.collect { view.setScrollingEnabled(it) } }
         launch { viewModel.isDozing.collect { isDozing -> view.setDozing(isDozing) } }
@@ -88,11 +87,9 @@ constructor(
         launchAndDispose {
             view.setSyntheticScrollConsumer(viewModel.syntheticScrollConsumer)
             view.setCurrentGestureOverscrollConsumer(viewModel.currentGestureOverscrollConsumer)
-            view.setHeadsUpHeightConsumer(viewModel.headsUpHeightConsumer)
             DisposableHandle {
                 view.setSyntheticScrollConsumer(null)
                 view.setCurrentGestureOverscrollConsumer(null)
-                view.setHeadsUpHeightConsumer(null)
             }
         }
     }

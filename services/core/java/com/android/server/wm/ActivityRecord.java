@@ -7660,20 +7660,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    /**
-     * @return The to top most child window for which {@link LayoutParams#isFullscreen()} returns
-     *         true and isn't fully transparent.
-     */
-    WindowState getTopFullscreenOpaqueWindow() {
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState win = mChildren.get(i);
-            if (win != null && win.mAttrs.isFullscreen() && !win.isFullyTransparent()) {
-                return win;
-            }
-        }
-        return null;
-    }
-
     WindowState findMainWindow() {
         return findMainWindow(true);
     }

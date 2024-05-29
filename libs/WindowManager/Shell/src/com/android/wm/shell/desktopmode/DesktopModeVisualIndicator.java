@@ -223,6 +223,7 @@ public class DesktopModeVisualIndicator {
         mLeash = builder
                 .setName("Desktop Mode Visual Indicator")
                 .setContainerLayer()
+                .setCallsite("DesktopModeVisualIndicator.createView")
                 .build();
         t.show(mLeash);
         final WindowManager.LayoutParams lp =

@@ -184,6 +184,13 @@ flag {
 }
 
 flag {
+    name: "notification_avalanche_throttle_hun"
+    namespace: "systemui"
+    description: "(currently unused) During notification avalanche, throttle HUNs showing in fast succession."
+    bug: "307288824"
+}
+
+flag {
     name: "notification_avalanche_suppression"
     namespace: "systemui"
     description: "After notification avalanche floodgate event, suppress HUNs completely."
@@ -987,6 +994,13 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+  name: "glanceable_hub_shortcut_button"
+  namespace: "systemui"
+  description: "Shows a button over the dream and lock screen to open the glanceable hub"
+  bug: "339667383"
 }
 
 flag {

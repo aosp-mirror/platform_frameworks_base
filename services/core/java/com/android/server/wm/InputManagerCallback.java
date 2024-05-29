@@ -286,6 +286,7 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
                     .setName(name)
                     .setCallsite("createSurfaceForGestureMonitor")
                     .setParent(inputOverlay)
+                    .setCallsite("InputManagerCallback.createSurfaceForGestureMonitor")
                     .build();
         }
     }

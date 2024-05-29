@@ -94,7 +94,8 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
                     telephonyManager,
                     dispatcher,
                     testScope.backgroundScope,
-                    FakeLogBuffer.Factory.create(),
+                    logBuffer = FakeLogBuffer.Factory.create(),
+                    verboseLogBuffer = FakeLogBuffer.Factory.create(),
                     systemClock,
                 )
 
@@ -451,7 +452,8 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
                 telephonyManager,
                 dispatcher,
                 testScope.backgroundScope,
-                FakeLogBuffer.Factory.create(),
+                logBuffer = FakeLogBuffer.Factory.create(),
+                verboseLogBuffer = FakeLogBuffer.Factory.create(),
                 systemClock,
             )
     }

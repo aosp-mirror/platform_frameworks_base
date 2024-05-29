@@ -42,14 +42,6 @@ object Flags {
     @JvmField val NULL_FLAG = unreleasedFlag("null_flag")
 
     // 100 - notification
-    // TODO(b/297792660): Tracking Bug
-    @JvmField val UNCLEARED_TRANSIENT_HUN_FIX =
-        releasedFlag("uncleared_transient_hun_fix")
-
-    // TODO(b/298308067): Tracking Bug
-    @JvmField val SWIPE_UNCLEARED_TRANSIENT_VIEW_FIX =
-        releasedFlag("swipe_uncleared_transient_view_fix")
-
     // TODO(b/254512751): Tracking Bug
     val NOTIFICATION_PIPELINE_DEVELOPER_LOGGING =
         unreleasedFlag("notification_pipeline_developer_logging")
@@ -169,12 +161,6 @@ object Flags {
     @JvmField
     val WALLPAPER_PICKER_GRID_APPLY_BUTTON =
             unreleasedFlag("wallpaper_picker_grid_apply_button")
-
-    /** Keyguard Migration */
-
-    // TODO(b/297037052): Tracking bug.
-    @JvmField
-    val REMOVE_NPVC_BOTTOM_AREA_USAGE = unreleasedFlag("remove_npvc_bottom_area_usage")
 
     /** Flag meant to guard the talkback fix for the KeyguardIndicationTextView */
     // TODO(b/286563884): Tracking bug

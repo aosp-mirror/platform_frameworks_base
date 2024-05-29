@@ -76,8 +76,7 @@
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"أرسَل صورة"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"جارٍ حفظ لقطة الشاشة..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"جارٍ حفظ لقطة الشاشة في ملف العمل…"</string>
-    <!-- no translation found for screenshot_saving_private_profile (8934706048497093297) -->
-    <skip />
+    <string name="screenshot_saving_private_profile" msgid="8934706048497093297">"يتم حاليًا حفظ لقطة الشاشة في الملف الشخصي الخاص"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"تم حفظ لقطة الشاشة."</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"تعذّر حفظ لقطة الشاشة"</string>
     <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"الشاشة الخارجية"</string>
