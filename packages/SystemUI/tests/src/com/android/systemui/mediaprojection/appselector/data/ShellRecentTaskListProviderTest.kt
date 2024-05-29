@@ -164,8 +164,6 @@ class ShellRecentTaskListProviderTest : SysuiTestCase() {
             baseIntentComponent = null,
             colorBackground = null,
             isForegroundTask = false,
-            userType = userType,
-            splitBounds = null
         )
 
     private fun createSingleTask(taskId: Int, isVisible: Boolean = false): GroupedRecentTaskInfo =
