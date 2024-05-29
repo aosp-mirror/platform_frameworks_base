@@ -38,6 +38,7 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Person;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.FlagsParameterization;
 import android.testing.TestableLooper;
 
@@ -147,6 +148,62 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     public void SysuiSetup() throws Exception {
         super.SysuiSetup();
         mAvalancheController = new AvalancheController(dumpManager);
+    }
+
+    @Test
+    public void testHasNotifications_headsUpManagerMapNotEmpty_true() {
+        final BaseHeadsUpManager bhum = createHeadsUpManager();
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
+        bhum.showNotification(entry);
+
+        assertThat(bhum.mHeadsUpEntryMap).isNotEmpty();
+        assertThat(bhum.hasNotifications()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    public void testHasNotifications_avalancheMapNotEmpty_true() {
+        final BaseHeadsUpManager bhum = createHeadsUpManager();
+        final NotificationEntry notifEntry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0,
+                mContext);
+        final BaseHeadsUpManager.HeadsUpEntry headsUpEntry = bhum.createHeadsUpEntry(notifEntry);
+        mAvalancheController.addToNext(headsUpEntry, () -> {});
+
+        assertThat(mAvalancheController.getWaitingEntryList()).isNotEmpty();
+        assertThat(bhum.hasNotifications()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    public void testHasNotifications_false() {
+        final BaseHeadsUpManager bhum = createHeadsUpManager();
+        assertThat(bhum.mHeadsUpEntryMap).isEmpty();
+        assertThat(mAvalancheController.getWaitingEntryList()).isEmpty();
+        assertThat(bhum.hasNotifications()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    public void testGetHeadsUpEntryList_includesAvalancheEntryList() {
+        final BaseHeadsUpManager bhum = createHeadsUpManager();
+        final NotificationEntry notifEntry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0,
+                mContext);
+        final BaseHeadsUpManager.HeadsUpEntry headsUpEntry = bhum.createHeadsUpEntry(notifEntry);
+        mAvalancheController.addToNext(headsUpEntry, () -> {});
+
+        assertThat(bhum.getHeadsUpEntryList()).contains(headsUpEntry);
+    }
+
+    @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    public void testGetHeadsUpEntry_returnsAvalancheEntry() {
+        final BaseHeadsUpManager bhum = createHeadsUpManager();
+        final NotificationEntry notifEntry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0,
+                mContext);
+        final BaseHeadsUpManager.HeadsUpEntry headsUpEntry = bhum.createHeadsUpEntry(notifEntry);
+        mAvalancheController.addToNext(headsUpEntry, () -> {});
+
+        assertThat(bhum.getHeadsUpEntry(notifEntry.getKey())).isEqualTo(headsUpEntry);
     }
 
     @Test
