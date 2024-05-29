@@ -221,7 +221,7 @@
     <string name="choose_profile" msgid="343803890897657450">"প্রোফাইল বেছে নিন"</string>
     <string name="category_personal" msgid="6236798763159385225">"ব্যক্তিগত"</string>
     <string name="category_work" msgid="4014193632325996115">"অফিস"</string>
-    <string name="category_private" msgid="4244892185452788977">"ব্যক্তিগত"</string>
+    <string name="category_private" msgid="4244892185452788977">"প্রাইভেট"</string>
     <string name="category_clone" msgid="1554511758987195974">"ক্লোন"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ডেভেলপার বিকল্প"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ডেভেলপার বিকল্প সক্ষম করুন"</string>
