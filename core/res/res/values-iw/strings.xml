@@ -2384,7 +2384,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"פריסת המקלדת מוגדרת ל<xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… אפשר להקיש כדי לשנות את ההגדרה הזו."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"הוגדרו מקלדות פיזיות"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"יש להקיש כדי להציג את המקלדות"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"פרופיל פרטי"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"פרטי"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"שכפול"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"פרופיל עבודה"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"פרופיל עבודה 2"</string>
