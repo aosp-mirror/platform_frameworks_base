@@ -588,17 +588,20 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             } else if (ev.getAction() == ACTION_HOVER_MOVE
                     && MaximizeMenu.Companion.isMaximizeMenuView(id)) {
                 decoration.onMaximizeMenuHoverMove(id, ev);
+                mMainHandler.removeCallbacks(mCloseMaximizeWindowRunnable);
             } else if (ev.getAction() == ACTION_HOVER_EXIT) {
                 if (!decoration.isMaximizeMenuActive() && id == R.id.maximize_window) {
                     decoration.onMaximizeWindowHoverExit();
-                } else if (id == R.id.maximize_window || id == R.id.maximize_menu) {
+                } else if (id == R.id.maximize_window
+                        || MaximizeMenu.Companion.isMaximizeMenuView(id)) {
                     // Close menu if not hovering over maximize menu or maximize button after a
                     // delay to give user a chance to re-enter view or to move from one maximize
                     // menu view to another.
                     mMainHandler.postDelayed(mCloseMaximizeWindowRunnable,
                             CLOSE_MAXIMIZE_MENU_DELAY_MS);
-                } else if (MaximizeMenu.Companion.isMaximizeMenuView(id)) {
-                    decoration.onMaximizeMenuHoverExit(id, ev);
+                    if (id != R.id.maximize_window) {
+                        decoration.onMaximizeMenuHoverExit(id, ev);
+                    }
                 }
                 return true;
             }
