@@ -2198,7 +2198,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Majtas në bllokun e drejtimit"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Djathtas në bllokun e drejtimit"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Qendra e bllokut të drejtimit"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Shiriti i nëntitullit të <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> është vendosur në grupin E KUFIZUAR"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"dërgoi një imazh"</string>
@@ -2399,7 +2398,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Struktura e tastierës u caktua në: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Trokit për ta ndryshuar."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Tastierat fizike u konfiguruan"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Trokit për të parë tastierat"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Privat"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Private"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Klon"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"Puna"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Puna 2"</string>
