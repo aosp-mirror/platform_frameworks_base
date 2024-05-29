@@ -91,12 +91,19 @@ constructor(
         } else {
             dismissKeyguard()
         }
-        transitionCoordinator?.startExit()
+
+        var transitionOptions: ActivityOptions? = null
+        if (transitionCoordinator?.decor?.isAttachedToWindow == true) {
+            transitionCoordinator.startExit()
+            transitionOptions = options
+        }
 
         if (user == myUserHandle()) {
-            withContext(mainDispatcher) { context.startActivity(intent, options?.toBundle()) }
+            withContext(mainDispatcher) {
+                context.startActivity(intent, transitionOptions?.toBundle())
+            }
         } else {
-            launchCrossProfileIntent(user, intent, options?.toBundle())
+            launchCrossProfileIntent(user, intent, transitionOptions?.toBundle())
         }
 
         if (overrideTransition) {
