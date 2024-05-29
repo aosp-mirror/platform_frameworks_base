@@ -17,6 +17,8 @@ package com.android.systemui.statusbar.policy
 
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import com.android.internal.logging.UiEvent
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
@@ -35,6 +37,7 @@ class AvalancheController
 @Inject
 constructor(
     dumpManager: DumpManager,
+    private val uiEventLogger: UiEventLogger
 ) : Dumpable {
 
     private val tag = "AvalancheController"
@@ -64,6 +67,21 @@ constructor(
     // HeadsUpEntry we did not show at all because they are not the top priority hun in their batch
     // For debugging only
     @VisibleForTesting var debugDropSet: MutableSet<HeadsUpEntry> = HashSet()
+
+    enum class ThrottleEvent(private val id: Int) : UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "HUN was shown.")
+        SHOWN(1812),
+
+        @UiEvent(doc = "HUN was dropped to show higher priority HUNs.")
+        DROPPED(1813),
+
+        @UiEvent(doc = "HUN was removed while waiting to show.")
+        REMOVED(1814);
+
+        override fun getId(): Int {
+            return id
+        }
+    }
 
     init {
         dumpManager.registerNormalDumpable(tag, /* module */ this)
@@ -145,6 +163,7 @@ constructor(
             log { "$fn => remove from next" }
             if (entry in nextMap) nextMap.remove(entry)
             if (entry in nextList) nextList.remove(entry)
+            uiEventLogger.log(ThrottleEvent.REMOVED)
         } else if (entry in debugDropSet) {
             log { "$fn => remove from dropset" }
             debugDropSet.remove(entry)
@@ -268,6 +287,7 @@ constructor(
     private fun showNow(entry: HeadsUpEntry, runnableList: MutableList<Runnable>) {
         log { "SHOW: " + getKey(entry) }
 
+        uiEventLogger.log(ThrottleEvent.SHOWN)
         headsUpEntryShowing = entry
 
         runnableList.forEach {
@@ -295,6 +315,12 @@ constructor(
 
         // Remove runnable labels for dropped huns
         val listToDrop = nextList.subList(1, nextList.size)
+
+        // Log dropped HUNs
+        for (e in listToDrop) {
+            uiEventLogger.log(ThrottleEvent.DROPPED)
+        }
+
         if (debug) {
             // Clear runnable labels
             for (e in listToDrop) {
