@@ -35,6 +35,7 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -46,6 +47,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.withContext
 
 /** Provides observable models about the current media session state. */
@@ -105,12 +107,9 @@ constructor(
             .filterData()
             .map { it?.packageName }
             .distinctUntilChanged()
-            .map { localMediaRepositoryFactory.create(it) }
-            .stateIn(
-                coroutineScope,
-                SharingStarted.Eagerly,
-                localMediaRepositoryFactory.create(null)
-            )
+            .transformLatest {
+                coroutineScope { emit(localMediaRepositoryFactory.create(it, this)) }
+            }
 
     /** Currently connected [MediaDevice]. */
     val currentConnectedDevice: Flow<MediaDevice?> =
