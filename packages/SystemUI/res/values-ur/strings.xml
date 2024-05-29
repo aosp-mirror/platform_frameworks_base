@@ -76,8 +76,7 @@
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ایک تصویر بھیجی"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"اسکرین شاٹ محفوظ ہو رہا ہے…"</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"اسکرین شاٹ دفتری پروفائل میں محفوظ کیا جا رہا ہے…"</string>
-    <!-- no translation found for screenshot_saving_private_profile (8934706048497093297) -->
-    <skip />
+    <string name="screenshot_saving_private_profile" msgid="8934706048497093297">"اسکرین شاٹ کو نجی پروفائل میں محفوظ کیا جا رہا ہے"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"اسکرین شاٹ محفوظ ہو گیا"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"اسکرین شاٹ کو محفوظ نہیں کیا جا سکا"</string>
     <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"خارجی ڈسپلے"</string>
