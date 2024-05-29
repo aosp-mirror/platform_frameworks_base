@@ -720,7 +720,7 @@ public class DividerPresenterTest {
 
         // Divider position is greater than minPosition and the velocity is enough for fling
         assertEquals(
-                0, // Closed position
+                30, // minPosition
                 DividerPresenter.dividerPositionWithDraggingToFullscreenAllowed(
                         50 /* dividerPosition */,
                         30 /* minPosition */,
@@ -731,7 +731,7 @@ public class DividerPresenterTest {
 
         // Divider position is less than maxPosition and the velocity is enough for fling
         assertEquals(
-                1200, // Fully expanded position
+                900, // maxPosition
                 DividerPresenter.dividerPositionWithDraggingToFullscreenAllowed(
                         800 /* dividerPosition */,
                         30 /* minPosition */,
