@@ -699,9 +699,9 @@
     <!-- QuickSettings: Bluetooth auto on info text when enabled [CHAR LIMIT=NONE]-->
     <string name="turn_on_bluetooth_auto_info_enabled">Bluetooth will turn on tomorrow morning</string>
     <!-- QuickSettings: Bluetooth dialog audio sharing button text [CHAR LIMIT=50]-->
-    <string name="quick_settings_bluetooth_audio_sharing_button">Audio Sharing</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button">Share audio</string>
     <!-- QuickSettings: Bluetooth dialog audio sharing button text when sharing audio [CHAR LIMIT=50]-->
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing">Sharing Audio</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing">Sharing audio</string>
 
     <!-- QuickSettings: Bluetooth secondary label for the battery level of a connected device [CHAR LIMIT=20]-->
     <string name="quick_settings_bluetooth_secondary_label_battery_level"><xliff:g id="battery_level_as_percentage">%s</xliff:g> battery</string>
