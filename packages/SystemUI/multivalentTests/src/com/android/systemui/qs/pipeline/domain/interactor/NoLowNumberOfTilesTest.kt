@@ -34,6 +34,8 @@ import com.android.systemui.qs.pipeline.data.repository.MinimumTilesFixedReposit
 import com.android.systemui.qs.pipeline.data.repository.fakeDefaultTilesRepository
 import com.android.systemui.qs.pipeline.data.repository.fakeMinimumTilesRepository
 import com.android.systemui.qs.pipeline.data.repository.fakeRestoreRepository
+import com.android.systemui.qs.pipeline.data.repository.fakeRetailModeRepository
+import com.android.systemui.qs.pipeline.data.repository.fakeTileSpecRepository
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.qsTileFactory
 import com.android.systemui.settings.fakeUserTracker
@@ -135,6 +137,19 @@ class NoLowNumberOfTilesTest : SysuiTestCase() {
                 runCurrent()
 
                 assertThat(tiles!!.map { it.spec }).isEqualTo(defaultTiles)
+            }
+        }
+
+    @Test
+    fun inRetailMode_onlyOneTile_noPrependDefault() =
+        with(kosmos) {
+            testScope.runTest {
+                fakeRetailModeRepository.setRetailMode(true)
+                fakeTileSpecRepository.setTiles(0, listOf(goodTile))
+                val tiles by collectLastValue(currentTilesInteractor.currentTiles)
+                runCurrent()
+
+                assertThat(tiles!!.map { it.spec }).isEqualTo(listOf(goodTile))
             }
         }
 
