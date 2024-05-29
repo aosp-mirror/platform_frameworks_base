@@ -88,8 +88,8 @@ import java.util.List;
 import java.util.Set;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
-@TestableLooper.RunWithLooper(setAsMainLooper = true)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class KeyguardIndicationControllerTest extends KeyguardIndicationControllerBaseTest {
     @Test
     public void afterFaceLockout_skipShowingFaceNotRecognized() {
@@ -131,11 +131,14 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
 
     @Test
     public void onAlignmentStateChanged_showsSlowChargingIndication() {
-        createController();
-        verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
-        mController.setVisible(true);
+        mInstrumentation.runOnMainSync(() -> {
+            createController();
+            verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
+            mController.setVisible(true);
 
-        mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_POOR);
+            mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_POOR);
+        });
+        mInstrumentation.waitForIdleSync();
         mTestableLooper.processAllMessages();
 
         verifyIndicationMessage(INDICATION_TYPE_ALIGNMENT,
@@ -146,11 +149,14 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
 
     @Test
     public void onAlignmentStateChanged_showsNotChargingIndication() {
-        createController();
-        verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
-        mController.setVisible(true);
+        mInstrumentation.runOnMainSync(() -> {
+            createController();
+            verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
+            mController.setVisible(true);
 
-        mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_TERRIBLE);
+            mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_TERRIBLE);
+        });
+        mInstrumentation.waitForIdleSync();
         mTestableLooper.processAllMessages();
 
         verifyIndicationMessage(INDICATION_TYPE_ALIGNMENT,
@@ -162,12 +168,15 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
     @FlakyTest(bugId = 279944472)
     @Test
     public void onAlignmentStateChanged_whileDozing_showsSlowChargingIndication() {
-        createController();
-        verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
-        mController.setVisible(true);
-        mStatusBarStateListener.onDozingChanged(true);
+        mInstrumentation.runOnMainSync(() -> {
+            createController();
+            verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
+            mController.setVisible(true);
+            mStatusBarStateListener.onDozingChanged(true);
 
-        mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_POOR);
+            mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_POOR);
+        });
+        mInstrumentation.waitForIdleSync();
         mTestableLooper.processAllMessages();
 
         assertThat(mTextView.getText()).isEqualTo(
@@ -178,12 +187,15 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
 
     @Test
     public void onAlignmentStateChanged_whileDozing_showsNotChargingIndication() {
-        createController();
-        verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
-        mController.setVisible(true);
-        mStatusBarStateListener.onDozingChanged(true);
+        mInstrumentation.runOnMainSync(() -> {
+            createController();
+            verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
+            mController.setVisible(true);
+            mStatusBarStateListener.onDozingChanged(true);
 
-        mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_TERRIBLE);
+            mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_TERRIBLE);
+        });
+        mInstrumentation.waitForIdleSync();
         mTestableLooper.processAllMessages();
 
         assertThat(mTextView.getText()).isEqualTo(
@@ -630,12 +642,6 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
     @Test
     public void sendFaceHelpMessages_fingerprintEnrolled() {
         createController();
-        mController.mCoExAcquisitionMsgIdsToShowCallback.accept(
-                Set.of(
-                        BiometricFaceConstants.FACE_ACQUIRED_MOUTH_COVERING_DETECTED,
-                        BiometricFaceConstants.FACE_ACQUIRED_DARK_GLASSES_DETECTED
-                )
-        );
 
         // GIVEN unlocking with fingerprint is possible and allowed
         fingerprintUnlockIsPossibleAndAllowed();
