@@ -5253,13 +5253,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
                 //Clip to the window bounds.
                 Rect windowBounds = mTempRect1;
-                if (Flags.focusClickPointWindowBoundsFromA11yWindowInfo()) {
-                    AccessibilityWindowInfo window = focus.getWindow();
-                    if (window != null) {
-                        window.getBoundsInScreen(windowBounds);
-                    }
-                } else {
-                    getWindowBounds(focus.getWindowId(), windowBounds);
+                AccessibilityWindowInfo window = focus.getWindow();
+                if (window != null) {
+                    window.getBoundsInScreen(windowBounds);
                 }
                 if (!boundsInScreenBeforeMagnification.intersect(windowBounds)) {
                     return false;
