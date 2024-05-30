@@ -16,6 +16,8 @@
 
 package android.view;
 
+import android.animation.Animator;
+
 /**
  * Exists just to allow for android.graphics & android.view package separation
  *
@@ -26,4 +28,7 @@ package android.view;
 public interface NativeVectorDrawableAnimator {
     /** @hide */
     long getAnimatorNativePtr();
+
+    /** @hide */
+    void setThreadedRendererAnimatorListener(Animator.AnimatorListener listener);
 }

@@ -184,6 +184,13 @@ flag {
 }
 
 flag {
+    name: "notification_avalanche_throttle_hun"
+    namespace: "systemui"
+    description: "(currently unused) During notification avalanche, throttle HUNs showing in fast succession."
+    bug: "307288824"
+}
+
+flag {
     name: "notification_avalanche_suppression"
     namespace: "systemui"
     description: "After notification avalanche floodgate event, suppress HUNs completely."
@@ -990,6 +997,13 @@ flag {
 }
 
 flag {
+  name: "glanceable_hub_shortcut_button"
+  namespace: "systemui"
+  description: "Shows a button over the dream and lock screen to open the glanceable hub"
+  bug: "339667383"
+}
+
+flag {
   name: "glanceable_hub_gesture_handle"
   namespace: "systemui"
   description: "Shows a vertical bar at the right edge to indicate the user can swipe to open the glanceable hub"
@@ -1011,4 +1025,14 @@ flag {
    metadata {
      purpose: PURPOSE_BUGFIX
    }
+}
+
+flag {
+  name: "notification_media_manager_background_execution"
+  namespace: "systemui"
+  description: "Decide whether to execute binder calls in background thread"
+  bug: "336612071"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

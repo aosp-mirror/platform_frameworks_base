@@ -18,6 +18,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -28,19 +29,23 @@ import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAfforda
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.stateIn
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class KeyguardQuickAffordancesCombinedViewModel
 @Inject
 constructor(
+    @Application applicationScope: CoroutineScope,
     private val quickAffordanceInteractor: KeyguardQuickAffordanceInteractor,
     private val keyguardInteractor: KeyguardInteractor,
     shadeInteractor: ShadeInteractor,
@@ -84,15 +89,20 @@ constructor(
     /** The only time the expansion is important is while lockscreen is actively displayed */
     private val shadeExpansionAlpha =
         combine(
-            showingLockscreen,
-            shadeInteractor.anyExpansion,
-        ) { showingLockscreen, expansion ->
-            if (showingLockscreen) {
-                1 - expansion
-            } else {
-                0f
+                showingLockscreen,
+                shadeInteractor.anyExpansion,
+            ) { showingLockscreen, expansion ->
+                if (showingLockscreen) {
+                    1 - expansion
+                } else {
+                    0f
+                }
             }
-        }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Lazily,
+                initialValue = 0f,
+            )
 
     /**
      * ID of the slot that's currently selected in the preview that renders exclusively in the

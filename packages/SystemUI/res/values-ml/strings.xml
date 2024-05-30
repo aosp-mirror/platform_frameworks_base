@@ -76,8 +76,7 @@
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ചിത്രം അയച്ചു"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"സ്‌ക്രീൻഷോട്ട് സംരക്ഷിക്കുന്നു..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"ഔദ്യോഗിക പ്രൊഫൈലിലേക്ക് സ്ക്രീൻഷോട്ട് സംരക്ഷിക്കുന്നു…"</string>
-    <!-- no translation found for screenshot_saving_private_profile (8934706048497093297) -->
-    <skip />
+    <string name="screenshot_saving_private_profile" msgid="8934706048497093297">"സ്ക്രീൻഷോട്ട് സ്വകാര്യമാക്കി സംരക്ഷിക്കുന്നു"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"സ്‌ക്രീൻഷോട്ട് സംരക്ഷിച്ചു"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"സ്‌ക്രീൻഷോട്ട് സംരക്ഷിക്കാനായില്ല"</string>
     <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"ബാഹ്യ ഡിസ്പ്ലേ"</string>

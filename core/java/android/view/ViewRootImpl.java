@@ -427,6 +427,12 @@ public final class ViewRootImpl implements ViewParent,
 
     private static final long NANOS_PER_SEC = 1000000000;
 
+    // If the ViewRootImpl has been idle for more than 750ms, clear the preferred
+    // frame rate category and frame rate.
+    private static final int IDLE_TIME_MILLIS = 750;
+
+    private static final long NANOS_PER_MILLI = 1_000_000;
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     static final ThreadLocal<HandlerActionQueue> sRunQueues = new ThreadLocal<HandlerActionQueue>();
 
@@ -659,6 +665,10 @@ public final class ViewRootImpl implements ViewParent,
     private int mMinusOneFrameIntervalMillis = 0;
     // VRR interval between the previous and the frame before
     private int mMinusTwoFrameIntervalMillis = 0;
+    // VRR has the invalidation idle message been posted?
+    private boolean mInvalidationIdleMessagePosted = false;
+    // VRR: List of all Views that are animating with the threaded render
+    private ArrayList<View> mThreadedRendererViews = new ArrayList();
 
     /**
      * Update the Choreographer's FrameInfo object with the timing information for the current
@@ -1184,6 +1194,8 @@ public final class ViewRootImpl implements ViewParent,
             toolkitFrameRateVelocityMappingReadOnly();
     private static boolean sToolkitEnableInvalidateCheckThreadFlagValue =
             Flags.enableInvalidateCheckThread();
+    private static boolean sSurfaceFlingerBugfixFlagValue =
+            com.android.graphics.surfaceflinger.flags.Flags.vrrBugfix24q4();
 
     static {
         sToolkitSetFrameRateReadOnlyFlagValue = toolkitSetFrameRateReadOnly();
@@ -2262,6 +2274,33 @@ public final class ViewRootImpl implements ViewParent,
             forceLayout(mView);
         }
         requestLayout();
+    }
+
+    /** Handles messages {@link #MSG_INSETS_CONTROL_CHANGED}. */
+    private void handleInsetsControlChanged(@NonNull InsetsState insetsState,
+            @NonNull InsetsSourceControl.Array activeControls) {
+        final InsetsSourceControl[] controls = activeControls.get();
+
+        if (mTranslator != null) {
+            mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
+            mTranslator.translateSourceControlsInScreenToAppWindow(controls);
+        }
+
+        // Deliver state change before control change, such that:
+        // a) When gaining control, controller can compare with server state to evaluate
+        // whether it needs to run animation.
+        // b) When loosing control, controller can restore server state by taking last
+        // dispatched state as truth.
+        mInsetsController.onStateChanged(insetsState);
+        if (mAdded) {
+            mInsetsController.onControlsChanged(controls);
+        } else if (controls != null) {
+            for (InsetsSourceControl control : controls) {
+                if (control != null) {
+                    control.release(SurfaceControl::release);
+                }
+            }
+        }
     }
 
     private final DisplayListener mDisplayListener = new DisplayListener() {
@@ -4261,8 +4300,13 @@ public final class ViewRootImpl implements ViewParent,
         // when the values are applicable.
         if (mDrawnThisFrame) {
             mDrawnThisFrame = false;
+            if (!mInvalidationIdleMessagePosted && sSurfaceFlingerBugfixFlagValue) {
+                mInvalidationIdleMessagePosted = true;
+                mHandler.sendEmptyMessageDelayed(MSG_CHECK_INVALIDATION_IDLE, IDLE_TIME_MILLIS);
+            }
             setCategoryFromCategoryCounts();
             updateInfrequentCount();
+            updateFrameRateFromThreadedRendererViews();
             setPreferredFrameRate(mPreferredFrameRate);
             setPreferredFrameRateCategory(mPreferredFrameRateCategory);
             if (mPreferredFrameRate > 0
@@ -6499,6 +6543,8 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_WINDOW_TOUCH_MODE_CHANGED";
                 case MSG_KEEP_CLEAR_RECTS_CHANGED:
                     return "MSG_KEEP_CLEAR_RECTS_CHANGED";
+                case MSG_CHECK_INVALIDATION_IDLE:
+                    return "MSG_CHECK_INVALIDATION_IDLE";
                 case MSG_REFRESH_POINTER_ICON:
                     return "MSG_REFRESH_POINTER_ICON";
                 case MSG_TOUCH_BOOST_TIMEOUT:
@@ -6572,24 +6618,11 @@ public final class ViewRootImpl implements ViewParent,
                     break;
                 }
                 case MSG_INSETS_CONTROL_CHANGED: {
-                    SomeArgs args = (SomeArgs) msg.obj;
-
-                    // Deliver state change before control change, such that:
-                    // a) When gaining control, controller can compare with server state to evaluate
-                    // whether it needs to run animation.
-                    // b) When loosing control, controller can restore server state by taking last
-                    // dispatched state as truth.
-                    mInsetsController.onStateChanged((InsetsState) args.arg1);
-                    InsetsSourceControl[] controls = (InsetsSourceControl[]) args.arg2;
-                    if (mAdded) {
-                        mInsetsController.onControlsChanged(controls);
-                    } else if (controls != null) {
-                        for (InsetsSourceControl control : controls) {
-                            if (control != null) {
-                                control.release(SurfaceControl::release);
-                            }
-                        }
-                    }
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    final InsetsState insetsState = (InsetsState) args.arg1;
+                    final InsetsSourceControl.Array activeControls =
+                            (InsetsSourceControl.Array) args.arg2;
+                    handleInsetsControlChanged(insetsState, activeControls);
                     args.recycle();
                     break;
                 }
@@ -6759,6 +6792,31 @@ public final class ViewRootImpl implements ViewParent,
                     mNumPausedForSync = 0;
                     scheduleTraversals();
                     break;
+                case MSG_CHECK_INVALIDATION_IDLE: {
+                    long delta;
+                    if (mIsTouchBoosting || mIsFrameRateBoosting || mInsetsAnimationRunning) {
+                        delta = 0;
+                    } else {
+                        delta = System.nanoTime() / NANOS_PER_MILLI - mLastUpdateTimeMillis;
+                    }
+                    if (delta >= IDLE_TIME_MILLIS) {
+                        mFrameRateCategoryHighCount = 0;
+                        mFrameRateCategoryHighHintCount = 0;
+                        mFrameRateCategoryNormalCount = 0;
+                        mFrameRateCategoryLowCount = 0;
+                        mPreferredFrameRate = 0;
+                        mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+                        updateFrameRateFromThreadedRendererViews();
+                        setPreferredFrameRate(mPreferredFrameRate);
+                        setPreferredFrameRateCategory(mPreferredFrameRateCategory);
+                        mInvalidationIdleMessagePosted = false;
+                    } else {
+                        mInvalidationIdleMessagePosted = true;
+                        mHandler.sendEmptyMessageDelayed(MSG_CHECK_INVALIDATION_IDLE,
+                                IDLE_TIME_MILLIS - delta);
+                    }
+                    break;
+                }
                 case MSG_TOUCH_BOOST_TIMEOUT:
                     /**
                      * Lower the frame rate after the boosting period (FRAME_RATE_TOUCH_BOOST_TIME).
@@ -9784,25 +9842,9 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.sendMessage(msg);
     }
 
-    private void dispatchInsetsControlChanged(InsetsState insetsState,
-            InsetsSourceControl[] activeControls) {
-        if (Binder.getCallingPid() == android.os.Process.myPid()) {
-            insetsState = new InsetsState(insetsState, true /* copySource */);
-            if (activeControls != null) {
-                for (int i = activeControls.length - 1; i >= 0; i--) {
-                    activeControls[i] = new InsetsSourceControl(activeControls[i]);
-                }
-            }
-        }
-        if (mTranslator != null) {
-            mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
-            mTranslator.translateSourceControlsInScreenToAppWindow(activeControls);
-        }
-        if (insetsState != null && insetsState.isSourceOrDefaultVisible(ID_IME, Type.ime())) {
-            ImeTracing.getInstance().triggerClientDump("ViewRootImpl#dispatchInsetsControlChanged",
-                    getInsetsController().getHost().getInputMethodManager(), null /* icProto */);
-        }
-        SomeArgs args = SomeArgs.obtain();
+    private void dispatchInsetsControlChanged(@NonNull InsetsState insetsState,
+            @NonNull InsetsSourceControl.Array activeControls) {
+        final SomeArgs args = SomeArgs.obtain();
         args.arg1 = insetsState;
         args.arg2 = activeControls;
         mHandler.obtainMessage(MSG_INSETS_CONTROL_CHANGED, args).sendToTarget();
@@ -11245,9 +11287,9 @@ public final class ViewRootImpl implements ViewParent,
                 return;
             }
             // The the parameters from WindowStateResizeItem are already copied.
-            final boolean needCopy =
+            final boolean needsCopy =
                     !isFromResizeItem && (Binder.getCallingPid() == Process.myPid());
-            if (needCopy) {
+            if (needsCopy) {
                 insetsState = new InsetsState(insetsState, true /* copySource */);
                 frames = new ClientWindowFrames(frames);
                 mergedConfiguration = new MergedConfiguration(mergedConfiguration);
@@ -11263,10 +11305,32 @@ public final class ViewRootImpl implements ViewParent,
             final boolean isFromInsetsControlChangeItem = mIsFromTransactionItem;
             mIsFromTransactionItem = false;
             final ViewRootImpl viewAncestor = mViewAncestor.get();
-            if (viewAncestor != null) {
-                viewAncestor.dispatchInsetsControlChanged(insetsState, activeControls.get());
+            if (viewAncestor == null) {
+                return;
             }
-            // TODO(b/339380439): no need to post if the call is from InsetsControlChangeItem
+            if (insetsState.isSourceOrDefaultVisible(ID_IME, Type.ime())) {
+                ImeTracing.getInstance().triggerClientDump(
+                        "ViewRootImpl#dispatchInsetsControlChanged",
+                        viewAncestor.getInsetsController().getHost().getInputMethodManager(),
+                        null /* icProto */);
+            }
+            // If the UI thread is the same as the current thread that is dispatching
+            // WindowStateInsetsControlChangeItem, then it can run directly.
+            if (isFromInsetsControlChangeItem && viewAncestor.mHandler.getLooper()
+                    == ActivityThread.currentActivityThread().getLooper()) {
+                viewAncestor.handleInsetsControlChanged(insetsState, activeControls);
+                return;
+            }
+            // The parameters from WindowStateInsetsControlChangeItem are already copied.
+            final boolean needsCopy =
+                    !isFromInsetsControlChangeItem && (Binder.getCallingPid() == Process.myPid());
+            if (needsCopy) {
+                insetsState = new InsetsState(insetsState, true /* copySource */);
+                activeControls = new InsetsSourceControl.Array(
+                        activeControls, true /* copyControls */);
+            }
+
+            viewAncestor.dispatchInsetsControlChanged(insetsState, activeControls);
         }
 
         @Override
@@ -12581,6 +12645,24 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
+     * Views that are animating with the ThreadedRenderer don't use the normal invalidation
+     * path, so the value won't be updated through performTraversals. This reads the votes
+     * from those views.
+     */
+    private void updateFrameRateFromThreadedRendererViews() {
+        ArrayList<View> views = mThreadedRendererViews;
+        for (int i = views.size() - 1; i >= 0; i--) {
+            View view = views.get(i);
+            View.AttachInfo attachInfo = view.mAttachInfo;
+            if (attachInfo == null || attachInfo.mViewRootImpl != this) {
+                views.remove(i);
+            } else {
+                view.votePreferredFrameRate();
+            }
+        }
+    }
+
+    /**
      * Sets the mPreferredFrameRateCategory from the high, high_hint, normal, and low counts.
      */
     private void setCategoryFromCategoryCounts() {
@@ -12758,6 +12840,31 @@ public final class ViewRootImpl implements ViewParent,
             // mFrameRateCategoryView = view == null ? "-" : view.getClass().getSimpleName();
         }
         mDrawnThisFrame = true;
+    }
+
+    /**
+     * Mark a View as having an active ThreadedRenderer animation. This is used for
+     * RenderNodeAnimators and AnimatedVectorDrawables. When the animation stops,
+     * {@link #removeThreadedRendererView(View)} must be called.
+     * @param view The View with the ThreadedRenderer animation that started.
+     */
+    public void addThreadedRendererView(View view) {
+        if (!mThreadedRendererViews.contains(view)) {
+            mThreadedRendererViews.add(view);
+        }
+    }
+
+    /**
+     * When a ThreadedRenderer animation ends, the View that is associated with it using
+     * {@link #addThreadedRendererView(View)} must be removed with a call to this method.
+     * @param view The View whose ThreadedRender animation has stopped.
+     */
+    public void removeThreadedRendererView(View view) {
+        mThreadedRendererViews.remove(view);
+        if (!mInvalidationIdleMessagePosted && sSurfaceFlingerBugfixFlagValue) {
+            mInvalidationIdleMessagePosted = true;
+            mHandler.sendEmptyMessageDelayed(MSG_CHECK_INVALIDATION_IDLE, IDLE_TIME_MILLIS);
+        }
     }
 
     /**
@@ -12983,6 +13090,10 @@ public final class ViewRootImpl implements ViewParent,
     private void removeVrrMessages() {
         mHandler.removeMessages(MSG_TOUCH_BOOST_TIMEOUT);
         mHandler.removeMessages(MSG_FRAME_RATE_SETTING);
+        if (mInvalidationIdleMessagePosted && sSurfaceFlingerBugfixFlagValue) {
+            mInvalidationIdleMessagePosted = false;
+            mHandler.removeMessages(MSG_CHECK_INVALIDATION_IDLE);
+        }
     }
 
     /**
@@ -13001,7 +13112,7 @@ public final class ViewRootImpl implements ViewParent,
         mMinusOneFrameIntervalMillis = timeIntervalMillis;
 
         mLastUpdateTimeMillis = currentTimeMillis;
-        if (timeIntervalMillis + mMinusTwoFrameIntervalMillis
+        if (mThreadedRendererViews.isEmpty() && timeIntervalMillis + mMinusTwoFrameIntervalMillis
                 >= INFREQUENT_UPDATE_INTERVAL_MILLIS) {
             int infrequentUpdateCount = mInfrequentUpdateCount;
             mInfrequentUpdateCount = infrequentUpdateCount == INFREQUENT_UPDATE_COUNTS

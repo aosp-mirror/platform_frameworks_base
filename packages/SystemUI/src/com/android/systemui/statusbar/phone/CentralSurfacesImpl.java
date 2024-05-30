@@ -172,6 +172,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
 import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor;
 import com.android.systemui.shade.CameraLauncher;
+import com.android.systemui.shade.GlanceableHubContainerController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.QuickSettingsController;
@@ -595,6 +596,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final ColorExtractor.OnColorsChangedListener mOnColorsChangedListener =
             (extractor, which) -> updateTheme();
     private final BrightnessMirrorShowingInteractor mBrightnessMirrorShowingInteractor;
+    private final GlanceableHubContainerController mGlanceableHubContainerController;
 
     /**
      * Public constructor for CentralSurfaces.
@@ -707,7 +709,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             UserTracker userTracker,
             Provider<FingerprintManager> fingerprintManager,
             ActivityStarter activityStarter,
-            BrightnessMirrorShowingInteractor brightnessMirrorShowingInteractor
+            BrightnessMirrorShowingInteractor brightnessMirrorShowingInteractor,
+            GlanceableHubContainerController glanceableHubContainerController
     ) {
         mContext = context;
         mNotificationsController = notificationsController;
@@ -802,6 +805,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mFingerprintManager = fingerprintManager;
         mActivityStarter = activityStarter;
         mBrightnessMirrorShowingInteractor = brightnessMirrorShowingInteractor;
+        mGlanceableHubContainerController = glanceableHubContainerController;
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mStartingSurfaceOptional = startingSurfaceOptional;
@@ -2948,6 +2952,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public void handleDreamTouch(MotionEvent event) {
         getNotificationShadeWindowViewController().handleDreamTouch(event);
+    }
+
+    @Override
+    public void handleCommunalHubTouch(MotionEvent event) {
+        mGlanceableHubContainerController.onTouchEvent(event);
     }
 
     @Override

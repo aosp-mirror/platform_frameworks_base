@@ -149,11 +149,6 @@
         <item name="android:letterSpacing">0.01</item>
     </style>
 
-    <style name="TextAppearance.QS.SecurityFooter" parent="@style/TextAppearance.QS.Status">
-        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
-        <item name="android:textColor">?attr/onSurface</item>
-    </style>
-
     <style name="TextAppearance.QS.Status.Carriers" />
 
     <style name="TextAppearance.QS.Status.Carriers.NoCarrierText">

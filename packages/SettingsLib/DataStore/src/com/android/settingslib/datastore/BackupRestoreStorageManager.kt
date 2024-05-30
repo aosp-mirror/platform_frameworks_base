@@ -138,7 +138,7 @@ class BackupRestoreStorageManager private constructor(private val application: A
         private fun notifyBackupManager(key: Any?, reason: Int) {
             val name = storage.name
             // prefer not triggering backup immediately after restore
-            if (reason == ChangeReason.RESTORE) {
+            if (reason == DataChangeReason.RESTORE) {
                 Log.d(
                     LOG_TAG,
                     "Notify BackupManager dataChanged ignored for restore: storage=$name key=$key"
@@ -161,8 +161,8 @@ class BackupRestoreStorageManager private constructor(private val application: A
 
         fun notifyRestoreFinished() {
             when (storage) {
-                is KeyedObservable<*> -> storage.notifyChange(ChangeReason.RESTORE)
-                is Observable -> storage.notifyChange(ChangeReason.RESTORE)
+                is KeyedObservable<*> -> storage.notifyChange(DataChangeReason.RESTORE)
+                is Observable -> storage.notifyChange(DataChangeReason.RESTORE)
             }
         }
     }

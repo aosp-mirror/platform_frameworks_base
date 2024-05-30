@@ -19,16 +19,18 @@ package com.android.systemui.dock
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 /**
- * Retrieves whether or not the device is docked according to DockManager. Emits a starting value
- *  of isDocked.
+ * Retrieves whether or not the device is docked according to DockManager. Emits a starting value of
+ * isDocked.
  */
 fun DockManager.retrieveIsDocked(): Flow<Boolean> =
     ConflatedCallbackFlow.conflatedCallbackFlow {
-        val callback = DockManager.DockEventListener { trySend(isDocked) }
-        addListener(callback)
-        trySend(isDocked)
+            val callback = DockManager.DockEventListener { trySend(isDocked) }
+            addListener(callback)
+            trySend(isDocked)
 
-        awaitClose { removeListener(callback) }
-    }
+            awaitClose { removeListener(callback) }
+        }
+        .distinctUntilChanged()

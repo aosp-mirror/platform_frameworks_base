@@ -20,6 +20,8 @@ import android.app.Notification
 import android.app.Notification.MessagingStyle
 import android.app.Person
 import android.content.pm.LauncherApps
+import android.graphics.drawable.AdaptiveIconDrawable
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Bundle
@@ -165,7 +167,7 @@ constructor(
                 Log.wtf(
                     TAG,
                     "Updating using the cache is not supported when the " +
-                        "notifications_background_conversation_icons flag is off"
+                        "notifications_background_icons flag is off"
                 )
             }
             if (!usingCache || !Flags.notificationsBackgroundIcons()) {
@@ -216,39 +218,79 @@ constructor(
 
     @Throws(InflationException::class)
     private fun getIconDescriptor(entry: NotificationEntry, redact: Boolean): StatusBarIcon {
-        val n = entry.sbn.notification
         val showPeopleAvatar = !redact && isImportantConversation(entry)
 
+        // If the descriptor is already cached, return it
+        getCachedIconDescriptor(entry, showPeopleAvatar)?.also {
+            return it
+        }
+
+        val smallIcon = entry.sbn.notification.smallIcon
+        var usingMonochromeAppIcon = false
+        val icon: Icon?
+        if (showPeopleAvatar) {
+            icon = createPeopleAvatar(entry)
+        } else if (android.app.Flags.notificationsUseMonochromeAppIcon()) {
+            icon = getMonochromeAppIcon(entry)?.also { usingMonochromeAppIcon = true } ?: smallIcon
+        } else {
+            icon = smallIcon
+        }
+
+        if (icon == null) {
+            throw InflationException("No icon in notification from ${entry.sbn.packageName}")
+        }
+
+        val sbi = icon.toStatusBarIcon(entry)
+        cacheIconDescriptor(entry, sbi, showPeopleAvatar, usingMonochromeAppIcon)
+        return sbi
+    }
+
+    private fun getCachedIconDescriptor(
+        entry: NotificationEntry,
+        showPeopleAvatar: Boolean
+    ): StatusBarIcon? {
         val peopleAvatarDescriptor = entry.icons.peopleAvatarDescriptor
+        val appIconDescriptor = entry.icons.appIconDescriptor
         val smallIconDescriptor = entry.icons.smallIconDescriptor
 
         // If cached, return corresponding cached values
-        if (showPeopleAvatar && peopleAvatarDescriptor != null) {
-            return peopleAvatarDescriptor
-        } else if (!showPeopleAvatar && smallIconDescriptor != null) {
-            return smallIconDescriptor
+        return when {
+            showPeopleAvatar && peopleAvatarDescriptor != null -> peopleAvatarDescriptor
+            android.app.Flags.notificationsUseMonochromeAppIcon() && appIconDescriptor != null ->
+                appIconDescriptor
+            smallIconDescriptor != null -> smallIconDescriptor
+            else -> null
         }
+    }
 
-        val icon =
-            (if (showPeopleAvatar) {
-                createPeopleAvatar(entry)
-            } else {
-                n.smallIcon
-            })
-                ?: throw InflationException("No icon in notification from " + entry.sbn.packageName)
-
-        val sbi = icon.toStatusBarIcon(entry)
-
-        // Cache if important conversation or app icon.
-        if (isImportantConversation(entry) || android.app.Flags.notificationsUseAppIcon()) {
+    private fun cacheIconDescriptor(
+        entry: NotificationEntry,
+        descriptor: StatusBarIcon,
+        showPeopleAvatar: Boolean,
+        usingMonochromeAppIcon: Boolean
+    ) {
+        if (android.app.Flags.notificationsUseAppIcon() ||
+            android.app.Flags.notificationsUseMonochromeAppIcon()
+        ) {
+            // If either of the new icon flags is enabled, we cache the icon all the time.
             if (showPeopleAvatar) {
-                entry.icons.peopleAvatarDescriptor = sbi
+                entry.icons.peopleAvatarDescriptor = descriptor
+            } else if (usingMonochromeAppIcon) {
+                // When notificationsUseMonochromeAppIcon is enabled, we use the appIconDescriptor.
+                entry.icons.appIconDescriptor = descriptor
             } else {
-                entry.icons.smallIconDescriptor = sbi
+                // When notificationsUseAppIcon is enabled, the app icon overrides the small icon.
+                // But either way, it's a good idea to cache the descriptor.
+                entry.icons.smallIconDescriptor = descriptor
+            }
+        } else if (isImportantConversation(entry)) {
+            // Old approach: cache only if important conversation.
+            if (showPeopleAvatar) {
+                entry.icons.peopleAvatarDescriptor = descriptor
+            } else {
+                entry.icons.smallIconDescriptor = descriptor
             }
         }
-
-        return sbi
     }
 
     @Throws(InflationException::class)
@@ -274,6 +316,29 @@ constructor(
             n.number,
             iconBuilder.getIconContentDescription(n)
         )
+    }
+
+    // TODO(b/335211019): Should we merge this with the method in GroupHelper?
+    private fun getMonochromeAppIcon(entry: NotificationEntry): Icon? {
+        // TODO(b/335211019): This should be done in the background.
+        var monochromeIcon: Icon? = null
+        try {
+            val appIcon: Drawable = iconBuilder.getAppIcon(entry.sbn.notification)
+            if (appIcon is AdaptiveIconDrawable) {
+                if (appIcon.monochrome != null) {
+                    monochromeIcon =
+                        Icon.createWithResourceAdaptiveDrawable(
+                            /* resPackage = */ entry.sbn.packageName,
+                            /* resId = */ appIcon.sourceDrawableResId,
+                            /* useMonochrome = */ true,
+                            /* inset = */ -3.0f * AdaptiveIconDrawable.getExtraInsetFraction()
+                        )
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to getAppIcon() in getMonochromeAppIcon()", e)
+        }
+        return monochromeIcon
     }
 
     private suspend fun getLauncherShortcutIconForPeopleAvatar(entry: NotificationEntry) =

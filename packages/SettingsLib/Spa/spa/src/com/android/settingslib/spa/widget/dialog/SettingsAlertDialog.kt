@@ -38,6 +38,7 @@ import androidx.compose.ui.window.DialogProperties
 
 data class AlertDialogButton(
     val text: String,
+    val enabled: Boolean = true,
     val onClick: () -> Unit = {},
 )
 
@@ -114,6 +115,7 @@ private fun AlertDialogPresenter.Button(button: AlertDialogButton) {
             close()
             button.onClick()
         },
+        enabled = button.enabled,
     ) {
         Text(button.text)
     }
