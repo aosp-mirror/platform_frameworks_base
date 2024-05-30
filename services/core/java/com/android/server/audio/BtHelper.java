@@ -94,14 +94,14 @@ public class BtHelper {
     private final Map<BluetoothDevice, AudioDeviceAttributes> mResolvedScoAudioDevices =
             new HashMap<>();
 
-    private @Nullable BluetoothHearingAid mHearingAid;
+    private @Nullable BluetoothHearingAid mHearingAid = null;
 
-    private @Nullable BluetoothLeAudio mLeAudio;
+    private @Nullable BluetoothLeAudio mLeAudio = null;
 
     private @Nullable BluetoothLeAudioCodecConfig mLeAudioCodecConfig;
 
     // Reference to BluetoothA2dp to query for AbsoluteVolume.
-    private @Nullable BluetoothA2dp mA2dp;
+    private @Nullable BluetoothA2dp mA2dp = null;
 
     private @Nullable BluetoothCodecConfig mA2dpCodecConfig;
 
@@ -577,7 +577,11 @@ public class BtHelper {
                 mHearingAid = null;
                 break;
             case BluetoothProfile.LE_AUDIO:
+                if (mLeAudio != null && mLeAudioCallback != null) {
+                    mLeAudio.unregisterCallback(mLeAudioCallback);
+                }
                 mLeAudio = null;
+                mLeAudioCallback = null;
                 mLeAudioCodecConfig = null;
                 break;
             case BluetoothProfile.LE_AUDIO_BROADCAST:
@@ -596,8 +600,6 @@ public class BtHelper {
 
     // BluetoothLeAudio callback used to update the list of addresses in the same group as a
     // connected LE Audio device
-    MyLeAudioCallback mLeAudioCallback = null;
-
     class MyLeAudioCallback implements BluetoothLeAudio.Callback {
         @Override
         public void onCodecConfigChanged(int groupId,
@@ -620,6 +622,8 @@ public class BtHelper {
         }
     }
 
+    MyLeAudioCallback mLeAudioCallback = null;
+
     // @GuardedBy("mDeviceBroker.mSetModeLock")
     @GuardedBy("AudioDeviceBroker.this.mDeviceStateLock")
     /*package*/ synchronized void onBtProfileConnected(int profile, BluetoothProfile proxy) {
@@ -635,18 +639,28 @@ public class BtHelper {
                 onHeadsetProfileConnected((BluetoothHeadset) proxy);
                 return;
             case BluetoothProfile.A2DP:
+                if (((BluetoothA2dp) proxy).equals(mA2dp)) {
+                    return;
+                }
                 mA2dp = (BluetoothA2dp) proxy;
                 break;
             case BluetoothProfile.HEARING_AID:
+                if (((BluetoothHearingAid) proxy).equals(mHearingAid)) {
+                    return;
+                }
                 mHearingAid = (BluetoothHearingAid) proxy;
                 break;
             case BluetoothProfile.LE_AUDIO:
-                if (mLeAudio == null) {
-                    mLeAudioCallback = new MyLeAudioCallback();
-                    ((BluetoothLeAudio) proxy).registerCallback(
-                            mContext.getMainExecutor(), mLeAudioCallback);
+                if (((BluetoothLeAudio) proxy).equals(mLeAudio)) {
+                    return;
+                }
+                if (mLeAudio != null && mLeAudioCallback != null) {
+                    mLeAudio.unregisterCallback(mLeAudioCallback);
                 }
                 mLeAudio = (BluetoothLeAudio) proxy;
+                mLeAudioCallback = new MyLeAudioCallback();
+                mLeAudio.registerCallback(
+                            mContext.getMainExecutor(), mLeAudioCallback);
                 break;
             case BluetoothProfile.A2DP_SINK:
             case BluetoothProfile.LE_AUDIO_BROADCAST:
