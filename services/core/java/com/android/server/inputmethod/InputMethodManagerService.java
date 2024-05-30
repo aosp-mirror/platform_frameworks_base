@@ -1547,6 +1547,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
                         getPackageManagerForUser(mContext, currentUserId),
                         newSettings.getEnabledInputMethodList());
+
+                final var unused = SystemServerInitThreadPool.submit(
+                        AdditionalSubtypeMapRepository::startWriterThread,
+                        "Start AdditionalSubtypeMapRepository's writer thread");
             }
         }
     }
