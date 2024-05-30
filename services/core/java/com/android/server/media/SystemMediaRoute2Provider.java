@@ -158,20 +158,20 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     public void requestCreateSession(
             long requestId,
             String packageName,
-            String routeId,
+            String routeOriginalId,
             Bundle sessionHints,
             @RoutingSessionInfo.TransferReason int transferReason,
             @NonNull UserHandle transferInitiatorUserHandle,
             @NonNull String transferInitiatorPackageName) {
         // Assume a router without MODIFY_AUDIO_ROUTING permission can't request with
         // a route ID different from the default route ID. The service should've filtered.
-        if (TextUtils.equals(routeId, MediaRoute2Info.ROUTE_ID_DEFAULT)) {
+        if (TextUtils.equals(routeOriginalId, MediaRoute2Info.ROUTE_ID_DEFAULT)) {
             mCallback.onSessionCreated(this, requestId, mDefaultSessionInfo);
             return;
         }
 
         if (!Flags.enableBuiltInSpeakerRouteSuitabilityStatuses()) {
-            if (TextUtils.equals(routeId, mSelectedRouteId)) {
+            if (TextUtils.equals(routeOriginalId, mSelectedRouteId)) {
                 RoutingSessionInfo currentSessionInfo;
                 synchronized (mLock) {
                     currentSessionInfo = mSessionInfos.get(0);
@@ -192,7 +192,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             mPendingSessionCreationOrTransferRequest =
                     new SessionCreationOrTransferRequest(
                             requestId,
-                            routeId,
+                            routeOriginalId,
                             RoutingSessionInfo.TRANSFER_REASON_FALLBACK,
                             transferInitiatorUserHandle,
                             transferInitiatorPackageName);
@@ -204,7 +204,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 transferInitiatorUserHandle,
                 transferInitiatorPackageName,
                 SYSTEM_SESSION_ID,
-                routeId,
+                routeOriginalId,
                 transferReason);
     }
 
@@ -234,15 +234,15 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             long requestId,
             @NonNull UserHandle transferInitiatorUserHandle,
             @NonNull String transferInitiatorPackageName,
-            String sessionId,
-            String routeId,
+            String sessionOriginalId,
+            String routeOriginalId,
             @RoutingSessionInfo.TransferReason int transferReason) {
         String selectedDeviceRouteId = mDeviceRouteController.getSelectedRoute().getId();
-        if (TextUtils.equals(routeId, MediaRoute2Info.ROUTE_ID_DEFAULT)) {
+        if (TextUtils.equals(routeOriginalId, MediaRoute2Info.ROUTE_ID_DEFAULT)) {
             if (Flags.enableBuiltInSpeakerRouteSuitabilityStatuses()) {
                 // Transfer to the default route (which is the selected route). We replace the id to
                 // be the selected route id so that the transfer reason gets updated.
-                routeId = selectedDeviceRouteId;
+                routeOriginalId = selectedDeviceRouteId;
             } else {
                 Log.w(TAG, "Ignoring transfer to " + MediaRoute2Info.ROUTE_ID_DEFAULT);
                 return;
@@ -254,18 +254,18 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 mPendingTransferRequest =
                         new SessionCreationOrTransferRequest(
                                 requestId,
-                                routeId,
+                                routeOriginalId,
                                 transferReason,
                                 transferInitiatorUserHandle,
                                 transferInitiatorPackageName);
             }
         }
 
-        String finalRouteId = routeId; // Make a final copy to use it in the lambda.
+        String finalRouteId = routeOriginalId; // Make a final copy to use it in the lambda.
         boolean isAvailableDeviceRoute =
                 mDeviceRouteController.getAvailableRoutes().stream()
                         .anyMatch(it -> it.getId().equals(finalRouteId));
-        boolean isSelectedDeviceRoute = TextUtils.equals(routeId, selectedDeviceRouteId);
+        boolean isSelectedDeviceRoute = TextUtils.equals(routeOriginalId, selectedDeviceRouteId);
 
         if (isSelectedDeviceRoute || isAvailableDeviceRoute) {
             // The requested route is managed by the device route controller. Note that the selected
@@ -273,12 +273,12 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             // of the routing session). If the selected device route is transferred to, we need to
             // make the bluetooth routes inactive so that the device route becomes the selected
             // route of the routing session.
-            mDeviceRouteController.transferTo(routeId);
+            mDeviceRouteController.transferTo(routeOriginalId);
             mBluetoothRouteController.transferTo(null);
         } else {
             // The requested route is managed by the bluetooth route controller.
             mDeviceRouteController.transferTo(null);
-            mBluetoothRouteController.transferTo(routeId);
+            mBluetoothRouteController.transferTo(routeOriginalId);
         }
 
         if (Flags.enableBuiltInSpeakerRouteSuitabilityStatuses()
@@ -288,20 +288,20 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     @Override
-    public void setRouteVolume(long requestId, String routeId, int volume) {
-        if (!TextUtils.equals(routeId, mSelectedRouteId)) {
+    public void setRouteVolume(long requestId, String routeOriginalId, int volume) {
+        if (!TextUtils.equals(routeOriginalId, mSelectedRouteId)) {
             return;
         }
         mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
     }
 
     @Override
-    public void setSessionVolume(long requestId, String sessionId, int volume) {
+    public void setSessionVolume(long requestId, String sessionOriginalId, int volume) {
         // Do nothing since we don't support grouping volume yet.
     }
 
     @Override
-    public void prepareReleaseSession(String sessionId) {
+    public void prepareReleaseSession(String sessionUniqueId) {
         // Do nothing since the system session persists.
     }
 
@@ -503,12 +503,13 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         }
 
         long pendingRequestId = mPendingSessionCreationOrTransferRequest.mRequestId;
-        if (mPendingSessionCreationOrTransferRequest.mTargetRouteId.equals(mSelectedRouteId)) {
+        if (mPendingSessionCreationOrTransferRequest.mTargetOriginalRouteId.equals(
+                mSelectedRouteId)) {
             if (DEBUG) {
                 Slog.w(
                         TAG,
                         "Session creation success to route "
-                                + mPendingSessionCreationOrTransferRequest.mTargetRouteId);
+                                + mPendingSessionCreationOrTransferRequest.mTargetOriginalRouteId);
             }
             mPendingSessionCreationOrTransferRequest = null;
             mCallback.onSessionCreated(this, pendingRequestId, newSessionInfo);
@@ -520,7 +521,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                     Slog.w(
                             TAG,
                             "Session creation failed to route "
-                                    + mPendingSessionCreationOrTransferRequest.mTargetRouteId);
+                                    + mPendingSessionCreationOrTransferRequest
+                                            .mTargetOriginalRouteId);
                 }
                 mPendingSessionCreationOrTransferRequest = null;
                 mCallback.onRequestFailed(
@@ -529,7 +531,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 Slog.w(
                         TAG,
                         "Session creation waiting state to route "
-                                + mPendingSessionCreationOrTransferRequest.mTargetRouteId);
+                                + mPendingSessionCreationOrTransferRequest.mTargetOriginalRouteId);
             }
         }
     }
@@ -541,7 +543,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         // See b/307723189 for context
         for (MediaRoute2Info btRoute : mBluetoothRouteController.getAllBluetoothRoutes()) {
             if (TextUtils.equals(
-                    btRoute.getId(), mPendingSessionCreationOrTransferRequest.mTargetRouteId)) {
+                    btRoute.getId(),
+                    mPendingSessionCreationOrTransferRequest.mTargetOriginalRouteId)) {
                 return true;
             }
         }
