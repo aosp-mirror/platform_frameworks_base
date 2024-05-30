@@ -17,10 +17,18 @@ package com.android.systemui.dreams.homecontrols
 
 import android.app.Activity
 import android.service.dreams.DreamService
-import javax.inject.Inject
 
-class DreamActivityProviderImpl @Inject constructor() : DreamActivityProvider {
-    override fun getActivity(dreamService: DreamService): Activity {
-        return dreamService.activity
-    }
+/** Provides abstraction for [DreamService] methods, so they can be mocked in tests. */
+interface DreamServiceDelegate {
+    /** Wrapper for [DreamService.getActivity] which can be mocked in tests. */
+    fun getActivity(dreamService: DreamService): Activity?
+
+    /** Wrapper for [DreamService.wakeUp] which can be mocked in tests. */
+    fun wakeUp(dreamService: DreamService)
+
+    /** Wrapper for [DreamService.finish] which can be mocked in tests. */
+    fun finish(dreamService: DreamService)
+
+    /** Wrapper for [DreamService.getRedirectWake] which can be mocked in tests. */
+    fun redirectWake(dreamService: DreamService): Boolean
 }

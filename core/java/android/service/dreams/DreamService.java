@@ -1276,13 +1276,22 @@ public class DreamService extends Service implements Window.Callback {
         });
     }
 
+    /**
+     * Whether or not wake requests will be redirected.
+     *
+     * @hide
+     */
+    public boolean getRedirectWake() {
+        return mOverlayConnection != null && mRedirectWake;
+    }
+
     private void wakeUp(boolean fromSystem) {
         if (mDebug) {
             Slog.v(mTag, "wakeUp(): fromSystem=" + fromSystem + ", mWaking=" + mWaking
                     + ", mFinished=" + mFinished);
         }
 
-        if (!fromSystem && mOverlayConnection != null && mRedirectWake) {
+        if (!fromSystem && getRedirectWake()) {
             mOverlayConnection.addConsumer(overlay -> {
                 try {
                     overlay.onWakeRequested();
