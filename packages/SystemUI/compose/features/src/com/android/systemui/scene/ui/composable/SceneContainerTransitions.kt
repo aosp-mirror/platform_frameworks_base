@@ -22,6 +22,7 @@ import com.android.systemui.scene.ui.composable.transitions.lockscreenToQuickSet
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToSplitShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.shadeToQuickSettingsTransition
+import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.shade.ui.composable.Shade
 
 /**
@@ -101,5 +102,11 @@ val SceneContainerTransitions = transitions {
             Shade.Elements.SplitShadeStartColumn,
             y = { Shade.Dimensions.ScrimOverscrollLimit }
         )
+    }
+    overscroll(Scenes.NotificationsShade, Orientation.Vertical) {
+        translate(OverlayShade.Elements.Panel, y = { OverlayShade.Dimensions.OverscrollLimit })
+    }
+    overscroll(Scenes.QuickSettingsShade, Orientation.Vertical) {
+        translate(OverlayShade.Elements.Panel, y = { OverlayShade.Dimensions.OverscrollLimit })
     }
 }
