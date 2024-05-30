@@ -177,16 +177,9 @@ flag {
 }
 
 flag {
-    name: "notification_throttle_hun"
-    namespace: "systemui"
-    description: "During notification avalanche, throttle HUNs showing in fast succession."
-    bug: "307288824"
-}
-
-flag {
     name: "notification_avalanche_throttle_hun"
     namespace: "systemui"
-    description: "(currently unused) During notification avalanche, throttle HUNs showing in fast succession."
+    description: "During notification avalanche, throttle HUNs showing in fast succession."
     bug: "307288824"
 }
 
