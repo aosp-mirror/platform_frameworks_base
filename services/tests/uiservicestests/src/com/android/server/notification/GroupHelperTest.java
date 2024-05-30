@@ -708,7 +708,8 @@ public class GroupHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testDropToZeroRemoveGroup() {
+    @DisableFlags(android.app.Flags.FLAG_CHECK_AUTOGROUP_BEFORE_POST)
+    public void testDropToZeroRemoveGroup_disableFlag() {
         final String pkg = "package";
         List<StatusBarNotification> posted = new ArrayList<>();
         for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
@@ -736,7 +737,37 @@ public class GroupHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testAppStartsGrouping() {
+    @EnableFlags(android.app.Flags.FLAG_CHECK_AUTOGROUP_BEFORE_POST)
+    public void testDropToZeroRemoveGroup() {
+        final String pkg = "package";
+        List<StatusBarNotification> posted = new ArrayList<>();
+        for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
+            final StatusBarNotification sbn = getSbn(pkg, i, String.valueOf(i), UserHandle.SYSTEM);
+            posted.add(sbn);
+            mGroupHelper.onNotificationPosted(sbn, false);
+        }
+        verify(mCallback, times(1)).addAutoGroupSummary(
+                anyInt(), eq(pkg), anyString(), eq(getNotificationAttributes(BASE_FLAGS)));
+        verify(mCallback, times(AUTOGROUP_AT_COUNT - 1)).addAutoGroup(anyString(), anyBoolean());
+        verify(mCallback, never()).removeAutoGroup(anyString());
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
+        Mockito.reset(mCallback);
+
+        for (int i = 0; i < AUTOGROUP_AT_COUNT - 1; i++) {
+            mGroupHelper.onNotificationRemoved(posted.remove(0));
+        }
+        verify(mCallback, never()).removeAutoGroup(anyString());
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
+        Mockito.reset(mCallback);
+
+        mGroupHelper.onNotificationRemoved(posted.remove(0));
+        verify(mCallback, never()).removeAutoGroup(anyString());
+        verify(mCallback, times(1)).removeAutoGroupSummary(anyInt(), anyString());
+    }
+
+    @Test
+    @DisableFlags(android.app.Flags.FLAG_CHECK_AUTOGROUP_BEFORE_POST)
+    public void testAppStartsGrouping_disableFlag() {
         final String pkg = "package";
         List<StatusBarNotification> posted = new ArrayList<>();
         for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
@@ -747,6 +778,36 @@ public class GroupHelperTest extends UiServiceTestCase {
         verify(mCallback, times(1)).addAutoGroupSummary(
                 anyInt(), eq(pkg), anyString(), eq(getNotificationAttributes(BASE_FLAGS)));
         verify(mCallback, times(AUTOGROUP_AT_COUNT)).addAutoGroup(anyString(), anyBoolean());
+        verify(mCallback, never()).removeAutoGroup(anyString());
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
+        Mockito.reset(mCallback);
+
+        for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
+            final StatusBarNotification sbn =
+                    getSbn(pkg, i, String.valueOf(i), UserHandle.SYSTEM, "app group");
+            sbn.setOverrideGroupKey("autogrouped");
+            mGroupHelper.onNotificationPosted(sbn, true);
+            verify(mCallback, times(1)).removeAutoGroup(sbn.getKey());
+            if (i < AUTOGROUP_AT_COUNT - 1) {
+                verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
+            }
+        }
+        verify(mCallback, times(1)).removeAutoGroupSummary(anyInt(), anyString());
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_CHECK_AUTOGROUP_BEFORE_POST)
+    public void testAppStartsGrouping() {
+        final String pkg = "package";
+        List<StatusBarNotification> posted = new ArrayList<>();
+        for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
+            final StatusBarNotification sbn = getSbn(pkg, i, String.valueOf(i), UserHandle.SYSTEM);
+            posted.add(sbn);
+            mGroupHelper.onNotificationPosted(sbn, false);
+        }
+        verify(mCallback, times(1)).addAutoGroupSummary(
+                anyInt(), eq(pkg), anyString(), eq(getNotificationAttributes(BASE_FLAGS)));
+        verify(mCallback, times(AUTOGROUP_AT_COUNT - 1)).addAutoGroup(anyString(), anyBoolean());
         verify(mCallback, never()).removeAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
         Mockito.reset(mCallback);
@@ -915,8 +976,9 @@ public class GroupHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    @DisableFlags(android.app.Flags.FLAG_CHECK_AUTOGROUP_BEFORE_POST)
     @EnableFlags(Flags.FLAG_AUTOGROUP_SUMMARY_ICON_UPDATE)
-    public void testAddSummary_diffIcon_diffColor() {
+    public void testAddSummary_diffIcon_diffColor_disableFlag() {
         final String pkg = "package";
         final Icon initialIcon = mock(Icon.class);
         when(initialIcon.sameAs(initialIcon)).thenReturn(true);
@@ -941,6 +1003,51 @@ public class GroupHelperTest extends UiServiceTestCase {
         verify(mCallback, times(1)).addAutoGroupSummary(
                 anyInt(), eq(pkg), anyString(), eq(initialAttr));
         verify(mCallback, times(AUTOGROUP_AT_COUNT)).addAutoGroup(anyString(), anyBoolean());
+        verify(mCallback, never()).removeAutoGroup(anyString());
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
+
+        // After auto-grouping, add new notification with a different color
+        final Icon newIcon = mock(Icon.class);
+        final int newIconColor = Color.YELLOW;
+        StatusBarNotification sbn = getSbn(pkg, AUTOGROUP_AT_COUNT,
+                String.valueOf(AUTOGROUP_AT_COUNT), UserHandle.SYSTEM, null, newIcon,
+                newIconColor);
+        groupHelper.onNotificationPosted(sbn, true);
+
+        // Summary should be updated to the default color and the icon to the monochrome icon
+        NotificationAttributes newAttr = new NotificationAttributes(BASE_FLAGS, monochromeIcon,
+                COLOR_DEFAULT, DEFAULT_VISIBILITY);
+        verify(mCallback, times(1)).updateAutogroupSummary(anyInt(), anyString(), eq(newAttr));
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_AUTOGROUP_SUMMARY_ICON_UPDATE,
+            android.app.Flags.FLAG_CHECK_AUTOGROUP_BEFORE_POST})
+    public void testAddSummary_diffIcon_diffColor() {
+        final String pkg = "package";
+        final Icon initialIcon = mock(Icon.class);
+        when(initialIcon.sameAs(initialIcon)).thenReturn(true);
+        final int initialIconColor = Color.BLUE;
+
+        // Spy GroupHelper for getMonochromeAppIcon
+        final Icon monochromeIcon = mock(Icon.class);
+        when(monochromeIcon.sameAs(monochromeIcon)).thenReturn(true);
+        GroupHelper groupHelper = spy(mGroupHelper);
+        doReturn(monochromeIcon).when(groupHelper).getMonochromeAppIcon(eq(pkg));
+
+        final NotificationAttributes initialAttr = new NotificationAttributes(BASE_FLAGS,
+                initialIcon, initialIconColor, DEFAULT_VISIBILITY);
+
+        // Add notifications with same icon and color
+        for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
+            StatusBarNotification sbn = getSbn(pkg, i, String.valueOf(i), UserHandle.SYSTEM, null,
+                    initialIcon, initialIconColor);
+            groupHelper.onNotificationPosted(sbn, false);
+        }
+        // Check that the summary would have the same icon and color
+        verify(mCallback, times(1)).addAutoGroupSummary(
+                anyInt(), eq(pkg), anyString(), eq(initialAttr));
+        verify(mCallback, times(AUTOGROUP_AT_COUNT - 1)).addAutoGroup(anyString(), anyBoolean());
         verify(mCallback, never()).removeAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
 
