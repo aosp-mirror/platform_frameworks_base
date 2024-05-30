@@ -102,7 +102,7 @@ public final class AutoFillUI {
         void cancelSession();
         void requestShowSoftInput(AutofillId id);
         void requestFallbackFromFillDialog();
-        void onShown(int uiType);
+        void onShown(int uiType, int datasetSize);
     }
 
     public AutoFillUI(@NonNull Context context) {
@@ -246,9 +246,9 @@ public final class AutoFillUI {
                 }
 
                 @Override
-                public void onShown() {
+                public void onShown(int datasetSize) {
                     if (mCallback != null) {
-                        mCallback.onShown(UI_TYPE_MENU);
+                        mCallback.onShown(UI_TYPE_MENU, datasetSize);
                     }
                 }
 
@@ -462,7 +462,7 @@ public final class AutoFillUI {
 
                         @Override
                         public void onShown() {
-                            callback.onShown(UI_TYPE_DIALOG);
+                            mCallback.onShown(UI_TYPE_DIALOG, response.getDatasets().size());
                         }
 
                         @Override

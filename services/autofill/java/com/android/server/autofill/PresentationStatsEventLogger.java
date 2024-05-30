@@ -295,6 +295,38 @@ public final class PresentationStatsEventLogger {
         });
     }
 
+    /**
+     * Called for inline suggestions - inflated one at
+     * a time. If InlineSuggestions were filtered,
+     * reset the count be incrementing
+     */
+    public void maybeIncrementCountShown() {
+        mEventInternal.ifPresent(event -> {
+            if (event.shouldResetShownCount) {
+                event.shouldResetShownCount = false;
+                event.mCountShown = 0;
+            }
+
+            if (event.mCountShown == 0) {
+                // The first time suggestions are rendered
+                // set time stamp
+                maybeSetSuggestionPresentedTimestampMs();
+            }
+
+            event.mCountShown += 1;
+        });
+    }
+
+    /**
+     * Call this when UI is hidden. This will set a flag to reset count for inline. We do this
+     * instead of resetting right away in case there are 0 inline presentations after.
+     */
+    public void markShownCountAsResettable() {
+        mEventInternal.ifPresent(event -> {
+            event.shouldResetShownCount = true;
+        });
+    }
+
     public void maybeSetCountShown(@Nullable List<Dataset> datasetList,
             AutofillId currentViewId) {
         mEventInternal.ifPresent(event -> {
@@ -304,6 +336,13 @@ public final class PresentationStatsEventLogger {
                 event.mNoPresentationReason = NOT_SHOWN_REASON_ANY_SHOWN;
             }
         });
+    }
+
+    public void maybeSetCountShown(int datasets) {
+        mEventInternal.ifPresent(
+                event -> {
+                    event.mCountShown = datasets;
+                });
     }
 
     private static CountContainer getDatasetCountForAutofillId(@Nullable List<Dataset> datasetList,
@@ -567,31 +606,36 @@ public final class PresentationStatsEventLogger {
      * <p>If the ViewState contains ViewState.STATE_AUTOFILLED, sets field_autofilled_timestamp_ms
      * else, set field_first_modified_timestamp_ms (if unset) and field_last_modified_timestamp_ms
      */
-    public void onFieldTextUpdated(ViewState state) {
-        mEventInternal.ifPresent(
-                event -> {
+    public void onFieldTextUpdated(ViewState state, int length) {
+        mEventInternal.ifPresent(event -> {
                     int timestamp = getElapsedTime();
                     // Focused id should be set before this is called
-                    if (state.id != null && state.id.getViewId() != event.mFocusedId) {
+                    if (state == null || state.id == null || state.id.getViewId() != event.mFocusedId) {
                         // if these don't match, the currently field different than before
                         Slog.w(
                                 TAG,
-                                "current id: "
-                                        + state.id.getViewId()
-                                        + " is different than focused id: "
-                                        + event.mFocusedId);
+                                "Bad view state for: " + event.mFocusedId);
                         return;
                     }
 
+                    // Text changed because filling into form, just log Autofill timestamp
                     if ((state.getState() & ViewState.STATE_AUTOFILLED) != 0) {
                         event.mAutofilledTimestampMs = timestamp;
-                    } else {
-                        if (event.mFieldModifiedFirstTimestampMs == DEFAULT_VALUE_INT) {
-                            event.mFieldModifiedFirstTimestampMs = timestamp;
-                        }
-                        event.mFieldModifiedLastTimestampMs = timestamp;
+                        return;
                     }
-                });
+
+                    // Set length variables
+                    if (event.mFieldFirstLength == DEFAULT_VALUE_INT) {
+                        event.mFieldFirstLength = length;
+                    }
+                    event.mFieldLastLength = length;
+
+                    // Set timestamp variables
+                    if (event.mFieldModifiedFirstTimestampMs == DEFAULT_VALUE_INT) {
+                        event.mFieldModifiedFirstTimestampMs = timestamp;
+                    }
+                    event.mFieldModifiedLastTimestampMs = timestamp;
+        });
     }
 
     public void setPresentationSelectedTimestamp() {
@@ -652,15 +696,16 @@ public final class PresentationStatsEventLogger {
 
     /** Sets focused_autofill_id using view id */
     public void maybeSetFocusedId(AutofillId id) {
-        maybeSetFocusedId(id.getViewId());
+        mEventInternal.ifPresent(
+                event -> {
+                    event.mFocusedId = id.getViewId();
+                    if (id.isVirtualInt()) {
+                        event.mFocusedVirtualAutofillId =
+                                id.getVirtualChildIntId() % 100;
+                    }
+                });
     }
 
-    /** Sets focused_autofill_id as long as mEventInternal is present */
-    public void maybeSetFocusedId(int id) {
-        mEventInternal.ifPresent(event -> {
-            event.mFocusedId = id;
-        });
-    }
     /**
      * Set views_filled_failure_count using failure count as long as mEventInternal
      * presents.
@@ -812,7 +857,7 @@ public final class PresentationStatsEventLogger {
         @NotShownReason int mNoPresentationReason = NOT_SHOWN_REASON_UNKNOWN;
         boolean mIsDatasetAvailable;
         int mAvailableCount;
-        int mCountShown;
+        int mCountShown = 0;
         int mCountFilteredUserTyping;
         int mCountNotShownImePresentationNotDrawn;
         int mCountNotShownImeUserNotSeen;
@@ -858,6 +903,9 @@ public final class PresentationStatsEventLogger {
 
         ArraySet<AutofillId> mAutofillIdsAttemptedAutofill;
         ArraySet<AutofillId> mAlreadyFilledAutofillIds = new ArraySet<>();
+
+        // Not logged - used for internal logic
+        boolean shouldResetShownCount = false;
         PresentationStatsEventInternal() {}
     }
 

@@ -16,6 +16,7 @@
 package com.android.server.autofill.ui;
 
 import static android.service.autofill.FillResponse.FLAG_CREDENTIAL_MANAGER_RESPONSE;
+
 import static com.android.server.autofill.Helper.paramsToString;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sFullScreenMode;
@@ -90,7 +91,7 @@ final class FillUi {
         void onDatasetPicked(@NonNull Dataset dataset);
         void onCanceled();
         void onDestroy();
-        void onShown();
+        void onShown(int datasetSize);
         void requestShowFillUi(int width, int height,
                 IAutofillWindowPresenter windowPresenter);
         void requestHideFillUi();
@@ -742,7 +743,8 @@ final class FillUi {
                     mWm.addView(mContentView, params);
                     mOverlayControl.hideOverlays();
                     mShowing = true;
-                    mCallback.onShown();
+                    int numShownDatasets = (mAdapter == null) ? 0 : mAdapter.getCount();
+                    mCallback.onShown(numShownDatasets);
                 } else {
                     mWm.updateViewLayout(mContentView, params);
                 }
