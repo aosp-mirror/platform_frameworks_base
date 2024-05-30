@@ -125,13 +125,14 @@ public class InstallStart extends Activity {
                 -1, callingUid) == PackageManager.PERMISSION_GRANTED;
         boolean isSystemDownloadsProvider = PackageUtil.getSystemDownloadsProviderInfo(
                                                 mPackageManager, callingUid) != null;
-        boolean isTrustedSource = false;
-        if (sourceInfo != null && sourceInfo.isPrivilegedApp()) {
-            isTrustedSource = intent.getBooleanExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, false) || (
-                callingUid != Process.INVALID_UID && checkPermission(
-                    Manifest.permission.INSTALL_PACKAGES, -1 /* pid */, callingUid)
-                    == PackageManager.PERMISSION_GRANTED);
-        }
+
+        boolean isPrivilegedAndKnown = (sourceInfo != null && sourceInfo.isPrivilegedApp()) &&
+            intent.getBooleanExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, false);
+        boolean isInstallPkgPermissionGranted =
+            checkPermission(Manifest.permission.INSTALL_PACKAGES, /* pid= */ -1, callingUid)
+                    == PackageManager.PERMISSION_GRANTED;
+
+        boolean isTrustedSource = isPrivilegedAndKnown || isInstallPkgPermissionGranted;
 
         if (!isTrustedSource && !isSystemDownloadsProvider && !isDocumentsManager
                 && callingUid != Process.INVALID_UID) {
