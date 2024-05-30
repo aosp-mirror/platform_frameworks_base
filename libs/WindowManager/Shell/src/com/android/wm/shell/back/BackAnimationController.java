@@ -40,7 +40,6 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.IRemoteAnimationRunner;
 import android.view.InputDevice;
@@ -62,7 +61,6 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.AppearanceRegion;
 import com.android.wm.shell.R;
-import com.android.wm.shell.animation.FlingAnimationUtils;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
@@ -87,15 +85,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     public static final boolean IS_ENABLED =
             SystemProperties.getInt("persist.wm.debug.predictive_back",
                     SETTING_VALUE_ON) == SETTING_VALUE_ON;
-    public static final float FLING_MAX_LENGTH_SECONDS = 0.1f;     // 100ms
-    public static final float FLING_SPEED_UP_FACTOR = 0.6f;
-
-    /**
-     * The maximum additional progress in case of fling gesture.
-     * The end animation starts after the user lifts the finger from the screen, we continue to
-     * fire {@link BackEvent}s until the velocity reaches 0.
-     */
-    private static final float MAX_FLING_PROGRESS = 0.3f; /* 30% of the screen */
 
     /** Predictive back animation developer option */
     private final AtomicBoolean mEnableAnimations = new AtomicBoolean(false);
@@ -117,8 +106,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private boolean mThresholdCrossed = false;
     private boolean mPointersPilfered = false;
     private final boolean mRequirePointerPilfer;
-
-    private final FlingAnimationUtils mFlingAnimationUtils;
 
     /** Registry for the back animations */
     private final ShellBackAnimationRegistry mShellBackAnimationRegistry;
@@ -232,11 +219,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mBgHandler = bgHandler;
         shellInit.addInitCallback(this::onInit, this);
         mAnimationBackground = backAnimationBackground;
-        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
-        mFlingAnimationUtils = new FlingAnimationUtils.Builder(displayMetrics)
-                .setMaxLengthSeconds(FLING_MAX_LENGTH_SECONDS)
-                .setSpeedUpFactor(FLING_SPEED_UP_FACTOR)
-                .build();
         mShellBackAnimationRegistry = shellBackAnimationRegistry;
         mLatencyTracker = LatencyTracker.getInstance(mContext);
         mShellCommandHandler = shellCommandHandler;
