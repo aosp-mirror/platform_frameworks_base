@@ -18,7 +18,9 @@
 package com.android.systemui.biometrics.ui.binder
 
 import android.graphics.Rect
+import android.graphics.drawable.Animatable2
 import android.graphics.drawable.AnimatedVectorDrawable
+import android.graphics.drawable.Drawable
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
@@ -30,8 +32,8 @@ import com.android.systemui.biometrics.ui.viewmodel.PromptIconViewModel
 import com.android.systemui.biometrics.ui.viewmodel.PromptIconViewModel.AuthType
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.res.R
 import com.android.systemui.util.kotlin.Utils.Companion.toQuad
+import com.android.systemui.util.kotlin.Utils.Companion.toQuint
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import kotlinx.coroutines.flow.combine
@@ -61,11 +63,29 @@ object PromptIconViewBinder {
 
                     iconOverlayView.layoutParams.width = iconViewLayoutParamSizeOverride.first
                     iconOverlayView.layoutParams.height = iconViewLayoutParamSizeOverride.second
+                } else {
+                    iconView.layoutParams.width = viewModel.fingerprintIconWidth.first()
+                    iconView.layoutParams.height = viewModel.fingerprintIconWidth.first()
+
+                    iconOverlayView.layoutParams.width = viewModel.fingerprintIconWidth.first()
+                    iconOverlayView.layoutParams.height = viewModel.fingerprintIconWidth.first()
                 }
 
                 var faceIcon: AnimatedVectorDrawable? = null
+                val faceIconCallback =
+                    object : Animatable2.AnimationCallback() {
+                        override fun onAnimationStart(drawable: Drawable) {
+                            viewModel.onAnimationStart()
+                        }
+
+                        override fun onAnimationEnd(drawable: Drawable) {
+                            viewModel.onAnimationEnd()
+                        }
+                    }
 
                 launch {
+                    var width = 0
+                    var height = 0
                     combine(promptViewModel.size, viewModel.activeAuthType, ::Pair).collect {
                         (_, activeAuthType) ->
                         // Every time after bp shows, [isIconViewLoaded] is set to false in
@@ -75,17 +95,6 @@ object PromptIconViewBinder {
                         when (activeAuthType) {
                             AuthType.Fingerprint,
                             AuthType.Coex -> {
-                                if (iconViewLayoutParamSizeOverride == null) {
-                                    iconView.layoutParams.width =
-                                        viewModel.fingerprintIconWidth.first()
-                                    iconView.layoutParams.height =
-                                        viewModel.fingerprintIconHeight.first()
-
-                                    iconOverlayView.layoutParams.width =
-                                        viewModel.fingerprintIconWidth.first()
-                                    iconOverlayView.layoutParams.height =
-                                        viewModel.fingerprintIconHeight.first()
-                                }
                                 /**
                                  * View is only set visible in BiometricViewSizeBinder once
                                  * PromptSize is determined that accounts for iconView size, to
@@ -100,10 +109,8 @@ object PromptIconViewBinder {
                                 }
                             }
                             AuthType.Face -> {
-                                if (iconViewLayoutParamSizeOverride == null) {
-                                    iconView.layoutParams.width = viewModel.faceIconWidth
-                                    iconView.layoutParams.height = viewModel.faceIconHeight
-                                }
+                                width = viewModel.faceIconWidth
+                                height = viewModel.faceIconHeight
                                 /**
                                  * Set to true by default since face icon is a drawable, which
                                  * doesn't have a LottieOnCompositionLoadedListener equivalent.
@@ -113,6 +120,13 @@ object PromptIconViewBinder {
                                  */
                                 promptViewModel.setIsIconViewLoaded(true)
                             }
+                        }
+
+                        if (width != 0 && height != 0) {
+                            iconView.layoutParams.width = width
+                            iconView.layoutParams.height = height
+                            iconOverlayView.layoutParams.width = width
+                            iconOverlayView.layoutParams.height = height
                         }
                     }
                 }
@@ -141,13 +155,19 @@ object PromptIconViewBinder {
                             combine(
                                 viewModel.activeAuthType,
                                 viewModel.shouldAnimateIconView,
+                                viewModel.shouldRepeatAnimation,
                                 viewModel.showingError,
-                                ::Triple
+                                ::toQuad
                             ),
-                            ::toQuad
+                            ::toQuint
                         )
-                        .collect { (iconAsset, activeAuthType, shouldAnimateIconView, showingError)
-                            ->
+                        .collect {
+                            (
+                                iconAsset,
+                                activeAuthType,
+                                shouldAnimateIconView,
+                                shouldRepeatAnimation,
+                                showingError) ->
                             if (iconAsset != -1) {
                                 when (activeAuthType) {
                                     AuthType.Fingerprint,
@@ -160,27 +180,21 @@ object PromptIconViewBinder {
                                         }
                                     }
                                     AuthType.Face -> {
-                                        // TODO(b/318569643): Consolidate logic once all face auth
-                                        // assets are migrated from drawable to json
-                                        if (iconAsset == R.raw.face_dialog_authenticating) {
-                                            iconView.setAnimation(iconAsset)
-                                            iconView.frame = 0
-
+                                        faceIcon?.apply {
+                                            unregisterAnimationCallback(faceIconCallback)
+                                            stop()
+                                        }
+                                        faceIcon =
+                                            iconView.context.getDrawable(iconAsset)
+                                                as AnimatedVectorDrawable
+                                        faceIcon?.apply {
+                                            iconView.setImageDrawable(this)
                                             if (shouldAnimateIconView) {
-                                                iconView.playAnimation()
-                                                iconView.loop(true)
-                                            }
-                                        } else {
-                                            faceIcon?.apply { stop() }
-                                            faceIcon =
-                                                iconView.context.getDrawable(iconAsset)
-                                                    as AnimatedVectorDrawable
-                                            faceIcon?.apply {
-                                                iconView.setImageDrawable(this)
-                                                if (shouldAnimateIconView) {
-                                                    forceAnimationOnUI()
-                                                    start()
+                                                forceAnimationOnUI()
+                                                if (shouldRepeatAnimation) {
+                                                    registerAnimationCallback(faceIconCallback)
                                                 }
+                                                start()
                                             }
                                         }
                                     }
