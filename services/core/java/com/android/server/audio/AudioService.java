@@ -31,6 +31,10 @@ import static android.Manifest.permission.MODIFY_PHONE_STATE;
 import static android.Manifest.permission.QUERY_AUDIO_STATE;
 import static android.Manifest.permission.WRITE_SETTINGS;
 import static android.app.BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT;
+import static android.content.Intent.ACTION_PACKAGE_ADDED;
+import static android.content.Intent.ACTION_PACKAGE_REMOVED;
+import static android.content.Intent.EXTRA_ARCHIVAL;
+import static android.content.Intent.EXTRA_REPLACING;
 import static android.media.AudioDeviceInfo.TYPE_BLE_HEADSET;
 import static android.media.AudioDeviceInfo.TYPE_BLE_SPEAKER;
 import static android.media.AudioDeviceInfo.TYPE_BLUETOOTH_A2DP;
@@ -59,6 +63,7 @@ import static android.provider.Settings.Secure.VOLUME_HUSH_VIBRATE;
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.media.audio.Flags.absVolumeIndexFix;
 import static com.android.media.audio.Flags.alarmMinVolumeZero;
+import static com.android.media.audio.Flags.audioserverPermissions;
 import static com.android.media.audio.Flags.disablePrescaleAbsoluteVolume;
 import static com.android.media.audio.Flags.ringerModeAffectsAlarm;
 import static com.android.media.audio.Flags.setStreamVolumeOrder;
@@ -240,15 +245,18 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.EventLogTags;
+import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.audio.AudioServiceEvents.DeviceVolumeEvent;
 import com.android.server.audio.AudioServiceEvents.PhoneStateEvent;
 import com.android.server.audio.AudioServiceEvents.VolChangedBroadcastEvent;
 import com.android.server.audio.AudioServiceEvents.VolumeEvent;
+import com.android.server.pm.PackageManagerLocal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerInternal.UserRestrictionsListener;
 import com.android.server.pm.UserManagerService;
+import com.android.server.pm.pkg.PackageState;
 import com.android.server.utils.EventLogger;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
@@ -273,6 +281,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
@@ -302,6 +311,8 @@ public class AudioService extends IAudioService.Stub
     private final SystemServerAdapter mSystemServer;
     private final SettingsAdapter mSettings;
     private final AudioPolicyFacade mAudioPolicy;
+
+    private final AudioServerPermissionProvider mPermissionProvider;
 
     private final MusicFxHelper mMusicFxHelper;
 
@@ -1021,14 +1032,22 @@ public class AudioService extends IAudioService.Stub
 
         public Lifecycle(Context context) {
             super(context);
+            var audioserverLifecycleExecutor = Executors.newSingleThreadExecutor();
+            var audioPolicyFacade = new DefaultAudioPolicyFacade(audioserverLifecycleExecutor);
             mService = new AudioService(context,
                               AudioSystemAdapter.getDefaultAdapter(),
                               SystemServerAdapter.getDefaultAdapter(context),
                               SettingsAdapter.getDefaultAdapter(),
                               new AudioVolumeGroupHelper(),
-                              new DefaultAudioPolicyFacade(r -> r.run()),
-                              null);
-
+                              audioPolicyFacade,
+                              null,
+                              context.getSystemService(AppOpsManager.class),
+                              PermissionEnforcer.fromContext(context),
+                              audioserverPermissions() ?
+                                initializeAudioServerPermissionProvider(
+                                    context, audioPolicyFacade, audioserverLifecycleExecutor) :
+                                    null
+                              );
         }
 
         @Override
@@ -1105,25 +1124,6 @@ public class AudioService extends IAudioService.Stub
     /**
      * @param context
      * @param audioSystem Adapter for {@link AudioSystem}
-     * @param systemServer Adapter for privileged functionality for system server components
-     * @param settings Adapter for {@link Settings}
-     * @param audioVolumeGroupHelper Adapter for {@link AudioVolumeGroup}
-     * @param audioPolicy Interface of a facade to IAudioPolicyManager
-     * @param looper Looper to use for the service's message handler. If this is null, an
-     *               {@link AudioSystemThread} is created as the messaging thread instead.
-     */
-    public AudioService(Context context, AudioSystemAdapter audioSystem,
-            SystemServerAdapter systemServer, SettingsAdapter settings,
-            AudioVolumeGroupHelperBase audioVolumeGroupHelper, AudioPolicyFacade audioPolicy,
-            @Nullable Looper looper) {
-        this (context, audioSystem, systemServer, settings, audioVolumeGroupHelper,
-                audioPolicy, looper, context.getSystemService(AppOpsManager.class),
-                PermissionEnforcer.fromContext(context));
-    }
-
-    /**
-     * @param context
-     * @param audioSystem Adapter for {@link AudioSystem}
      * @param systemServer Adapter for privilieged functionality for system server components
      * @param settings Adapter for {@link Settings}
      * @param audioVolumeGroupHelper Adapter for {@link AudioVolumeGroup}
@@ -1137,12 +1137,15 @@ public class AudioService extends IAudioService.Stub
     public AudioService(Context context, AudioSystemAdapter audioSystem,
             SystemServerAdapter systemServer, SettingsAdapter settings,
             AudioVolumeGroupHelperBase audioVolumeGroupHelper, AudioPolicyFacade audioPolicy,
-            @Nullable Looper looper, AppOpsManager appOps, @NonNull PermissionEnforcer enforcer) {
+            @Nullable Looper looper, AppOpsManager appOps, @NonNull PermissionEnforcer enforcer,
+            /* @NonNull */ AudioServerPermissionProvider permissionProvider) {
         super(enforcer);
         sLifecycleLogger.enqueue(new EventLogger.StringEvent("AudioService()"));
         mContext = context;
         mContentResolver = context.getContentResolver();
         mAppOps = appOps;
+
+        mPermissionProvider = permissionProvider;
 
         mAudioSystem = audioSystem;
         mSystemServer = systemServer;
@@ -4559,6 +4562,8 @@ public class AudioService extends IAudioService.Stub
                 + featureSpatialAudioHeadtrackingLowLatency());
         pw.println("\tandroid.media.audio.focusFreezeTestApi:"
                 + focusFreezeTestApi());
+        pw.println("\tcom.android.media.audio.audioserverPermissions:"
+                + audioserverPermissions());
         pw.println("\tcom.android.media.audio.disablePrescaleAbsoluteVolume:"
                 + disablePrescaleAbsoluteVolume());
         pw.println("\tcom.android.media.audio.setStreamVolumeOrder:"
@@ -11936,6 +11941,45 @@ public class AudioService extends IAudioService.Stub
      */
     private static final String mMetricsId = MediaMetrics.Name.AUDIO_SERVICE
             + MediaMetrics.SEPARATOR;
+
+    private static AudioServerPermissionProvider initializeAudioServerPermissionProvider(
+            Context context, AudioPolicyFacade audioPolicy, Executor audioserverExecutor) {
+        Collection<PackageState> packageStates = null;
+        try (PackageManagerLocal.UnfilteredSnapshot snapshot =
+                    LocalManagerRegistry.getManager(PackageManagerLocal.class)
+                        .withUnfilteredSnapshot()) {
+            packageStates = snapshot.getPackageStates().values();
+        }
+        var provider = new AudioServerPermissionProvider(packageStates);
+        audioPolicy.registerOnStartTask(() -> {
+            provider.onServiceStart(audioPolicy.getPermissionController());
+        });
+
+        // Set up event listeners
+        IntentFilter packageUpdateFilter = new IntentFilter();
+        packageUpdateFilter.addAction(ACTION_PACKAGE_ADDED);
+        packageUpdateFilter.addAction(ACTION_PACKAGE_REMOVED);
+        packageUpdateFilter.addDataScheme("package");
+
+        context.registerReceiverForAllUsers(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                String pkgName = intent.getData().getEncodedSchemeSpecificPart();
+                int uid = intent.getIntExtra(Intent.EXTRA_UID, Process.INVALID_UID);
+                if (intent.getBooleanExtra(EXTRA_REPLACING, false) ||
+                        intent.getBooleanExtra(EXTRA_ARCHIVAL, false)) return;
+                if (action.equals(ACTION_PACKAGE_ADDED)) {
+                    audioserverExecutor.execute(() ->
+                            provider.onModifyPackageState(uid, pkgName, false /* isRemoved */));
+                } else if (action.equals(ACTION_PACKAGE_REMOVED)) {
+                    audioserverExecutor.execute(() ->
+                            provider.onModifyPackageState(uid, pkgName, true /* isRemoved */));
+                }
+            }
+        }, packageUpdateFilter, null, null); // main thread is fine, since dispatch on executor
+        return provider;
+    }
 
     // Inform AudioFlinger of our device's low RAM attribute
     private static void readAndSetLowRamDevice()
