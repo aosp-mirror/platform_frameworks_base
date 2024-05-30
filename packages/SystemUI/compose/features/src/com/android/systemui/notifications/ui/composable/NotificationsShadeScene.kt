@@ -18,8 +18,8 @@ package com.android.systemui.notifications.ui.composable
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -75,7 +75,7 @@ constructor(
         OverlayShade(
             modifier = modifier,
             viewModel = overlayShadeViewModel,
-            horizontalArrangement = Arrangement.Start,
+            horizontalArrangement = Arrangement.End,
             lockscreenContent = lockscreenContent,
         ) {
             Column {
@@ -95,7 +95,7 @@ constructor(
                     shouldPunchHoleBehindScrim = false,
                     shouldFillMaxSize = false,
                     shadeMode = ShadeMode.Dual,
-                    modifier = Modifier.width(416.dp),
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         }
