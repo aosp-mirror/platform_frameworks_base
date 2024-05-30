@@ -105,6 +105,7 @@ package android {
     field public static final String CAMERA_OPEN_CLOSE_LISTENER = "android.permission.CAMERA_OPEN_CLOSE_LISTENER";
     field @FlaggedApi("com.android.internal.camera.flags.camera_privacy_allowlist") public static final String CAMERA_PRIVACY_ALLOWLIST = "android.permission.CAMERA_PRIVACY_ALLOWLIST";
     field public static final String CAPTURE_AUDIO_HOTWORD = "android.permission.CAPTURE_AUDIO_HOTWORD";
+    field @FlaggedApi("android.os.allow_consentless_bugreport_delegated_consent") public static final String CAPTURE_CONSENTLESS_BUGREPORT_DELEGATED_CONSENT = "android.permission.CAPTURE_CONSENTLESS_BUGREPORT_DELEGATED_CONSENT";
     field public static final String CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD = "android.permission.CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD";
     field public static final String CAPTURE_MEDIA_OUTPUT = "android.permission.CAPTURE_MEDIA_OUTPUT";
     field public static final String CAPTURE_TUNER_AUDIO_INPUT = "android.permission.CAPTURE_TUNER_AUDIO_INPUT";
