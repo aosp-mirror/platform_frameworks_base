@@ -22,7 +22,11 @@ import android.os.Parcelable;
 import android.os.UserHandle;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
+
 public class StatusBarIcon implements Parcelable {
+    public enum Type {PeopleAvatar, MonochromeAppIcon, NotifSmallIcon, SystemIcon}
+
     public UserHandle user;
     public String pkg;
     public Icon icon;
@@ -30,9 +34,10 @@ public class StatusBarIcon implements Parcelable {
     public boolean visible = true;
     public int number;
     public CharSequence contentDescription;
+    public Type type;
 
     public StatusBarIcon(UserHandle user, String resPackage, Icon icon, int iconLevel, int number,
-            CharSequence contentDescription) {
+            CharSequence contentDescription, Type type) {
         if (icon.getType() == Icon.TYPE_RESOURCE
                 && TextUtils.isEmpty(icon.getResPackage())) {
             // This is an odd situation where someone's managed to hand us an icon without a
@@ -46,15 +51,17 @@ public class StatusBarIcon implements Parcelable {
         this.iconLevel = iconLevel;
         this.number = number;
         this.contentDescription = contentDescription;
+        this.type = type;
     }
 
     public StatusBarIcon(String iconPackage, UserHandle user,
             int iconId, int iconLevel, int number,
-            CharSequence contentDescription) {
+            CharSequence contentDescription, Type type) {
         this(user, iconPackage, Icon.createWithResource(iconPackage, iconId),
-                iconLevel, number, contentDescription);
+                iconLevel, number, contentDescription, type);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "StatusBarIcon(icon=" + icon
@@ -65,10 +72,11 @@ public class StatusBarIcon implements Parcelable {
                 + " )";
     }
 
+    @NonNull
     @Override
     public StatusBarIcon clone() {
         StatusBarIcon that = new StatusBarIcon(this.user, this.pkg, this.icon,
-                this.iconLevel, this.number, this.contentDescription);
+                this.iconLevel, this.number, this.contentDescription, this.type);
         that.visible = this.visible;
         return that;
     }
@@ -88,6 +96,7 @@ public class StatusBarIcon implements Parcelable {
         this.visible = in.readInt() != 0;
         this.number = in.readInt();
         this.contentDescription = in.readCharSequence();
+        this.type = Type.valueOf(in.readString());
     }
 
     public void writeToParcel(Parcel out, int flags) {
@@ -98,6 +107,7 @@ public class StatusBarIcon implements Parcelable {
         out.writeInt(this.visible ? 1 : 0);
         out.writeInt(this.number);
         out.writeCharSequence(this.contentDescription);
+        out.writeString(this.type.name());
     }
 
     public int describeContents() {
