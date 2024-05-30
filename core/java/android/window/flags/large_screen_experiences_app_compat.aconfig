@@ -70,6 +70,16 @@ flag {
 }
 
 flag {
+  name: "immersive_app_repositioning"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Fix immersive apps changing size when repositioning"
+  bug: "334076352"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "camera_compat_for_freeform"
   namespace: "large_screen_experiences_app_compat"
   description: "Whether to apply Camera Compat treatment to fixed-orientation apps in freeform windowing mode"
