@@ -1013,7 +1013,7 @@ public class AudioService extends IAudioService.Stub
                               SystemServerAdapter.getDefaultAdapter(context),
                               SettingsAdapter.getDefaultAdapter(),
                               new AudioVolumeGroupHelper(),
-                              new DefaultAudioPolicyFacade(),
+                              new DefaultAudioPolicyFacade(r -> r.run()),
                               null);
 
         }
