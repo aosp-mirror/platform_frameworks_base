@@ -57,12 +57,12 @@ import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
 import com.android.server.UiServiceTestCase;
@@ -79,9 +79,12 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.List;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 @SmallTest
 @SuppressLint("GuardedBy") // It's ok for this test to access guarded methods from the class.
-@RunWith(AndroidJUnit4.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 public class GroupHelperTest extends UiServiceTestCase {
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
@@ -94,6 +97,16 @@ public class GroupHelperTest extends UiServiceTestCase {
     private final static int AUTOGROUP_AT_COUNT = 7;
     private GroupHelper mGroupHelper;
     private @Mock Icon mSmallIcon;
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return FlagsParameterization.allCombinationsOf(
+                android.app.Flags.FLAG_CHECK_AUTOGROUP_BEFORE_POST);
+    }
+
+    public GroupHelperTest(FlagsParameterization flags) {
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
 
     @Before
     public void setUp() {
