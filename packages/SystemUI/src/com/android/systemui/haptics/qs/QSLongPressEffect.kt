@@ -19,7 +19,9 @@ package com.android.systemui.haptics.qs
 import android.os.VibrationEffect
 import android.view.View
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.animation.Expandable
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.statusbar.VibratorHelper
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -50,6 +52,10 @@ constructor(
     /** Current state */
     var state = State.IDLE
         private set
+
+    /** The QSTile and Expandable used to perform a long-click and click actions */
+    var qsTile: QSTile? = null
+    var expandable: Expandable? = null
 
     /** Flow for view control and action */
     private val _postedActionType = MutableStateFlow<ActionType?>(null)
@@ -105,6 +111,7 @@ constructor(
         when (state) {
             State.IDLE -> {
                 setState(State.TIMEOUT_WAIT)
+                _postedActionType.value = ActionType.WAIT_TAP_TIMEOUT
             }
             State.RUNNING_BACKWARDS -> _postedActionType.value = ActionType.CANCEL_ANIMATOR
             else -> {}
@@ -112,16 +119,9 @@ constructor(
     }
 
     fun handleActionUp() {
-        when (state) {
-            State.TIMEOUT_WAIT -> {
-                _postedActionType.value = ActionType.CLICK
-                setState(State.IDLE)
-            }
-            State.RUNNING_FORWARD -> {
-                _postedActionType.value = ActionType.REVERSE_ANIMATOR
-                setState(State.RUNNING_BACKWARDS)
-            }
-            else -> {}
+        if (state == State.RUNNING_FORWARD) {
+            _postedActionType.value = ActionType.REVERSE_ANIMATOR
+            setState(State.RUNNING_BACKWARDS)
         }
     }
 
@@ -129,6 +129,7 @@ constructor(
         when (state) {
             State.TIMEOUT_WAIT -> {
                 setState(State.IDLE)
+                clearActionType()
             }
             State.RUNNING_FORWARD -> {
                 _postedActionType.value = ActionType.REVERSE_ANIMATOR
@@ -145,18 +146,23 @@ constructor(
 
     /** This function is called both when an animator completes or gets cancelled */
     fun handleAnimationComplete() {
-        if (state == State.RUNNING_FORWARD) {
-            vibrate(snapEffect)
-            _postedActionType.value = ActionType.LONG_PRESS
-        }
-        if (state != State.TIMEOUT_WAIT) {
-            // This will happen if the animator did not finish by being cancelled
-            setState(State.IDLE)
+        when (state) {
+            State.RUNNING_FORWARD -> {
+                setState(State.IDLE)
+                vibrate(snapEffect)
+                _postedActionType.value = ActionType.LONG_PRESS
+            }
+            State.RUNNING_BACKWARDS -> {
+                setState(State.IDLE)
+                clearActionType()
+            }
+            else -> {}
         }
     }
 
     fun handleAnimationCancel() {
         setState(State.TIMEOUT_WAIT)
+        _postedActionType.value = ActionType.WAIT_TAP_TIMEOUT
     }
 
     fun handleTimeoutComplete() {
@@ -190,7 +196,20 @@ constructor(
                 effectDuration
             )
         setState(State.IDLE)
+        clearActionType()
         return true
+    }
+
+    fun onTileClick(): Boolean {
+        if (state == State.TIMEOUT_WAIT) {
+            setState(State.IDLE)
+            clearActionType()
+            qsTile?.let {
+                it.click(expandable)
+                return true
+            }
+        }
+        return false
     }
 
     enum class State {
@@ -202,7 +221,7 @@ constructor(
 
     /* A type of action to perform on the view depending on the effect's state and logic */
     enum class ActionType {
-        CLICK,
+        WAIT_TAP_TIMEOUT,
         LONG_PRESS,
         RESET_AND_LONG_PRESS,
         START_ANIMATOR,
