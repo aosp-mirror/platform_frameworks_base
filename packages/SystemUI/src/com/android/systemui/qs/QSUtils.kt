@@ -2,9 +2,9 @@ package com.android.systemui.qs
 
 import android.content.Context
 import android.view.View
+import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.LifecycleOwner
 import com.android.compose.theme.PlatformTheme
-import com.android.compose.ui.platform.DensityAwareComposeView
 import com.android.internal.policy.SystemBarUtils
 import com.android.systemui.qs.footer.ui.compose.FooterActions
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
@@ -34,7 +34,7 @@ object QSUtils {
         viewModel: FooterActionsViewModel,
         qsVisibilityLifecycleOwner: LifecycleOwner,
     ): View {
-        return DensityAwareComposeView(context).apply {
+        return ComposeView(context).apply {
             setContent { PlatformTheme { FooterActions(viewModel, qsVisibilityLifecycleOwner) } }
         }
     }
