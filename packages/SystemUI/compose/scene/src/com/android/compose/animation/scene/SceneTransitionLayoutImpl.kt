@@ -185,14 +185,14 @@ internal class SceneTransitionLayoutImpl(
     }
 
     @Composable
-    internal fun Content(modifier: Modifier) {
+    internal fun Content(modifier: Modifier, swipeDetector: SwipeDetector) {
         Box(
             modifier
                 // Handle horizontal and vertical swipes on this layout.
                 // Note: order here is important and will give a slight priority to the vertical
                 // swipes.
-                .swipeToScene(horizontalDraggableHandler)
-                .swipeToScene(verticalDraggableHandler)
+                .swipeToScene(horizontalDraggableHandler, swipeDetector)
+                .swipeToScene(verticalDraggableHandler, swipeDetector)
                 .then(LayoutElement(layoutImpl = this))
         ) {
             LookaheadScope {

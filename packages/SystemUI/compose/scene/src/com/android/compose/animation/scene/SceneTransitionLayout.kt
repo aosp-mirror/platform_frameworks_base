@@ -55,6 +55,7 @@ fun SceneTransitionLayout(
     state: SceneTransitionLayoutState,
     modifier: Modifier = Modifier,
     swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
+    swipeDetector: SwipeDetector = DefaultSwipeDetector,
     @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0f,
     scenes: SceneTransitionLayoutScope.() -> Unit,
 ) {
@@ -62,6 +63,7 @@ fun SceneTransitionLayout(
         state,
         modifier,
         swipeSourceDetector,
+        swipeDetector,
         transitionInterceptionThreshold,
         onLayoutImpl = null,
         scenes,
@@ -95,6 +97,7 @@ fun SceneTransitionLayout(
     transitions: SceneTransitions,
     modifier: Modifier = Modifier,
     swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
+    swipeDetector: SwipeDetector = DefaultSwipeDetector,
     @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0f,
     enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,
     scenes: SceneTransitionLayoutScope.() -> Unit,
@@ -111,6 +114,7 @@ fun SceneTransitionLayout(
         state,
         modifier,
         swipeSourceDetector,
+        swipeDetector,
         transitionInterceptionThreshold,
         scenes,
     )
@@ -467,6 +471,7 @@ internal fun SceneTransitionLayoutForTesting(
     state: SceneTransitionLayoutState,
     modifier: Modifier = Modifier,
     swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
+    swipeDetector: SwipeDetector = DefaultSwipeDetector,
     transitionInterceptionThreshold: Float = 0f,
     onLayoutImpl: ((SceneTransitionLayoutImpl) -> Unit)? = null,
     scenes: SceneTransitionLayoutScope.() -> Unit,
@@ -502,5 +507,5 @@ internal fun SceneTransitionLayoutForTesting(
         layoutImpl.transitionInterceptionThreshold = transitionInterceptionThreshold
     }
 
-    layoutImpl.Content(modifier)
+    layoutImpl.Content(modifier, swipeDetector)
 }
