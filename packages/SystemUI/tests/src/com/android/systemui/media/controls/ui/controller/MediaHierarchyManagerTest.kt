@@ -29,7 +29,9 @@ import com.android.systemui.communal.ui.viewmodel.communalTransitionViewModel
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
 import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
@@ -49,7 +51,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.animation.UniqueObjectHostView
-import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.settings.FakeSettings
@@ -75,6 +76,8 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -112,12 +115,14 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private lateinit var mediaHierarchyManager: MediaHierarchyManager
     private lateinit var isQsBypassingShade: MutableStateFlow<Boolean>
+    private lateinit var shadeExpansion: MutableStateFlow<Float>
     private lateinit var mediaFrame: ViewGroup
     private val configurationController = FakeConfigurationController()
     private val settings = FakeSettings()
     private lateinit var testableLooper: TestableLooper
     private lateinit var fakeHandler: FakeHandler
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val keyguardRepository = kosmos.fakeKeyguardRepository
 
     @Before
     fun setup() {
@@ -129,7 +134,9 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         fakeHandler = FakeHandler(testableLooper.looper)
         whenever(mediaCarouselController.mediaFrame).thenReturn(mediaFrame)
         isQsBypassingShade = MutableStateFlow(false)
+        shadeExpansion = MutableStateFlow(0f)
         whenever(shadeInteractor.isQsBypassingShade).thenReturn(isQsBypassingShade)
+        whenever(shadeInteractor.shadeExpansion).thenReturn(shadeExpansion)
         whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(false)
         mediaHierarchyManager =
             MediaHierarchyManager(
@@ -141,6 +148,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 mediaDataManager,
                 keyguardViewController,
                 dreamOverlayStateController,
+                kosmos.keyguardInteractor,
                 kosmos.communalTransitionViewModel,
                 configurationController,
                 wakefulnessLifecycle,
@@ -191,7 +199,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController)
             .onDesiredLocationChanged(
                 ArgumentMatchers.anyInt(),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
                 anyLong()
@@ -204,7 +212,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController, times(0))
             .onDesiredLocationChanged(
                 ArgumentMatchers.anyInt(),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
                 anyLong()
@@ -218,7 +226,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController)
             .onDesiredLocationChanged(
                 ArgumentMatchers.anyInt(),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
                 anyLong()
@@ -231,7 +239,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController, times(0))
             .onDesiredLocationChanged(
                 ArgumentMatchers.anyInt(),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
                 anyLong()
@@ -245,7 +253,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController)
             .onDesiredLocationChanged(
                 ArgumentMatchers.anyInt(),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
                 anyLong()
@@ -255,7 +263,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController)
             .onDesiredLocationChanged(
                 ArgumentMatchers.anyInt(),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
                 anyLong()
@@ -269,7 +277,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController)
             .onDesiredLocationChanged(
                 ArgumentMatchers.anyInt(),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
                 anyLong()
@@ -281,7 +289,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController)
             .onDesiredLocationChanged(
                 ArgumentMatchers.anyInt(),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
                 anyLong()
@@ -297,7 +305,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController)
             .onDesiredLocationChanged(
                 eq(MediaHierarchyManager.LOCATION_QQS),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 eq(false),
                 anyLong(),
                 anyLong()
@@ -309,7 +317,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController)
             .onDesiredLocationChanged(
                 eq(MediaHierarchyManager.LOCATION_LOCKSCREEN),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 eq(false),
                 anyLong(),
                 anyLong()
@@ -482,6 +490,26 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun isCurrentlyInGuidedTransformation_desiredLocationIsHub_returnsFalse() =
+        testScope.runTest {
+            goToLockscreen()
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GLANCEABLE_HUB,
+                testScope = testScope,
+            )
+            mediaHierarchyManager.qsExpansion = 0f
+            mediaHierarchyManager.setTransitionToFullShadeAmount(123f)
+
+            whenever(lockHost.visible).thenReturn(true)
+            whenever(qsHost.visible).thenReturn(true)
+            whenever(qqsHost.visible).thenReturn(true)
+            whenever(hubModeHost.visible).thenReturn(true)
+
+            assertThat(mediaHierarchyManager.isCurrentlyInGuidedTransformation()).isFalse()
+        }
+
+    @Test
     fun testDream() {
         goToDream()
         setMediaDreamComplicationEnabled(true)
@@ -499,7 +527,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController)
             .onDesiredLocationChanged(
                 eq(MediaHierarchyManager.LOCATION_QQS),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 eq(false),
                 anyLong(),
                 anyLong()
@@ -532,7 +560,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
             verify(mediaCarouselController)
                 .onDesiredLocationChanged(
                     eq(MediaHierarchyManager.LOCATION_QQS),
-                    any(MediaHostState::class.java),
+                    any<MediaHostState>(),
                     eq(false),
                     anyLong(),
                     anyLong()
@@ -590,7 +618,50 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
             verify(mediaCarouselController)
                 .onDesiredLocationChanged(
                     eq(MediaHierarchyManager.LOCATION_QS),
-                    any(MediaHostState::class.java),
+                    any<MediaHostState>(),
+                    eq(false),
+                    anyLong(),
+                    anyLong()
+                )
+        }
+
+    @Test
+    fun testCommunalLocation_whenDreamingAndShadeExpanding() =
+        testScope.runTest {
+            keyguardRepository.setDreaming(true)
+            runCurrent()
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.DREAMING,
+                to = KeyguardState.GLANCEABLE_HUB,
+                testScope = testScope,
+            )
+            // Mock the behavior for dreaming that pulling down shade will immediately set QS as
+            // expanded
+            expandQS()
+            // Starts opening the shade
+            shadeExpansion.value = 0.1f
+            runCurrent()
+
+            // UMO shows on hub
+            verify(mediaCarouselController)
+                .onDesiredLocationChanged(
+                    eq(MediaHierarchyManager.LOCATION_COMMUNAL_HUB),
+                    anyOrNull(),
+                    eq(false),
+                    anyLong(),
+                    anyLong()
+                )
+            clearInvocations(mediaCarouselController)
+
+            // The shade is opened enough to make QS elements visible
+            shadeExpansion.value = 0.5f
+            runCurrent()
+
+            // UMO shows on QS
+            verify(mediaCarouselController)
+                .onDesiredLocationChanged(
+                    eq(MediaHierarchyManager.LOCATION_QS),
+                    any<MediaHostState>(),
                     eq(false),
                     anyLong(),
                     anyLong()

@@ -42,6 +42,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.controls.util.MediaFlags
@@ -61,6 +62,11 @@ import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.settings.SecureSettings
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 
 private val TAG: String = MediaHierarchyManager::class.java.simpleName
@@ -89,6 +95,7 @@ val View.isShownNotFaded: Boolean
  * This manager is responsible for placement of the unique media view between the different hosts
  * and animate the positions of the views to achieve seamless transitions.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class MediaHierarchyManager
 @Inject
@@ -101,6 +108,7 @@ constructor(
     private val mediaManager: MediaDataManager,
     private val keyguardViewController: KeyguardViewController,
     private val dreamOverlayStateController: DreamOverlayStateController,
+    private val keyguardInteractor: KeyguardInteractor,
     communalTransitionViewModel: CommunalTransitionViewModel,
     configurationController: ConfigurationController,
     wakefulnessLifecycle: WakefulnessLifecycle,
@@ -235,6 +243,15 @@ constructor(
     @MediaLocation private var currentAttachmentLocation = -1
 
     private var inSplitShade = false
+
+    /**
+     * Whether we are transitioning to the hub or from the hub to the shade. If so, use fade as the
+     * transformation type and skip calculating state with the bounds and the transition progress.
+     */
+    private val isHubTransition
+        get() =
+            desiredLocation == LOCATION_COMMUNAL_HUB ||
+                (previousLocation == LOCATION_COMMUNAL_HUB && desiredLocation == LOCATION_QS)
 
     /** Is there any active media or recommendation in the carousel? */
     private var hasActiveMediaOrRecommendation: Boolean = false
@@ -413,6 +430,12 @@ constructor(
     /** Is the communal UI showing */
     private var isCommunalShowing: Boolean = false
 
+    /** Is the communal UI showing and not dreaming */
+    private var onCommunalNotDreaming: Boolean = false
+
+    /** Is the communal UI showing, dreaming and shade expanding */
+    private var onCommunalDreamingAndShadeExpanding: Boolean = false
+
     /**
      * The current cross fade progress. 0.5f means it's just switching between the start and the end
      * location and the content is fully faded, while 0.75f means that we're halfway faded in again
@@ -585,11 +608,26 @@ constructor(
 
         // Listen to the communal UI state. Make sure that communal UI is showing and hub itself is
         // available, ie. not disabled and able to be shown.
+        // When dreaming, qs expansion is immediately set to 1f, so we listen to shade expansion to
+        // calculate the new location.
         coroutineScope.launch {
-            communalTransitionViewModel.isUmoOnCommunal.collect { value ->
-                isCommunalShowing = value
-                updateDesiredLocation(forceNoAnimation = true)
-            }
+            combine(
+                    communalTransitionViewModel.isUmoOnCommunal,
+                    keyguardInteractor.isDreaming,
+                    // keep on communal before the shade is expanded enough to show the elements in
+                    // QS
+                    shadeInteractor.shadeExpansion
+                        .mapLatest { it < EXPANSION_THRESHOLD }
+                        .distinctUntilChanged(),
+                    ::Triple
+                )
+                .collectLatest { (communalShowing, isDreaming, isShadeExpanding) ->
+                    isCommunalShowing = communalShowing
+                    onCommunalDreamingAndShadeExpanding =
+                        communalShowing && isDreaming && isShadeExpanding
+                    onCommunalNotDreaming = communalShowing && !isDreaming
+                    updateDesiredLocation(forceNoAnimation = true)
+                }
         }
     }
 
@@ -805,6 +843,9 @@ constructor(
         if (skipQqsOnExpansion) {
             return false
         }
+        if (isHubTransition) {
+            return false
+        }
         // This is an invalid transition, and can happen when using the camera gesture from the
         // lock screen. Disallow.
         if (
@@ -947,6 +988,9 @@ constructor(
     @VisibleForTesting
     @TransformationType
     fun calculateTransformationType(): Int {
+        if (isHubTransition) {
+            return TRANSFORMATION_TYPE_FADE
+        }
         if (isTransitioningToFullShade) {
             if (inSplitShade && areGuidedTransitionHostsVisible()) {
                 return TRANSFORMATION_TYPE_TRANSITION
@@ -977,7 +1021,7 @@ constructor(
      *   otherwise
      */
     private fun getTransformationProgress(): Float {
-        if (skipQqsOnExpansion) {
+        if (skipQqsOnExpansion || isHubTransition) {
             return -1.0f
         }
         val progress = getQSTransformationProgress()
@@ -1147,15 +1191,18 @@ constructor(
         }
         val onLockscreen =
             (!bypassController.bypassEnabled && (statusbarState == StatusBarState.KEYGUARD))
+
+        // UMO should show on hub unless the qs is expanding when not dreaming, or shade is
+        // expanding when dreaming
+        val onCommunal =
+            (onCommunalNotDreaming && qsExpansion == 0.0f) || onCommunalDreamingAndShadeExpanding
         val location =
             when {
                 mediaFlags.isSceneContainerEnabled() -> desiredLocation
                 dreamOverlayActive && dreamMediaComplicationActive -> LOCATION_DREAM_OVERLAY
-
-                // UMO should show in communal unless the shade is expanding or visible.
-                isCommunalShowing && qsExpansion == 0.0f -> LOCATION_COMMUNAL_HUB
+                onCommunal -> LOCATION_COMMUNAL_HUB
                 (qsExpansion > 0.0f || inSplitShade) && !onLockscreen -> LOCATION_QS
-                qsExpansion > 0.4f && onLockscreen -> LOCATION_QS
+                qsExpansion > EXPANSION_THRESHOLD && onLockscreen -> LOCATION_QS
                 onLockscreen && isSplitShadeExpanding() -> LOCATION_QS
                 onLockscreen && isTransformingToFullShadeAndInQQS() -> LOCATION_QQS
 
@@ -1190,6 +1237,9 @@ constructor(
             // reattach it without an animation
             return LOCATION_LOCKSCREEN
         }
+        // When communal showing while dreaming, skipQqsOnExpansion is also true but we want to
+        // return the calculated location, so it won't disappear as soon as shade is pulled down.
+        if (isCommunalShowing) return location
         if (skipQqsOnExpansion) {
             // When doing an immediate expand or collapse, we want to keep it in QS.
             return LOCATION_QS
@@ -1288,6 +1338,9 @@ constructor(
          * transitioning
          */
         const val TRANSFORMATION_TYPE_FADE = 1
+
+        /** Expansion amount value at which elements start to become visible in the QS panel. */
+        const val EXPANSION_THRESHOLD = 0.4f
     }
 }
 
