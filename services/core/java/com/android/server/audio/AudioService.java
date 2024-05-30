@@ -57,6 +57,7 @@ import static android.provider.Settings.Secure.VOLUME_HUSH_OFF;
 import static android.provider.Settings.Secure.VOLUME_HUSH_VIBRATE;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+import static com.android.media.audio.Flags.absVolumeIndexFix;
 import static com.android.media.audio.Flags.alarmMinVolumeZero;
 import static com.android.media.audio.Flags.disablePrescaleAbsoluteVolume;
 import static com.android.media.audio.Flags.ringerModeAffectsAlarm;
@@ -631,6 +632,17 @@ public class AudioService extends IAudioService.Stub
 
     // If absolute volume is supported in AVRCP device
     private volatile boolean mAvrcpAbsVolSupported = false;
+
+    private final Object mCachedAbsVolDrivingStreamsLock = new Object();
+    // Contains for all the device types which support absolute volume the current streams that
+    // are driving the volume changes
+    @GuardedBy("mCachedAbsVolDrivingStreamsLock")
+    private final HashMap<Integer, Integer> mCachedAbsVolDrivingStreams = new HashMap<>(
+            Map.of(AudioSystem.DEVICE_OUT_BLE_HEADSET, AudioSystem.STREAM_MUSIC,
+                    AudioSystem.DEVICE_OUT_BLE_SPEAKER, AudioSystem.STREAM_MUSIC,
+                    AudioSystem.DEVICE_OUT_BLE_BROADCAST, AudioSystem.STREAM_MUSIC,
+                    AudioSystem.DEVICE_OUT_HEARING_AID, AudioSystem.STREAM_MUSIC
+            ));
 
     /**
     * Default stream type used for volume control in the absence of playback
@@ -1472,6 +1484,13 @@ public class AudioService extends IAudioService.Stub
 
         // check on volume initialization
         checkVolumeRangeInitialization("AudioService()");
+
+        synchronized (mCachedAbsVolDrivingStreamsLock) {
+            mCachedAbsVolDrivingStreams.forEach((dev, stream) -> {
+                mAudioSystem.setDeviceAbsoluteVolumeEnabled(dev, /*address=*/"", /*enabled=*/true,
+                        stream);
+            });
+        }
     }
 
     private SubscriptionManager.OnSubscriptionsChangedListener mSubscriptionChangedListener =
@@ -1911,6 +1930,14 @@ public class AudioService extends IAudioService.Stub
         }
 
         onIndicateSystemReady();
+
+        synchronized (mCachedAbsVolDrivingStreamsLock) {
+            mCachedAbsVolDrivingStreams.forEach((dev, stream) -> {
+                mAudioSystem.setDeviceAbsoluteVolumeEnabled(dev, /*address=*/"", /*enabled=*/true,
+                        stream);
+            });
+        }
+
         // indicate the end of reconfiguration phase to audio HAL
         AudioSystem.setParameters("restarting=false");
 
@@ -3737,8 +3764,10 @@ public class AudioService extends IAudioService.Stub
 
             int newIndex = mStreamStates[streamType].getIndex(device);
 
+            int streamToDriveAbsVol = absVolumeIndexFix() ? getBluetoothContextualVolumeStream() :
+                    AudioSystem.STREAM_MUSIC;
             // Check if volume update should be send to AVRCP
-            if (streamTypeAlias == AudioSystem.STREAM_MUSIC
+            if (streamTypeAlias == streamToDriveAbsVol
                     && AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(device)
                     && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
                 if (DEBUG_VOL) {
@@ -4540,6 +4569,8 @@ public class AudioService extends IAudioService.Stub
                 + scoManagedByAudio());
         pw.println("\tcom.android.media.audio.vgsVssSyncMuteOrder:"
                 + vgsVssSyncMuteOrder());
+        pw.println("\tcom.android.media.audio.absVolumeIndexFix:"
+                + absVolumeIndexFix());
     }
 
     private void dumpAudioMode(PrintWriter pw) {
@@ -4735,7 +4766,9 @@ public class AudioService extends IAudioService.Stub
             }
         }
 
-        if (streamTypeAlias == AudioSystem.STREAM_MUSIC
+        int streamToDriveAbsVol = absVolumeIndexFix() ? getBluetoothContextualVolumeStream() :
+                AudioSystem.STREAM_MUSIC;
+        if (streamTypeAlias == streamToDriveAbsVol
                 && AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(device)
                 && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
             if (DEBUG_VOL) {
@@ -6183,6 +6216,17 @@ public class AudioService extends IAudioService.Stub
                 updateAbsVolumeMultiModeDevices(previousMode, mode);
 
                 setLeAudioVolumeOnModeUpdate(mode, device, streamAlias, index, maxIndex);
+
+                synchronized (mCachedAbsVolDrivingStreamsLock) {
+                    mCachedAbsVolDrivingStreams.replaceAll((absDev, stream) -> {
+                        int streamToDriveAbs = getBluetoothContextualVolumeStream();
+                        if (stream != streamToDriveAbs) {
+                            mAudioSystem.setDeviceAbsoluteVolumeEnabled(absDev, /*address=*/
+                                    "", /*enabled*/true, streamToDriveAbs);
+                        }
+                        return streamToDriveAbs;
+                    });
+                }
 
                 // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all SCO
                 // connections not started by the application changing the mode when pid changes
@@ -8105,6 +8149,10 @@ public class AudioService extends IAudioService.Stub
             return mAudioVolumeGroup.name();
         }
 
+        public int getId() {
+            return mAudioVolumeGroup.getId();
+        }
+
         /**
          * Volume group with non null minimum index are considered as non mutable, thus
          * bijectivity is broken with potential associated stream type.
@@ -8755,24 +8803,30 @@ public class AudioService extends IAudioService.Stub
         }
 
         private int getAbsoluteVolumeIndex(int index) {
-            /* Special handling for Bluetooth Absolute Volume scenario
-             * If we send full audio gain, some accessories are too loud even at its lowest
-             * volume. We are not able to enumerate all such accessories, so here is the
-             * workaround from phone side.
-             * Pre-scale volume at lowest volume steps 1 2 and 3.
-             * For volume step 0, set audio gain to 0 as some accessories won't mute on their end.
-             */
-            if (index == 0) {
-                // 0% for volume 0
-                index = 0;
-            } else if (!disablePrescaleAbsoluteVolume() && index > 0 && index <= 3) {
-                // Pre-scale for volume steps 1 2 and 3
-                index = (int) (mIndexMax * mPrescaleAbsoluteVolume[index - 1]) / 10;
+            if (absVolumeIndexFix()) {
+                // The attenuation is applied in the APM. No need to manipulate the index here
+                return index;
             } else {
-                // otherwise, full gain
-                index = (mIndexMax + 5) / 10;
+                /* Special handling for Bluetooth Absolute Volume scenario
+                 * If we send full audio gain, some accessories are too loud even at its lowest
+                 * volume. We are not able to enumerate all such accessories, so here is the
+                 * workaround from phone side.
+                 * Pre-scale volume at lowest volume steps 1 2 and 3.
+                 * For volume step 0, set audio gain to 0 as some accessories won't mute on their
+                 * end.
+                 */
+                if (index == 0) {
+                    // 0% for volume 0
+                    index = 0;
+                } else if (!disablePrescaleAbsoluteVolume() && index > 0 && index <= 3) {
+                    // Pre-scale for volume steps 1 2 and 3
+                    index = (int) (mIndexMax * mPrescaleAbsoluteVolume[index - 1]) / 10;
+                } else {
+                    // otherwise, full gain
+                    index = (mIndexMax + 5) / 10;
+                }
+                return index;
             }
-            return index;
         }
 
         private void setStreamVolumeIndex(int index, int device) {
@@ -8782,6 +8836,11 @@ public class AudioService extends IAudioService.Stub
             if (mStreamType == AudioSystem.STREAM_BLUETOOTH_SCO && index == 0
                     && !isFullyMuted()) {
                 index = 1;
+            }
+
+            if (DEBUG_VOL) {
+                Log.d(TAG, "setStreamVolumeIndexAS(" + mStreamType + ", " + index + ", " + device
+                        + ")");
             }
             mAudioSystem.setStreamVolumeIndexAS(mStreamType, index, device);
         }
@@ -8794,14 +8853,24 @@ public class AudioService extends IAudioService.Stub
             } else if (isAbsoluteVolumeDevice(device)
                     || isA2dpAbsoluteVolumeDevice(device)
                     || AudioSystem.isLeAudioDeviceType(device)) {
-                index = getAbsoluteVolumeIndex((getIndex(device) + 5)/10);
+                // do not change the volume logic for dynamic abs behavior devices like HDMI
+                if (absVolumeIndexFix() && isAbsoluteVolumeDevice(device)) {
+                    index = getAbsoluteVolumeIndex((mIndexMax + 5) / 10);
+                } else {
+                    index = getAbsoluteVolumeIndex((getIndex(device) + 5) / 10);
+                }
             } else if (isFullVolumeDevice(device)) {
                 index = (mIndexMax + 5)/10;
             } else if (device == AudioSystem.DEVICE_OUT_HEARING_AID) {
-                index = (mIndexMax + 5)/10;
+                if (absVolumeIndexFix()) {
+                    index = getAbsoluteVolumeIndex((getIndex(device) + 5) / 10);
+                } else {
+                    index = (mIndexMax + 5) / 10;
+                }
             } else {
                 index = (getIndex(device) + 5)/10;
             }
+
             setStreamVolumeIndex(index, device);
         }
 
@@ -8819,11 +8888,22 @@ public class AudioService extends IAudioService.Stub
                                 || isA2dpAbsoluteVolumeDevice(device)
                                 || AudioSystem.isLeAudioDeviceType(device)) {
                             isAbsoluteVolume = true;
-                            index = getAbsoluteVolumeIndex((getIndex(device) + 5)/10);
+                            // do not change the volume logic for dynamic abs behavior devices
+                            // like HDMI
+                            if (absVolumeIndexFix() && isAbsoluteVolumeDevice(device)) {
+                                index = getAbsoluteVolumeIndex((mIndexMax + 5) / 10);
+                            } else {
+                                index = getAbsoluteVolumeIndex((getIndex(device) + 5) / 10);
+                            }
                         } else if (isFullVolumeDevice(device)) {
                             index = (mIndexMax + 5)/10;
                         } else if (device == AudioSystem.DEVICE_OUT_HEARING_AID) {
-                            index = (mIndexMax + 5)/10;
+                            if (absVolumeIndexFix()) {
+                                isAbsoluteVolume = true;
+                                index = getAbsoluteVolumeIndex((getIndex(device) + 5) / 10);
+                            } else {
+                                index = (mIndexMax + 5) / 10;
+                            }
                         } else {
                             index = (mIndexMap.valueAt(i) + 5)/10;
                         }
@@ -9820,6 +9900,27 @@ public class AudioService extends IAudioService.Stub
 
     /*package*/ void setAvrcpAbsoluteVolumeSupported(boolean support) {
         mAvrcpAbsVolSupported = support;
+        if (absVolumeIndexFix()) {
+            int a2dpDev = AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP;
+            synchronized (mCachedAbsVolDrivingStreamsLock) {
+                mCachedAbsVolDrivingStreams.compute(a2dpDev, (dev, stream) -> {
+                    if (stream != null && !mAvrcpAbsVolSupported) {
+                        mAudioSystem.setDeviceAbsoluteVolumeEnabled(a2dpDev, /*address=*/
+                                "", /*enabled*/false, AudioSystem.DEVICE_NONE);
+                        return null;
+                    }
+                    // For A2DP and AVRCP we need to set the driving stream based on the
+                    // BT contextual stream. Hence, we need to make sure in adjustStreamVolume
+                    // and setStreamVolume that the driving abs volume stream is consistent.
+                    int streamToDriveAbs = getBluetoothContextualVolumeStream();
+                    if (stream == null || stream != streamToDriveAbs) {
+                        mAudioSystem.setDeviceAbsoluteVolumeEnabled(a2dpDev, /*address=*/
+                                "", /*enabled*/true, streamToDriveAbs);
+                    }
+                    return streamToDriveAbs;
+                });
+            }
+        }
         sendMsg(mAudioHandler, MSG_SET_DEVICE_VOLUME, SENDMSG_QUEUE,
                     AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, 0,
                     mStreamStates[AudioSystem.STREAM_MUSIC], 0);
