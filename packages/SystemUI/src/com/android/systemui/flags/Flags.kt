@@ -459,14 +459,6 @@ object Flags {
     @JvmField
     val ENABLE_CLOCK_KEYGUARD_PRESENTATION = releasedFlag("enable_clock_keyguard_presentation")
 
-    /** Enable the Compose implementation of the PeopleSpaceActivity. */
-    @JvmField
-    val COMPOSE_PEOPLE_SPACE = releasedFlag("compose_people_space")
-
-    /** Enable the Compose implementation of the Quick Settings footer actions. */
-    @JvmField
-    val COMPOSE_QS_FOOTER_ACTIONS = releasedFlag("compose_qs_footer_actions")
-
     /** Enable the share wifi button in Quick Settings internet dialog. */
     @JvmField
     val SHARE_WIFI_QS_BUTTON = releasedFlag("share_wifi_qs_button")
