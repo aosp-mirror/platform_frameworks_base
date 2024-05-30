@@ -163,6 +163,9 @@ interface ElementStateScope {
 @Stable
 @ElementDsl
 interface BaseSceneScope : ElementStateScope {
+    /** The key of this scene. */
+    val sceneKey: SceneKey
+
     /** The state of the [SceneTransitionLayout] in which this scene is contained. */
     val layoutState: SceneTransitionLayoutState
 
