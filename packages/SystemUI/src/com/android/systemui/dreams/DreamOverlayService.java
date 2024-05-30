@@ -543,7 +543,11 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mStateController.setEntryAnimationsFinished(false);
 
         mDreamOverlayContainerViewController = null;
-        mTouchMonitor = null;
+
+        if (mTouchMonitor != null) {
+            mTouchMonitor.destroy();
+            mTouchMonitor = null;
+        }
 
         mWindow = null;
         mStarted = false;
