@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shade.ui.viewmodel
+package com.android.systemui.scene.domain
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeSceneViewModel
+import com.android.systemui.scene.domain.resolver.HomeSceneFamilyResolverModule
+import com.android.systemui.scene.domain.resolver.SceneResolverModule
+import dagger.Module
 
-val Kosmos.notificationsShadeSceneViewModel: NotificationsShadeSceneViewModel by
-    Kosmos.Fixture { NotificationsShadeSceneViewModel() }
+@Module(
+    includes =
+        [
+            HomeSceneFamilyResolverModule::class,
+            SceneResolverModule::class,
+        ]
+)
+object SceneDomainModule

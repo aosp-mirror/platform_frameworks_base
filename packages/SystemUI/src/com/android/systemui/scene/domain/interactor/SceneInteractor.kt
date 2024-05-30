@@ -23,9 +23,12 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.scene.data.repository.SceneContainerRepository
+import com.android.systemui.scene.domain.resolver.SceneResolver
 import com.android.systemui.scene.shared.logger.SceneLogger
+import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.util.kotlin.pairwiseBy
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -52,6 +55,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     private val repository: SceneContainerRepository,
     private val logger: SceneLogger,
+    private val sceneFamilyResolvers: Lazy<Map<SceneKey, @JvmSuppressWildcards SceneResolver>>,
     private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
 ) {
 
@@ -180,10 +184,11 @@ constructor(
         sceneState: Any? = null,
     ) {
         val currentSceneKey = currentScene.value
+        val resolvedScene = sceneFamilyResolvers.get()[toScene]?.resolvedScene?.value ?: toScene
         if (
             !validateSceneChange(
                 from = currentSceneKey,
-                to = toScene,
+                to = resolvedScene,
                 loggingReason = loggingReason,
             )
         ) {
@@ -192,13 +197,13 @@ constructor(
 
         logger.logSceneChangeRequested(
             from = currentSceneKey,
-            to = toScene,
+            to = resolvedScene,
             reason = loggingReason,
             isInstant = false,
         )
 
-        onSceneAboutToChangeListener.forEach { it.onSceneAboutToChange(toScene, sceneState) }
-        repository.changeScene(toScene, transitionKey)
+        onSceneAboutToChangeListener.forEach { it.onSceneAboutToChange(resolvedScene, sceneState) }
+        repository.changeScene(resolvedScene, transitionKey)
     }
 
     /**
@@ -212,10 +217,11 @@ constructor(
         loggingReason: String,
     ) {
         val currentSceneKey = currentScene.value
+        val resolvedScene = sceneFamilyResolvers.get()[toScene]?.resolvedScene?.value ?: toScene
         if (
             !validateSceneChange(
                 from = currentSceneKey,
-                to = toScene,
+                to = resolvedScene,
                 loggingReason = loggingReason,
             )
         ) {
@@ -224,12 +230,12 @@ constructor(
 
         logger.logSceneChangeRequested(
             from = currentSceneKey,
-            to = toScene,
+            to = resolvedScene,
             reason = loggingReason,
             isInstant = true,
         )
 
-        repository.snapToScene(toScene)
+        repository.snapToScene(resolvedScene)
     }
 
     /**
@@ -287,6 +293,13 @@ constructor(
     fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
         repository.setTransitionState(transitionState)
     }
+
+    /**
+     * Returns the [concrete scene][Scenes] for [sceneKey] if it is a [scene family][SceneFamilies],
+     * otherwise returns a singleton [Flow] containing [sceneKey].
+     */
+    fun resolveSceneFamily(sceneKey: SceneKey): Flow<SceneKey> =
+        sceneFamilyResolvers.get()[sceneKey]?.resolvedScene ?: flowOf(sceneKey)
 
     private fun isVisibleInternal(
         raw: Boolean = repository.isVisible.value,
