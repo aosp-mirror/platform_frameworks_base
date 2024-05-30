@@ -23,6 +23,7 @@ import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.traces.component.ComponentNameMatcher
+import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import org.junit.FixMethodOrder
@@ -77,6 +78,7 @@ class CloseImeShownOnAppStartToAppOnPressBackTest(flicker: LegacyFlickerTest) : 
 
     @Presubmit @Test fun imeLayerBecomesInvisible() = flicker.imeLayerBecomesInvisible()
 
+    @FlakyTest(bugId = 330486656)
     @Presubmit
     @Test
     fun imeAppLayerIsAlwaysVisible() {
