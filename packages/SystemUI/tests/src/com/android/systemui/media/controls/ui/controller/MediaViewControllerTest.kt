@@ -376,7 +376,7 @@ class MediaViewControllerTest : SysuiTestCase() {
 
     @Test
     fun attachPlayer_seekBarDisabled_seekBarVisibilityIsSetToInvisible() {
-        whenever(mediaFlags.isMediaControlsRefactorEnabled()).thenReturn(true)
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(true)
 
         mediaViewController.attachPlayer(viewHolder)
         getEnabledChangeListener().onEnabledChanged(enabled = true)
@@ -388,7 +388,7 @@ class MediaViewControllerTest : SysuiTestCase() {
 
     @Test
     fun attachPlayer_seekBarEnabled_seekBarVisible() {
-        whenever(mediaFlags.isMediaControlsRefactorEnabled()).thenReturn(true)
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(true)
 
         mediaViewController.attachPlayer(viewHolder)
         getEnabledChangeListener().onEnabledChanged(enabled = true)
@@ -399,7 +399,7 @@ class MediaViewControllerTest : SysuiTestCase() {
 
     @Test
     fun attachPlayer_seekBarStatusUpdate_seekBarVisibilityChanges() {
-        whenever(mediaFlags.isMediaControlsRefactorEnabled()).thenReturn(true)
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(true)
 
         mediaViewController.attachPlayer(viewHolder)
         getEnabledChangeListener().onEnabledChanged(enabled = true)
@@ -415,7 +415,7 @@ class MediaViewControllerTest : SysuiTestCase() {
 
     @Test
     fun attachPlayer_notScrubbing_scrubbingViewsGone() {
-        whenever(mediaFlags.isMediaControlsRefactorEnabled()).thenReturn(true)
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(true)
 
         mediaViewController.attachPlayer(viewHolder)
         mediaViewController.canShowScrubbingTime = true
@@ -435,7 +435,7 @@ class MediaViewControllerTest : SysuiTestCase() {
 
     @Test
     fun setIsScrubbing_noSemanticActions_scrubbingViewsGone() {
-        whenever(mediaFlags.isMediaControlsRefactorEnabled()).thenReturn(true)
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(true)
 
         mediaViewController.attachPlayer(viewHolder)
         mediaViewController.canShowScrubbingTime = false
@@ -454,7 +454,7 @@ class MediaViewControllerTest : SysuiTestCase() {
 
     @Test
     fun setIsScrubbing_noPrevButton_scrubbingTimesNotShown() {
-        whenever(mediaFlags.isMediaControlsRefactorEnabled()).thenReturn(true)
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(true)
 
         mediaViewController.attachPlayer(viewHolder)
         mediaViewController.setUpNextButtonInfo(true)
@@ -476,7 +476,7 @@ class MediaViewControllerTest : SysuiTestCase() {
 
     @Test
     fun setIsScrubbing_noNextButton_scrubbingTimesNotShown() {
-        whenever(mediaFlags.isMediaControlsRefactorEnabled()).thenReturn(true)
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(true)
 
         mediaViewController.attachPlayer(viewHolder)
         mediaViewController.setUpNextButtonInfo(false)
@@ -498,7 +498,7 @@ class MediaViewControllerTest : SysuiTestCase() {
 
     @Test
     fun setIsScrubbing_scrubbingViewsShownAndPrevNextHiddenOnlyInExpanded() {
-        whenever(mediaFlags.isMediaControlsRefactorEnabled()).thenReturn(true)
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(true)
 
         mediaViewController.attachPlayer(viewHolder)
         mediaViewController.setUpNextButtonInfo(true)
@@ -524,7 +524,7 @@ class MediaViewControllerTest : SysuiTestCase() {
 
     @Test
     fun setIsScrubbing_trueThenFalse_reservePrevAndNextButtons() {
-        whenever(mediaFlags.isMediaControlsRefactorEnabled()).thenReturn(true)
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(true)
 
         mediaViewController.attachPlayer(viewHolder)
         mediaViewController.setUpNextButtonInfo(true, ConstraintSet.INVISIBLE)
