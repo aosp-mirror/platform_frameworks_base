@@ -79,7 +79,10 @@ fun SceneScope.OverlayShade(
                 },
             horizontalArrangement = horizontalArrangement,
         ) {
-            Panel(modifier = Modifier.panelSize(), content = content)
+            Panel(
+                modifier = Modifier.element(OverlayShade.Elements.Panel).panelSize(),
+                content = content
+            )
         }
     }
 }
@@ -138,6 +141,7 @@ private fun Modifier.panelSize(): Modifier {
 object OverlayShade {
     object Elements {
         val Scrim = ElementKey("OverlayShadeScrim", scenePicker = LowestZIndexScenePicker)
+        val Panel = ElementKey("OverlayShadePanel", scenePicker = LowestZIndexScenePicker)
         val PanelBackground =
             ElementKey("OverlayShadePanelBackground", scenePicker = LowestZIndexScenePicker)
     }
@@ -153,6 +157,7 @@ object OverlayShade {
         val PanelCornerRadius = 46.dp
         val PanelWidthMedium = 390.dp
         val PanelWidthLarge = 474.dp
+        val OverscrollLimit = 100f
     }
 
     object Shapes {
