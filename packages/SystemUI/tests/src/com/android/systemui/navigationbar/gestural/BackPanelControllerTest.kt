@@ -55,6 +55,7 @@ class BackPanelControllerTest : SysuiTestCase() {
     companion object {
         private const val START_X: Float = 0f
     }
+
     private val kosmos = testKosmos()
     private lateinit var mBackPanelController: BackPanelController
     private lateinit var systemClock: FakeSystemClock
