@@ -56,9 +56,6 @@ public class LottieColorUtils {
                 ".black",
                 android.R.color.white);
         map.put(
-                ".blue200",
-                R.color.settingslib_color_blue700);
-        map.put(
                 ".blue400",
                 R.color.settingslib_color_blue600);
         map.put(
