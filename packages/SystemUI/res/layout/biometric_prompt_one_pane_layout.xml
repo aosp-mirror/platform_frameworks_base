@@ -2,7 +2,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/biometric_prompt_constraint_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -23,10 +22,11 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/rightGuideline"
-        app:layout_constraintStart_toStartOf="@+id/leftGuideline"
-        app:layout_constraintTop_toTopOf="@+id/topBarrier"
-        app:layout_constraintWidth_max="640dp" />
+        app:layout_constraintEnd_toStartOf="@id/rightGuideline"
+        app:layout_constraintStart_toStartOf="@id/leftGuideline"
+        app:layout_constraintTop_toTopOf="@id/topBarrier"
+        app:layout_constraintWidth_max="@dimen/biometric_prompt_panel_max_width" />
+
 
     <include
         android:id="@+id/button_bar"
@@ -41,10 +41,10 @@
         android:id="@+id/scrollView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:fadeScrollbars="false"
         android:fillViewport="true"
-        android:paddingBottom="32dp"
-        android:paddingHorizontal="32dp"
+        android:fadeScrollbars="false"
+        android:paddingBottom="@dimen/biometric_prompt_top_scroll_view_bottom_padding"
+        android:paddingHorizontal="@dimen/biometric_prompt_top_scroll_view_horizontal_padding"
         android:paddingTop="24dp"
         app:layout_constrainedHeight="true"
         app:layout_constrainedWidth="true"
@@ -61,23 +61,24 @@
 
             <ImageView
                 android:id="@+id/logo"
+                android:contentDescription="@string/biometric_dialog_logo"
                 android:layout_width="@dimen/biometric_prompt_logo_size"
                 android:layout_height="@dimen/biometric_prompt_logo_size"
                 android:layout_gravity="center"
-                android:contentDescription="@string/biometric_dialog_logo"
                 android:scaleType="fitXY"
-                android:visibility="visible"
+                android:importantForAccessibility="no"
                 app:layout_constraintBottom_toTopOf="@+id/logo_description"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
 
             <TextView
                 android:id="@+id/logo_description"
                 style="@style/TextAppearance.AuthCredential.LogoDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="16dp"
+                android:paddingTop="@dimen/biometric_prompt_logo_description_top_padding"
                 app:layout_constraintBottom_toTopOf="@+id/title"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -126,8 +127,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="@integer/biometric_dialog_text_gravity"
-                android:paddingTop="16dp"
                 android:textAlignment="viewStart"
+                android:paddingTop="16dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -144,7 +145,6 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
-    <!-- Cancel Button, replaces negative button when biometric is accepted -->
     <TextView
         android:id="@+id/indicator"
         style="@style/TextAppearance.AuthCredential.Indicator"
@@ -161,9 +161,6 @@
         app:layout_constraintTop_toBottomOf="@+id/biometric_icon"
         app:layout_constraintVertical_bias="0.0" />
 
-    <!-- "Use Credential" Button, replaces if device credential is allowed -->
-
-    <!-- Positive Button -->
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/topBarrier"
         android:layout_width="wrap_content"
@@ -172,7 +169,6 @@
         app:barrierDirection="top"
         app:constraint_referenced_ids="scrollView" />
 
-    <!-- Try Again Button -->
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/scrollBarrier"
         android:layout_width="wrap_content"
@@ -181,20 +177,19 @@
         app:barrierDirection="top"
         app:constraint_referenced_ids="biometric_icon, button_bar" />
 
-    <!-- Guidelines for setting panel border -->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/leftGuideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_begin="@dimen/biometric_dialog_border_padding" />
+        app:layout_constraintGuide_begin="@dimen/biometric_prompt_one_pane_medium_horizontal_guideline_padding" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/rightGuideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_end="@dimen/biometric_dialog_border_padding" />
+        app:layout_constraintGuide_end="@dimen/biometric_prompt_one_pane_medium_horizontal_guideline_padding" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/bottomGuideline"
@@ -208,7 +203,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="horizontal"
-        app:layout_constraintGuide_begin="56dp" />
+        app:layout_constraintGuide_begin="@dimen/biometric_prompt_one_pane_medium_top_guideline_padding" />
 
     <com.android.systemui.biometrics.BiometricPromptLottieViewWrapper
         android:id="@+id/biometric_icon"
@@ -233,5 +228,4 @@
         app:layout_constraintEnd_toEndOf="@+id/biometric_icon"
         app:layout_constraintStart_toStartOf="@+id/biometric_icon"
         app:layout_constraintTop_toTopOf="@+id/biometric_icon" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

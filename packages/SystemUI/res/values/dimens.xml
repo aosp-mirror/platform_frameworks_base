@@ -1119,11 +1119,18 @@
     <dimen name="biometric_dialog_height">240dp</dimen>
 
     <!-- Dimensions for biometric prompt panel padding -->
-    <dimen name="biometric_prompt_small_horizontal_guideline_padding">344dp</dimen>
-    <dimen name="biometric_prompt_udfps_horizontal_guideline_padding">114dp</dimen>
-    <dimen name="biometric_prompt_udfps_mid_guideline_padding">409dp</dimen>
-    <dimen name="biometric_prompt_medium_horizontal_guideline_padding">640dp</dimen>
-    <dimen name="biometric_prompt_medium_mid_guideline_padding">330dp</dimen>
+    <dimen name="biometric_prompt_panel_max_width">640dp</dimen>
+    <dimen name="biometric_prompt_land_small_horizontal_guideline_padding">344dp</dimen>
+    <dimen name="biometric_prompt_two_pane_udfps_horizontal_guideline_padding">114dp</dimen>
+    <dimen name="biometric_prompt_two_pane_udfps_mid_guideline_padding">409dp</dimen>
+    <dimen name="biometric_prompt_two_pane_medium_horizontal_guideline_padding">640dp</dimen>
+    <dimen name="biometric_prompt_two_pane_medium_mid_guideline_padding">330dp</dimen>
+    <dimen name="biometric_prompt_one_pane_medium_top_guideline_padding">119dp</dimen>
+    <dimen name="biometric_prompt_one_pane_medium_horizontal_guideline_padding">0dp</dimen>
+
+    <!-- Dimensions for biometric prompt scroll view padding -->
+    <dimen name="biometric_prompt_top_scroll_view_bottom_padding">24dp</dimen>
+    <dimen name="biometric_prompt_top_scroll_view_horizontal_padding">24dp</dimen>
 
     <!-- Dimensions for biometric prompt icon padding -->
     <dimen name="biometric_prompt_portrait_small_bottom_padding">60dp</dimen>
@@ -1136,6 +1143,7 @@
 
     <!-- Dimensions for biometric prompt custom content view. -->
     <dimen name="biometric_prompt_logo_size">32dp</dimen>
+    <dimen name="biometric_prompt_logo_description_top_padding">8dp</dimen>
     <dimen name="biometric_prompt_content_corner_radius">28dp</dimen>
     <dimen name="biometric_prompt_content_padding_horizontal">24dp</dimen>
     <dimen name="biometric_prompt_content_padding_vertical">16dp</dimen>

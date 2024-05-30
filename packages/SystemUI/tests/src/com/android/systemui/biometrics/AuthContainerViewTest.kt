@@ -128,6 +128,12 @@ open class AuthContainerViewTest : SysuiTestCase() {
     private lateinit var packageManager: PackageManager
     @Mock private lateinit var activityTaskManager: ActivityTaskManager
 
+    private lateinit var displayRepository: FakeDisplayRepository
+    private lateinit var displayStateInteractor: DisplayStateInteractor
+    private lateinit var udfpsOverlayInteractor: UdfpsOverlayInteractor
+    private lateinit var biometricStatusInteractor: BiometricStatusInteractor
+    private lateinit var iconProvider: IconProvider
+
     private val testScope = TestScope(StandardTestDispatcher())
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
     private val biometricPromptRepository = FakePromptRepository()
@@ -143,16 +149,11 @@ open class AuthContainerViewTest : SysuiTestCase() {
     private val promptSelectorInteractor by lazy {
         PromptSelectorInteractorImpl(
             fingerprintRepository,
+            displayStateInteractor,
             biometricPromptRepository,
             lockPatternUtils,
         )
     }
-
-    private lateinit var displayRepository: FakeDisplayRepository
-    private lateinit var displayStateInteractor: DisplayStateInteractor
-    private lateinit var udfpsOverlayInteractor: UdfpsOverlayInteractor
-    private lateinit var biometricStatusInteractor: BiometricStatusInteractor
-    private lateinit var iconProvider: IconProvider
 
     private val credentialViewModel = CredentialViewModel(mContext, bpCredentialInteractor)
     private val defaultLogoIcon = context.getDrawable(R.drawable.ic_android)

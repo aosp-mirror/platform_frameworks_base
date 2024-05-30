@@ -1407,7 +1407,12 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         runningTaskInfo.topActivity = topActivity
         whenever(activityTaskManager.getTasks(1)).thenReturn(listOf(runningTaskInfo))
         selector =
-            PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
+            PromptSelectorInteractorImpl(
+                fingerprintRepository,
+                displayStateInteractor,
+                promptRepository,
+                lockPatternUtils
+            )
         selector.resetPrompt(REQUEST_ID)
 
         viewModel =
@@ -1643,7 +1648,8 @@ private fun PromptSelectorInteractor.initializePrompt(
         BiometricModalities(fingerprintProperties = fingerprint, faceProperties = face),
         CHALLENGE,
         packageName,
-        false /*onUseDeviceCredential*/
+        onSwitchToCredential = false,
+        isLandscape = false,
     )
 }
 

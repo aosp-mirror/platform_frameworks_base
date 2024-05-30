@@ -29,6 +29,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -360,15 +361,23 @@ public class AuthContainerView extends LinearLayout
                 Utils.findFirstSensorProperties(fpProps, mConfig.mSensorIds),
                 Utils.findFirstSensorProperties(faceProps, mConfig.mSensorIds));
 
+        final boolean isLandscape = mContext.getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_LANDSCAPE;
         mPromptSelectorInteractorProvider = promptSelectorInteractorProvider;
         mPromptSelectorInteractorProvider.get().setPrompt(mConfig.mPromptInfo, mEffectiveUserId,
                 getRequestId(), biometricModalities, mConfig.mOperationId, mConfig.mOpPackageName,
-                false /*onSwitchToCredential*/);
+                false /*onSwitchToCredential*/, isLandscape);
 
         final LayoutInflater layoutInflater = LayoutInflater.from(mContext);
-        if (constraintBp() && mPromptViewModel.getPromptKind().getValue().isBiometric()) {
-            mLayout = (ConstraintLayout) layoutInflater.inflate(
-                    R.layout.biometric_prompt_constraint_layout, this, false /* attachToRoot */);
+        final PromptKind kind = mPromptViewModel.getPromptKind().getValue();
+        if (constraintBp() && kind.isBiometric()) {
+            if (kind.isTwoPaneLandscapeBiometric()) {
+                mLayout = (ConstraintLayout) layoutInflater.inflate(
+                        R.layout.biometric_prompt_two_pane_layout, this, false /* attachToRoot */);
+            } else {
+                mLayout = (ConstraintLayout) layoutInflater.inflate(
+                        R.layout.biometric_prompt_one_pane_layout, this, false /* attachToRoot */);
+            }
         } else {
             mLayout = (FrameLayout) layoutInflater.inflate(
                     R.layout.auth_container_view, this, false /* attachToRoot */);

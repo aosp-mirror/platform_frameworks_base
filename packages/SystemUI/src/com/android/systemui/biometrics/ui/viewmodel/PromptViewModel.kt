@@ -261,10 +261,13 @@ constructor(
         combine(
                 _forceLargeSize,
                 displayStateInteractor.isLargeScreen,
-                displayStateInteractor.currentRotation
+                displayStateInteractor.currentRotation,
             ) { forceLarge, isLargeScreen, rotation ->
                 when {
-                    forceLarge || isLargeScreen -> PromptPosition.Bottom
+                    forceLarge ||
+                        isLargeScreen ||
+                        promptKind.value.isOnePaneNoSensorLandscapeBiometric() ->
+                        PromptPosition.Bottom
                     rotation == DisplayRotation.ROTATION_90 -> PromptPosition.Right
                     rotation == DisplayRotation.ROTATION_270 -> PromptPosition.Left
                     rotation == DisplayRotation.ROTATION_180 -> PromptPosition.Top
@@ -297,23 +300,27 @@ constructor(
     /** Prompt panel size padding */
     private val smallHorizontalGuidelinePadding =
         context.resources.getDimensionPixelSize(
-            R.dimen.biometric_prompt_small_horizontal_guideline_padding
+            R.dimen.biometric_prompt_land_small_horizontal_guideline_padding
         )
     private val udfpsHorizontalGuidelinePadding =
         context.resources.getDimensionPixelSize(
-            R.dimen.biometric_prompt_udfps_horizontal_guideline_padding
+            R.dimen.biometric_prompt_two_pane_udfps_horizontal_guideline_padding
         )
     private val udfpsMidGuidelinePadding =
         context.resources.getDimensionPixelSize(
-            R.dimen.biometric_prompt_udfps_mid_guideline_padding
+            R.dimen.biometric_prompt_two_pane_udfps_mid_guideline_padding
+        )
+    private val mediumTopGuidelinePadding =
+        context.resources.getDimensionPixelSize(
+            R.dimen.biometric_prompt_one_pane_medium_top_guideline_padding
         )
     private val mediumHorizontalGuidelinePadding =
         context.resources.getDimensionPixelSize(
-            R.dimen.biometric_prompt_medium_horizontal_guideline_padding
+            R.dimen.biometric_prompt_two_pane_medium_horizontal_guideline_padding
         )
     private val mediumMidGuidelinePadding =
         context.resources.getDimensionPixelSize(
-            R.dimen.biometric_prompt_medium_mid_guideline_padding
+            R.dimen.biometric_prompt_two_pane_medium_mid_guideline_padding
         )
 
     /** Rect for positioning biometric icon */
@@ -416,9 +423,9 @@ constructor(
      * asset to be loaded before determining the prompt size.
      */
     val isIconViewLoaded: Flow<Boolean> =
-        combine(modalities, _isIconViewLoaded.asStateFlow()) { modalities, isIconViewLoaded ->
-                val noIcon = modalities.isEmpty
-                noIcon || isIconViewLoaded
+        combine(hideSensorIcon, _isIconViewLoaded.asStateFlow()) { hideSensorIcon, isIconViewLoaded
+                ->
+                hideSensorIcon || isIconViewLoaded
             }
             .distinctUntilChanged()
 
@@ -448,17 +455,24 @@ constructor(
      * from opposite side of the screen
      */
     val guidelineBounds: Flow<Rect> =
-        combine(iconPosition, size, position, modalities) { _, size, position, modalities ->
+        combine(iconPosition, promptKind, size, position, modalities) {
+                _,
+                promptKind,
+                size,
+                position,
+                modalities ->
                 when (position) {
-                    PromptPosition.Bottom -> Rect(0, 0, 0, 0)
+                    PromptPosition.Bottom ->
+                        if (promptKind.isOnePaneNoSensorLandscapeBiometric()) {
+                            Rect(0, 0, 0, 0)
+                        } else {
+                            Rect(0, mediumTopGuidelinePadding, 0, 0)
+                        }
                     PromptPosition.Right ->
                         if (size.isSmall) {
                             Rect(-smallHorizontalGuidelinePadding, 0, 0, 0)
                         } else if (modalities.hasUdfps) {
                             Rect(udfpsHorizontalGuidelinePadding, 0, 0, udfpsMidGuidelinePadding)
-                        } else if (modalities.isEmpty) {
-                            // TODO: Temporary fix until no biometric landscape layout is added
-                            Rect(-mediumHorizontalGuidelinePadding, 0, 0, 6)
                         } else {
                             Rect(-mediumHorizontalGuidelinePadding, 0, 0, mediumMidGuidelinePadding)
                         }
@@ -467,9 +481,6 @@ constructor(
                             Rect(0, 0, -smallHorizontalGuidelinePadding, 0)
                         } else if (modalities.hasUdfps) {
                             Rect(0, 0, udfpsHorizontalGuidelinePadding, -udfpsMidGuidelinePadding)
-                        } else if (modalities.isEmpty) {
-                            // TODO: Temporary fix until no biometric landscape layout is added
-                            Rect(0, 0, -mediumHorizontalGuidelinePadding, -6)
                         } else {
                             Rect(
                                 0,
