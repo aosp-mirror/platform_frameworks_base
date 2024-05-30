@@ -515,7 +515,9 @@ public class AuthContainerView extends LinearLayout
         } else {
             throw new IllegalStateException("Unknown credential type: " + credentialType);
         }
-        mCredentialView = factory.inflate(layoutResourceId, null, false);
+        // TODO(b/288175645): Once AuthContainerView is removed, set 0dp in credential view xml
+        //  files with the corresponding left/right or top/bottom constraints being set to "parent".
+        mCredentialView = factory.inflate(layoutResourceId, mLayout, false);
 
         // The background is used for detecting taps / cancelling authentication. Since the
         // credential view is full-screen and should not be canceled from background taps,
