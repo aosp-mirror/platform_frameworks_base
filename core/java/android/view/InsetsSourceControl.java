@@ -269,20 +269,52 @@ public class InsetsSourceControl implements Parcelable {
         public Array() {
         }
 
-        public Array(@NonNull Array other) {
-            mControls = other.mControls;
+        /**
+         * @param copyControls whether or not to make a copy of the each {@link InsetsSourceControl}
+         */
+        public Array(@NonNull Array other, boolean copyControls) {
+            setTo(other, copyControls);
         }
 
-        public Array(Parcel in) {
+        public Array(@NonNull Parcel in) {
             readFromParcel(in);
         }
 
-        public void set(@Nullable InsetsSourceControl[] controls) {
-            mControls = controls;
+        /** Updates the current Array to the given Array. */
+        public void setTo(@NonNull Array other, boolean copyControls) {
+            set(other.mControls, copyControls);
         }
 
+        /** Updates the current controls to the given controls. */
+        public void set(@Nullable InsetsSourceControl[] controls, boolean copyControls) {
+            if (controls == null || !copyControls) {
+                mControls = controls;
+                return;
+            }
+            // Make a copy of the array.
+            mControls = new InsetsSourceControl[controls.length];
+            for (int i = mControls.length - 1; i >= 0; i--) {
+                if (controls[i] != null) {
+                    mControls[i] = new InsetsSourceControl(controls[i]);
+                }
+            }
+        }
+
+        /** Gets the controls. */
         public @Nullable InsetsSourceControl[] get() {
             return mControls;
+        }
+
+        /** Sets the given flags to all controls. */
+        public void setParcelableFlags(int parcelableFlags) {
+            if (mControls == null) {
+                return;
+            }
+            for (InsetsSourceControl control : mControls) {
+                if (control != null) {
+                    control.setParcelableFlags(parcelableFlags);
+                }
+            }
         }
 
         @Override
