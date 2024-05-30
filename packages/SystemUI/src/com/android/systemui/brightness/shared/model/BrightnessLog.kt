@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.brightness.data.model
+package com.android.systemui.brightness.shared.model
 
-@JvmInline
-value class LinearBrightness(val floatValue: Float) {
-    fun clamp(min: LinearBrightness, max: LinearBrightness): LinearBrightness {
-        return if (floatValue < min.floatValue) {
-            min
-        } else if (floatValue > max.floatValue) {
-            max
-        } else {
-            this
-        }
-    }
-}
+import javax.inject.Qualifier
+
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class BrightnessLog()
