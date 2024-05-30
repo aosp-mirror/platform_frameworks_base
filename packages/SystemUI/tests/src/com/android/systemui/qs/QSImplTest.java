@@ -39,7 +39,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -50,8 +49,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
+import androidx.compose.ui.platform.ComposeView;
 import androidx.lifecycle.Lifecycle;
 import androidx.test.filters.SmallTest;
 
@@ -579,36 +578,18 @@ public class QSImplTest extends SysuiTestCase {
         customizer.setId(android.R.id.edit);
         mQsView.addView(customizer);
 
-        LinearLayout footerActionsView = new LinearLayout(mContext);
+        ComposeView footerActionsView = new ComposeView(mContext);
         footerActionsView.setId(R.id.qs_footer_actions);
         mQsView.addView(footerActionsView);
     }
 
     private void setUpInflater() {
-        LayoutInflater realInflater = LayoutInflater.from(mContext);
-
         when(mLayoutInflater.cloneInContext(any(Context.class))).thenReturn(mLayoutInflater);
         when(mLayoutInflater.inflate(anyInt(), nullable(ViewGroup.class), anyBoolean()))
-                .thenAnswer((invocation) -> inflate(realInflater, (int) invocation.getArgument(0),
-                        (ViewGroup) invocation.getArgument(1),
-                        (boolean) invocation.getArgument(2)));
+                .thenAnswer((invocation) -> mQsView);
         when(mLayoutInflater.inflate(anyInt(), nullable(ViewGroup.class)))
-                .thenAnswer((invocation) -> inflate(realInflater, (int) invocation.getArgument(0),
-                        (ViewGroup) invocation.getArgument(1)));
+                .thenAnswer((invocation) -> mQsView);
         mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE, mLayoutInflater);
-    }
-
-    private View inflate(LayoutInflater realInflater, int layoutRes, @Nullable ViewGroup root) {
-        return inflate(realInflater, layoutRes, root, root != null);
-    }
-
-    private View inflate(LayoutInflater realInflater, int layoutRes, @Nullable ViewGroup root,
-            boolean attachToRoot) {
-        if (layoutRes == R.layout.footer_actions) {
-            return realInflater.inflate(layoutRes, root, attachToRoot);
-        }
-
-        return mQsView;
     }
 
     private void setupQsComponent() {

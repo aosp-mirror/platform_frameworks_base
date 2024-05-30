@@ -34,11 +34,11 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import androidx.annotation.FloatRange;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.compose.ui.platform.ComposeView;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
@@ -167,7 +167,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
 
     private View mRootView;
     @Nullable
-    private View mFooterActionsView;
+    private ComposeView mFooterActionsView;
 
     @Inject
     public QSImpl(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
@@ -285,34 +285,9 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
     }
 
     private void bindFooterActionsView(View root) {
-        LinearLayout footerActionsView = root.findViewById(R.id.qs_footer_actions);
-
-        // Compose is available, so let's use the Compose implementation of the footer actions.
-        View composeView = QSUtils.createFooterActionsView(root.getContext(),
+        mFooterActionsView = root.findViewById(R.id.qs_footer_actions);
+        QSUtils.setFooterActionsViewContent(mFooterActionsView,
                 mQSFooterActionsViewModel, mListeningAndVisibilityLifecycleOwner);
-        mFooterActionsView = composeView;
-
-        // The id R.id.qs_footer_actions is used by QSContainerImpl to set the horizontal margin
-        // to all views except for qs_footer_actions, so we set it to the Compose view.
-        composeView.setId(R.id.qs_footer_actions);
-
-        // Set this tag so that QSContainerImpl does not add horizontal paddings to this Compose
-        // implementation of the footer actions. They will be set in Compose instead so that the
-        // background fills the full screen width.
-        composeView.setTag(R.id.tag_compose_qs_footer_actions, true);
-
-        // Set the same elevation as the View implementation, otherwise the footer actions will be
-        // drawn below the scroll view with QS grid and clicks won't get through on small devices
-        // where there isn't enough vertical space to show all the tiles and the footer actions.
-        composeView.setElevation(
-                composeView.getContext().getResources().getDimension(R.dimen.qs_panel_elevation));
-
-        // Replace the View by the Compose provided one.
-        ViewGroup parent = (ViewGroup) footerActionsView.getParent();
-        ViewGroup.LayoutParams layoutParams = footerActionsView.getLayoutParams();
-        int index = parent.indexOfChild(footerActionsView);
-        parent.removeViewAt(index);
-        parent.addView(composeView, index, layoutParams);
     }
 
     @Override

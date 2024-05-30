@@ -1,7 +1,6 @@
 package com.android.systemui.qs
 
 import android.content.Context
-import android.view.View
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.LifecycleOwner
 import com.android.compose.theme.PlatformTheme
@@ -29,13 +28,11 @@ object QSUtils {
     }
 
     @JvmStatic
-    fun createFooterActionsView(
-        context: Context,
+    fun setFooterActionsViewContent(
+        view: ComposeView,
         viewModel: FooterActionsViewModel,
         qsVisibilityLifecycleOwner: LifecycleOwner,
-    ): View {
-        return ComposeView(context).apply {
-            setContent { PlatformTheme { FooterActions(viewModel, qsVisibilityLifecycleOwner) } }
-        }
+    ) {
+        view.setContent { PlatformTheme { FooterActions(viewModel, qsVisibilityLifecycleOwner) } }
     }
 }
