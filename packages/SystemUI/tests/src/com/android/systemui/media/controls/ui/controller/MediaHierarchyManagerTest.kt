@@ -18,10 +18,10 @@ package com.android.systemui.media.controls.ui.controller
 
 import android.graphics.Rect
 import android.provider.Settings
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
 import com.android.systemui.SysuiTestCase
@@ -78,7 +78,7 @@ import org.mockito.junit.MockitoJUnit
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class MediaHierarchyManagerTest : SysuiTestCase() {
 

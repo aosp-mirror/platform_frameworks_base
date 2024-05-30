@@ -5,7 +5,7 @@ import android.graphics.HardwareRenderer
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.DisableSceneContainer
@@ -43,7 +43,7 @@ import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class ResourceTrimmerTest : SysuiTestCase() {
     val kosmos = testKosmos()
