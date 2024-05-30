@@ -1525,7 +1525,7 @@ public class WindowManagerService extends IWindowManager.Stub
             InputChannel outInputChannel, InsetsState outInsetsState,
             InsetsSourceControl.Array outActiveControls, Rect outAttachedFrame,
             float[] outSizeCompatScale) {
-        outActiveControls.set(null);
+        outActiveControls.set(null, false /* copyControls */);
         int[] appOp = new int[1];
         final boolean isRoundedCornerOverlay = (attrs.privateFlags
                 & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0;
@@ -2317,7 +2317,7 @@ public class WindowManagerService extends IWindowManager.Stub
             InsetsState outInsetsState, InsetsSourceControl.Array outActiveControls,
             Bundle outBundle, WindowRelayoutResult outRelayoutResult) {
         if (outActiveControls != null) {
-            outActiveControls.set(null);
+            outActiveControls.set(null, false /* copyControls */);
         }
         int result = 0;
         boolean configChanged = false;
@@ -2745,23 +2745,14 @@ public class WindowManagerService extends IWindowManager.Stub
     private void getInsetsSourceControls(WindowState win, InsetsSourceControl.Array outArray) {
         final InsetsSourceControl[] controls =
                 win.getDisplayContent().getInsetsStateController().getControlsForDispatch(win);
-        if (controls != null) {
-            final int length = controls.length;
-            final InsetsSourceControl[] outControls = new InsetsSourceControl[length];
-            for (int i = 0; i < length; i++) {
-                // We will leave the critical section before returning the leash to the client,
-                // so we need to copy the leash to prevent others release the one that we are
-                // about to return.
-                if (controls[i] != null) {
-                    // This source control is an extra copy if the client is not local. By setting
-                    // PARCELABLE_WRITE_RETURN_VALUE, the leash will be released at the end of
-                    // SurfaceControl.writeToParcel.
-                    outControls[i] = new InsetsSourceControl(controls[i]);
-                    outControls[i].setParcelableFlags(PARCELABLE_WRITE_RETURN_VALUE);
-                }
-            }
-            outArray.set(outControls);
-        }
+        // We will leave the critical section before returning the leash to the client,
+        // so we need to copy the leash to prevent others release the one that we are
+        // about to return.
+        outArray.set(controls, true /* copyControls */);
+        // This source control is an extra copy if the client is not local. By setting
+        // PARCELABLE_WRITE_RETURN_VALUE, the leash will be released at the end of
+        // SurfaceControl.writeToParcel.
+        outArray.setParcelableFlags(PARCELABLE_WRITE_RETURN_VALUE);
     }
 
     private void tryStartExitingAnimation(WindowState win, WindowStateAnimator winAnimator) {

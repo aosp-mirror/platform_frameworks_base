@@ -183,12 +183,16 @@ private:
         MyLooper() : Looper(false) {}
         ~MyLooper() = default;
     };
-    sp<MyLooper> mLooper;
     std::thread mThread;
+
+protected:
+    sp<MyLooper> mLooper;
 };
 
-PointerControllerTest::PointerControllerTest() : mPointerSprite(new NiceMock<MockSprite>),
-        mLooper(new MyLooper), mThread(&PointerControllerTest::loopThread, this) {
+PointerControllerTest::PointerControllerTest()
+      : mPointerSprite(new NiceMock<MockSprite>),
+        mThread(&PointerControllerTest::loopThread, this),
+        mLooper(new MyLooper) {
     mSpriteController.reset(new NiceMock<MockSpriteController>(mLooper));
     mPolicy = new MockPointerControllerPolicyInterface();
 
@@ -339,7 +343,7 @@ TEST_F(PointerControllerTest, updatesSkipScreenshotFlagForTouchSpots) {
     testing::Mock::VerifyAndClearExpectations(testSpotSprite.get());
 
     // Marking the display to skip screenshot should update sprite as well
-    mPointerController->setSkipScreenshot(ui::LogicalDisplayId::DEFAULT, true);
+    mPointerController->setSkipScreenshotFlagForDisplay(ui::LogicalDisplayId::DEFAULT);
     EXPECT_CALL(*testSpotSprite, setSkipScreenshot).With(testing::Args<0>(true));
 
     // Update spots to sync state with sprite
@@ -348,12 +352,52 @@ TEST_F(PointerControllerTest, updatesSkipScreenshotFlagForTouchSpots) {
     testing::Mock::VerifyAndClearExpectations(testSpotSprite.get());
 
     // Reset flag and verify again
-    mPointerController->setSkipScreenshot(ui::LogicalDisplayId::DEFAULT, false);
+    mPointerController->clearSkipScreenshotFlags();
     EXPECT_CALL(*testSpotSprite, setSkipScreenshot).With(testing::Args<0>(false));
     mPointerController->setSpots(&testSpotCoords, testIdToIndex.cbegin(), testIdBits,
                                  ui::LogicalDisplayId::DEFAULT);
     testing::Mock::VerifyAndClearExpectations(testSpotSprite.get());
 }
+
+class PointerControllerSkipScreenshotFlagTest
+      : public PointerControllerTest,
+        public testing::WithParamInterface<PointerControllerInterface::ControllerType> {};
+
+TEST_P(PointerControllerSkipScreenshotFlagTest, updatesSkipScreenshotFlag) {
+    sp<MockSprite> testPointerSprite(new NiceMock<MockSprite>);
+    EXPECT_CALL(*mSpriteController, createSprite).WillOnce(Return(testPointerSprite));
+
+    // Create a pointer controller
+    mPointerController =
+            PointerController::create(mPolicy, mLooper, *mSpriteController, GetParam());
+    ensureDisplayViewportIsSet(ui::LogicalDisplayId::DEFAULT);
+
+    // By default skip screenshot flag is not set for the sprite
+    EXPECT_CALL(*testPointerSprite, setSkipScreenshot).With(testing::Args<0>(false));
+
+    // Update pointer to sync state with sprite
+    mPointerController->setPosition(100, 100);
+    testing::Mock::VerifyAndClearExpectations(testPointerSprite.get());
+
+    // Marking the controller to skip screenshot should update pointer sprite
+    mPointerController->setSkipScreenshotFlagForDisplay(ui::LogicalDisplayId::DEFAULT);
+    EXPECT_CALL(*testPointerSprite, setSkipScreenshot).With(testing::Args<0>(true));
+
+    // Update pointer to sync state with sprite
+    mPointerController->move(10, 10);
+    testing::Mock::VerifyAndClearExpectations(testPointerSprite.get());
+
+    // Reset flag and verify again
+    mPointerController->clearSkipScreenshotFlags();
+    EXPECT_CALL(*testPointerSprite, setSkipScreenshot).With(testing::Args<0>(false));
+    mPointerController->move(10, 10);
+    testing::Mock::VerifyAndClearExpectations(testPointerSprite.get());
+}
+
+INSTANTIATE_TEST_SUITE_P(PointerControllerSkipScreenshotFlagTest,
+                         PointerControllerSkipScreenshotFlagTest,
+                         testing::Values(PointerControllerInterface::ControllerType::MOUSE,
+                                         PointerControllerInterface::ControllerType::STYLUS));
 
 class PointerControllerWindowInfoListenerTest : public Test {};
 

@@ -39,7 +39,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -51,6 +50,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import androidx.compose.ui.platform.ComposeView;
 import androidx.lifecycle.Lifecycle;
 import androidx.test.filters.SmallTest;
 
@@ -58,12 +58,10 @@ import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.EnableSceneContainer;
-import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.media.controls.ui.view.MediaHost;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSComponent;
 import com.android.systemui.qs.external.TileServiceRequestController;
-import com.android.systemui.qs.footer.ui.binder.FooterActionsViewBinder;
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.res.R;
@@ -112,9 +110,7 @@ public class QSImplTest extends SysuiTestCase {
     @Mock private QSSquishinessController mSquishinessController;
     @Mock private FooterActionsViewModel mFooterActionsViewModel;
     @Mock private FooterActionsViewModel.Factory mFooterActionsViewModelFactory;
-    @Mock private FooterActionsViewBinder mFooterActionsViewBinder;
     @Mock private LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
-    @Mock private FeatureFlagsClassic mFeatureFlags;
     private ViewGroup mQsView;
 
     private final CommandQueue mCommandQueue =
@@ -496,18 +492,13 @@ public class QSImplTest extends SysuiTestCase {
     @Test
     @EnableSceneContainer
     public void testSceneContainerFlagsEnabled_FooterActionsRemoved_controllerNotStarted() {
-        clearInvocations(
-                mFooterActionsViewBinder, mFooterActionsViewModel, mFooterActionsViewModelFactory);
+        clearInvocations(mFooterActionsViewModel, mFooterActionsViewModelFactory);
         QSImpl other = instantiate();
 
         other.onComponentCreated(mQsComponent, null);
 
         assertThat((View) other.getView().findViewById(R.id.qs_footer_actions)).isNull();
-        verifyZeroInteractions(
-                mFooterActionsViewModel,
-                mFooterActionsViewBinder,
-                mFooterActionsViewModelFactory
-        );
+        verifyZeroInteractions(mFooterActionsViewModel, mFooterActionsViewModelFactory);
     }
 
     @Test
@@ -553,9 +544,7 @@ public class QSImplTest extends SysuiTestCase {
                 mock(QSLogger.class),
                 mock(FooterActionsController.class),
                 mFooterActionsViewModelFactory,
-                mFooterActionsViewBinder,
-                mLargeScreenShadeInterpolator,
-                mFeatureFlags
+                mLargeScreenShadeInterpolator
         );
     }
 
@@ -589,39 +578,18 @@ public class QSImplTest extends SysuiTestCase {
         customizer.setId(android.R.id.edit);
         mQsView.addView(customizer);
 
-        View footerActionsView = new FooterActionsViewBinder().create(mContext);
+        ComposeView footerActionsView = new ComposeView(mContext);
         footerActionsView.setId(R.id.qs_footer_actions);
         mQsView.addView(footerActionsView);
     }
 
     private void setUpInflater() {
-        LayoutInflater realInflater = LayoutInflater.from(mContext);
-
         when(mLayoutInflater.cloneInContext(any(Context.class))).thenReturn(mLayoutInflater);
         when(mLayoutInflater.inflate(anyInt(), nullable(ViewGroup.class), anyBoolean()))
-                .thenAnswer((invocation) -> inflate(realInflater, (int) invocation.getArgument(0),
-                        (ViewGroup) invocation.getArgument(1),
-                        (boolean) invocation.getArgument(2)));
+                .thenAnswer((invocation) -> mQsView);
         when(mLayoutInflater.inflate(anyInt(), nullable(ViewGroup.class)))
-                .thenAnswer((invocation) -> inflate(realInflater, (int) invocation.getArgument(0),
-                        (ViewGroup) invocation.getArgument(1)));
+                .thenAnswer((invocation) -> mQsView);
         mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE, mLayoutInflater);
-    }
-
-    private View inflate(LayoutInflater realInflater, int layoutRes, @Nullable ViewGroup root) {
-        return inflate(realInflater, layoutRes, root, root != null);
-    }
-
-    private View inflate(LayoutInflater realInflater, int layoutRes, @Nullable ViewGroup root,
-            boolean attachToRoot) {
-        if (layoutRes == R.layout.footer_actions
-                || layoutRes == R.layout.footer_actions_text_button
-                || layoutRes == R.layout.footer_actions_number_button
-                || layoutRes == R.layout.footer_actions_icon_button) {
-            return realInflater.inflate(layoutRes, root, attachToRoot);
-        }
-
-        return mQsView;
     }
 
     private void setupQsComponent() {

@@ -126,7 +126,8 @@ fun SceneScope.HeadsUpNotificationSpace(
                             " size=${coordinates.size}" +
                             " bounds=$boundsInWindow"
                     }
-                    viewModel.onHeadsUpTopChanged(boundsInWindow.top)
+                    // Note: boundsInWindow doesn't scroll off the screen
+                    stackScrollView.setHeadsUpTop(boundsInWindow.top)
                 }
     ) {
         content {}

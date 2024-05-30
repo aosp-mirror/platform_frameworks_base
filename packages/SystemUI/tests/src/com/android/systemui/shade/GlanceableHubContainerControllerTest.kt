@@ -18,6 +18,8 @@ package com.android.systemui.shade
 
 import android.graphics.Rect
 import android.os.PowerManager
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.ViewUtils
@@ -30,6 +32,7 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.Flags
+import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_FULLSCREEN_SWIPE
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.ambient.touch.TouchHandler
 import com.android.systemui.ambient.touch.TouchMonitor
@@ -51,6 +54,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.sceneDataSourceDelegator
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.statusbar.notification.stack.notificationStackScrollLayoutController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
@@ -64,9 +68,11 @@ import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.Mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @ExperimentalCoroutinesApi
@@ -124,6 +130,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     ambientTouchComponentFactory,
                     communalContent,
                     kosmos.sceneDataSourceDelegator,
+                    kosmos.notificationStackScrollLayoutController
                 )
         }
         testableLooper = TestableLooper.get(this)
@@ -166,6 +173,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                         ambientTouchComponentFactory,
                         communalContent,
                         kosmos.sceneDataSourceDelegator,
+                        kosmos.notificationStackScrollLayoutController
                     )
 
                 // First call succeeds.
@@ -176,6 +184,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             }
         }
 
+    @DisableFlags(FLAG_GLANCEABLE_HUB_FULLSCREEN_SWIPE)
     @Test
     fun onTouchEvent_communalClosed_doesNotIntercept() =
         with(kosmos) {
@@ -187,6 +196,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             }
         }
 
+    @DisableFlags(FLAG_GLANCEABLE_HUB_FULLSCREEN_SWIPE)
     @Test
     fun onTouchEvent_openGesture_interceptsTouches() =
         with(kosmos) {
@@ -204,6 +214,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             }
         }
 
+    @DisableFlags(FLAG_GLANCEABLE_HUB_FULLSCREEN_SWIPE)
     @Test
     fun onTouchEvent_communalTransitioning_interceptsTouches() =
         with(kosmos) {
@@ -230,6 +241,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             }
         }
 
+    @DisableFlags(FLAG_GLANCEABLE_HUB_FULLSCREEN_SWIPE)
     @Test
     fun onTouchEvent_communalOpen_interceptsTouches() =
         with(kosmos) {
@@ -244,6 +256,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             }
         }
 
+    @DisableFlags(FLAG_GLANCEABLE_HUB_FULLSCREEN_SWIPE)
     @Test
     fun onTouchEvent_communalAndBouncerShowing_doesNotIntercept() =
         with(kosmos) {
@@ -262,6 +275,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             }
         }
 
+    @DisableFlags(FLAG_GLANCEABLE_HUB_FULLSCREEN_SWIPE)
     @Test
     fun onTouchEvent_communalAndShadeShowing_doesNotIntercept() =
         with(kosmos) {
@@ -278,6 +292,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             }
         }
 
+    @DisableFlags(FLAG_GLANCEABLE_HUB_FULLSCREEN_SWIPE)
     @Test
     fun onTouchEvent_containerViewDisposed_doesNotIntercept() =
         with(kosmos) {
@@ -310,6 +325,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     ambientTouchComponentFactory,
                     communalContent,
                     kosmos.sceneDataSourceDelegator,
+                    kosmos.notificationStackScrollLayoutController,
                 )
 
             assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.INITIALIZED)
@@ -329,6 +345,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     ambientTouchComponentFactory,
                     communalContent,
                     kosmos.sceneDataSourceDelegator,
+                    kosmos.notificationStackScrollLayoutController,
                 )
 
             // Only initView without attaching a view as we don't want the flows to start collecting
@@ -499,13 +516,30 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             }
         }
 
+    @Test
+    @EnableFlags(FLAG_GLANCEABLE_HUB_FULLSCREEN_SWIPE)
+    fun fullScreenSwipeGesture_doNotProcessTouchesInNotificationStack() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is closed.
+                goToScene(CommunalScenes.Blank)
+                `when`(
+                        notificationStackScrollLayoutController.isBelowLastNotification(
+                            anyFloat(),
+                            anyFloat()
+                        )
+                    )
+                    .thenReturn(false)
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
+            }
+        }
+
     private fun initAndAttachContainerView() {
         containerView = View(context)
 
         parentView = FrameLayout(context)
-        parentView.addView(containerView)
 
-        underTest.initView(containerView)
+        parentView.addView(underTest.initView(containerView))
 
         // Attach the view so that flows start collecting.
         ViewUtils.attachView(parentView, CONTAINER_WIDTH, CONTAINER_HEIGHT)

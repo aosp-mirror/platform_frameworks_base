@@ -22,6 +22,7 @@ import android.annotation.DrawableRes
 import android.annotation.SuppressLint
 import android.graphics.Point
 import android.graphics.Rect
+import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.View.OnLayoutChangeListener
@@ -56,8 +57,11 @@ import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
+import com.android.systemui.keyguard.ui.viewmodel.TransitionData
 import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
@@ -93,12 +97,14 @@ object KeyguardRootViewBinder {
     fun bind(
         view: ViewGroup,
         viewModel: KeyguardRootViewModel,
+        blueprintViewModel: KeyguardBlueprintViewModel,
         configuration: ConfigurationState,
         occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel?,
         chipbarCoordinator: ChipbarCoordinator?,
         screenOffAnimationController: ScreenOffAnimationController,
         shadeInteractor: ShadeInteractor,
         clockInteractor: KeyguardClockInteractor,
+        clockViewModel: KeyguardClockViewModel,
         interactionJankMonitor: InteractionJankMonitor?,
         deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor?,
         vibratorHelper: VibratorHelper?,
@@ -348,7 +354,16 @@ object KeyguardRootViewBinder {
             }
         }
 
-        disposables += view.onLayoutChanged(OnLayoutChange(viewModel, childViews, burnInParams))
+        disposables +=
+            view.onLayoutChanged(
+                OnLayoutChange(
+                    viewModel,
+                    blueprintViewModel,
+                    clockViewModel,
+                    childViews,
+                    burnInParams
+                )
+            )
 
         // Views will be added or removed after the call to bind(). This is needed to avoid many
         // calls to findViewById
@@ -404,9 +419,13 @@ object KeyguardRootViewBinder {
 
     private class OnLayoutChange(
         private val viewModel: KeyguardRootViewModel,
+        private val blueprintViewModel: KeyguardBlueprintViewModel,
+        private val clockViewModel: KeyguardClockViewModel,
         private val childViews: Map<Int, View>,
         private val burnInParams: MutableStateFlow<BurnInParameters>,
     ) : OnLayoutChangeListener {
+        var prevTransition: TransitionData? = null
+
         override fun onLayoutChange(
             view: View,
             left: Int,
@@ -418,11 +437,21 @@ object KeyguardRootViewBinder {
             oldRight: Int,
             oldBottom: Int
         ) {
+            // After layout, ensure the notifications are positioned correctly
             childViews[nsslPlaceholderId]?.let { notificationListPlaceholder ->
-                // After layout, ensure the notifications are positioned correctly
+                // Do not update a second time while a blueprint transition is running
+                val transition = blueprintViewModel.currentTransition.value
+                val shouldAnimate = transition != null && transition.config.type.animateNotifChanges
+                if (prevTransition == transition && shouldAnimate) {
+                    if (DEBUG) Log.w(TAG, "Skipping; layout during transition")
+                    return
+                }
+
+                prevTransition = transition
                 viewModel.onNotificationContainerBoundsChanged(
                     notificationListPlaceholder.top.toFloat(),
                     notificationListPlaceholder.bottom.toFloat(),
+                    animate = shouldAnimate
                 )
             }
 
@@ -585,4 +614,6 @@ object KeyguardRootViewBinder {
 
     private const val ID = "occluding_app_device_entry_unlock_msg"
     private const val AOD_ICONS_APPEAR_DURATION: Long = 200
+    private const val TAG = "KeyguardRootViewBinder"
+    private const val DEBUG = false
 }

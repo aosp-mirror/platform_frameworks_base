@@ -93,6 +93,7 @@ object BiometricViewSizeBinder {
 
         if (constraintBp()) {
             val leftGuideline = view.requireViewById<Guideline>(R.id.leftGuideline)
+            val topGuideline = view.requireViewById<Guideline>(R.id.topGuideline)
             val rightGuideline = view.requireViewById<Guideline>(R.id.rightGuideline)
             val midGuideline = view.findViewById<Guideline>(R.id.midGuideline)
 
@@ -355,6 +356,18 @@ object BiometricViewSizeBinder {
                                 )
                             }
 
+                            if (bounds.top >= 0) {
+                                mediumConstraintSet.setGuidelineBegin(topGuideline.id, bounds.top)
+                                smallConstraintSet.setGuidelineBegin(topGuideline.id, bounds.top)
+                            } else if (bounds.top < 0) {
+                                mediumConstraintSet.setGuidelineEnd(
+                                    topGuideline.id,
+                                    abs(bounds.top)
+                                )
+                                smallConstraintSet.setGuidelineEnd(topGuideline.id, abs(bounds.top))
+                            }
+
+                            // Use rect bottom to set mid guideline of two-pane.
                             if (midGuideline != null) {
                                 if (bounds.bottom >= 0) {
                                     midGuideline.setGuidelineEnd(bounds.bottom)

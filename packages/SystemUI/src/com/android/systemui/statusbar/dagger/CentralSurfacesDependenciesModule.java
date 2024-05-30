@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.dagger;
 import static com.android.systemui.Flags.predictiveBackAnimateDialogs;
 
 import android.content.Context;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.service.dreams.IDreamManager;
 import android.util.Log;
@@ -99,7 +100,8 @@ public interface CentralSurfacesDependenciesModule {
             NotifCollection notifCollection,
             MediaDataManager mediaDataManager,
             DumpManager dumpManager,
-            @Background Executor backgroundExecutor) {
+            @Background Executor backgroundExecutor,
+            @Main Handler handler) {
         return new NotificationMediaManager(
                 context,
                 visibilityProvider,
@@ -107,7 +109,8 @@ public interface CentralSurfacesDependenciesModule {
                 notifCollection,
                 mediaDataManager,
                 dumpManager,
-                backgroundExecutor);
+                backgroundExecutor,
+                handler);
     }
 
     /** */

@@ -27,7 +27,6 @@ import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.VelocityTracker
-import android.view.View
 import android.view.ViewConfiguration
 import android.view.WindowManager
 import androidx.annotation.VisibleForTesting
@@ -164,6 +163,7 @@ internal constructor(
 
     private val elapsedTimeSinceInactive
         get() = systemClock.uptimeMillis() - gestureInactiveTime
+
     private val elapsedTimeSinceEntry
         get() = systemClock.uptimeMillis() - gestureEntryTime
 
@@ -612,6 +612,7 @@ internal constructor(
     }
 
     private var previousPreThresholdWidthInterpolator = params.entryWidthInterpolator
+
     private fun preThresholdWidthStretchAmount(progress: Float): Float {
         val interpolator = run {
             val isPastSlop = totalTouchDeltaInactive > viewConfiguration.scaledTouchSlop
@@ -677,8 +678,7 @@ internal constructor(
             velocityTracker?.run {
                 computeCurrentVelocity(PX_PER_SEC)
                 xVelocity.takeIf { mView.isLeftPanel } ?: (xVelocity * -1)
-            }
-                ?: 0f
+            } ?: 0f
         val isPastFlingVelocityThreshold =
             flingVelocity > viewConfiguration.scaledMinimumFlingVelocity
         return flingDistance > minFlingDistance && isPastFlingVelocityThreshold
@@ -1006,15 +1006,15 @@ internal constructor(
 
     private fun performDeactivatedHapticFeedback() {
         vibratorHelper.performHapticFeedback(
-                mView,
-                HapticFeedbackConstants.GESTURE_THRESHOLD_DEACTIVATE
+            mView,
+            HapticFeedbackConstants.GESTURE_THRESHOLD_DEACTIVATE
         )
     }
 
     private fun performActivatedHapticFeedback() {
         vibratorHelper.performHapticFeedback(
-                mView,
-                HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE
+            mView,
+            HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE
         )
     }
 
@@ -1028,8 +1028,7 @@ internal constructor(
             velocityTracker?.run {
                 computeCurrentVelocity(PX_PER_MS)
                 MathUtils.smoothStep(slowVelocityBound, fastVelocityBound, abs(xVelocity))
-            }
-                ?: valueOnFastVelocity
+            } ?: valueOnFastVelocity
 
         return MathUtils.lerp(valueOnFastVelocity, valueOnSlowVelocity, 1 - factor)
     }

@@ -69,7 +69,12 @@ public class WindowStateInsetsControlChangeItem extends WindowStateTransactionIt
         }
         instance.setWindow(window);
         instance.mInsetsState = new InsetsState(insetsState, true /* copySources */);
-        instance.mActiveControls = new InsetsSourceControl.Array(activeControls);
+        instance.mActiveControls = new InsetsSourceControl.Array(
+                activeControls, true /* copyControls */);
+        // This source control is an extra copy if the client is not local. By setting
+        // PARCELABLE_WRITE_RETURN_VALUE, the leash will be released at the end of
+        // SurfaceControl.writeToParcel.
+        instance.mActiveControls.setParcelableFlags(PARCELABLE_WRITE_RETURN_VALUE);
 
         return instance;
     }

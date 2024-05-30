@@ -58,6 +58,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.combineTransform
@@ -67,13 +69,14 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class KeyguardRootViewModel
 @Inject
 constructor(
-    @Application private val scope: CoroutineScope,
+    @Application private val applicationScope: CoroutineScope,
     private val deviceEntryInteractor: DeviceEntryInteractor,
     private val dozeParameters: DozeParameters,
     private val keyguardInteractor: KeyguardInteractor,
@@ -280,7 +283,7 @@ constructor(
         burnInJob?.cancel()
 
         burnInJob =
-            scope.launch("$TAG#aodBurnInViewModel") {
+            applicationScope.launch("$TAG#aodBurnInViewModel") {
                 aodBurnInViewModel.movement(params).collect { _burnInModel.value = it }
             }
     }
@@ -294,7 +297,7 @@ constructor(
         }
 
     /** Is the notification icon container visible? */
-    val isNotifIconContainerVisible: Flow<AnimatedValue<Boolean>> =
+    val isNotifIconContainerVisible: StateFlow<AnimatedValue<Boolean>> =
         combine(
                 goneToAodTransitionRunning,
                 keyguardTransitionInteractor.finishedKeyguardState.map {
@@ -336,11 +339,15 @@ constructor(
                         }
                 }
             }
-            .distinctUntilChanged()
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = AnimatedValue.NotAnimating(false),
+            )
 
-    fun onNotificationContainerBoundsChanged(top: Float, bottom: Float) {
+    fun onNotificationContainerBoundsChanged(top: Float, bottom: Float, animate: Boolean = false) {
         keyguardInteractor.setNotificationContainerBounds(
-            NotificationContainerBounds(top = top, bottom = bottom)
+            NotificationContainerBounds(top = top, bottom = bottom, isAnimated = animate)
         )
     }
 

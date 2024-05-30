@@ -48,6 +48,7 @@ import static android.media.audio.Flags.automaticBtDeviceType;
 import static android.media.audio.Flags.featureSpatialAudioHeadtrackingLowLatency;
 import static android.media.audio.Flags.focusFreezeTestApi;
 import static android.media.audio.Flags.roForegroundAudioControl;
+import static android.media.audio.Flags.scoManagedByAudio;
 import static android.media.audiopolicy.Flags.enableFadeManagerConfiguration;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.INVALID_UID;
@@ -1013,7 +1014,7 @@ public class AudioService extends IAudioService.Stub
                               SystemServerAdapter.getDefaultAdapter(context),
                               SettingsAdapter.getDefaultAdapter(),
                               new AudioVolumeGroupHelper(),
-                              new DefaultAudioPolicyFacade(),
+                              new DefaultAudioPolicyFacade(r -> r.run()),
                               null);
 
         }
@@ -1503,7 +1504,9 @@ public class AudioService extends IAudioService.Stub
         // Register for device connection intent broadcasts.
         IntentFilter intentFilter =
                 new IntentFilter(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
-        intentFilter.addAction(BluetoothHeadset.ACTION_ACTIVE_DEVICE_CHANGED);
+        if (!mDeviceBroker.isScoManagedByAudio()) {
+            intentFilter.addAction(BluetoothHeadset.ACTION_ACTIVE_DEVICE_CHANGED);
+        }
         intentFilter.addAction(Intent.ACTION_DOCK_EVENT);
         if (mDisplayManager == null) {
             intentFilter.addAction(Intent.ACTION_SCREEN_ON);
@@ -4529,11 +4532,12 @@ public class AudioService extends IAudioService.Stub
                 + focusFreezeTestApi());
         pw.println("\tcom.android.media.audio.disablePrescaleAbsoluteVolume:"
                 + disablePrescaleAbsoluteVolume());
-
         pw.println("\tcom.android.media.audio.setStreamVolumeOrder:"
                 + setStreamVolumeOrder());
         pw.println("\tandroid.media.audio.roForegroundAudioControl:"
                 + roForegroundAudioControl());
+        pw.println("\tandroid.media.audio.scoManagedByAudio:"
+                + scoManagedByAudio());
         pw.println("\tcom.android.media.audio.vgsVssSyncMuteOrder:"
                 + vgsVssSyncMuteOrder());
     }
@@ -7859,7 +7863,8 @@ public class AudioService extends IAudioService.Stub
         if (profile != BluetoothProfile.A2DP && profile != BluetoothProfile.A2DP_SINK
                 && profile != BluetoothProfile.LE_AUDIO
                 && profile != BluetoothProfile.LE_AUDIO_BROADCAST
-                && profile != BluetoothProfile.HEARING_AID) {
+                && profile != BluetoothProfile.HEARING_AID
+                && !(mDeviceBroker.isScoManagedByAudio() && profile == BluetoothProfile.HEADSET)) {
             throw new IllegalArgumentException("Illegal BluetoothProfile profile for device "
                     + previousDevice + " -> " + newDevice + ". Got: " + profile);
         }

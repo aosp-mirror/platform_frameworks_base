@@ -17,17 +17,12 @@
 
 package com.android.systemui.keyguard.ui.binder
 
-import android.os.Handler
-import android.transition.Transition
-import android.transition.TransitionManager
 import android.util.Log
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.tracing.coroutines.launch
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.BaseBlueprintTransition
@@ -40,47 +35,9 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.shared.R as sharedR
 import com.android.systemui.util.kotlin.pairwise
-import javax.inject.Inject
-import kotlin.math.max
 
-@SysUISingleton
-class KeyguardBlueprintViewBinder
-@Inject
-constructor(
-    @Main private val handler: Handler,
-) {
-    private var runningPriority = -1
-    private val runningTransitions = mutableSetOf<Transition>()
-    private val isTransitionRunning: Boolean
-        get() = runningTransitions.size > 0
-    private val transitionListener =
-        object : Transition.TransitionListener {
-            override fun onTransitionCancel(transition: Transition) {
-                if (DEBUG) Log.e(TAG, "onTransitionCancel: ${transition::class.simpleName}")
-                runningTransitions.remove(transition)
-            }
-
-            override fun onTransitionEnd(transition: Transition) {
-                if (DEBUG) Log.e(TAG, "onTransitionEnd: ${transition::class.simpleName}")
-                runningTransitions.remove(transition)
-            }
-
-            override fun onTransitionPause(transition: Transition) {
-                if (DEBUG) Log.i(TAG, "onTransitionPause: ${transition::class.simpleName}")
-                runningTransitions.remove(transition)
-            }
-
-            override fun onTransitionResume(transition: Transition) {
-                if (DEBUG) Log.i(TAG, "onTransitionResume: ${transition::class.simpleName}")
-                runningTransitions.add(transition)
-            }
-
-            override fun onTransitionStart(transition: Transition) {
-                if (DEBUG) Log.i(TAG, "onTransitionStart: ${transition::class.simpleName}")
-                runningTransitions.add(transition)
-            }
-        }
-
+object KeyguardBlueprintViewBinder {
+    @JvmStatic
     fun bind(
         constraintLayout: ConstraintLayout,
         viewModel: KeyguardBlueprintViewModel,
@@ -118,7 +75,7 @@ constructor(
                                     )
                                 }
 
-                            runTransition(constraintLayout, transition, config) {
+                            viewModel.runTransition(constraintLayout, transition, config) {
                                 // Replace sections from the previous blueprint with the new ones
                                 blueprint.replaceViews(
                                     constraintLayout,
@@ -146,7 +103,7 @@ constructor(
                     viewModel.refreshTransition.collect { config ->
                         val blueprint = viewModel.blueprint.value
 
-                        runTransition(
+                        viewModel.runTransition(
                             constraintLayout,
                             IntraBlueprintTransition(config, clockViewModel, smartspaceViewModel),
                             config,
@@ -164,50 +121,6 @@ constructor(
                     }
                 }
             }
-        }
-    }
-
-    private fun runTransition(
-        constraintLayout: ConstraintLayout,
-        transition: Transition,
-        config: Config,
-        apply: () -> Unit,
-    ) {
-        val currentPriority = if (isTransitionRunning) runningPriority else -1
-        if (config.checkPriority && config.type.priority < currentPriority) {
-            if (DEBUG) {
-                Log.w(
-                    TAG,
-                    "runTransition: skipping ${transition::class.simpleName}: " +
-                        "currentPriority=$currentPriority; config=$config"
-                )
-            }
-            apply()
-            return
-        }
-
-        if (DEBUG) {
-            Log.i(
-                TAG,
-                "runTransition: running ${transition::class.simpleName}: " +
-                    "currentPriority=$currentPriority; config=$config"
-            )
-        }
-
-        // beginDelayedTransition makes a copy, so we temporarially add the uncopied transition to
-        // the running set until the copy is started by the handler.
-        runningTransitions.add(transition)
-        transition.addListener(transitionListener)
-        runningPriority = max(currentPriority, config.type.priority)
-
-        handler.post {
-            if (config.terminatePrevious) {
-                TransitionManager.endTransitions(constraintLayout)
-            }
-
-            TransitionManager.beginDelayedTransition(constraintLayout, transition)
-            runningTransitions.remove(transition)
-            apply()
         }
     }
 
@@ -237,8 +150,6 @@ constructor(
         )
     }
 
-    companion object {
-        private const val TAG = "KeyguardBlueprintViewBinder"
-        private const val DEBUG = false
-    }
+    private const val TAG = "KeyguardBlueprintViewBinder"
+    private const val DEBUG = false
 }
