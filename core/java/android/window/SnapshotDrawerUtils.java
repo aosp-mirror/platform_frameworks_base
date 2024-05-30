@@ -77,6 +77,14 @@ public class SnapshotDrawerUtils {
     private static final String TAG = "SnapshotDrawerUtils";
 
     /**
+     * Used to check if toolkitSetFrameRateReadOnly flag is enabled
+     *
+     * @hide
+     */
+    private static boolean sToolkitSetFrameRateReadOnlyFlagValue =
+            android.view.flags.Flags.toolkitSetFrameRateReadOnly();
+
+    /**
      * When creating the starting window, we use the exact same layout flags such that we end up
      * with a window with the exact same dimensions etc. However, these flags are not used in layout
      * and might cause other side effects so we exclude them.
@@ -439,6 +447,9 @@ public class SnapshotDrawerUtils {
         layoutParams.setFitInsetsTypes(attrs.getFitInsetsTypes());
         layoutParams.setFitInsetsSides(attrs.getFitInsetsSides());
         layoutParams.setFitInsetsIgnoringVisibility(attrs.isFitInsetsIgnoringVisibility());
+        if (sToolkitSetFrameRateReadOnlyFlagValue) {
+            layoutParams.setFrameRatePowerSavingsBalanced(false);
+        }
 
         layoutParams.setTitle(title);
         layoutParams.inputFeatures |= INPUT_FEATURE_NO_INPUT_CHANNEL;
