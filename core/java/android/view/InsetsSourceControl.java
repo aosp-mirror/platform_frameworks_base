@@ -305,6 +305,18 @@ public class InsetsSourceControl implements Parcelable {
             return mControls;
         }
 
+        /** Cleanup {@link SurfaceControl} stored in controls to prevent leak. */
+        public void release() {
+            if (mControls == null) {
+                return;
+            }
+            for (InsetsSourceControl control : mControls) {
+                if (control != null) {
+                    control.release(SurfaceControl::release);
+                }
+            }
+        }
+
         /** Sets the given flags to all controls. */
         public void setParcelableFlags(int parcelableFlags) {
             if (mControls == null) {
