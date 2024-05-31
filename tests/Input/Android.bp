@@ -31,6 +31,7 @@ android_test {
         "androidx.test.runner",
         "androidx.test.uiautomator_uiautomator",
         "compatibility-device-util-axt",
+        "cts-input-lib",
         "flag-junit",
         "frameworks-base-testutils",
         "hamcrest-library",
