@@ -381,7 +381,10 @@ public class ShadeCarrierGroupController {
         mLogger.logHandleUpdateCarrierInfo(info);
 
         mNoSimTextView.setVisibility(View.GONE);
-        if (!info.airplaneMode && info.anySimReady) {
+        if (info.isInSatelliteMode) {
+            mLogger.logUsingSatelliteText(info.carrierText);
+            showSingleText(info.carrierText);
+        } else if (!info.airplaneMode && info.anySimReady) {
             boolean[] slotSeen = new boolean[SIM_SLOTS];
             if (info.listOfCarriers.length == info.subscriptionIds.length) {
                 mLogger.logUsingSimViews();
@@ -416,20 +419,29 @@ public class ShadeCarrierGroupController {
                         info.listOfCarriers.length, info.subscriptionIds.length);
             }
         } else {
+            // No sims or airplane mode (but not WFC), so just show the main carrier text.
             mLogger.logUsingNoSimView(info.carrierText);
-            // No sims or airplane mode (but not WFC). Do not show ShadeCarrierGroup,
-            // instead just show info.carrierText in a different view.
-            for (int i = 0; i < SIM_SLOTS; i++) {
-                mInfos[i] = mInfos[i].changeVisibility(false);
-                mCarrierGroups[i].setCarrierText("");
-                mCarrierGroups[i].setVisibility(View.GONE);
-            }
-            mNoSimTextView.setText(info.carrierText);
-            if (!TextUtils.isEmpty(info.carrierText)) {
-                mNoSimTextView.setVisibility(View.VISIBLE);
-            }
+            showSingleText(info.carrierText);
         }
         handleUpdateState(); // handleUpdateCarrierInfo is always called from main thread.
+    }
+
+    /**
+     * Shows only the given text in a single TextView and hides ShadeCarrierGroup (which would show
+     * individual SIM details).
+     */
+    private void showSingleText(CharSequence text) {
+        for (int i = 0; i < SIM_SLOTS; i++) {
+            mInfos[i] = mInfos[i].changeVisibility(false);
+            mCarrierGroups[i].setCarrierText("");
+            mCarrierGroups[i].setVisibility(View.GONE);
+        }
+        // TODO(b/341841138): Re-name this view now that it's being used for more than just the
+        //  no-SIM case.
+        mNoSimTextView.setText(text);
+        if (!TextUtils.isEmpty(text)) {
+            mNoSimTextView.setVisibility(View.VISIBLE);
+        }
     }
 
     private static class H extends Handler {
