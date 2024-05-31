@@ -4057,9 +4057,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 return;
             }
 
-            // Log the metrics when the component state is changed.
-            PackageMetrics.reportComponentStateChanged(computer, componentStateMetricsList, userId);
-
             if (isSynchronous) {
                 flushPackageRestrictionsAsUserInternalLocked(userId);
             } else {
@@ -4078,6 +4075,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 }
             }
         }
+
+        // Log the metrics when the component state is changed.
+        PackageMetrics.reportComponentStateChanged(snapshotComputer(), componentStateMetricsList,
+                userId);
 
         final long callingId = Binder.clearCallingIdentity();
         try {
