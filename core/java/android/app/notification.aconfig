@@ -192,3 +192,10 @@ flag {
   description: "Removes all custom views"
   bug: "342602960"
 }
+
+flag {
+  name: "redact_sensitive_content_notifications_on_lockscreen"
+  namespace: "systemui"
+  description: "redacts notifications on the lockscreen if they have the 'sensitiveContent' flag"
+  bug: "343631648"
+}
