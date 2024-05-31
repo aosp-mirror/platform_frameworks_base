@@ -28,7 +28,6 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
 import static android.os.Process.INVALID_PID;
 import static android.os.Process.INVALID_UID;
-import static android.os.Process.ROOT_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.provider.DeviceConfig.NAMESPACE_WINDOW_MANAGER;
 
@@ -386,10 +385,6 @@ public class BackgroundActivityStartController {
                     return BackgroundStartPrivileges.NONE;
                 case MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED:
                     // no explicit choice by the app - let us decide what to do
-                    if (callingUid == ROOT_UID || callingUid == SYSTEM_UID) {
-                        // root and system must always opt in explicitly
-                        return BackgroundStartPrivileges.NONE;
-                    }
                     if (callingPackage != null) {
                         // determine based on the calling/creating package
                         boolean changeEnabled = CompatChanges.isChangeEnabled(
