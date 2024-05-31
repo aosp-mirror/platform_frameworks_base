@@ -16,13 +16,16 @@
 
 package com.android.systemui.keyboard.shortcut.ui.composable
 
-import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,21 +35,19 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
-import androidx.compose.material.icons.filled.Accessibility
-import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Tv
-import androidx.compose.material.icons.filled.VerticalSplit
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItemColors
@@ -56,6 +57,7 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -69,10 +71,13 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
@@ -81,8 +86,13 @@ import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.res.R
 
 @Composable
-fun ShortcutHelper(modifier: Modifier = Modifier, onKeyboardSettingsClicked: () -> Unit) {
-    if (shouldUseSinglePane()) {
+fun ShortcutHelper(
+    onKeyboardSettingsClicked: () -> Unit,
+    modifier: Modifier = Modifier,
+    categories: List<ShortcutHelperCategory> = ShortcutHelperTemporaryData.categories,
+    useSinglePane: @Composable () -> Boolean = { shouldUseSinglePane() },
+) {
+    if (useSinglePane()) {
         ShortcutHelperSinglePane(modifier, categories, onKeyboardSettingsClicked)
     } else {
         ShortcutHelperTwoPane(modifier, categories, onKeyboardSettingsClicked)
@@ -91,7 +101,8 @@ fun ShortcutHelper(modifier: Modifier = Modifier, onKeyboardSettingsClicked: () 
 
 @Composable
 private fun shouldUseSinglePane() =
-    LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.Compact
+    LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.Compact ||
+        LocalWindowSizeClass.current.heightSizeClass == WindowHeightSizeClass.Compact
 
 @Composable
 private fun ShortcutHelperSinglePane(
@@ -209,11 +220,31 @@ private fun RotatingExpandCollapseIcon(isExpanded: Boolean) {
 
 @Composable
 private fun ShortcutCategoryDetailsSinglePane(category: ShortcutHelperCategory) {
-    Box(modifier = Modifier.fillMaxWidth().heightIn(min = 300.dp)) {
-        Text(
-            modifier = Modifier.align(Alignment.Center),
-            text = stringResource(category.labelResId),
-        )
+    Column(Modifier.padding(horizontal = 16.dp)) {
+        category.subCategories.fastForEach { subCategory ->
+            ShortcutSubCategorySinglePane(subCategory)
+        }
+    }
+}
+
+@Composable
+private fun ShortcutSubCategorySinglePane(subCategory: SubCategory) {
+    // This @Composable is expected to be in a Column.
+    SubCategoryTitle(subCategory.label)
+    subCategory.shortcuts.fastForEachIndexed { index, shortcut ->
+        if (index > 0) {
+            HorizontalDivider()
+        }
+        ShortcutSinglePane(shortcut)
+    }
+}
+
+@Composable
+private fun ShortcutSinglePane(shortcut: Shortcut) {
+    Column(Modifier.padding(vertical = 24.dp)) {
+        ShortcutDescriptionText(shortcut = shortcut)
+        Spacer(modifier = Modifier.height(12.dp))
+        ShortcutKeyCombinations(shortcut = shortcut)
     }
 }
 
@@ -223,6 +254,7 @@ private fun ShortcutHelperTwoPane(
     categories: List<ShortcutHelperCategory>,
     onKeyboardSettingsClicked: () -> Unit,
 ) {
+    var selectedCategory by remember { mutableStateOf(categories.first()) }
     Column(modifier = modifier.fillMaxSize().padding(start = 24.dp, end = 24.dp, top = 26.dp)) {
         TitleBar()
         Spacer(modifier = Modifier.height(12.dp))
@@ -230,12 +262,157 @@ private fun ShortcutHelperTwoPane(
             StartSidePanel(
                 modifier = Modifier.fillMaxWidth(fraction = 0.32f),
                 categories = categories,
+                selectedCategory = selectedCategory,
+                onCategoryClicked = { selectedCategory = it },
                 onKeyboardSettingsClicked = onKeyboardSettingsClicked,
             )
             Spacer(modifier = Modifier.width(24.dp))
-            EndSidePanel(Modifier.fillMaxSize())
+            EndSidePanel(Modifier.fillMaxSize(), selectedCategory)
         }
     }
+}
+
+@Composable
+private fun EndSidePanel(modifier: Modifier, category: ShortcutHelperCategory) {
+    LazyColumn(modifier.nestedScroll(rememberNestedScrollInteropConnection())) {
+        items(items = category.subCategories, key = { item -> item.label }) {
+            SubCategoryContainerDualPane(it)
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+    }
+}
+
+@Composable
+private fun SubCategoryContainerDualPane(subCategory: SubCategory) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        color = MaterialTheme.colorScheme.surfaceBright
+    ) {
+        Column(Modifier.padding(horizontal = 32.dp, vertical = 24.dp)) {
+            SubCategoryTitle(subCategory.label)
+            Spacer(Modifier.height(24.dp))
+            subCategory.shortcuts.fastForEachIndexed { index, shortcut ->
+                if (index > 0) {
+                    HorizontalDivider()
+                }
+                ShortcutViewDualPane(shortcut)
+            }
+        }
+    }
+}
+
+@Composable
+private fun SubCategoryTitle(title: String) {
+    Text(
+        title,
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.primary,
+    )
+}
+
+@Composable
+private fun ShortcutViewDualPane(shortcut: Shortcut) {
+    Row(Modifier.padding(vertical = 16.dp)) {
+        ShortcutDescriptionText(
+            modifier = Modifier.weight(0.25f).align(Alignment.CenterVertically),
+            shortcut = shortcut,
+        )
+        ShortcutKeyCombinations(
+            modifier = Modifier.weight(0.75f),
+            shortcut = shortcut,
+        )
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ShortcutKeyCombinations(
+    modifier: Modifier = Modifier,
+    shortcut: Shortcut,
+) {
+    FlowRow(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        shortcut.commands.forEachIndexed { index, command ->
+            if (index > 0) {
+                ShortcutOrSeparator(spacing = 16.dp)
+            }
+            ShortcutCommand(command)
+        }
+    }
+}
+
+@Composable
+private fun ShortcutCommand(command: ShortcutCommand) {
+    // This @Composable is expected to be in a Row or FlowRow.
+    command.keys.forEachIndexed { keyIndex, key ->
+        if (keyIndex > 0) {
+            Spacer(Modifier.width(4.dp))
+        }
+        ShortcutKeyContainer {
+            if (key is ShortcutKey.Text) {
+                ShortcutTextKey(key)
+            } else if (key is ShortcutKey.Icon) {
+                ShortcutIconKey(key)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ShortcutKeyContainer(shortcutKeyContent: @Composable BoxScope.() -> Unit) {
+    Box(
+        modifier =
+            Modifier.height(36.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceContainer,
+                    shape = RoundedCornerShape(12.dp)
+                ),
+    ) {
+        shortcutKeyContent()
+    }
+}
+
+@Composable
+private fun BoxScope.ShortcutTextKey(key: ShortcutKey.Text) {
+    Text(
+        text = key.value,
+        modifier = Modifier.align(Alignment.Center).padding(horizontal = 12.dp),
+        style = MaterialTheme.typography.titleSmall,
+    )
+}
+
+@Composable
+private fun BoxScope.ShortcutIconKey(key: ShortcutKey.Icon) {
+    Icon(
+        imageVector = key.value,
+        contentDescription = null,
+        modifier = Modifier.align(Alignment.Center).padding(6.dp)
+    )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun FlowRowScope.ShortcutOrSeparator(spacing: Dp) {
+    Spacer(Modifier.width(spacing))
+    Text(
+        text = stringResource(R.string.shortcut_helper_key_combinations_or_separator),
+        modifier = Modifier.align(Alignment.CenterVertically),
+        style = MaterialTheme.typography.titleSmall,
+    )
+    Spacer(Modifier.width(spacing))
+}
+
+@Composable
+private fun ShortcutDescriptionText(
+    shortcut: Shortcut,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        modifier = modifier,
+        text = shortcut.label,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurface,
+    )
 }
 
 @Composable
@@ -243,26 +420,31 @@ private fun StartSidePanel(
     modifier: Modifier,
     categories: List<ShortcutHelperCategory>,
     onKeyboardSettingsClicked: () -> Unit,
+    selectedCategory: ShortcutHelperCategory,
+    onCategoryClicked: (ShortcutHelperCategory) -> Unit,
 ) {
     Column(modifier) {
         ShortcutsSearchBar()
         Spacer(modifier = Modifier.heightIn(16.dp))
-        CategoriesPanelTwoPane(categories)
+        CategoriesPanelTwoPane(categories, selectedCategory, onCategoryClicked)
         Spacer(modifier = Modifier.weight(1f))
         KeyboardSettings(onKeyboardSettingsClicked)
     }
 }
 
 @Composable
-private fun CategoriesPanelTwoPane(categories: List<ShortcutHelperCategory>) {
-    var selected by remember { mutableStateOf(categories.first()) }
+private fun CategoriesPanelTwoPane(
+    categories: List<ShortcutHelperCategory>,
+    selectedCategory: ShortcutHelperCategory,
+    onCategoryClicked: (ShortcutHelperCategory) -> Unit
+) {
     Column {
         categories.fastForEach {
             CategoryItemTwoPane(
                 label = stringResource(it.labelResId),
                 icon = it.icon,
-                selected = selected == it,
-                onClick = { selected = it }
+                selected = selectedCategory == it,
+                onClick = { onCategoryClicked(it) }
             )
         }
     }
@@ -305,15 +487,6 @@ private fun CategoryItemTwoPane(
 }
 
 @Composable
-fun EndSidePanel(modifier: Modifier) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(28.dp),
-        color = MaterialTheme.colorScheme.surfaceBright
-    ) {}
-}
-
-@Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun TitleBar() {
     CenterAlignedTopAppBar(
@@ -333,6 +506,7 @@ private fun TitleBar() {
 private fun ShortcutsSearchBar() {
     var query by remember { mutableStateOf("") }
     SearchBar(
+        modifier = Modifier.fillMaxWidth(),
         colors = SearchBarDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceBright),
         query = query,
         active = false,
@@ -371,25 +545,6 @@ private fun KeyboardSettings(onClick: () -> Unit) {
         }
     }
 }
-
-/** Temporary data class just to populate the UI. */
-private data class ShortcutHelperCategory(
-    @StringRes val labelResId: Int,
-    val icon: ImageVector,
-)
-
-// Temporarily populating the categories directly in the UI.
-private val categories =
-    listOf(
-        ShortcutHelperCategory(R.string.shortcut_helper_category_system, Icons.Default.Tv),
-        ShortcutHelperCategory(
-            R.string.shortcut_helper_category_multitasking,
-            Icons.Default.VerticalSplit
-        ),
-        ShortcutHelperCategory(R.string.shortcut_helper_category_input, Icons.Default.Keyboard),
-        ShortcutHelperCategory(R.string.shortcut_helper_category_app_shortcuts, Icons.Default.Apps),
-        ShortcutHelperCategory(R.string.shortcut_helper_category_a11y, Icons.Default.Accessibility),
-    )
 
 object ShortcutHelper {
 

@@ -3525,6 +3525,14 @@
          use. The helper shows shortcuts in categories, which can be collapsed or expanded.
          [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_content_description_expand_icon">Expand icon</string>
+    <!-- Word that separates different possible key combinations of a shortcut. For example the
+         "Go to home screen" shortcut could be triggered using "home button" OR "ctrl + h".
+         This is that "or" separator.
+         The keyboard shortcut helper is a  component that shows the  user which keyboard shortcuts
+         they can use.
+         [CHAR LIMIT=NONE]
+          -->
+    <string name="shortcut_helper_key_combinations_or_separator">or</string>
 
     <!-- Content description for keyboard backlight brightness dialog [CHAR LIMIT=NONE] -->
     <string name="keyboard_backlight_dialog_title">Keyboard backlight</string>
