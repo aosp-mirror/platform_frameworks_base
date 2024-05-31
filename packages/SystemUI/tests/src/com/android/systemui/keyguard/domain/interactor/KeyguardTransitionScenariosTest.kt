@@ -570,13 +570,13 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
             // WHEN biometrics succeeds with wake and unlock mode
             powerInteractor.setAwakeForTest()
             keyguardRepository.setBiometricUnlockState(BiometricUnlockMode.WAKE_AND_UNLOCK)
-            advanceTimeBy(60L)
+            runCurrent()
 
             assertThat(transitionRepository)
                 .startedTransition(
                     to = KeyguardState.GONE,
                     from = KeyguardState.DOZING,
-                    ownerName = "FromDozingTransitionInteractor",
+                    ownerName = "FromDozingTransitionInteractor(biometric wake and unlock)",
                     animatorAssertion = { it.isNotNull() }
                 )
 
