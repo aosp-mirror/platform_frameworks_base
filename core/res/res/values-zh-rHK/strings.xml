@@ -201,6 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"你的工作設定檔無法再在此裝置上使用"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"密碼輸入錯誤的次數過多"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"管理員已開放裝置供個人使用"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"已移除私人空間"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"你的機構不允許在此受管理的裝置上建立私人空間。"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"裝置已受管理"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"你的機構會管理此裝置，並可能會監控網絡流量。輕按即可瞭解詳情。"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"應用程式可存取你的位置"</string>
@@ -2194,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"十字鍵向左鍵"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"十字鍵向右鍵"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"十字鍵中心鍵"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」的說明列。"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> 已納入受限制的儲存區"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>："</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"已傳送圖片"</string>
@@ -2415,10 +2416,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"運作方式"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"待處理…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"重新設定「指紋解鎖」功能"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"由於「<xliff:g id="FINGERPRINT">%s</xliff:g>」無法正常運作，因此系統已將其刪除"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"由於「<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>」和「<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>」無法正常運作，因此系統已將其刪除。"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"由於「<xliff:g id="FINGERPRINT">%s</xliff:g>」無法正常運作，因此系統已將其刪除。請重新設定，才能使用指紋解鎖手機。"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"由於「<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>」和「<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>」無法正常運作，因此系統已將其刪除。請重新設定，才能使用指紋解鎖手機。"</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"重新設定「面孔解鎖」功能"</string>

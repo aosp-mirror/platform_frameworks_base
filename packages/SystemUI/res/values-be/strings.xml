@@ -76,6 +76,7 @@
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"адпраўлены відарыс"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Захаванне скрыншота..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Захаванне здымка экрана ў працоўны профіль…"</string>
+    <string name="screenshot_saving_private_profile" msgid="8934706048497093297">"Здымак экрана захоўваецца ў прыватны профіль"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Здымак экрана захаваны"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Не атрымалася зрабіць здымак экрана"</string>
     <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"Знешні дысплэй"</string>
@@ -371,6 +372,8 @@
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Спалучыць новую прыладу"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Націсніце, каб спалучыць новую прыладу"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Не ўдалося абнавіць набор налад"</string>
+    <!-- no translation found for hearing_devices_preset_label (7878267405046232358) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Разблакіраваць мікрафон прылады?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Разблакіраваць камеру прылады?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Разблакіраваць камеру і мікрафон прылады?"</string>
@@ -710,7 +713,7 @@
     <string name="notification_more_settings" msgid="4936228656989201793">"Дадатковыя налады"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"Наладзіць"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"Паказаць усплывальнае апавяшчэнне"</string>
-    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Выдаліць усплывальныя апавяшчэнні"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Выдаліць усплывальныя чаты"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"кіраванне апавяшчэннямі"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"параметры адкладвання апавяшчэнняў"</string>

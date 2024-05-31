@@ -263,7 +263,7 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
         testScope.runTest {
             init()
             val lockoutMessage by collectLastValue(underTest.bouncerMessage)
-
+            kosmos.fakeBiometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(true)
             kosmos.fakeDeviceEntryFaceAuthRepository.setLockedOut(true)
             runCurrent()
 
@@ -281,6 +281,23 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun onFaceLockoutStateChange_whenFaceIsNotEnrolled_isANoop() =
+        testScope.runTest {
+            init()
+            val lockoutMessage by collectLastValue(underTest.bouncerMessage)
+
+            kosmos.fakeBiometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(false)
+            runCurrent()
+            kosmos.fakeDeviceEntryFaceAuthRepository.setLockedOut(true)
+            runCurrent()
+
+            assertThat(primaryResMessage(lockoutMessage))
+                .isEqualTo("Unlock with PIN or fingerprint")
+            assertThat(lockoutMessage?.secondaryMessage?.message).isNull()
+            assertThat(lockoutMessage?.secondaryMessage?.messageResId).isEqualTo(0)
+        }
+
+    @Test
     fun onFaceLockout_whenItIsClass3_propagatesState() =
         testScope.runTest {
             init()
@@ -288,6 +305,7 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
             kosmos.fakeFacePropertyRepository.setSensorInfo(
                 FaceSensorInfo(1, SensorStrength.STRONG)
             )
+            kosmos.fakeBiometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(true)
             kosmos.fakeDeviceEntryFaceAuthRepository.setLockedOut(true)
             runCurrent()
 
@@ -308,6 +326,7 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
         testScope.runTest {
             init()
             val lockedOutMessage by collectLastValue(underTest.bouncerMessage)
+            kosmos.fakeBiometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
 
             kosmos.fakeDeviceEntryFingerprintAuthRepository.setLockedOut(true)
             runCurrent()
@@ -322,6 +341,23 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
             assertThat(primaryResMessage(lockedOutMessage))
                 .isEqualTo("Unlock with PIN or fingerprint")
             assertThat(lockedOutMessage?.secondaryMessage?.message).isNull()
+        }
+
+    @Test
+    fun onFingerprintLockoutStateChange_whenFingerprintIsNotEnrolled_isANoop() =
+        testScope.runTest {
+            init()
+            val lockoutMessage by collectLastValue(underTest.bouncerMessage)
+
+            kosmos.fakeBiometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(true)
+            kosmos.fakeBiometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
+            runCurrent()
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setLockedOut(true)
+            runCurrent()
+
+            assertThat(primaryResMessage(lockoutMessage)).isEqualTo("Enter PIN")
+            assertThat(lockoutMessage?.secondaryMessage?.message).isNull()
+            assertThat(lockoutMessage?.secondaryMessage?.messageResId).isEqualTo(0)
         }
 
     @Test

@@ -253,8 +253,12 @@ public class RecentTasksController implements TaskStackListenerCallback,
         notifyRunningTaskVanished(taskInfo);
     }
 
-    /** Notify listeners that the windowing mode of the given Task was updated. */
-    public void onTaskWindowingModeChanged(ActivityManager.RunningTaskInfo taskInfo) {
+    /**
+     * Notify listeners that the running infos related to recent tasks was updated.
+     *
+     * This currently includes windowing mode and visibility.
+     */
+    public void onTaskRunningInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
         notifyRecentTasksChanged();
         notifyRunningTaskChanged(taskInfo);
     }
@@ -442,6 +446,25 @@ public class RecentTasksController implements TaskStackListenerCallback,
         return null;
     }
 
+    /**
+     * Find the background task that match the given taskId.
+     */
+    @Nullable
+    public ActivityManager.RecentTaskInfo findTaskInBackground(int taskId) {
+        List<ActivityManager.RecentTaskInfo> tasks = mActivityTaskManager.getRecentTasks(
+                Integer.MAX_VALUE, ActivityManager.RECENT_IGNORE_UNAVAILABLE,
+                ActivityManager.getCurrentUser());
+        for (int i = 0; i < tasks.size(); i++) {
+            final ActivityManager.RecentTaskInfo task = tasks.get(i);
+            if (task.isVisible) {
+                continue;
+            }
+            if (taskId == task.taskId) {
+                return task;
+            }
+        }
+        return null;
+    }
     public void dump(@NonNull PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);

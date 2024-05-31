@@ -71,9 +71,13 @@ public class PowerStatsAggregator {
                 mStats = new AggregatedPowerStats(mAggregatedPowerStatsConfig);
             }
 
+            start(mStats, startTimeMs);
+
             boolean clockUpdateAdded = false;
             long baseTime = startTimeMs > 0 ? startTimeMs : UNINITIALIZED;
             long lastTime = 0;
+            int lastStates = 0xFFFFFFFF;
+            int lastStates2 = 0xFFFFFFFF;
             try (BatteryStatsHistoryIterator iterator = mHistory.iterate(startTimeMs, endTimeMs)) {
                 while (iterator.hasNext()) {
                     BatteryStats.HistoryItem item = iterator.next();
@@ -111,6 +115,19 @@ public class PowerStatsAggregator {
                         mCurrentScreenState = screenState;
                     }
 
+                    if ((item.states
+                            & BatteryStats.HistoryItem.IMPORTANT_FOR_POWER_STATS_STATES)
+                            != lastStates
+                            || (item.states2
+                            & BatteryStats.HistoryItem.IMPORTANT_FOR_POWER_STATS_STATES2)
+                            != lastStates2) {
+                        mStats.noteStateChange(item);
+                        lastStates = item.states
+                                & BatteryStats.HistoryItem.IMPORTANT_FOR_POWER_STATS_STATES;
+                        lastStates2 = item.states2
+                                & BatteryStats.HistoryItem.IMPORTANT_FOR_POWER_STATS_STATES2;
+                    }
+
                     if (item.processStateChange != null) {
                         mStats.setUidState(item.processStateChange.uid,
                                 AggregatedPowerStatsConfig.STATE_PROCESS_STATE,
@@ -121,7 +138,7 @@ public class PowerStatsAggregator {
                         if (!mStats.isCompatible(item.powerStats)) {
                             if (lastTime > baseTime) {
                                 mStats.setDuration(lastTime - baseTime);
-                                finish(mStats);
+                                finish(mStats, lastTime);
                                 consumer.accept(mStats);
                             }
                             mStats.reset();
@@ -134,7 +151,7 @@ public class PowerStatsAggregator {
             }
             if (lastTime > baseTime) {
                 mStats.setDuration(lastTime - baseTime);
-                finish(mStats);
+                finish(mStats, lastTime);
                 consumer.accept(mStats);
             }
 
@@ -142,12 +159,22 @@ public class PowerStatsAggregator {
         }
     }
 
-    private void finish(AggregatedPowerStats stats) {
+    private void start(AggregatedPowerStats stats, long timestampMs) {
         for (int i = 0; i < mProcessors.size(); i++) {
             PowerComponentAggregatedPowerStats component =
                     stats.getPowerComponentStats(mProcessors.keyAt(i));
             if (component != null) {
-                mProcessors.valueAt(i).finish(component);
+                mProcessors.valueAt(i).start(component, timestampMs);
+            }
+        }
+    }
+
+    private void finish(AggregatedPowerStats stats, long timestampMs) {
+        for (int i = 0; i < mProcessors.size(); i++) {
+            PowerComponentAggregatedPowerStats component =
+                    stats.getPowerComponentStats(mProcessors.keyAt(i));
+            if (component != null) {
+                mProcessors.valueAt(i).finish(component, timestampMs);
             }
         }
     }

@@ -677,6 +677,10 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
             mId = id;
         }
 
+        public int getResourceId() {
+            return mId;
+        }
+
         @Override
         public boolean equals(Object o) {
             return o instanceof DrawableIconWithRes && ((DrawableIconWithRes) o).mId == mId;

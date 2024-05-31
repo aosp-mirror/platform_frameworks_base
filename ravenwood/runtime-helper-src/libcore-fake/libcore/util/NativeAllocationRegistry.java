@@ -15,7 +15,7 @@
  */
 package libcore.util;
 
-import libcore.ravenwood.LibcoreRavenwoodUtils;
+import com.android.ravenwood.common.RavenwoodRuntimeNative;
 
 import java.lang.ref.Cleaner;
 import java.lang.ref.Reference;
@@ -27,11 +27,6 @@ import java.lang.ref.Reference;
  *   (Should ART switch to java.lang.ref.Cleaner?)
  */
 public class NativeAllocationRegistry {
-    static {
-        // Initialize the JNI method.
-        LibcoreRavenwoodUtils.loadRavenwoodNativeRuntime();
-    }
-
     private final long mFreeFunction;
     private static final Cleaner sCleaner = Cleaner.create();
 
@@ -71,7 +66,7 @@ public class NativeAllocationRegistry {
         }
 
         final Runnable releaser = () -> {
-            applyFreeFunction(mFreeFunction, nativePtr);
+            RavenwoodRuntimeNative.applyFreeFunction(mFreeFunction, nativePtr);
         };
         sCleaner.register(referent, releaser);
 
@@ -79,10 +74,4 @@ public class NativeAllocationRegistry {
         Reference.reachabilityFence(referent);
         return releaser;
     }
-
-    /**
-     * Calls {@code freeFunction}({@code nativePtr}).
-     */
-    public static native void applyFreeFunction(long freeFunction, long nativePtr);
 }
-

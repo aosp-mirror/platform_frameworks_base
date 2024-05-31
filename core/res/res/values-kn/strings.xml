@@ -201,6 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"ನಿಮ್ಮ ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ ಈ ಸಾಧನದಲ್ಲಿ ಈಗ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"ಹಲವಾರು ಪಾಸ್‌ವರ್ಡ್ ಪ್ರಯತ್ನಗಳು"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"ವೈಯಕ್ತಿಕ ಬಳಕೆಗಾಗಿ ನಿರ್ವಾಹಕರು ತೊರೆದ ಸಾಧನ"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"ಪ್ರೈವೆಟ್ ಸ್ಪೇಸ್ ಅನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"ಈ ನಿರ್ವಹಿಸಲಾದ ಸಾಧನದಲ್ಲಿ ಪ್ರೈವೆಟ್ ಸ್ಪೇಸ್‌ಗಳನ್ನು ನಿಮ್ಮ ಸಂಸ್ಥೆಯು ಅನುಮತಿಸುವುದಿಲ್ಲ."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ಸಾಧನವನ್ನು ನಿರ್ವಹಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ನಿಮ್ಮ ಸಂಸ್ಥೆಯು ಈ ಸಾಧನವನ್ನು ನಿರ್ವಹಿಸುತ್ತದೆ ಮತ್ತು ಅದು ನೆಟ್‌ವರ್ಕ್ ಟ್ರಾಫಿಕ್ ಮೇಲೆ ಗಮನವಿರಿಸಬಹುದು. ವಿವರಗಳಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ಆ್ಯಪ್‌ಗಳು ನಿಮ್ಮ ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಬಹುದು"</string>
@@ -2194,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad ನ ಎಡಭಾಗದ ಬಟನ್"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad ನ ಬಲಭಾಗದ ಬಟನ್"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad ನ ಮಧ್ಯದ ಬಟನ್"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಆ್ಯಪ್‌ನ ಶೀರ್ಷಿಕೆಯ ಪಟ್ಟಿ."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ಅನ್ನು ನಿರ್ಬಂಧಿತ ಬಕೆಟ್‌ಗೆ ಹಾಕಲಾಗಿದೆ"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"ಚಿತ್ರವನ್ನು ಕಳುಹಿಸಲಾಗಿದೆ"</string>
@@ -2415,10 +2416,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ಇದು ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"ಬಾಕಿ ಉಳಿದಿದೆ..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಮತ್ತೊಮ್ಮೆ ಸೆಟಪ್ ಮಾಡಿ"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> ಸರಿಯಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತಿರಲಿಲ್ಲ, ಹಾಗಾಗಿ ಅದನ್ನು ಅಳಿಸಲಾಗಿದೆ"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ಮತ್ತು <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ಸರಿಯಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತಿರಲಿಲ್ಲ, ಹಾಗಾಗಿ ಅವುಗಳನ್ನು ಅಳಿಸಲಾಗಿದೆ"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ಸರಿಯಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತಿಲ್ಲ ಹಾಗೂ ಅದನ್ನು ಅಳಿಸಲಾಗಿದೆ. ಫಿಂಗರ್‌ ಪ್ರಿಂಟ್ ಮೂಲಕ ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಅದನ್ನು ಪುನಃ ಸೆಟಪ್‌ ಮಾಡಿ."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ಮತ್ತು <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ಸರಿಯಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತಿಲ್ಲ ಹಾಗೂ ಅವುಗಳನ್ನು ಅಳಿಸಲಾಗಿದೆ. ನಿಮ್ಮ ಫಿಂಗರ್‌ ಪ್ರಿಂಟ್ ಮೂಲಕ ನಿಮ್ಮ ಫೋನ್ ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಅವುಗಳನ್ನು ಪುನಃ ಸೆಟಪ್‌ ಮಾಡಿ."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಮತ್ತೊಮ್ಮೆ ಸೆಟಪ್ ಮಾಡಿ"</string>

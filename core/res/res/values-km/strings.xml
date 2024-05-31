@@ -201,6 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"កម្រងព័ត៌មាន​ការងារ​របស់អ្នក​លែងមាន​នៅលើ​ឧបករណ៍​នេះទៀត​ហើយ"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"ការព្យាយាមបញ្ចូលពាក្យសម្ងាត់ច្រើនដងពេកហើយ"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"អ្នកគ្រប់គ្រង​បានបោះបង់​ឧបករណ៍​ចោល​ដោយសារ​ការប្រើប្រាស់​ផ្ទាល់ខ្លួន"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"លំហឯកជនត្រូវបានដកចេញ"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"ស្ថាប័នរបស់អ្នកមិនអនុញ្ញាតលំហឯកជននៅលើឧបករណ៍ដែលស្ថិតក្រោមការគ្រប់គ្រងនេះទេ។"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ឧបករណ៍ស្ថិតក្រោមការគ្រប់គ្រង"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ស្ថាប័នរបស់អ្នកគ្រប់គ្រងឧបករណ៍នេះ ហើយអាចនឹងតាមដានចរាចរណ៍បណ្តាញ។ ចុចដើម្បីទទួលបានព័ត៌មានលម្អិត។"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"កម្មវិធី​អាច​ចូលប្រើ​ទីតាំង​របស់អ្នក​បាន"</string>
@@ -2194,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad ឆ្វេង"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad ស្ដាំ"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad កណ្ដាល"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"របារពណ៌នា​អំពី <xliff:g id="APP_NAME">%1$s</xliff:g>។"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ត្រូវបានដាក់​ទៅក្នុងធុង​ដែលបានដាក់កំហិត"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>៖"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"បាន​ផ្ញើរូបភាព"</string>
@@ -2415,10 +2416,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"របៀបដែលវាដំណើរការ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"កំពុងរង់ចាំ..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"រៀបចំការដោះសោ​ដោយស្កេន​ស្នាមម្រាមដៃម្ដងទៀត"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> មិនដំណើរការល្អទេ ហើយត្រូវបានលុបចេញហើយ"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> និង <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> មិនដំណើរការល្អទេ ហើយត្រូវបានលុបចេញហើយ"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> មិនដំណើរការល្អទេ ហើយត្រូវបានលុបចេញហើយ។ រៀបចំវាម្ដងទៀត ដើម្បីដោះសោទូរសព្ទរបស់អ្នកដោយប្រើស្នាមម្រាមដៃ។"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> និង <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> មិនដំណើរការល្អទេ ហើយត្រូវបានលុបចេញហើយ។ រៀបចំវាម្ដងទៀត ដើម្បីដោះសោទូរសព្ទរបស់អ្នកដោយប្រើស្នាមម្រាមដៃ។"</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"រៀបចំ​ការដោះ​សោ​ដោយស្កេន​មុខម្ដងទៀត"</string>

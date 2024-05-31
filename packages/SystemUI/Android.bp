@@ -752,6 +752,7 @@ android_robolectric_test {
     plugins: [
         "dagger2-compiler",
     ],
+    strict_mode: false,
 }
 
 // in-place tests which use Robolectric in the tests directory
@@ -771,7 +772,6 @@ android_robolectric_test {
     ],
     static_libs: [
         "RoboTestLibraries",
-        "mockito-kotlin2",
     ],
     libs: [
         "android.test.runner",
@@ -787,6 +787,7 @@ android_robolectric_test {
     plugins: [
         "dagger2-compiler",
     ],
+    strict_mode: false,
 }
 
 android_ravenwood_test {

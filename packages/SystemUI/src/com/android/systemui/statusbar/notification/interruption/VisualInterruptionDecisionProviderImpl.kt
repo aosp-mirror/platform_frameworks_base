@@ -43,6 +43,8 @@ import com.android.systemui.util.EventLog
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SystemSettings
 import com.android.systemui.util.time.SystemClock
+import com.android.wm.shell.bubbles.Bubbles
+import java.util.Optional
 import javax.inject.Inject
 
 class VisualInterruptionDecisionProviderImpl
@@ -65,7 +67,8 @@ constructor(
     private val userTracker: UserTracker,
     private val avalancheProvider: AvalancheProvider,
     private val systemSettings: SystemSettings,
-    private val packageManager: PackageManager
+    private val packageManager: PackageManager,
+    private val bubbles: Optional<Bubbles>
 ) : VisualInterruptionDecisionProvider {
 
     init {
@@ -158,7 +161,7 @@ constructor(
         addCondition(PulseDisabledSuppressor(ambientDisplayConfiguration, userTracker))
         addCondition(PulseBatterySaverSuppressor(batteryController))
         addFilter(PeekPackageSnoozedSuppressor(headsUpManager))
-        addFilter(PeekAlreadyBubbledSuppressor(statusBarStateController))
+        addFilter(PeekAlreadyBubbledSuppressor(statusBarStateController, bubbles))
         addFilter(PeekDndSuppressor())
         addFilter(PeekNotImportantSuppressor())
         addCondition(PeekDeviceNotInUseSuppressor(powerManager, statusBarStateController))
@@ -175,7 +178,8 @@ constructor(
 
         if (NotificationAvalancheSuppression.isEnabled) {
             addFilter(
-                AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager)
+                AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
+                        uiEventLogger)
             )
             avalancheProvider.register()
         }

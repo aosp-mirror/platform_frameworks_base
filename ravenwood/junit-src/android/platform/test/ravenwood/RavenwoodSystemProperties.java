@@ -16,6 +16,8 @@
 
 package android.platform.test.ravenwood;
 
+import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_SYSPROP;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -101,6 +103,8 @@ public class RavenwoodSystemProperties {
         setValue("ro.soc.model", "Ravenwood");
 
         setValue("ro.debuggable", "1");
+
+        setValue(RAVENWOOD_SYSPROP, "1");
     }
 
     /** Copy constructor */

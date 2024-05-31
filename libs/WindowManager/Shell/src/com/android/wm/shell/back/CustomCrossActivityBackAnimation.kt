@@ -33,6 +33,8 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.protolog.ShellProtoLogGroup
 import com.android.wm.shell.shared.annotations.ShellMainThread
 import javax.inject.Inject
+import kotlin.math.max
+import kotlin.math.min
 
 /** Class that handles customized predictive cross activity back animations. */
 @ShellMainThread
@@ -96,6 +98,12 @@ class CustomCrossActivityBackAnimation(
         targetEnteringRect.set(startClosingRect)
     }
 
+    override fun getPostCommitAnimationDuration(): Long {
+        return min(
+            MAX_POST_COMMIT_ANIM_DURATION, max(closeAnimation!!.duration, enterAnimation!!.duration)
+        )
+    }
+
     override fun getPreCommitEnteringBaseTransformation(progress: Float): Transformation {
         gestureProgress = progress
         transformation.clear()
@@ -107,9 +115,9 @@ class CustomCrossActivityBackAnimation(
         super.startBackAnimation(backMotionEvent)
         if (
             closeAnimation == null ||
-                enterAnimation == null ||
-                closingTarget == null ||
-                enteringTarget == null
+            enterAnimation == null ||
+            closingTarget == null ||
+            enteringTarget == null
         ) {
             ProtoLog.d(
                 ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW,
@@ -125,10 +133,13 @@ class CustomCrossActivityBackAnimation(
         super.onPostCommitProgress(linearProgress)
         if (closingTarget == null || enteringTarget == null) return
 
-        // TODO: Should we use the duration from the custom xml spec for the post-commit animation?
-        applyTransform(closingTarget!!.leash, currentClosingRect, linearProgress, closeAnimation!!)
-        val enteringProgress =
-            MathUtils.lerp(gestureProgress * PRE_COMMIT_MAX_PROGRESS, 1f, linearProgress)
+        val closingProgress = closeAnimation!!.getPostCommitProgress(linearProgress)
+        applyTransform(closingTarget!!.leash, currentClosingRect, closingProgress, closeAnimation!!)
+        val enteringProgress = MathUtils.lerp(
+            gestureProgress * PRE_COMMIT_MAX_PROGRESS,
+            1f,
+            enterAnimation!!.getPostCommitProgress(linearProgress)
+        )
         applyTransform(
             enteringTarget!!.leash,
             currentEnteringRect,
@@ -175,6 +186,19 @@ class CustomCrossActivityBackAnimation(
         return false
     }
 
+    private fun Animation.getPostCommitProgress(linearProgress: Float): Float {
+        return when (duration) {
+            0L -> 1f
+            else -> min(
+                1f,
+                getPostCommitAnimationDuration() / min(
+                    MAX_POST_COMMIT_ANIM_DURATION,
+                    duration
+                ).toFloat() * linearProgress
+            )
+        }
+    }
+
     class AnimationLoadResult {
         var closeAnimation: Animation? = null
         var enterAnimation: Animation? = null
@@ -183,6 +207,7 @@ class CustomCrossActivityBackAnimation(
 
     companion object {
         private const val PRE_COMMIT_MAX_PROGRESS = 0.2f
+        private const val MAX_POST_COMMIT_ANIM_DURATION = 2000L
     }
 }
 
@@ -226,7 +251,7 @@ class CustomAnimationLoader(private val transitionAnimation: TransitionAnimation
         // Try to get animation from Activity#overrideActivityTransition
         if (
             enterAnimation && animationInfo.customEnterAnim != 0 ||
-                !enterAnimation && animationInfo.customExitAnim != 0
+            !enterAnimation && animationInfo.customExitAnim != 0
         ) {
             a =
                 transitionAnimation.loadAppTransitionAnimation(

@@ -36,6 +36,7 @@ import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
+import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
@@ -89,6 +90,7 @@ object KeyguardDismissInteractorFactory {
                 { mock(DeviceEntryFingerprintAuthInteractor::class.java) },
                 { mock(KeyguardInteractor::class.java) },
                 { mock(KeyguardTransitionInteractor::class.java) },
+                { mock(SceneInteractor::class.java) },
                 testScope.backgroundScope,
             )
         val powerInteractorWithDeps =

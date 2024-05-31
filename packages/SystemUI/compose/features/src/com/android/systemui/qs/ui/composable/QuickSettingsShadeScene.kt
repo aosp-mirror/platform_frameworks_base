@@ -33,9 +33,9 @@ import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.shade.ui.viewmodel.OverlayShadeViewModel
 import dagger.Lazy
+import java.util.Optional
 import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
-import java.util.Optional
 
 @SysUISingleton
 class QuickSettingsShadeScene

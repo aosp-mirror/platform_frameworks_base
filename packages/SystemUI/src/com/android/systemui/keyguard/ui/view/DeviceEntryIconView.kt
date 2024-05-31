@@ -88,6 +88,12 @@ constructor(
             }
     }
 
+    /**
+     * Setups different icon states.
+     * - All lottie views will require a LottieOnCompositionLoadedListener to update
+     *   LottieProperties (like color) of the view.
+     * - Drawable properties can be updated using ImageView properties like imageTintList.
+     */
     private fun setupIconStates() {
         // Lockscreen States
         // LOCK

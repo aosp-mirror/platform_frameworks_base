@@ -495,7 +495,7 @@
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - 在 <xliff:g id="TIME">%3$s</xliff:g>前充滿電"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> • 在 <xliff:g id="TIME">%2$s</xliff:g>前充滿電"</string>
     <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"在 <xliff:g id="TIME">%1$s</xliff:g>前充滿電"</string>
-    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"在 <xliff:g id="TIME">%1$s</xliff:g>前充滿電"</string>
+    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"<xliff:g id="TIME">%1$s</xliff:g> 前充滿電"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"未知"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"充電中"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"快速充電中"</string>

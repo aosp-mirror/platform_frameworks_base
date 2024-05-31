@@ -43,6 +43,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
 
+import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -305,7 +307,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mInteractionJankMonitor = mKosmos.getInteractionJankMonitor();
         MockitoAnnotations.initMocks(this);
         when(mSessionTracker.getSessionId(SESSION_KEYGUARD)).thenReturn(mKeyguardInstanceId);
-
+        when(mFaceAuthInteractor.isAuthenticated()).thenReturn(MutableStateFlow(false));
+        when(mFaceAuthInteractor.isLockedOut()).thenReturn(MutableStateFlow(false));
         when(mUserManager.isUserUnlocked(anyInt())).thenReturn(true);
         currentUserIsSystem();
         when(mStrongAuthTracker.getStub()).thenReturn(mock(IStrongAuthTracker.Stub.class));
@@ -1082,7 +1085,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(true /* isClass3Biometric */))
                 .thenReturn(true);
         when(mFaceAuthInteractor.isFaceAuthStrong()).thenReturn(true);
-        when(mFaceAuthInteractor.isAuthenticated()).thenReturn(true);
+        when(mFaceAuthInteractor.isAuthenticated()).thenReturn(MutableStateFlow(true));
 
         assertThat(mKeyguardUpdateMonitor.getUserCanSkipBouncer(user)).isTrue();
     }
@@ -1093,7 +1096,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 .thenReturn(false);
         int user = mSelectedUserInteractor.getSelectedUserId();
         when(mFaceAuthInteractor.isFaceAuthStrong()).thenReturn(false);
-        when(mFaceAuthInteractor.isAuthenticated()).thenReturn(true);
+        when(mFaceAuthInteractor.isAuthenticated()).thenReturn(MutableStateFlow(true));
 
         assertThat(mKeyguardUpdateMonitor.getUserCanSkipBouncer(user)).isFalse();
     }
@@ -1477,7 +1480,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
 
         // WHEN face authenticated
-        when(mFaceAuthInteractor.isAuthenticated()).thenReturn(true);
+        when(mFaceAuthInteractor.isAuthenticated()).thenReturn(MutableStateFlow(true));
 
         // THEN we shouldn't listen for udfps
         assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isEqualTo(false);
@@ -1531,7 +1534,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         verifyFingerprintAuthenticateCall();
 
-        when(mFaceAuthInteractor.isAuthenticated()).thenReturn(true);
+        when(mFaceAuthInteractor.isAuthenticated()).thenReturn(MutableStateFlow(true));
         when(mFaceAuthInteractor.isFaceAuthStrong()).thenReturn(false);
         when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(false /* isClass3Biometric */))
                 .thenReturn(false);
@@ -2274,7 +2277,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     private void faceAuthLockOut() {
-        when(mFaceAuthInteractor.isLockedOut()).thenReturn(true);
+        when(mFaceAuthInteractor.isLockedOut()).thenReturn(MutableStateFlow(true));
         mFaceAuthenticationListener.getValue().onAuthenticationStatusChanged(
                 new ErrorFaceAuthenticationStatus(FACE_ERROR_LOCKOUT_PERMANENT, "", 0L));
     }

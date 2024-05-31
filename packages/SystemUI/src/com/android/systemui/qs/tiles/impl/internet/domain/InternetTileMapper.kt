@@ -53,6 +53,7 @@ constructor(
             stateDescription = data.stateDescription.loadContentDescription(context)
             contentDescription = data.contentDescription.loadContentDescription(context)
 
+            iconRes = data.iconId
             if (data.icon != null) {
                 this.icon = { data.icon }
             } else if (data.iconId != null) {

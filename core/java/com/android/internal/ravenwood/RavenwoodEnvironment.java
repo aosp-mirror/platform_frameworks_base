@@ -27,6 +27,7 @@ public final class RavenwoodEnvironment {
     public static final String TAG = "RavenwoodEnvironment";
 
     private static RavenwoodEnvironment sInstance = new RavenwoodEnvironment();
+    private static Workaround sWorkaround = new Workaround();
 
     private RavenwoodEnvironment() {
         if (isRunningOnRavenwood()) {
@@ -75,5 +76,31 @@ public final class RavenwoodEnvironment {
 
     private boolean isRunningOnRavenwood$ravenwood() {
         return true;
+    }
+
+    /**
+     * See {@link Workaround}. It's only usablke on Ravenwood.
+     */
+    public static Workaround workaround() {
+        if (getInstance().isRunningOnRavenwood()) {
+            return sWorkaround;
+        }
+        throw new IllegalStateException("Workaround can only be used on Ravenwood");
+    }
+
+    /**
+     * A set of APIs used to work around missing features on Ravenwood. Ideally, this class should
+     * be empty, and all its APIs should be able to be implemented properly.
+     */
+    public static class Workaround {
+        Workaround() {
+        }
+
+        /**
+         * @return whether the app's target SDK level is at least Q.
+         */
+        public boolean isTargetSdkAtLeastQ() {
+            return true;
+        }
     }
 }

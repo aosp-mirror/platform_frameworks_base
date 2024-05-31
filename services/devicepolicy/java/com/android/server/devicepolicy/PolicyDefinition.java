@@ -240,7 +240,7 @@ final class PolicyDefinition<V> {
                     POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_INHERITABLE
                             | POLICY_FLAG_NON_COEXISTABLE_POLICY
                             | POLICY_FLAG_SKIP_ENFORCEMENT_IF_UNCHANGED,
-                    PolicyEnforcerCallbacks::setApplicationRestrictions,
+                    PolicyEnforcerCallbacks::noOp,
                     new BundlePolicySerializer());
 
     /**
@@ -263,7 +263,7 @@ final class PolicyDefinition<V> {
             new MostRecent<>(),
             POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_NON_COEXISTABLE_POLICY,
             // DevicePolicyManagerService handles the enforcement, this just takes care of storage
-            (Long value, Context context, Integer userId, PolicyKey policyKey) -> true,
+            PolicyEnforcerCallbacks::noOp,
             new LongPolicySerializer());
 
     static PolicyDefinition<Integer> KEYGUARD_DISABLED_FEATURES = new PolicyDefinition<>(
@@ -271,7 +271,7 @@ final class PolicyDefinition<V> {
             new FlagUnion(),
             POLICY_FLAG_LOCAL_ONLY_POLICY,
             // Nothing is enforced for keyguard features, we just need to store it
-            (Integer value, Context context, Integer userId, PolicyKey policyKey) -> true,
+            PolicyEnforcerCallbacks::noOp,
             new IntegerPolicySerializer());
 
     // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
@@ -312,7 +312,7 @@ final class PolicyDefinition<V> {
                     TRUE_MORE_RESTRICTIVE,
                     POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_INHERITABLE,
                     // Nothing is enforced, we just need to store it
-                    (Boolean value, Context context, Integer userId, PolicyKey policyKey) -> true,
+                    PolicyEnforcerCallbacks::noOp,
                     new BooleanPolicySerializer());
 
     /**
@@ -332,7 +332,7 @@ final class PolicyDefinition<V> {
             new NoArgsPolicyKey(DevicePolicyIdentifiers.PERMITTED_INPUT_METHODS_POLICY),
             new MostRecent<>(),
             POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_INHERITABLE,
-            (Set<String> value, Context context, Integer userId, PolicyKey policyKey) -> true,
+            PolicyEnforcerCallbacks::noOp,
             new PackageSetPolicySerializer());
 
 
@@ -365,6 +365,30 @@ final class PolicyDefinition<V> {
             POLICY_FLAG_LOCAL_ONLY_POLICY,
             PolicyEnforcerCallbacks::setContentProtectionPolicy,
             new IntegerPolicySerializer());
+
+    static PolicyDefinition<Integer> PASSWORD_COMPLEXITY = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.PASSWORD_COMPLEXITY_POLICY),
+            new MostRestrictive<>(
+                    List.of(
+                            new IntegerPolicyValue(
+                                    DevicePolicyManager.PASSWORD_COMPLEXITY_HIGH),
+                            new IntegerPolicyValue(
+                                    DevicePolicyManager.PASSWORD_COMPLEXITY_MEDIUM),
+                            new IntegerPolicyValue(
+                                    DevicePolicyManager.PASSWORD_COMPLEXITY_LOW),
+                            new IntegerPolicyValue(
+                                    DevicePolicyManager.PASSWORD_COMPLEXITY_NONE))),
+            POLICY_FLAG_LOCAL_ONLY_POLICY,
+            PolicyEnforcerCallbacks::noOp,
+            new IntegerPolicySerializer());
+
+    static PolicyDefinition<Set<String>> PACKAGES_SUSPENDED =
+            new PolicyDefinition<>(
+                    new NoArgsPolicyKey(
+                            DevicePolicyIdentifiers.PACKAGES_SUSPENDED_POLICY),
+                    new PackageSetUnion(),
+                    PolicyEnforcerCallbacks::noOp,
+                    new PackageSetPolicySerializer());
 
     private static final Map<String, PolicyDefinition<?>> POLICY_DEFINITIONS = new HashMap<>();
     private static Map<String, Integer> USER_RESTRICTION_FLAGS = new HashMap<>();
@@ -405,6 +429,13 @@ final class PolicyDefinition<V> {
                 USB_DATA_SIGNALING);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.CONTENT_PROTECTION_POLICY,
                 CONTENT_PROTECTION);
+        // Intentionally not flagged since if the flag is flipped off on a device already
+        // having PASSWORD_COMPLEXITY policy in the on-device XML, it will cause the
+        // deserialization logic to break due to seeing an unknown tag.
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PASSWORD_COMPLEXITY_POLICY,
+                PASSWORD_COMPLEXITY);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PACKAGES_SUSPENDED_POLICY,
+                PACKAGES_SUSPENDED);
 
         // User Restriction Policies
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_MODIFY_ACCOUNTS, /* flags= */ 0);
@@ -523,7 +554,7 @@ final class PolicyDefinition<V> {
     private final PolicyKey mPolicyKey;
     private final ResolutionMechanism<V> mResolutionMechanism;
     private final int mPolicyFlags;
-    // A function that accepts  policy to apple, context, userId, callback arguments, and returns
+    // A function that accepts  policy to apply, context, userId, callback arguments, and returns
     // true if the policy has been enforced successfully.
     private final QuadFunction<V, Context, Integer, PolicyKey, Boolean> mPolicyEnforcerCallback;
     private final PolicySerializer<V> mPolicySerializer;

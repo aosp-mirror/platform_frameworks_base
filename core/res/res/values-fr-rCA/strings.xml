@@ -202,6 +202,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Votre profil professionnel n\'est plus accessible sur cet appareil"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Trop de tentatives d\'entrée du mot de passe"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"L\'administrateur a libéré l\'appareil pour un usage personnel"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Espace privé retiré"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Votre organisation n\'autorise pas les espaces privés sur cet appareil géré."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"L\'appareil est géré"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Votre organisation gère cet appareil et peut surveiller le trafic réseau. Touchez ici pour obtenir plus d\'information."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Les applications peuvent accéder à votre position"</string>
@@ -2195,7 +2197,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Pavé directionnel – gauche"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Pavé directionnel – droite"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Pavé directionnel – centre"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Barre de légende de l\'application <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> a été placé dans le compartiment RESTREINT"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g> :"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"a envoyé une image"</string>
@@ -2416,10 +2417,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Fonctionnement"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"En attente…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Configurer le Déverrouillage par empreinte digitale à nouveau"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> ne fonctionnait pas bien et a été supprimée"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> et <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ne fonctionnaient pas bien et ont été supprimées"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ne fonctionnait pas bien et a été supprimée. Configurez-le à nouveau pour déverrouiller votre téléphone avec l\'empreinte digitale."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> et <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ne fonctionnaient pas bien et ont été supprimées. Configurez-les à nouveau pour déverrouiller votre téléphone avec votre empreinte digitale."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Configurer le Déverrouillage par reconnaissance faciale à nouveau"</string>

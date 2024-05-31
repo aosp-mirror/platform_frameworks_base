@@ -23,6 +23,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.policy.configurationController
 import com.android.systemui.volume.panel.dagger.factory.volumePanelComponentFactory
 import com.android.systemui.volume.panel.domain.VolumePanelStartable
+import com.android.systemui.volume.panel.domain.interactor.volumePanelGlobalStateInteractor
 
 var Kosmos.volumePanelStartables: Set<VolumePanelStartable> by Kosmos.Fixture { emptySet() }
 
@@ -36,5 +37,6 @@ val Kosmos.volumePanelViewModelFactory: VolumePanelViewModel.Factory by
             volumePanelComponentFactory,
             configurationController,
             broadcastDispatcher,
+            volumePanelGlobalStateInteractor,
         )
     }

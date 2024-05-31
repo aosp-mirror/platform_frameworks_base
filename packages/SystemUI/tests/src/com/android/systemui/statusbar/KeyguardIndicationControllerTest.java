@@ -1514,19 +1514,6 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
     }
 
     @Test
-    public void onTrustAgentErrorMessageDroppedBecauseFingerprintMessageShowing() {
-        createController();
-        mController.setVisible(true);
-        mController.getKeyguardCallback().onBiometricHelp(BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED,
-                "fp not recognized", BiometricSourceType.FINGERPRINT);
-        clearInvocations(mRotateTextViewController);
-
-        mKeyguardUpdateMonitorCallback.onTrustAgentErrorMessage("testMessage");
-        verifyNoMessage(INDICATION_TYPE_TRUST);
-        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
-    }
-
-    @Test
     public void trustGrantedMessageShowsEvenWhenFingerprintMessageShowing() {
         createController();
         mController.setVisible(true);
@@ -1589,24 +1576,6 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
 
     private void verifyTransientMessage(String message) {
         verify(mRotateTextViewController).showTransient(eq(message));
-    }
-
-    private void verifyNoMessage(int type) {
-        if (type == INDICATION_TYPE_TRANSIENT) {
-            verify(mRotateTextViewController, never()).showTransient(anyString());
-        } else {
-            verify(mRotateTextViewController, never()).updateIndication(eq(type),
-                    anyObject(), anyBoolean());
-        }
-    }
-
-    private void verifyIndicationShown(int indicationType, String message) {
-        verify(mRotateTextViewController)
-                .updateIndication(eq(indicationType),
-                        mKeyguardIndicationCaptor.capture(),
-                        eq(true));
-        assertThat(mKeyguardIndicationCaptor.getValue().getMessage().toString())
-                .isEqualTo(message);
     }
 
     private void fingerprintUnlockIsNotPossible() {

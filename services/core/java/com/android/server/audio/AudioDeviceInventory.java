@@ -293,6 +293,7 @@ public class AudioDeviceInventory {
             Iterator<Entry<Pair<Integer, String>, AdiDeviceState>> iterator =
                     mDeviceInventory.entrySet().iterator();
             if (iterator.hasNext()) {
+                iterator.next();
                 iterator.remove();
             }
         }
@@ -856,6 +857,15 @@ public class AudioDeviceInventory {
                     } else if (switchToAvailable) {
                         makeLeAudioDeviceAvailable(
                                 btInfo, streamType, codec, "onSetBtActiveDevice");
+                    }
+                    break;
+                case BluetoothProfile.HEADSET:
+                    if (mDeviceBroker.isScoManagedByAudio()) {
+                        if (switchToUnavailable) {
+                            mDeviceBroker.onSetBtScoActiveDevice(null);
+                        } else if (switchToAvailable) {
+                            mDeviceBroker.onSetBtScoActiveDevice(btInfo.mDevice);
+                        }
                     }
                     break;
                 default: throw new IllegalArgumentException("Invalid profile "

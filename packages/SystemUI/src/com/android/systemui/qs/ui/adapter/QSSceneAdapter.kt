@@ -46,7 +46,6 @@ import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -89,8 +88,10 @@ interface QSSceneAdapter {
     /**
      * A view with the QS content ([QSContainerImpl]), managed by an instance of [QSImpl] tracked by
      * the interactor.
+     *
+     * A null value means that there is no inflated view yet. See [inflate].
      */
-    val qsView: Flow<View>
+    val qsView: StateFlow<View?>
 
     /** Sets the [MirrorController] in [QSImpl]. Set to `null` to remove. */
     fun setBrightnessMirrorController(mirrorController: MirrorController?)
@@ -101,8 +102,21 @@ interface QSSceneAdapter {
      */
     suspend fun inflate(context: Context)
 
-    /** Set the current state for QS. [state]. */
+    /**
+     * Set the current state for QS. [state].
+     *
+     * This will not trigger expansion (animation between QQS or QS) or squishiness to be applied.
+     * For that, use [applyLatestExpansionAndSquishiness] outside of the composition phase.
+     */
     fun setState(state: State)
+
+    /**
+     * Explicitly applies the expansion and squishiness value from the latest state set. Call this
+     * only outside of the composition phase as this will call [QSImpl.setQsExpansion] that is
+     * normally called during animations. In particular, this will read the value of
+     * [State.squishiness], that is not safe to read in the composition phase.
+     */
+    fun applyLatestExpansionAndSquishiness()
 
     /** Propagates the bottom nav bar size to [QSImpl] to be used as necessary. */
     suspend fun applyBottomNavBarPadding(padding: Int)
@@ -141,14 +155,24 @@ interface QSSceneAdapter {
             override val squishiness = { 1f }
         }
 
-        /** State for appearing QQS from Lockscreen or Gone */
-        data class UnsquishingQQS(override val squishiness: () -> Float) : State {
+        /**
+         * State for appearing QQS from Lockscreen or Gone.
+         *
+         * This should not be a data class, as it has a method parameter and even if it's the same
+         * lambda the output value may have changed.
+         */
+        class UnsquishingQQS(override val squishiness: () -> Float) : State {
             override val isVisible = true
             override val expansion = 0f
         }
 
-        /** State for appearing QS from Lockscreen or Gone, used in Split shade */
-        data class UnsquishingQS(override val squishiness: () -> Float) : State {
+        /**
+         * State for appearing QS from Lockscreen or Gone, used in Split shade.
+         *
+         * This should not be a data class, as it has a method parameter and even if it's the same
+         * lambda the output value may have changed.
+         */
+        class UnsquishingQS(override val squishiness: () -> Float) : State {
             override val isVisible = true
             override val expansion = 1f
         }
@@ -236,7 +260,10 @@ constructor(
 
     private val _qsImpl: MutableStateFlow<QSImpl?> = MutableStateFlow(null)
     val qsImpl = _qsImpl.asStateFlow()
-    override val qsView: Flow<View> = _qsImpl.map { it?.view }.filterNotNull()
+    override val qsView: StateFlow<View?> =
+        _qsImpl
+            .map { it?.view }
+            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), _qsImpl.value?.view)
 
     override val qqsHeight: Int
         get() = qsImpl.value?.qqsHeight ?: 0
@@ -370,7 +397,12 @@ constructor(
         setQsVisible(state.isVisible)
         setExpanded(state.isVisible && state.expansion > 0f)
         setListening(state.isVisible)
-        setQsExpansion(state.expansion, 1f, 0f, state.squishiness())
+    }
+
+    override fun applyLatestExpansionAndSquishiness() {
+        val qsImpl = _qsImpl.value
+        val state = state.value
+        qsImpl?.setQsExpansion(state.expansion, 1f, 0f, state.squishiness())
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {

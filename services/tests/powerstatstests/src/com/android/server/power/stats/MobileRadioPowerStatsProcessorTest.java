@@ -228,7 +228,7 @@ public class MobileRadioPowerStatsProcessorTest {
 
         aggregatedStats.addPowerStats(powerStats, 10_000);
 
-        processor.finish(aggregatedStats);
+        processor.finish(aggregatedStats, 10_000);
 
         MobileRadioPowerStatsLayout statsLayout =
                 new MobileRadioPowerStatsLayout(
@@ -475,7 +475,7 @@ public class MobileRadioPowerStatsProcessorTest {
 
         aggregatedStats.addPowerStats(powerStats, 10_000);
 
-        processor.finish(aggregatedStats);
+        processor.finish(aggregatedStats, 10_000);
         return aggregatedStats;
     }
 

@@ -40,8 +40,6 @@ import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 import static com.android.server.wm.ActivityStarter.Request;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.LaunchParamsModifierUtils.applyLayoutGravity;
-import static com.android.server.wm.LaunchParamsModifierUtils.calculateLayoutBounds;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -644,13 +642,13 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         displayArea.getStableRect(stableBounds);
 
         if (windowLayout.hasSpecifiedSize()) {
-            calculateLayoutBounds(stableBounds, windowLayout, inOutBounds,
+            LaunchParamsUtil.calculateLayoutBounds(stableBounds, windowLayout, inOutBounds,
                     /* desiredBounds */ null);
         } else if (inOutBounds.isEmpty()) {
             getTaskBounds(root, displayArea, windowLayout, WINDOWING_MODE_FREEFORM,
                     /* hasInitialBounds */ false, inOutBounds);
         }
-        applyLayoutGravity(verticalGravity, horizontalGravity, inOutBounds,
+        LaunchParamsUtil.applyLayoutGravity(verticalGravity, horizontalGravity, inOutBounds,
                 stableBounds);
     }
 

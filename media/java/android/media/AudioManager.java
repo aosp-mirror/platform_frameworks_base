@@ -8617,6 +8617,7 @@ public class AudioManager {
     @SystemApi
     @NonNull
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_ROUTING)
+    // TODO also open to MODIFY_AUDIO_SETTINGS_PRIVILEGED b/341780042
     public static List<AudioVolumeGroup> getAudioVolumeGroups() {
         final IAudioService service = getService();
         try {

@@ -172,6 +172,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
 import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor;
 import com.android.systemui.shade.CameraLauncher;
+import com.android.systemui.shade.GlanceableHubContainerController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.QuickSettingsController;
@@ -544,6 +545,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     // Fingerprint (as computed by getLoggingFingerprint() of the last logged state.
     private int mLastLoggedStateFingerprint;
     private boolean mIsLaunchingActivityOverLockscreen;
+    private boolean mDismissingShadeForActivityLaunch;
 
     private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
     protected final BatteryController mBatteryController;
@@ -594,6 +596,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final ColorExtractor.OnColorsChangedListener mOnColorsChangedListener =
             (extractor, which) -> updateTheme();
     private final BrightnessMirrorShowingInteractor mBrightnessMirrorShowingInteractor;
+    private final GlanceableHubContainerController mGlanceableHubContainerController;
 
     /**
      * Public constructor for CentralSurfaces.
@@ -706,7 +709,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             UserTracker userTracker,
             Provider<FingerprintManager> fingerprintManager,
             ActivityStarter activityStarter,
-            BrightnessMirrorShowingInteractor brightnessMirrorShowingInteractor
+            BrightnessMirrorShowingInteractor brightnessMirrorShowingInteractor,
+            GlanceableHubContainerController glanceableHubContainerController
     ) {
         mContext = context;
         mNotificationsController = notificationsController;
@@ -801,6 +805,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mFingerprintManager = fingerprintManager;
         mActivityStarter = activityStarter;
         mBrightnessMirrorShowingInteractor = brightnessMirrorShowingInteractor;
+        mGlanceableHubContainerController = glanceableHubContainerController;
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mStartingSurfaceOptional = startingSurfaceOptional;
@@ -1573,6 +1578,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public boolean isLaunchingActivityOverLockscreen() {
         return mIsLaunchingActivityOverLockscreen;
+    }
+
+    @Override
+    public boolean isDismissingShadeForActivityLaunch() {
+        return mDismissingShadeForActivityLaunch;
     }
 
     /**
@@ -2945,6 +2955,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     @Override
+    public void handleCommunalHubTouch(MotionEvent event) {
+        mGlanceableHubContainerController.onTouchEvent(event);
+    }
+
+    @Override
     public void awakenDreams() {
         mUiBgExecutor.execute(() -> {
             try {
@@ -3306,8 +3321,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     @Override
-    public void setIsLaunchingActivityOverLockscreen(boolean isLaunchingActivityOverLockscreen) {
+    public void setIsLaunchingActivityOverLockscreen(
+            boolean isLaunchingActivityOverLockscreen, boolean dismissShade) {
         mIsLaunchingActivityOverLockscreen = isLaunchingActivityOverLockscreen;
+        mDismissingShadeForActivityLaunch = dismissShade;
         mKeyguardViewMediator.launchingActivityOverLockscreen(mIsLaunchingActivityOverLockscreen);
     }
 

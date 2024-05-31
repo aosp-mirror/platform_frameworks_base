@@ -100,6 +100,7 @@ class QRCodeScannerTileMapperTest : SysuiTestCase() {
                     null
                 )
             },
+            com.android.systemui.res.R.drawable.ic_qr_code_scanner,
             label,
             activationState,
             secondaryLabel,

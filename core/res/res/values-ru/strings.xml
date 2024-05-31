@@ -203,6 +203,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Ваш рабочий профиль больше не доступен на этом устройстве"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Слишком много попыток ввести пароль."</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Администратор освободил устройство для личного использования"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Частное пространство удалено"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Ваша организация запрещает использовать частное пространство на этом управляемом устройстве."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Это управляемое устройство"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Ваша организация управляет этим устройством и может отслеживать сетевой трафик. Подробнее…"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"У приложений есть доступ к вашим геоданным"</string>
@@ -285,8 +287,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Аудиоподсказки"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"Блокировка входа"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"&gt;999"</string>
-    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
-    <skip />
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"Ответить"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Новое уведомление"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Физическая клавиатура"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Безопасность"</string>
@@ -2197,14 +2198,13 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"D-pad – влево"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"D-pad – вправо"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"D-pad – по центру"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Строка субтитров в приложении \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Приложение \"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>\" помещено в категорию с ограниченным доступом."</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"Отправлено изображение"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Чат"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Групповой чат"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
-    <string name="resolver_personal_tab" msgid="2051260504014442073">"Личное"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Личный"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Рабочее"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Просмотр личных данных"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Просмотр рабочих данных"</string>
@@ -2418,10 +2418,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Узнать принцип работы"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Обработка…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Настройте разблокировку по отпечатку пальца заново"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"Отпечаток пальца \"<xliff:g id="FINGERPRINT">%s</xliff:g>\" оказался неудачным и был удален."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"Отпечатки пальцев \"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>\" и \"<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>\" оказались неудачными и были удалены."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"Отпечаток пальца \"<xliff:g id="FINGERPRINT">%s</xliff:g>\" оказался неудачным и был удален. Чтобы использовать разблокировку с помощью отпечатка пальца, настройте ее заново."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"Отпечатки пальцев \"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>\" и \"<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>\" оказались неудачными и были удалены. Чтобы использовать разблокировку с помощью отпечатка пальца, настройте ее заново."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Настройте фейсконтроль заново"</string>

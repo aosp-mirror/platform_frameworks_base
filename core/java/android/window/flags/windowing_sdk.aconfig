@@ -148,3 +148,24 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    namespace: "windowing_sdk"
+    name: "insets_control_seq"
+    description: "Add seqId to InsetsControls to ensure the stale update is ignored"
+    bug: "339380439"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "windowing_sdk"
+     name: "move_animation_options_to_change"
+     description: "Move AnimationOptions from TransitionInfo to each Change"
+     bug: "327332488"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}

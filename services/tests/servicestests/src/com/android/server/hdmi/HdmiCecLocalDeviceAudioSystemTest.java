@@ -472,6 +472,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         HdmiCecMessage message =
                 HdmiCecMessageBuilder.buildRequestArcInitiation(ADDR_TV, ADDR_AUDIO_SYSTEM);
         mNativeWrapper.setPhysicalAddress(0x1100);
+        mHdmiControlService.onHotplug(0x1100, true);
 
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleRequestArcInitiate(message))
                 .isEqualTo(Constants.ABORT_NOT_IN_CORRECT_MODE);
@@ -482,6 +483,8 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         HdmiCecMessage message =
                 HdmiCecMessageBuilder.buildRequestArcInitiation(ADDR_TV, ADDR_AUDIO_SYSTEM);
         mNativeWrapper.setPhysicalAddress(0x1000);
+        mHdmiControlService.onHotplug(0x1000, true);
+
         mHdmiCecLocalDeviceAudioSystem.removeAction(ArcInitiationActionFromAvr.class);
 
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleRequestArcInitiate(message))

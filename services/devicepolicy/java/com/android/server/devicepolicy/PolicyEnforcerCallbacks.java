@@ -73,6 +73,10 @@ final class PolicyEnforcerCallbacks {
 
     private static final String LOG_TAG = "PolicyEnforcerCallbacks";
 
+    static <T> boolean noOp(T value, Context context, Integer userId, PolicyKey policyKey) {
+        return true;
+    }
+
     static boolean setAutoTimezoneEnabled(@Nullable Boolean enabled, @NonNull Context context) {
         if (!DevicePolicyManagerService.isUnicornFlagEnabled()) {
             Slogf.w(LOG_TAG, "Trying to enforce setAutoTimezoneEnabled while flag is off.");

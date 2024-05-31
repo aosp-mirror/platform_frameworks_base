@@ -72,6 +72,9 @@
     <!-- The default margin used in immersive mode to capture the start of a swipe gesture from the
          edge of the screen to show the system bars. -->
     <dimen name="system_gestures_start_threshold">24dp</dimen>
+    <!-- The minimum swipe gesture distance for showing the system bars when in immersive mode. This
+         swipe must be within the specified system_gestures_start_threshold area. -->
+    <dimen name="system_gestures_distance_threshold">24dp</dimen>
 
     <!-- Height of the bottom navigation bar frame; this is different than navigation_bar_height
          where that is the height reported to all the other windows to resize themselves around the

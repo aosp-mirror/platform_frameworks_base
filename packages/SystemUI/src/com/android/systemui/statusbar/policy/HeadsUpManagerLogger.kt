@@ -121,19 +121,23 @@ class HeadsUpManagerLogger @Inject constructor(
         })
     }
 
-    fun logRemoveEntryRequest(key: String) {
+    fun logRemoveEntryRequest(key: String, reason: String, isWaiting: Boolean) {
         buffer.log(TAG, INFO, {
             str1 = logKey(key)
+            str2 = reason
+            bool1 = isWaiting
         }, {
-            "request: remove entry $str1"
+            "request: $str2 => remove entry $str1 isWaiting: $isWaiting"
         })
     }
 
-    fun logRemoveEntry(key: String) {
+    fun logRemoveEntry(key: String, reason: String, isWaiting: Boolean) {
         buffer.log(TAG, INFO, {
             str1 = logKey(key)
+            str2 = reason
+            bool1 = isWaiting
         }, {
-            "remove entry $str1"
+            "$str2 => remove entry $str1 isWaiting: $isWaiting"
         })
     }
 
@@ -153,12 +157,13 @@ class HeadsUpManagerLogger @Inject constructor(
         })
     }
 
-    fun logRemoveNotification(key: String, releaseImmediately: Boolean) {
+    fun logRemoveNotification(key: String, releaseImmediately: Boolean, isWaiting: Boolean) {
         buffer.log(TAG, INFO, {
             str1 = logKey(key)
             bool1 = releaseImmediately
+            bool2 = isWaiting
         }, {
-            "remove notification $str1 releaseImmediately: $bool1"
+            "remove notification $str1 releaseImmediately: $bool1 isWaiting: $bool2"
         })
     }
 
@@ -208,12 +213,13 @@ class HeadsUpManagerLogger @Inject constructor(
         })
     }
 
-    fun logSetEntryPinned(entry: NotificationEntry, isPinned: Boolean) {
+    fun logSetEntryPinned(entry: NotificationEntry, isPinned: Boolean, reason: String) {
         buffer.log(TAG, VERBOSE, {
             str1 = entry.logKey
             bool1 = isPinned
+            str2 = reason
         }, {
-            "set entry pinned $str1 pinned: $bool1"
+            "$str2 => set entry pinned $str1 pinned: $bool1"
         })
     }
 

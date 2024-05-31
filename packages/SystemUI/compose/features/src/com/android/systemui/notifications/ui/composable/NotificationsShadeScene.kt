@@ -17,21 +17,31 @@
 package com.android.systemui.notifications.ui.composable
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
+import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.composable.LockscreenContent
 import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeSceneViewModel
+import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
 import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.shade.ui.viewmodel.OverlayShadeViewModel
+import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
+import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController
+import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import dagger.Lazy
 import java.util.Optional
 import javax.inject.Inject
@@ -41,36 +51,53 @@ import kotlinx.coroutines.flow.StateFlow
 class NotificationsShadeScene
 @Inject
 constructor(
-    viewModel: NotificationsShadeSceneViewModel,
+    sceneViewModel: NotificationsShadeSceneViewModel,
     private val overlayShadeViewModel: OverlayShadeViewModel,
+    private val shadeHeaderViewModel: ShadeHeaderViewModel,
+    private val notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
+    private val tintedIconManagerFactory: TintedIconManager.Factory,
+    private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
+    private val statusBarIconController: StatusBarIconController,
+    private val shadeSession: SaveableSession,
+    private val stackScrollView: Lazy<NotificationScrollView>,
     private val lockscreenContent: Lazy<Optional<LockscreenContent>>,
 ) : ComposableScene {
 
     override val key = Scenes.NotificationsShade
 
     override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
-        viewModel.destinationScenes
+        sceneViewModel.destinationScenes
 
     @Composable
     override fun SceneScope.Content(
         modifier: Modifier,
     ) {
         OverlayShade(
-            viewModel = overlayShadeViewModel,
             modifier = modifier,
-            horizontalArrangement = Arrangement.Start,
+            viewModel = overlayShadeViewModel,
+            horizontalArrangement = Arrangement.End,
             lockscreenContent = lockscreenContent,
         ) {
-            Text(
-                text = "Notifications list",
-                modifier = Modifier.padding(NotificationsShade.Dimensions.Padding)
-            )
-        }
-    }
-}
+            Column {
+                ExpandedShadeHeader(
+                    viewModel = shadeHeaderViewModel,
+                    createTintedIconManager = tintedIconManagerFactory::create,
+                    createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
+                    statusBarIconController = statusBarIconController,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
 
-object NotificationsShade {
-    object Dimensions {
-        val Padding = 16.dp
+                NotificationScrollingStack(
+                    shadeSession = shadeSession,
+                    stackScrollView = stackScrollView.get(),
+                    viewModel = notificationsPlaceholderViewModel,
+                    maxScrimTop = { 0f },
+                    shouldPunchHoleBehindScrim = false,
+                    shouldFillMaxSize = false,
+                    shadeMode = ShadeMode.Dual,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
     }
 }

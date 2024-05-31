@@ -177,7 +177,7 @@ flag {
 }
 
 flag {
-    name: "notification_throttle_hun"
+    name: "notification_avalanche_throttle_hun"
     namespace: "systemui"
     description: "During notification avalanche, throttle HUNs showing in fast succession."
     bug: "307288824"
@@ -960,10 +960,13 @@ flag {
 }
 
 flag {
-  name: "media_controls_user_initiated_dismiss"
+  name: "media_controls_user_initiated_deleteintent"
   namespace: "systemui"
   description: "Only dismiss media notifications when the control was removed by the user."
   bug: "335875159"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -984,6 +987,20 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+  name: "glanceable_hub_fullscreen_swipe"
+  namespace: "systemui"
+  description: "Increase swipe area for gestures to bring in glanceable hub"
+  bug: "339665673"
+}
+
+flag {
+  name: "glanceable_hub_shortcut_button"
+  namespace: "systemui"
+  description: "Shows a button over the dream and lock screen to open the glanceable hub"
+  bug: "339667383"
 }
 
 flag {
@@ -1008,4 +1025,14 @@ flag {
    metadata {
      purpose: PURPOSE_BUGFIX
    }
+}
+
+flag {
+  name: "notification_media_manager_background_execution"
+  namespace: "systemui"
+  description: "Decide whether to execute binder calls in background thread"
+  bug: "336612071"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

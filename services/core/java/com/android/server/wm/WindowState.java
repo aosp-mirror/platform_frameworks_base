@@ -188,6 +188,7 @@ import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyCache;
+import android.app.servertransaction.WindowStateInsetsControlChangeItem;
 import android.app.servertransaction.WindowStateResizeItem;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -3818,11 +3819,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         final InsetsStateController stateController =
                 getDisplayContent().getInsetsStateController();
-        mLastReportedActiveControls.set(stateController.getControlsForDispatch(this));
-        try {
-            mClient.insetsControlChanged(getCompatInsetsState(), mLastReportedActiveControls);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Failed to deliver inset control state change to w=" + this, e);
+        final InsetsState insetsState = getCompatInsetsState();
+        mLastReportedActiveControls.set(stateController.getControlsForDispatch(this),
+                false /* copyControls */);
+        if (Flags.insetsControlChangedItem()) {
+            getProcess().scheduleClientTransactionItem(WindowStateInsetsControlChangeItem.obtain(
+                    mClient, insetsState, mLastReportedActiveControls));
+        } else {
+            try {
+                mClient.insetsControlChanged(insetsState, mLastReportedActiveControls);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to deliver inset control state change to w=" + this, e);
+            }
         }
     }
 

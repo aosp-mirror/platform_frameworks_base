@@ -59,6 +59,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
     private final List<IBinder> mPendingTransitionTokens = new ArrayList<>();
 
     private OnTaskResizeAnimationListener mOnTaskResizeAnimationListener;
+
     public EnterDesktopTaskTransitionHandler(
             Transitions transitions) {
         this(transitions, SurfaceControl.Transaction::new);
@@ -72,11 +73,12 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
     }
 
     void setOnTaskResizeAnimationListener(OnTaskResizeAnimationListener listener) {
-        mOnTaskResizeAnimationListener =  listener;
+        mOnTaskResizeAnimationListener = listener;
     }
 
     /**
      * Starts Transition of type TRANSIT_MOVE_TO_DESKTOP
+     *
      * @param wct WindowContainerTransaction for transition
      * @return the token representing the started transition
      */

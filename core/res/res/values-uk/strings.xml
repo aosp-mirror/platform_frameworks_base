@@ -203,6 +203,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Робочий профіль більше не доступний на цьому пристрої"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Забагато спроб ввести пароль"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Адміністратор не дозволив використовувати пристрій для особистих потреб"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Приватний простір видалено"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Ваша організація не дозволяє мати приватні простори на цьому керованому пристрої."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Пристрій контролюється"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Адміністратор вашої організації контролює цей пристрій і відстежує мережевий трафік. Торкніться, щоб дізнатися більше."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Додаток має доступ до геоданих"</string>
@@ -285,8 +287,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Голос. підказки"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"Блокування"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
-    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
-    <skip />
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"Відповісти"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Нове сповіщення"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Фізична клавіатура"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Безпека"</string>
@@ -2197,7 +2198,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Кнопка \"вліво\" панелі керування"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Кнопка \"вправо\" панелі керування"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Центральна кнопка панелі керування"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Смуга із субтитрами для додатка <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Пакет \"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>\" додано в сегмент з обмеженнями"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"надіслано зображення"</string>
@@ -2418,10 +2418,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Як це працює"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Обробка…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Налаштуйте розблокування відбитком пальця повторно"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"Відбиток \"<xliff:g id="FINGERPRINT">%s</xliff:g>\" працював неналежним чином, і його видалено"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"Відбитки \"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>\" і \"<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>\" працювали неналежним чином, і їх видалено"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"Відбиток \"<xliff:g id="FINGERPRINT">%s</xliff:g>\" працював неналежним чином, і його видалено. Налаштуйте його ще раз, щоб розблоковувати телефон за допомогою відбитка пальця."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"Відбитки \"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>\" і \"<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>\" працювали неналежним чином, і їх видалено. Налаштуйте їх ще раз, щоб розблоковувати телефон за допомогою відбитка пальця."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Налаштуйте фейс-контроль повторно"</string>

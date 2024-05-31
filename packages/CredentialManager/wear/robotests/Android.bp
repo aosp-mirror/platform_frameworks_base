@@ -25,4 +25,5 @@ android_robolectric_test {
     ],
     java_resource_dirs: ["config"],
     upstream: true,
+    strict_mode: false,
 }

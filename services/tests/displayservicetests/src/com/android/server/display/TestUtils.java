@@ -30,13 +30,21 @@ import java.lang.reflect.Method;
 public final class TestUtils {
 
     public static SensorEvent createSensorEvent(Sensor sensor, int value) throws Exception {
+        return createSensorEvent(sensor, value, SystemClock.elapsedRealtimeNanos());
+    }
+
+    /**
+     * Creates a light sensor event
+     */
+    public static SensorEvent createSensorEvent(Sensor sensor, int value, long timestamp)
+            throws Exception {
         final Constructor<SensorEvent> constructor =
                 SensorEvent.class.getDeclaredConstructor(int.class);
         constructor.setAccessible(true);
         final SensorEvent event = constructor.newInstance(1);
         event.sensor = sensor;
         event.values[0] = value;
-        event.timestamp = SystemClock.elapsedRealtimeNanos();
+        event.timestamp = timestamp;
         return event;
     }
 

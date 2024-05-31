@@ -47,6 +47,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.gui.DropInputMode;
 import android.gui.StalledTransactionInfo;
+import android.gui.TrustedOverlay;
 import android.hardware.DataSpace;
 import android.hardware.HardwareBuffer;
 import android.hardware.OverlayProperties;
@@ -165,7 +166,7 @@ public final class SurfaceControl implements Parcelable {
             float maxStretchAmountX, float maxStretchAmountY, float childRelativeLeft,
             float childRelativeTop, float childRelativeRight, float childRelativeBottom);
     private static native void nativeSetTrustedOverlay(long transactionObj, long nativeObject,
-            boolean isTrustedOverlay);
+            int isTrustedOverlay);
     private static native void nativeSetDropInputMode(
             long transactionObj, long nativeObject, int flags);
     private static native void nativeSetCanOccludePresentation(long transactionObj,
@@ -302,6 +303,7 @@ public final class SurfaceControl implements Parcelable {
                                                                 long desiredPresentTimeNanos);
     private static native void nativeSetFrameTimeline(long transactionObj,
                                                            long vsyncId);
+    private static native void nativeNotifyShutdown();
 
     /**
      * Transforms that can be applied to buffers as they are displayed to a window.
@@ -4303,13 +4305,37 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Sets the trusted overlay state on this SurfaceControl and it is inherited to all the
-         * children. The caller must hold the ACCESS_SURFACE_FLINGER permission.
+         * @see Transaction#setTrustedOverlay(SurfaceControl, int)
          * @hide
          */
         public Transaction setTrustedOverlay(SurfaceControl sc, boolean isTrustedOverlay) {
+            return setTrustedOverlay(sc,
+                    isTrustedOverlay ? TrustedOverlay.ENABLED : TrustedOverlay.UNSET);
+        }
+
+        /**
+         * Trusted overlay state prevents SurfaceControl from being considered as obscuring for
+         * input occlusion detection purposes. The caller must hold the
+         * ACCESS_SURFACE_FLINGER permission. See {@code TrustedOverlay}.
+         * <p>
+         * Arguments:
+         * {@code TrustedOverlay.UNSET} - The default value, SurfaceControl will inherit the state
+         * from its parents. If the parent state is also {@code TrustedOverlay.UNSET}, the layer
+         * will be considered as untrusted.
+         * <p>
+         * {@code TrustedOverlay.DISABLED} - Treats this SurfaceControl and all its children as an
+         * untrusted overlay. This will override any state set by its parent SurfaceControl.
+         * <p>
+         * {@code TrustedOverlay.ENABLED} - Treats this SurfaceControl and all its children as a
+         * trusted overlay unless the child SurfaceControl explicitly disables its trusted state
+         * via {@code TrustedOverlay.DISABLED}.
+         * <p>
+         * @hide
+         */
+        public Transaction setTrustedOverlay(SurfaceControl sc,
+                                             @TrustedOverlay int trustedOverlay) {
             checkPreconditions(sc);
-            nativeSetTrustedOverlay(mNativeObject, sc.mNativeObject, isTrustedOverlay);
+            nativeSetTrustedOverlay(mNativeObject, sc.mNativeObject, trustedOverlay);
             return this;
         }
 
@@ -4765,4 +4791,11 @@ public final class SurfaceControl implements Parcelable {
         return nativeGetStalledTransactionInfo(pid);
     }
 
+    /**
+     * Notify the SurfaceFlinger to capture transaction traces when shutdown.
+     * @hide
+     */
+    public static void notifyShutdown() {
+        nativeNotifyShutdown();
+    }
 }

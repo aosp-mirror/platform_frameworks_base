@@ -221,13 +221,13 @@ public class HdmiCecLocalDeviceTvTest {
                         .setEarcSupported(true)
                         .build();
         mNativeWrapper.setPortInfo(hdmiPortInfos);
+        mTvPhysicalAddress = 0x0000;
+        mNativeWrapper.setPhysicalAddress(mTvPhysicalAddress);
         mHdmiControlService.initService();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(context);
         mHdmiControlService.setPowerManager(mPowerManager);
-        mTvPhysicalAddress = 0x0000;
         mEarcBlocksArc = false;
-        mNativeWrapper.setPhysicalAddress(mTvPhysicalAddress);
         mHdmiControlService.setEarcEnabled(HdmiControlManager.EARC_FEATURE_DISABLED);
         mTestLooper.dispatchAll();
         mHdmiCecLocalDeviceTv = mHdmiControlService.tv();

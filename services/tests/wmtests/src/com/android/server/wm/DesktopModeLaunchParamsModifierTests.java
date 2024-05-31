@@ -57,7 +57,8 @@ import org.junit.runner.RunWith;
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
-public class DesktopModeLaunchParamsModifierTests extends LaunchParamsModifierTestsBase {
+public class DesktopModeLaunchParamsModifierTests extends
+        LaunchParamsModifierTestsBase<DesktopModeLaunchParamsModifier> {
     @Before
     public void setUp() throws Exception {
         mActivity = new ActivityBuilder(mAtm).build();

@@ -53,3 +53,14 @@ flag {
     bug: "303535376"
     is_fixed_read_only: true
 }
+
+flag {
+    namespace: "virtual_devices"
+    name: "virtual_display_multi_window_mode_support"
+    description: "Add support for WINDOWING_MODE_MULTI_WINDOW to virtual displays by default"
+    is_fixed_read_only: true
+    bug: "341151395"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

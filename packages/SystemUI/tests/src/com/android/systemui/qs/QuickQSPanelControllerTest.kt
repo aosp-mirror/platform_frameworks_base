@@ -25,6 +25,7 @@ import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.haptics.qs.QSLongPressEffect
+import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.plugins.qs.QSTile
@@ -62,6 +63,10 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var tileLayout: TileLayout
     @Captor private lateinit var captor: ArgumentCaptor<QSPanel.OnConfigurationChangedListener>
     @Mock private lateinit var longPressEffectProvider: Provider<QSLongPressEffect>
+    @Mock private lateinit var mediaCarouselInteractor: MediaCarouselInteractor
+
+    private val usingMediaPlayer: Boolean
+        get() = false
 
     private val uiEventLogger = UiEventLoggerFake()
     private val dumpManager = DumpManager()
@@ -86,7 +91,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
                 quickQSPanel,
                 qsHost,
                 qsCustomizerController,
-                /* usingMediaPlayer = */ false,
+                usingMediaPlayer,
                 mediaHost,
                 { usingCollapsedLandscapeMedia },
                 metricsLogger,
@@ -94,6 +99,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
                 qsLogger,
                 dumpManager,
                 longPressEffectProvider,
+                mediaCarouselInteractor,
             )
 
         controller.init()
@@ -163,6 +169,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
         qsLogger: QSLogger,
         dumpManager: DumpManager,
         longPressEffectProvider: Provider<QSLongPressEffect>,
+        mediaCarouselInteractor: MediaCarouselInteractor,
     ) :
         QuickQSPanelController(
             view,
@@ -177,6 +184,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
             dumpManager,
             ResourcesSplitShadeStateController(),
             longPressEffectProvider,
+            mediaCarouselInteractor
         ) {
 
         private var rotation = RotationUtils.ROTATION_NONE

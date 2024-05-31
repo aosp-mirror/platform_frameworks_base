@@ -1099,10 +1099,6 @@ class BackNavigationController {
         }
 
         void finishPresentAnimations() {
-            if (!mComposed) {
-                return;
-            }
-
             if (mCloseAdaptor != null) {
                 mCloseAdaptor.mTarget.cancelAnimation();
                 mCloseAdaptor = null;
@@ -1131,8 +1127,10 @@ class BackNavigationController {
         }
 
         void clearBackAnimateTarget() {
-            finishPresentAnimations();
-            mComposed = false;
+            if (mComposed) {
+                mComposed = false;
+                finishPresentAnimations();
+            }
             mWaitTransition = false;
             mStartingSurfaceTargetMatch = false;
             mSwitchType = UNKNOWN;
@@ -1270,6 +1268,8 @@ class BackNavigationController {
                         .setContainerLayer()
                         .setHidden(false)
                         .setParent(task.getSurfaceControl())
+                        .setCallsite(
+                                "BackWindowAnimationAdaptorWrapper.getOrCreateAnimationTarget")
                         .build();
                 mCloseTransaction = new SurfaceControl.Transaction();
                 mCloseTransaction.reparent(leashSurface, null);

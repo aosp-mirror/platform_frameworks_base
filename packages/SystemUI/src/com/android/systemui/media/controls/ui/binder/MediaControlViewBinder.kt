@@ -157,7 +157,6 @@ object MediaControlViewBinder {
             viewController,
             backgroundDispatcher,
             mainDispatcher,
-            mediaFlags,
             isSongUpdated
         )
 
@@ -414,7 +413,6 @@ object MediaControlViewBinder {
         viewController: MediaViewController,
         backgroundDispatcher: CoroutineDispatcher,
         mainDispatcher: CoroutineDispatcher,
-        mediaFlags: MediaFlags,
         updateBackground: Boolean,
     ) {
         val traceCookie = viewHolder.hashCode()
@@ -424,13 +422,8 @@ object MediaControlViewBinder {
             viewController.isArtworkBound = false
         }
         // Capture width & height from views in foreground for artwork scaling in background
-        var width = viewHolder.albumView.measuredWidth
-        var height = viewHolder.albumView.measuredHeight
-        if (mediaFlags.isSceneContainerEnabled() && (width <= 0 || height <= 0)) {
-            // TODO(b/312714128): ensure we have a valid size before setting background
-            width = viewController.widthInSceneContainerPx
-            height = viewController.heightInSceneContainerPx
-        }
+        val width = viewController.widthInSceneContainerPx
+        val height = viewController.heightInSceneContainerPx
         withContext(backgroundDispatcher) {
             val artwork =
                 if (viewModel.shouldAddGradient) {
@@ -449,6 +442,11 @@ object MediaControlViewBinder {
                 val colorSchemeChanged =
                     viewController.colorSchemeTransition.updateColorScheme(viewModel.colorScheme)
                 val albumView = viewHolder.albumView
+
+                // Set up width of album view constraint.
+                viewController.expandedLayout.getConstraint(albumView.id).layout.mWidth = width
+                viewController.collapsedLayout.getConstraint(albumView.id).layout.mWidth = width
+
                 albumView.setPadding(0, 0, 0, 0)
                 if (
                     updateBackground ||

@@ -9,6 +9,9 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
+import android.graphics.drawable.RippleDrawable
+import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.RoundRectShape
 import android.view.View
 import android.view.View.OnLongClickListener
 import android.widget.ImageButton
@@ -45,6 +48,38 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         appIconBitmap: Bitmap,
         onMaximizeHoverAnimationFinishedListener: () -> Unit
 ) : DesktopModeWindowDecorationViewHolder(rootView) {
+
+    /**
+     * The corner radius to apply to the app chip, maximize and close button's background drawable.
+     **/
+    private val headerButtonsRippleRadius = context.resources
+        .getDimensionPixelSize(R.dimen.desktop_mode_header_buttons_ripple_radius)
+
+    /**
+     * The app chip, maximize and close button's height extends to the top & bottom edges of the
+     * header, and their width may be larger than their height. This is by design to increase the
+     * clickable and hover-able bounds of the view as much as possible. However, to prevent the
+     * ripple drawable from being as large as the views (and asymmetrical), insets are applied to
+     * the background ripple drawable itself to give the appearance of a smaller button
+     * (with padding between itself and the header edges / sibling buttons) but without affecting
+     * its touchable region.
+     */
+    private val appChipDrawableInsets = DrawableInsets(
+        vertical = context.resources
+            .getDimensionPixelSize(R.dimen.desktop_mode_header_app_chip_ripple_inset_vertical)
+    )
+    private val maximizeDrawableInsets = DrawableInsets(
+        vertical = context.resources
+            .getDimensionPixelSize(R.dimen.desktop_mode_header_maximize_ripple_inset_vertical),
+        horizontal = context.resources
+            .getDimensionPixelSize(R.dimen.desktop_mode_header_maximize_ripple_inset_horizontal)
+    )
+    private val closeDrawableInsets = DrawableInsets(
+        vertical = context.resources
+            .getDimensionPixelSize(R.dimen.desktop_mode_header_close_ripple_inset_vertical),
+        horizontal = context.resources
+            .getDimensionPixelSize(R.dimen.desktop_mode_header_close_ripple_inset_horizontal)
+    )
 
     private val captionView: View = rootView.requireViewById(R.id.desktop_mode_caption)
     private val captionHandle: View = rootView.requireViewById(R.id.caption_handle)
@@ -97,7 +132,19 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         maximizeWindowButton.imageAlpha = alpha
         closeWindowButton.imageAlpha = alpha
         expandMenuButton.imageAlpha = alpha
-
+        context.withStyledAttributes(
+            set = null,
+            attrs = intArrayOf(
+                android.R.attr.selectableItemBackground,
+                android.R.attr.selectableItemBackgroundBorderless
+            ),
+            defStyleAttr = 0,
+            defStyleRes = 0
+        ) {
+            openMenuButton.background = getDrawable(0)
+            maximizeWindowButton.background = getDrawable(1)
+            closeWindowButton.background = getDrawable(1)
+        }
         maximizeButtonView.setAnimationTints(isDarkMode())
     }
 
@@ -126,18 +173,40 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         val foregroundColor = headerStyle.foreground.color
         val foregroundAlpha = headerStyle.foreground.opacity
         val colorStateList = ColorStateList.valueOf(foregroundColor).withAlpha(foregroundAlpha)
-        closeWindowButton.imageTintList = colorStateList
-        expandMenuButton.imageTintList = colorStateList
-        with (appNameTextView) {
-            isVisible = header.type == Header.Type.DEFAULT
-            setTextColor(colorStateList)
+        // App chip.
+        openMenuButton.apply {
+            background = createRippleDrawable(
+                color = foregroundColor,
+                cornerRadius = headerButtonsRippleRadius,
+                drawableInsets = appChipDrawableInsets,
+            )
+            expandMenuButton.imageTintList = colorStateList
+            appNameTextView.apply {
+                isVisible = header.type == Header.Type.DEFAULT
+                setTextColor(colorStateList)
+            }
+            appIconImageView.imageAlpha = foregroundAlpha
         }
-        appIconImageView.imageAlpha = foregroundAlpha
+        // Maximize button.
         maximizeButtonView.setAnimationTints(
             darkMode = header.appTheme == Header.Theme.DARK,
             iconForegroundColor = colorStateList,
-            baseForegroundColor = foregroundColor
+            baseForegroundColor = foregroundColor,
+            rippleDrawable = createRippleDrawable(
+                color = foregroundColor,
+                cornerRadius = headerButtonsRippleRadius,
+                drawableInsets = maximizeDrawableInsets
+            )
         )
+        // Close button.
+        closeWindowButton.apply {
+            imageTintList = colorStateList
+            background = createRippleDrawable(
+                color = foregroundColor,
+                cornerRadius = headerButtonsRippleRadius,
+                drawableInsets = closeDrawableInsets
+            )
+        }
     }
 
     override fun onHandleMenuOpened() {}
@@ -390,10 +459,61 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         context.withStyledAttributes(null, intArrayOf(attr), 0, 0) {
             return getColor(0, 0)
         }
-        return Color.BLACK
+        return Color.WHITE
     }
 
-    data class Header(
+    @ColorInt
+    private fun replaceColorAlpha(@ColorInt color: Int, alpha: Int): Int {
+        return Color.argb(
+            alpha,
+            Color.red(color),
+            Color.green(color),
+            Color.blue(color)
+        )
+    }
+
+    private fun createRippleDrawable(
+        @ColorInt color: Int,
+        cornerRadius: Int,
+        drawableInsets: DrawableInsets,
+    ): RippleDrawable {
+        return RippleDrawable(
+            ColorStateList(
+                arrayOf(
+                    intArrayOf(android.R.attr.state_hovered),
+                    intArrayOf(android.R.attr.state_pressed),
+                    intArrayOf(),
+                ),
+                intArrayOf(
+                    replaceColorAlpha(color, OPACITY_11),
+                    replaceColorAlpha(color, OPACITY_15),
+                    Color.TRANSPARENT
+                )
+            ),
+            null /* content */,
+            LayerDrawable(arrayOf(
+                ShapeDrawable().apply {
+                    shape = RoundRectShape(
+                        FloatArray(8) { cornerRadius.toFloat() },
+                        null /* inset */,
+                        null /* innerRadii */
+                    )
+                    paint.color = Color.WHITE
+                }
+            )).apply {
+                require(numberOfLayers == 1) { "Must only contain one layer" }
+                setLayerInset(0 /* index */,
+                    drawableInsets.l, drawableInsets.t, drawableInsets.r, drawableInsets.b)
+            }
+        )
+    }
+
+    private data class DrawableInsets(val l: Int, val t: Int, val r: Int, val b: Int) {
+        constructor(vertical: Int = 0, horizontal: Int = 0) :
+                this(horizontal, vertical, horizontal, vertical)
+    }
+
+    private data class Header(
         val type: Type,
         val systemTheme: Theme,
         val appTheme: Theme,
@@ -408,7 +528,7 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
 
     private fun Header.Theme.isDark(): Boolean = this == Header.Theme.DARK
 
-    data class HeaderStyle(
+    private data class HeaderStyle(
         val background: Background,
         val foreground: Foreground
     ) {
@@ -497,6 +617,8 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         private const val FOCUSED_OPACITY = 255
 
         private const val OPACITY_100 = 255
+        private const val OPACITY_11 = 28
+        private const val OPACITY_15 = 38
         private const val OPACITY_30 = 77
         private const val OPACITY_55 = 140
         private const val OPACITY_65 = 166

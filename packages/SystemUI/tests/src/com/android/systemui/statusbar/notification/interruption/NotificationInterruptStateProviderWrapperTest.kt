@@ -27,6 +27,7 @@ import com.android.systemui.statusbar.notification.interruption.NotificationInte
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider.FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderWrapper.DecisionImpl
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderWrapper.FullScreenIntentDecisionImpl
+import java.util.Optional
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -55,7 +56,8 @@ class NotificationInterruptStateProviderWrapperTest : VisualInterruptionDecision
                 deviceProvisionedController,
                 systemClock,
                 globalSettings,
-                eventLog
+                eventLog,
+                Optional.of(bubbles)
             )
         )
     }

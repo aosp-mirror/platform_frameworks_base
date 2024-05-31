@@ -52,4 +52,6 @@
     <string name="keyboard_layout_georgian" msgid="4596185456863747454">"Γεωργιανά"</string>
     <string name="keyboard_layout_thai_kedmanee" msgid="6637147314580760938">"Ταϊλανδικά (Kedmanee)"</string>
     <string name="keyboard_layout_thai_pattachote" msgid="2547992342794252205">"Ταϊλανδικά (Pattachote)"</string>
+    <string name="keyboard_layout_serbian_latin" msgid="3128791759390046571">"Σερβικά (Λατινικά)"</string>
+    <string name="keyboard_layout_montenegrin_latin" msgid="1467832503378949945">"Μαυροβουνιακά (Λατινικά)"</string>
 </resources>

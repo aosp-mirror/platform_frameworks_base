@@ -202,6 +202,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Profilul de serviciu nu mai este disponibil pe acest dispozitiv"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Prea multe încercări de introducere a parolei"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administratorul a retras dispozitivul pentru uz personal"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Spațiul privat a fost eliminat"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Organizația ta nu permite spațiile private pe acest dispozitiv gestionat."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Dispozitivul este gestionat"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Organizația ta gestionează acest dispozitiv și poate monitoriza traficul în rețea. Atinge pentru mai multe detalii."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Aplicațiile îți pot accesa locația"</string>
@@ -284,8 +286,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Asistent vocal"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"Blocare strictă"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"˃999"</string>
-    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
-    <skip />
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"Răspunde"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Notificare nouă"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Tastatură fizică"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Securitate"</string>
@@ -2196,7 +2197,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad stânga"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad dreapta"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad centru"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Bară cu legenda pentru <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> a fost adăugat la grupul RESTRICȚIONATE"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"a trimis o imagine"</string>
@@ -2417,10 +2417,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cum funcționează"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"În așteptare..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Configurează din nou Deblocarea cu amprenta"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> nu funcționa bine și a fost ștearsă"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> și <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nu funcționau bine și au fost șterse"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> nu funcționa bine și s-a șters. Configureaz-o din nou pentru a-ți debloca telefonul cu amprenta."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> și <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nu funcționau bine și s-au șters. Configurează-le din nou pentru a-ți debloca telefonul cu amprenta."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Reconfigurează Deblocarea facială"</string>

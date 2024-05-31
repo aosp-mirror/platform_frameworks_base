@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.pipeline.satellite.data.prod
 
 import android.os.OutcomeReceiver
+import android.telephony.TelephonyCallback
+import android.telephony.TelephonyManager
 import android.telephony.satellite.NtnSignalStrengthCallback
 import android.telephony.satellite.SatelliteManager
 import android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_SUCCESS
@@ -30,7 +32,8 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.core.MessageInitializer
 import com.android.systemui.log.core.MessagePrinter
-import com.android.systemui.statusbar.pipeline.dagger.OemSatelliteInputLog
+import com.android.systemui.statusbar.pipeline.dagger.DeviceBasedSatelliteInputLog
+import com.android.systemui.statusbar.pipeline.dagger.VerboseDeviceBasedSatelliteInputLog
 import com.android.systemui.statusbar.pipeline.satellite.data.RealDeviceBasedSatelliteRepository
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.SatelliteSupport.Companion.whenSupported
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.SatelliteSupport.NotSupported
@@ -38,6 +41,7 @@ import com.android.systemui.statusbar.pipeline.satellite.data.prod.SatelliteSupp
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.SatelliteSupport.Unknown
 import com.android.systemui.statusbar.pipeline.satellite.shared.model.SatelliteConnectionState
 import com.android.systemui.util.kotlin.getOrNull
+import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.time.SystemClock
 import java.util.Optional
 import javax.inject.Inject
@@ -51,12 +55,15 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -92,13 +99,19 @@ sealed interface SatelliteSupport {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     companion object {
-        /** Convenience function to switch to the supported flow */
+        /**
+         * Convenience function to switch to the supported flow. [retrySignal] is a flow that emits
+         * [Unit] whenever the [supported] flow needs to be restarted
+         */
         fun <T> Flow<SatelliteSupport>.whenSupported(
             supported: (SatelliteManager) -> Flow<T>,
             orElse: Flow<T>,
-        ): Flow<T> = flatMapLatest {
-            when (it) {
-                is Supported -> supported(it.satelliteManager)
+            retrySignal: Flow<Unit>,
+        ): Flow<T> = flatMapLatest { satelliteSupport ->
+            when (satelliteSupport) {
+                is Supported -> {
+                    retrySignal.flatMapLatest { supported(satelliteSupport.satelliteManager) }
+                }
                 else -> orElse
             }
         }
@@ -132,9 +145,11 @@ class DeviceBasedSatelliteRepositoryImpl
 @Inject
 constructor(
     satelliteManagerOpt: Optional<SatelliteManager>,
+    telephonyManager: TelephonyManager,
     @Background private val bgDispatcher: CoroutineDispatcher,
     @Application private val scope: CoroutineScope,
-    @OemSatelliteInputLog private val logBuffer: LogBuffer,
+    @DeviceBasedSatelliteInputLog private val logBuffer: LogBuffer,
+    @VerboseDeviceBasedSatelliteInputLog private val verboseLogBuffer: LogBuffer,
     private val systemClock: SystemClock,
 ) : RealDeviceBasedSatelliteRepository {
 
@@ -201,11 +216,65 @@ constructor(
         }
     }
 
+    /**
+     * Note that we are given an "unbound" [TelephonyManager] (meaning it was not created with a
+     * specific `subscriptionId`). Therefore this is the radio power state of the
+     * DEFAULT_SUBSCRIPTION_ID subscription. This subscription, I am led to believe, is the one that
+     * would be used for the SatelliteManager subscription.
+     *
+     * By watching power state changes, we can detect if the telephony process crashes.
+     *
+     * See b/337258696 for details
+     */
+    private val radioPowerState: StateFlow<Int> =
+        conflatedCallbackFlow {
+                val cb =
+                    object : TelephonyCallback(), TelephonyCallback.RadioPowerStateListener {
+                        override fun onRadioPowerStateChanged(powerState: Int) {
+                            trySend(powerState)
+                        }
+                    }
+
+                telephonyManager.registerTelephonyCallback(bgDispatcher.asExecutor(), cb)
+
+                awaitClose { telephonyManager.unregisterTelephonyCallback(cb) }
+            }
+            .flowOn(bgDispatcher)
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                TelephonyManager.RADIO_POWER_UNAVAILABLE
+            )
+
+    /**
+     * In the event that a telephony phone process has crashed, we expect to see a radio power state
+     * change from ON to something else. This trigger can be used to re-start a flow via
+     * [whenSupported]
+     *
+     * This flow emits [Unit] when started so that newly-started collectors always run, and only
+     * restart when the state goes from ON -> !ON
+     */
+    private val telephonyProcessCrashedEvent: Flow<Unit> =
+        radioPowerState
+            .pairwise()
+            .mapNotNull { (prev: Int, new: Int) ->
+                if (
+                    prev == TelephonyManager.RADIO_POWER_ON &&
+                        new != TelephonyManager.RADIO_POWER_ON
+                ) {
+                    Unit
+                } else {
+                    null
+                }
+            }
+            .onStart { emit(Unit) }
+
     override val connectionState =
         satelliteSupport
             .whenSupported(
                 supported = ::connectionStateFlow,
-                orElse = flowOf(SatelliteConnectionState.Off)
+                orElse = flowOf(SatelliteConnectionState.Off),
+                retrySignal = telephonyProcessCrashedEvent,
             )
             .stateIn(scope, SharingStarted.Eagerly, SatelliteConnectionState.Off)
 
@@ -232,14 +301,18 @@ constructor(
 
     override val signalStrength =
         satelliteSupport
-            .whenSupported(supported = ::signalStrengthFlow, orElse = flowOf(0))
+            .whenSupported(
+                supported = ::signalStrengthFlow,
+                orElse = flowOf(0),
+                retrySignal = telephonyProcessCrashedEvent,
+            )
             .stateIn(scope, SharingStarted.Eagerly, 0)
 
     // By using the SupportedSatelliteManager here, we expect registration never to fail
     private fun signalStrengthFlow(sm: SupportedSatelliteManager) =
         conflatedCallbackFlow {
                 val cb = NtnSignalStrengthCallback { signalStrength ->
-                    logBuffer.i({ int1 = signalStrength.level }) {
+                    verboseLogBuffer.i({ int1 = signalStrength.level }) {
                         "onNtnSignalStrengthChanged: level=$int1"
                     }
                     trySend(signalStrength.level)

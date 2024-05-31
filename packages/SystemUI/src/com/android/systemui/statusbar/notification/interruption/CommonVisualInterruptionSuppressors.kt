@@ -33,6 +33,8 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED
 import android.provider.Settings.Global.HEADS_UP_OFF
+import com.android.internal.logging.UiEventLogger
+import com.android.internal.logging.UiEvent;
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
@@ -48,6 +50,9 @@ import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SystemSettings
 import com.android.systemui.util.time.SystemClock
+import com.android.wm.shell.bubbles.Bubbles
+import java.util.Optional
+import kotlin.jvm.optionals.getOrElse
 
 class PeekDisabledSuppressor(
     private val globalSettings: GlobalSettings,
@@ -119,12 +124,18 @@ class PeekPackageSnoozedSuppressor(private val headsUpManager: HeadsUpManager) :
         }
 }
 
-class PeekAlreadyBubbledSuppressor(private val statusBarStateController: StatusBarStateController) :
-    VisualInterruptionFilter(types = setOf(PEEK), reason = "already bubbled") {
+class PeekAlreadyBubbledSuppressor(
+    private val statusBarStateController: StatusBarStateController,
+    private val bubbles: Optional<Bubbles>
+) : VisualInterruptionFilter(types = setOf(PEEK), reason = "already bubbled") {
     override fun shouldSuppress(entry: NotificationEntry) =
         when {
             statusBarStateController.state != SHADE -> false
-            else -> entry.isBubble
+            else -> {
+                val bubblesCanShowNotification =
+                    bubbles.map { it.canShowBubbleNotification() }.getOrElse { false }
+                entry.isBubble && bubblesCanShowNotification
+            }
         }
 }
 
@@ -232,12 +243,12 @@ class AlertKeyguardVisibilitySuppressor(
     override fun shouldSuppress(entry: NotificationEntry) =
         keyguardNotificationVisibilityProvider.shouldHideNotification(entry)
 }
-
 class AvalancheSuppressor(
     private val avalancheProvider: AvalancheProvider,
     private val systemClock: SystemClock,
     private val systemSettings: SystemSettings,
     private val packageManager: PackageManager,
+    private val uiEventLogger: UiEventLogger,
 ) :
     VisualInterruptionFilter(
         types = setOf(PEEK, PULSE),
@@ -255,6 +266,44 @@ class AvalancheSuppressor(
         ALLOW_COLORIZED,
         ALLOW_EMERGENCY,
         SUPPRESS
+    }
+
+     enum class AvalancheEvent(private val id: Int) : UiEventLogger.UiEventEnum {
+         @UiEvent(doc = "An avalanche event occurred but this notification was suppressed by a " +
+                 "non-avalanche suppressor.")
+         START(1802),
+
+         @UiEvent(doc = "HUN was suppressed in avalanche.")
+         SUPPRESS(1803),
+
+         @UiEvent(doc = "HUN allowed during avalanche because it is high priority.")
+         ALLOW_CONVERSATION_AFTER_AVALANCHE(1804),
+
+         @UiEvent(doc = "HUN allowed during avalanche because it is a high priority conversation.")
+         ALLOW_HIGH_PRIORITY_CONVERSATION_ANY_TIME(1805),
+
+         @UiEvent(doc = "HUN allowed during avalanche because it is a call.")
+         ALLOW_CALLSTYLE(1806),
+
+         @UiEvent(doc = "HUN allowed during avalanche because it is a calendar notification.")
+         ALLOW_CATEGORY_REMINDER(1807),
+
+         @UiEvent(doc = "HUN allowed during avalanche because it is a calendar notification.")
+         ALLOW_CATEGORY_EVENT(1808),
+
+         @UiEvent(doc = "HUN allowed during avalanche because it has a full screen intent and " +
+                 "the full screen intent permission is granted.")
+         ALLOW_FSI_WITH_PERMISSION_ON(1809),
+
+         @UiEvent(doc = "HUN allowed during avalanche because it is colorized.")
+         ALLOW_COLORIZED(1810),
+
+         @UiEvent(doc = "HUN allowed during avalanche because it is an emergency notification.")
+         ALLOW_EMERGENCY(1811);
+
+        override fun getId(): Int {
+            return id
+        }
     }
 
     override fun shouldSuppress(entry: NotificationEntry): Boolean {
@@ -278,41 +327,46 @@ class AvalancheSuppressor(
             entry.ranking.isConversation &&
                 entry.sbn.notification.getWhen() > avalancheProvider.startTime
         ) {
+            uiEventLogger.log(AvalancheEvent.ALLOW_CONVERSATION_AFTER_AVALANCHE)
             return State.ALLOW_CONVERSATION_AFTER_AVALANCHE
         }
 
         if (entry.channel?.isImportantConversation == true) {
+            uiEventLogger.log(AvalancheEvent.ALLOW_HIGH_PRIORITY_CONVERSATION_ANY_TIME)
             return State.ALLOW_HIGH_PRIORITY_CONVERSATION_ANY_TIME
         }
 
         if (entry.sbn.notification.isStyle(Notification.CallStyle::class.java)) {
+            uiEventLogger.log(AvalancheEvent.ALLOW_CALLSTYLE)
             return State.ALLOW_CALLSTYLE
         }
 
         if (entry.sbn.notification.category == CATEGORY_REMINDER) {
+            uiEventLogger.log(AvalancheEvent.ALLOW_CATEGORY_REMINDER)
             return State.ALLOW_CATEGORY_REMINDER
         }
 
         if (entry.sbn.notification.category == CATEGORY_EVENT) {
+            uiEventLogger.log(AvalancheEvent.ALLOW_CATEGORY_EVENT)
             return State.ALLOW_CATEGORY_EVENT
         }
 
         if (entry.sbn.notification.fullScreenIntent != null) {
+            uiEventLogger.log(AvalancheEvent.ALLOW_FSI_WITH_PERMISSION_ON)
             return State.ALLOW_FSI_WITH_PERMISSION_ON
         }
-
         if (entry.sbn.notification.isColorized) {
-            return State.ALLOW_COLORIZED
-        }
-        if (entry.sbn.notification.isColorized) {
+            uiEventLogger.log(AvalancheEvent.ALLOW_COLORIZED)
             return State.ALLOW_COLORIZED
         }
         if (
             packageManager.checkPermission(RECEIVE_EMERGENCY_BROADCAST, entry.sbn.packageName) ==
                 PERMISSION_GRANTED
         ) {
+            uiEventLogger.log(AvalancheEvent.ALLOW_EMERGENCY)
             return State.ALLOW_EMERGENCY
         }
+        uiEventLogger.log(AvalancheEvent.SUPPRESS)
         return State.SUPPRESS
     }
 

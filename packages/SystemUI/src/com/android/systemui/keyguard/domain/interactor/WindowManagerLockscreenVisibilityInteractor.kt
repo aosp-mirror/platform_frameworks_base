@@ -18,6 +18,7 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
@@ -29,6 +30,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
 import com.android.systemui.util.kotlin.sample
+import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -84,25 +86,52 @@ constructor(
             }
             .distinctUntilChanged()
 
+    private val isDeviceEntered: Flow<Boolean> by lazy {
+        deviceEntryInteractor.get().isDeviceEntered
+    }
+
+    private val isDeviceNotEntered: Flow<Boolean> by lazy { isDeviceEntered.map { !it } }
+
     /**
-     * Surface visibility, which is either determined by the default visibility in the FINISHED
-     * KeyguardState, or the transition-specific visibility used during certain RUNNING transitions.
+     * Surface visibility, which is either determined by the default visibility when not
+     * transitioning between [KeyguardState]s or [Scenes] or the transition-specific visibility used
+     * during certain ongoing transitions.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     val surfaceBehindVisibility: Flow<Boolean> =
-        transitionInteractor.isInTransitionToAnyState
-            .flatMapLatest { isInTransition ->
-                if (!isInTransition) {
-                    defaultSurfaceBehindVisibility
-                } else {
-                    combine(
-                        transitionSpecificSurfaceBehindVisibility,
-                        defaultSurfaceBehindVisibility,
-                    ) { transitionVisibility, defaultVisibility ->
-                        // Defer to the transition-specific visibility since we're RUNNING a
-                        // transition, but fall back to the default visibility if the current
-                        // transition's interactor did not specify a visibility.
-                        transitionVisibility ?: defaultVisibility
+        if (SceneContainerFlag.isEnabled) {
+                sceneInteractor.get().transitionState.flatMapLatestConflated { transitionState ->
+                    when (transitionState) {
+                        is ObservableTransitionState.Transition ->
+                            when {
+                                transitionState.fromScene == Scenes.Lockscreen &&
+                                    transitionState.toScene == Scenes.Gone -> flowOf(true)
+                                transitionState.fromScene == Scenes.Bouncer &&
+                                    transitionState.toScene == Scenes.Gone ->
+                                    transitionState.progress.map { progress ->
+                                        progress >
+                                            FromPrimaryBouncerTransitionInteractor
+                                                .TO_GONE_SURFACE_BEHIND_VISIBLE_THRESHOLD
+                                    }
+                                else -> isDeviceEntered
+                            }
+                        is ObservableTransitionState.Idle -> isDeviceEntered
+                    }
+                }
+            } else {
+                transitionInteractor.isInTransitionToAnyState.flatMapLatest { isInTransition ->
+                    if (!isInTransition) {
+                        defaultSurfaceBehindVisibility
+                    } else {
+                        combine(
+                            transitionSpecificSurfaceBehindVisibility,
+                            defaultSurfaceBehindVisibility,
+                        ) { transitionVisibility, defaultVisibility ->
+                            // Defer to the transition-specific visibility since we're RUNNING a
+                            // transition, but fall back to the default visibility if the current
+                            // transition's interactor did not specify a visibility.
+                            transitionVisibility ?: defaultVisibility
+                        }
                     }
                 }
             }
@@ -162,7 +191,7 @@ constructor(
      */
     val lockscreenVisibility: Flow<Boolean> =
         if (SceneContainerFlag.isEnabled) {
-            deviceEntryInteractor.get().isDeviceEntered.map { !it }
+            isDeviceNotEntered
         } else {
             transitionInteractor.currentKeyguardState
                 .sample(transitionInteractor.startedStepWithPrecedingStep, ::Pair)
@@ -176,7 +205,8 @@ constructor(
 
                     if (!returningToGoneAfterCancellation) {
                         // By default, apply the lockscreen visibility of the current state.
-                        KeyguardState.lockscreenVisibleInState(currentState)
+                        deviceEntryInteractor.get().isLockscreenEnabled() &&
+                            KeyguardState.lockscreenVisibleInState(currentState)
                     } else {
                         // If we're transitioning to GONE after a prior canceled transition from
                         // GONE, then this is the camera launch transition from an asleep state back

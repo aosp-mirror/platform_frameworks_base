@@ -278,11 +278,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             public void onTaskStageChanged(int taskId, @StageType int stage, boolean visible) {
                 if (visible && stage != STAGE_TYPE_UNDEFINED) {
                     DesktopModeWindowDecoration decor = mWindowDecorByTaskId.get(taskId);
-                    if (decor == null || !DesktopModeStatus.canEnterDesktopMode(mContext)
-                            || decor.mTaskInfo.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
-                        return;
+                    if (decor != null && DesktopModeStatus.canEnterDesktopMode(mContext)) {
+                        mDesktopTasksController.moveToSplit(decor.mTaskInfo);
                     }
-                    mDesktopTasksController.moveToSplit(decor.mTaskInfo);
                 }
             }
         });
@@ -388,6 +386,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         private final DragPositioningCallback mDragPositioningCallback;
         private final DragDetector mDragDetector;
         private final GestureDetector mGestureDetector;
+        private final int mDisplayId;
 
         /**
          * Whether to pilfer the next motion event to send cancellations to the windows below.
@@ -409,6 +408,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             mDragPositioningCallback = dragPositioningCallback;
             mDragDetector = new DragDetector(this);
             mGestureDetector = new GestureDetector(mContext, this);
+            mDisplayId = taskInfo.displayId;
             mCloseMaximizeWindowRunnable = () -> {
                 final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
                 if (decoration == null) return;
@@ -434,7 +434,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     mTaskOperations.closeTask(mTaskToken, wct);
                 }
             } else if (id == R.id.back_button) {
-                mTaskOperations.injectBackKey();
+                mTaskOperations.injectBackKey(mDisplayId);
             } else if (id == R.id.caption_handle || id == R.id.open_menu_button) {
                 if (!decoration.isHandleMenuActive()) {
                     moveTaskToFront(decoration.mTaskInfo);

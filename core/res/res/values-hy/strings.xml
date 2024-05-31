@@ -201,6 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Ձեր աշխատանքային պրոֆիլն այս սարքում այլևս հասանելի չէ"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Գաղտնաբառը մուտքագրելու չափից շատ փորձեր են կատարվել"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Ադմինիստրատորը տրամադրել է սարքը անձնական օգտագործման համար"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Մասնավոր տարածքը հեռացվել է"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Ձեր կազմակերպությունն արգելում է մասնավոր տարածքներն այս կառավարվող սարքում։"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Սարքը կառավարվում է"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Ձեր կազմակերպությունը կառավարում է այս սարքը և կարող է վերահսկել ցանցի թրաֆիկը: Հպեք՝ մանրամասները դիտելու համար:"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Հավելվածներին հասանելի է ձեր տեղադրությունը"</string>
@@ -283,8 +285,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Ձայնային օգնութ"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"Արգելափակում"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
-    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
-    <skip />
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"Պատասխանել"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Նոր ծանուցում"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Ֆիզիկական ստեղնաշար"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Անվտանգություն"</string>
@@ -2195,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad-ի «Ձախ» կոճակ"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad-ի «Աջ» կոճակ"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad-ի «Կենտրոն» կոճակ"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի ենթագրերի գոտին։"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> փաթեթը գցվեց ՍԱՀՄԱՆԱՓԱԿՎԱԾ զամբյուղի մեջ"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>՝"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"օգտատերը պատկեր է ուղարկել"</string>
@@ -2416,10 +2416,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ինչպես է դա աշխատում"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Առկախ է…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Նորից կարգավորեք մատնահետքով ապակողպումը"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"«<xliff:g id="FINGERPRINT">%s</xliff:g>» մատնահետքը հեռացվել է, քանի որ լավ չէր աշխատում"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"«<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>» և «<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>» մատնահետքերը հեռացվել են, քանի որ լավ չէին աշխատում"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"«<xliff:g id="FINGERPRINT">%s</xliff:g>» մատնահետքը հեռացվել է, քանի որ լավ չէր աշխատում։ Նորից կարգավորեք այն՝ ձեր հեռախոսը մատնահետքով ապակողպելու համար։"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"«<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>» և «<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>» մատնահետքերը հեռացվել են, քանի որ լավ չէին աշխատում։ Նորից կարգավորեք դրանք՝ ձեր հեռախոսը մատնահետքով ապակողպելու համար։"</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Նորից կարգավորեք դեմքով ապակողպումը"</string>

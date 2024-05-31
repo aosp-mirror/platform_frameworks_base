@@ -111,12 +111,12 @@ public class PowerStatusMonitorActionTest {
                         .setArcSupported(false)
                         .build();
         mNativeWrapper.setPortInfo(hdmiPortInfo);
+        mPhysicalAddress = 0x0000;
+        mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         mHdmiControlService.initService();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlService.setPowerManager(mPowerManager);
-        mPhysicalAddress = 0x0000;
-        mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         mTestLooper.dispatchAll();
         mTvDevice = mHdmiControlService.tv();
         mNativeWrapper.clearResultMessages();

@@ -66,6 +66,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.input.InputManager;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.media.MediaRouter2Manager;
@@ -685,6 +686,12 @@ public class FrameworkServicesModule {
             pm.initializeUsageHelper();
         }
         return pm;
+    }
+
+    @Provides
+    @Singleton
+    static LocationManager provideLocationManager(Context context) {
+        return context.getSystemService(LocationManager.class);
     }
 
     @Provides

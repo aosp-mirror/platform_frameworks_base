@@ -19,9 +19,14 @@ package com.android.systemui.statusbar;
 import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 
+import static com.android.systemui.Flags.validateKeyboardShortcutHelperIconUri;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.AppGlobals;
+import android.app.SynchronousUserSwitchObserver;
+import android.app.UserSwitchObserver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -37,6 +42,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.hardware.input.InputManagerGlobal;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.text.Editable;
@@ -136,12 +142,21 @@ public final class KeyboardShortcutListSearch {
     };
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private final HandlerThread mHandlerThread = new HandlerThread("KeyboardShortcutHelper");
+    @VisibleForTesting Handler mBackgroundHandler;
     @VisibleForTesting public Context mContext;
     private final IPackageManager mPackageManager;
 
     @VisibleForTesting BottomSheetDialog mKeyboardShortcutsBottomSheetDialog;
     private KeyCharacterMap mKeyCharacterMap;
     private KeyCharacterMap mBackupKeyCharacterMap;
+
+    private final UserSwitchObserver mUserSwitchObserver = new SynchronousUserSwitchObserver() {
+            @Override
+            public void onUserSwitching(int newUserId) throws RemoteException {
+                dismiss();
+            }
+    };
 
     @VisibleForTesting
     KeyboardShortcutListSearch(Context context, WindowManager windowManager) {
@@ -413,36 +428,75 @@ public final class KeyboardShortcutListSearch {
     private boolean mAppShortcutsReceived;
     private boolean mImeShortcutsReceived;
 
-    @VisibleForTesting
-    public void showKeyboardShortcuts(int deviceId) {
-        retrieveKeyCharacterMap(deviceId);
-        mAppShortcutsReceived = false;
-        mImeShortcutsReceived = false;
-        mWindowManager.requestAppKeyboardShortcuts(result -> {
-            // Add specific app shortcuts
+    private void onAppSpecificShortcutsReceived(List<KeyboardShortcutGroup> result) {
+        // Add specific app shortcuts
+        if (result != null) {
             if (result.isEmpty()) {
                 mCurrentAppPackageName = null;
                 mKeySearchResultMap.put(SHORTCUT_SPECIFICAPP_INDEX, false);
             } else {
                 mCurrentAppPackageName = result.get(0).getPackageName();
-                mSpecificAppGroup.addAll(reMapToKeyboardShortcutMultiMappingGroup(result));
+                if (validateKeyboardShortcutHelperIconUri()) {
+                    KeyboardShortcuts.sanitiseShortcuts(result);
+                }
+                mSpecificAppGroup.addAll(
+                        reMapToKeyboardShortcutMultiMappingGroup(result));
                 mKeySearchResultMap.put(SHORTCUT_SPECIFICAPP_INDEX, true);
             }
-            mAppShortcutsReceived = true;
-            if (mImeShortcutsReceived) {
-                mergeAndShowKeyboardShortcutsGroups();
-            }
-        }, deviceId);
-        mWindowManager.requestImeKeyboardShortcuts(result -> {
-            // Add specific Ime shortcuts
+        }
+        mAppShortcutsReceived = true;
+        if (mImeShortcutsReceived) {
+            mergeAndShowKeyboardShortcutsGroups();
+        }
+    }
+
+    private void onImeSpecificShortcutsReceived(List<KeyboardShortcutGroup> result) {
+        // Add specific Ime shortcuts
+        if (result != null) {
             if (!result.isEmpty()) {
-                mInputGroup.addAll(reMapToKeyboardShortcutMultiMappingGroup(result));
+                if (validateKeyboardShortcutHelperIconUri()) {
+                    KeyboardShortcuts.sanitiseShortcuts(result);
+                }
+                mInputGroup.addAll(
+                        reMapToKeyboardShortcutMultiMappingGroup(result));
             }
-            mImeShortcutsReceived = true;
-            if (mAppShortcutsReceived) {
-                mergeAndShowKeyboardShortcutsGroups();
+        }
+        mImeShortcutsReceived = true;
+        if (mAppShortcutsReceived) {
+            mergeAndShowKeyboardShortcutsGroups();
+        }
+    }
+
+    @VisibleForTesting
+    public void showKeyboardShortcuts(int deviceId) {
+        if (mBackgroundHandler == null) {
+            mHandlerThread.start();
+            mBackgroundHandler = new Handler(mHandlerThread.getLooper());
+        }
+
+        if (validateKeyboardShortcutHelperIconUri()) {
+            try {
+                ActivityManager.getService().registerUserSwitchObserver(mUserSwitchObserver, TAG);
+            } catch (RemoteException e) {
+                Log.e(TAG, "could not register user switch observer", e);
             }
-        }, deviceId);
+        }
+
+        retrieveKeyCharacterMap(deviceId);
+        mAppShortcutsReceived = false;
+        mImeShortcutsReceived = false;
+        mWindowManager.requestAppKeyboardShortcuts(
+                result -> {
+                    mBackgroundHandler.post(() -> {
+                        onAppSpecificShortcutsReceived(result);
+                    });
+                }, deviceId);
+        mWindowManager.requestImeKeyboardShortcuts(
+                result -> {
+                    mBackgroundHandler.post(() -> {
+                        onImeSpecificShortcutsReceived(result);
+                    });
+                }, deviceId);
     }
 
     private void mergeAndShowKeyboardShortcutsGroups() {
@@ -507,6 +561,14 @@ public final class KeyboardShortcutListSearch {
         if (mKeyboardShortcutsBottomSheetDialog != null) {
             mKeyboardShortcutsBottomSheetDialog.dismiss();
             mKeyboardShortcutsBottomSheetDialog = null;
+        }
+        mHandlerThread.quit();
+        if (validateKeyboardShortcutHelperIconUri()) {
+            try {
+                ActivityManager.getService().unregisterUserSwitchObserver(mUserSwitchObserver);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Could not unregister user switch observer", e);
+            }
         }
     }
 

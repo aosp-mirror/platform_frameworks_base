@@ -75,7 +75,7 @@
     <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Otključajte opcije za prijavu za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Odaberite spremljeni pristupni ključ za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Odaberite spremljenu zaporku za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Odaberite spremljene podatke za prijavu za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Odaberite podatke za prijavu za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g> koje želite spremiti"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"Odaberite račun za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Želite li odabrati opciju za <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Želite li koristiti te podatke u aplikaciji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>

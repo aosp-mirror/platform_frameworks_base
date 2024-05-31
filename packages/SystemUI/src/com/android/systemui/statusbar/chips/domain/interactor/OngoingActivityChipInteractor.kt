@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.chips.domain.interactor
 
-import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
 import kotlinx.coroutines.flow.StateFlow
 
 /** Interface for an interactor that knows the state of a single type of ongoing activity chip. */

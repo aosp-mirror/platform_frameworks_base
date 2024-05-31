@@ -20,6 +20,7 @@ import android.provider.Settings
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.CoreStartable
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.dagger.SysUISingleton
@@ -32,10 +33,13 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.util.kotlin.emitOnStart
+import com.android.systemui.util.kotlin.getValue
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
 import com.android.systemui.util.settings.SystemSettings
+import java.util.Optional
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -64,9 +68,11 @@ class CommunalSceneStartable
 constructor(
     private val dockManager: DockManager,
     private val communalInteractor: CommunalInteractor,
+    private val communalSceneInteractor: CommunalSceneInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val keyguardInteractor: KeyguardInteractor,
     private val systemSettings: SystemSettings,
+    centralSurfacesOpt: Optional<CentralSurfaces>,
     private val notificationShadeWindowController: NotificationShadeWindowController,
     @Application private val applicationScope: CoroutineScope,
     @Background private val bgScope: CoroutineScope,
@@ -78,13 +84,15 @@ constructor(
 
     private var isDreaming: Boolean = false
 
+    private val centralSurfaces: CentralSurfaces? by centralSurfacesOpt
+
     override fun start() {
         // Handle automatically switching based on keyguard state.
         keyguardTransitionInteractor.startedKeyguardTransitionStep
             .mapLatest(::determineSceneAfterTransition)
             .filterNotNull()
             .onEach { nextScene ->
-                communalInteractor.changeScene(nextScene, CommunalTransitionKeys.SimpleFade)
+                communalSceneInteractor.changeScene(nextScene, CommunalTransitionKeys.SimpleFade)
             }
             .launchIn(applicationScope)
 
@@ -124,7 +132,7 @@ constructor(
         // app is updated by the Play store, a new timeout should be started.
         bgScope.launch {
             combine(
-                    communalInteractor.desiredScene,
+                    communalSceneInteractor.currentScene,
                     // Emit a value on start so the combine starts.
                     communalInteractor.userActivity.emitOnStart()
                 ) { scene, _ ->
@@ -140,19 +148,19 @@ constructor(
         }
         bgScope.launch {
             keyguardInteractor.isDreaming
-                .sample(communalInteractor.desiredScene, ::Pair)
+                .sample(communalSceneInteractor.currentScene, ::Pair)
                 .collectLatest { (isDreaming, scene) ->
                     this@CommunalSceneStartable.isDreaming = isDreaming
                     if (scene == CommunalScenes.Communal && isDreaming && timeoutJob == null) {
                         // If dreaming starts after timeout has expired, ex. if dream restarts under
                         // the hub, just close the hub immediately.
-                        communalInteractor.changeScene(CommunalScenes.Blank)
+                        communalSceneInteractor.changeScene(CommunalScenes.Blank)
                     }
                 }
         }
 
         bgScope.launch {
-            communalInteractor.isIdleOnCommunal.collectLatest {
+            communalSceneInteractor.isIdleOnCommunal.collectLatest {
                 withContext(mainDispatcher) {
                     notificationShadeWindowController.setGlanceableHubShowing(it)
                 }
@@ -171,7 +179,7 @@ constructor(
                 bgScope.launch {
                     delay(screenTimeout.milliseconds)
                     if (isDreaming) {
-                        communalInteractor.changeScene(CommunalScenes.Blank)
+                        communalSceneInteractor.changeScene(CommunalScenes.Blank)
                     }
                     timeoutJob = null
                 }
@@ -184,11 +192,15 @@ constructor(
         val to = lastStartedTransition.to
         val from = lastStartedTransition.from
         val docked = dockManager.isDocked
+        val launchingActivityOverLockscreen =
+            centralSurfaces?.isLaunchingActivityOverLockscreen ?: false
 
         return when {
-            to == KeyguardState.OCCLUDED -> {
+            to == KeyguardState.OCCLUDED && !launchingActivityOverLockscreen -> {
                 // Hide communal when an activity is started on keyguard, to ensure the activity
-                // underneath the hub is shown.
+                // underneath the hub is shown. When launching activities over lockscreen, we only
+                // change scenes once the activity launch animation is finished, so avoid
+                // changing the scene here.
                 CommunalScenes.Blank
             }
             to == KeyguardState.GLANCEABLE_HUB && from == KeyguardState.OCCLUDED -> {

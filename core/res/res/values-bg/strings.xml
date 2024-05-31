@@ -201,6 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Служебният ви потребителски профил вече не е налице на това устройство"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Опитите за паролата са твърде много"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Администраторът предостави устройствотото за лична употреба"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Частното пространство бе премахнато"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Организацията ви не допуска частни пространства на това управлявано устройство."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Устройството се управлява"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Организацията ви управлява това устройство и може да наблюдава мрежовия трафик. Докоснете за подробности."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Прилож. имат достъп до местоположението ви"</string>
@@ -283,8 +285,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Гласова помощ"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"Заключване"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
-    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
-    <skip />
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"Отговор"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Ново известие"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Физическа клавиатура"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Сигурност"</string>
@@ -2195,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Контролен пад – ляво"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Контролен пад – дясно"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Контролен пад – център"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Лента за надписи на <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Пакетът <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> е поставен в ОГРАНИЧЕНИЯ контейнер"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"изпратено изображение"</string>
@@ -2416,10 +2416,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Начин на работа"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Изчаква..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Повторно настройване на „Отключване с отпечатък“"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"Отпечатъкът „<xliff:g id="FINGERPRINT">%s</xliff:g>“ бе изтрит, защото не работеше добре"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"Отпечатъците „<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>“ и „<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>“ бяха изтрити, защото не работеха добре"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"Отпечатъкът „<xliff:g id="FINGERPRINT">%s</xliff:g>“ бе изтрит, защото не работеше добре. Настройте го отново, за да отключвате телефона си с отпечатък."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"Отпечатъците „<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>“ и „<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>“ бяха изтрити, защото не работеха добре. Настройте ги отново, за да отключвате телефона си с отпечатък."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Повторно настройване на „Отключване с лице“"</string>

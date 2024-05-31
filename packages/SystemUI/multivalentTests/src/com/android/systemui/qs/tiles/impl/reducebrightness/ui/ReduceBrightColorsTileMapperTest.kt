@@ -83,17 +83,13 @@ class ReduceBrightColorsTileMapperTest : SysuiTestCase() {
     ): QSTileState {
         val label =
             context.getString(com.android.internal.R.string.reduce_bright_colors_feature_name)
+        val iconRes =
+            if (activationState == QSTileState.ActivationState.ACTIVE)
+                R.drawable.qs_extra_dim_icon_on
+            else R.drawable.qs_extra_dim_icon_off
         return QSTileState(
-            {
-                Icon.Loaded(
-                    context.getDrawable(
-                        if (activationState == QSTileState.ActivationState.ACTIVE)
-                            R.drawable.qs_extra_dim_icon_on
-                        else R.drawable.qs_extra_dim_icon_off
-                    )!!,
-                    null
-                )
-            },
+            { Icon.Loaded(context.getDrawable(iconRes)!!, null) },
+            iconRes,
             label,
             activationState,
             context.resources

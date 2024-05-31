@@ -76,6 +76,8 @@
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"dërgoi një imazh"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Po ruan pamjen e ekranit…"</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Pamja e ekranit po ruhet te profili i punës…"</string>
+    <!-- no translation found for screenshot_saving_private_profile (8934706048497093297) -->
+    <skip />
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Pamja e ekranit u ruajt"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Pamja e ekranit nuk mund të ruhej"</string>
     <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"Ekrani i jashtëm"</string>
@@ -371,6 +373,8 @@
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Çifto pajisje të re"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Kliko për të çiftuar një pajisje të re"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Paravendosja nuk mund të përditësohej"</string>
+    <!-- no translation found for hearing_devices_preset_label (7878267405046232358) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Të zhbllokohet mikrofoni i pajisjes?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Të zhbllokohet kamera e pajisjes?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Të zhbllokohen kamera dhe mikrofoni i pajisjes?"</string>

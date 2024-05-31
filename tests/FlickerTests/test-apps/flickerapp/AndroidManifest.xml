@@ -74,6 +74,7 @@
                   android:taskAffinity="com.android.server.wm.flicker.testapp.SeamlessRotationActivity"
                   android:theme="@style/CutoutShortEdges"
                   android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+                  android:showWhenLocked="true"
                   android:label="SeamlessActivity"
                   android:exported="true">
             <intent-filter>

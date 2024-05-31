@@ -22,6 +22,7 @@ import com.android.app.tracing.coroutines.launch
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode.Companion.isWakeAndUnlock
@@ -47,9 +48,10 @@ constructor(
     @Background private val scope: CoroutineScope,
     @Background bgDispatcher: CoroutineDispatcher,
     @Main mainDispatcher: CoroutineDispatcher,
-    private val keyguardInteractor: KeyguardInteractor,
+    keyguardInteractor: KeyguardInteractor,
     powerInteractor: PowerInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
+    val deviceEntryRepository: DeviceEntryRepository,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.AOD,
@@ -58,6 +60,7 @@ constructor(
         bgDispatcher = bgDispatcher,
         powerInteractor = powerInteractor,
         keyguardOcclusionInteractor = keyguardOcclusionInteractor,
+        keyguardInteractor = keyguardInteractor,
     ) {
 
     override fun start() {
@@ -125,7 +128,12 @@ constructor(
                         val shouldTransitionToOccluded =
                             !KeyguardWmStateRefactor.isEnabled && isKeyguardOccludedLegacy
 
-                        if (canDismissLockscreen) {
+                        val shouldTransitionToGone =
+                            (!KeyguardWmStateRefactor.isEnabled && canDismissLockscreen) ||
+                                (KeyguardWmStateRefactor.isEnabled &&
+                                    !deviceEntryRepository.isLockscreenEnabled())
+
+                        if (shouldTransitionToGone) {
                             startTransitionTo(
                                 toState = KeyguardState.GONE,
                             )

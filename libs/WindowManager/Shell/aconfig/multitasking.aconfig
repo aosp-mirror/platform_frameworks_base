@@ -92,3 +92,10 @@ flag {
     description: "Enables Taskbar on phones"
     bug: "341784466"
 }
+
+flag {
+    name: "enable_bubble_anything"
+    namespace: "multitasking"
+    description: "Enable UI affordances to put other content into a bubble"
+    bug: "342245211"
+}

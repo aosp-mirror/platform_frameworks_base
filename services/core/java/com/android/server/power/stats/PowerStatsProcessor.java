@@ -15,9 +15,15 @@
  */
 package com.android.server.power.stats;
 
+import static com.android.server.power.stats.MultiStateStats.STATE_DOES_NOT_EXIST;
+import static com.android.server.power.stats.MultiStateStats.States.findTrackedStateByName;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.BatteryStats;
 import android.util.Log;
+
+import com.android.internal.os.PowerStats;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,10 +46,21 @@ import java.util.List;
 abstract class PowerStatsProcessor {
     private static final String TAG = "PowerStatsProcessor";
 
-    private static final int INDEX_DOES_NOT_EXIST = -1;
     private static final double MILLIAMPHOUR_PER_MICROCOULOMB = 1.0 / 1000.0 / 60.0 / 60.0;
 
-    abstract void finish(PowerComponentAggregatedPowerStats stats);
+    void start(PowerComponentAggregatedPowerStats stats, long timestampMs) {
+    }
+
+    void noteStateChange(PowerComponentAggregatedPowerStats stats,
+            BatteryStats.HistoryItem item) {
+    }
+
+    void addPowerStats(PowerComponentAggregatedPowerStats stats, PowerStats powerStats,
+            long timestampMs) {
+        stats.addPowerStats(powerStats, timestampMs);
+    }
+
+    abstract void finish(PowerComponentAggregatedPowerStats stats, long timestampMs);
 
     protected static class PowerEstimationPlan {
         private final AggregatedPowerStatsConfig.PowerComponent mConfig;
@@ -79,7 +96,7 @@ abstract class PowerStatsProcessor {
                 }
 
                 int index = findTrackedStateByName(uidStateConfig, deviceStateConfig[i].getName());
-                if (index != INDEX_DOES_NOT_EXIST && uidStateConfig[index].isTracked()) {
+                if (index != STATE_DOES_NOT_EXIST && uidStateConfig[index].isTracked()) {
                     deviceStatesTrackedPerUid[i] = deviceStateConfig[i];
                 }
             }
@@ -131,7 +148,7 @@ abstract class PowerStatsProcessor {
                 }
 
                 int index = findTrackedStateByName(deviceStateConfig, uidStateConfig[i].getName());
-                if (index != INDEX_DOES_NOT_EXIST && deviceStateConfig[index].isTracked()) {
+                if (index != STATE_DOES_NOT_EXIST && deviceStateConfig[index].isTracked()) {
                     uidStatesTrackedForDevice[i] = uidStateConfig[i];
                 } else {
                     uidStatesNotTrackedForDevice[i] = uidStateConfig[i];
@@ -301,15 +318,6 @@ abstract class PowerStatsProcessor {
                 @AggregatedPowerStatsConfig.TrackedState int[] stateValues) {
             this.stateValues = stateValues;
         }
-    }
-
-    private static int findTrackedStateByName(MultiStateStats.States[] states, String name) {
-        for (int i = 0; i < states.length; i++) {
-            if (states[i].getName().equals(name)) {
-                return i;
-            }
-        }
-        return INDEX_DOES_NOT_EXIST;
     }
 
     @NonNull

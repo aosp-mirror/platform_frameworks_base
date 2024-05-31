@@ -3,53 +3,57 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="8016145283189546017">"Uređaji za unos"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android tipkovnica"</string>
-    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"engleska (UK)"</string>
-    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"engleska (SAD)"</string>
-    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"engleska (SAD), međunarodna"</string>
-    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"engleska (SAD), Colemakov raspored"</string>
-    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"engleska (SAD), Dvorakov raspored"</string>
-    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"Engleska (SAD), raspored Workman"</string>
-    <string name="keyboard_layout_german_label" msgid="8451565865467909999">"njemačka"</string>
-    <string name="keyboard_layout_french_label" msgid="813450119589383723">"francuska"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"engleski (UK)"</string>
+    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"engleski (SAD)"</string>
+    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"engleski (SAD), međunarodni raspored"</string>
+    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"engleski (SAD), Colemakov raspored"</string>
+    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"engleski (SAD), Dvorakov raspored"</string>
+    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"engleski (SAD), raspored Workman"</string>
+    <string name="keyboard_layout_german_label" msgid="8451565865467909999">"njemački"</string>
+    <string name="keyboard_layout_french_label" msgid="813450119589383723">"francuski"</string>
     <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"francuska (Kanada)"</string>
-    <string name="keyboard_layout_russian_label" msgid="8724879775815042968">"ruska"</string>
-    <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"ruska, raspored Maca"</string>
-    <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"španjolska"</string>
-    <string name="keyboard_layout_swiss_french_label" msgid="4659191025396371684">"švicarsko-francuska"</string>
-    <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"švicarsko-njemačka"</string>
-    <string name="keyboard_layout_belgian" msgid="2011984572838651558">"belgijska"</string>
-    <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"bugarska"</string>
-    <string name="keyboard_layout_bulgarian_phonetic" msgid="7568914730360106653">"bugarska (fonetska)"</string>
-    <string name="keyboard_layout_italian" msgid="6497079660449781213">"talijanska"</string>
-    <string name="keyboard_layout_danish" msgid="8036432066627127851">"danska"</string>
-    <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"norveška"</string>
-    <string name="keyboard_layout_swedish" msgid="732959109088479351">"švedska"</string>
-    <string name="keyboard_layout_finnish" msgid="5585659438924315466">"finska"</string>
-    <string name="keyboard_layout_croatian" msgid="4172229471079281138">"hrvatska"</string>
-    <string name="keyboard_layout_czech" msgid="1349256901452975343">"češka"</string>
-    <string name="keyboard_layout_czech_qwerty" msgid="3331402534128515501">"Češka QWERTY tipkovnica"</string>
-    <string name="keyboard_layout_estonian" msgid="8775830985185665274">"estonska"</string>
-    <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"mađarska"</string>
-    <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"islandska"</string>
-    <string name="keyboard_layout_brazilian" msgid="5117896443147781939">"brazilska"</string>
-    <string name="keyboard_layout_portuguese" msgid="2888198587329660305">"portugalska"</string>
-    <string name="keyboard_layout_slovak" msgid="2469379934672837296">"slovačka"</string>
-    <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"slovenska"</string>
-    <string name="keyboard_layout_turkish" msgid="7736163250907964898">"turska"</string>
+    <string name="keyboard_layout_russian_label" msgid="8724879775815042968">"ruski"</string>
+    <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"ruski, raspored na Macu"</string>
+    <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"španjolski"</string>
+    <string name="keyboard_layout_swiss_french_label" msgid="4659191025396371684">"francuski (Švicarska)"</string>
+    <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"njemački (Švicarska)"</string>
+    <string name="keyboard_layout_belgian" msgid="2011984572838651558">"belgijski raspored"</string>
+    <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"bugarski"</string>
+    <string name="keyboard_layout_bulgarian_phonetic" msgid="7568914730360106653">"bugarski (fonetski)"</string>
+    <string name="keyboard_layout_italian" msgid="6497079660449781213">"talijanski"</string>
+    <string name="keyboard_layout_danish" msgid="8036432066627127851">"danski"</string>
+    <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"norveški"</string>
+    <string name="keyboard_layout_swedish" msgid="732959109088479351">"švedski"</string>
+    <string name="keyboard_layout_finnish" msgid="5585659438924315466">"finski"</string>
+    <string name="keyboard_layout_croatian" msgid="4172229471079281138">"hrvatski"</string>
+    <string name="keyboard_layout_czech" msgid="1349256901452975343">"češki"</string>
+    <string name="keyboard_layout_czech_qwerty" msgid="3331402534128515501">"češki (QWERTY tipkovnica)"</string>
+    <string name="keyboard_layout_estonian" msgid="8775830985185665274">"estonski"</string>
+    <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"mađarski"</string>
+    <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"islandski"</string>
+    <string name="keyboard_layout_brazilian" msgid="5117896443147781939">"portugalski (Brazil)"</string>
+    <string name="keyboard_layout_portuguese" msgid="2888198587329660305">"portugalski"</string>
+    <string name="keyboard_layout_slovak" msgid="2469379934672837296">"slovački"</string>
+    <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"slovenski"</string>
+    <string name="keyboard_layout_turkish" msgid="7736163250907964898">"turski"</string>
     <string name="keyboard_layout_turkish_f" msgid="9130320856010776018">"turski F"</string>
-    <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"ukrajinska"</string>
+    <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"ukrajinski"</string>
     <string name="keyboard_layout_arabic" msgid="5671970465174968712">"arapski"</string>
     <string name="keyboard_layout_greek" msgid="7289253560162386040">"grčki"</string>
     <string name="keyboard_layout_hebrew" msgid="7241473985890173812">"hebrejski"</string>
     <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"litavski"</string>
     <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"španjolski (Latinska Amerika)"</string>
-    <string name="keyboard_layout_latvian" msgid="4405417142306250595">"latvijska"</string>
+    <string name="keyboard_layout_latvian" msgid="4405417142306250595">"latvijski"</string>
     <string name="keyboard_layout_persian" msgid="3920643161015888527">"perzijski"</string>
     <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"azerbajdžanski"</string>
     <string name="keyboard_layout_polish" msgid="1121588624094925325">"poljski"</string>
     <string name="keyboard_layout_belarusian" msgid="7619281752698687588">"bjeloruski"</string>
-    <string name="keyboard_layout_mongolian" msgid="7678483495823936626">"Mongolski"</string>
-    <string name="keyboard_layout_georgian" msgid="4596185456863747454">"Gruzijska"</string>
-    <string name="keyboard_layout_thai_kedmanee" msgid="6637147314580760938">"tajlandski (kedmanee)"</string>
-    <string name="keyboard_layout_thai_pattachote" msgid="2547992342794252205">"Tajski (pattachote)"</string>
+    <string name="keyboard_layout_mongolian" msgid="7678483495823936626">"mongolski"</string>
+    <string name="keyboard_layout_georgian" msgid="4596185456863747454">"gruzijski"</string>
+    <string name="keyboard_layout_thai_kedmanee" msgid="6637147314580760938">"tajski (kedmanee)"</string>
+    <string name="keyboard_layout_thai_pattachote" msgid="2547992342794252205">"tajski (pattachote)"</string>
+    <!-- no translation found for keyboard_layout_serbian_latin (3128791759390046571) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_montenegrin_latin (1467832503378949945) -->
+    <skip />
 </resources>

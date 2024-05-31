@@ -155,7 +155,7 @@ internal open class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
     }
 }
 
-internal class AvailableHearingDeviceItemFactory : ActiveMediaDeviceItemFactory() {
+internal class AvailableHearingDeviceItemFactory : AvailableMediaDeviceItemFactory() {
     override fun isFilterMatched(
         context: Context,
         cachedDevice: CachedBluetoothDevice,

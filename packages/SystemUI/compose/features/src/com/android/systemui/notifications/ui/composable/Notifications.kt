@@ -67,7 +67,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneScope
-import com.android.compose.modifiers.height
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.common.ui.compose.windowinsets.LocalRawScreenHeight
 import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadius
@@ -108,18 +107,17 @@ object Notifications {
  */
 @Composable
 fun SceneScope.HeadsUpNotificationSpace(
+    stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
     modifier: Modifier = Modifier,
     isPeekFromBottom: Boolean = false,
 ) {
-    val headsUpHeight = viewModel.headsUpHeight.collectAsStateWithLifecycle()
-
     Element(
         Notifications.Elements.HeadsUpNotificationPlaceholder,
         modifier =
             modifier
-                .height { headsUpHeight.value.roundToInt() }
                 .fillMaxWidth()
+                .notificationHeadsUpHeight(stackScrollView)
                 .debugBackground(viewModel, DEBUG_HUN_COLOR)
                 .onGloballyPositioned { coordinates: LayoutCoordinates ->
                     val boundsInWindow = coordinates.boundsInWindow()
@@ -128,7 +126,8 @@ fun SceneScope.HeadsUpNotificationSpace(
                             " size=${coordinates.size}" +
                             " bounds=$boundsInWindow"
                     }
-                    viewModel.onHeadsUpTopChanged(boundsInWindow.top)
+                    // Note: boundsInWindow doesn't scroll off the screen
+                    stackScrollView.setHeadsUpTop(boundsInWindow.top)
                 }
     ) {
         content {}
@@ -152,6 +151,7 @@ fun SceneScope.ConstrainedNotificationStack(
             modifier = Modifier.fillMaxSize(),
         )
         HeadsUpNotificationSpace(
+            stackScrollView = stackScrollView,
             viewModel = viewModel,
             modifier = Modifier.align(Alignment.TopCenter),
         )
@@ -169,6 +169,7 @@ fun SceneScope.NotificationScrollingStack(
     viewModel: NotificationsPlaceholderViewModel,
     maxScrimTop: () -> Float,
     shouldPunchHoleBehindScrim: Boolean,
+    shouldFillMaxSize: Boolean = true,
     shadeMode: ShadeMode,
     modifier: Modifier = Modifier,
 ) {
@@ -327,14 +328,14 @@ fun SceneScope.NotificationScrollingStack(
         }
         Box(
             modifier =
-                Modifier.fillMaxSize()
-                    .graphicsLayer {
+                Modifier.graphicsLayer {
                         alpha =
                             if (shouldPunchHoleBehindScrim) {
                                 (expansionFraction / EXPANSION_FOR_MAX_SCRIM_ALPHA).coerceAtMost(1f)
                             } else 1f
                     }
                     .background(MaterialTheme.colorScheme.surface)
+                    .thenIf(shouldFillMaxSize) { Modifier.fillMaxSize() }
                     .debugBackground(viewModel, DEBUG_BOX_COLOR)
         ) {
             NotificationPlaceholder(
@@ -357,7 +358,7 @@ fun SceneScope.NotificationScrollingStack(
                         .onSizeChanged { size -> stackHeight.intValue = size.height },
             )
         }
-        HeadsUpNotificationSpace(viewModel = viewModel)
+        HeadsUpNotificationSpace(stackScrollView = stackScrollView, viewModel = viewModel)
     }
 }
 

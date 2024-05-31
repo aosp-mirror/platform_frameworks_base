@@ -103,10 +103,8 @@
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"Α: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Δ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> μπαταρία."</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"Αριστερά: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> μπαταρία"</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"Δεξιά: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> μπαταρία"</string>
-    <!-- no translation found for tv_bluetooth_battery_level_untethered_left (337629670583744410) -->
-    <skip />
-    <!-- no translation found for tv_bluetooth_battery_level_untethered_right (8610019317279155595) -->
-    <skip />
+    <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"Αριστερό <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_right" msgid="8610019317279155595">"Δεξί <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Ενεργό"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Αποθηκεύτηκε"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Ενεργό (μόνο το αριστερό)"</string>
@@ -237,9 +235,9 @@
     <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Επιλογή προφίλ"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Προσωπικό"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Προσωπικός"</string>
     <string name="category_work" msgid="4014193632325996115">"Εργασίας"</string>
-    <string name="category_private" msgid="4244892185452788977">"Ιδιωτικό"</string>
+    <string name="category_private" msgid="4244892185452788977">"Ιδιωτικός"</string>
     <string name="category_clone" msgid="1554511758987195974">"Κλωνοποίηση"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Επιλογές για προγραμματιστές"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Ενεργοποίηση επιλογών για προγραμματιστές"</string>

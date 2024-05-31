@@ -24,13 +24,13 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.uiEventLogger
 import com.android.internal.logging.uiEventLoggerFake
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.volume.panel.data.repository.volumePanelGlobalStateRepository
 import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import com.android.systemui.volume.panel.ui.viewmodel.volumePanelViewModel
 import com.google.common.truth.Truth.assertThat
@@ -56,7 +56,10 @@ class BottomBarViewModelTest : SysuiTestCase() {
 
     @Captor private lateinit var activityStartedCaptor: ArgumentCaptor<ActivityStarter.Callback>
 
-    private val kosmos = testKosmos()
+    private val kosmos =
+        testKosmos().apply {
+            volumePanelGlobalStateRepository.updateVolumePanelState { it.copy(isVisible = true) }
+        }
 
     private lateinit var underTest: BottomBarViewModel
 
@@ -75,8 +78,7 @@ class BottomBarViewModelTest : SysuiTestCase() {
                 underTest.onDoneClicked()
                 runCurrent()
 
-                val volumePanelState by collectLastValue(volumePanelViewModel.volumePanelState)
-                assertThat(volumePanelState!!.isVisible).isFalse()
+                assertThat(volumePanelGlobalStateRepository.globalState.value.isVisible).isFalse()
             }
         }
     }
@@ -106,8 +108,7 @@ class BottomBarViewModelTest : SysuiTestCase() {
                     .isEqualTo(VolumePanelUiEvent.VOLUME_PANEL_SOUND_SETTINGS_CLICKED.id)
 
                 activityStartedCaptor.value.onActivityStarted(ActivityManager.START_SUCCESS)
-                val volumePanelState by collectLastValue(volumePanelViewModel.volumePanelState)
-                assertThat(volumePanelState!!.isVisible).isFalse()
+                assertThat(volumePanelGlobalStateRepository.globalState.value.isVisible).isFalse()
             }
         }
     }

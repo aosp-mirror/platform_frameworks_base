@@ -309,7 +309,7 @@
          fresh, it will be used as the current location by Telephony to decide whether satellite
          services should be allowed.
          -->
-    <integer name="config_oem_enabled_satellite_location_fresh_duration">600</integer>
+    <integer name="config_oem_enabled_satellite_location_fresh_duration">300</integer>
     <java-symbol type="integer" name="config_oem_enabled_satellite_location_fresh_duration" />
 
     <!-- Whether enhanced IWLAN handover check is enabled. If enabled, telephony frameworks
@@ -383,5 +383,30 @@
          -->
     <bool name="config_wait_for_device_alignment_in_demo_datagram">false</bool>
     <java-symbol type="bool" name="config_wait_for_device_alignment_in_demo_datagram" />
+
+    <!-- The time duration in millis after which Telephony will abort the last message datagram
+     sending requests. Telephony starts a timer when receiving a last message datagram sending
+     request in either OFF, IDLE, or NOT_CONNECTED state. In NOT_CONNECTED, the duration of the
+     timer is given by this config.
+     In OFF or IDLE state, the duration of the timer is the sum of this config and the
+     config_satellite_modem_image_switching_duration_millis.
+     -->
+    <integer name="config_datagram_wait_for_connected_state_for_last_message_timeout_millis">60000</integer>
+    <java-symbol type="integer" name="config_datagram_wait_for_connected_state_for_last_message_timeout_millis" />
+
+    <!-- The time duration in millis after which Telephony will abort the last message datagram
+     sending requests and send failure response to the client that has requested sending the
+     datagrams. Telephony starts a timer after pushing down the last message datagram sending
+     request to modem. Before expiry, the timer will be stopped when Telephony receives the response
+     for the sending request from modem.
+     -->
+    <integer name="config_wait_for_datagram_sending_response_for_last_message_timeout_millis">60000</integer>
+    <java-symbol type="integer" name="config_wait_for_datagram_sending_response_for_last_message_timeout_millis" />
+
+    <!-- Boolean indicating whether Telephony should force PhoneGlobals creation
+         regardless of FEATURE_TELEPHONY presence.
+         -->
+    <bool name="config_force_phone_globals_creation">false</bool>
+    <java-symbol type="bool" name="config_force_phone_globals_creation" />
 
 </resources>

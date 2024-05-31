@@ -241,7 +241,8 @@ class BleDeviceProcessor implements AssociationStore.OnChangeListener {
         final BroadcastReceiver receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                checkBleState();
+                // Post to the main thread to make sure it is a Non-Blocking call.
+                new Handler(Looper.getMainLooper()).post(() -> checkBleState());
             }
         };
 

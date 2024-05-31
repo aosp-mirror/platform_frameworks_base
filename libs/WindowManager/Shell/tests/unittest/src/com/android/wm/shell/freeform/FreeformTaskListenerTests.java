@@ -91,7 +91,8 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
 
         mFreeformTaskListener.onFocusTaskChanged(task);
 
-        verify(mDesktopModeTaskRepository).addOrMoveFreeformTaskToTop(task.taskId);
+        verify(mDesktopModeTaskRepository)
+            .addOrMoveFreeformTaskToTop(task.displayId, task.taskId);
     }
 
     @Test
@@ -103,7 +104,7 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
         mFreeformTaskListener.onFocusTaskChanged(fullscreenTask);
 
         verify(mDesktopModeTaskRepository, never())
-                .addOrMoveFreeformTaskToTop(fullscreenTask.taskId);
+                .addOrMoveFreeformTaskToTop(fullscreenTask.displayId, fullscreenTask.taskId);
     }
 
     @After

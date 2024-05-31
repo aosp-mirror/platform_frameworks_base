@@ -5590,6 +5590,12 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = managedProfileAdminUid;
         addManagedProfile(admin1, managedProfileAdminUid, admin1, VERSION_CODES.R);
 
+        // Profile has a unified challenge
+        doReturn(false).when(getServices().lockPatternUtils)
+                .isSeparateProfileChallengeEnabled(managedProfileUserId);
+        doReturn(true).when(getServices().lockPatternUtils)
+                .isProfileWithUnifiedChallenge(managedProfileUserId);
+
         dpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_HIGH);
         parentDpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_LOW);
 
@@ -5609,6 +5615,12 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 UserHandle.getUid(managedProfileUserId, DpmMockContext.SYSTEM_UID);
         mContext.binder.callingUid = managedProfileAdminUid;
         addManagedProfile(admin1, managedProfileAdminUid, admin1, VERSION_CODES.R);
+
+        // Profile has a unified challenge
+        doReturn(false).when(getServices().lockPatternUtils)
+                .isSeparateProfileChallengeEnabled(managedProfileUserId);
+        doReturn(true).when(getServices().lockPatternUtils)
+                .isProfileWithUnifiedChallenge(managedProfileUserId);
 
         dpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_COMPLEX);
         dpm.setPasswordMinimumLength(admin1, 8);
@@ -5870,6 +5882,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
         doReturn(separateChallenge).when(getServices().lockPatternUtils)
                 .isSeparateProfileChallengeEnabled(userId);
+        doReturn(!separateChallenge).when(getServices().lockPatternUtils)
+                .isProfileWithUnifiedChallenge(userId);
         when(getServices().userManager.getCredentialOwnerProfile(userId))
                 .thenReturn(separateChallenge ? userId : UserHandle.USER_SYSTEM);
         when(getServices().lockSettingsInternal.getUserPasswordMetrics(userId))
@@ -7631,6 +7645,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         addManagedProfile(admin1, managedProfileAdminUid, admin1);
         mContext.binder.callingUid = managedProfileAdminUid;
+        when(getServices().userManager.isManagedProfile()).thenReturn(true);
 
         final Set<Integer> allowedModes = Set.of(PASSWORD_COMPLEXITY_NONE, PASSWORD_COMPLEXITY_LOW,
                 PASSWORD_COMPLEXITY_MEDIUM, PASSWORD_COMPLEXITY_HIGH);

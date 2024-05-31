@@ -69,6 +69,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.Expandable
@@ -98,6 +101,7 @@ object TileType
 fun Tile(
     tile: TileViewModel,
     iconOnly: Boolean,
+    showLabels: Boolean = false,
     modifier: Modifier,
 ) {
     val state: TileUiState by
@@ -136,7 +140,8 @@ fun Tile(
                 secondaryLabel = state.secondaryLabel.toString(),
                 icon = icon,
                 colors = state.colors,
-                iconOnly = iconOnly
+                iconOnly = iconOnly,
+                showLabels = showLabels,
             )
         }
     }
@@ -160,7 +165,7 @@ fun TileLazyGrid(
 @Composable
 fun DefaultEditTileGrid(
     tiles: List<EditTileViewModel>,
-    iconOnlySpecs: Set<TileSpec>,
+    isIconOnly: (TileSpec) -> Boolean,
     columns: GridCells,
     modifier: Modifier,
     onAddTile: (TileSpec, Int) -> Unit,
@@ -171,8 +176,6 @@ fun DefaultEditTileGrid(
     val addTileToEnd: (TileSpec) -> Unit by rememberUpdatedState {
         onAddTile(it, CurrentTilesInteractor.POSITION_AT_END)
     }
-    val isIconOnly: (TileSpec) -> Boolean =
-        remember(iconOnlySpecs) { { tileSpec: TileSpec -> tileSpec in iconOnlySpecs } }
 
     TileLazyGrid(modifier = modifier, columns = columns) {
         // These Text are just placeholders to see the different sections. Not final UI.
@@ -213,6 +216,7 @@ fun LazyGridScope.editTiles(
     clickAction: ClickAction,
     onClick: (TileSpec) -> Unit,
     isIconOnly: (TileSpec) -> Boolean,
+    showLabels: Boolean = false,
     indicatePosition: Boolean = false,
 ) {
     items(
@@ -250,10 +254,13 @@ fun LazyGridScope.editTiles(
                         this.stateDescription = stateDescription
                     }
         ) {
+            val iconOnly = isIconOnly(viewModel.tileSpec)
+            val tileHeight = tileHeight(iconOnly && showLabels)
             EditTile(
                 tileViewModel = viewModel,
-                isIconOnly(viewModel.tileSpec),
-                modifier = Modifier.height(dimensionResource(id = R.dimen.qs_tile_height))
+                iconOnly = iconOnly,
+                showLabels = showLabels,
+                modifier = Modifier.height(tileHeight)
             )
             if (canClick) {
                 Badge(clickAction, Modifier.align(Alignment.TopEnd))
@@ -281,6 +288,7 @@ fun Badge(action: ClickAction, modifier: Modifier = Modifier) {
 fun EditTile(
     tileViewModel: EditTileViewModel,
     iconOnly: Boolean,
+    showLabels: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val label = tileViewModel.label.load() ?: tileViewModel.tileSpec.spec
@@ -297,6 +305,7 @@ fun EditTile(
             colors = colors,
             icon = tileViewModel.icon,
             iconOnly = iconOnly,
+            showLabels = showLabels,
             animateIconToEnd = true,
         )
     }
@@ -380,9 +389,26 @@ private fun TileContent(
     icon: Icon,
     colors: TileColorAttributes,
     iconOnly: Boolean,
+    showLabels: Boolean = false,
     animateIconToEnd: Boolean = false,
 ) {
-    TileIcon(icon, colorAttr(colors.icon), animateIconToEnd)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxHeight()
+    ) {
+        TileIcon(icon, colorAttr(colors.icon), animateIconToEnd)
+
+        if (iconOnly && showLabels) {
+            Text(
+                label,
+                maxLines = 2,
+                color = colorAttr(colors.label),
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
 
     if (!iconOnly) {
         Column(verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxHeight()) {
@@ -400,4 +426,17 @@ private fun TileContent(
             }
         }
     }
+}
+
+@Composable
+fun tileHeight(iconWithLabel: Boolean = false): Dp {
+    return if (iconWithLabel) {
+        TileDimensions.IconTileWithLabelHeight
+    } else {
+        dimensionResource(id = R.dimen.qs_tile_height)
+    }
+}
+
+private object TileDimensions {
+    val IconTileWithLabelHeight = 100.dp
 }

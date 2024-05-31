@@ -158,7 +158,7 @@ constructor(
             if (faceEnabled || fingerprintEnabled || trustEnabled) {
                 combine(
                         biometricSettingsInteractor.authenticationFlags,
-                        faceAuthInteractor.lockedOut,
+                        faceAuthInteractor.isLockedOut,
                         fingerprintAuthInteractor.isLockedOut,
                         trustInteractor.isTrustAgentCurrentlyAllowed,
                         ::Quad

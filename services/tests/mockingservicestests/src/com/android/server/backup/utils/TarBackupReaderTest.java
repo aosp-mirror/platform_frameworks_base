@@ -25,6 +25,7 @@ import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_RESTORE_ANY_V
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_SYSTEM_APP_NO_AGENT;
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_VERSIONS_MATCH;
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER;
+import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_V_TO_U_RESTORE_PKG_ELIGIBLE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -42,17 +43,23 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.SigningInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
+import android.provider.Settings;
+import android.testing.TestableContext;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.mockingservicestests.R;
 import com.android.server.backup.FileMetadata;
+import com.android.server.backup.Flags;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.restore.PerformAdbRestoreTask;
 import com.android.server.backup.restore.RestorePolicy;
@@ -61,6 +68,7 @@ import com.android.server.backup.testutils.PackageManagerStub;
 import com.google.common.hash.Hashing;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -86,6 +94,8 @@ public class TarBackupReaderTest {
     @Mock private BytesReadListener mBytesReadListenerMock;
     @Mock private IBackupManagerMonitor mBackupManagerMonitorMock;
     @Mock private PackageManagerInternal mMockPackageManagerInternal;
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private final PackageManagerStub mPackageManagerStub = new PackageManagerStub();
     private Context mContext;
@@ -95,7 +105,7 @@ public class TarBackupReaderTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mContext = InstrumentationRegistry.getContext();
+        mContext = new TestableContext(ApplicationProvider.getApplicationContext());
         mUserId = UserHandle.USER_SYSTEM;
     }
 
@@ -515,6 +525,107 @@ public class TarBackupReaderTest {
 
     @Test
     public void
+    chooseRestorePolicy_flagOnNotRestoreAnyVersionVToURestoreAndInAllowlist_returnsIgnore()
+            throws Exception {
+
+        mSetFlagsRule.enableFlags(
+                Flags.FLAG_ENABLE_V_TO_U_RESTORE_FOR_SYSTEM_COMPONENTS_IN_ALLOWLIST);
+
+        TarBackupReader tarBackupReader = createTarBackupReader();
+
+        Settings.Secure.putString(mContext.getContentResolver(),
+                Settings.Secure.V_TO_U_RESTORE_ALLOWLIST, "test");
+
+        Signature[] signatures = new Signature[]{FAKE_SIGNATURE_1};
+        FileMetadata info = new FileMetadata();
+        info.version = Build.VERSION_CODES.UPSIDE_DOWN_CAKE + 1;
+
+        PackageInfo packageInfo = createNonRestoreAnyVersionUPackage();
+        PackageManagerStub.sPackageInfo = packageInfo;
+
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(FAKE_SIGNATURE_1,
+                packageInfo.packageName);
+        RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
+                false /* allowApks */, info, signatures, mMockPackageManagerInternal,
+                mUserId, mContext);
+
+        assertThat(policy).isEqualTo(RestorePolicy.ACCEPT);
+        ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(mBackupManagerMonitorMock).onEvent(bundleCaptor.capture());
+        assertThat(bundleCaptor.getValue().get(EXTRA_LOG_EVENT_ID)).isEqualTo(
+                LOG_EVENT_ID_V_TO_U_RESTORE_PKG_ELIGIBLE);
+    }
+
+
+    @Test
+    public void
+    chooseRestorePolicy_flagOffNotRestoreAnyVersionVToURestoreAndInAllowlist_returnsAccept()
+            throws Exception {
+
+        mSetFlagsRule.disableFlags(
+                Flags.FLAG_ENABLE_V_TO_U_RESTORE_FOR_SYSTEM_COMPONENTS_IN_ALLOWLIST);
+
+        TarBackupReader tarBackupReader = createTarBackupReader();
+
+        Settings.Secure.putString(mContext.getContentResolver(),
+                Settings.Secure.V_TO_U_RESTORE_ALLOWLIST, "test");
+
+        Signature[] signatures = new Signature[]{FAKE_SIGNATURE_1};
+        FileMetadata info = new FileMetadata();
+        info.version = Build.VERSION_CODES.UPSIDE_DOWN_CAKE + 1;
+
+        PackageInfo packageInfo = createNonRestoreAnyVersionUPackage();
+        PackageManagerStub.sPackageInfo = packageInfo;
+
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(FAKE_SIGNATURE_1,
+                packageInfo.packageName);
+        RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
+                false /* allowApks */, info, signatures, mMockPackageManagerInternal,
+                mUserId, mContext);
+
+        assertThat(policy).isEqualTo(RestorePolicy.IGNORE);
+        ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(mBackupManagerMonitorMock).onEvent(bundleCaptor.capture());
+        assertThat(bundleCaptor.getValue().get(EXTRA_LOG_EVENT_ID)).isEqualTo(
+                LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER);
+
+    }
+
+    @Test
+    public void
+    chooseRestorePolicy_flagOnNotRestoreAnyVersionVToURestoreAndNotInAllowlist_returnsIgnore()
+            throws Exception {
+
+        mSetFlagsRule.enableFlags(
+                Flags.FLAG_ENABLE_V_TO_U_RESTORE_FOR_SYSTEM_COMPONENTS_IN_ALLOWLIST);
+
+        TarBackupReader tarBackupReader = createTarBackupReader();
+
+        Settings.Secure.putString(mContext.getContentResolver(),
+                Settings.Secure.V_TO_U_RESTORE_ALLOWLIST, "pkg");
+
+        Signature[] signatures = new Signature[]{FAKE_SIGNATURE_1};
+        FileMetadata info = new FileMetadata();
+        info.version = Build.VERSION_CODES.UPSIDE_DOWN_CAKE + 1;
+
+        PackageInfo packageInfo = createNonRestoreAnyVersionUPackage();
+        PackageManagerStub.sPackageInfo = packageInfo;
+
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(FAKE_SIGNATURE_1,
+                packageInfo.packageName);
+        RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
+                false /* allowApks */, info, signatures, mMockPackageManagerInternal,
+                mUserId, mContext);
+
+        assertThat(policy).isEqualTo(RestorePolicy.IGNORE);
+        ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(mBackupManagerMonitorMock).onEvent(bundleCaptor.capture());
+        assertThat(bundleCaptor.getValue().get(EXTRA_LOG_EVENT_ID)).isEqualTo(
+                LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER);
+    }
+
+    @Test
+    public void
     chooseRestorePolicy_notRestoreAnyVersionAndVersionMismatchButAllowApksAndHasApk_returnsAcceptIfApk()
             throws Exception {
         InputStream inputStream = mContext.getResources().openRawResource(
@@ -523,6 +634,10 @@ public class TarBackupReaderTest {
                 inputStream, null);
         TarBackupReader tarBackupReader = new TarBackupReader(tarInputStream,
                 mBytesReadListenerMock, mBackupManagerMonitorMock);
+
+        Settings.Secure.putString(mContext.getContentResolver(),
+                Settings.Secure.V_TO_U_RESTORE_ALLOWLIST, "pkg");
+
         Signature[] signatures = new Signature[]{FAKE_SIGNATURE_1};
         FileMetadata info = new FileMetadata();
         info.version = 2;
@@ -564,6 +679,10 @@ public class TarBackupReaderTest {
                 inputStream, null);
         TarBackupReader tarBackupReader = new TarBackupReader(tarInputStream,
                 mBytesReadListenerMock, mBackupManagerMonitorMock);
+
+        Settings.Secure.putString(mContext.getContentResolver(),
+                Settings.Secure.V_TO_U_RESTORE_ALLOWLIST, "pkg");
+
         Signature[] signatures = new Signature[]{FAKE_SIGNATURE_1};
         FileMetadata info = new FileMetadata();
         info.version = 2;
@@ -595,6 +714,34 @@ public class TarBackupReaderTest {
         verify(mBackupManagerMonitorMock).onEvent(bundleCaptor.capture());
         assertThat(bundleCaptor.getValue().get(EXTRA_LOG_EVENT_ID)).isEqualTo(
                 LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER);
+    }
+
+    private TarBackupReader createTarBackupReader() throws Exception {
+        InputStream inputStream = mContext.getResources().openRawResource(
+                R.raw.backup_telephony_no_password);
+        InputStream tarInputStream = PerformAdbRestoreTask.parseBackupFileHeaderAndReturnTarStream(
+                inputStream, null);
+        TarBackupReader tarBackupReader = new TarBackupReader(tarInputStream,
+                mBytesReadListenerMock, mBackupManagerMonitorMock);
+        return tarBackupReader;
+    }
+
+    private PackageInfo createNonRestoreAnyVersionUPackage(){
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = "test";
+        packageInfo.applicationInfo = new ApplicationInfo();
+        packageInfo.applicationInfo.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
+        packageInfo.applicationInfo.flags &= ~ApplicationInfo.FLAG_RESTORE_ANY_VERSION;
+        packageInfo.applicationInfo.uid = Process.FIRST_APPLICATION_UID;
+        packageInfo.applicationInfo.backupAgentName = null;
+        packageInfo.signingInfo = new SigningInfo(
+                new SigningDetails(
+                        new Signature[]{FAKE_SIGNATURE_1},
+                        SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null));
+        packageInfo.versionCode = Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
+        return packageInfo;
     }
 }
 

@@ -26,4 +26,6 @@ import com.android.compose.animation.scene.TransitionKey
 object CommunalTransitionKeys {
     /** Fades the glanceable hub without any translation */
     val SimpleFade = TransitionKey("SimpleFade")
+    /** Immediately transitions without any delay */
+    val Immediately = TransitionKey("Immediately")
 }

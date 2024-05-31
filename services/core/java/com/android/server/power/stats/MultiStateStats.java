@@ -41,6 +41,7 @@ public class MultiStateStats {
     private static final String TAG = "MultiStateStats";
 
     private static final String XML_TAG_STATS = "stats";
+    public static final int STATE_DOES_NOT_EXIST = -1;
 
     /**
      * A set of states, e.g. on-battery, screen-on, procstate.  The state values are integers
@@ -67,6 +68,18 @@ public class MultiStateStats {
 
         public String[] getLabels() {
             return mLabels;
+        }
+
+        /**
+         * Finds state by name in the provided array. If not found, returns STATE_DOES_NOT_EXIST.
+         */
+        public static int findTrackedStateByName(MultiStateStats.States[] states, String name) {
+            for (int i = 0; i < states.length; i++) {
+                if (states[i].getName().equals(name)) {
+                    return i;
+                }
+            }
+            return STATE_DOES_NOT_EXIST;
         }
 
         /**

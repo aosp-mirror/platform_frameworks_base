@@ -5246,28 +5246,8 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void cancelNotificationFromListener(INotificationListener token, String pkg,
                 String tag, int id) {
-            final int callingUid = Binder.getCallingUid();
-            final int callingPid = Binder.getCallingPid();
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                synchronized (mNotificationLock) {
-                    final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-                    int cancelReason = REASON_LISTENER_CANCEL;
-                    if (mAssistants.isServiceTokenValidLocked(token)) {
-                        cancelReason = REASON_ASSISTANT_CANCEL;
-                    }
-                    if (info.supportsProfiles()) {
-                        Slog.e(TAG, "Ignoring deprecated cancelNotification(pkg, tag, id) "
-                                + "from " + info.component
-                                + " use cancelNotification(key) instead.");
-                    } else {
-                        cancelNotificationFromListenerLocked(info, callingUid, callingPid,
-                                pkg, tag, id, info.userid, cancelReason);
-                    }
-                }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
+            Slog.e(TAG, "Ignoring deprecated cancelNotification(pkg, tag, id) use " +
+                    "cancelNotification(key) instead.");
         }
 
         /**
@@ -7794,24 +7774,44 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void checkRemoteViews(String pkg, String tag, int id, Notification notification) {
-        if (removeRemoteView(pkg, tag, id, notification.contentView)) {
+        if (android.app.Flags.removeRemoteViews()) {
+            if (notification.contentView != null || notification.bigContentView != null
+                    ||  notification.headsUpContentView != null
+                    || (notification.publicVersion != null
+                    && (notification.publicVersion.contentView != null
+                    || notification.publicVersion.bigContentView != null
+                    || notification.publicVersion.headsUpContentView != null))) {
+                Slog.i(TAG, "Removed customViews for " + pkg);
+                mUsageStats.registerImageRemoved(pkg);
+            }
             notification.contentView = null;
-        }
-        if (removeRemoteView(pkg, tag, id, notification.bigContentView)) {
             notification.bigContentView = null;
-        }
-        if (removeRemoteView(pkg, tag, id, notification.headsUpContentView)) {
             notification.headsUpContentView = null;
-        }
-        if (notification.publicVersion != null) {
-            if (removeRemoteView(pkg, tag, id, notification.publicVersion.contentView)) {
+            if (notification.publicVersion != null) {
                 notification.publicVersion.contentView = null;
-            }
-            if (removeRemoteView(pkg, tag, id, notification.publicVersion.bigContentView)) {
                 notification.publicVersion.bigContentView = null;
-            }
-            if (removeRemoteView(pkg, tag, id, notification.publicVersion.headsUpContentView)) {
                 notification.publicVersion.headsUpContentView = null;
+            }
+        } else {
+            if (removeRemoteView(pkg, tag, id, notification.contentView)) {
+                notification.contentView = null;
+            }
+            if (removeRemoteView(pkg, tag, id, notification.bigContentView)) {
+                notification.bigContentView = null;
+            }
+            if (removeRemoteView(pkg, tag, id, notification.headsUpContentView)) {
+                notification.headsUpContentView = null;
+            }
+            if (notification.publicVersion != null) {
+                if (removeRemoteView(pkg, tag, id, notification.publicVersion.contentView)) {
+                    notification.publicVersion.contentView = null;
+                }
+                if (removeRemoteView(pkg, tag, id, notification.publicVersion.bigContentView)) {
+                    notification.publicVersion.bigContentView = null;
+                }
+                if (removeRemoteView(pkg, tag, id, notification.publicVersion.headsUpContentView)) {
+                    notification.publicVersion.headsUpContentView = null;
+                }
             }
         }
     }

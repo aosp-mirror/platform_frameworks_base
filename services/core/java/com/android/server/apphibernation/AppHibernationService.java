@@ -571,6 +571,7 @@ public final class AppHibernationService extends SystemService {
                 mIActivityManager.noteAppRestrictionEnabled(
                         packageName, uid, ActivityManager.RESTRICTION_LEVEL_FORCE_STOPPED,
                         true, ActivityManager.RESTRICTION_REASON_DORMANT, null,
+                        ActivityManager.RESTRICTION_SOURCE_SYSTEM,
                         /* TODO: fetch actual timeout - 90 days */ 90 * 24 * 60 * 60_000L);
             }
             // No need to log the unhibernate case as an unstop is logged already in ActivityMS

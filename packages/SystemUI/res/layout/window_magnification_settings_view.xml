@@ -125,6 +125,7 @@
             android:ellipsize="marquee"
             android:text="@string/accessibility_allow_diagonal_scrolling"
             android:textAppearance="@style/TextAppearance.MagnificationSetting.Title"
+            android:labelFor="@id/magnifier_horizontal_lock_switch"
             android:layout_gravity="center_vertical" />
 
         <Switch

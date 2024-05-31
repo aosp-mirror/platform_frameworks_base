@@ -51,6 +51,7 @@ import android.window.TaskConstants;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.shared.DesktopModeStatus;
@@ -268,6 +269,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                     .setName("Decor container of Task=" + mTaskInfo.taskId)
                     .setContainerLayer()
                     .setParent(mTaskSurface)
+                    .setCallsite("WindowDecoration.relayout_1")
                     .build();
 
             startT.setTrustedOverlay(mDecorationContainerSurface, true)
@@ -285,6 +287,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                     .setName("Caption container of Task=" + mTaskInfo.taskId)
                     .setContainerLayer()
                     .setParent(mDecorationContainerSurface)
+                    .setCallsite("WindowDecoration.relayout_2")
                     .build();
         }
 
@@ -575,6 +578,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 .setName(namePrefix + " of Task=" + mTaskInfo.taskId)
                 .setContainerLayer()
                 .setParent(mDecorationContainerSurface)
+                .setCallsite("WindowDecoration.addWindow")
                 .build();
         View v = LayoutInflater.from(mDecorWindowContext).inflate(layoutId, null);
 
@@ -684,7 +688,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
     }
 
-    interface SurfaceControlViewHostFactory {
+    @VisibleForTesting
+    public interface SurfaceControlViewHostFactory {
         default SurfaceControlViewHost create(Context c, Display d, WindowlessWindowManager wmm) {
             return new SurfaceControlViewHost(c, d, wmm, "WindowDecoration");
         }

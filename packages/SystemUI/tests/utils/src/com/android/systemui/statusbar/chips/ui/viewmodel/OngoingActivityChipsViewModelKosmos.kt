@@ -17,10 +17,31 @@
 package com.android.systemui.statusbar.chips.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
+import com.android.systemui.screenrecord.data.repository.screenRecordRepository
+import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractor
+import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.ScreenRecordChipInteractor
+import com.android.systemui.util.time.fakeSystemClock
 
-val Kosmos.screenRecordChipInteractor: FakeScreenRecordChipInteractor by
-    Kosmos.Fixture { FakeScreenRecordChipInteractor() }
+val Kosmos.screenRecordChipInteractor: ScreenRecordChipInteractor by
+    Kosmos.Fixture {
+        ScreenRecordChipInteractor(
+            scope = applicationCoroutineScope,
+            screenRecordRepository = screenRecordRepository,
+            systemClock = fakeSystemClock,
+        )
+    }
+
+val Kosmos.mediaProjectionChipInteractor: MediaProjectionChipInteractor by
+    Kosmos.Fixture {
+        MediaProjectionChipInteractor(
+            scope = applicationCoroutineScope,
+            mediaProjectionRepository = fakeMediaProjectionRepository,
+            systemClock = fakeSystemClock,
+        )
+    }
 
 val Kosmos.callChipInteractor: FakeCallChipInteractor by Kosmos.Fixture { FakeCallChipInteractor() }
 
@@ -29,6 +50,7 @@ val Kosmos.ongoingActivityChipsViewModel: OngoingActivityChipsViewModel by
         OngoingActivityChipsViewModel(
             testScope.backgroundScope,
             screenRecordChipInteractor = screenRecordChipInteractor,
+            mediaProjectionChipInteractor = mediaProjectionChipInteractor,
             callChipInteractor = callChipInteractor,
         )
     }

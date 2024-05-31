@@ -145,6 +145,7 @@ import com.android.server.policy.WindowManagerPolicy.ScreenOnListener;
 import com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wallpaper.WallpaperManagerInternal;
+import com.android.wm.shell.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -1805,7 +1806,8 @@ public class DisplayPolicy {
         updateConfigurationAndScreenSizeDependentBehaviors();
 
         final boolean shouldAttach =
-                res.getBoolean(R.bool.config_attachNavBarToAppDuringTransition);
+                res.getBoolean(R.bool.config_attachNavBarToAppDuringTransition)
+                        && !Flags.enableTinyTaskbar();
         if (mShouldAttachNavBarToAppDuringTransition != shouldAttach) {
             mShouldAttachNavBarToAppDuringTransition = shouldAttach;
         }

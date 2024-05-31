@@ -201,6 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"نمایه کاری شما دیگر در این دستگاه دردسترس نیست"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"تلاش‌های بسیار زیادی برای وارد کردن گذرواژه انجام شده است"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"سرپرست از این دستگاه برای استفاده شخصی چشم‌پوشی کرد"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"فضای خصوصی حذف شد"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"سازمان شما اجازه نمی‌دهد در این دستگاه مدیریت‌شده فضای خصوصی وجود داشته باشد."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"دستگاه مدیریت می‌شود"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"سازمانتان این دستگاه را مدیریت می‌کند و ممکن است ترافیک شبکه را پایش کند. برای اطلاع از جزئیات، ضربه بزنید."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"برنامه‌ها می‌توانند به مکانتان دسترسی پیدا کنند"</string>
@@ -283,8 +285,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"دستیار صوتی"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"قفل همه"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"۹۹۹+"</string>
-    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
-    <skip />
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"پاسخ دادن"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"اعلان جدید"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"صفحه‌کلید فیزیکی"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"امنیت"</string>
@@ -607,8 +608,8 @@
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"به برنامه اجازه می‌دهد به دستگاه‌های بلوتوث مرتبط‌شده متصل شود"</string>
     <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"تبلیغ در دستگاه‌های بلوتوث اطراف"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"برنامه مجاز می‌شود در دستگاه‌های بلوتوث اطراف تبلیغ کند."</string>
-    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"مشخص کردن موقعیت نسبی بین دستگاه‌های باند فوق‌وسیع اطراف"</string>
-    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"به برنامه اجازه داده می‌شود موقعیت نسبی بین دستگاه‌های باند فوق‌وسیع اطراف را مشخص کند"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"مشخص کردن موقعیت نسبی بین دستگاه‌های «فراپهن‌باند» اطراف"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"به برنامه اجازه داده می‌شود موقعیت نسبی بین دستگاه‌های «فراپهن‌باند» اطراف را مشخص کند"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"‏برقراری تعامل با دستگاه‌های Wi-Fi اطراف"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"‏به برنامه اجازه می‌دهد در دستگاه‌های Wi-Fi اطراف تبلیغ کند، به آن‌ها متصل شود، و موقعیت نسبی آن‌ها را تشخیص دهد"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏اطلاعات ترجیحی سرویس پولی NFC"</string>
@@ -2195,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"پد کنترل چپ"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"پد کنترل راست"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"پد کنترل وسط"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"نوار شرح <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> در سطل «محدودشده» قرار گرفت"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"تصویری ارسال کرد"</string>
@@ -2416,10 +2416,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"روش کار"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"درحال تعلیق…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"راه‌اندازی مجدد «قفل‌گشایی با اثر انگشت»"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"‫<xliff:g id="FINGERPRINT">%s</xliff:g> خوب کار نمی‌کرد و حذف شد"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"‫<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> و <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> خوب کار نمی‌کردند و حذف شدند"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> خوب کار نمی‌کرد و حذف شد. برای باز کردن قفل تلفن با اثر انگشت، آن را دوباره راه‌اندازی کنید."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"‫<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> و <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> خوب کار نمی‌کرد و حذف شد. برای باز کردن قفل تلفن با اثر انگشت، آن‌ها را دوباره راه‌اندازی کنید."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"راه‌اندازی مجدد «قفل‌گشایی با چهره»"</string>

@@ -16,6 +16,10 @@
 
 package com.android.internal.os;
 
+import static android.os.BatteryStats.HistoryItem.EVENT_FLAG_FINISH;
+import static android.os.BatteryStats.HistoryItem.EVENT_FLAG_START;
+import static android.os.BatteryStats.HistoryItem.EVENT_STATE_CHANGE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.BatteryConsumer;
@@ -1449,11 +1453,41 @@ public class BatteryStatsHistory {
     }
 
     /**
+     * Records an event when some state flag changes to true.
+     */
+    public void recordStateStartEvent(long elapsedRealtimeMs, long uptimeMs, int stateFlags,
+            int uid, String name) {
+        synchronized (this) {
+            mHistoryCur.states |= stateFlags;
+            mHistoryCur.eventCode = EVENT_STATE_CHANGE | EVENT_FLAG_START;
+            mHistoryCur.eventTag = mHistoryCur.localEventTag;
+            mHistoryCur.eventTag.uid = uid;
+            mHistoryCur.eventTag.string = name;
+            writeHistoryItem(elapsedRealtimeMs, uptimeMs);
+        }
+    }
+
+    /**
      * Records an event when some state flag changes to false.
      */
     public void recordStateStopEvent(long elapsedRealtimeMs, long uptimeMs, int stateFlags) {
         synchronized (this) {
             mHistoryCur.states &= ~stateFlags;
+            writeHistoryItem(elapsedRealtimeMs, uptimeMs);
+        }
+    }
+
+    /**
+     * Records an event when some state flag changes to false.
+     */
+    public void recordStateStopEvent(long elapsedRealtimeMs, long uptimeMs, int stateFlags,
+            int uid, String name) {
+        synchronized (this) {
+            mHistoryCur.states &= ~stateFlags;
+            mHistoryCur.eventCode = EVENT_STATE_CHANGE | EVENT_FLAG_FINISH;
+            mHistoryCur.eventTag = mHistoryCur.localEventTag;
+            mHistoryCur.eventTag.uid = uid;
+            mHistoryCur.eventTag.string = name;
             writeHistoryItem(elapsedRealtimeMs, uptimeMs);
         }
     }

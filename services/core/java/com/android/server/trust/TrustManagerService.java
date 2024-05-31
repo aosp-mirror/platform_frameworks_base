@@ -29,6 +29,7 @@ import android.app.AlarmManager.OnAlarmListener;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustListener;
 import android.app.trust.ITrustManager;
+import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -47,6 +48,8 @@ import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.location.ISignificantPlaceProvider;
+import android.hardware.location.ISignificantPlaceProviderManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -83,6 +86,8 @@ import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemService;
+import com.android.server.servicewatcher.CurrentUserServiceSupplier;
+import com.android.server.servicewatcher.ServiceWatcher;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -248,6 +253,9 @@ public class TrustManagerService extends SystemService {
     private boolean mTrustAgentsCanRun = false;
     private int mCurrentUser = UserHandle.USER_SYSTEM;
 
+    private ServiceWatcher mSignificantPlaceServiceWatcher;
+    private volatile boolean mIsInSignificantPlace = false;
+
     /**
      * A class for providing dependencies to {@link TrustManagerService} in both production and test
      * cases.
@@ -310,6 +318,38 @@ public class TrustManagerService extends SystemService {
             mTrustAgentsCanRun = true;
             refreshAgentList(UserHandle.USER_ALL);
             refreshDeviceLockedForUser(UserHandle.USER_ALL);
+
+            if (android.security.Flags.significantPlaces()) {
+                mSignificantPlaceServiceWatcher = ServiceWatcher.create(mContext, TAG,
+                        CurrentUserServiceSupplier.create(
+                                mContext,
+                                TrustManager.ACTION_BIND_SIGNIFICANT_PLACE_PROVIDER,
+                                null,
+                                null,
+                                null),
+                        new ServiceWatcher.ServiceListener<>() {
+                            @Override
+                            public void onBind(IBinder binder,
+                                    CurrentUserServiceSupplier.BoundServiceInfo service)
+                                    throws RemoteException {
+                                ISignificantPlaceProvider.Stub.asInterface(binder)
+                                        .setSignificantPlaceProviderManager(
+                                                new ISignificantPlaceProviderManager.Stub() {
+                                                    @Override
+                                                    public void setInSignificantPlace(
+                                                            boolean inSignificantPlace) {
+                                                        mIsInSignificantPlace = inSignificantPlace;
+                                                    }
+                                                });
+                            }
+
+                            @Override
+                            public void onUnbind() {
+                                mIsInSignificantPlace = false;
+                            }
+                        });
+                mSignificantPlaceServiceWatcher.register();
+            }
         } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
             maybeEnableFactoryTrustAgents(UserHandle.USER_SYSTEM);
         }
@@ -1651,6 +1691,11 @@ public class TrustManagerService extends SystemService {
             }
         }
 
+        @Override
+        public boolean isInSignificantPlace() {
+            return mIsInSignificantPlace;
+        }
+
         private void enforceReportPermission() {
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE, "reporting trust events");
@@ -1679,6 +1724,9 @@ public class TrustManagerService extends SystemService {
                     fout.println("Trust manager state:");
                     for (UserInfo user : userInfos) {
                         dumpUser(fout, user, user.id == mCurrentUser);
+                    }
+                    if (mSignificantPlaceServiceWatcher != null) {
+                        mSignificantPlaceServiceWatcher.dump(fout);
                     }
                 }
             }, 1500);

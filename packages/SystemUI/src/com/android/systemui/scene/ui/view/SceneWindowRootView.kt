@@ -2,12 +2,14 @@ package com.android.systemui.scene.ui.view
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowInsets
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
+import com.android.systemui.shade.TouchLogger
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -59,5 +61,17 @@ class SceneWindowRootView(
     override fun onApplyWindowInsets(windowInsets: WindowInsets): WindowInsets {
         this.windowInsets.value = windowInsets
         return windowInsets
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        viewModel.onMotionEvent(ev)
+        return super.dispatchTouchEvent(ev).also {
+            TouchLogger.logDispatchTouch(TAG, ev, it)
+            viewModel.onMotionEventComplete()
+        }
+    }
+
+    companion object {
+        private const val TAG = "SceneWindowRootView"
     }
 }

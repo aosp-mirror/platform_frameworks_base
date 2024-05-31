@@ -17,8 +17,11 @@
 package com.android.systemui.statusbar.phone
 
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.view.Gravity
 import android.view.WindowManager
+import com.android.systemui.animation.back.BackAnimationSpec
+import com.android.systemui.animation.back.bottomSheetForSysUi
 
 /** [DialogDelegate] that configures a dialog to be an edge-to-edge one. */
 class EdgeToEdgeDialogDelegate : DialogDelegate<SystemUIDialog> {
@@ -40,4 +43,10 @@ class EdgeToEdgeDialogDelegate : DialogDelegate<SystemUIDialog> {
     override fun getWidth(dialog: SystemUIDialog): Int = WindowManager.LayoutParams.MATCH_PARENT
 
     override fun getHeight(dialog: SystemUIDialog): Int = WindowManager.LayoutParams.MATCH_PARENT
+
+    override fun getBackAnimationSpec(
+        displayMetricsProvider: () -> DisplayMetrics
+    ): BackAnimationSpec {
+        return BackAnimationSpec.bottomSheetForSysUi(displayMetricsProvider)
+    }
 }

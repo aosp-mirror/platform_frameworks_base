@@ -28,14 +28,15 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
-import com.android.systemui.communal.data.repository.FakeCommunalRepository
+import com.android.systemui.communal.data.repository.FakeCommunalSceneRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
 import com.android.systemui.communal.data.repository.fakeCommunalMediaRepository
-import com.android.systemui.communal.data.repository.fakeCommunalRepository
+import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.data.repository.fakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.communal.domain.interactor.communalTutorialInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalScenes
@@ -106,7 +107,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private lateinit var userRepository: FakeUserRepository
     private lateinit var shadeTestUtil: ShadeTestUtil
     private lateinit var keyguardTransitionRepository: FakeKeyguardTransitionRepository
-    private lateinit var communalRepository: FakeCommunalRepository
+    private lateinit var communalRepository: FakeCommunalSceneRepository
 
     private lateinit var underTest: CommunalViewModel
 
@@ -126,7 +127,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         mediaRepository = kosmos.fakeCommunalMediaRepository
         userRepository = kosmos.fakeUserRepository
         shadeTestUtil = kosmos.shadeTestUtil
-        communalRepository = kosmos.fakeCommunalRepository
+        communalRepository = kosmos.fakeCommunalSceneRepository
 
         kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
         mSetFlagsRule.enableFlags(FLAG_COMMUNAL_HUB)
@@ -143,6 +144,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                 context.resources,
                 kosmos.keyguardTransitionInteractor,
                 kosmos.keyguardInteractor,
+                kosmos.communalSceneInteractor,
                 kosmos.communalInteractor,
                 kosmos.communalTutorialInteractor,
                 kosmos.shadeInteractor,

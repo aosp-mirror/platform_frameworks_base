@@ -52,7 +52,7 @@ constructor(
     @Background private val scope: CoroutineScope,
     @Background bgDispatcher: CoroutineDispatcher,
     @Main mainDispatcher: CoroutineDispatcher,
-    private val keyguardInteractor: KeyguardInteractor,
+    keyguardInteractor: KeyguardInteractor,
     private val communalInteractor: CommunalInteractor,
     private val flags: FeatureFlags,
     private val keyguardSecurityModel: KeyguardSecurityModel,
@@ -67,6 +67,7 @@ constructor(
         bgDispatcher = bgDispatcher,
         powerInteractor = powerInteractor,
         keyguardOcclusionInteractor = keyguardOcclusionInteractor,
+        keyguardInteractor = keyguardInteractor,
     ) {
 
     override fun start() {
@@ -86,7 +87,7 @@ constructor(
                     return@combine null
                 }
 
-                fromBouncerStep.value > 0.5f
+                fromBouncerStep.value > TO_GONE_SURFACE_BEHIND_VISIBLE_THRESHOLD
             }
             .onStart {
                 // Default to null ("don't care, use a reasonable default").
@@ -232,5 +233,6 @@ constructor(
         val TO_AOD_DURATION = DEFAULT_DURATION
         val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
         val TO_DOZING_DURATION = DEFAULT_DURATION
+        val TO_GONE_SURFACE_BEHIND_VISIBLE_THRESHOLD = 0.5f
     }
 }

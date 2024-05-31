@@ -1071,12 +1071,17 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_STATE_CHANGED,
                     SysUiStatsLog.KEYGUARD_STATE_CHANGED__STATE__OCCLUDED);
             if (mCentralSurfaces.isLaunchingActivityOverLockscreen()) {
-                // When isLaunchingActivityOverLockscreen() is true, we know for sure that the post
-                // collapse runnables will be run.
-                mShadeController.get().addPostCollapseAction(() -> {
+                final Runnable postCollapseAction = () -> {
                     mNotificationShadeWindowController.setKeyguardOccluded(isOccluded);
                     reset(true /* hideBouncerWhenShowing */);
-                });
+                };
+                if (mCentralSurfaces.isDismissingShadeForActivityLaunch()) {
+                    // When isDismissingShadeForActivityLaunch() is true, we know for sure that the
+                    // post collapse runnables will be run.
+                    mShadeController.get().addPostCollapseAction(postCollapseAction);
+                } else {
+                    postCollapseAction.run();
+                }
                 return;
             }
         } else if (isShowing && isUnOccluding) {

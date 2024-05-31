@@ -201,6 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານບໍ່ສາມາດໃຊ້ໄດ້ໃນອຸປະກອນນີ້ອີກຕໍ່ໄປ"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"ລອງໃສ່ລະຫັດຜ່ານຫຼາຍເທື່ອເກີນໄປ"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"ອຸປະກອນທີ່ຍົກເລີກແລ້ວສຳລັບການໃຊ້ສ່ວນບຸກຄົນ"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"ລຶບພື້ນທີ່ສ່ວນບຸກຄົນອອກແລ້ວ"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"ອົງກອນຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ມີພື້ນທີ່ສ່ວນບຸກຄົນໃນອຸປະກອນທີ່ໄດ້ຮັບການຈັດການນີ້."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ອຸປະກອນມີການຈັດການ"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ອົງກອນຂອງທ່ານຈັດການອຸປະກອນນີ້ ແລະ ອາດກວດສອບທຣາບຟິກເຄືອຂ່າຍນຳ. ແຕະເພື່ອເບິ່ງລາຍລະອຽດ."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ແອັບສາມາດເຂົ້າເຖິງສະຖານທີ່ຂອງທ່ານໄດ້"</string>
@@ -1188,8 +1190,8 @@
     <string name="deleteText" msgid="4200807474529938112">"ລຶບ"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ຮູບແບບການປ້ອນຂໍ້ມູນ"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"ການເຮັດວຽກຂອງຂໍ້ຄວາມ"</string>
-    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"ການຂຽນດ້ວຍມືບໍ່ຖືກຮອງຮັບໃນຊ່ອງຂໍ້ມູນນີ້"</string>
-    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"ການຂຽນດ້ວຍມືບໍ່ຖືກຮອງຮັບໃນຊ່ອງຂໍ້ມູນລະຫັດຜ່ານ"</string>
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"ບໍ່ຮອງຮັບການຂຽນດ້ວຍມືໃນຊ່ອງຂໍ້ມູນນີ້"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"ຊ່ອງຂໍ້ມູນລະຫັດຜ່ານບໍ່ຮອງຮັບການຂຽນດ້ວຍມື"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"ກັບຄືນ"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ສະຫຼັບວິທີການປ້ອນຂໍ້ມູນ"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"ພື້ນທີ່ຈັດເກັບຂໍ້ມູນກຳລັງຈະເຕັມ"</string>
@@ -2194,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad ຊ້າຍ"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad ຂວາ"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad ກາງ"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"ແຖບຄຳບັນຍາຍຂອງ <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ຖືກວາງໄວ້ໃນກະຕ່າ \"ຈຳກັດ\" ແລ້ວ"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"ສົ່ງຮູບແລ້ວ"</string>
@@ -2415,10 +2416,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ມັນເຮັດວຽກແນວໃດ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"ລໍຖ້າດຳເນີນການ..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ຕັ້ງຄ່າການປົດລັອກດ້ວຍລາຍນິ້ວມືຄືນໃໝ່"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> ເຮັດວຽກໄດ້ບໍ່ດີ ແລະ ຖືກລຶບອອກແລ້ວ"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ແລະ <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ເຮັດວຽກໄດ້ບໍ່ດີ ແລະ ຖືກລຶບອອກແລ້ວ"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ເຮັດວຽກໄດ້ບໍ່ດີ ແລະ ຖືກລຶບອອກແລ້ວ. ໃຫ້ຕັ້ງຄ່າມັນຄືນໃໝ່ເພື່ອປົດລັອກໂທລະສັບຂອງທ່ານດ້ວຍລາຍນິ້ວມື."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ແລະ <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ເຮັດວຽກໄດ້ບໍ່ດີ ແລະ ຖືກລຶບອອກແລ້ວ. ໃຫ້ຕັ້ງຄ່າພວກມັນຄືນໃໝ່ເພື່ອປົດລັອກໂທລະສັບຂອງທ່ານດ້ວຍລາຍນິ້ວມື."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"ຕັ້ງຄ່າການປົດລັອກດ້ວຍໜ້າຄືນໃໝ່"</string>

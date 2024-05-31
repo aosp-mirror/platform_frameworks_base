@@ -2035,6 +2035,24 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/PhysicalDisplaySwitchTransitionLauncher.java"
     },
+    "-1640401313436844534": {
+      "message": "Resetting frozen recents task list reason=app touch win=%s x=%d y=%d insetFrame=%s",
+      "level": "INFO",
+      "group": "WM_DEBUG_TASKS",
+      "at": "com\/android\/server\/wm\/RecentTasks.java"
+    },
+    "-8803811426486764449": {
+      "message": "Setting frozen recents task list",
+      "level": "INFO",
+      "group": "WM_DEBUG_TASKS",
+      "at": "com\/android\/server\/wm\/RecentTasks.java"
+    },
+    "4040735335719974079": {
+      "message": "Resetting frozen recents task list reason=timeout",
+      "level": "INFO",
+      "group": "WM_DEBUG_TASKS",
+      "at": "com\/android\/server\/wm\/RecentTasks.java"
+    },
     "3308140128142966415": {
       "message": "remove RecentTask %s when finishing user %d",
       "level": "INFO",
@@ -3221,6 +3239,36 @@
       "message": "Start collecting in Transition: %s",
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
+    "-4546322749928357965": {
+      "message": "Registering transition player %s over %d other players",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
+    "-4250307779892136611": {
+      "message": "Registering transition player %s ",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
+    "3242771541905259983": {
+      "message": "Attempt to unregister transition player %s but it isn't registered",
+      "level": "WARN",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
+    "3691912781236221027": {
+      "message": "Unregistering active transition player %s at index=%d leaving %d in stack",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
+    "-2879980134100946679": {
+      "message": "Unregistering transition player %s at index=%d leaving %d in stack",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
       "at": "com\/android\/server\/wm\/TransitionController.java"
     },
     "-4235778637051052061": {

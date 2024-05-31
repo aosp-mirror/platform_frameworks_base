@@ -31,6 +31,7 @@ import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_FULL_RESTORE_
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_MISSING_SIGNATURE;
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_RESTORE_ANY_VERSION;
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_SYSTEM_APP_NO_AGENT;
+import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_V_TO_U_RESTORE_PKG_ELIGIBLE;
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_VERSIONS_MATCH;
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER;
 
@@ -53,17 +54,22 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.server.backup.FileMetadata;
+import com.android.server.backup.Flags;
 import com.android.server.backup.restore.RestorePolicy;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Utility methods to read backup tar file.
@@ -390,7 +396,7 @@ public class TarBackupReader {
             boolean allowApks, FileMetadata info, Signature[] signatures,
             PackageManagerInternal pmi, int userId, Context context) {
         return chooseRestorePolicy(packageManager, allowApks, info, signatures, pmi, userId,
-                BackupEligibilityRules.forBackup(packageManager, pmi, userId, context));
+                BackupEligibilityRules.forBackup(packageManager, pmi, userId, context), context);
     }
 
     /**
@@ -406,7 +412,8 @@ public class TarBackupReader {
      */
     public RestorePolicy chooseRestorePolicy(PackageManager packageManager,
             boolean allowApks, FileMetadata info, Signature[] signatures,
-            PackageManagerInternal pmi, int userId, BackupEligibilityRules eligibilityRules) {
+            PackageManagerInternal pmi, int userId, BackupEligibilityRules eligibilityRules,
+            Context context) {
         if (signatures == null) {
             return RestorePolicy.IGNORE;
         }
@@ -445,6 +452,16 @@ public class TarBackupReader {
                             policy = RestorePolicy.ACCEPT;
                             mBackupManagerMonitorEventSender.monitorEvent(
                                     LOG_EVENT_ID_VERSIONS_MATCH,
+                                    pkgInfo,
+                                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                    null);
+                        } else if (isAllowlistedForVToURestore(info, pkgInfo, userId, context)) {
+                            Slog.i(TAG, "Performing a V to U downgrade; package: "
+                                            + info.packageName
+                                            + " is allowlisted");
+                            policy = RestorePolicy.ACCEPT;
+                            mBackupManagerMonitorEventSender.monitorEvent(
+                                    LOG_EVENT_ID_V_TO_U_RESTORE_PKG_ELIGIBLE,
                                     pkgInfo,
                                     LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
                                     null);
@@ -749,6 +766,36 @@ public class TarBackupReader {
         } while (offset < contentSize);
 
         return true;
+    }
+
+    // checks the sdk of the target/source device for a B&R operation.
+    // system components can opt in of V->U restore via allowlist.
+    @SuppressWarnings("AndroidFrameworkCompatChange")
+    private boolean isAllowlistedForVToURestore(FileMetadata backupFileInfo,
+            PackageInfo installedPackageInfo,
+            int userId, Context context) {
+        // We assume that the package version matches the sdk (e.g. version 35 means V).
+        // This is true for most of the system components ( and it is specifically true for those
+        // that are in the allowlist)
+        // In order to check if this is a V to U transfer we check if the package version from the
+        // backup is 35 and on the target is 34.
+        // We don't need to check the  V to U denylist here since a package can only make it
+        // to TarBackupReader if allowed and not denied (from PerformUnifiedRestoreTask)
+
+        String vToUAllowlist = getVToUAllowlist(context, userId);
+        List<String> mVToUAllowlist = Arrays.asList(vToUAllowlist.split(","));
+        return Flags.enableVToURestoreForSystemComponentsInAllowlist()
+                && (installedPackageInfo.getLongVersionCode()
+                == Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+                && (backupFileInfo.version > Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+                && (mVToUAllowlist.contains(installedPackageInfo.packageName));
+    }
+
+    private String getVToUAllowlist(Context context, int userId) {
+        return Settings.Secure.getStringForUser(
+                context.getContentResolver(),
+                Settings.Secure.V_TO_U_RESTORE_ALLOWLIST,
+                userId);
     }
 
     private static long extractRadix(byte[] data, int offset, int maxChars, int radix)

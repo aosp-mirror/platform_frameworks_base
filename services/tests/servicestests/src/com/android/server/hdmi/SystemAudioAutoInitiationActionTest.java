@@ -92,6 +92,8 @@ public class SystemAudioAutoInitiationActionTest {
 
         mHdmiControlService.setIoLooper(myLooper);
         mNativeWrapper = new FakeNativeWrapper();
+        mPhysicalAddress = 0x0000;
+        mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         HdmiCecController hdmiCecController = HdmiCecController.createWithNativeWrapper(
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
@@ -115,8 +117,6 @@ public class SystemAudioAutoInitiationActionTest {
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlService.setPowerManager(mPowerManager);
-        mPhysicalAddress = 0x0000;
-        mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         mTestLooper.dispatchAll();
         mHdmiCecLocalDeviceTv = mHdmiControlService.tv();
         mPhysicalAddress = mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress();

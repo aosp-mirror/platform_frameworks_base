@@ -54,7 +54,7 @@ constructor(
     private val deviceUnlockSource =
         merge(
             fingerprintAuthInteractor.fingerprintSuccess.map { DeviceUnlockSource.Fingerprint },
-            faceAuthInteractor.authenticated
+            faceAuthInteractor.isAuthenticated
                 .filter { it }
                 .map {
                     if (deviceEntryRepository.isBypassEnabled.value) {

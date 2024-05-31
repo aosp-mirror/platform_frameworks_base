@@ -284,6 +284,8 @@ android_ravenwood_libgroup {
         "100-framework-minus-apex.ravenwood",
         "200-kxml2-android",
 
+        "ravenwood-runtime-common-ravenwood",
+
         "android.test.mock.ravenwood",
         "ravenwood-helper-runtime",
         "hoststubgen-helper-runtime.ravenwood",

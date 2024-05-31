@@ -166,7 +166,7 @@ public class MobileRadioPowerStatsProcessor extends PowerStatsProcessor {
     }
 
     @Override
-    void finish(PowerComponentAggregatedPowerStats stats) {
+    void finish(PowerComponentAggregatedPowerStats stats, long timestampMs) {
         if (stats.getPowerStatsDescriptor() == null) {
             return;
         }

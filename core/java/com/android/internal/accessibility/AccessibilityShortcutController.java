@@ -103,6 +103,8 @@ public class AccessibilityShortcutController {
     // The component name for the sub setting of Hearing aids in Accessibility settings
     public static final ComponentName ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME =
             new ComponentName("com.android.server.accessibility", "HearingAids");
+    public static final ComponentName ACCESSIBILITY_HEARING_AIDS_TILE_COMPONENT_NAME =
+            new ComponentName("com.android.server.accessibility", "HearingDevicesTile");
 
     public static final ComponentName COLOR_INVERSION_TILE_COMPONENT_NAME =
             new ComponentName("com.android.server.accessibility", "ColorInversionTile");

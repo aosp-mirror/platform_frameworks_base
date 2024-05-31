@@ -246,6 +246,17 @@ flag {
 }
 
 flag {
+    name: "offload_controls_doze_auto_brightness"
+    namespace: "display_manager"
+    description: "Allows the registered DisplayOffloader to control if auto-brightness is used in doze"
+    bug: "327392714"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_peak_refresh_rate_physical_limit"
     namespace: "display_manager"
     description: "Flag for adding physical refresh rate limit if smooth display setting is on "
@@ -278,3 +289,13 @@ flag {
     }
 }
 
+flag {
+    name: "offload_doze_override_holds_wakelock"
+    namespace: "display_manager"
+    description: "DisplayPowerController holds a suspend-blocker while changing the display state on behalf of offload doze override."
+    bug: "338403827"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

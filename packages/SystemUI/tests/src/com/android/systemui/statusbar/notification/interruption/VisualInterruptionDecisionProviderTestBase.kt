@@ -75,8 +75,6 @@ import com.android.systemui.statusbar.notification.interruption.NotificationInte
 import com.android.systemui.statusbar.policy.FakeDeviceProvisionedController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.util.FakeEventLog
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.settings.FakeGlobalSettings
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.SystemSettings
@@ -85,12 +83,15 @@ import com.android.systemui.utils.leaks.FakeBatteryController
 import com.android.systemui.utils.leaks.FakeKeyguardStateController
 import com.android.systemui.utils.leaks.LeakCheckedTest
 import com.android.systemui.utils.os.FakeHandler
+import com.android.wm.shell.bubbles.Bubbles
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.`when` as whenever
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     private val fakeLogBuffer =
@@ -129,6 +130,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     protected val uiEventLogger = UiEventLoggerFake()
     protected val userTracker = FakeUserTracker()
     protected val avalancheProvider: AvalancheProvider = mock()
+    protected val bubbles: Bubbles = mock()
     lateinit var systemSettings: SystemSettings
     protected val packageManager: PackageManager = mock()
 
@@ -159,6 +161,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         deviceProvisionedController.currentUser = userId
         userTracker.set(listOf(user), /* currentUserIndex = */ 0)
         systemSettings = FakeSettings()
+        whenever(bubbles.canShowBubbleNotification()).thenReturn(true)
 
         provider.start()
     }
@@ -204,6 +207,14 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     fun testShouldNotPeek_alreadyBubbled() {
         ensurePeekState { statusBarState = SHADE }
         assertShouldNotHeadsUp(buildPeekEntry { isBubble = true })
+        assertNoEventsLogged()
+    }
+
+    @Test
+    fun testShouldPeek_bubblesCannotShowNotification() {
+        whenever(bubbles.canShowBubbleNotification()).thenReturn(false)
+        ensurePeekState { statusBarState = SHADE }
+        assertShouldHeadsUp(buildPeekEntry { isBubble = true })
         assertNoEventsLogged()
     }
 

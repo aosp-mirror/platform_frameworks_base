@@ -23,6 +23,7 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.Icon
 import android.os.UserHandle
+import android.platform.test.flag.junit.SetFlagsRule
 import android.view.IWindowManager
 import android.view.WindowManager
 import android.view.WindowManagerGlobal
@@ -33,6 +34,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.protolog.common.ProtoLog
 import com.android.launcher3.icons.BubbleIconFactory
+import com.android.wm.shell.Flags
 import com.android.wm.shell.R
 import com.android.wm.shell.bubbles.Bubbles.SysuiProxy
 import com.android.wm.shell.bubbles.animation.AnimatableScaleMatrix
@@ -44,18 +46,23 @@ import com.android.wm.shell.taskview.TaskViewTaskController
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import org.junit.After
-import java.util.concurrent.Semaphore
-import java.util.concurrent.TimeUnit
-import java.util.function.Consumer
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
+import java.util.concurrent.Semaphore
+import java.util.concurrent.TimeUnit
+import java.util.function.Consumer
 
 /** Unit tests for [BubbleStackView]. */
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class BubbleStackViewTest {
+
+    @get:Rule val setFlagsRule = SetFlagsRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private lateinit var positioner: BubblePositioner
@@ -66,6 +73,8 @@ class BubbleStackViewTest {
     private lateinit var windowManager: IWindowManager
     private lateinit var bubbleTaskViewFactory: BubbleTaskViewFactory
     private lateinit var bubbleData: BubbleData
+    private lateinit var bubbleStackViewManager: FakeBubbleStackViewManager
+    private var sysuiProxy = mock<SysuiProxy>()
 
     @Before
     fun setUp() {
@@ -86,7 +95,6 @@ class BubbleStackViewTest {
                 )
             )
         positioner = BubblePositioner(context, windowManager)
-        val bubbleStackViewManager = FakeBubbleStackViewManager()
         bubbleData =
             BubbleData(
                 context,
@@ -95,8 +103,7 @@ class BubbleStackViewTest {
                 BubbleEducationController(context),
                 shellExecutor
             )
-
-        val sysuiProxy = mock<SysuiProxy>()
+        bubbleStackViewManager = FakeBubbleStackViewManager()
         expandedViewManager = FakeBubbleExpandedViewManager()
         bubbleTaskViewFactory = FakeBubbleTaskViewFactory()
         bubbleStackView =
@@ -232,6 +239,115 @@ class BubbleStackViewTest {
         assertThat(lastUpdate!!.bubbles.map { it.key })
             .containsExactly("bubble1", "bubble2")
             .inOrder()
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_OPTIONAL_BUBBLE_OVERFLOW)
+    @Test
+    fun testCreateStackView_noOverflowContents_noOverflow() {
+        bubbleStackView =
+                BubbleStackView(
+                        context,
+                        bubbleStackViewManager,
+                        positioner,
+                        bubbleData,
+                        null,
+                        FloatingContentCoordinator(),
+                        { sysuiProxy },
+                        shellExecutor
+                )
+
+        assertThat(bubbleData.overflowBubbles).isEmpty()
+        val bubbleOverflow = bubbleData.overflow
+        // Overflow shouldn't be attached
+        assertThat(bubbleStackView.getBubbleIndex(bubbleOverflow)).isEqualTo(-1)
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_OPTIONAL_BUBBLE_OVERFLOW)
+    @Test
+    fun testCreateStackView_hasOverflowContents_hasOverflow() {
+        // Add a bubble to the overflow
+        val bubble1 = createAndInflateChatBubble(key = "bubble1")
+        bubbleData.notificationEntryUpdated(bubble1, false, false)
+        bubbleData.dismissBubbleWithKey(bubble1.key, Bubbles.DISMISS_USER_GESTURE)
+        assertThat(bubbleData.overflowBubbles).isNotEmpty()
+
+        bubbleStackView =
+                BubbleStackView(
+                        context,
+                        bubbleStackViewManager,
+                        positioner,
+                        bubbleData,
+                        null,
+                        FloatingContentCoordinator(),
+                        { sysuiProxy },
+                        shellExecutor
+                )
+        val bubbleOverflow = bubbleData.overflow
+        assertThat(bubbleStackView.getBubbleIndex(bubbleOverflow)).isGreaterThan(-1)
+    }
+
+    @DisableFlags(Flags.FLAG_ENABLE_OPTIONAL_BUBBLE_OVERFLOW)
+    @Test
+    fun testCreateStackView_noOverflowContents_hasOverflow() {
+        bubbleStackView =
+                BubbleStackView(
+                        context,
+                        bubbleStackViewManager,
+                        positioner,
+                        bubbleData,
+                        null,
+                        FloatingContentCoordinator(),
+                        { sysuiProxy },
+                        shellExecutor
+                )
+
+        assertThat(bubbleData.overflowBubbles).isEmpty()
+        val bubbleOverflow = bubbleData.overflow
+        assertThat(bubbleStackView.getBubbleIndex(bubbleOverflow)).isGreaterThan(-1)
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_OPTIONAL_BUBBLE_OVERFLOW)
+    @Test
+    fun showOverflow_true() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            bubbleStackView.showOverflow(true)
+        }
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+
+        val bubbleOverflow = bubbleData.overflow
+        assertThat(bubbleStackView.getBubbleIndex(bubbleOverflow)).isGreaterThan(-1)
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_OPTIONAL_BUBBLE_OVERFLOW)
+    @Test
+    fun showOverflow_false() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            bubbleStackView.showOverflow(true)
+        }
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+        val bubbleOverflow = bubbleData.overflow
+        assertThat(bubbleStackView.getBubbleIndex(bubbleOverflow)).isGreaterThan(-1)
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            bubbleStackView.showOverflow(false)
+        }
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+
+        // The overflow should've been removed
+        assertThat(bubbleStackView.getBubbleIndex(bubbleOverflow)).isEqualTo(-1)
+    }
+
+    @DisableFlags(Flags.FLAG_ENABLE_OPTIONAL_BUBBLE_OVERFLOW)
+    @Test
+    fun showOverflow_ignored() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            bubbleStackView.showOverflow(false)
+        }
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+
+        // showOverflow should've been ignored, so the overflow would be attached
+        val bubbleOverflow = bubbleData.overflow
+        assertThat(bubbleStackView.getBubbleIndex(bubbleOverflow)).isGreaterThan(-1)
     }
 
     private fun createAndInflateChatBubble(key: String): Bubble {

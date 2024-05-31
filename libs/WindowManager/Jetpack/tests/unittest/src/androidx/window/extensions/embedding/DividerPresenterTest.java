@@ -144,6 +144,7 @@ public class DividerPresenterTest {
                 new SplitAttributes.Builder()
                         .setDividerAttributes(DEFAULT_DIVIDER_ATTRIBUTES)
                         .build());
+        final Rect mockTaskBounds = new Rect(0, 0, 2000, 1000);
         final TaskFragmentContainer mockPrimaryContainer =
                 createMockTaskFragmentContainer(
                         mPrimaryContainerToken, new Rect(0, 0, 950, 1000));
@@ -158,7 +159,9 @@ public class DividerPresenterTest {
                 DEFAULT_DIVIDER_ATTRIBUTES,
                 mSurfaceControl,
                 getInitialDividerPosition(
-                        mSplitContainer, true /* isVerticalSplit */, false /* isReversedLayout */),
+                        mockPrimaryContainer, mockSecondaryContainer, mockTaskBounds,
+                        50 /* divideWidthPx */, false /* isDraggableExpandType */,
+                        true /* isVerticalSplit */, false /* isReversedLayout */),
                 true /* isVerticalSplit */,
                 false /* isReversedLayout */,
                 Display.DEFAULT_DISPLAY,
@@ -502,7 +505,6 @@ public class DividerPresenterTest {
         assertEquals(
                 0.3f, // Primary is 300px after dragging.
                 DividerPresenter.calculateNewSplitRatio(
-                        mSplitContainer,
                         dividerPosition,
                         taskBounds,
                         dividerWidthPx,
@@ -518,7 +520,6 @@ public class DividerPresenterTest {
         assertEquals(
                 DividerPresenter.RATIO_EXPANDED_SECONDARY,
                 DividerPresenter.calculateNewSplitRatio(
-                        mSplitContainer,
                         dividerPosition,
                         taskBounds,
                         dividerWidthPx,
@@ -535,7 +536,6 @@ public class DividerPresenterTest {
         assertEquals(
                 0.2f, // Adjusted to the minPosition 200
                 DividerPresenter.calculateNewSplitRatio(
-                        mSplitContainer,
                         dividerPosition,
                         taskBounds,
                         dividerWidthPx,
@@ -569,7 +569,6 @@ public class DividerPresenterTest {
                 // After dragging, secondary is [0, 0, 2000, 300]. Primary is [0, 400, 2000, 1100].
                 0.7f,
                 DividerPresenter.calculateNewSplitRatio(
-                        mSplitContainer,
                         dividerPosition,
                         taskBounds,
                         dividerWidthPx,
@@ -587,7 +586,6 @@ public class DividerPresenterTest {
                 // The primary (bottom) container is expanded
                 DividerPresenter.RATIO_EXPANDED_PRIMARY,
                 DividerPresenter.calculateNewSplitRatio(
-                        mSplitContainer,
                         dividerPosition,
                         taskBounds,
                         dividerWidthPx,
@@ -605,7 +603,6 @@ public class DividerPresenterTest {
                 // Adjusted to minPosition 200, so the primary (bottom) container is 800.
                 0.8f,
                 DividerPresenter.calculateNewSplitRatio(
-                        mSplitContainer,
                         dividerPosition,
                         taskBounds,
                         dividerWidthPx,
@@ -720,7 +717,7 @@ public class DividerPresenterTest {
 
         // Divider position is greater than minPosition and the velocity is enough for fling
         assertEquals(
-                0, // Closed position
+                30, // minPosition
                 DividerPresenter.dividerPositionWithDraggingToFullscreenAllowed(
                         50 /* dividerPosition */,
                         30 /* minPosition */,
@@ -731,7 +728,7 @@ public class DividerPresenterTest {
 
         // Divider position is less than maxPosition and the velocity is enough for fling
         assertEquals(
-                1200, // Fully expanded position
+                900, // maxPosition
                 DividerPresenter.dividerPositionWithDraggingToFullscreenAllowed(
                         800 /* dividerPosition */,
                         30 /* minPosition */,

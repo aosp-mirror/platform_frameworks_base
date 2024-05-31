@@ -152,4 +152,10 @@
 
     <!-- Thai (Pattachote variant) keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_thai_pattachote">Thai (Pattachote)</string>
+
+    <!-- Serbian (Latin) keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_serbian_latin">Serbian (Latin)</string>
+
+    <!-- Montenegrin (Latin) keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_montenegrin_latin">Montenegrin (Latin)</string>
 </resources>

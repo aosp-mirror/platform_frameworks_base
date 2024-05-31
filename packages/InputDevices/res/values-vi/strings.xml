@@ -52,4 +52,6 @@
     <string name="keyboard_layout_georgian" msgid="4596185456863747454">"Tiếng Georgia"</string>
     <string name="keyboard_layout_thai_kedmanee" msgid="6637147314580760938">"Tiếng Thái (Kedmanee)"</string>
     <string name="keyboard_layout_thai_pattachote" msgid="2547992342794252205">"Tiếng Thái (Pattachote)"</string>
+    <string name="keyboard_layout_serbian_latin" msgid="3128791759390046571">"Tiếng Serbia (Latinh)"</string>
+    <string name="keyboard_layout_montenegrin_latin" msgid="1467832503378949945">"Tiếng Montenegro (Latinh)"</string>
 </resources>

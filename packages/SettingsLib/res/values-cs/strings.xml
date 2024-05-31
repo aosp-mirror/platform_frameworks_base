@@ -237,7 +237,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Vyberte profil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Osobní"</string>
     <string name="category_work" msgid="4014193632325996115">"Pracovní"</string>
-    <string name="category_private" msgid="4244892185452788977">"Soukromé"</string>
+    <string name="category_private" msgid="4244892185452788977">"Soukromý"</string>
     <string name="category_clone" msgid="1554511758987195974">"Klon"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Pro vývojáře"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Aktivovat možnosti pro vývojáře"</string>
@@ -287,7 +287,7 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Povolit odemknutí zavaděče"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Povolit odemknutí OEM?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"UPOZORNĚNÍ: Pokud bude toto nastavení zapnuto, nebudou v tomto zařízení fungovat funkce ochrany zařízení."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Vybrat aplikaci k simulování polohy"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Vybrat aplikaci k simulování polohy"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Aplikace k simulování polohy není nastavena"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Aplikace k simulování polohy: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Sítě"</string>
@@ -602,7 +602,7 @@
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Pro tohoto uživatele nejsou k dispozici žádná sdílená data."</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Při načítání sdílených dat došlo k chybě. Zkuste to znovu."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"ID sdílených dat: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
-    <string name="blob_expires_text" msgid="7882727111491739331">"Platnost vyprší <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Platnost skončí <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Při mazání sdílených dat došlo k chybě."</string>
     <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Pro tato sdílená data nejsou k dispozici žádné smlouvy. Chcete je smazat?"</string>
     <string name="accessor_info_title" msgid="8289823651512477787">"Aplikace, které sdílejí data"</string>

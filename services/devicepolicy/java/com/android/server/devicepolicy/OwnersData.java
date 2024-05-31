@@ -88,7 +88,9 @@ class OwnersData {
 
     private static final String ATTR_MIGRATED_TO_POLICY_ENGINE = "migratedToPolicyEngine";
     private static final String ATTR_SECURITY_LOG_MIGRATED = "securityLogMigrated";
-
+    private static final String ATTR_REQUIRED_PASSWORD_COMPLEXITY_MIGRATED =
+            "passwordComplexityMigrated";
+    private static final String ATTR_SUSPENDED_PACKAGES_MIGRATED = "suspendedPackagesMigrated";
     private static final String ATTR_MIGRATED_POST_UPGRADE = "migratedPostUpgrade";
 
     // Internal state for the device owner package.
@@ -118,6 +120,8 @@ class OwnersData {
 
     boolean mMigratedToPolicyEngine = false;
     boolean mSecurityLoggingMigrated = false;
+    boolean mRequiredPasswordComplexityMigrated = false;
+    boolean mSuspendedPackagesMigrated = false;
 
     boolean mPoliciesMigratedPostUpdate = false;
 
@@ -409,6 +413,14 @@ class OwnersData {
             if (Flags.securityLogV2Enabled()) {
                 out.attributeBoolean(null, ATTR_SECURITY_LOG_MIGRATED, mSecurityLoggingMigrated);
             }
+            if (Flags.unmanagedModeMigration()) {
+                out.attributeBoolean(null, ATTR_REQUIRED_PASSWORD_COMPLEXITY_MIGRATED,
+                        mRequiredPasswordComplexityMigrated);
+                out.attributeBoolean(null, ATTR_SUSPENDED_PACKAGES_MIGRATED,
+                        mSuspendedPackagesMigrated);
+
+            }
+
             out.endTag(null, TAG_POLICY_ENGINE_MIGRATION);
 
         }
@@ -473,6 +485,12 @@ class OwnersData {
                             null, ATTR_MIGRATED_POST_UPGRADE, false);
                     mSecurityLoggingMigrated = Flags.securityLogV2Enabled()
                             && parser.getAttributeBoolean(null, ATTR_SECURITY_LOG_MIGRATED, false);
+                    mRequiredPasswordComplexityMigrated = Flags.unmanagedModeMigration()
+                            && parser.getAttributeBoolean(null,
+                                    ATTR_REQUIRED_PASSWORD_COMPLEXITY_MIGRATED, false);
+                    mSuspendedPackagesMigrated = Flags.unmanagedModeMigration()
+                            && parser.getAttributeBoolean(null,
+                                    ATTR_SUSPENDED_PACKAGES_MIGRATED, false);
 
                     break;
                 default:

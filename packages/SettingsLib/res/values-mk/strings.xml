@@ -103,10 +103,8 @@
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"Л: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> батерија, Д: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батерија."</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"Лево: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерија"</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"Десно: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерија"</string>
-    <!-- no translation found for tv_bluetooth_battery_level_untethered_left (337629670583744410) -->
-    <skip />
-    <!-- no translation found for tv_bluetooth_battery_level_untethered_right (8610019317279155595) -->
-    <skip />
+    <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"Одлево: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_right" msgid="8610019317279155595">"Оддесно: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Активен"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Зачувано"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Активно (само лево)"</string>
@@ -237,9 +235,9 @@
     <item msgid="6946761421234586000">"400 %"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Изберете профил"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Личен"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Лично"</string>
     <string name="category_work" msgid="4014193632325996115">"Работа"</string>
-    <string name="category_private" msgid="4244892185452788977">"Приватен"</string>
+    <string name="category_private" msgid="4244892185452788977">"Приватно"</string>
     <string name="category_clone" msgid="1554511758987195974">"Клон"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Програмерски опции"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Овозможете ги програмерските опции"</string>

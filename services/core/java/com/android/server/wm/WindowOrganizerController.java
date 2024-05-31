@@ -1613,6 +1613,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
             case OP_TYPE_SET_DECOR_SURFACE_BOOSTED: {
                 if (Flags.activityEmbeddingInteractiveDividerFlag()) {
+                    final Task task = taskFragment.getTask();
+                    if (task == null) {
+                        break;
+                    }
                     final SurfaceControl.Transaction clientTransaction =
                             operation.getSurfaceTransaction();
                     if (clientTransaction != null) {
@@ -1621,10 +1625,22 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         // any invalid operations.
                         clientTransaction.sanitize(caller.mPid, caller.mUid);
                     }
-                    taskFragment.getTask().setDecorSurfaceBoosted(
-                            taskFragment,
-                            operation.getBooleanValue() /* isBoosted */,
-                            clientTransaction);
+
+                    if (transition != null) {
+                        // The decor surface boost/unboost must happen after the transition is
+                        // completed. Otherwise, the decor surface could be moved before Shell
+                        // completes the transition, causing flicker.
+                        transition.addTransitionEndedListener(() ->
+                                task.setDecorSurfaceBoosted(
+                                        taskFragment,
+                                        operation.getBooleanValue() /* isBoosted */,
+                                        clientTransaction));
+                    } else {
+                        task.setDecorSurfaceBoosted(
+                                taskFragment,
+                                operation.getBooleanValue() /* isBoosted */,
+                                clientTransaction);
+                    }
                 }
                 break;
             }
@@ -2081,6 +2097,19 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 final WindowProcessController wpc =
                         mService.getProcessController(callerPid, callerUid);
                 mTransitionController.registerTransitionPlayer(player, wpc);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public void unregisterTransitionPlayer(ITransitionPlayer player) {
+        enforceTaskPermission("unregisterTransitionPlayer()");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                mTransitionController.unregisterTransitionPlayer(player);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

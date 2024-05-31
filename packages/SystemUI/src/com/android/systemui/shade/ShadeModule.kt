@@ -17,9 +17,12 @@
 package com.android.systemui.shade
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.plugins.qs.QSContainerController
 import com.android.systemui.qs.ui.adapter.QSSceneAdapterImpl
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.shade.carrier.ShadeCarrierGroupControllerLog
 import com.android.systemui.shade.data.repository.PrivacyChipRepository
 import com.android.systemui.shade.data.repository.PrivacyChipRepositoryImpl
 import com.android.systemui.shade.data.repository.ShadeRepository
@@ -142,6 +145,13 @@ abstract class ShadeModule {
         @SysUISingleton
         fun providesQSContainerController(impl: QSSceneAdapterImpl): QSContainerController {
             return impl
+        }
+
+        @Provides
+        @SysUISingleton
+        @ShadeCarrierGroupControllerLog
+        fun provideShadeCarrierLog(factory: LogBufferFactory): LogBuffer {
+            return factory.create("ShadeCarrierGroupControllerLog", 400)
         }
     }
 

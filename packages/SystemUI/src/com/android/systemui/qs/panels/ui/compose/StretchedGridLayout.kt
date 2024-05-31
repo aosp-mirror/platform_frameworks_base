@@ -27,11 +27,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.panels.domain.interactor.IconTilesInteractor
-import com.android.systemui.qs.panels.domain.interactor.InfiniteGridSizeInteractor
 import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.shared.model.TileRow
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.InfiniteGridSizeViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.res.R
@@ -41,8 +41,8 @@ import javax.inject.Inject
 class StretchedGridLayout
 @Inject
 constructor(
-    private val iconTilesInteractor: IconTilesInteractor,
-    private val gridSizeInteractor: InfiniteGridSizeInteractor,
+    private val iconTilesViewModel: IconTilesViewModel,
+    private val gridSizeViewModel: InfiniteGridSizeViewModel,
 ) : GridLayout {
 
     @Composable
@@ -60,14 +60,13 @@ constructor(
         // Icon [3 | 4]
         // Large [6 | 8]
         val columns = 12
-        val iconTilesSpecs by iconTilesInteractor.iconTilesSpecs.collectAsStateWithLifecycle()
         val stretchedTiles =
             remember(tiles) {
                 val sizedTiles =
                     tiles.map {
                         SizedTile(
                             it,
-                            if (iconTilesSpecs.contains(it.spec)) {
+                            if (iconTilesViewModel.isIconTile(it.spec)) {
                                 3
                             } else {
                                 6
@@ -80,9 +79,9 @@ constructor(
         TileLazyGrid(columns = GridCells.Fixed(columns), modifier = modifier) {
             items(stretchedTiles.size, span = { GridItemSpan(stretchedTiles[it].width) }) { index ->
                 Tile(
-                    stretchedTiles[index].tile,
-                    iconTilesSpecs.contains(stretchedTiles[index].tile.spec),
-                    Modifier.height(dimensionResource(id = R.dimen.qs_tile_height))
+                    tile = stretchedTiles[index].tile,
+                    iconOnly = iconTilesViewModel.isIconTile(stretchedTiles[index].tile.spec),
+                    modifier = Modifier.height(dimensionResource(id = R.dimen.qs_tile_height))
                 )
             }
         }
@@ -95,12 +94,11 @@ constructor(
         onAddTile: (TileSpec, Int) -> Unit,
         onRemoveTile: (TileSpec) -> Unit
     ) {
-        val iconOnlySpecs by iconTilesInteractor.iconTilesSpecs.collectAsStateWithLifecycle()
-        val columns by gridSizeInteractor.columns.collectAsStateWithLifecycle()
+        val columns by gridSizeViewModel.columns.collectAsStateWithLifecycle()
 
         DefaultEditTileGrid(
             tiles = tiles,
-            iconOnlySpecs = iconOnlySpecs,
+            isIconOnly = iconTilesViewModel::isIconTile,
             columns = GridCells.Fixed(columns),
             modifier = modifier,
             onAddTile = onAddTile,

@@ -16,11 +16,16 @@
 
 package com.android.systemui.shade.data.repository
 
+import java.util.UUID
+
 /**
  * Information about a fling on the shade: whether we're flinging expanded or collapsed, and the
  * velocity of the touch gesture that started the fling (if applicable).
  */
-data class FlingInfo(
+data class FlingInfo @JvmOverloads constructor(
     val expand: Boolean,
     val velocity: Float = 0f,
+
+    /** Required to emit duplicate FlingInfo from StateFlow. */
+    val id: UUID = UUID.randomUUID()
 )

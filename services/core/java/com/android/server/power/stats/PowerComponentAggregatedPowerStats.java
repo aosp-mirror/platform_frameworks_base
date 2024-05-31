@@ -16,6 +16,8 @@
 
 package com.android.server.power.stats;
 
+import static com.android.server.power.stats.MultiStateStats.STATE_DOES_NOT_EXIST;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.UserHandle;
@@ -68,10 +70,12 @@ class PowerComponentAggregatedPowerStats {
     private MultiStateStats mDeviceStats;
     private final SparseArray<MultiStateStats> mStateStats = new SparseArray<>();
     private final SparseArray<UidStats> mUidStats = new SparseArray<>();
+    private long[] mZeroArray;
 
     private static class UidStats {
         public int[] states;
         public MultiStateStats stats;
+        public boolean updated;
     }
 
     PowerComponentAggregatedPowerStats(@NonNull AggregatedPowerStats aggregatedPowerStats,
@@ -122,16 +126,18 @@ class PowerComponentAggregatedPowerStats {
             }
         }
 
-        if (mUidStateConfig[stateId].isTracked()) {
+        int uidStateId = MultiStateStats.States
+                .findTrackedStateByName(mUidStateConfig, mDeviceStateConfig[stateId].getName());
+        if (uidStateId != STATE_DOES_NOT_EXIST && mUidStateConfig[uidStateId].isTracked()) {
             for (int i = mUidStats.size() - 1; i >= 0; i--) {
                 PowerComponentAggregatedPowerStats.UidStats uidStats = mUidStats.valueAt(i);
                 if (uidStats.stats == null) {
                     createUidStats(uidStats, timestampMs);
                 }
 
-                uidStats.states[stateId] = state;
+                uidStats.states[uidStateId] = state;
                 if (uidStats.stats != null) {
-                    uidStats.stats.setState(stateId, state, timestampMs);
+                    uidStats.stats.setState(uidStateId, state, timestampMs);
                 }
             }
         }
@@ -196,6 +202,22 @@ class PowerComponentAggregatedPowerStats {
                 createUidStats(uidStats, timestampMs);
             }
             uidStats.stats.increment(powerStats.uidStats.valueAt(i), timestampMs);
+            uidStats.updated = true;
+        }
+
+        // For UIDs not mentioned in the PowerStats object, we must assume a 0 increment.
+        // It is essential to call `stats.increment(zero)` in order to record the new
+        // timestamp, which will ensure correct proportional attribution across all UIDs
+        for (int i = mUidStats.size() - 1; i >= 0; i--) {
+            PowerComponentAggregatedPowerStats.UidStats uidStats = mUidStats.valueAt(i);
+            if (!uidStats.updated && uidStats.stats != null) {
+                if (mZeroArray == null
+                        || mZeroArray.length != mPowerStatsDescriptor.uidStatsArrayLength) {
+                    mZeroArray = new long[mPowerStatsDescriptor.uidStatsArrayLength];
+                }
+                uidStats.stats.increment(mZeroArray, timestampMs);
+            }
+            uidStats.updated = false;
         }
 
         mPowerStatsTimestamp = timestampMs;
@@ -217,10 +239,13 @@ class PowerComponentAggregatedPowerStats {
             uidStats = new UidStats();
             uidStats.states = new int[mUidStateConfig.length];
             for (int stateId = 0; stateId < mUidStateConfig.length; stateId++) {
-                if (mUidStateConfig[stateId].isTracked()
-                        && stateId < mDeviceStateConfig.length
-                        && mDeviceStateConfig[stateId].isTracked()) {
-                    uidStats.states[stateId] = mDeviceStates[stateId];
+                if (mUidStateConfig[stateId].isTracked()) {
+                    int deviceStateId = MultiStateStats.States.findTrackedStateByName(
+                            mDeviceStateConfig, mUidStateConfig[stateId].getName());
+                    if (deviceStateId != STATE_DOES_NOT_EXIST
+                            && mDeviceStateConfig[deviceStateId].isTracked()) {
+                        uidStats.states[stateId] = mDeviceStates[deviceStateId];
+                    }
                 }
             }
             mUidStats.put(uid, uidStats);

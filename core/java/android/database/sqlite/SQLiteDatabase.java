@@ -683,7 +683,9 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * <p>
      * Read-only transactions may run concurrently with other read-only transactions, and if the
      * database is in WAL mode, they may also run concurrently with IMMEDIATE or EXCLUSIVE
-     * transactions.
+     * transactions. The {@code temp} schema may be modified during a read-only transaction;
+     * if the transaction is {@link #setTransactionSuccessful}, modifications to temp tables may
+     * be visible to some subsequent transactions.
      * <p>
      * Transactions can be nested.  However, the behavior of the transaction is not altered by
      * nested transactions.  A nested transaction may be any of the three transaction types but if
@@ -731,7 +733,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * commits, or is rolled back, either explicitly or by a call to
      * {@link #yieldIfContendedSafely}.
      */
-    // TODO(340874899) Provide an Executor overload
+    @SuppressLint("ExecutorRegistration")
     public void beginTransactionWithListener(
             @Nullable SQLiteTransactionListener transactionListener) {
         beginTransaction(transactionListener, true);
@@ -761,7 +763,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *            transaction begins, commits, or is rolled back, either
      *            explicitly or by a call to {@link #yieldIfContendedSafely}.
      */
-    // TODO(340874899) Provide an Executor overload
+    @SuppressLint("ExecutorRegistration")
     public void beginTransactionWithListenerNonExclusive(
             @Nullable SQLiteTransactionListener transactionListener) {
         beginTransaction(transactionListener, false);
@@ -787,7 +789,6 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *   }
      * </pre>
      */
-    // TODO(340874899) Provide an Executor overload
     @SuppressLint("ExecutorRegistration")
     @FlaggedApi(Flags.FLAG_SQLITE_APIS_35)
     public void beginTransactionWithListenerReadOnly(

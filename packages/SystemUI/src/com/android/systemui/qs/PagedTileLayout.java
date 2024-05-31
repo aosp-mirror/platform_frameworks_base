@@ -485,6 +485,11 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     @Override
+    public int getMinRows() {
+        return mMinRows;
+    }
+
+    @Override
     public boolean setMaxColumns(int maxColumns) {
         mMaxColumns = maxColumns;
         boolean changed = false;
@@ -495,6 +500,11 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             }
         }
         return changed;
+    }
+
+    @Override
+    public int getMaxColumns() {
+        return mMaxColumns;
     }
 
     /**

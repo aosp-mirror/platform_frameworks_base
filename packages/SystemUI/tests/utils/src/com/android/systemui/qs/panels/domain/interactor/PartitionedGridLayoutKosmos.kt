@@ -18,6 +18,7 @@ package com.android.systemui.qs.panels.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.qs.panels.ui.compose.PartitionedGridLayout
+import com.android.systemui.qs.panels.ui.viewmodel.partitionedGridViewModel
 
 val Kosmos.partitionedGridLayout by
-    Kosmos.Fixture { PartitionedGridLayout(iconTilesInteractor, infiniteGridSizeInteractor) }
+    Kosmos.Fixture { PartitionedGridLayout(partitionedGridViewModel) }

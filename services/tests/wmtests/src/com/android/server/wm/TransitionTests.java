@@ -1446,6 +1446,33 @@ public class TransitionTests extends WindowTestsBase {
     }
 
     @Test
+    public void testTransitionEndedListeners() {
+        final TransitionController controller = new TestTransitionController(mAtm);
+        controller.setSyncEngine(mWm.mSyncEngine);
+        final ITransitionPlayer player = new ITransitionPlayer.Default();
+        controller.registerTransitionPlayer(player, null /* playerProc */);
+        final Runnable transitionEndedListener = mock(Runnable.class);
+
+        final Transition transition1 = controller.createTransition(TRANSIT_OPEN);
+        transition1.addTransitionEndedListener(transitionEndedListener);
+
+        // Using abort to force-finish the sync (since we can't wait for drawing in unit test).
+        // We didn't call abort on the transition itself, so it will still run onTransactionReady
+        // normally.
+        mWm.mSyncEngine.abort(transition1.getSyncId());
+        transition1.finishTransition();
+
+        verify(transitionEndedListener).run();
+
+        clearInvocations(transitionEndedListener);
+
+        final Transition transition2 = controller.createTransition(TRANSIT_OPEN);
+        transition2.addTransitionEndedListener(transitionEndedListener);
+        transition2.abort();
+        verify(transitionEndedListener).run();
+    }
+
+    @Test
     public void testTransientLaunch() {
         spyOn(mWm.mSnapshotController.mTaskSnapshotController);
         final ArrayList<ActivityRecord> enteringAnimReports = new ArrayList<>();
@@ -1549,8 +1576,10 @@ public class TransitionTests extends WindowTestsBase {
         });
         assertTrue(activity1.isVisible());
         doReturn(false).when(task1).isTranslucent(null);
+        doReturn(false).when(task1).isTranslucentForTransition();
         assertTrue(controller.canApplyDim(task1));
         doReturn(true).when(task1).isTranslucent(null);
+        doReturn(true).when(task1).isTranslucentForTransition();
         assertFalse(controller.canApplyDim(task1));
 
         controller.finishTransition(closeTransition);

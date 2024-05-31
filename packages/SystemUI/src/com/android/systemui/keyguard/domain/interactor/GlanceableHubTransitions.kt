@@ -19,7 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
-import com.android.systemui.communal.domain.interactor.CommunalTransitionProgress
+import com.android.systemui.communal.domain.model.CommunalTransitionProgressModel
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -71,7 +71,7 @@ constructor(
                 if (id == null) {
                     // No transition started.
                     if (
-                        transitionProgress is CommunalTransitionProgress.Transition &&
+                        transitionProgress is CommunalTransitionProgressModel.Transition &&
                             lastStartedState == fromState
                     ) {
                         transitionId =
@@ -93,7 +93,7 @@ constructor(
                     val nextState: TransitionState
                     val progressFraction: Float
                     when (transitionProgress) {
-                        is CommunalTransitionProgress.Idle -> {
+                        is CommunalTransitionProgressModel.Idle -> {
                             if (transitionProgress.scene == toScene) {
                                 nextState = TransitionState.FINISHED
                                 progressFraction = 1f
@@ -102,11 +102,11 @@ constructor(
                                 progressFraction = 0f
                             }
                         }
-                        is CommunalTransitionProgress.Transition -> {
+                        is CommunalTransitionProgressModel.Transition -> {
                             nextState = TransitionState.RUNNING
                             progressFraction = transitionProgress.progress
                         }
-                        is CommunalTransitionProgress.OtherTransition -> {
+                        is CommunalTransitionProgressModel.OtherTransition -> {
                             // Shouldn't happen but if another transition starts during the
                             // current one, mark the current one as canceled.
                             nextState = TransitionState.CANCELED

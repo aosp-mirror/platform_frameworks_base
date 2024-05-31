@@ -192,7 +192,6 @@ public class ScreenshotController {
     private final WindowContext mContext;
     private final FeatureFlags mFlags;
     private final ScreenshotViewProxy mViewProxy;
-    private final ScreenshotActionsProvider.Factory mActionsProviderFactory;
     private final ScreenshotNotificationsController mNotificationsController;
     private final ScreenshotSmartActions mScreenshotSmartActions;
     private final UiEventLogger mUiEventLogger;
@@ -202,7 +201,7 @@ public class ScreenshotController {
     private final ExecutorService mBgExecutor;
     private final BroadcastSender mBroadcastSender;
     private final BroadcastDispatcher mBroadcastDispatcher;
-    private final ActionExecutor mActionExecutor;
+    private final ScreenshotActionsController mActionsController;
 
     private final WindowManager mWindowManager;
     private final WindowManager.LayoutParams mWindowLayoutParams;
@@ -217,16 +216,18 @@ public class ScreenshotController {
     private final ActionIntentExecutor mActionIntentExecutor;
     private final UserManager mUserManager;
     private final AssistContentRequester mAssistContentRequester;
+    private final ActionExecutor mActionExecutor;
+
 
     private final MessageContainerController mMessageContainerController;
     private final AnnouncementResolver mAnnouncementResolver;
     private Bitmap mScreenBitmap;
     private SaveImageInBackgroundTask mSaveInBgTask;
     private boolean mScreenshotTakenInPortrait;
-    private boolean mBlockAttach;
+    private boolean mAttachRequested;
+    private boolean mDetachRequested;
     private Animator mScreenshotAnimation;
     private RequestCallback mCurrentRequestCallback;
-    private ScreenshotActionsProvider mActionsProvider;
     private String mPackageName = "";
     private final BroadcastReceiver mCopyBroadcastReceiver;
 
@@ -253,7 +254,6 @@ public class ScreenshotController {
             WindowManager windowManager,
             FeatureFlags flags,
             ScreenshotViewProxy.Factory viewProxyFactory,
-            ScreenshotActionsProvider.Factory actionsProviderFactory,
             ScreenshotSmartActions screenshotSmartActions,
             ScreenshotNotificationsController.Factory screenshotNotificationsControllerFactory,
             UiEventLogger uiEventLogger,
@@ -265,6 +265,7 @@ public class ScreenshotController {
             BroadcastSender broadcastSender,
             BroadcastDispatcher broadcastDispatcher,
             ScreenshotNotificationSmartActionsProvider screenshotNotificationSmartActionsProvider,
+            ScreenshotActionsController.Factory screenshotActionsControllerFactory,
             ActionIntentExecutor actionIntentExecutor,
             ActionExecutor.Factory actionExecutorFactory,
             UserManager userManager,
@@ -276,7 +277,6 @@ public class ScreenshotController {
             @Assisted boolean showUIOnExternalDisplay
     ) {
         mScreenshotSmartActions = screenshotSmartActions;
-        mActionsProviderFactory = actionsProviderFactory;
         mNotificationsController = screenshotNotificationsControllerFactory.create(
                 display.getDisplayId());
         mUiEventLogger = uiEventLogger;
@@ -327,6 +327,8 @@ public class ScreenshotController {
                     finishDismiss();
                     return Unit.INSTANCE;
                 });
+        mActionsController = screenshotActionsControllerFactory.getController(mActionExecutor);
+
 
         // Sound is only reproduced from the controller of the default display.
         if (mDisplay.getDisplayId() == Display.DEFAULT_DISPLAY) {
@@ -403,20 +405,21 @@ public class ScreenshotController {
             return;
         }
 
+        final UUID requestId;
         if (screenshotShelfUi2()) {
-            final UUID requestId = UUID.randomUUID();
-            final String screenshotId = String.format("Screenshot_%s", requestId);
-            mActionsProvider = mActionsProviderFactory.create(
-                    screenshot, screenshotId, mActionExecutor);
+            requestId = mActionsController.setCurrentScreenshot(screenshot);
             saveScreenshotInBackground(screenshot, requestId, finisher);
 
             if (screenshot.getTaskId() >= 0) {
-                mAssistContentRequester.requestAssistContent(screenshot.getTaskId(),
-                        assistContent -> mActionsProvider.onAssistContent(assistContent));
+                mAssistContentRequester.requestAssistContent(
+                        screenshot.getTaskId(),
+                        assistContent ->
+                                mActionsController.onAssistContent(requestId, assistContent));
             } else {
-                mActionsProvider.onAssistContent(null);
+                mActionsController.onAssistContent(requestId, null);
             }
         } else {
+            requestId = UUID.randomUUID(); // passed through but unused for legacy UI
             saveScreenshotInWorkerThread(screenshot.getUserHandle(), finisher,
                     this::showUiOnActionsReady, this::showUiOnQuickShareActionReady);
         }
@@ -425,7 +428,7 @@ public class ScreenshotController {
         setWindowFocusable(true);
         mViewProxy.requestFocus();
 
-        enqueueScrollCaptureRequest(screenshot.getUserHandle());
+        enqueueScrollCaptureRequest(requestId, screenshot.getUserHandle());
 
         attachWindow();
 
@@ -586,11 +589,11 @@ public class ScreenshotController {
         mWindow.setContentView(mViewProxy.getView());
     }
 
-    private void enqueueScrollCaptureRequest(UserHandle owner) {
+    private void enqueueScrollCaptureRequest(UUID requestId, UserHandle owner) {
         // Wait until this window is attached to request because it is
         // the reference used to locate the target window (below).
         withWindowAttached(() -> {
-            requestScrollCapture(owner);
+            requestScrollCapture(requestId, owner);
             mWindow.peekDecorView().getViewRootImpl().setActivityConfigCallback(
                     new ViewRootImpl.ActivityConfigCallback() {
                         @Override
@@ -600,14 +603,14 @@ public class ScreenshotController {
                                 // Hide the scroll chip until we know it's available in this
                                 // orientation
                                 if (screenshotShelfUi2()) {
-                                    mActionsProvider.onScrollChipInvalidated();
+                                    mActionsController.onScrollChipInvalidated();
                                 } else {
                                     mViewProxy.hideScrollChip();
                                 }
                                 // Delay scroll capture eval a bit to allow the underlying activity
                                 // to set up in the new orientation.
                                 mScreenshotHandler.postDelayed(
-                                        () -> requestScrollCapture(owner), 150);
+                                        () -> requestScrollCapture(requestId, owner), 150);
                                 mViewProxy.updateInsets(
                                         mWindowManager.getCurrentWindowMetrics().getWindowInsets());
                                 // Screenshot animation calculations won't be valid anymore,
@@ -629,7 +632,7 @@ public class ScreenshotController {
         });
     }
 
-    private void requestScrollCapture(UserHandle owner) {
+    private void requestScrollCapture(UUID requestId, UserHandle owner) {
         mScrollCaptureExecutor.requestScrollCapture(
                 mDisplay.getDisplayId(),
                 mWindow.getDecorView().getWindowToken(),
@@ -637,10 +640,8 @@ public class ScreenshotController {
                     mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_IMPRESSION,
                             0, response.getPackageName());
                     if (screenshotShelfUi2()) {
-                        if (mActionsProvider != null) {
-                            mActionsProvider.onScrollChipReady(
-                                    () -> onScrollButtonClicked(owner, response));
-                        }
+                        mActionsController.onScrollChipReady(requestId,
+                                () -> onScrollButtonClicked(owner, response));
                     } else {
                         mViewProxy.showScrollChip(response.getPackageName(),
                                 () -> onScrollButtonClicked(owner, response));
@@ -672,7 +673,7 @@ public class ScreenshotController {
                 () -> {
                     final Intent intent = ActionIntentCreator.INSTANCE.createLongScreenshotIntent(
                             owner, mContext);
-                    mActionIntentExecutor.launchIntentAsync(intent, owner, true, null, null);
+                    mContext.startActivity(intent);
                 },
                 mViewProxy::restoreNonScrollingUi,
                 mViewProxy::startLongScreenshotTransition);
@@ -687,7 +688,7 @@ public class ScreenshotController {
                     new ViewTreeObserver.OnWindowAttachListener() {
                         @Override
                         public void onWindowAttached() {
-                            mBlockAttach = false;
+                            mAttachRequested = false;
                             decorView.getViewTreeObserver().removeOnWindowAttachListener(this);
                             action.run();
                         }
@@ -703,13 +704,13 @@ public class ScreenshotController {
     @MainThread
     private void attachWindow() {
         View decorView = mWindow.getDecorView();
-        if (decorView.isAttachedToWindow() || mBlockAttach) {
+        if (decorView.isAttachedToWindow() || mAttachRequested) {
             return;
         }
         if (DEBUG_WINDOW) {
             Log.d(TAG, "attachWindow");
         }
-        mBlockAttach = true;
+        mAttachRequested = true;
         mWindowManager.addView(decorView, mWindowLayoutParams);
         decorView.requestApplyInsets();
 
@@ -727,6 +728,11 @@ public class ScreenshotController {
                 Log.d(TAG, "Removing screenshot window");
             }
             mWindowManager.removeViewImmediate(decorView);
+            mDetachRequested = false;
+        }
+        if (mAttachRequested && !mDetachRequested) {
+            mDetachRequested = true;
+            withWindowAttached(this::removeWindow);
         }
 
         mViewProxy.stopInputListening();
@@ -826,6 +832,7 @@ public class ScreenshotController {
     /** Reset screenshot view and then call onCompleteRunnable */
     private void finishDismiss() {
         Log.d(TAG, "finishDismiss");
+        mActionsController.endScreenshotSession();
         mScrollCaptureExecutor.close();
         if (mCurrentRequestCallback != null) {
             mCurrentRequestCallback.onFinish();
@@ -846,9 +853,8 @@ public class ScreenshotController {
                 ImageExporter.Result result = future.get();
                 Log.d(TAG, "Saved screenshot: " + result);
                 logScreenshotResultStatus(result.uri, screenshot.getUserHandle());
-                mScreenshotHandler.resetTimeout();
                 if (result.uri != null) {
-                    mActionsProvider.setCompletedScreenshot(new ScreenshotSavedResult(
+                    mActionsController.setCompletedScreenshot(requestId, new ScreenshotSavedResult(
                             result.uri, screenshot.getUserOrDefault(), result.timestamp));
                 }
                 if (DEBUG_CALLBACK) {

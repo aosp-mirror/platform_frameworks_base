@@ -201,6 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"ဤစက်ပစ္စည်းတွင် သင်၏ အလုပ်ပရိုဖိုင်မရှိတော့ပါ"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"စကားဝှက်ထည့်သွင်းရန် ကြိုးစားသည့် အကြိမ်အရေအတွက် အလွန်များသွား၍ ဖြစ်ပါသည်"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"ပုဂ္ဂိုလ်ရေးအသုံးပြုရန်အတွက် စီမံခန့်ခွဲသူက စက်ပစ္စည်းထိန်းချုပ်မှုကို ရပ်တန့်လိုက်သည်"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"သီးသန့်နေရာကို ဖယ်ရှားလိုက်သည်"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"သင့်အဖွဲ့အစည်းသည် ကြီးကြပ်ထားသော ဤစက်ပေါ်တွင် သီးသန့်နေရာများကို ခွင့်မပြုပါ။"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"စက်ပစ္စည်းကို စီမံခန့်ခွဲထားပါသည်"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ဤစက်ပစ္စည်းကို သင်၏ အဖွဲ့အစည်းက စီမံပြီး ကွန်ရက်အသွားအလာကို စောင့်ကြည့်နိုင်ပါသည်။ ထပ်မံလေ့လာရန် တို့ပါ။"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"အက်ပ်များက သင်၏တည်နေရာကို ကြည့်နိုင်သည်"</string>
@@ -2194,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad ဘယ်"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad ညာ"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad အလယ်"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>၏ ခေါင်းစီး ဘား။"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ကို တားမြစ်ထားသော သိမ်းဆည်းမှုအတွင်းသို့ ထည့်ပြီးပါပြီ"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>-"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"ပုံပို့ထားသည်"</string>
@@ -2415,10 +2416,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"အလုပ်လုပ်ပုံ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"ဆိုင်းငံ့ထားသည်…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"‘လက်ဗွေသုံး လော့ခ်ဖွင့်ခြင်း’ ကို စနစ်ထပ်မံထည့်သွင်းပါ"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> သိပ်အဆင်မပြေသဖြင့် ဖျက်ထားသည်"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> နှင့် <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> တို့ သိပ်အဆင်မပြေသဖြင့် ဖျက်ထားသည်"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> သိပ်အဆင်မပြေသဖြင့် ဖျက်ထားသည်။ သင့်ဖုန်းကို လက်ဗွေဖြင့်လော့ခ်ဖွင့်ရန် ၎င်းကို စနစ်ထပ်မံထည့်သွင်းပါ။"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> နှင့် <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> တို့ သိပ်အဆင်မပြေသဖြင့် ဖျက်ထားသည်။ သင့်ဖုန်းကို လက်ဗွေဖြင့်လော့ခ်ဖွင့်ရန် ၎င်းတို့ကို စနစ်ထပ်မံထည့်သွင်းပါ။"</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"‘မျက်နှာပြ လော့ခ်ဖွင့်ခြင်း’ ကို စနစ်ထပ်မံထည့်သွင်းပါ"</string>

@@ -42,9 +42,10 @@ constructor(
             when (data) {
                 is ScreenRecordModel.Recording -> {
                     activationState = QSTileState.ActivationState.ACTIVE
+                    iconRes = R.drawable.qs_screen_record_icon_on
                     val loadedIcon =
                         Icon.Loaded(
-                            resources.getDrawable(R.drawable.qs_screen_record_icon_on, theme),
+                            resources.getDrawable(iconRes!!, theme),
                             contentDescription = null
                         )
                     icon = { loadedIcon }
@@ -53,9 +54,10 @@ constructor(
                 }
                 is ScreenRecordModel.Starting -> {
                     activationState = QSTileState.ActivationState.ACTIVE
+                    iconRes = R.drawable.qs_screen_record_icon_on
                     val loadedIcon =
                         Icon.Loaded(
-                            resources.getDrawable(R.drawable.qs_screen_record_icon_on, theme),
+                            resources.getDrawable(iconRes!!, theme),
                             contentDescription = null
                         )
                     icon = { loadedIcon }
@@ -65,9 +67,10 @@ constructor(
                 }
                 is ScreenRecordModel.DoingNothing -> {
                     activationState = QSTileState.ActivationState.INACTIVE
+                    iconRes = R.drawable.qs_screen_record_icon_off
                     val loadedIcon =
                         Icon.Loaded(
-                            resources.getDrawable(R.drawable.qs_screen_record_icon_off, theme),
+                            resources.getDrawable(iconRes!!, theme),
                             contentDescription = null
                         )
                     icon = { loadedIcon }

@@ -76,6 +76,7 @@
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"a envoyé une image"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Enregistrement de la capture d\'écran…"</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Enregistrement de capture d\'écran dans profil pro…"</string>
+    <string name="screenshot_saving_private_profile" msgid="8934706048497093297">"Enregistrement de la capture d\'écran dans le profil privé"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Capture d\'écran enregistrée"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Impossible d\'enregistrer la capture d\'écran"</string>
     <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"Écran externe"</string>
@@ -371,6 +372,8 @@
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Associer un nouvel appareil"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Cliquer pour associer un nouvel appareil"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Impossible de mettre à jour les préréglages"</string>
+    <!-- no translation found for hearing_devices_preset_label (7878267405046232358) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Débloquer le micro de l\'appareil ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Débloquer la caméra de l\'appareil ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Débloquer l\'appareil photo et le micro de l\'appareil ?"</string>

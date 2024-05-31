@@ -203,11 +203,11 @@ public class PhoneCallPowerStatsProcessorTest {
 
         aggregatedPowerStats.addPowerStats(collector.collectStats(), 10_000);
 
-        mobileStatsProcessor.finish(mobileRadioStats);
+        mobileStatsProcessor.finish(mobileRadioStats, 10_000);
 
         PowerComponentAggregatedPowerStats stats =
                 aggregatedPowerStats.getPowerComponentStats(BatteryConsumer.POWER_COMPONENT_PHONE);
-        phoneStatsProcessor.finish(stats);
+        phoneStatsProcessor.finish(stats, 10_000);
 
         PowerStatsLayout statsLayout =
                 new PowerStatsLayout(stats.getPowerStatsDescriptor());

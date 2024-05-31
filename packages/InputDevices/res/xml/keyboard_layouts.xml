@@ -332,4 +332,18 @@
         android:keyboardLayout="@raw/keyboard_layout_thai_pattachote"
         android:keyboardLocale="th-Thai"
         android:keyboardLayoutType="extended" />
+
+    <keyboard-layout
+        android:name="keyboard_layout_serbian_latin"
+        android:label="@string/keyboard_layout_serbian_latin"
+        android:keyboardLayout="@raw/keyboard_layout_serbian_latin"
+        android:keyboardLocale="sr-Latn-RS"
+        android:keyboardLayoutType="qwertz" />
+
+    <keyboard-layout
+        android:name="keyboard_layout_montenegrin_latin"
+        android:label="@string/keyboard_layout_montenegrin_latin"
+        android:keyboardLayout="@raw/keyboard_layout_serbian_latin"
+        android:keyboardLocale="cnr-Latn-ME"
+        android:keyboardLayoutType="qwertz" />
 </keyboard-layouts>

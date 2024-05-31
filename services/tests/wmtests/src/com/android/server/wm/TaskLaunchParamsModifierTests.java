@@ -70,7 +70,8 @@ import java.util.Locale;
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
-public class TaskLaunchParamsModifierTests extends LaunchParamsModifierTestsBase {
+public class TaskLaunchParamsModifierTests extends
+        LaunchParamsModifierTestsBase<TaskLaunchParamsModifier> {
     private static final Rect SMALL_DISPLAY_BOUNDS = new Rect(/* left */ 0, /* top */ 0,
             /* right */ 1000, /* bottom */ 500);
     private static final Rect SMALL_DISPLAY_STABLE_BOUNDS = new Rect(/* left */ 100,
@@ -1898,8 +1899,7 @@ public class TaskLaunchParamsModifierTests extends LaunchParamsModifierTestsBase
         }
         Rect startingBounds = new Rect(0, 0, 20, 20);
         Rect adjustedBounds = new Rect(startingBounds);
-        ((TaskLaunchParamsModifier) mTarget).adjustBoundsToAvoidConflict(displayBounds,
-                existingTaskBounds, adjustedBounds);
+        mTarget.adjustBoundsToAvoidConflict(displayBounds, existingTaskBounds, adjustedBounds);
         assertEquals(startingBounds, adjustedBounds);
     }
 

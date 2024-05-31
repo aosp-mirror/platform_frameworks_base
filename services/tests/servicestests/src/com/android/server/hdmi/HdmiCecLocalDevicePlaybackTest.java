@@ -167,6 +167,7 @@ public class HdmiCecLocalDevicePlaybackTest {
             }
         };
         mHdmiCecLocalDevicePlayback.init();
+        mPlaybackPhysicalAddress = 0x2000;
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[1];
         hdmiPortInfos[0] =
                 new HdmiPortInfo.Builder(1, HdmiPortInfo.PORT_OUTPUT, 0x0000)
@@ -176,13 +177,12 @@ public class HdmiCecLocalDevicePlaybackTest {
                         .build();
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mNativeWrapper.setPortConnectionStatus(1, true);
+        mNativeWrapper.setPhysicalAddress(mPlaybackPhysicalAddress);
         mHdmiControlService.initService();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(context);
         mHdmiControlService.setPowerManager(mPowerManager);
         mHdmiControlService.setPowerManagerInternal(mPowerManagerInternal);
-        mPlaybackPhysicalAddress = 0x2000;
-        mNativeWrapper.setPhysicalAddress(mPlaybackPhysicalAddress);
         mTestLooper.dispatchAll();
         mLocalDevices.add(mHdmiCecLocalDevicePlayback);
         mHdmiControlService.getHdmiCecNetwork().addCecDevice(INFO_TV);
@@ -416,6 +416,7 @@ public class HdmiCecLocalDevicePlaybackTest {
         int newPlaybackPhysicalAddress = 0x2100;
         int switchPhysicalAddress = 0x2000;
         mNativeWrapper.setPhysicalAddress(newPlaybackPhysicalAddress);
+        mHdmiControlService.onHotplug(newPlaybackPhysicalAddress, true);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
 
         mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(

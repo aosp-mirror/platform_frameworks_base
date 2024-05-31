@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,16 +42,7 @@ private val padding = 24.dp
 fun VolumePanelRoot(
     viewModel: VolumePanelViewModel,
     modifier: Modifier = Modifier,
-    onDismiss: () -> Unit
 ) {
-    LaunchedEffect(viewModel) {
-        viewModel.volumePanelState.collect {
-            if (!it.isVisible) {
-                onDismiss()
-            }
-        }
-    }
-
     val accessibilityTitle = stringResource(R.string.accessibility_volume_settings)
     val state: VolumePanelState by viewModel.volumePanelState.collectAsStateWithLifecycle()
     val components by viewModel.componentsLayout.collectAsStateWithLifecycle(null)

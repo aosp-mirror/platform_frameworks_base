@@ -23,9 +23,12 @@ import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.res.R
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -42,6 +45,7 @@ constructor(
     private val burnInInteractor: BurnInInteractor,
     private val shortcutsCombinedViewModel: KeyguardQuickAffordancesCombinedViewModel,
     configurationInteractor: ConfigurationInteractor,
+    keyguardTransitionInteractor: KeyguardTransitionInteractor,
 ) {
 
     /** Notifies when a new configuration is set */
@@ -69,12 +73,22 @@ constructor(
                 .distinctUntilChanged()
         }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val burnIn: Flow<BurnInModel> =
-        burnInInteractor
-            .burnIn(
-                xDimenResourceId = R.dimen.burn_in_prevention_offset_x,
-                yDimenResourceId = R.dimen.default_burn_in_prevention_offset,
-            )
+        combine(
+                burnInInteractor.burnIn(
+                    xDimenResourceId = R.dimen.burn_in_prevention_offset_x,
+                    yDimenResourceId = R.dimen.default_burn_in_prevention_offset,
+                ),
+                keyguardTransitionInteractor.transitionValue(KeyguardState.AOD),
+            ) { burnIn, aodTransitionValue ->
+                BurnInModel(
+                    (burnIn.translationX * aodTransitionValue).toInt(),
+                    (burnIn.translationY * aodTransitionValue).toInt(),
+                    burnIn.scale,
+                    burnIn.scaleClockOnly,
+                )
+            }
             .distinctUntilChanged()
 
     /** An observable for the x-offset by which the indication area should be translated. */

@@ -23,7 +23,7 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
-import com.android.systemui.communal.data.repository.fakeCommunalRepository
+import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
@@ -170,7 +170,7 @@ class FromPrimaryBouncerTransitionInteractorTest : SysuiTestCase() {
     fun testReturnToGlanceableHub_whenBouncerHides_ifIdleOnCommunal() =
         testScope.runTest {
             underTest.start()
-            kosmos.fakeCommunalRepository.setTransitionState(
+            kosmos.fakeCommunalSceneRepository.setTransitionState(
                 flowOf(ObservableTransitionState.Idle(CommunalScenes.Communal))
             )
             bouncerRepository.setPrimaryShow(true)

@@ -25,6 +25,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
@@ -36,6 +37,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -47,11 +49,13 @@ constructor(
     @Background private val scope: CoroutineScope,
     @Background bgDispatcher: CoroutineDispatcher,
     @Main mainDispatcher: CoroutineDispatcher,
-    private val keyguardInteractor: KeyguardInteractor,
+    keyguardInteractor: KeyguardInteractor,
     powerInteractor: PowerInteractor,
     private val communalInteractor: CommunalInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
     private val biometricSettingsRepository: BiometricSettingsRepository,
+    private val keyguardRepository: KeyguardRepository,
+    private val keyguardEnabledInteractor: KeyguardEnabledInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.GONE,
@@ -60,6 +64,7 @@ constructor(
         bgDispatcher = bgDispatcher,
         powerInteractor = powerInteractor,
         keyguardOcclusionInteractor = keyguardOcclusionInteractor,
+        keyguardInteractor = keyguardInteractor,
     ) {
 
     override fun start() {
@@ -91,6 +96,21 @@ constructor(
                                 KeyguardState.LOCKSCREEN
                             }
                         startTransitionTo(to, ownerReason = "User initiated lockdown")
+                    }
+            }
+
+            scope.launch {
+                keyguardRepository.isKeyguardEnabled
+                    .filterRelevantKeyguardStateAnd { enabled -> enabled }
+                    .sample(keyguardEnabledInteractor.showKeyguardWhenReenabled)
+                    .filter { reshow -> reshow }
+                    .collect {
+                        startTransitionTo(
+                            KeyguardState.LOCKSCREEN,
+                            ownerReason =
+                                "Keyguard was re-enabled, and we weren't GONE when it " +
+                                    "was originally disabled"
+                        )
                     }
             }
         } else {

@@ -155,9 +155,22 @@ public class WindowOrganizer {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
-    public void registerTransitionPlayer(@Nullable ITransitionPlayer player) {
+    public void registerTransitionPlayer(@NonNull ITransitionPlayer player) {
         try {
             getWindowOrganizerController().registerTransitionPlayer(player);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregister a previously-registered ITransitionPlayer.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+    public void unregisterTransitionPlayer(@NonNull ITransitionPlayer player) {
+        try {
+            getWindowOrganizerController().unregisterTransitionPlayer(player);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

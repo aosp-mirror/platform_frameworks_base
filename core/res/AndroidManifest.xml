@@ -2291,6 +2291,11 @@
     <permission android:name="android.permission.THREAD_NETWORK_PRIVILEGED"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- @hide Allows access to Thread network APIs or shell commands ("cmd thread_network") which
+        are only for testing. -->
+    <permission android:name="android.permission.THREAD_NETWORK_TESTING"
+                android:protectionLevel="signature" />
+
     <!-- #SystemApi @hide Allows an app to bypass Private DNS.
          <p>Not for use by third-party applications.
          TODO: publish as system API in next API release. -->
@@ -4696,6 +4701,11 @@
          @hide @TestApi -->
     <permission android:name="android.permission.REQUEST_UNIQUE_ID_ATTESTATION"
          android:protectionLevel="signature" />
+
+    <!-- Allows an application to use the RemoteKeyProvisioningService.
+         @hide -->
+    <permission android:name="android.permission.BIND_RKP_SERVICE"
+                android:protectionLevel="signature" />
 
     <!-- Allows an application to get enabled credential manager providers.
          @hide -->

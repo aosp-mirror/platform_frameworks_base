@@ -610,6 +610,8 @@
 
     <!-- Permission required for CTS test - CtsThreadNetworkTestCases -->
     <uses-permission android:name="android.permission.THREAD_NETWORK_PRIVILEGED"/>
+    <!-- Permission required to access Thread network shell commands for testing -->
+    <uses-permission android:name="android.permission.THREAD_NETWORK_TESTING"/>
 
     <!-- Permission required for CTS tests to enable/disable rate limiting toasts. -->
     <uses-permission android:name="android.permission.MANAGE_TOAST_RATE_LIMITING" />

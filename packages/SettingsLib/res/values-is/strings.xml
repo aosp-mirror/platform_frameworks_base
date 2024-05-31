@@ -103,10 +103,8 @@
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> rafhlöðuhleðsla."</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"Vinstri: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> rafhlöðuhleðsla"</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"Hægri: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> rafhlöðuhleðsla"</string>
-    <!-- no translation found for tv_bluetooth_battery_level_untethered_left (337629670583744410) -->
-    <skip />
-    <!-- no translation found for tv_bluetooth_battery_level_untethered_right (8610019317279155595) -->
-    <skip />
+    <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"Vinstri <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_right" msgid="8610019317279155595">"Hægri <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Virkt"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Vistað"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Kveikt (eingöngu vinstra)"</string>
@@ -237,7 +235,7 @@
     <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Veldu snið"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Persónulegt"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Einkasnið"</string>
     <string name="category_work" msgid="4014193632325996115">"Vinna"</string>
     <string name="category_private" msgid="4244892185452788977">"Lokað"</string>
     <string name="category_clone" msgid="1554511758987195974">"Afrit"</string>
@@ -497,7 +495,7 @@
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - Fullt kl. <xliff:g id="TIME">%3$s</xliff:g>"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - Fullhlaðið kl. <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"Fullhlaðið kl. <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"Fullt kl. <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"Fullhlaðin kl. <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Óþekkt"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Í hleðslu"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Hröð hleðsla"</string>

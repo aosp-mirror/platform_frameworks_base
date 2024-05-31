@@ -136,20 +136,20 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
-    fun testTransitionToOccluded_onWakeUp_ifPowerButtonGestureDetected_fromAod_nonDismissableKeyguard() =
+    fun testTransitionToOccluded_onWakeUp_ifPowerButtonGestureDetected_fromAod_nonDismissibleKeyguard() =
         testScope.runTest {
             powerInteractor.onCameraLaunchGestureDetected()
             powerInteractor.setAwakeForTest()
             advanceTimeBy(100) // account for debouncing
 
-            // We should head back to GONE since we started there.
+            // We should head to OCCLUDED because keyguard is not dismissible.
             assertThat(transitionRepository)
                 .startedTransition(from = KeyguardState.AOD, to = KeyguardState.OCCLUDED)
         }
 
     @Test
     @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
-    fun testTransitionToGone_onWakeUp_ifPowerButtonGestureDetected_fromAod_dismissableKeyguard() =
+    fun testTransitionToGone_onWakeUp_ifPowerButtonGestureDetected_fromAod_dismissibleKeyguard() =
         testScope.runTest {
             kosmos.fakeKeyguardRepository.setKeyguardDismissible(true)
             powerInteractor.onCameraLaunchGestureDetected()
@@ -188,6 +188,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
             )
 
             // Detect a power gesture and then wake up.
+            kosmos.fakeKeyguardRepository.setKeyguardDismissible(true)
             reset(transitionRepository)
             powerInteractor.onCameraLaunchGestureDetected()
             powerInteractor.setAwakeForTest()
@@ -355,6 +356,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
             )
 
             // Detect a power gesture and then wake up.
+            kosmos.fakeKeyguardRepository.setKeyguardDismissible(true)
             reset(transitionRepository)
             powerInteractor.onCameraLaunchGestureDetected()
             powerInteractor.setAwakeForTest()

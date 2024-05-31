@@ -193,4 +193,12 @@ flag {
     namespace: "permissions"
     description: "Enable getDeviceId API in OpEventProxyInfo"
     bug: "337340961"
+ }
+
+flag {
+    name: "device_aware_app_op_new_schema_enabled"
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Persist device attributed AppOp accesses on the disk"
+    bug: "308201969"
 }

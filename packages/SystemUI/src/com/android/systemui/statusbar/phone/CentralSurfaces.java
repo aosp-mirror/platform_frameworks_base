@@ -199,6 +199,11 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner, CoreStartable
 
     boolean isLaunchingActivityOverLockscreen();
 
+    /**
+     * Whether an activity launch over lockscreen is causing the shade to be dismissed.
+     */
+    boolean isDismissingShadeForActivityLaunch();
+
     void onKeyguardViewManagerStatesUpdated();
 
     /**  */
@@ -322,6 +327,11 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner, CoreStartable
     @Deprecated
     float getDisplayDensity();
 
+    /**
+     * Forwards touch events to communal hub
+     */
+    void handleCommunalHubTouch(MotionEvent event);
+
     public static class KeyboardShortcutsMessage {
         final int mDeviceId;
 
@@ -333,7 +343,8 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner, CoreStartable
     /**
      * Sets launching activity over LS state in central surfaces.
      */
-    void setIsLaunchingActivityOverLockscreen(boolean isLaunchingActivityOverLockscreen);
+    void setIsLaunchingActivityOverLockscreen(
+            boolean isLaunchingActivityOverLockscreen, boolean dismissShade);
 
     /**
      * Gets an animation controller from a notification row.

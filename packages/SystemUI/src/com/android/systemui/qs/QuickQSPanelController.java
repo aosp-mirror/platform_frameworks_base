@@ -26,6 +26,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.haptics.qs.QSLongPressEffect;
+import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor;
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager;
 import com.android.systemui.media.controls.ui.view.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
@@ -36,6 +37,8 @@ import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.leak.RotationUtils;
 
+import kotlinx.coroutines.flow.StateFlow;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,11 +46,14 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 
+
 /** Controller for {@link QuickQSPanel}. */
 @QSScope
 public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> {
 
     private final Provider<Boolean> mUsingCollapsedLandscapeMediaProvider;
+
+    private final MediaCarouselInteractor mMediaCarouselInteractor;
 
     @Inject
     QuickQSPanelController(QuickQSPanel view, QSHost qsHost,
@@ -58,12 +64,14 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
                     Provider<Boolean> usingCollapsedLandscapeMediaProvider,
             MetricsLogger metricsLogger, UiEventLogger uiEventLogger, QSLogger qsLogger,
             DumpManager dumpManager, SplitShadeStateController splitShadeStateController,
-            Provider<QSLongPressEffect> longPressEffectProvider
+            Provider<QSLongPressEffect> longPressEffectProvider,
+            MediaCarouselInteractor mediaCarouselInteractor
     ) {
         super(view, qsHost, qsCustomizerController, usingMediaPlayer, mediaHost, metricsLogger,
                 uiEventLogger, qsLogger, dumpManager, splitShadeStateController,
                 longPressEffectProvider);
         mUsingCollapsedLandscapeMediaProvider = usingCollapsedLandscapeMediaProvider;
+        mMediaCarouselInteractor = mediaCarouselInteractor;
     }
 
     @Override
@@ -72,6 +80,11 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
         updateMediaExpansion();
         mMediaHost.setShowsOnlyActiveMedia(true);
         mMediaHost.init(MediaHierarchyManager.LOCATION_QQS);
+    }
+
+    @Override
+    StateFlow<Boolean> getMediaVisibleFlow() {
+        return mMediaCarouselInteractor.getHasActiveMediaOrRecommendation();
     }
 
     private void updateMediaExpansion() {

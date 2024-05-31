@@ -1142,6 +1142,20 @@ public class LocalDisplayAdapterTest {
     }
 
     @Test
+    public void test_createLocalExternalDisplay_displayManagementEnabled_doesNotCrash()
+            throws Exception {
+        FakeDisplay display = new FakeDisplay(PORT_A);
+        display.info.isInternal = false;
+        setUpDisplay(display);
+        updateAvailableDisplays();
+        mAdapter.registerLocked();
+        when(mSurfaceControlProxy.getDesiredDisplayModeSpecs(display.token)).thenReturn(null);
+        mInjector.getTransmitter().sendHotplug(display, /* connected */ true);
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+    }
+
+    @Test
     public void test_createLocalExternalDisplay_displayManagementEnabled_shouldHaveDefaultGroup()
             throws Exception {
         FakeDisplay display = new FakeDisplay(PORT_A);
@@ -1246,6 +1260,11 @@ public class LocalDisplayAdapterTest {
 
             @Override
             public void onBlockingScreenOn(Runnable unblocker) {}
+
+            @Override
+            public boolean allowAutoBrightnessInDoze() {
+                return true;
+            }
         });
 
         mDisplayOffloadSession = new DisplayOffloadSessionImpl(mDisplayOffloader,

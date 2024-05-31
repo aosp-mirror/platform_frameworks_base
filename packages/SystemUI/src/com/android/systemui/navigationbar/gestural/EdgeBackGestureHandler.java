@@ -15,6 +15,7 @@
  */
 package com.android.systemui.navigationbar.gestural;
 
+import static android.content.pm.ActivityInfo.CONFIG_FONT_SCALE;
 import static android.view.InputDevice.SOURCE_MOUSE;
 import static android.view.InputDevice.SOURCE_TOUCHPAD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
@@ -24,10 +25,13 @@ import static com.android.systemui.classifier.Classifier.BACK_GESTURE;
 import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadScroll;
 import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadThreeFingerSwipe;
 
+import static java.util.stream.Collectors.joining;
+
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
@@ -47,6 +51,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.provider.DeviceConfig;
+import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -102,6 +107,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -255,7 +261,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
 
     private boolean mIsAttached;
     private boolean mIsGestureHandlingEnabled;
-    private boolean mIsTrackpadConnected;
+    private final Set<Integer> mTrackpadsConnected = new ArraySet<>();
     private boolean mInGestureNavMode;
     private boolean mUsingThreeButtonNav;
     private boolean mIsEnabled;
@@ -358,16 +364,14 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
 
     private final InputManager.InputDeviceListener mInputDeviceListener =
             new InputManager.InputDeviceListener() {
-
-        // Only one trackpad can be connected to a device at a time, since it takes over the
-        // only USB port.
-        private int mTrackpadDeviceId;
-
         @Override
         public void onInputDeviceAdded(int deviceId) {
             if (isTrackpadDevice(deviceId)) {
-                mTrackpadDeviceId = deviceId;
-                update(true /* isTrackpadConnected */);
+                boolean wasEmpty = mTrackpadsConnected.isEmpty();
+                mTrackpadsConnected.add(deviceId);
+                if (wasEmpty) {
+                    update();
+                }
             }
         }
 
@@ -376,18 +380,29 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
 
         @Override
         public void onInputDeviceRemoved(int deviceId) {
-            if (mTrackpadDeviceId == deviceId) {
-                update(false /* isTrackpadConnected */);
+            mTrackpadsConnected.remove(deviceId);
+            if (mTrackpadsConnected.isEmpty()) {
+                update();
             }
         }
 
-        private void update(boolean isTrackpadConnected) {
-            boolean isPreviouslyTrackpadConnected = mIsTrackpadConnected;
-            mIsTrackpadConnected = isTrackpadConnected;
-            if (isPreviouslyTrackpadConnected != mIsTrackpadConnected) {
-                updateIsEnabled();
-                updateCurrentUserResources();
+        private void update() {
+            if (mIsEnabled && !mTrackpadsConnected.isEmpty()) {
+                // Don't reinitialize gesture handling due to trackpad connecting when it's
+                // already set up.
+                return;
             }
+            updateIsEnabled();
+            updateCurrentUserResources();
+        }
+
+        private boolean isTrackpadDevice(int deviceId) {
+            InputDevice inputDevice = mInputManager.getInputDevice(deviceId);
+            if (inputDevice == null) {
+                return false;
+            }
+            return inputDevice.getSources() == (InputDevice.SOURCE_MOUSE
+                    | InputDevice.SOURCE_TOUCHPAD);
         }
     };
 
@@ -566,6 +581,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         mOverviewProxyService.removeCallback(mQuickSwitchListener);
         mSysUiState.removeCallback(mSysUiStateCallback);
         mInputManager.unregisterInputDeviceListener(mInputDeviceListener);
+        mTrackpadsConnected.clear();
         updateIsEnabled();
         mUserTracker.removeCallback(mUserChangedCallback);
     }
@@ -605,7 +621,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             Trace.beginSection("EdgeBackGestureHandler#updateIsEnabled");
 
             mIsGestureHandlingEnabled = mInGestureNavMode || (mUsingThreeButtonNav
-                    && mIsTrackpadConnected);
+                    && !mTrackpadsConnected.isEmpty());
             boolean isEnabled = mIsAttached && mIsGestureHandlingEnabled;
             if (isEnabled == mIsEnabled) {
                 return;
@@ -865,15 +881,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         final Rect excludeBounds = mExcludeRegion.getBounds();
         return !excludeBounds.contains(insets.left, insets.top, mDisplaySize.x - insets.right,
                 mDisplaySize.y - insets.bottom);
-    }
-
-    private boolean isTrackpadDevice(int deviceId) {
-        InputDevice inputDevice = mInputManager.getInputDevice(deviceId);
-        if (inputDevice == null) {
-            return false;
-        }
-        return inputDevice.getSources() == (InputDevice.SOURCE_MOUSE
-                | InputDevice.SOURCE_TOUCHPAD);
     }
 
     private boolean desktopExcludeRegionContains(int x, int y) {
@@ -1175,6 +1182,10 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         // TODO(b/332635834): Disable this logging once b/332635834 is fixed.
         Log.i(DEBUG_MISSING_GESTURE_TAG, "Config changed: newConfig=" + newConfig
                 + " lastReportedConfig=" + mLastReportedConfig);
+        final int diff = newConfig.diff(mLastReportedConfig);
+        if ((diff & CONFIG_FONT_SCALE) != 0 || (diff & ActivityInfo.CONFIG_DENSITY) != 0) {
+            updateCurrentUserResources();
+        }
         mLastReportedConfig.updateFrom(newConfig);
         updateDisplaySize();
     }
@@ -1251,7 +1262,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         pw.println("  mPredictionLog=" + String.join("\n", mPredictionLog));
         pw.println("  mGestureLogInsideInsets=" + String.join("\n", mGestureLogInsideInsets));
         pw.println("  mGestureLogOutsideInsets=" + String.join("\n", mGestureLogOutsideInsets));
-        pw.println("  mIsTrackpadConnected=" + mIsTrackpadConnected);
+        pw.println("  mTrackpadsConnected=" + mTrackpadsConnected.stream().map(
+                String::valueOf).collect(joining()));
         pw.println("  mUsingThreeButtonNav=" + mUsingThreeButtonNav);
         pw.println("  mEdgeBackPlugin=" + mEdgeBackPlugin);
         if (mEdgeBackPlugin != null) {

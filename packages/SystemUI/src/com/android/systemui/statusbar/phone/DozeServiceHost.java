@@ -54,12 +54,12 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.util.Assert;
+import com.android.systemui.util.CopyOnLoopListenerSet;
+import com.android.systemui.util.IListenerSet;
 
 import dagger.Lazy;
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
-
-import java.util.ArrayList;
 
 import javax.inject.Inject;
 
@@ -69,7 +69,7 @@ import javax.inject.Inject;
 @ExperimentalCoroutinesApi @SysUISingleton
 public final class DozeServiceHost implements DozeHost {
     private static final String TAG = "DozeServiceHost";
-    private final ArrayList<Callback> mCallbacks = new ArrayList<>();
+    private final IListenerSet<Callback> mCallbacks = new CopyOnLoopListenerSet<>();
     private final DozeLog mDozeLog;
     private final PowerManager mPowerManager;
     private boolean mAnimateWakeup;
@@ -178,8 +178,8 @@ public final class DozeServiceHost implements DozeHost {
      */
     public void fireSideFpsAcquisitionStarted() {
         Assert.isMainThread();
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            mCallbacks.get(i).onSideFingerprintAcquisitionStarted();
+        for (Callback callback : mCallbacks) {
+            callback.onSideFingerprintAcquisitionStarted();
         }
     }
 
@@ -211,7 +211,7 @@ public final class DozeServiceHost implements DozeHost {
     @Override
     public void addCallback(@NonNull Callback callback) {
         Assert.isMainThread();
-        mCallbacks.add(callback);
+        mCallbacks.addIfAbsent(callback);
     }
 
     @Override
