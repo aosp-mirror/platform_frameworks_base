@@ -448,7 +448,7 @@ public final class DozeServiceHost implements DozeHost {
     /**
      * When the dozing host is waiting for scrims to fade out to change the display state.
      */
-    boolean hasPendingScreenOffCallback() {
+    public boolean hasPendingScreenOffCallback() {
         return mPendingScreenOffCallback != null;
     }
 

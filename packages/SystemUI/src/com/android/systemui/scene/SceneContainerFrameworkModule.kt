@@ -21,6 +21,7 @@ import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlagsModule
 import com.android.systemui.notifications.ui.composable.NotificationsShadeSessionModule
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
+import com.android.systemui.scene.domain.startable.ScrimStartable
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.shared.flag.DualShade
@@ -53,6 +54,11 @@ interface SceneContainerFrameworkModule {
     @IntoMap
     @ClassKey(SceneContainerStartable::class)
     fun containerStartable(impl: SceneContainerStartable): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(ScrimStartable::class)
+    fun scrimStartable(impl: ScrimStartable): CoreStartable
 
     @Binds
     @IntoMap
