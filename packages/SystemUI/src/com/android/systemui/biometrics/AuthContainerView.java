@@ -629,7 +629,7 @@ public class AuthContainerView extends LinearLayout
         if (fpProp != null && fpProp.isAnyUdfpsType()) {
             maybeUpdatePositionForUdfps(forceInvalidate /* invalidate */);
         }
-        if (faceProp != null && mBiometricView.isFaceOnly()) {
+        if (faceProp != null && mBiometricView != null && mBiometricView.isFaceOnly()) {
             alwaysUpdatePositionAtScreenBottom(forceInvalidate /* invalidate */);
         }
         if (fpProp != null && fpProp.sensorType == TYPE_POWER_BUTTON) {
