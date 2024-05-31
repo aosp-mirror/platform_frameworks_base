@@ -147,8 +147,9 @@ constructor(
                 deviceEntryIconViewModel.get().udfpsLocation.value?.let { udfpsLocation ->
                     Log.d(
                         "DeviceEntrySection",
-                        "udfpsLocation=$udfpsLocation" +
-                            " unusedAuthController=${authController.udfpsLocation}"
+                        "udfpsLocation=$udfpsLocation, " +
+                            "scaledLocation=(${udfpsLocation.centerX},${udfpsLocation.centerY}), " +
+                            "unusedAuthController=${authController.udfpsLocation}"
                     )
                     centerIcon(
                         Point(udfpsLocation.centerX.toInt(), udfpsLocation.centerY.toInt()),
