@@ -3739,7 +3739,13 @@ class Task extends TaskFragment {
         return !isOwnActivity && !isTrustedTaskFragment;
     }
 
-    void setDecorSurfaceBoosted(
+    /**
+     * Sets the requested boosted state for the decor surface.
+     *
+     * The caller must call {@link #commitDecorSurfaceBoostedState()} to ensure that the change is
+     * applied.
+     */
+    void requestDecorSurfaceBoosted(
             @NonNull TaskFragment ownerTaskFragment,
             boolean isBoosted,
             @Nullable SurfaceControl.Transaction clientTransaction) {
@@ -3747,9 +3753,17 @@ class Task extends TaskFragment {
                 || mDecorSurfaceContainer.mOwnerTaskFragment != ownerTaskFragment) {
             return;
         }
-        mDecorSurfaceContainer.setBoosted(isBoosted, clientTransaction);
-        // scheduleAnimation() is called inside assignChildLayers(), which ensures that child
-        // surface visibility is updated with prepareSurfaces()
+        mDecorSurfaceContainer.requestBoosted(isBoosted, clientTransaction);
+    }
+
+    void commitDecorSurfaceBoostedState() {
+        if (mDecorSurfaceContainer == null) {
+            return;
+        }
+        mDecorSurfaceContainer.commitBoostedState();
+
+        // assignChildLayers() calls scheduleAnimation(), which calls prepareSurfaces()
+        // to ensure child surface visibility.
         assignChildLayers();
     }
 
@@ -6787,11 +6801,11 @@ class Task extends TaskFragment {
      * Associates the decor surface with the given TF, or create one if there
      * isn't one in the Task yet. The surface will be removed with the TF,
      * and become invisible if the TF is invisible. */
-    void moveOrCreateDecorSurfaceFor(TaskFragment taskFragment) {
+    void moveOrCreateDecorSurfaceFor(TaskFragment taskFragment, boolean visible) {
         if (mDecorSurfaceContainer != null) {
             mDecorSurfaceContainer.mOwnerTaskFragment = taskFragment;
         } else {
-            mDecorSurfaceContainer = new DecorSurfaceContainer(taskFragment);
+            mDecorSurfaceContainer = new DecorSurfaceContainer(taskFragment, visible);
             assignChildLayers();
             sendTaskFragmentParentInfoChangedIfNeeded();
         }
@@ -6808,6 +6822,13 @@ class Task extends TaskFragment {
 
     @Nullable SurfaceControl getDecorSurface() {
         return mDecorSurfaceContainer != null ? mDecorSurfaceContainer.mDecorSurface : null;
+    }
+
+    void setDecorSurfaceVisible(@NonNull SurfaceControl.Transaction t) {
+        if (mDecorSurfaceContainer == null) {
+            return;
+        }
+        t.show(mDecorSurfaceContainer.mDecorSurface);
     }
 
     /**
@@ -6849,12 +6870,13 @@ class Task extends TaskFragment {
         @NonNull TaskFragment mOwnerTaskFragment;
 
         private boolean mIsBoosted;
+        private boolean mIsBoostedRequested;
 
         // The surface transactions that will be applied when the layer is reassigned.
         @NonNull private final List<SurfaceControl.Transaction> mPendingClientTransactions =
                 new ArrayList<>();
 
-        private DecorSurfaceContainer(@NonNull TaskFragment initialOwner) {
+        private DecorSurfaceContainer(@NonNull TaskFragment initialOwner, boolean visible) {
             mOwnerTaskFragment = initialOwner;
             mContainerSurface = makeSurface().setContainerLayer()
                     .setParent(mSurfaceControl)
@@ -6867,23 +6889,36 @@ class Task extends TaskFragment {
             mDecorSurface = makeSurface()
                     .setParent(mContainerSurface)
                     .setName(mSurfaceControl + " - decor surface")
-                    .setHidden(false)
+                    .setHidden(!visible)
                     .setCallsite("Task.DecorSurfaceContainer")
                     .build();
         }
 
-        private void setBoosted(
+        /**
+         * Sets the requested boosted state. The state is not applied until
+         * {@link commitBoostedState} is called.
+         */
+        private void requestBoosted(
                 boolean isBoosted, @Nullable SurfaceControl.Transaction clientTransaction) {
-            mIsBoosted = isBoosted;
-            // The client transaction will be applied together with the next assignLayer.
+            mIsBoostedRequested = isBoosted;
+            // The client transaction will be applied together with the next commitBoostedState.
             if (clientTransaction != null) {
                 mPendingClientTransactions.add(clientTransaction);
             }
         }
 
+        /** Applies the last requested boosted state. */
+        private void commitBoostedState() {
+            mIsBoosted = mIsBoostedRequested;
+            applyPendingClientTransactions(getSyncTransaction());
+        }
+
         private void assignLayer(@NonNull SurfaceControl.Transaction t, int layer) {
             t.setLayer(mContainerSurface, layer);
             t.setVisibility(mContainerSurface, mOwnerTaskFragment.isVisible() || mIsBoosted);
+        }
+
+        private void applyPendingClientTransactions(@NonNull SurfaceControl.Transaction t) {
             for (int i = 0; i < mPendingClientTransactions.size(); i++) {
                 t.merge(mPendingClientTransactions.get(i));
             }
