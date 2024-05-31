@@ -130,6 +130,9 @@ interface IAccessibilityServiceConnection {
     void setMagnificationCallbackEnabled(int displayId, boolean enabled);
 
     @RequiresNoPermission
+    boolean isMagnificationSystemUIConnected();
+
+    @RequiresNoPermission
     boolean setSoftKeyboardShowMode(int showMode);
 
     @RequiresNoPermission
