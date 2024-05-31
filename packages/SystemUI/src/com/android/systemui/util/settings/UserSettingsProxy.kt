@@ -16,6 +16,7 @@
 package com.android.systemui.util.settings
 
 import android.annotation.UserIdInt
+import android.content.ContentResolver
 import android.database.ContentObserver
 import android.net.Uri
 import android.os.UserHandle
@@ -26,6 +27,9 @@ import com.android.systemui.util.settings.SettingsProxy.Companion.parseFloat
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseFloatOrThrow
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseLongOrThrow
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseLongOrUseDefault
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Used to interact with per-user Settings.Secure and Settings.System settings (but not
@@ -51,6 +55,7 @@ interface UserSettingsProxy : SettingsProxy {
                 "userId cannot be set in interface, use setter from an implementation instead."
             )
         }
+
     /**
      * Returns the actual current user handle when querying with the current user. Otherwise,
      * returns the passed in user id.
@@ -60,9 +65,21 @@ interface UserSettingsProxy : SettingsProxy {
             userHandle
         } else userTracker.userId
     }
+
     override fun registerContentObserverSync(uri: Uri, settingsObserver: ContentObserver) {
         registerContentObserverForUserSync(uri, settingsObserver, userId)
     }
+
+    override suspend fun registerContentObserver(uri: Uri, settingsObserver: ContentObserver) =
+        withContext(getBackgroundDispatcher()) {
+            registerContentObserverForUserSync(uri, settingsObserver, userId)
+        }
+
+    override fun registerContentObserverAsync(uri: Uri, settingsObserver: ContentObserver) =
+        CoroutineScope(getBackgroundDispatcher()).launch {
+            registerContentObserverForUserSync(uri, settingsObserver, userId)
+        }
+
     /** Convenience wrapper around [ContentResolver.registerContentObserver].' */
     override fun registerContentObserverSync(
         uri: Uri,
@@ -71,6 +88,30 @@ interface UserSettingsProxy : SettingsProxy {
     ) {
         registerContentObserverForUserSync(uri, notifyForDescendants, settingsObserver, userId)
     }
+
+    override suspend fun registerContentObserver(
+        uri: Uri,
+        notifyForDescendants: Boolean,
+        settingsObserver: ContentObserver
+    ) =
+        withContext(getBackgroundDispatcher()) {
+            registerContentObserverForUserSync(uri, notifyForDescendants, settingsObserver, userId)
+        }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * API corresponding to [registerContentObserverForUser] for Java usage.
+     */
+    override fun registerContentObserverAsync(
+        uri: Uri,
+        notifyForDescendants: Boolean,
+        settingsObserver: ContentObserver
+    ) =
+        CoroutineScope(getBackgroundDispatcher()).launch {
+            registerContentObserverForUserSync(uri, notifyForDescendants, settingsObserver, userId)
+        }
+
     /**
      * Convenience wrapper around [ContentResolver.registerContentObserver]
      *
@@ -83,6 +124,37 @@ interface UserSettingsProxy : SettingsProxy {
     ) {
         registerContentObserverForUserSync(getUriFor(name), settingsObserver, userHandle)
     }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * suspend API corresponding to [registerContentObserverForUser] to ensure that
+     * [ContentObserver] registration happens on a worker thread. Caller may wrap the API in an
+     * async block if they wish to synchronize execution.
+     */
+    suspend fun registerContentObserverForUser(
+        name: String,
+        settingsObserver: ContentObserver,
+        userHandle: Int
+    ) =
+        withContext(getBackgroundDispatcher()) {
+            registerContentObserverForUserSync(name, settingsObserver, userHandle)
+        }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * API corresponding to [registerContentObserverForUser] for Java usage.
+     */
+    fun registerContentObserverForUserAsync(
+        name: String,
+        settingsObserver: ContentObserver,
+        userHandle: Int
+    ) =
+        CoroutineScope(getBackgroundDispatcher()).launch {
+            registerContentObserverForUserSync(getUriFor(name), settingsObserver, userHandle)
+        }
+
     /** Convenience wrapper around [ContentResolver.registerContentObserver] */
     fun registerContentObserverForUserSync(
         uri: Uri,
@@ -91,6 +163,37 @@ interface UserSettingsProxy : SettingsProxy {
     ) {
         registerContentObserverForUserSync(uri, false, settingsObserver, userHandle)
     }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * suspend API corresponding to [registerContentObserverForUser] to ensure that
+     * [ContentObserver] registration happens on a worker thread. Caller may wrap the API in an
+     * async block if they wish to synchronize execution.
+     */
+    suspend fun registerContentObserverForUser(
+        uri: Uri,
+        settingsObserver: ContentObserver,
+        userHandle: Int
+    ) =
+        withContext(getBackgroundDispatcher()) {
+            registerContentObserverForUserSync(uri, settingsObserver, userHandle)
+        }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * API corresponding to [registerContentObserverForUser] for Java usage.
+     */
+    fun registerContentObserverForUserAsync(
+        uri: Uri,
+        settingsObserver: ContentObserver,
+        userHandle: Int
+    ) =
+        CoroutineScope(getBackgroundDispatcher()).launch {
+            registerContentObserverForUserSync(uri, settingsObserver, userHandle)
+        }
+
     /**
      * Convenience wrapper around [ContentResolver.registerContentObserver]
      *
@@ -109,6 +212,50 @@ interface UserSettingsProxy : SettingsProxy {
             userHandle
         )
     }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * suspend API corresponding to [registerContentObserverForUser] to ensure that
+     * [ContentObserver] registration happens on a worker thread. Caller may wrap the API in an
+     * async block if they wish to synchronize execution.
+     */
+    suspend fun registerContentObserverForUser(
+        name: String,
+        notifyForDescendants: Boolean,
+        settingsObserver: ContentObserver,
+        userHandle: Int
+    ) =
+        withContext(getBackgroundDispatcher()) {
+            registerContentObserverForUserSync(
+                name,
+                notifyForDescendants,
+                settingsObserver,
+                userHandle
+            )
+        }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * API corresponding to [registerContentObserverForUser] for Java usage.
+     */
+    fun registerContentObserverForUserAsync(
+        name: String,
+        notifyForDescendants: Boolean,
+        settingsObserver: ContentObserver,
+        userHandle: Int
+    ) {
+        CoroutineScope(getBackgroundDispatcher()).launch {
+            registerContentObserverForUserSync(
+                getUriFor(name),
+                notifyForDescendants,
+                settingsObserver,
+                userHandle
+            )
+        }
+    }
+
     /** Convenience wrapper around [ContentResolver.registerContentObserver] */
     fun registerContentObserverForUserSync(
         uri: Uri,
@@ -127,6 +274,49 @@ interface UserSettingsProxy : SettingsProxy {
             Unit
         }
     }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * suspend API corresponding to [registerContentObserverForUser] to ensure that
+     * [ContentObserver] registration happens on a worker thread. Caller may wrap the API in an
+     * async block if they wish to synchronize execution.
+     */
+    suspend fun registerContentObserverForUser(
+        uri: Uri,
+        notifyForDescendants: Boolean,
+        settingsObserver: ContentObserver,
+        userHandle: Int
+    ) =
+        withContext(getBackgroundDispatcher()) {
+            registerContentObserverForUserSync(
+                uri,
+                notifyForDescendants,
+                settingsObserver,
+                getRealUserHandle(userHandle)
+            )
+        }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * API corresponding to [registerContentObserverForUser] for Java usage.
+     */
+    fun registerContentObserverForUserAsync(
+        uri: Uri,
+        notifyForDescendants: Boolean,
+        settingsObserver: ContentObserver,
+        userHandle: Int
+    ) =
+        CoroutineScope(getBackgroundDispatcher()).launch {
+            registerContentObserverForUserSync(
+                uri,
+                notifyForDescendants,
+                settingsObserver,
+                userHandle
+            )
+        }
+
     /**
      * Look up a name in the database.
      *
@@ -136,8 +326,10 @@ interface UserSettingsProxy : SettingsProxy {
     override fun getString(name: String): String {
         return getStringForUser(name, userId)
     }
+
     /** See [getString]. */
     fun getStringForUser(name: String, userHandle: Int): String
+
     /**
      * Store a name/value pair into the database. Values written by this method will be overridden
      * if a restore happens in the future.
@@ -147,11 +339,14 @@ interface UserSettingsProxy : SettingsProxy {
      * @return true if the value was set, false on database errors
      */
     fun putString(name: String, value: String, overrideableByRestore: Boolean): Boolean
+
     override fun putString(name: String, value: String): Boolean {
         return putStringForUser(name, value, userId)
     }
+
     /** Similar implementation to [putString] for the specified [userHandle]. */
     fun putStringForUser(name: String, value: String, userHandle: Int): Boolean
+
     /** Similar implementation to [putString] for the specified [userHandle]. */
     fun putStringForUser(
         name: String,
@@ -161,9 +356,11 @@ interface UserSettingsProxy : SettingsProxy {
         @UserIdInt userHandle: Int,
         overrideableByRestore: Boolean
     ): Boolean
+
     override fun getInt(name: String, def: Int): Int {
         return getIntForUser(name, def, userId)
     }
+
     /** Similar implementation to [getInt] for the specified [userHandle]. */
     fun getIntForUser(name: String, def: Int, userHandle: Int): Int {
         val v = getStringForUser(name, userHandle)
@@ -173,8 +370,10 @@ interface UserSettingsProxy : SettingsProxy {
             def
         }
     }
+
     @Throws(SettingNotFoundException::class)
     override fun getInt(name: String) = getIntForUser(name, userId)
+
     /** Similar implementation to [getInt] for the specified [userHandle]. */
     @Throws(SettingNotFoundException::class)
     fun getIntForUser(name: String, userHandle: Int): Int {
@@ -185,52 +384,66 @@ interface UserSettingsProxy : SettingsProxy {
             throw SettingNotFoundException(name)
         }
     }
+
     override fun putInt(name: String, value: Int) = putIntForUser(name, value, userId)
+
     /** Similar implementation to [getInt] for the specified [userHandle]. */
     fun putIntForUser(name: String, value: Int, userHandle: Int) =
         putStringForUser(name, value.toString(), userHandle)
+
     override fun getBool(name: String, def: Boolean) = getBoolForUser(name, def, userId)
+
     /** Similar implementation to [getBool] for the specified [userHandle]. */
     fun getBoolForUser(name: String, def: Boolean, userHandle: Int) =
         getIntForUser(name, if (def) 1 else 0, userHandle) != 0
+
     @Throws(SettingNotFoundException::class)
     override fun getBool(name: String) = getBoolForUser(name, userId)
+
     /** Similar implementation to [getBool] for the specified [userHandle]. */
     @Throws(SettingNotFoundException::class)
     fun getBoolForUser(name: String, userHandle: Int): Boolean {
         return getIntForUser(name, userHandle) != 0
     }
+
     override fun putBool(name: String, value: Boolean): Boolean {
         return putBoolForUser(name, value, userId)
     }
+
     /** Similar implementation to [putBool] for the specified [userHandle]. */
     fun putBoolForUser(name: String, value: Boolean, userHandle: Int) =
         putIntForUser(name, if (value) 1 else 0, userHandle)
+
     /** Similar implementation to [getLong] for the specified [userHandle]. */
     fun getLongForUser(name: String, def: Long, userHandle: Int): Long {
         val valString = getStringForUser(name, userHandle)
         return parseLongOrUseDefault(valString, def)
     }
+
     /** Similar implementation to [getLong] for the specified [userHandle]. */
     @Throws(SettingNotFoundException::class)
     fun getLongForUser(name: String, userHandle: Int): Long {
         val valString = getStringForUser(name, userHandle)
         return parseLongOrThrow(name, valString)
     }
+
     /** Similar implementation to [putLong] for the specified [userHandle]. */
     fun putLongForUser(name: String, value: Long, userHandle: Int) =
         putStringForUser(name, value.toString(), userHandle)
+
     /** Similar implementation to [getFloat] for the specified [userHandle]. */
     fun getFloatForUser(name: String, def: Float, userHandle: Int): Float {
         val v = getStringForUser(name, userHandle)
         return parseFloat(v, def)
     }
+
     /** Similar implementation to [getFloat] for the specified [userHandle]. */
     @Throws(SettingNotFoundException::class)
     fun getFloatForUser(name: String, userHandle: Int): Float {
         val v = getStringForUser(name, userHandle)
         return parseFloatOrThrow(name, v)
     }
+
     /** Similar implementation to [putFloat] for the specified [userHandle]. */
     fun putFloatForUser(name: String, value: Float, userHandle: Int) =
         putStringForUser(name, value.toString(), userHandle)
