@@ -90,3 +90,10 @@ flag {
   description: "Add canvas#drawRegion API"
   bug: "318612129"
 }
+
+flag {
+  name: "initialize_gl_always"
+  namespace: "core_graphics"
+  description: "Initialize GL even when HWUI is set to use Vulkan. This improves app startup time for apps using GL."
+  bug: "335172671"
+}
