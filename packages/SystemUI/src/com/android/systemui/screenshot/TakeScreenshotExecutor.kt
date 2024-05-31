@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.systemui.screenshot
 
 import android.net.Uri
@@ -12,6 +28,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.display.data.repository.DisplayRepository
 import com.android.systemui.res.R
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_CAPTURE_FAILED
+import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER
 import com.android.systemui.screenshot.TakeScreenshotService.RequestCallback
 import java.util.function.Consumer
 import javax.inject.Inject
@@ -25,12 +42,24 @@ interface TakeScreenshotExecutor {
         onSaved: (Uri?) -> Unit,
         requestCallback: RequestCallback
     )
+
     fun onCloseSystemDialogsReceived()
+
     fun removeWindows()
+
     fun onDestroy()
+
     fun executeScreenshotsAsync(
         screenshotRequest: ScreenshotRequest,
         onSaved: Consumer<Uri?>,
+        requestCallback: RequestCallback
+    )
+}
+
+interface ScreenshotHandler {
+    fun handleScreenshot(
+        screenshot: ScreenshotData,
+        finisher: Consumer<Uri?>,
         requestCallback: RequestCallback
     )
 }
@@ -51,10 +80,10 @@ constructor(
     private val screenshotRequestProcessor: ScreenshotRequestProcessor,
     private val uiEventLogger: UiEventLogger,
     private val screenshotNotificationControllerFactory: ScreenshotNotificationsController.Factory,
+    private val headlessScreenshotHandler: HeadlessScreenshotHandler,
 ) : TakeScreenshotExecutor {
-
     private val displays = displayRepository.displays
-    private val screenshotControllers = mutableMapOf<Int, ScreenshotController>()
+    private var screenshotController: ScreenshotController? = null
     private val notificationControllers = mutableMapOf<Int, ScreenshotNotificationsController>()
 
     /**
@@ -72,9 +101,15 @@ constructor(
         val resultCallbackWrapper = MultiResultCallbackWrapper(requestCallback)
         displays.forEach { display ->
             val displayId = display.displayId
+            var screenshotHandler: ScreenshotHandler =
+                if (displayId == Display.DEFAULT_DISPLAY) {
+                    getScreenshotController(display)
+                } else {
+                    headlessScreenshotHandler
+                }
             Log.d(TAG, "Executing screenshot for display $displayId")
             dispatchToController(
-                display = display,
+                screenshotHandler,
                 rawScreenshotData = ScreenshotData.fromRequest(screenshotRequest, displayId),
                 onSaved =
                     if (displayId == Display.DEFAULT_DISPLAY) {
@@ -87,7 +122,7 @@ constructor(
 
     /** All logging should be triggered only by this method. */
     private suspend fun dispatchToController(
-        display: Display,
+        screenshotHandler: ScreenshotHandler,
         rawScreenshotData: ScreenshotData,
         onSaved: (Uri?) -> Unit,
         callback: RequestCallback
@@ -101,13 +136,12 @@ constructor(
                     logScreenshotRequested(rawScreenshotData)
                     onFailedScreenshotRequest(rawScreenshotData, callback)
                 }
-                .getOrNull()
-                ?: return
+                .getOrNull() ?: return
 
         logScreenshotRequested(screenshotData)
         Log.d(TAG, "Screenshot request: $screenshotData")
         try {
-            getScreenshotController(display).handleScreenshot(screenshotData, onSaved, callback)
+            screenshotHandler.handleScreenshot(screenshotData, onSaved, callback)
         } catch (e: IllegalStateException) {
             Log.e(TAG, "Error while ScreenshotController was handling ScreenshotData!", e)
             onFailedScreenshotRequest(screenshotData, callback)
@@ -147,36 +181,24 @@ constructor(
         }
     }
 
-    /** Propagates the close system dialog signal to all controllers. */
+    /** Propagates the close system dialog signal to the ScreenshotController. */
     override fun onCloseSystemDialogsReceived() {
-        screenshotControllers.forEach { (_, screenshotController) ->
-            if (!screenshotController.isPendingSharedTransition) {
-                screenshotController.requestDismissal(ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER)
-            }
+        if (screenshotController?.isPendingSharedTransition == false) {
+            screenshotController?.requestDismissal(SCREENSHOT_DISMISSED_OTHER)
         }
     }
 
     /** Removes all screenshot related windows. */
     override fun removeWindows() {
-        screenshotControllers.forEach { (_, screenshotController) ->
-            screenshotController.removeWindow()
-        }
+        screenshotController?.removeWindow()
     }
 
     /**
      * Destroys the executor. Afterwards, this class is not expected to work as intended anymore.
      */
     override fun onDestroy() {
-        screenshotControllers.forEach { (_, screenshotController) ->
-            screenshotController.onDestroy()
-        }
-        screenshotControllers.clear()
-    }
-
-    private fun getScreenshotController(display: Display): ScreenshotController {
-        return screenshotControllers.computeIfAbsent(display.displayId) {
-            screenshotControllerFactory.create(display, /* showUIOnExternalDisplay= */ false)
-        }
+        screenshotController?.onDestroy()
+        screenshotController = null
     }
 
     private fun getNotificationController(id: Int): ScreenshotNotificationsController {
@@ -194,6 +216,12 @@ constructor(
         mainScope.launch {
             executeScreenshots(screenshotRequest, { uri -> onSaved.accept(uri) }, requestCallback)
         }
+    }
+
+    private fun getScreenshotController(display: Display): ScreenshotController {
+        val controller = screenshotController ?: screenshotControllerFactory.create(display, false)
+        screenshotController = controller
+        return controller
     }
 
     /**
