@@ -21,8 +21,10 @@ import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.domain.interactor.CommunalTutorialInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
@@ -68,6 +70,7 @@ constructor(
     keyguardInteractor: KeyguardInteractor,
     communalSceneInteractor: CommunalSceneInteractor,
     private val communalInteractor: CommunalInteractor,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     tutorialInteractor: CommunalTutorialInteractor,
     private val shadeInteractor: ShadeInteractor,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
@@ -248,6 +251,10 @@ constructor(
      */
     val showGestureIndicator: Flow<Boolean> = not(keyguardInteractor.isDreaming)
 
+    /** The type of background to use for the hub. */
+    val communalBackground: Flow<CommunalBackgroundType> =
+        communalSettingsInteractor.communalBackground
+
     companion object {
         const val POPUP_AUTO_HIDE_TIMEOUT_MS = 12000L
     }
@@ -255,5 +262,6 @@ constructor(
 
 sealed class PopupType {
     object CtaTile : PopupType()
+
     object CustomizeWidgetButton : PopupType()
 }
