@@ -58,6 +58,7 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation
 import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation
+import com.android.systemui.statusbar.notification.row.shared.NewRemoteViews
 import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor
 import com.android.systemui.statusbar.notification.row.ui.viewbinder.SingleLineConversationViewBinder
 import com.android.systemui.statusbar.notification.row.ui.viewbinder.SingleLineViewBinder
@@ -160,51 +161,43 @@ constructor(
         packageContext: Context,
         smartRepliesInflater: SmartReplyStateInflater
     ): InflationProgress {
-        var result =
-            createRemoteViews(
-                reInflateFlags,
-                builder,
-                bindParams.isMinimized,
-                bindParams.usesIncreasedHeight,
-                bindParams.usesIncreasedHeadsUpHeight,
-                packageContext,
-                row,
-                notifLayoutInflaterFactoryProvider,
-                headsUpStyleProvider,
-                logger
+        val result =
+            beginInflationAsync(
+                reInflateFlags = reInflateFlags,
+                entry = entry,
+                builder = builder,
+                isMinimized = bindParams.isMinimized,
+                usesIncreasedHeight = bindParams.usesIncreasedHeight,
+                usesIncreasedHeadsUpHeight = bindParams.usesIncreasedHeadsUpHeight,
+                systemUIContext = packageContext,
+                packageContext = packageContext,
+                row = row,
+                notifLayoutInflaterFactoryProvider = notifLayoutInflaterFactoryProvider,
+                headsUpStyleProvider = headsUpStyleProvider,
+                conversationProcessor = conversationProcessor,
+                logger = logger,
             )
-        result =
-            inflateSmartReplyViews(
-                result,
-                reInflateFlags,
-                entry,
-                row.context,
-                packageContext,
-                row.existingSmartReplyState,
-                smartRepliesInflater,
-                logger
-            )
+        inflateSmartReplyViews(
+            result,
+            reInflateFlags,
+            entry,
+            row.context,
+            packageContext,
+            row.existingSmartReplyState,
+            smartRepliesInflater,
+            logger,
+        )
         if (AsyncHybridViewInflation.isEnabled) {
-            val isConversation: Boolean = entry.ranking.isConversation
-            var messagingStyle: Notification.MessagingStyle? = null
-            if (isConversation) {
-                messagingStyle = conversationProcessor.processNotification(entry, builder, logger)
-            }
-            result.inflatedSingleLineViewModel =
-                SingleLineViewInflater.inflateSingleLineViewModel(
-                    entry.sbn.notification,
-                    messagingStyle,
-                    builder,
-                    row.context
-                )
             result.inflatedSingleLineView =
-                SingleLineViewInflater.inflateSingleLineViewHolder(
-                    isConversation,
-                    reInflateFlags,
-                    entry,
-                    row.context,
-                    logger
-                )
+                result.inflatedSingleLineViewModel?.let { viewModel ->
+                    SingleLineViewInflater.inflateSingleLineViewHolder(
+                        viewModel.isConversation(),
+                        reInflateFlags,
+                        entry,
+                        row.context,
+                        logger,
+                    )
+                }
         }
         apply(
             inflationExecutor,
@@ -216,7 +209,7 @@ constructor(
             entry,
             row,
             remoteInputManager.remoteViewsOnClickHandler,
-            null /* callback */,
+            /* callback= */ null,
             logger
         )
         return result
@@ -423,24 +416,21 @@ constructor(
                 // For all of our templates, we want it to be RTL
                 packageContext = RtlEnabledContext(packageContext)
             }
-            val isConversation: Boolean = entry.ranking.isConversation
-            var messagingStyle: Notification.MessagingStyle? = null
-            if (isConversation) {
-                messagingStyle =
-                    conversationProcessor.processNotification(entry, recoveredBuilder, logger)
-            }
             val inflationProgress =
-                createRemoteViews(
-                    reInflateFlags,
-                    recoveredBuilder,
-                    isMinimized,
-                    usesIncreasedHeight,
-                    usesIncreasedHeadsUpHeight,
-                    packageContext,
-                    row,
-                    notifLayoutInflaterFactoryProvider,
-                    headsUpStyleProvider,
-                    logger
+                beginInflationAsync(
+                    reInflateFlags = reInflateFlags,
+                    entry = entry,
+                    builder = recoveredBuilder,
+                    isMinimized = isMinimized,
+                    usesIncreasedHeight = usesIncreasedHeight,
+                    usesIncreasedHeadsUpHeight = usesIncreasedHeadsUpHeight,
+                    systemUIContext = context,
+                    packageContext = packageContext,
+                    row = row,
+                    notifLayoutInflaterFactoryProvider = notifLayoutInflaterFactoryProvider,
+                    headsUpStyleProvider = headsUpStyleProvider,
+                    conversationProcessor = conversationProcessor,
+                    logger = logger
                 )
             logger.logAsyncTaskProgress(
                 entry,
@@ -448,43 +438,35 @@ constructor(
             )
             val previousSmartReplyState: InflatedSmartReplyState? = row.existingSmartReplyState
             logger.logAsyncTaskProgress(entry, "inflating smart reply views")
-            val result =
-                inflateSmartReplyViews(
-                    /* result = */ inflationProgress,
-                    reInflateFlags,
-                    entry,
-                    context,
-                    packageContext,
-                    previousSmartReplyState,
-                    smartRepliesInflater,
-                    logger
-                )
+            inflateSmartReplyViews(
+                /* result = */ inflationProgress,
+                reInflateFlags,
+                entry,
+                context,
+                packageContext,
+                previousSmartReplyState,
+                smartRepliesInflater,
+                logger,
+            )
             if (AsyncHybridViewInflation.isEnabled) {
-                // Inflate the single-line content view's ViewModel and ViewHolder from the
-                // background thread, the ViewHolder needs to be bind with ViewModel later from
-                // the main thread.
-                result.inflatedSingleLineViewModel =
-                    SingleLineViewInflater.inflateSingleLineViewModel(
-                        entry.sbn.notification,
-                        messagingStyle,
-                        recoveredBuilder,
-                        context
-                    )
-                result.inflatedSingleLineView =
-                    SingleLineViewInflater.inflateSingleLineViewHolder(
-                        isConversation,
-                        reInflateFlags,
-                        entry,
-                        context,
-                        logger
-                    )
+                logger.logAsyncTaskProgress(entry, "inflating single line view")
+                inflationProgress.inflatedSingleLineView =
+                    inflationProgress.inflatedSingleLineViewModel?.let { viewModel ->
+                        SingleLineViewInflater.inflateSingleLineViewHolder(
+                            viewModel.isConversation(),
+                            reInflateFlags,
+                            entry,
+                            context,
+                            logger
+                        )
+                    }
             }
             logger.logAsyncTaskProgress(entry, "getting row image resolver (on wrong thread!)")
             val imageResolver = row.imageResolver
             // wait for image resolver to finish preloading
             logger.logAsyncTaskProgress(entry, "waiting for preloaded images")
             imageResolver.waitForPreloadedImages(IMG_PRELOAD_TIMEOUT_MS)
-            return result
+            return inflationProgress
         }
 
         public override fun onPostExecute(result: Result<InflationProgress>) {
@@ -570,12 +552,7 @@ constructor(
 
     @VisibleForTesting
     class InflationProgress {
-        var newContentView: RemoteViews? = null
-        var newHeadsUpView: RemoteViews? = null
-        var newExpandedView: RemoteViews? = null
-        var newPublicView: RemoteViews? = null
-        var newGroupHeaderView: RemoteViews? = null
-        var newMinimizedGroupHeaderView: RemoteViews? = null
+        lateinit var remoteViews: NewRemoteViews
 
         @VisibleForTesting var packageContext: Context? = null
 
@@ -617,16 +594,16 @@ constructor(
             previousSmartReplyState: InflatedSmartReplyState?,
             inflater: SmartReplyStateInflater,
             logger: NotificationRowContentBinderLogger
-        ): InflationProgress {
+        ) {
             val inflateContracted =
                 (reInflateFlags and FLAG_CONTENT_VIEW_CONTRACTED != 0 &&
-                    result.newContentView != null)
+                    result.remoteViews.contracted != null)
             val inflateExpanded =
                 (reInflateFlags and FLAG_CONTENT_VIEW_EXPANDED != 0 &&
-                    result.newExpandedView != null)
+                    result.remoteViews.expanded != null)
             val inflateHeadsUp =
                 (reInflateFlags and FLAG_CONTENT_VIEW_HEADS_UP != 0 &&
-                    result.newHeadsUpView != null)
+                    result.remoteViews.headsUp != null)
             if (inflateContracted || inflateExpanded || inflateHeadsUp) {
                 logger.logAsyncTaskProgress(entry, "inflating contracted smart reply state")
                 result.inflatedSmartReplyState = inflater.inflateSmartReplyState(entry)
@@ -653,6 +630,59 @@ constructor(
                         result.inflatedSmartReplyState!!
                     )
             }
+        }
+
+        private fun beginInflationAsync(
+            @InflationFlag reInflateFlags: Int,
+            entry: NotificationEntry,
+            builder: Notification.Builder,
+            isMinimized: Boolean,
+            usesIncreasedHeight: Boolean,
+            usesIncreasedHeadsUpHeight: Boolean,
+            systemUIContext: Context,
+            packageContext: Context,
+            row: ExpandableNotificationRow,
+            notifLayoutInflaterFactoryProvider: NotifLayoutInflaterFactory.Provider,
+            headsUpStyleProvider: HeadsUpStyleProvider,
+            conversationProcessor: ConversationNotificationProcessor,
+            logger: NotificationRowContentBinderLogger
+        ): InflationProgress {
+            val result = InflationProgress()
+
+            // process conversations and extract the messaging style
+            val messagingStyle =
+                if (entry.ranking.isConversation) {
+                    conversationProcessor.processNotification(entry, builder, logger)
+                } else null
+
+            result.remoteViews =
+                createRemoteViews(
+                    reInflateFlags = reInflateFlags,
+                    builder = builder,
+                    isMinimized = isMinimized,
+                    usesIncreasedHeight = usesIncreasedHeight,
+                    usesIncreasedHeadsUpHeight = usesIncreasedHeadsUpHeight,
+                    row = row,
+                    notifLayoutInflaterFactoryProvider = notifLayoutInflaterFactoryProvider,
+                    headsUpStyleProvider = headsUpStyleProvider,
+                    logger = logger,
+                )
+
+            if (AsyncHybridViewInflation.isEnabled) {
+                logger.logAsyncTaskProgress(entry, "inflating single line view model")
+                result.inflatedSingleLineViewModel =
+                    SingleLineViewInflater.inflateSingleLineViewModel(
+                        notification = entry.sbn.notification,
+                        messagingStyle = messagingStyle,
+                        builder = builder,
+                        systemUiContext = systemUIContext,
+                    )
+            }
+
+            result.packageContext = packageContext
+            result.headsUpStatusBarText = builder.getHeadsUpStatusBarText(false /* showingPublic */)
+            result.headsUpStatusBarTextPublic =
+                builder.getHeadsUpStatusBarText(true /* showingPublic */)
             return result
         }
 
@@ -662,84 +692,102 @@ constructor(
             isMinimized: Boolean,
             usesIncreasedHeight: Boolean,
             usesIncreasedHeadsUpHeight: Boolean,
-            packageContext: Context,
             row: ExpandableNotificationRow,
             notifLayoutInflaterFactoryProvider: NotifLayoutInflaterFactory.Provider,
             headsUpStyleProvider: HeadsUpStyleProvider,
             logger: NotificationRowContentBinderLogger
-        ): InflationProgress {
+        ): NewRemoteViews {
             return TraceUtils.trace("NotificationContentInflater.createRemoteViews") {
-                val result = InflationProgress()
                 val entryForLogging: NotificationEntry = row.entry
-                if (reInflateFlags and FLAG_CONTENT_VIEW_CONTRACTED != 0) {
-                    logger.logAsyncTaskProgress(entryForLogging, "creating contracted remote view")
-                    result.newContentView =
+                val contracted =
+                    if (reInflateFlags and FLAG_CONTENT_VIEW_CONTRACTED != 0) {
+                        logger.logAsyncTaskProgress(
+                            entryForLogging,
+                            "creating contracted remote view"
+                        )
                         createContentView(builder, isMinimized, usesIncreasedHeight)
-                }
-                if (reInflateFlags and FLAG_CONTENT_VIEW_EXPANDED != 0) {
-                    logger.logAsyncTaskProgress(entryForLogging, "creating expanded remote view")
-                    result.newExpandedView = createExpandedView(builder, isMinimized)
-                }
-                if (reInflateFlags and FLAG_CONTENT_VIEW_HEADS_UP != 0) {
-                    logger.logAsyncTaskProgress(entryForLogging, "creating heads up remote view")
-                    val isHeadsUpCompact = headsUpStyleProvider.shouldApplyCompactStyle()
-                    if (isHeadsUpCompact) {
-                        result.newHeadsUpView = builder.createCompactHeadsUpContentView()
-                    } else {
-                        result.newHeadsUpView =
+                    } else null
+                val expanded =
+                    if (reInflateFlags and FLAG_CONTENT_VIEW_EXPANDED != 0) {
+                        logger.logAsyncTaskProgress(
+                            entryForLogging,
+                            "creating expanded remote view"
+                        )
+                        createExpandedView(builder, isMinimized)
+                    } else null
+                val headsUp =
+                    if (reInflateFlags and FLAG_CONTENT_VIEW_HEADS_UP != 0) {
+                        logger.logAsyncTaskProgress(
+                            entryForLogging,
+                            "creating heads up remote view"
+                        )
+                        val isHeadsUpCompact = headsUpStyleProvider.shouldApplyCompactStyle()
+                        if (isHeadsUpCompact) {
+                            builder.createCompactHeadsUpContentView()
+                        } else {
                             builder.createHeadsUpContentView(usesIncreasedHeadsUpHeight)
-                    }
-                }
-                if (reInflateFlags and FLAG_CONTENT_VIEW_PUBLIC != 0) {
-                    logger.logAsyncTaskProgress(entryForLogging, "creating public remote view")
-                    result.newPublicView = builder.makePublicContentView(isMinimized)
-                }
-                if (AsyncGroupHeaderViewInflation.isEnabled) {
-                    if (reInflateFlags and FLAG_GROUP_SUMMARY_HEADER != 0) {
+                        }
+                    } else null
+                val public =
+                    if (reInflateFlags and FLAG_CONTENT_VIEW_PUBLIC != 0) {
+                        logger.logAsyncTaskProgress(entryForLogging, "creating public remote view")
+                        builder.makePublicContentView(isMinimized)
+                    } else null
+                val normalGroupHeader =
+                    if (
+                        AsyncGroupHeaderViewInflation.isEnabled &&
+                            reInflateFlags and FLAG_GROUP_SUMMARY_HEADER != 0
+                    ) {
                         logger.logAsyncTaskProgress(
                             entryForLogging,
                             "creating group summary remote view"
                         )
-                        result.newGroupHeaderView = builder.makeNotificationGroupHeader()
-                    }
-                    if (reInflateFlags and FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER != 0) {
+                        builder.makeNotificationGroupHeader()
+                    } else null
+                val minimizedGroupHeader =
+                    if (
+                        AsyncGroupHeaderViewInflation.isEnabled &&
+                            reInflateFlags and FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER != 0
+                    ) {
                         logger.logAsyncTaskProgress(
                             entryForLogging,
                             "creating low-priority group summary remote view"
                         )
-                        result.newMinimizedGroupHeaderView =
-                            builder.makeLowPriorityContentView(true /* useRegularSubtext */)
+                        builder.makeLowPriorityContentView(true /* useRegularSubtext */)
+                    } else null
+                NewRemoteViews(
+                        contracted = contracted,
+                        headsUp = headsUp,
+                        expanded = expanded,
+                        public = public,
+                        normalGroupHeader = normalGroupHeader,
+                        minimizedGroupHeader = minimizedGroupHeader
+                    )
+                    .also {
+                        setNotifsViewsInflaterFactory(it, row, notifLayoutInflaterFactoryProvider)
                     }
-                }
-                setNotifsViewsInflaterFactory(result, row, notifLayoutInflaterFactoryProvider)
-                result.packageContext = packageContext
-                result.headsUpStatusBarText =
-                    builder.getHeadsUpStatusBarText(false /* showingPublic */)
-                result.headsUpStatusBarTextPublic =
-                    builder.getHeadsUpStatusBarText(true /* showingPublic */)
-                result
             }
         }
 
         private fun setNotifsViewsInflaterFactory(
-            result: InflationProgress,
+            remoteViews: NewRemoteViews,
             row: ExpandableNotificationRow,
             notifLayoutInflaterFactoryProvider: NotifLayoutInflaterFactory.Provider
         ) {
             setRemoteViewsInflaterFactory(
-                result.newContentView,
+                remoteViews.contracted,
                 notifLayoutInflaterFactoryProvider.provide(row, FLAG_CONTENT_VIEW_CONTRACTED)
             )
             setRemoteViewsInflaterFactory(
-                result.newExpandedView,
+                remoteViews.expanded,
                 notifLayoutInflaterFactoryProvider.provide(row, FLAG_CONTENT_VIEW_EXPANDED)
             )
             setRemoteViewsInflaterFactory(
-                result.newHeadsUpView,
+                remoteViews.headsUp,
                 notifLayoutInflaterFactoryProvider.provide(row, FLAG_CONTENT_VIEW_HEADS_UP)
             )
             setRemoteViewsInflaterFactory(
-                result.newPublicView,
+                remoteViews.public,
                 notifLayoutInflaterFactoryProvider.provide(row, FLAG_CONTENT_VIEW_PUBLIC)
             )
         }
@@ -774,7 +822,7 @@ constructor(
             if (reInflateFlags and flag != 0) {
                 val isNewView =
                     !canReapplyRemoteView(
-                        newView = result.newContentView,
+                        newView = result.remoteViews.contracted,
                         oldView = remoteViewCache.getCachedView(entry, FLAG_CONTENT_VIEW_CONTRACTED)
                     )
                 val applyCallback: ApplyCallback =
@@ -785,7 +833,7 @@ constructor(
                         }
 
                         override val remoteView: RemoteViews
-                            get() = result.newContentView!!
+                            get() = result.remoteViews.contracted!!
                     }
                 logger.logAsyncTaskProgress(entry, "applying contracted view")
                 applyRemoteView(
@@ -814,10 +862,10 @@ constructor(
             }
             flag = FLAG_CONTENT_VIEW_EXPANDED
             if (reInflateFlags and flag != 0) {
-                if (result.newExpandedView != null) {
+                if (result.remoteViews.expanded != null) {
                     val isNewView =
                         !canReapplyRemoteView(
-                            newView = result.newExpandedView,
+                            newView = result.remoteViews.expanded,
                             oldView =
                                 remoteViewCache.getCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED)
                         )
@@ -829,7 +877,7 @@ constructor(
                             }
 
                             override val remoteView: RemoteViews
-                                get() = result.newExpandedView!!
+                                get() = result.remoteViews.expanded!!
                         }
                     logger.logAsyncTaskProgress(entry, "applying expanded view")
                     applyRemoteView(
@@ -859,10 +907,10 @@ constructor(
             }
             flag = FLAG_CONTENT_VIEW_HEADS_UP
             if (reInflateFlags and flag != 0) {
-                if (result.newHeadsUpView != null) {
+                if (result.remoteViews.headsUp != null) {
                     val isNewView =
                         !canReapplyRemoteView(
-                            newView = result.newHeadsUpView,
+                            newView = result.remoteViews.headsUp,
                             oldView =
                                 remoteViewCache.getCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP)
                         )
@@ -874,7 +922,7 @@ constructor(
                             }
 
                             override val remoteView: RemoteViews
-                                get() = result.newHeadsUpView!!
+                                get() = result.remoteViews.headsUp!!
                         }
                     logger.logAsyncTaskProgress(entry, "applying heads up view")
                     applyRemoteView(
@@ -906,7 +954,7 @@ constructor(
             if (reInflateFlags and flag != 0) {
                 val isNewView =
                     !canReapplyRemoteView(
-                        newView = result.newPublicView,
+                        newView = result.remoteViews.public,
                         oldView = remoteViewCache.getCachedView(entry, FLAG_CONTENT_VIEW_PUBLIC)
                     )
                 val applyCallback: ApplyCallback =
@@ -917,7 +965,7 @@ constructor(
                         }
 
                         override val remoteView: RemoteViews
-                            get() = result.newPublicView!!
+                            get() = result.remoteViews.public!!
                     }
                 logger.logAsyncTaskProgress(entry, "applying public view")
                 applyRemoteView(
@@ -950,7 +998,7 @@ constructor(
                 if (reInflateFlags and FLAG_GROUP_SUMMARY_HEADER != 0) {
                     val isNewView =
                         !canReapplyRemoteView(
-                            newView = result.newGroupHeaderView,
+                            newView = result.remoteViews.normalGroupHeader,
                             oldView =
                                 remoteViewCache.getCachedView(entry, FLAG_GROUP_SUMMARY_HEADER)
                         )
@@ -962,7 +1010,7 @@ constructor(
                             }
 
                             override val remoteView: RemoteViews
-                                get() = result.newGroupHeaderView!!
+                                get() = result.remoteViews.normalGroupHeader!!
                         }
                     logger.logAsyncTaskProgress(entry, "applying group header view")
                     applyRemoteView(
@@ -989,7 +1037,7 @@ constructor(
                 if (reInflateFlags and FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER != 0) {
                     val isNewView =
                         !canReapplyRemoteView(
-                            newView = result.newMinimizedGroupHeaderView,
+                            newView = result.remoteViews.minimizedGroupHeader,
                             oldView =
                                 remoteViewCache.getCachedView(
                                     entry,
@@ -1008,7 +1056,7 @@ constructor(
                             }
 
                             override val remoteView: RemoteViews
-                                get() = result.newMinimizedGroupHeaderView!!
+                                get() = result.remoteViews.minimizedGroupHeader!!
                         }
                     logger.logAsyncTaskProgress(entry, "applying low priority group header view")
                     applyRemoteView(
@@ -1329,7 +1377,7 @@ constructor(
                     remoteViewCache.putCachedView(
                         entry,
                         FLAG_CONTENT_VIEW_CONTRACTED,
-                        result.newContentView
+                        result.remoteViews.contracted
                     )
                 } else if (remoteViewCache.hasCachedView(entry, FLAG_CONTENT_VIEW_CONTRACTED)) {
                     // Reinflation case. Only update if it's still cached (i.e. view has not been
@@ -1337,7 +1385,7 @@ constructor(
                     remoteViewCache.putCachedView(
                         entry,
                         FLAG_CONTENT_VIEW_CONTRACTED,
-                        result.newContentView
+                        result.remoteViews.contracted
                     )
                 }
                 setRepliesAndActions = true
@@ -1348,26 +1396,26 @@ constructor(
                     remoteViewCache.putCachedView(
                         entry,
                         FLAG_CONTENT_VIEW_EXPANDED,
-                        result.newExpandedView
+                        result.remoteViews.expanded
                     )
-                } else if (result.newExpandedView == null) {
+                } else if (result.remoteViews.expanded == null) {
                     privateLayout.setExpandedChild(null)
                     remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED)
                 } else if (remoteViewCache.hasCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED)) {
                     remoteViewCache.putCachedView(
                         entry,
                         FLAG_CONTENT_VIEW_EXPANDED,
-                        result.newExpandedView
+                        result.remoteViews.expanded
                     )
                 }
-                if (result.newExpandedView != null) {
+                if (result.remoteViews.expanded != null) {
                     privateLayout.setExpandedInflatedSmartReplies(
                         result.expandedInflatedSmartReplies
                     )
                 } else {
                     privateLayout.setExpandedInflatedSmartReplies(null)
                 }
-                row.setExpandable(result.newExpandedView != null)
+                row.setExpandable(result.remoteViews.expanded != null)
                 setRepliesAndActions = true
             }
             if (reInflateFlags and FLAG_CONTENT_VIEW_HEADS_UP != 0) {
@@ -1376,19 +1424,19 @@ constructor(
                     remoteViewCache.putCachedView(
                         entry,
                         FLAG_CONTENT_VIEW_HEADS_UP,
-                        result.newHeadsUpView
+                        result.remoteViews.headsUp
                     )
-                } else if (result.newHeadsUpView == null) {
+                } else if (result.remoteViews.headsUp == null) {
                     privateLayout.setHeadsUpChild(null)
                     remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP)
                 } else if (remoteViewCache.hasCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP)) {
                     remoteViewCache.putCachedView(
                         entry,
                         FLAG_CONTENT_VIEW_HEADS_UP,
-                        result.newHeadsUpView
+                        result.remoteViews.headsUp
                     )
                 }
-                if (result.newHeadsUpView != null) {
+                if (result.remoteViews.headsUp != null) {
                     privateLayout.setHeadsUpInflatedSmartReplies(result.headsUpInflatedSmartReplies)
                 } else {
                     privateLayout.setHeadsUpInflatedSmartReplies(null)
@@ -1419,13 +1467,13 @@ constructor(
                     remoteViewCache.putCachedView(
                         entry,
                         FLAG_CONTENT_VIEW_PUBLIC,
-                        result.newPublicView
+                        result.remoteViews.public
                     )
                 } else if (remoteViewCache.hasCachedView(entry, FLAG_CONTENT_VIEW_PUBLIC)) {
                     remoteViewCache.putCachedView(
                         entry,
                         FLAG_CONTENT_VIEW_PUBLIC,
-                        result.newPublicView
+                        result.remoteViews.public
                     )
                 }
             }
@@ -1439,7 +1487,7 @@ constructor(
                         remoteViewCache.putCachedView(
                             entry,
                             FLAG_GROUP_SUMMARY_HEADER,
-                            result.newGroupHeaderView
+                            result.remoteViews.normalGroupHeader
                         )
                     } else if (remoteViewCache.hasCachedView(entry, FLAG_GROUP_SUMMARY_HEADER)) {
                         // Re-inflation case. Only update if it's still cached (i.e. view has not
@@ -1447,7 +1495,7 @@ constructor(
                         remoteViewCache.putCachedView(
                             entry,
                             FLAG_GROUP_SUMMARY_HEADER,
-                            result.newGroupHeaderView
+                            result.remoteViews.normalGroupHeader
                         )
                     }
                 }
@@ -1462,7 +1510,7 @@ constructor(
                         remoteViewCache.putCachedView(
                             entry,
                             FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER,
-                            result.newMinimizedGroupHeaderView
+                            result.remoteViews.minimizedGroupHeader
                         )
                     } else if (
                         remoteViewCache.hasCachedView(entry, FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER)
@@ -1472,7 +1520,7 @@ constructor(
                         remoteViewCache.putCachedView(
                             entry,
                             FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER,
-                            result.newGroupHeaderView
+                            result.remoteViews.normalGroupHeader
                         )
                     }
                 }
