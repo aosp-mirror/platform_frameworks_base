@@ -36,6 +36,9 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.BindParams
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationCallback
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag
+import com.android.systemui.statusbar.notification.row.shared.HeadsUpStatusBarModel
+import com.android.systemui.statusbar.notification.row.shared.NewRemoteViews
+import com.android.systemui.statusbar.notification.row.shared.NotificationContentModel
 import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState
 import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder
@@ -219,8 +222,13 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
     @Test
     @Ignore("b/345418902")
     fun testInflationIsRetriedIfAsyncFails() {
-        val result = NotificationRowContentBinderImpl.InflationProgress()
-        result.packageContext = mContext
+        val headsUpStatusBarModel = HeadsUpStatusBarModel("private", "public")
+        val result =
+            NotificationRowContentBinderImpl.InflationProgress(
+                packageContext = mContext,
+                remoteViews = NewRemoteViews(),
+                contentModel = NotificationContentModel(headsUpStatusBarModel)
+            )
         val countDownLatch = CountDownLatch(1)
         NotificationRowContentBinderImpl.applyRemoteView(
             AsyncTask.SERIAL_EXECUTOR,

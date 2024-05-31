@@ -58,11 +58,12 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation
 import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation
+import com.android.systemui.statusbar.notification.row.shared.HeadsUpStatusBarModel
 import com.android.systemui.statusbar.notification.row.shared.NewRemoteViews
+import com.android.systemui.statusbar.notification.row.shared.NotificationContentModel
 import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor
 import com.android.systemui.statusbar.notification.row.ui.viewbinder.SingleLineConversationViewBinder
 import com.android.systemui.statusbar.notification.row.ui.viewbinder.SingleLineViewBinder
-import com.android.systemui.statusbar.notification.row.ui.viewmodel.SingleLineViewModel
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState
@@ -161,6 +162,7 @@ constructor(
         packageContext: Context,
         smartRepliesInflater: SmartReplyStateInflater
     ): InflationProgress {
+        val systemUIContext = row.context
         val result =
             beginInflationAsync(
                 reInflateFlags = reInflateFlags,
@@ -169,7 +171,7 @@ constructor(
                 isMinimized = bindParams.isMinimized,
                 usesIncreasedHeight = bindParams.usesIncreasedHeight,
                 usesIncreasedHeadsUpHeight = bindParams.usesIncreasedHeadsUpHeight,
-                systemUIContext = packageContext,
+                systemUIContext = systemUIContext,
                 packageContext = packageContext,
                 row = row,
                 notifLayoutInflaterFactoryProvider = notifLayoutInflaterFactoryProvider,
@@ -181,7 +183,7 @@ constructor(
             result,
             reInflateFlags,
             entry,
-            row.context,
+            systemUIContext,
             packageContext,
             row.existingSmartReplyState,
             smartRepliesInflater,
@@ -189,12 +191,12 @@ constructor(
         )
         if (AsyncHybridViewInflation.isEnabled) {
             result.inflatedSingleLineView =
-                result.inflatedSingleLineViewModel?.let { viewModel ->
+                result.contentModel.singleLineViewModel?.let { viewModel ->
                     SingleLineViewInflater.inflateSingleLineViewHolder(
                         viewModel.isConversation(),
                         reInflateFlags,
                         entry,
-                        row.context,
+                        systemUIContext,
                         logger,
                     )
                 }
@@ -451,9 +453,9 @@ constructor(
             if (AsyncHybridViewInflation.isEnabled) {
                 logger.logAsyncTaskProgress(entry, "inflating single line view")
                 inflationProgress.inflatedSingleLineView =
-                    inflationProgress.inflatedSingleLineViewModel?.let { viewModel ->
+                    inflationProgress.contentModel.singleLineViewModel?.let {
                         SingleLineViewInflater.inflateSingleLineViewHolder(
-                            viewModel.isConversation(),
+                            it.isConversation(),
                             reInflateFlags,
                             entry,
                             context,
@@ -551,10 +553,11 @@ constructor(
     }
 
     @VisibleForTesting
-    class InflationProgress {
-        lateinit var remoteViews: NewRemoteViews
-
-        @VisibleForTesting var packageContext: Context? = null
+    class InflationProgress(
+        @VisibleForTesting val packageContext: Context,
+        val remoteViews: NewRemoteViews,
+        val contentModel: NotificationContentModel,
+    ) {
 
         var inflatedContentView: View? = null
         var inflatedHeadsUpView: View? = null
@@ -562,14 +565,9 @@ constructor(
         var inflatedPublicView: View? = null
         var inflatedGroupHeaderView: NotificationHeaderView? = null
         var inflatedMinimizedGroupHeaderView: NotificationHeaderView? = null
-        var headsUpStatusBarText: CharSequence? = null
-        var headsUpStatusBarTextPublic: CharSequence? = null
         var inflatedSmartReplyState: InflatedSmartReplyState? = null
         var expandedInflatedSmartReplies: InflatedSmartReplyViewHolder? = null
         var headsUpInflatedSmartReplies: InflatedSmartReplyViewHolder? = null
-
-        // ViewModel for SingleLineView, holds the UI State
-        var inflatedSingleLineViewModel: SingleLineViewModel? = null
 
         // Inflated SingleLineView that lacks the UI State
         var inflatedSingleLineView: HybridNotificationView? = null
@@ -647,15 +645,13 @@ constructor(
             conversationProcessor: ConversationNotificationProcessor,
             logger: NotificationRowContentBinderLogger
         ): InflationProgress {
-            val result = InflationProgress()
-
             // process conversations and extract the messaging style
             val messagingStyle =
                 if (entry.ranking.isConversation) {
                     conversationProcessor.processNotification(entry, builder, logger)
                 } else null
 
-            result.remoteViews =
+            val remoteViews =
                 createRemoteViews(
                     reInflateFlags = reInflateFlags,
                     builder = builder,
@@ -668,22 +664,37 @@ constructor(
                     logger = logger,
                 )
 
-            if (AsyncHybridViewInflation.isEnabled) {
-                logger.logAsyncTaskProgress(entry, "inflating single line view model")
-                result.inflatedSingleLineViewModel =
+            val singleLineViewModel =
+                if (
+                    AsyncHybridViewInflation.isEnabled &&
+                        reInflateFlags and FLAG_CONTENT_VIEW_SINGLE_LINE != 0
+                ) {
+                    logger.logAsyncTaskProgress(entry, "inflating single line view model")
                     SingleLineViewInflater.inflateSingleLineViewModel(
                         notification = entry.sbn.notification,
                         messagingStyle = messagingStyle,
                         builder = builder,
                         systemUiContext = systemUIContext,
                     )
-            }
+                } else null
 
-            result.packageContext = packageContext
-            result.headsUpStatusBarText = builder.getHeadsUpStatusBarText(false /* showingPublic */)
-            result.headsUpStatusBarTextPublic =
-                builder.getHeadsUpStatusBarText(true /* showingPublic */)
-            return result
+            val headsUpStatusBarModel =
+                HeadsUpStatusBarModel(
+                    privateText = builder.getHeadsUpStatusBarText(/* publicMode= */ false),
+                    publicText = builder.getHeadsUpStatusBarText(/* publicMode= */ true),
+                )
+
+            val contentModel =
+                NotificationContentModel(
+                    headsUpStatusBarModel = headsUpStatusBarModel,
+                    singleLineViewModel = singleLineViewModel,
+                )
+
+            return InflationProgress(
+                packageContext = packageContext,
+                remoteViews = remoteViews,
+                contentModel = contentModel,
+            )
         }
 
         private fun createRemoteViews(
@@ -877,7 +888,7 @@ constructor(
                             }
 
                             override val remoteView: RemoteViews
-                                get() = result.remoteViews.expanded!!
+                                get() = result.remoteViews.expanded
                         }
                     logger.logAsyncTaskProgress(entry, "applying expanded view")
                     applyRemoteView(
@@ -922,7 +933,7 @@ constructor(
                             }
 
                             override val remoteView: RemoteViews
-                                get() = result.remoteViews.headsUp!!
+                                get() = result.remoteViews.headsUp
                         }
                     logger.logAsyncTaskProgress(entry, "applying heads up view")
                     applyRemoteView(
@@ -1448,7 +1459,7 @@ constructor(
                     reInflateFlags and FLAG_CONTENT_VIEW_SINGLE_LINE != 0
             ) {
                 val singleLineView = result.inflatedSingleLineView
-                val viewModel: SingleLineViewModel? = result.inflatedSingleLineViewModel
+                val viewModel = result.contentModel.singleLineViewModel
                 if (singleLineView != null && viewModel != null) {
                     if (viewModel.isConversation()) {
                         SingleLineConversationViewBinder.bind(viewModel, singleLineView)
@@ -1525,8 +1536,7 @@ constructor(
                     }
                 }
             }
-            entry.setHeadsUpStatusBarText(result.headsUpStatusBarText)
-            entry.setHeadsUpStatusBarTextPublic(result.headsUpStatusBarTextPublic)
+            entry.setContentModel(result.contentModel)
             Trace.endAsyncSection(APPLY_TRACE_METHOD, System.identityHashCode(row))
             endListener?.onAsyncInflationFinished(entry)
             return true
