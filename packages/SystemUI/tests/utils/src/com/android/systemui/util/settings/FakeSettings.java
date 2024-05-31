@@ -78,6 +78,11 @@ public class FakeSettings implements SecureSettings, SystemSettings {
     }
 
     @Override
+    public CoroutineDispatcher getBackgroundDispatcher() {
+        return mDispatcher;
+    }
+
+    @Override
     public void registerContentObserverForUserSync(Uri uri, boolean notifyDescendants,
             ContentObserver settingsObserver, int userHandle) {
         List<ContentObserver> observers;

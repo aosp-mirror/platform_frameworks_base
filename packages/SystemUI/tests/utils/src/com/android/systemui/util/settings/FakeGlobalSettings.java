@@ -54,6 +54,11 @@ public class FakeGlobalSettings implements GlobalSettings {
     }
 
     @Override
+    public CoroutineDispatcher getBackgroundDispatcher() {
+        return mDispatcher;
+    }
+
+    @Override
     public void registerContentObserverSync(Uri uri, boolean notifyDescendants,
             ContentObserver settingsObserver) {
         List<ContentObserver> observers;
