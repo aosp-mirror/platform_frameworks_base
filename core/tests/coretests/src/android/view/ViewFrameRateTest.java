@@ -164,7 +164,7 @@ public class ViewFrameRateTest {
         mActivityRule.runOnUiThread(() -> {
             mMovingView.setFrameContentVelocity(1f);
             mMovingView.invalidate();
-            runAfterDraw(() -> assertEquals(60f, mViewRoot.getLastPreferredFrameRate(), 0f));
+            runAfterDraw(() -> assertEquals(80f, mViewRoot.getLastPreferredFrameRate(), 0f));
         });
         waitForAfterDraw();
     }
@@ -190,7 +190,7 @@ public class ViewFrameRateTest {
             frameLayout.setFrameContentVelocity(1f);
             mMovingView.offsetTopAndBottom(100);
             frameLayout.invalidate();
-            runAfterDraw(() -> assertEquals(60f, mViewRoot.getLastPreferredFrameRate(), 0f));
+            runAfterDraw(() -> assertEquals(80f, mViewRoot.getLastPreferredFrameRate(), 0f));
         });
         waitForAfterDraw();
     }
@@ -435,7 +435,7 @@ public class ViewFrameRateTest {
             runAfterDraw(() -> {
                 assertEquals(FRAME_RATE_CATEGORY_LOW,
                         mViewRoot.getLastPreferredFrameRateCategory());
-                assertEquals(60f, mViewRoot.getLastPreferredFrameRate());
+                assertEquals(80f, mViewRoot.getLastPreferredFrameRate());
             });
         });
         waitForAfterDraw();
