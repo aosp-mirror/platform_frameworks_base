@@ -292,6 +292,7 @@ abstract class CrossActivityBackAnimation(
         enteringTarget?.let {
             if (it.leash != null && it.leash.isValid) {
                 transaction.setCornerRadius(it.leash, 0f)
+                if (!triggerBack) transaction.setAlpha(it.leash, 0f)
                 it.leash.release()
             }
             enteringTarget = null
