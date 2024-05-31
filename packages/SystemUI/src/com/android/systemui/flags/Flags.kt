@@ -60,14 +60,6 @@ object Flags {
             "notification_drag_to_contents"
         )
 
-    /**
-     * This flag controls whether we register a listener for StatsD notification memory reports.
-     * For statsd to actually call the listener however, a server-side toggle needs to be
-     * enabled as well.
-     */
-    val NOTIFICATION_MEMORY_LOGGING_ENABLED =
-            releasedFlag("notification_memory_logging_enabled")
-
     // TODO(b/280783617): Tracking Bug
     @Keep
     @JvmField
