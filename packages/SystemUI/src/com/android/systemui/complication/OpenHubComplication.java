@@ -67,7 +67,7 @@ public class OpenHubComplication implements Complication {
     @Override
     public int getRequiredTypeAvailability() {
         // TODO(b/339667383): create a new complication type if we decide to productionize this
-        return COMPLICATION_TYPE_HOME_CONTROLS;
+        return COMPLICATION_TYPE_NONE;
     }
 
     /**
