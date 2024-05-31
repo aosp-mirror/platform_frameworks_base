@@ -794,8 +794,9 @@ public class VoiceInteractionManagerService extends SystemService {
                 if (curService != null && !curService.isEmpty()) {
                     try {
                         serviceComponent = ComponentName.unflattenFromString(curService);
-                        serviceInfo = getValidVoiceInteractionServiceInfo(serviceComponent);
-                    } catch (RuntimeException e) {
+                        serviceInfo = AppGlobals.getPackageManager()
+                                .getServiceInfo(serviceComponent, 0, mCurUser);
+                    } catch (RuntimeException | RemoteException e) {
                         Slog.wtf(TAG, "Bad voice interaction service name " + curService, e);
                         serviceComponent = null;
                         serviceInfo = null;
@@ -831,27 +832,6 @@ public class VoiceInteractionManagerService extends SystemService {
                     }
                 }
             }
-        }
-
-        @Nullable
-        private ServiceInfo getValidVoiceInteractionServiceInfo(
-                @Nullable ComponentName serviceComponent) {
-            if (serviceComponent == null) {
-                return null;
-            }
-            List<ResolveInfo> services = queryInteractorServices(
-                    mCurUser, serviceComponent.getPackageName());
-            for (int i = 0; i < services.size(); i++) {
-                ResolveInfo service = services.get(i);
-                VoiceInteractionServiceInfo info = new VoiceInteractionServiceInfo(
-                        mContext.getPackageManager(), service.serviceInfo);
-                ServiceInfo candidateInfo = info.getServiceInfo();
-                if (candidateInfo != null
-                        && candidateInfo.getComponentName().equals(serviceComponent)) {
-                    return candidateInfo;
-                }
-            }
-            return null;
         }
 
         private List<ResolveInfo> queryInteractorServices(
