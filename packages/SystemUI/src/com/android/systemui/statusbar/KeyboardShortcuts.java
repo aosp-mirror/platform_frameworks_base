@@ -610,7 +610,7 @@ public final class KeyboardShortcuts {
             keyboardShortcutInfoAppItems.add(new KeyboardShortcutInfo(
                     mContext.getString(R.string.keyboard_shortcut_group_applications_calendar),
                     calendarIcon,
-                    KeyEvent.KEYCODE_L,
+                    KeyEvent.KEYCODE_K,
                     KeyEvent.META_META_ON));
         }
 
