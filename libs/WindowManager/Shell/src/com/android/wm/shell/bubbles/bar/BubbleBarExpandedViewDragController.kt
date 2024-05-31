@@ -150,7 +150,7 @@ class BubbleBarExpandedViewDragController(
             draggedObject: MagnetizedObject<*>
         ) {
             isStuckToDismiss = true
-            pinController.setDropTargetHidden(true)
+            pinController.onStuckToDismissTarget()
         }
 
         override fun onUnstuckFromTarget(
@@ -162,7 +162,6 @@ class BubbleBarExpandedViewDragController(
         ) {
             isStuckToDismiss = false
             animationHelper.animateUnstuckFromDismissView(target)
-            pinController.setDropTargetHidden(false)
         }
 
         override fun onReleasedInTarget(
