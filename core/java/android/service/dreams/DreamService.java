@@ -19,6 +19,7 @@ package android.service.dreams;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.service.dreams.Flags.dreamHandlesConfirmKeys;
 import static android.service.dreams.Flags.dreamHandlesBeingObscured;
+import static android.service.dreams.Flags.startAndStopDozingInBackground;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IdRes;
@@ -923,9 +924,16 @@ public class DreamService extends Service implements Window.Callback {
 
         if (mDozing) {
             try {
-                mDreamManager.startDozing(
+                if (startAndStopDozingInBackground()) {
+                    mDreamManager.startDozingOneway(
                         mDreamToken, mDozeScreenState, mDozeScreenStateReason,
                         mDozeScreenBrightness);
+                } else {
+                    mDreamManager.startDozing(
+                            mDreamToken, mDozeScreenState, mDozeScreenStateReason,
+                            mDozeScreenBrightness);
+                }
+
             } catch (RemoteException ex) {
                 // system server died
             }
@@ -1250,7 +1258,11 @@ public class DreamService extends Service implements Window.Callback {
         try {
             // finishSelf will unbind the dream controller from the dream service. This will
             // trigger DreamService.this.onDestroy and DreamService.this will die.
-            mDreamManager.finishSelf(mDreamToken, true /*immediate*/);
+            if (startAndStopDozingInBackground()) {
+                mDreamManager.finishSelfOneway(mDreamToken, true /*immediate*/);
+            } else {
+                mDreamManager.finishSelf(mDreamToken, true /*immediate*/);
+            }
         } catch (RemoteException ex) {
             // system server died
         }
