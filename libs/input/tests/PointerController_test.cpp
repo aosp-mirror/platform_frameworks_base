@@ -162,6 +162,16 @@ public:
 };
 
 class PointerControllerTest : public Test {
+private:
+    void loopThread();
+
+    std::atomic<bool> mRunning = true;
+    class MyLooper : public Looper {
+    public:
+        MyLooper() : Looper(false) {}
+        ~MyLooper() = default;
+    };
+
 protected:
     PointerControllerTest();
     ~PointerControllerTest();
@@ -173,26 +183,16 @@ protected:
     std::unique_ptr<MockSpriteController> mSpriteController;
     std::shared_ptr<PointerController> mPointerController;
     sp<android::gui::WindowInfosListener> mRegisteredListener;
+    sp<MyLooper> mLooper;
 
 private:
-    void loopThread();
-
-    std::atomic<bool> mRunning = true;
-    class MyLooper : public Looper {
-    public:
-        MyLooper() : Looper(false) {}
-        ~MyLooper() = default;
-    };
     std::thread mThread;
-
-protected:
-    sp<MyLooper> mLooper;
 };
 
 PointerControllerTest::PointerControllerTest()
       : mPointerSprite(new NiceMock<MockSprite>),
-        mThread(&PointerControllerTest::loopThread, this),
-        mLooper(new MyLooper) {
+        mLooper(new MyLooper),
+        mThread(&PointerControllerTest::loopThread, this) {
     mSpriteController.reset(new NiceMock<MockSpriteController>(mLooper));
     mPolicy = new MockPointerControllerPolicyInterface();
 
