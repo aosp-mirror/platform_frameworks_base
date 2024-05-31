@@ -42,9 +42,9 @@ import android.graphics.drawable.Icon
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.ext.truth.content.IntentSubject.assertThat
 import androidx.test.filters.SmallTest
-import androidx.test.runner.AndroidJUnit4
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.notetask.NoteTaskController.Companion.EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE
 import com.android.systemui.notetask.NoteTaskController.Companion.SHORTCUT_ID

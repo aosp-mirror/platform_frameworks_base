@@ -41,10 +41,10 @@ import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
-import android.testing.AndroidTestingRunner;
 import android.util.SparseArray;
 
 import androidx.annotation.Nullable;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
@@ -95,7 +95,7 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Provider;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class QSTileHostTest extends SysuiTestCase {
 
