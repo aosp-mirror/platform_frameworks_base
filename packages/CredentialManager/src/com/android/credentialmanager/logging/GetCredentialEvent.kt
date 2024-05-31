@@ -17,6 +17,7 @@ package com.android.credentialmanager.logging
 
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
+import com.android.internal.logging.UiEventLogger.UiEventEnum.RESERVE_NEW_UI_EVENT_ID
 
 enum class GetCredentialEvent(private val id: Int) : UiEventLogger.UiEventEnum {
 
@@ -54,7 +55,10 @@ enum class GetCredentialEvent(private val id: Int) : UiEventLogger.UiEventEnum {
     CREDMAN_GET_CRED_PRIMARY_SELECTION_CARD(1341),
 
     @UiEvent(doc = "The all sign in option card is visible on screen.")
-    CREDMAN_GET_CRED_ALL_SIGN_IN_OPTION_CARD(1342);
+    CREDMAN_GET_CRED_ALL_SIGN_IN_OPTION_CARD(1342),
+
+    @UiEvent(doc = "The single tap biometric flow is launched.")
+    CREDMAN_GET_CRED_BIOMETRIC_FLOW_LAUNCHED(RESERVE_NEW_UI_EVENT_ID);
 
     override fun getId(): Int {
         return this.id
