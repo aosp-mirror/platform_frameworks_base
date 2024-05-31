@@ -17,6 +17,7 @@
 package com.android.systemui.shade.domain.interactor
 
 import com.android.keyguard.LockIconViewController
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
@@ -30,7 +31,8 @@ import kotlinx.coroutines.launch
 class ShadeLockscreenInteractorImpl
 @Inject
 constructor(
-    @Background private val scope: CoroutineScope,
+    @Application private val applicationScope: CoroutineScope,
+    @Background private val backgroundScope: CoroutineScope,
     private val shadeInteractor: ShadeInteractor,
     private val sceneInteractor: SceneInteractor,
     private val lockIconViewController: LockIconViewController,
@@ -68,7 +70,7 @@ constructor(
         // Now handled elsewhere. Do nothing.
     }
     override fun transitionToExpandedShade(delay: Long) {
-        scope.launch {
+        backgroundScope.launch {
             delay(delay)
             changeToShadeScene()
         }
@@ -96,10 +98,12 @@ constructor(
     }
 
     private fun changeToShadeScene() {
-        val shadeMode = shadeInteractor.shadeMode.value
-        sceneInteractor.changeScene(
-            if (shadeMode is ShadeMode.Dual) Scenes.NotificationsShade else Scenes.Shade,
-            "ShadeLockscreenInteractorImpl.expandToNotifications",
-        )
+        applicationScope.launch {
+            val shadeMode = shadeInteractor.shadeMode.value
+            sceneInteractor.changeScene(
+                if (shadeMode is ShadeMode.Dual) Scenes.NotificationsShade else Scenes.Shade,
+                "ShadeLockscreenInteractorImpl.expandToNotifications",
+            )
+        }
     }
 }
