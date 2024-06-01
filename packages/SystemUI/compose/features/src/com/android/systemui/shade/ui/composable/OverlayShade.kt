@@ -14,17 +14,28 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalLayoutApi::class)
+
 package com.android.systemui.shade.ui.composable
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsIgnoringVisibility
+import androidx.compose.foundation.layout.waterfall
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -35,12 +46,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
 import com.android.compose.animation.scene.SceneScope
-import com.android.compose.modifiers.thenIf
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.keyguard.ui.composable.LockscreenContent
 import com.android.systemui.scene.shared.model.Scenes
@@ -59,8 +70,6 @@ fun SceneScope.OverlayShade(
     content: @Composable () -> Unit,
 ) {
     val backgroundScene by viewModel.backgroundScene.collectAsStateWithLifecycle()
-    val widthSizeClass = LocalWindowSizeClass.current.widthSizeClass
-    val isPanelFullWidth = widthSizeClass == WindowWidthSizeClass.Compact
 
     Box(modifier) {
         if (backgroundScene == Scenes.Lockscreen) {
@@ -73,10 +82,7 @@ fun SceneScope.OverlayShade(
         Scrim(onClicked = viewModel::onScrimClicked)
 
         Row(
-            modifier =
-                Modifier.fillMaxSize().thenIf(!isPanelFullWidth) {
-                    Modifier.padding(OverlayShade.Dimensions.ScrimContentPadding)
-                },
+            modifier = Modifier.fillMaxSize().panelPadding(),
             horizontalArrangement = horizontalArrangement,
         ) {
             Panel(
@@ -135,6 +141,42 @@ private fun Modifier.panelSize(): Modifier {
             WindowWidthSizeClass.Expanded -> Modifier.width(OverlayShade.Dimensions.PanelWidthLarge)
             else -> error("Unsupported WindowWidthSizeClass \"$widthSizeClass\"")
         }
+    )
+}
+
+@Composable
+private fun Modifier.panelPadding(): Modifier {
+    val widthSizeClass = LocalWindowSizeClass.current.widthSizeClass
+    val systemBars = WindowInsets.systemBarsIgnoringVisibility
+    val displayCutout = WindowInsets.displayCutout
+    val waterfall = WindowInsets.waterfall
+    val contentPadding = PaddingValues(all = OverlayShade.Dimensions.ScrimContentPadding)
+
+    val combinedPadding =
+        combinePaddings(
+            systemBars.asPaddingValues(),
+            displayCutout.asPaddingValues(),
+            waterfall.asPaddingValues(),
+            contentPadding
+        )
+
+    return if (widthSizeClass == WindowWidthSizeClass.Compact) {
+        padding(bottom = combinedPadding.calculateBottomPadding())
+    } else {
+        padding(combinedPadding)
+    }
+}
+
+/** Creates a union of [paddingValues] by using the max padding of each edge. */
+@Composable
+private fun combinePaddings(vararg paddingValues: PaddingValues): PaddingValues {
+    val layoutDirection = LocalLayoutDirection.current
+
+    return PaddingValues(
+        start = paddingValues.maxOfOrNull { it.calculateStartPadding(layoutDirection) } ?: 0.dp,
+        top = paddingValues.maxOfOrNull { it.calculateTopPadding() } ?: 0.dp,
+        end = paddingValues.maxOfOrNull { it.calculateEndPadding(layoutDirection) } ?: 0.dp,
+        bottom = paddingValues.maxOfOrNull { it.calculateBottomPadding() } ?: 0.dp
     )
 }
 

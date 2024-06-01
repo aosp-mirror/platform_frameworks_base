@@ -2790,9 +2790,25 @@ public final class ViewRootImpl implements ViewParent,
     public void bringChildToFront(View child) {
     }
 
+    // keep in sync with getHostVisibilityReason
     int getHostVisibility() {
         return mView != null && (mAppVisible || mForceDecorViewVisibility)
                 ? mView.getVisibility() : View.GONE;
+    }
+
+    String getHostVisibilityReason() {
+        if (mView == null) {
+            return "mView is null";
+        }
+        if (!mAppVisible && !mForceDecorViewVisibility) {
+            return "!mAppVisible && !mForceDecorViewVisibility";
+        }
+        switch (mView.getVisibility()) {
+            case View.VISIBLE: return "View.VISIBLE";
+            case View.GONE: return "View.GONE";
+            case View.INVISIBLE: return "View.INVISIBLE";
+            default: return "";
+        }
     }
 
     /**
@@ -3346,6 +3362,7 @@ public final class ViewRootImpl implements ViewParent,
         int desiredWindowHeight;
 
         final int viewVisibility = getHostVisibility();
+        final String viewVisibilityReason = getHostVisibilityReason();
         final boolean viewVisibilityChanged = !mFirst
                 && (mViewVisibility != viewVisibility || mNewSurfaceNeeded
                 // Also check for possible double visibility update, which will make current
@@ -4220,7 +4237,7 @@ public final class ViewRootImpl implements ViewParent,
 
         if (!isViewVisible) {
             if (mLastTraversalWasVisible) {
-                logAndTrace("Not drawing due to not visible");
+                logAndTrace("Not drawing due to not visible. Reason=" + viewVisibilityReason);
             }
             mLastPerformTraversalsSkipDrawReason = "view_not_visible";
             if (mPendingTransitions != null && mPendingTransitions.size() > 0) {

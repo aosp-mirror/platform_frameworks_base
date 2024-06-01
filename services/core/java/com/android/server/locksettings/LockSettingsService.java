@@ -593,7 +593,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         public RebootEscrowManager getRebootEscrowManager(RebootEscrowManager.Callbacks callbacks,
                 LockSettingsStorage storage) {
             return new RebootEscrowManager(mContext, callbacks, storage,
-                    getHandler(getServiceThread()));
+                    getHandler(getServiceThread()), getUserManagerInternal());
         }
 
         public int binderGetCallingUid() {

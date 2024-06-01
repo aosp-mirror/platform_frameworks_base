@@ -19,6 +19,7 @@ package com.android.systemui.qs.tileimpl
 import android.animation.ArgbEvaluator
 import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Configuration
@@ -37,6 +38,7 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityEvent
@@ -395,15 +397,22 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
     override fun init(tile: QSTile) {
         val expandable = Expandable.fromView(this)
-        init(
+        if (quickSettingsVisualHapticsLongpress()) {
+            isHapticFeedbackEnabled = false
+            longPressEffect?.qsTile = tile
+            longPressEffect?.expandable = expandable
+            init(
+                { _: View? -> longPressEffect?.onTileClick() },
+                null, // Haptics and long-clicks will be handled by the [QSLongPressEffect]
+            )
+        } else {
+            init(
                 { _: View? -> tile.click(expandable) },
                 { _: View? ->
                     tile.longClick(expandable)
                     true
-                }
-        )
-        if (quickSettingsVisualHapticsLongpress()) {
-            isHapticFeedbackEnabled = false // Haptics will be handled by the [QSLongPressEffect]
+                },
+            )
         }
     }
 
@@ -541,6 +550,20 @@ open class QSTileViewImpl @JvmOverloads constructor(
         return sb.toString()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        // let the View run the onTouch logic for click and long-click detection
+        val result = super.onTouchEvent(event)
+        if (longPressEffect != null) {
+            when (event?.actionMasked) {
+                MotionEvent.ACTION_DOWN -> longPressEffect.handleActionDown()
+                MotionEvent.ACTION_UP -> longPressEffect.handleActionUp()
+                MotionEvent.ACTION_CANCEL -> longPressEffect.handleActionCancel()
+            }
+        }
+        return result
+    }
+
     // HANDLE STATE CHANGES RELATED METHODS
 
     protected open fun handleStateChanged(state: QSTile.State) {
@@ -675,7 +698,6 @@ open class QSTileViewImpl @JvmOverloads constructor(
             // Long-press effects might have been enabled before but the new state does not
             // handle a long-press. In this case, we go back to the behaviour of a regular tile
             // and clean-up the resources
-            setOnTouchListener(null)
             unbindLongPressEffect()
             showRippleEffect = isClickable
             initialLongPressProperties = null

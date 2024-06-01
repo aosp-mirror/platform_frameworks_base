@@ -1001,6 +1001,13 @@ flag {
 }
 
 flag {
+  name: "glanceable_hub_allow_keyguard_when_dreaming"
+  namespace: "systemui"
+  description: "Allows users to exit dream to keyguard with glanceable hub enabled"
+  bug: "343505271"
+}
+
+flag {
   name: "new_touchpad_gestures_tutorial"
   namespace: "systemui"
   description: "Enables new interactive tutorial for learning touchpad gestures"

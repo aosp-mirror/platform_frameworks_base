@@ -19,6 +19,7 @@ package com.android.systemui.communal
 import android.annotation.SuppressLint
 import android.app.DreamManager
 import com.android.systemui.CoreStartable
+import com.android.systemui.Flags.glanceableHubAllowKeyguardWhenDreaming
 import com.android.systemui.Flags.communalHub
 import com.android.systemui.Flags.restartDreamOnUnocclude
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
@@ -30,11 +31,11 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample
 import com.android.systemui.util.kotlin.sample
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import javax.inject.Inject
 
 /**
  * A [CoreStartable] responsible for automatically starting the dream when the communal hub is
@@ -78,6 +79,7 @@ constructor(
                 if (
                     finishedState == KeyguardState.GLANCEABLE_HUB &&
                         !dreaming &&
+                        !glanceableHubAllowKeyguardWhenDreaming() &&
                         dreamManager.canStartDreaming(isAwake)
                 ) {
                     dreamManager.startDream()

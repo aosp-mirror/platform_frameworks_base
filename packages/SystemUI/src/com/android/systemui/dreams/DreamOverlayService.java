@@ -18,6 +18,7 @@ package com.android.systemui.dreams;
 
 import static android.service.dreams.Flags.dreamWakeRedirect;
 
+import static com.android.systemui.Flags.glanceableHubAllowKeyguardWhenDreaming;
 import static com.android.systemui.dreams.dagger.DreamModule.DREAM_OVERLAY_WINDOW_TITLE;
 import static com.android.systemui.dreams.dagger.DreamModule.DREAM_TOUCH_INSET_MANAGER;
 import static com.android.systemui.dreams.dagger.DreamModule.HOME_CONTROL_PANEL_DREAM_COMPONENT;
@@ -395,7 +396,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             return;
         }
 
-        redirectWake(mCommunalAvailable);
+        redirectWake(mCommunalAvailable && !glanceableHubAllowKeyguardWhenDreaming());
     }
 
     @Override
