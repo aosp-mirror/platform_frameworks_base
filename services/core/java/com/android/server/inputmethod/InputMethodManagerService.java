@@ -1162,7 +1162,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             synchronized (ImfLock.class) {
                 mService.mUserDataRepository.getOrCreate(userId);
                 if (mService.mExperimentalConcurrentMultiUserModeEnabled) {
-                    if (mService.mCurrentUserId != userId) {
+                    if (mService.mCurrentUserId != userId && mService.mSystemReady) {
                         mService.experimentalInitializeVisibleBackgroundUserLocked(userId);
                     }
                 }
@@ -1551,6 +1551,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 final var unused = SystemServerInitThreadPool.submit(
                         AdditionalSubtypeMapRepository::startWriterThread,
                         "Start AdditionalSubtypeMapRepository's writer thread");
+
+                if (mExperimentalConcurrentMultiUserModeEnabled) {
+                    for (int userId : mUserManagerInternal.getUserIds()) {
+                        if (userId != mCurrentUserId) {
+                            experimentalInitializeVisibleBackgroundUserLocked(userId);
+                        }
+                    }
+                }
             }
         }
     }
@@ -2888,10 +2896,22 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      */
     @GuardedBy("ImfLock.class")
     void experimentalInitializeVisibleBackgroundUserLocked(@UserIdInt int userId) {
-        if (!mUserManagerInternal.isUserVisible(userId)) {
-            return;
-        }
         final var settings = InputMethodSettingsRepository.get(userId);
+
+        // Until we figure out what makes most sense, we enable all the pre-installed IMEs in
+        // concurrent multi-user IME mode.
+        String enabledImeIdsStr = settings.getEnabledInputMethodsStr();
+        for (var imi : settings.getMethodList()) {
+            if (!imi.isSystem()) {
+                return;
+            }
+            enabledImeIdsStr = InputMethodUtils.concatEnabledImeIds(enabledImeIdsStr, imi.getId());
+        }
+        if (!TextUtils.equals(settings.getEnabledInputMethodsStr(), enabledImeIdsStr)) {
+            settings.putEnabledInputMethodsStr(enabledImeIdsStr);
+        }
+
+        // Also update the currently-selected IME.
         String id = settings.getSelectedInputMethod();
         if (TextUtils.isEmpty(id)) {
             final InputMethodInfo imi = InputMethodInfoUtils.getMostApplicableDefaultIME(
