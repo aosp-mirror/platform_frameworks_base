@@ -213,7 +213,7 @@
     <item msgid="6946761421234586000">"400 %"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Изберете профил"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Личен"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Лично"</string>
     <string name="category_work" msgid="4014193632325996115">"Работа"</string>
     <string name="category_clone" msgid="1554511758987195974">"Клон"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Програмерски опции"</string>
