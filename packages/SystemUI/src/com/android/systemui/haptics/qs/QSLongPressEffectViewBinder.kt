@@ -17,8 +17,6 @@
 package com.android.systemui.haptics.qs
 
 import android.animation.ValueAnimator
-import android.annotation.SuppressLint
-import android.view.MotionEvent
 import android.view.ViewConfiguration
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.core.animation.doOnCancel
@@ -30,6 +28,7 @@ import com.android.app.tracing.coroutines.launch
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.qs.tileimpl.QSTileViewImpl
 import kotlinx.coroutines.DisposableHandle
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filterNotNull
 
 object QSLongPressEffectViewBinder {
@@ -41,9 +40,6 @@ object QSLongPressEffectViewBinder {
     ): DisposableHandle? {
         if (qsLongPressEffect == null) return null
 
-        // Set the touch listener as the long-press effect
-        setTouchListener(tile, qsLongPressEffect)
-
         return tile.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 // Action to perform
@@ -52,18 +48,18 @@ object QSLongPressEffectViewBinder {
 
                     qsLongPressEffect.actionType.filterNotNull().collect { action ->
                         when (action) {
-                            QSLongPressEffect.ActionType.CLICK -> {
-                                tile.performClick()
-                                qsLongPressEffect.clearActionType()
+                            QSLongPressEffect.ActionType.WAIT_TAP_TIMEOUT -> {
+                                delay(ViewConfiguration.getTapTimeout().toLong())
+                                qsLongPressEffect.handleTimeoutComplete()
                             }
                             QSLongPressEffect.ActionType.LONG_PRESS -> {
                                 tile.prepareForLaunch()
-                                tile.performLongClick()
+                                qsLongPressEffect.qsTile?.longClick(qsLongPressEffect.expandable)
                                 qsLongPressEffect.clearActionType()
                             }
                             QSLongPressEffect.ActionType.RESET_AND_LONG_PRESS -> {
                                 tile.resetLongPressEffectProperties()
-                                tile.performLongClick()
+                                qsLongPressEffect.qsTile?.longClick(qsLongPressEffect.expandable)
                                 qsLongPressEffect.clearActionType()
                             }
                             QSLongPressEffect.ActionType.START_ANIMATOR -> {
@@ -104,24 +100,6 @@ object QSLongPressEffectViewBinder {
                     }
                 }
             }
-        }
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setTouchListener(tile: QSTileViewImpl, longPressEffect: QSLongPressEffect?) {
-        tile.setOnTouchListener { _, event ->
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    tile.postDelayed(
-                        { longPressEffect?.handleTimeoutComplete() },
-                        ViewConfiguration.getTapTimeout().toLong(),
-                    )
-                    longPressEffect?.handleActionDown()
-                }
-                MotionEvent.ACTION_UP -> longPressEffect?.handleActionUp()
-                MotionEvent.ACTION_CANCEL -> longPressEffect?.handleActionCancel()
-            }
-            true
         }
     }
 }
