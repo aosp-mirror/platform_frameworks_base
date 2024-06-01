@@ -21,17 +21,20 @@ import android.graphics.Rect
 import android.graphics.drawable.Animatable2
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.Drawable
+import android.util.Log
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
+import com.airbnb.lottie.LottieListener
 import com.android.settingslib.widget.LottieColorUtils
 import com.android.systemui.Flags.constraintBp
 import com.android.systemui.biometrics.ui.viewmodel.PromptIconViewModel
 import com.android.systemui.biometrics.ui.viewmodel.PromptIconViewModel.AuthType
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.res.R
 import com.android.systemui.util.kotlin.Utils.Companion.toQuad
 import com.android.systemui.util.kotlin.Utils.Companion.toQuint
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
@@ -39,6 +42,8 @@ import com.android.systemui.util.kotlin.sample
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+
+private const val TAG = "PromptIconViewBinder"
 
 /** Sub-binder for [BiometricPromptLayout.iconView]. */
 object PromptIconViewBinder {
@@ -172,6 +177,7 @@ object PromptIconViewBinder {
                                 when (activeAuthType) {
                                     AuthType.Fingerprint,
                                     AuthType.Coex -> {
+                                        iconView.setIconFailureListener(iconAsset, activeAuthType)
                                         iconView.setAnimation(iconAsset)
                                         iconView.frame = 0
 
@@ -188,6 +194,10 @@ object PromptIconViewBinder {
                                             iconView.context.getDrawable(iconAsset)
                                                 as AnimatedVectorDrawable
                                         faceIcon?.apply {
+                                            iconView.setIconFailureListener(
+                                                iconAsset,
+                                                activeAuthType
+                                            )
                                             iconView.setImageDrawable(this)
                                             if (shouldAnimateIconView) {
                                                 forceAnimationOnUI()
@@ -217,6 +227,7 @@ object PromptIconViewBinder {
                         )
                         .collect { (iconOverlayAsset, shouldAnimateIconOverlay, showingError) ->
                             if (iconOverlayAsset != -1) {
+                                iconOverlayView.setIconOverlayFailureListener(iconOverlayAsset)
                                 iconOverlayView.setAnimation(iconOverlayAsset)
                                 iconOverlayView.frame = 0
                                 LottieColorUtils.applyDynamicColors(
@@ -250,4 +261,97 @@ object PromptIconViewBinder {
             }
         }
     }
+}
+
+private val assetIdToString: Map<Int, String> =
+    mapOf(
+        // UDFPS assets
+        R.raw.fingerprint_dialogue_error_to_fingerprint_lottie to
+            "fingerprint_dialogue_error_to_fingerprint_lottie",
+        R.raw.fingerprint_dialogue_error_to_success_lottie to
+            "fingerprint_dialogue_error_to_success_lottie",
+        R.raw.fingerprint_dialogue_fingerprint_to_error_lottie to
+            "fingerprint_dialogue_fingerprint_to_error_lottie",
+        R.raw.fingerprint_dialogue_fingerprint_to_success_lottie to
+            "fingerprint_dialogue_fingerprint_to_success_lottie",
+        // SFPS assets
+        R.raw.biometricprompt_fingerprint_to_error_landscape to
+            "biometricprompt_fingerprint_to_error_landscape",
+        R.raw.biometricprompt_folded_base_bottomright to "biometricprompt_folded_base_bottomright",
+        R.raw.biometricprompt_folded_base_default to "biometricprompt_folded_base_default",
+        R.raw.biometricprompt_folded_base_topleft to "biometricprompt_folded_base_topleft",
+        R.raw.biometricprompt_landscape_base to "biometricprompt_landscape_base",
+        R.raw.biometricprompt_portrait_base_bottomright to
+            "biometricprompt_portrait_base_bottomright",
+        R.raw.biometricprompt_portrait_base_topleft to "biometricprompt_portrait_base_topleft",
+        R.raw.biometricprompt_symbol_error_to_fingerprint_landscape to
+            "biometricprompt_symbol_error_to_fingerprint_landscape",
+        R.raw.biometricprompt_symbol_error_to_fingerprint_portrait_bottomright to
+            "biometricprompt_symbol_error_to_fingerprint_portrait_bottomright",
+        R.raw.biometricprompt_symbol_error_to_fingerprint_portrait_topleft to
+            "biometricprompt_symbol_error_to_fingerprint_portrait_topleft",
+        R.raw.biometricprompt_symbol_error_to_success_landscape to
+            "biometricprompt_symbol_error_to_success_landscape",
+        R.raw.biometricprompt_symbol_error_to_success_portrait_bottomright to
+            "biometricprompt_symbol_error_to_success_portrait_bottomright",
+        R.raw.biometricprompt_symbol_error_to_success_portrait_topleft to
+            "biometricprompt_symbol_error_to_success_portrait_topleft",
+        R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_bottomright to
+            "biometricprompt_symbol_fingerprint_to_error_portrait_bottomright",
+        R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_topleft to
+            "biometricprompt_symbol_fingerprint_to_error_portrait_topleft",
+        R.raw.biometricprompt_symbol_fingerprint_to_success_landscape to
+            "biometricprompt_symbol_fingerprint_to_success_landscape",
+        R.raw.biometricprompt_symbol_fingerprint_to_success_portrait_bottomright to
+            "biometricprompt_symbol_fingerprint_to_success_portrait_bottomright",
+        R.raw.biometricprompt_symbol_fingerprint_to_success_portrait_topleft to
+            "biometricprompt_symbol_fingerprint_to_success_portrait_topleft",
+        // Face assets
+        R.drawable.face_dialog_wink_from_dark to "face_dialog_wink_from_dark",
+        R.drawable.face_dialog_dark_to_checkmark to "face_dialog_dark_to_checkmark",
+        R.drawable.face_dialog_pulse_light_to_dark to "face_dialog_pulse_light_to_dark",
+        R.drawable.face_dialog_pulse_dark_to_light to "face_dialog_pulse_dark_to_light",
+        R.drawable.face_dialog_dark_to_error to "face_dialog_dark_to_error",
+        R.drawable.face_dialog_error_to_idle to "face_dialog_error_to_idle",
+        R.drawable.face_dialog_idle_static to "face_dialog_idle_static",
+        // Co-ex assets
+        R.raw.fingerprint_dialogue_unlocked_to_checkmark_success_lottie to
+            "fingerprint_dialogue_unlocked_to_checkmark_success_lottie",
+        R.raw.fingerprint_dialogue_error_to_unlock_lottie to
+            "fingerprint_dialogue_error_to_unlock_lottie",
+        R.raw.fingerprint_dialogue_fingerprint_to_unlock_lottie to
+            "fingerprint_dialogue_fingerprint_to_unlock_lottie",
+    )
+
+private fun getAssetNameFromId(id: Int): String {
+    return assetIdToString.getOrDefault(id, "Asset $id not found")
+}
+
+private fun LottieAnimationView.setIconFailureListener(iconAsset: Int, activeAuthType: AuthType) {
+    setFailureListener(
+        LottieListener<Throwable> { result: Throwable? ->
+            Log.d(
+                TAG,
+                "Collecting iconAsset | " +
+                    "activeAuthType = $activeAuthType | " +
+                    "Invalid resource id: $iconAsset, " +
+                    "name ${getAssetNameFromId(iconAsset)}",
+                result
+            )
+        }
+    )
+}
+
+private fun LottieAnimationView.setIconOverlayFailureListener(iconOverlayAsset: Int) {
+    setFailureListener(
+        LottieListener<Throwable> { result: Throwable? ->
+            Log.d(
+                TAG,
+                "Collecting iconOverlayAsset | " +
+                    "Invalid resource id: $iconOverlayAsset, " +
+                    "name ${getAssetNameFromId(iconOverlayAsset)}",
+                result
+            )
+        }
+    )
 }
