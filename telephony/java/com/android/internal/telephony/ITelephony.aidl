@@ -3375,4 +3375,13 @@ interface ITelephony {
      * @return {@code true} if the boolean config is set successfully, {@code false} otherwise.
      */
     boolean setDatagramControllerBooleanConfig(boolean reset, int booleanType, boolean enable);
+
+    /**
+     * This API can be used by only CTS to set the cache whether satellite communication is allowed.
+     *
+     * @param state a state indicates whether satellite access allowed state should be cached and
+     * the allowed state.
+     * @return {@code true} if the setting is successful, {@code false} otherwise.
+     */
+    boolean setIsSatelliteCommunicationAllowedForCurrentLocationCache(in String state);
 }
