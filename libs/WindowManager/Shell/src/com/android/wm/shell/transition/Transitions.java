@@ -1591,7 +1591,7 @@ public class Transitions implements RemoteCallable<Transitions>,
         public void setHomeTransitionListener(IHomeTransitionListener listener) {
             executeRemoteCallWithTaskPermission(mTransitions, "setHomeTransitionListener",
                     (transitions) -> {
-                        transitions.mHomeTransitionObserver.setHomeTransitionListener(mTransitions,
+                        transitions.mHomeTransitionObserver.setHomeTransitionListener(transitions,
                                 listener);
                     });
         }

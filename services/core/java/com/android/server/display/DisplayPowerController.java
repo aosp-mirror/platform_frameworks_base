@@ -791,10 +791,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     @Override
     public void overrideDozeScreenState(int displayState, @Display.StateReason int reason) {
+        Slog.i(TAG, "New offload doze override: " + Display.stateToString(displayState));
         mHandler.postAtTime(() -> {
             if (mDisplayOffloadSession == null
                     || !(DisplayOffloadSession.isSupportedOffloadState(displayState)
-                    || displayState == Display.STATE_UNKNOWN)) {
+                            || displayState == Display.STATE_UNKNOWN)) {
                 return;
             }
             mDisplayStateController.overrideDozeScreenState(displayState, reason);
@@ -1279,7 +1280,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private void updatePowerStateInternal() {
         // Update the power state request.
-        final boolean mustNotify;
+        boolean mustNotify = false;
         final int previousPolicy;
         boolean mustInitialize = false;
         mBrightnessReasonTemp.set(null);
@@ -1325,6 +1326,30 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // Initialize things the first time the power state is changed.
         if (mustInitialize) {
             initialize(readyToUpdateDisplayState() ? state : Display.STATE_UNKNOWN);
+        }
+
+        if (mFlags.isOffloadDozeOverrideHoldsWakelockEnabled()) {
+            // Sometimes, a display-state change can come without an associated PowerRequest,
+            // as with DisplayOffload.  For those cases, we have to make sure to also mark the
+            // display as "not ready" so that we can inform power-manager when the state-change is
+            // complete.
+            if (mPowerState.getScreenState() != state) {
+                final boolean wasReady;
+                synchronized (mLock) {
+                    wasReady = mDisplayReadyLocked;
+                    mDisplayReadyLocked = false;
+                    mustNotify = true;
+                }
+
+                if (wasReady) {
+                    // If we went from ready to not-ready from the state-change (instead of a
+                    // PowerRequest) there's a good chance that nothing is keeping PowerManager
+                    // from suspending. Grab the unfinished business suspend blocker to keep the
+                    // device awake until the display-state change goes into effect.
+                    mWakelockController.acquireWakelock(
+                            WakelockController.WAKE_LOCK_UNFINISHED_BUSINESS);
+                }
+            }
         }
 
         // Animate the screen state change unless already animating.

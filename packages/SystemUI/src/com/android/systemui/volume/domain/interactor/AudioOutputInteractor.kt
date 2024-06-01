@@ -18,8 +18,6 @@ package com.android.systemui.volume.domain.interactor
 
 import android.bluetooth.BluetoothAdapter
 import android.media.AudioDeviceInfo
-import android.media.AudioDeviceInfo.TYPE_WIRED_HEADPHONES
-import android.media.AudioDeviceInfo.TYPE_WIRED_HEADSET
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.media.BluetoothMediaDevice
@@ -30,7 +28,6 @@ import com.android.settingslib.volume.data.repository.AudioSharingRepository
 import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.volume.domain.model.AudioOutputDevice
-import com.android.systemui.volume.panel.component.mediaoutput.data.repository.LocalMediaRepositoryFactory
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputInteractor
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import javax.inject.Inject
@@ -58,8 +55,7 @@ constructor(
     private val bluetoothAdapter: BluetoothAdapter?,
     private val deviceIconInteractor: DeviceIconInteractor,
     private val mediaOutputInteractor: MediaOutputInteractor,
-    private val localMediaRepositoryFactory: LocalMediaRepositoryFactory,
-    private val audioSharingRepository: AudioSharingRepository,
+    audioSharingRepository: AudioSharingRepository,
 ) {
 
     val currentAudioDevice: Flow<AudioOutputDevice> =
@@ -83,30 +79,32 @@ constructor(
     val isInAudioSharing: Flow<Boolean> = audioSharingRepository.inAudioSharing
 
     private fun AudioDeviceInfo.toAudioOutputDevice(): AudioOutputDevice {
-        if (type == TYPE_WIRED_HEADPHONES || type == TYPE_WIRED_HEADSET) {
+        if (
+            BluetoothAdapter.checkBluetoothAddress(address) &&
+                localBluetoothManager != null &&
+                bluetoothAdapter != null
+        ) {
+            val remoteDevice = bluetoothAdapter.getRemoteDevice(address)
+            localBluetoothManager.cachedDeviceManager.findDevice(remoteDevice)?.let {
+                device: CachedBluetoothDevice ->
+                return AudioOutputDevice.Bluetooth(
+                    name = device.name,
+                    icon = deviceIconInteractor.loadIcon(device),
+                    cachedBluetoothDevice = device,
+                )
+            }
+        }
+        // Built-in device has an empty address
+        if (address.isNotEmpty()) {
             return AudioOutputDevice.Wired(
                 name = productName.toString(),
                 icon = deviceIconInteractor.loadIcon(type),
             )
         }
-        val cachedBluetoothDevice: CachedBluetoothDevice? =
-            if (address.isEmpty() || localBluetoothManager == null || bluetoothAdapter == null) {
-                null
-            } else {
-                val remoteDevice = bluetoothAdapter.getRemoteDevice(address)
-                localBluetoothManager.cachedDeviceManager.findDevice(remoteDevice)
-            }
-        return cachedBluetoothDevice?.let {
-            AudioOutputDevice.Bluetooth(
-                name = it.name,
-                icon = deviceIconInteractor.loadIcon(it),
-                cachedBluetoothDevice = it,
-            )
-        }
-            ?: AudioOutputDevice.BuiltIn(
-                name = productName.toString(),
-                icon = deviceIconInteractor.loadIcon(type),
-            )
+        return AudioOutputDevice.BuiltIn(
+            name = productName.toString(),
+            icon = deviceIconInteractor.loadIcon(type),
+        )
     }
 
     private fun MediaDevice.toAudioOutputDevice(): AudioOutputDevice {
@@ -117,7 +115,8 @@ constructor(
                     icon = icon,
                     cachedBluetoothDevice = cachedDevice,
                 )
-            deviceType == MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE ->
+            deviceType == MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE ||
+                deviceType == MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE ->
                 AudioOutputDevice.Wired(
                     name = name,
                     icon = icon,

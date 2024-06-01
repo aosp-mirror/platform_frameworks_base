@@ -161,8 +161,11 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         doAnswer(this::checkMainThread).when(mKeyguardUpdateMonitor)
                 .removeCallback(any(KeyguardUpdateMonitorCallback.class));
 
-        mCarrierTextCallbackInfo = new CarrierTextManager.CarrierTextCallbackInfo("",
-                new CharSequence[]{}, false, new int[]{});
+        mCarrierTextCallbackInfo = new CarrierTextManager.CarrierTextCallbackInfo(
+                /* carrierText= */ "",
+                /* listOfCarriers= */ new CharSequence[]{},
+                /* anySimReady= */ false,
+                /* subscriptionIds= */ new int[]{});
         when(mTelephonyManager.getSupportedModemCount()).thenReturn(3);
         when(mTelephonyManager.getActiveModemCount()).thenReturn(3);
 
@@ -473,7 +476,7 @@ public class CarrierTextManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void carrierText_satelliteTextNull_notUsed() {
+    public void carrierText_satelliteTextNull_isSatelliteFalse_textNotUsed() {
         reset(mCarrierTextCallback);
         List<SubscriptionInfo> list = new ArrayList<>();
         list.add(TEST_SUBSCRIPTION);
@@ -491,9 +494,35 @@ public class CarrierTextManagerTest extends SysuiTestCase {
                         CarrierTextManager.CarrierTextCallbackInfo.class);
         FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
 
-        // THEN the default subscription carrier text is used
+        // THEN satellite mode is false and the default subscription carrier text is used
         verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
+        assertThat(captor.getValue().isInSatelliteMode).isFalse();
         assertThat(captor.getValue().carrierText).isEqualTo(TEST_CARRIER);
+    }
+
+    @Test
+    public void carrierText_hasSatelliteText_isSatelliteTrue_textUsed() {
+        reset(mCarrierTextCallback);
+        List<SubscriptionInfo> list = new ArrayList<>();
+        list.add(TEST_SUBSCRIPTION);
+        when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(
+                TelephonyManager.SIM_STATE_READY);
+        when(mKeyguardUpdateMonitor.getFilteredSubscriptionInfo()).thenReturn(list);
+        mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
+
+        // WHEN the satellite text is non-null
+        mSatelliteViewModel.getCarrierText().setValue("Satellite Test Text");
+        mTestScope.getTestScheduler().runCurrent();
+
+        ArgumentCaptor<CarrierTextManager.CarrierTextCallbackInfo> captor =
+                ArgumentCaptor.forClass(
+                        CarrierTextManager.CarrierTextCallbackInfo.class);
+        FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
+
+        // THEN satellite mode is true and the satellite text is used
+        verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
+        assertThat(captor.getValue().isInSatelliteMode).isTrue();
+        assertThat(captor.getValue().carrierText).isEqualTo("Satellite Test Text");
     }
 
     @Test
@@ -517,6 +546,7 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
         verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
         // AND use the satellite text as the carrier text
+        assertThat(captor.getValue().isInSatelliteMode).isTrue();
         assertThat(captor.getValue().carrierText).isEqualTo("Test satellite text");
 
         // WHEN the satellite text is reset to null
@@ -528,6 +558,7 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         // that doesn't include the satellite info
         FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
         verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
+        assertThat(captor.getValue().isInSatelliteMode).isFalse();
         assertThat(captor.getValue().carrierText).isEqualTo(TEST_CARRIER);
     }
 
@@ -566,10 +597,11 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         mCarrierTextManager.setListening(mCarrierTextCallback);
 
         // THEN we should automatically re-trigger #updateCarrierText and get callback info
-        // that includes the new satellite text
+        // that includes the new satellite state and text
         mTestScope.getTestScheduler().runCurrent();
         FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
         verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
+        assertThat(captor.getValue().isInSatelliteMode).isTrue();
         assertThat(captor.getValue().carrierText).isEqualTo("New satellite text");
     }
 

@@ -3,7 +3,7 @@ package com.android.systemui.mediaprojection.appselector.data
 import android.app.ActivityManager.RecentTaskInfo
 import android.content.pm.UserInfo
 import android.os.UserManager
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.mediaprojection.appselector.data.RecentTask.UserType.CLONED
@@ -25,7 +25,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class ShellRecentTaskListProviderTest : SysuiTestCase() {
 

@@ -48,7 +48,6 @@ cc_library_shared {
         "libgui",
         "libui",
         "libinput",
-        "libnativewindow",
     ],
 
     header_libs: [

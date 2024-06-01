@@ -60,14 +60,6 @@ object Flags {
             "notification_drag_to_contents"
         )
 
-    /**
-     * This flag controls whether we register a listener for StatsD notification memory reports.
-     * For statsd to actually call the listener however, a server-side toggle needs to be
-     * enabled as well.
-     */
-    val NOTIFICATION_MEMORY_LOGGING_ENABLED =
-            releasedFlag("notification_memory_logging_enabled")
-
     // TODO(b/280783617): Tracking Bug
     @Keep
     @JvmField
@@ -386,9 +378,6 @@ object Flags {
     val WARN_ON_BLOCKING_BINDER_TRANSACTIONS =
         unreleasedFlag("warn_on_blocking_binder_transactions")
 
-    // TODO:(b/283203305): Tracking bug
-    @JvmField val TRIM_FONT_CACHES_AT_UNLOCK = unreleasedFlag("trim_font_caches_on_unlock")
-
     // TODO(b/298380520): Tracking Bug
     @JvmField
     val USER_TRACKER_BACKGROUND_CALLBACKS = unreleasedFlag("user_tracker_background_callbacks")
@@ -458,14 +447,6 @@ object Flags {
     /** TODO(b/296223317): Enables the new keyguard presentation containing a clock. */
     @JvmField
     val ENABLE_CLOCK_KEYGUARD_PRESENTATION = releasedFlag("enable_clock_keyguard_presentation")
-
-    /** Enable the Compose implementation of the PeopleSpaceActivity. */
-    @JvmField
-    val COMPOSE_PEOPLE_SPACE = releasedFlag("compose_people_space")
-
-    /** Enable the Compose implementation of the Quick Settings footer actions. */
-    @JvmField
-    val COMPOSE_QS_FOOTER_ACTIONS = releasedFlag("compose_qs_footer_actions")
 
     /** Enable the share wifi button in Quick Settings internet dialog. */
     @JvmField

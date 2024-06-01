@@ -262,6 +262,22 @@ public class SatelliteImplBase extends SatelliteService {
                     "abortSendingSatelliteDatagrams");
         }
 
+        @Override
+        public void updateSatelliteSubscription(String iccId, IIntegerConsumer resultCallback)
+                throws RemoteException {
+            executeMethodAsync(() -> SatelliteImplBase.this.updateSatelliteSubscription(
+                    iccId, resultCallback), "updateSatelliteSubscription");
+        }
+
+        @Override
+        public void updateSystemSelectionChannels(
+                List<SystemSelectionSpecifier> systemSelectionSpecifiers,
+                IIntegerConsumer resultCallback) throws RemoteException {
+            executeMethodAsync(() -> SatelliteImplBase.this.updateSystemSelectionChannels(
+                    systemSelectionSpecifiers, resultCallback),
+                    "updateSystemSelectionChannels");
+        }
+
         // Call the methods with a clean calling identity on the executor and wait indefinitely for
         // the future to return.
         private void executeMethodAsync(Runnable r, String errorLogName) throws RemoteException {
@@ -766,6 +782,29 @@ public class SatelliteImplBase extends SatelliteService {
      * @param resultCallback The {@link SatelliteError} result of the operation.
      */
     public void abortSendingSatelliteDatagrams(@NonNull IIntegerConsumer resultCallback){
+        // stub implementation
+    }
+
+    /**
+     * Request to update the satellite subscription to be used for Non-Terrestrial network.
+     *
+     * @param iccId The ICCID of the subscription
+     * @param resultCallback The callback to receive the error code result of the operation.
+     */
+    public void updateSatelliteSubscription(String iccId,
+            @NonNull IIntegerConsumer resultCallback) {
+        // stub implementation
+    }
+
+    /**
+     * Request to update system selection channels
+     *
+     * @param systemSelectionSpecifiers list of system selection specifiers
+     * @param resultCallback The callback to receive the error code result of the operation.
+     */
+    public void updateSystemSelectionChannels(
+            @NonNull List<SystemSelectionSpecifier> systemSelectionSpecifiers,
+            @NonNull IIntegerConsumer resultCallback) {
         // stub implementation
     }
 }

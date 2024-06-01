@@ -63,11 +63,11 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
+import platform.test.runner.parameterized.Parameter
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
-import org.junit.runners.Parameterized.Parameter
-import org.junit.runners.Parameterized.Parameters
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.ArgumentMatchers.eq
@@ -83,7 +83,7 @@ import org.mockito.MockitoAnnotations
     detail = "on certain architectures all permutations with startActivity=true is causing failures"
 )
 @SmallTest
-@RunWith(Parameterized::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @EnableSceneContainer
 class KeyguardQuickAffordanceInteractorSceneContainerTest : SysuiTestCase() {
 

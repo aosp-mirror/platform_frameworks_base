@@ -59,6 +59,7 @@ import android.view.accessibility.MagnificationAnimationCallback;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.FlakyTest;
 
+import com.android.compatibility.common.util.TestUtils;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityTraceManager;
@@ -76,6 +77,7 @@ import org.mockito.invocation.InvocationOnMock;
  */
 public class MagnificationConnectionManagerTest {
 
+    private static final int WAIT_CONNECTION_TIMEOUT_SECOND = 1;
     private static final int CURRENT_USER_ID = UserHandle.USER_SYSTEM;
     private static final int SERVICE_ID = 1;
 
@@ -115,17 +117,19 @@ public class MagnificationConnectionManagerTest {
     private void stubSetConnection(boolean needDelay) {
         doAnswer((InvocationOnMock invocation) -> {
             final boolean connect = (Boolean) invocation.getArguments()[0];
-            // Simulates setConnection() called by another process.
+            // Use post to simulate setConnection() called by another process.
+            final Context context = ApplicationProvider.getApplicationContext();
             if (needDelay) {
-                final Context context = ApplicationProvider.getApplicationContext();
                 context.getMainThreadHandler().postDelayed(
                         () -> {
                             mMagnificationConnectionManager.setConnection(
                                     connect ? mMockConnection.getConnection() : null);
                         }, 10);
             } else {
-                mMagnificationConnectionManager.setConnection(
-                        connect ? mMockConnection.getConnection() : null);
+                context.getMainThreadHandler().post(() -> {
+                    mMagnificationConnectionManager.setConnection(
+                            connect ? mMockConnection.getConnection() : null);
+                });
             }
             return true;
         }).when(mMockStatusBarManagerInternal).requestMagnificationConnection(anyBoolean());
@@ -629,9 +633,10 @@ public class MagnificationConnectionManagerTest {
     }
 
     @Test
-    public void isConnected_requestConnection_expectedValue() throws RemoteException {
+    public void isConnected_requestConnection_expectedValue() throws Exception {
         mMagnificationConnectionManager.requestConnection(true);
-        assertTrue(mMagnificationConnectionManager.isConnected());
+        TestUtils.waitUntil("connection is not ready", WAIT_CONNECTION_TIMEOUT_SECOND,
+                () -> mMagnificationConnectionManager.isConnected());
 
         mMagnificationConnectionManager.requestConnection(false);
         assertFalse(mMagnificationConnectionManager.isConnected());

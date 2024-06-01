@@ -21,6 +21,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.compose.animation.scene.CommunalSwipeDetector
+import com.android.compose.animation.scene.DefaultSwipeDetector
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
@@ -35,6 +37,7 @@ import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.compose.animation.scene.transitions
 import com.android.systemui.Flags
+import com.android.systemui.Flags.glanceableHubFullscreenSwipe
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.communal.ui.compose.extensions.allowGestures
@@ -108,6 +111,8 @@ fun CommunalContainer(
         )
     }
 
+    val detector = remember { CommunalSwipeDetector() }
+
     DisposableEffect(state) {
         val dataSource = SceneTransitionLayoutDataSource(state, coroutineScope)
         dataSourceDelegator.setDelegate(dataSource)
@@ -121,13 +126,25 @@ fun CommunalContainer(
         onDispose { viewModel.setTransitionState(null) }
     }
 
+    val swipeSourceDetector =
+        if (glanceableHubFullscreenSwipe()) {
+            detector
+        } else {
+            FixedSizeEdgeDetector(dimensionResource(id = R.dimen.communal_gesture_initiation_width))
+        }
+
+    val swipeDetector =
+        if (glanceableHubFullscreenSwipe()) {
+            detector
+        } else {
+            DefaultSwipeDetector
+        }
+
     SceneTransitionLayout(
         state = state,
         modifier = modifier.fillMaxSize(),
-        swipeSourceDetector =
-            FixedSizeEdgeDetector(
-                dimensionResource(id = R.dimen.communal_gesture_initiation_width)
-            ),
+        swipeSourceDetector = swipeSourceDetector,
+        swipeDetector = swipeDetector,
     ) {
         scene(
             CommunalScenes.Blank,

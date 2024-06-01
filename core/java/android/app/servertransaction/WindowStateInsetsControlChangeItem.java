@@ -27,6 +27,8 @@ import android.view.IWindow;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.Objects;
 
 /**
@@ -38,7 +40,9 @@ public class WindowStateInsetsControlChangeItem extends WindowStateTransactionIt
     private static final String TAG = "WindowStateInsetsControlChangeItem";
 
     private InsetsState mInsetsState;
-    private InsetsSourceControl.Array mActiveControls;
+
+    @VisibleForTesting
+    public InsetsSourceControl.Array mActiveControls;
 
     @Override
     public void execute(@NonNull ClientTransactionHandler client, @NonNull IWindow window,
@@ -51,6 +55,8 @@ public class WindowStateInsetsControlChangeItem extends WindowStateTransactionIt
             // An exception could happen if the process is restarted. It is safe to ignore since
             // the window should no longer exist.
             Log.w(TAG, "The original window no longer exists in the new process", e);
+            // Prevent leak
+            mActiveControls.release();
         }
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
@@ -69,7 +75,12 @@ public class WindowStateInsetsControlChangeItem extends WindowStateTransactionIt
         }
         instance.setWindow(window);
         instance.mInsetsState = new InsetsState(insetsState, true /* copySources */);
-        instance.mActiveControls = new InsetsSourceControl.Array(activeControls);
+        instance.mActiveControls = new InsetsSourceControl.Array(
+                activeControls, true /* copyControls */);
+        // This source control is an extra copy if the client is not local. By setting
+        // PARCELABLE_WRITE_RETURN_VALUE, the leash will be released at the end of
+        // SurfaceControl.writeToParcel.
+        instance.mActiveControls.setParcelableFlags(PARCELABLE_WRITE_RETURN_VALUE);
 
         return instance;
     }

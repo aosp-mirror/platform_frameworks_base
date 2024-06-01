@@ -22,6 +22,7 @@ import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.communal.dagger.Communal
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.scene.shared.model.SceneDataSource
 import javax.inject.Inject
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /** Encapsulates the state of communal mode. */
 interface CommunalSceneRepository {
@@ -64,6 +66,7 @@ interface CommunalSceneRepository {
 class CommunalSceneRepositoryImpl
 @Inject
 constructor(
+    @Application private val applicationScope: CoroutineScope,
     @Background backgroundScope: CoroutineScope,
     @Communal private val sceneDataSource: SceneDataSource,
 ) : CommunalSceneRepository {
@@ -82,11 +85,19 @@ constructor(
             )
 
     override fun changeScene(toScene: SceneKey, transitionKey: TransitionKey?) {
-        sceneDataSource.changeScene(toScene, transitionKey)
+        applicationScope.launch {
+            // SceneTransitionLayout state updates must be triggered on the thread the STL was
+            // created on.
+            sceneDataSource.changeScene(toScene, transitionKey)
+        }
     }
 
     override fun snapToScene(toScene: SceneKey) {
-        sceneDataSource.snapToScene(toScene)
+        applicationScope.launch {
+            // SceneTransitionLayout state updates must be triggered on the thread the STL was
+            // created on.
+            sceneDataSource.snapToScene(toScene)
+        }
     }
 
     /**

@@ -31,16 +31,16 @@ class IntraBlueprintTransition(
 
     enum class Type(
         val priority: Int,
+        val animateNotifChanges: Boolean,
     ) {
-        ClockSize(100),
-        ClockCenter(99),
-        DefaultClockStepping(98),
-        AodNotifIconsTransition(97),
-        SmartspaceVisibility(2),
-        DefaultTransition(1),
+        ClockSize(100, true),
+        ClockCenter(99, false),
+        DefaultClockStepping(98, false),
+        SmartspaceVisibility(2, true),
+        DefaultTransition(1, false),
         // When transition between blueprint, we don't need any duration or interpolator but we need
         // all elements go to correct state
-        NoTransition(0),
+        NoTransition(0, false),
     }
 
     data class Config(

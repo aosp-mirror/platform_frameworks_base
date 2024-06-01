@@ -3787,7 +3787,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (changeInfo.mRotation != wc.mDisplayContent.getRotation()) {
                 // This isn't cheap, so only do it for rotation change.
                 changeInfo.mSnapshotLuma = TransitionAnimation.getBorderLuma(
-                        buffer, screenshotBuffer.getColorSpace());
+                        buffer, screenshotBuffer.getColorSpace(), wc.mSurfaceControl);
             }
             SurfaceControl.Transaction t = wc.mWmService.mTransactionFactory.get();
             TransitionAnimation.configureScreenshotLayer(t, snapshotSurface, screenshotBuffer);

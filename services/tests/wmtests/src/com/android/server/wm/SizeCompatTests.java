@@ -107,6 +107,7 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.provider.DeviceConfig;
@@ -401,6 +402,7 @@ public class SizeCompatTests extends WindowTestsBase {
     // TODO(b/333663877): Enable test after fix
     @Test
     @RequiresFlagsDisabled({Flags.FLAG_INSETS_DECOUPLED_CONFIGURATION})
+    @EnableFlags(Flags.FLAG_IMMERSIVE_APP_REPOSITIONING)
     public void testRepositionLandscapeImmersiveAppWithDisplayCutout() {
         final int dw = 2100;
         final int dh = 2000;
@@ -4059,6 +4061,7 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_IMMERSIVE_APP_REPOSITIONING)
     public void testImmersiveLetterboxAlignedToBottom_OverlappingNavbar() {
         assertLandscapeActivityAlignedToBottomWithNavbar(true /* immersive */);
     }

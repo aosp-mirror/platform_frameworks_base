@@ -29,6 +29,7 @@ import com.android.systemui.common.ui.data.repository.fakeConfigurationRepositor
 import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.ui.viewmodel.communalTransitionViewModel
 import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryUdfpsInteractor
@@ -87,6 +88,7 @@ class KosmosJavaAdapter() {
     val configurationInteractor by lazy { kosmos.configurationInteractor }
     val bouncerRepository by lazy { kosmos.bouncerRepository }
     val communalRepository by lazy { kosmos.fakeCommunalSceneRepository }
+    val communalTransitionViewModel by lazy { kosmos.communalTransitionViewModel }
     val headsUpNotificationInteractor by lazy { kosmos.headsUpNotificationInteractor }
     val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
     val keyguardBouncerRepository by lazy { kosmos.fakeKeyguardBouncerRepository }

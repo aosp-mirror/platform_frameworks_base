@@ -19,14 +19,13 @@ import com.android.settingslib.volume.data.repository.LocalMediaRepository
 import com.android.settingslib.volume.data.repository.LocalMediaRepositoryImpl
 import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.media.controls.util.LocalMediaManagerFactory
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 
 interface LocalMediaRepositoryFactory {
 
-    fun create(packageName: String?): LocalMediaRepository
+    fun create(packageName: String?, coroutineScope: CoroutineScope): LocalMediaRepository
 }
 
 @SysUISingleton
@@ -35,10 +34,12 @@ class LocalMediaRepositoryFactoryImpl
 constructor(
     private val eventsReceiver: AudioManagerEventsReceiver,
     private val localMediaManagerFactory: LocalMediaManagerFactory,
-    @Application private val coroutineScope: CoroutineScope,
 ) : LocalMediaRepositoryFactory {
 
-    override fun create(packageName: String?): LocalMediaRepository =
+    override fun create(
+        packageName: String?,
+        coroutineScope: CoroutineScope
+    ): LocalMediaRepository =
         LocalMediaRepositoryImpl(
             eventsReceiver,
             localMediaManagerFactory.create(packageName),

@@ -713,6 +713,19 @@ android_media_AudioSystem_getForceUse(JNIEnv *env, jobject thiz, jint usage)
             AudioSystem::getForceUse(static_cast<audio_policy_force_use_t>(usage)));
 }
 
+static jint android_media_AudioSystem_setDeviceAbsoluteVolumeEnabled(JNIEnv *env, jobject thiz,
+                                                                     jint device, jstring address,
+                                                                     jboolean enabled,
+                                                                     jint stream) {
+    const char *c_address = env->GetStringUTFChars(address, nullptr);
+    int state = check_AudioSystem_Command(
+            AudioSystem::setDeviceAbsoluteVolumeEnabled(static_cast<audio_devices_t>(device),
+                                                        c_address, enabled,
+                                                        static_cast<audio_stream_type_t>(stream)));
+    env->ReleaseStringUTFChars(address, c_address);
+    return state;
+}
+
 static jint
 android_media_AudioSystem_initStreamVolume(JNIEnv *env, jobject thiz, jint stream, jint indexMin, jint indexMax)
 {
@@ -3373,6 +3386,7 @@ static const JNINativeMethod gMethods[] =
          MAKE_AUDIO_SYSTEM_METHOD(setPhoneState),
          MAKE_AUDIO_SYSTEM_METHOD(setForceUse),
          MAKE_AUDIO_SYSTEM_METHOD(getForceUse),
+         MAKE_AUDIO_SYSTEM_METHOD(setDeviceAbsoluteVolumeEnabled),
          MAKE_AUDIO_SYSTEM_METHOD(initStreamVolume),
          MAKE_AUDIO_SYSTEM_METHOD(setStreamVolumeIndex),
          MAKE_AUDIO_SYSTEM_METHOD(getStreamVolumeIndex),

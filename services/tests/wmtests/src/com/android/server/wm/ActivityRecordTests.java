@@ -2726,6 +2726,19 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertNoStartingWindow(activity);
     }
 
+    @Test
+    public void testPostCleanupStartingWindow() {
+        registerTestStartingWindowOrganizer();
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        activity.addStartingWindow(mPackageName, android.R.style.Theme, null, true, true, false,
+                true, false, false, false);
+        waitUntilHandlersIdle();
+        assertHasStartingWindow(activity);
+        // Simulate Shell remove starting window actively.
+        activity.mStartingWindow.removeImmediately();
+        assertNoStartingWindow(activity);
+    }
+
     private void testLegacySplashScreen(int targetSdk, int verifyType) {
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         activity.mTargetSdk = targetSdk;

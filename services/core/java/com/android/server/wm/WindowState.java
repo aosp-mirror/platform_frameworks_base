@@ -434,7 +434,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /** @see #isLastConfigReportedToClient() */
     private boolean mLastConfigReportedToClient;
 
-    // TODO(b/339380439): Ensure to use the same object for IWindowSession#relayout
+    private final ClientWindowFrames mLastReportedFrames = new ClientWindowFrames();
+
+    private final InsetsState mLastReportedInsetsState = new InsetsState();
+
     private final InsetsSourceControl.Array mLastReportedActiveControls =
             new InsetsSourceControl.Array();
 
@@ -494,8 +497,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     final float[] mTmpMatrixArray = new float[9];
 
     private final WindowFrames mWindowFrames = new WindowFrames();
-
-    private final ClientWindowFrames mClientWindowFrames = new ClientWindowFrames();
 
     /**
      * List of rects where system gestures should be ignored.
@@ -3650,8 +3651,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 outFrames.attachedFrame.scale(mInvGlobalScale);
             }
         }
-
         outFrames.compatScale = getCompatScaleForClient();
+        if (mLastReportedFrames != outFrames) {
+            mLastReportedFrames.setTo(outFrames);
+        }
 
         // Note: in the cases where the window is tied to an activity, we should not send a
         // configuration update when the window has requested to be hidden. Doing so can lead to
@@ -3676,6 +3679,25 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
         }
         mLastConfigReportedToClient = true;
+    }
+
+    void fillInsetsState(@NonNull InsetsState outInsetsState, boolean copySources) {
+        outInsetsState.set(getCompatInsetsState(), copySources);
+        if (outInsetsState != mLastReportedInsetsState) {
+            // No need to copy for the recorded.
+            mLastReportedInsetsState.set(outInsetsState, false /* copySources */);
+        }
+    }
+
+    void fillInsetsSourceControls(@NonNull InsetsSourceControl.Array outArray,
+            boolean copyControls) {
+        final InsetsSourceControl[] controls =
+                getDisplayContent().getInsetsStateController().getControlsForDispatch(this);
+        outArray.set(controls, copyControls);
+        if (outArray != mLastReportedActiveControls) {
+            // No need to copy for the recorded.
+            mLastReportedActiveControls.setTo(outArray, false /* copyControls */);
+        }
     }
 
     void reportResized() {
@@ -3712,9 +3734,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         final int prevRotation = mLastReportedConfiguration
                 .getMergedConfiguration().windowConfiguration.getRotation();
-        fillClientWindowFramesAndConfiguration(mClientWindowFrames, mLastReportedConfiguration,
+        fillClientWindowFramesAndConfiguration(mLastReportedFrames, mLastReportedConfiguration,
                 mLastReportedActivityWindowInfo, true /* useLatestConfig */,
                 false /* relayoutVisible */);
+        fillInsetsState(mLastReportedInsetsState, false /* copySources */);
         final boolean syncRedraw = shouldSendRedrawForSync();
         final boolean syncWithBuffers = syncRedraw && shouldSyncWithBuffers();
         final boolean reportDraw = syncRedraw || drawPending;
@@ -3734,8 +3757,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         if (Flags.bundleClientTransactionFlag()) {
             getProcess().scheduleClientTransactionItem(
-                    WindowStateResizeItem.obtain(mClient, mClientWindowFrames, reportDraw,
-                            mLastReportedConfiguration, getCompatInsetsState(), forceRelayout,
+                    WindowStateResizeItem.obtain(mClient, mLastReportedFrames, reportDraw,
+                            mLastReportedConfiguration, mLastReportedInsetsState, forceRelayout,
                             alwaysConsumeSystemBars, displayId,
                             syncWithBuffers ? mSyncSeqId : -1, isDragResizing,
                             mLastReportedActivityWindowInfo));
@@ -3743,8 +3766,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         } else {
             // TODO(b/301870955): cleanup after launch
             try {
-                mClient.resized(mClientWindowFrames, reportDraw, mLastReportedConfiguration,
-                        getCompatInsetsState(), forceRelayout, alwaysConsumeSystemBars, displayId,
+                mClient.resized(mLastReportedFrames, reportDraw, mLastReportedConfiguration,
+                        mLastReportedInsetsState, forceRelayout, alwaysConsumeSystemBars, displayId,
                         syncWithBuffers ? mSyncSeqId : -1, isDragResizing,
                         mLastReportedActivityWindowInfo);
                 onResizePostDispatched(drawPending, prevRotation, displayId);
@@ -3817,16 +3840,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mRemoved) {
             return;
         }
-        final InsetsStateController stateController =
-                getDisplayContent().getInsetsStateController();
-        final InsetsState insetsState = getCompatInsetsState();
-        mLastReportedActiveControls.set(stateController.getControlsForDispatch(this));
+        fillInsetsState(mLastReportedInsetsState, false /* copySources */);
+        fillInsetsSourceControls(mLastReportedActiveControls, false /* copyControls */);
         if (Flags.insetsControlChangedItem()) {
             getProcess().scheduleClientTransactionItem(WindowStateInsetsControlChangeItem.obtain(
-                    mClient, insetsState, mLastReportedActiveControls));
+                    mClient, mLastReportedInsetsState, mLastReportedActiveControls));
         } else {
             try {
-                mClient.insetsControlChanged(insetsState, mLastReportedActiveControls);
+                mClient.insetsControlChanged(mLastReportedInsetsState, mLastReportedActiveControls);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to deliver inset control state change to w=" + this, e);
             }

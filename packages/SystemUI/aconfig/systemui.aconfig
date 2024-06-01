@@ -177,16 +177,9 @@ flag {
 }
 
 flag {
-    name: "notification_throttle_hun"
-    namespace: "systemui"
-    description: "During notification avalanche, throttle HUNs showing in fast succession."
-    bug: "307288824"
-}
-
-flag {
     name: "notification_avalanche_throttle_hun"
     namespace: "systemui"
-    description: "(currently unused) During notification avalanche, throttle HUNs showing in fast succession."
+    description: "During notification avalanche, throttle HUNs showing in fast succession."
     bug: "307288824"
 }
 
@@ -743,16 +736,6 @@ flag {
 }
 
 flag {
-    name: "trim_resources_with_background_trim_at_lock"
-    namespace: "systemui"
-    description: "Trim fonts and other caches when the device locks to lower memory consumption."
-    bug: "322143614"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "dedicated_notif_inflation_thread"
     namespace: "systemui"
     description: "Create a separate background thread for inflating notifications"
@@ -997,6 +980,13 @@ flag {
 }
 
 flag {
+  name: "glanceable_hub_fullscreen_swipe"
+  namespace: "systemui"
+  description: "Increase swipe area for gestures to bring in glanceable hub"
+  bug: "339665673"
+}
+
+flag {
   name: "glanceable_hub_shortcut_button"
   namespace: "systemui"
   description: "Shows a button over the dream and lock screen to open the glanceable hub"
@@ -1025,4 +1015,14 @@ flag {
    metadata {
      purpose: PURPOSE_BUGFIX
    }
+}
+
+flag {
+  name: "notification_media_manager_background_execution"
+  namespace: "systemui"
+  description: "Decide whether to execute binder calls in background thread"
+  bug: "336612071"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

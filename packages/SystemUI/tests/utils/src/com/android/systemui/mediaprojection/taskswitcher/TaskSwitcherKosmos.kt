@@ -16,11 +16,10 @@
 
 package com.android.systemui.mediaprojection.taskswitcher
 
-import android.os.Handler
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.mediaprojection.data.repository.MediaProjectionManagerRepository
+import com.android.systemui.mediaprojection.data.repository.realMediaProjectionRepository
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.ActivityTaskManagerTasksRepository
 import com.android.systemui.mediaprojection.taskswitcher.domain.interactor.TaskSwitchInteractor
 import com.android.systemui.mediaprojection.taskswitcher.ui.viewmodel.TaskSwitcherNotificationViewModel
@@ -40,21 +39,9 @@ val Kosmos.activityTaskManagerTasksRepository by
         )
     }
 
-val Kosmos.mediaProjectionManagerRepository by
-    Kosmos.Fixture {
-        MediaProjectionManagerRepository(
-            mediaProjectionManager = fakeMediaProjectionManager.mediaProjectionManager,
-            handler = Handler.getMain(),
-            applicationScope = applicationCoroutineScope,
-            tasksRepository = activityTaskManagerTasksRepository,
-            backgroundDispatcher = testDispatcher,
-            mediaProjectionServiceHelper = fakeMediaProjectionManager.helper,
-        )
-    }
-
 val Kosmos.taskSwitcherInteractor by
     Kosmos.Fixture {
-        TaskSwitchInteractor(mediaProjectionManagerRepository, activityTaskManagerTasksRepository)
+        TaskSwitchInteractor(realMediaProjectionRepository, activityTaskManagerTasksRepository)
     }
 
 val Kosmos.taskSwitcherViewModel by

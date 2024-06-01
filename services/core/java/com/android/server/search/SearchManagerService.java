@@ -61,6 +61,8 @@ public class SearchManagerService extends ISearchManager.Stub {
     private static final String TAG = "SearchManagerService";
     final Handler mHandler;
 
+    private final MyPackageMonitor mMyPackageMonitor;
+
     public static class Lifecycle extends SystemService {
         private SearchManagerService mService;
 
@@ -95,7 +97,8 @@ public class SearchManagerService extends ISearchManager.Stub {
      */
     public SearchManagerService(Context context)  {
         mContext = context;
-        new MyPackageMonitor().register(context, null, UserHandle.ALL, true);
+        mMyPackageMonitor = new MyPackageMonitor();
+        mMyPackageMonitor.register(context, null, UserHandle.ALL, true);
         new GlobalSearchProviderObserver(context.getContentResolver());
         mHandler = BackgroundThread.getHandler();
     }
@@ -230,7 +233,6 @@ public class SearchManagerService extends ISearchManager.Stub {
             if (!shouldRebuildSearchableList(changingUserId)) {
                 return;
             }
-
             synchronized (mSearchables) {
                 // Invalidate the searchable list.
                 Searchables searchables = mSearchables.get(changingUserId);

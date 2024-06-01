@@ -39,6 +39,7 @@ import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.text.Layout.Alignment;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.StrikethroughSpan;
 
 import androidx.test.filters.SmallTest;
@@ -931,6 +932,83 @@ public class LayoutTest {
 
         // One for each line
         expect.that(numBackgroundsFound).isEqualTo(backgroundRectsDrawn);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_HIGH_CONTRAST_TEXT_SMALL_TEXT_RECT)
+    public void highContrastTextEnabled_testDrawMulticolorText_drawsBlackAndWhiteBackgrounds() {
+        /*
+        Here's what the final render should look like:
+
+       Text  |   Background
+     ========================
+        al   |    BW
+        w    |    WW
+        ei   |    WW
+        \t;  |    WW
+        s    |    BB
+        df   |    BB
+        s    |    BB
+        df   |    BB
+        @    |    BB
+      ------------------------
+         */
+
+        mTextPaint.setColor(Color.WHITE);
+
+        mSpannedText.setSpan(
+                // Can't use DKGREY because it is right on the cusp of clamping white
+                new ForegroundColorSpan(0xFF332211),
+                /* start= */ 1,
+                /* end= */ 6,
+                Spanned.SPAN_INCLUSIVE_EXCLUSIVE
+        );
+        mSpannedText.setSpan(
+                new ForegroundColorSpan(Color.LTGRAY),
+                /* start= */ 8,
+                /* end= */ 11,
+                Spanned.SPAN_INCLUSIVE_EXCLUSIVE
+        );
+        Layout layout = new StaticLayout(mSpannedText, mTextPaint, mWidth,
+                mAlign, mSpacingMult, mSpacingAdd, /* includePad= */ false);
+
+        final int width = 256;
+        final int height = 256;
+        MockCanvas c = new MockCanvas(width, height);
+        c.setHighContrastTextEnabled(true);
+        layout.draw(
+                c,
+                /* highlightPaths= */ null,
+                /* highlightPaints= */ null,
+                /* selectionPath= */ null,
+                /* selectionPaint= */ null,
+                /* cursorOffsetVertical= */ 0
+        );
+        List<MockCanvas.DrawCommand> drawCommands = c.getDrawCommands();
+        var highlightsDrawn = 0;
+        var numColorChangesWithinOneLine = 1;
+        var textsDrawn = STATIC_LINE_COUNT + numColorChangesWithinOneLine;
+        var backgroundRectsDrawn = STATIC_LINE_COUNT + numColorChangesWithinOneLine;
+        expect.withMessage("wrong number of drawCommands: " + drawCommands)
+                .that(drawCommands.size())
+                .isEqualTo(textsDrawn + backgroundRectsDrawn + highlightsDrawn);
+
+        var backgroundCommands = drawCommands.stream()
+                .filter(it -> it.rect != null)
+                .toList();
+
+        expect.that(backgroundCommands.get(0).paint.getColor()).isEqualTo(Color.BLACK);
+        expect.that(backgroundCommands.get(1).paint.getColor()).isEqualTo(Color.WHITE);
+        expect.that(backgroundCommands.get(2).paint.getColor()).isEqualTo(Color.WHITE);
+        expect.that(backgroundCommands.get(3).paint.getColor()).isEqualTo(Color.WHITE);
+        expect.that(backgroundCommands.get(4).paint.getColor()).isEqualTo(Color.WHITE);
+        expect.that(backgroundCommands.get(5).paint.getColor()).isEqualTo(Color.BLACK);
+        expect.that(backgroundCommands.get(6).paint.getColor()).isEqualTo(Color.BLACK);
+        expect.that(backgroundCommands.get(7).paint.getColor()).isEqualTo(Color.BLACK);
+        expect.that(backgroundCommands.get(8).paint.getColor()).isEqualTo(Color.BLACK);
+        expect.that(backgroundCommands.get(9).paint.getColor()).isEqualTo(Color.BLACK);
+
+        expect.that(backgroundCommands.size()).isEqualTo(backgroundRectsDrawn);
     }
 
     private static final class MockCanvas extends Canvas {

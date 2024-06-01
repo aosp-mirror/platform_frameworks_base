@@ -49,7 +49,7 @@ constructor(
     @Background private val scope: CoroutineScope,
     @Background bgDispatcher: CoroutineDispatcher,
     @Main mainDispatcher: CoroutineDispatcher,
-    private val keyguardInteractor: KeyguardInteractor,
+    keyguardInteractor: KeyguardInteractor,
     powerInteractor: PowerInteractor,
     private val communalInteractor: CommunalInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
@@ -64,6 +64,7 @@ constructor(
         bgDispatcher = bgDispatcher,
         powerInteractor = powerInteractor,
         keyguardOcclusionInteractor = keyguardOcclusionInteractor,
+        keyguardInteractor = keyguardInteractor,
     ) {
 
     override fun start() {

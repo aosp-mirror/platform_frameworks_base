@@ -23705,12 +23705,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
                     mPrivateFlags &= ~PFLAG_DIRTY_MASK;
 
-                    // // For VRR to vote the preferred frame rate
-                    if (sToolkitSetFrameRateReadOnlyFlagValue
-                            && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
-                        votePreferredFrameRate();
-                    }
-
                     mPrivateFlags4 |= PFLAG4_HAS_DRAWN;
 
                     // Fast path for layouts with no backgrounds
@@ -23726,6 +23720,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     } else {
                         draw(canvas);
                     }
+                }
+
+                // For VRR to vote the preferred frame rate
+                if (sToolkitSetFrameRateReadOnlyFlagValue
+                        && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
+                    votePreferredFrameRate();
                 }
             } finally {
                 renderNode.endRecording();
@@ -34061,10 +34061,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private float convertVelocityToFrameRate(float velocityPps) {
+        // From UXR study, premium experience is:
+        // 1500+    dp/s: 120fps
+        // 0 - 1500 dp/s:  80fps
+        // OEMs are likely to modify this to balance battery and user experience for their
+        // specific device.
         float density = mAttachInfo.mDensity;
         float velocityDps = velocityPps / density;
-        // Choose a frame rate in increments of 10fps
-        return Math.min(MAX_FRAME_RATE, 60f + (10f * (float) Math.floor(velocityDps / 300f)));
+        return (velocityDps >= 1500f) ? MAX_FRAME_RATE : 80f;
     }
 
     /**

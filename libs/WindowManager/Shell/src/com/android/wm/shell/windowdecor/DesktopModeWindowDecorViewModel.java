@@ -386,6 +386,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         private final DragPositioningCallback mDragPositioningCallback;
         private final DragDetector mDragDetector;
         private final GestureDetector mGestureDetector;
+        private final int mDisplayId;
 
         /**
          * Whether to pilfer the next motion event to send cancellations to the windows below.
@@ -407,6 +408,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             mDragPositioningCallback = dragPositioningCallback;
             mDragDetector = new DragDetector(this);
             mGestureDetector = new GestureDetector(mContext, this);
+            mDisplayId = taskInfo.displayId;
             mCloseMaximizeWindowRunnable = () -> {
                 final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
                 if (decoration == null) return;
@@ -432,7 +434,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     mTaskOperations.closeTask(mTaskToken, wct);
                 }
             } else if (id == R.id.back_button) {
-                mTaskOperations.injectBackKey();
+                mTaskOperations.injectBackKey(mDisplayId);
             } else if (id == R.id.caption_handle || id == R.id.open_menu_button) {
                 if (!decoration.isHandleMenuActive()) {
                     moveTaskToFront(decoration.mTaskInfo);
@@ -581,17 +583,20 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             } else if (ev.getAction() == ACTION_HOVER_MOVE
                     && MaximizeMenu.Companion.isMaximizeMenuView(id)) {
                 decoration.onMaximizeMenuHoverMove(id, ev);
+                mMainHandler.removeCallbacks(mCloseMaximizeWindowRunnable);
             } else if (ev.getAction() == ACTION_HOVER_EXIT) {
                 if (!decoration.isMaximizeMenuActive() && id == R.id.maximize_window) {
                     decoration.onMaximizeWindowHoverExit();
-                } else if (id == R.id.maximize_window || id == R.id.maximize_menu) {
+                } else if (id == R.id.maximize_window
+                        || MaximizeMenu.Companion.isMaximizeMenuView(id)) {
                     // Close menu if not hovering over maximize menu or maximize button after a
                     // delay to give user a chance to re-enter view or to move from one maximize
                     // menu view to another.
                     mMainHandler.postDelayed(mCloseMaximizeWindowRunnable,
                             CLOSE_MAXIMIZE_MENU_DELAY_MS);
-                } else if (MaximizeMenu.Companion.isMaximizeMenuView(id)) {
-                    decoration.onMaximizeMenuHoverExit(id, ev);
+                    if (id != R.id.maximize_window) {
+                        decoration.onMaximizeMenuHoverExit(id, ev);
+                    }
                 }
                 return true;
             }

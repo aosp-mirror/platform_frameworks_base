@@ -350,7 +350,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun quickAffordance_updateOncePerShadeExpansion() =
+    fun quickAffordance_doNotSendUpdatesWhileShadeExpandingAndStillHidden() =
         testScope.runTest {
             val shadeExpansion = MutableStateFlow(0f)
             whenever(shadeInteractor.anyExpansion).thenReturn(shadeExpansion)
@@ -365,7 +365,9 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                 shadeExpansion.value = i / 10f
             }
 
-            assertThat(collectedValue.size).isEqualTo(initialSize + 1)
+            assertThat(collectedValue[0])
+                .isInstanceOf(KeyguardQuickAffordanceModel.Hidden::class.java)
+            assertThat(collectedValue.size).isEqualTo(initialSize)
         }
 
     @Test

@@ -23,11 +23,14 @@ import android.util.SizeF
 import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
 import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
 import android.widget.FrameLayout
+import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -162,7 +165,6 @@ fun CommunalHub(
     var removeButtonCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
     var toolbarSize: IntSize? by remember { mutableStateOf(null) }
     var gridCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
-    var isDraggingToRemove by remember { mutableStateOf(false) }
     val gridState = rememberLazyGridState()
     val contentListState = rememberContentListState(widgetConfigurator, communalContent, viewModel)
     val reorderingWidgets by viewModel.reorderingWidgets.collectAsStateWithLifecycle()
@@ -250,12 +252,11 @@ fun CommunalHub(
                     contentOffset = contentOffset,
                     setGridCoordinates = { gridCoordinates = it },
                     updateDragPositionForRemove = { offset ->
-                        isDraggingToRemove =
-                            isPointerWithinCoordinates(
-                                offset = gridCoordinates?.let { it.positionInWindow() + offset },
-                                containerToCheck = removeButtonCoordinates
-                            )
-                        isDraggingToRemove
+                        isPointerWithinEnabledRemoveButton(
+                            removeEnabled = removeButtonEnabled,
+                            offset = gridCoordinates?.let { it.positionInWindow() + offset },
+                            containerToCheck = removeButtonCoordinates
+                        )
                     },
                     gridState = gridState,
                     contentListState = contentListState,
@@ -446,6 +447,14 @@ private fun BoxScope.CommunalHubLazyGrid(
                 val selected by
                     remember(index) { derivedStateOf { list[index].key == selectedKey.value } }
                 DraggableItem(
+                    modifier =
+                        if (dragDropState.draggingItemIndex == index) {
+                            Modifier
+                        } else {
+                            Modifier.animateItem(
+                                placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                            )
+                        },
                     dragDropState = dragDropState,
                     selected = selected,
                     enabled = list[index].isWidgetContent(),
@@ -1200,11 +1209,13 @@ private fun beforeContentPadding(paddingValues: PaddingValues): ContentPaddingIn
  * Check whether the pointer position that the item is being dragged at is within the coordinates of
  * the remove button in the toolbar. Returns true if the item is removable.
  */
-private fun isPointerWithinCoordinates(
+@VisibleForTesting
+fun isPointerWithinEnabledRemoveButton(
+    removeEnabled: Boolean,
     offset: Offset?,
     containerToCheck: LayoutCoordinates?
 ): Boolean {
-    if (offset == null || containerToCheck == null) {
+    if (!removeEnabled || offset == null || containerToCheck == null) {
         return false
     }
     val container = containerToCheck.boundsInWindow()
