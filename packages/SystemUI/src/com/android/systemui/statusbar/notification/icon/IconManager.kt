@@ -20,8 +20,6 @@ import android.app.Notification
 import android.app.Notification.MessagingStyle
 import android.app.Person
 import android.content.pm.LauncherApps
-import android.graphics.drawable.AdaptiveIconDrawable
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Bundle
@@ -232,12 +230,7 @@ constructor(
             } else if (
                 android.app.Flags.notificationsUseMonochromeAppIcon() && n.shouldUseAppIcon()
             ) {
-                val monochrome = getMonochromeAppIcon(entry)
-                if (monochrome != null) {
-                    monochrome to StatusBarIcon.Type.MonochromeAppIcon
-                } else {
-                    n.smallIcon to StatusBarIcon.Type.NotifSmallIcon
-                }
+                n.smallIcon to StatusBarIcon.Type.MaybeMonochromeAppIcon
             } else {
                 n.smallIcon to StatusBarIcon.Type.NotifSmallIcon
             }
@@ -277,7 +270,8 @@ constructor(
             when (descriptor.type) {
                 StatusBarIcon.Type.PeopleAvatar -> entry.icons.peopleAvatarDescriptor = descriptor
                 // When notificationsUseMonochromeAppIcon is enabled, we use the appIconDescriptor.
-                StatusBarIcon.Type.MonochromeAppIcon -> entry.icons.appIconDescriptor = descriptor
+                StatusBarIcon.Type.MaybeMonochromeAppIcon ->
+                    entry.icons.appIconDescriptor = descriptor
                 // When notificationsUseAppIcon is enabled, the app icon overrides the small icon.
                 // But either way, it's a good idea to cache the descriptor.
                 else -> entry.icons.smallIconDescriptor = descriptor
@@ -319,29 +313,6 @@ constructor(
             iconBuilder.getIconContentDescription(n),
             type
         )
-    }
-
-    // TODO(b/335211019): Should we merge this with the method in GroupHelper?
-    private fun getMonochromeAppIcon(entry: NotificationEntry): Icon? {
-        // TODO(b/335211019): This should be done in the background.
-        var monochromeIcon: Icon? = null
-        try {
-            val appIcon: Drawable = iconBuilder.getAppIcon(entry.sbn.notification)
-            if (appIcon is AdaptiveIconDrawable) {
-                if (appIcon.monochrome != null) {
-                    monochromeIcon =
-                        Icon.createWithResourceAdaptiveDrawable(
-                            /* resPackage = */ entry.sbn.packageName,
-                            /* resId = */ appIcon.sourceDrawableResId,
-                            /* useMonochrome = */ true,
-                            /* inset = */ -3.0f * AdaptiveIconDrawable.getExtraInsetFraction()
-                        )
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to getAppIcon() in getMonochromeAppIcon()", e)
-        }
-        return monochromeIcon
     }
 
     private suspend fun getLauncherShortcutIconForPeopleAvatar(entry: NotificationEntry) =
