@@ -18,7 +18,7 @@ package com.android.server.companion.association;
 
 import static com.android.server.companion.utils.MetricUtils.logCreateAssociation;
 import static com.android.server.companion.utils.MetricUtils.logRemoveAssociation;
-import static com.android.server.companion.utils.PermissionsUtils.enforceCallerCanManageAssociationsForPackage;
+import static com.android.server.companion.utils.PermissionsUtils.checkCallerCanManageAssociationsForPackage;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -457,10 +457,6 @@ public class AssociationStore {
 
     /**
      * Get association by id with caller checks.
-     *
-     * If the association is not found, an IllegalArgumentException would be thrown.
-     *
-     * If the caller can't access the association, a SecurityException would be thrown.
      */
     @NonNull
     public AssociationInfo getAssociationWithCallerChecks(int associationId) {
@@ -470,9 +466,13 @@ public class AssociationStore {
                     "getAssociationWithCallerChecks() Association id=[" + associationId
                             + "] doesn't exist.");
         }
-        enforceCallerCanManageAssociationsForPackage(mContext, association.getUserId(),
-                association.getPackageName(), null);
-        return association;
+        if (checkCallerCanManageAssociationsForPackage(mContext, association.getUserId(),
+                association.getPackageName())) {
+            return association;
+        }
+
+        throw new IllegalArgumentException(
+                "The caller can't interact with the association id=[" + associationId + "].");
     }
 
     /**

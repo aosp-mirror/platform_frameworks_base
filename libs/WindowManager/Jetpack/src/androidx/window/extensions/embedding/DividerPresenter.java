@@ -245,11 +245,9 @@ class DividerPresenter implements View.OnTouchListener {
                             isReversedLayout,
                             parentInfo.getDisplayId(),
                             isDraggableExpandType,
-                            getContainerBackgroundColor(
-                                    primaryContainer, DEFAULT_PRIMARY_VEIL_COLOR),
-                            getContainerBackgroundColor(
-                                    secondaryContainer, DEFAULT_SECONDARY_VEIL_COLOR)
-                    ));
+                            primaryContainer,
+                            secondaryContainer)
+            );
         }
     }
 
@@ -965,8 +963,10 @@ class DividerPresenter implements View.OnTouchListener {
         private final int mDisplayId;
         private final boolean mIsReversedLayout;
         private final boolean mIsDraggableExpandType;
-        private final Color mPrimaryVeilColor;
-        private final Color mSecondaryVeilColor;
+        @NonNull
+        private final TaskFragmentContainer mPrimaryContainer;
+        @NonNull
+        private final TaskFragmentContainer mSecondaryContainer;
         private final int mDividerWidthPx;
 
         @VisibleForTesting
@@ -979,8 +979,8 @@ class DividerPresenter implements View.OnTouchListener {
                 boolean isReversedLayout,
                 int displayId,
                 boolean isDraggableExpandType,
-                @NonNull Color primaryVeilColor,
-                @NonNull Color secondaryVeilColor) {
+                @NonNull TaskFragmentContainer primaryContainer,
+                @NonNull TaskFragmentContainer secondaryContainer) {
             mConfiguration = configuration;
             mDividerAttributes = dividerAttributes;
             mDecorSurface = decorSurface;
@@ -989,8 +989,8 @@ class DividerPresenter implements View.OnTouchListener {
             mIsReversedLayout = isReversedLayout;
             mDisplayId = displayId;
             mIsDraggableExpandType = isDraggableExpandType;
-            mPrimaryVeilColor = primaryVeilColor;
-            mSecondaryVeilColor = secondaryVeilColor;
+            mPrimaryContainer = primaryContainer;
+            mSecondaryContainer = secondaryContainer;
             mDividerWidthPx = getDividerWidthPx(dividerAttributes);
         }
 
@@ -1014,8 +1014,8 @@ class DividerPresenter implements View.OnTouchListener {
                     && a.mDisplayId == b.mDisplayId
                     && a.mIsReversedLayout == b.mIsReversedLayout
                     && a.mIsDraggableExpandType == b.mIsDraggableExpandType
-                    && a.mPrimaryVeilColor.equals(b.mPrimaryVeilColor)
-                    && a.mSecondaryVeilColor.equals(b.mSecondaryVeilColor);
+                    && a.mPrimaryContainer == b.mPrimaryContainer
+                    && a.mSecondaryContainer == b.mSecondaryContainer;
         }
 
         private static boolean areSameSurfaces(
@@ -1328,8 +1328,12 @@ class DividerPresenter implements View.OnTouchListener {
         }
 
         private void showVeils(@NonNull SurfaceControl.Transaction t) {
-            t.setColor(mPrimaryVeil, colorToFloatArray(mProperties.mPrimaryVeilColor))
-                    .setColor(mSecondaryVeil, colorToFloatArray(mProperties.mSecondaryVeilColor))
+            final Color primaryVeilColor = getContainerBackgroundColor(
+                    mProperties.mPrimaryContainer, DEFAULT_PRIMARY_VEIL_COLOR);
+            final Color secondaryVeilColor = getContainerBackgroundColor(
+                    mProperties.mSecondaryContainer, DEFAULT_SECONDARY_VEIL_COLOR);
+            t.setColor(mPrimaryVeil, colorToFloatArray(primaryVeilColor))
+                    .setColor(mSecondaryVeil, colorToFloatArray(secondaryVeilColor))
                     .setLayer(mDividerSurface, DIVIDER_LAYER)
                     .setLayer(mPrimaryVeil, VEIL_LAYER)
                     .setLayer(mSecondaryVeil, VEIL_LAYER)

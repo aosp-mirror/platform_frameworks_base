@@ -2294,12 +2294,8 @@ public final class ViewRootImpl implements ViewParent,
         mInsetsController.onStateChanged(insetsState);
         if (mAdded) {
             mInsetsController.onControlsChanged(controls);
-        } else if (controls != null) {
-            for (InsetsSourceControl control : controls) {
-                if (control != null) {
-                    control.release(SurfaceControl::release);
-                }
-            }
+        } else {
+            activeControls.release();
         }
     }
 
@@ -11306,6 +11302,9 @@ public final class ViewRootImpl implements ViewParent,
             mIsFromTransactionItem = false;
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor == null) {
+                if (isFromInsetsControlChangeItem) {
+                    activeControls.release();
+                }
                 return;
             }
             if (insetsState.isSourceOrDefaultVisible(ID_IME, Type.ime())) {

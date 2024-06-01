@@ -17,7 +17,6 @@
 package android.view;
 
 import static android.view.InsetsController.ANIMATION_TYPE_NONE;
-import static android.view.InsetsController.ANIMATION_TYPE_RESIZE;
 import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsController.DEBUG;
 import static android.view.InsetsSourceConsumerProto.ANIMATION_STATE;
@@ -32,7 +31,6 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility.PACK
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
@@ -181,11 +179,10 @@ public class InsetsSourceConsumer {
                     mController.notifyVisibilityChanged();
                 }
 
-                // If there is no animation controlling the leash, make sure the visibility and the
-                // position is up-to-date.
-                final int animType = mController.getAnimationType(mType);
-                if (animType == ANIMATION_TYPE_NONE || animType == ANIMATION_TYPE_RESIZE) {
-                    applyRequestedVisibilityAndPositionToControl();
+                // If we have a new leash, make sure visibility is up-to-date, even though we
+                // didn't want to run an animation above.
+                if (mController.getAnimationType(mType) == ANIMATION_TYPE_NONE) {
+                    applyRequestedVisibilityToControl();
                 }
 
                 // Remove the surface that owned by last control when it lost.
@@ -374,27 +371,21 @@ public class InsetsSourceConsumer {
         if (DEBUG) Log.d(TAG, "updateSource: " + newSource);
     }
 
-    private void applyRequestedVisibilityAndPositionToControl() {
-        if (mSourceControl == null) {
-            return;
-        }
-        final SurfaceControl leash = mSourceControl.getLeash();
-        if (leash == null) {
+    private void applyRequestedVisibilityToControl() {
+        if (mSourceControl == null || mSourceControl.getLeash() == null) {
             return;
         }
 
         final boolean requestedVisible = (mController.getRequestedVisibleTypes() & mType) != 0;
-        final Point surfacePosition = mSourceControl.getSurfacePosition();
         try (Transaction t = mTransactionSupplier.get()) {
             if (DEBUG) Log.d(TAG, "applyRequestedVisibilityToControl: " + requestedVisible);
             if (requestedVisible) {
-                t.show(leash);
+                t.show(mSourceControl.getLeash());
             } else {
-                t.hide(leash);
+                t.hide(mSourceControl.getLeash());
             }
             // Ensure the alpha value is aligned with the actual requested visibility.
-            t.setAlpha(leash, requestedVisible ? 1 : 0);
-            t.setPosition(leash, surfacePosition.x, surfacePosition.y);
+            t.setAlpha(mSourceControl.getLeash(), requestedVisible ? 1 : 0);
             t.apply();
         }
         onPerceptible(requestedVisible);

@@ -1927,7 +1927,7 @@ public class WindowManagerService extends IWindowManager.Stub
             displayContent.getInsetsStateController().updateAboveInsetsState(
                     false /* notifyInsetsChanged */);
 
-            outInsetsState.set(win.getCompatInsetsState(), true /* copySources */);
+            win.fillInsetsState(outInsetsState, true /* copySources */);
             getInsetsSourceControls(win, outActiveControls);
 
             if (win.mLayoutAttached) {
@@ -2680,7 +2680,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (outInsetsState != null) {
-                outInsetsState.set(win.getCompatInsetsState(), true /* copySources */);
+                win.fillInsetsState(outInsetsState, true /* copySources */);
             }
 
             ProtoLog.v(WM_DEBUG_FOCUS, "Relayout of %s: focusMayChange=%b",
@@ -2743,12 +2743,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void getInsetsSourceControls(WindowState win, InsetsSourceControl.Array outArray) {
-        final InsetsSourceControl[] controls =
-                win.getDisplayContent().getInsetsStateController().getControlsForDispatch(win);
         // We will leave the critical section before returning the leash to the client,
         // so we need to copy the leash to prevent others release the one that we are
         // about to return.
-        outArray.set(controls, true /* copyControls */);
+        win.fillInsetsSourceControls(outArray, true /* copyControls */);
         // This source control is an extra copy if the client is not local. By setting
         // PARCELABLE_WRITE_RETURN_VALUE, the leash will be released at the end of
         // SurfaceControl.writeToParcel.

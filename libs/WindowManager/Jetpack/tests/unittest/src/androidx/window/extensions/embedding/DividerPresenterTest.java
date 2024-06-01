@@ -166,8 +166,8 @@ public class DividerPresenterTest {
                 false /* isReversedLayout */,
                 Display.DEFAULT_DISPLAY,
                 false /* isDraggableExpandType */,
-                Color.valueOf(Color.BLACK), /* primaryVeilColor */
-                Color.valueOf(Color.GRAY) /* secondaryVeilColor */
+                mockPrimaryContainer,
+                mockSecondaryContainer
         );
 
         mDividerPresenter = new DividerPresenter(

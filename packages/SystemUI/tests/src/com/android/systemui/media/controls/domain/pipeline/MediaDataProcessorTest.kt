@@ -191,7 +191,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        whenever(mediaFlags.isMediaControlsRefactorEnabled()).thenReturn(true)
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(true)
 
         staticMockSession =
             ExtendedMockito.mockitoSession()

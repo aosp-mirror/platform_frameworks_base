@@ -78,9 +78,42 @@ filegroup {
     visibility: ["//visibility:private"],
 }
 
+// Tests where robolectric conversion caused errors in SystemUITests at runtime
+filegroup {
+    name: "SystemUI-tests-broken-robofiles-sysui-run",
+    srcs: [
+        "tests/src/**/systemui/globalactions/GlobalActionsDialogLiteTest.java",
+        "tests/src/**/systemui/media/controls/domain/pipeline/LegacyMediaDataManagerImplTest.kt",
+        "tests/src/**/systemui/media/controls/domain/pipeline/MediaDataProcessorTest.kt",
+        "tests/src/**/systemui/media/dialog/MediaOutputAdapterTest.java",
+        "tests/src/**/systemui/media/dialog/MediaOutputBaseDialogTest.java",
+        "tests/src/**/systemui/media/dialog/MediaOutputBroadcastDialogTest.java",
+        "tests/src/**/systemui/media/dialog/MediaOutputDialogTest.java",
+        "tests/src/**/systemui/mediaprojection/permission/MediaProjectionPermissionDialogDelegateTest.kt",
+    ],
+}
+
 filegroup {
     name: "SystemUI-tests-broken-robofiles-run",
     srcs: [
+        "tests/src/**/systemui/keyguard/CustomizationProviderTest.kt",
+        "tests/src/**/systemui/globalactions/GlobalActionsColumnLayoutTest.java",
+        "tests/src/**/systemui/globalactions/GlobalActionsDialogLiteTest.java",
+        "tests/src/**/systemui/globalactions/GlobalActionsImeTest.java",
+        "tests/src/**/systemui/graphics/ImageLoaderTest.kt",
+        "tests/src/**/systemui/keyguard/KeyguardViewMediatorTest.java",
+        "tests/src/**/systemui/keyguard/LifecycleTest.java",
+        "tests/src/**/systemui/keyguard/data/repository/KeyguardTransitionRepositoryTest.kt",
+        "tests/src/**/systemui/keyguard/ui/view/layout/sections/ClockSectionTest.kt",
+        "tests/src/**/systemui/keyguard/data/repository/KeyguardBlueprintRepositoryTest.kt",
+        "tests/src/**/systemui/keyguard/ui/viewmodel/KeyguardSmartspaceViewModelTest.kt",
+        "tests/src/**/systemui/lifecycle/RepeatWhenAttachedTest.kt",
+        "tests/src/**/systemui/log/LogBufferTest.kt",
+        "tests/src/**/systemui/media/dialog/MediaOutputBaseDialogTest.java",
+        "tests/src/**/systemui/media/dialog/MediaOutputBroadcastDialogTest.java",
+        "tests/src/**/systemui/media/dialog/MediaOutputDialogTest.java",
+        "tests/src/**/systemui/media/controls/domain/resume/MediaResumeListenerTest.kt",
+        "tests/src/**/systemui/mediaprojection/taskswitcher/ui/TaskSwitcherNotificationCoordinatorTest.kt",
         "tests/src/**/systemui/util/LifecycleFragmentTest.java",
         "tests/src/**/systemui/util/TestableAlertDialogTest.kt",
         "tests/src/**/systemui/util/kotlin/PairwiseFlowTest",
@@ -767,6 +800,7 @@ android_robolectric_test {
         ":SystemUI-tests-robofiles",
     ],
     exclude_srcs: [
+        ":SystemUI-tests-broken-robofiles-sysui-run",
         ":SystemUI-tests-broken-robofiles-compile",
         ":SystemUI-tests-broken-robofiles-run",
     ],

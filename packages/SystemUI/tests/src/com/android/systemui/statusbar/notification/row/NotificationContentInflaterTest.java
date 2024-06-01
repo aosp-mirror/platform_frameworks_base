@@ -140,7 +140,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 mSmartReplyStateInflater,
                 mNotifLayoutInflaterFactoryProvider,
                 mHeadsUpStyleProvider,
-                mock(NotificationContentInflaterLogger.class));
+                mock(NotificationRowContentBinderLogger.class));
     }
 
     @Test
@@ -265,7 +265,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                                 R.layout.custom_view_dark);
                     }
                 },
-                mock(NotificationContentInflaterLogger.class));
+                mock(NotificationRowContentBinderLogger.class));
         assertTrue(countDownLatch.await(500, TimeUnit.MILLISECONDS));
     }
 

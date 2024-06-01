@@ -255,6 +255,39 @@ public class QSImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void setQsExpansion_whenShouldUpdateSquishinessTrue_setsSquishinessBasedOnFraction() {
+        enableSplitShade();
+        when(mStatusBarStateController.getState()).thenReturn(KEYGUARD);
+        float expansion = 0.456f;
+        float panelExpansionFraction = 0.678f;
+        float proposedTranslation = 567f;
+        float squishinessFraction = 0.789f;
+
+        mUnderTest.setShouldUpdateSquishinessOnMedia(true);
+        mUnderTest.setQsExpansion(expansion, panelExpansionFraction, proposedTranslation,
+                squishinessFraction);
+
+        verify(mQSMediaHost).setSquishFraction(squishinessFraction);
+    }
+
+    @Test
+    public void setQsExpansion_whenOnKeyguardAndShouldUpdateSquishinessFalse_setsSquishiness() {
+        // Random test values without any meaning. They just have to be different from each other.
+        float expansion = 0.123f;
+        float panelExpansionFraction = 0.321f;
+        float proposedTranslation = 456f;
+        float squishinessFraction = 0.567f;
+
+        enableSplitShade();
+        setStatusBarCurrentAndUpcomingState(KEYGUARD);
+        mUnderTest.setShouldUpdateSquishinessOnMedia(false);
+        mUnderTest.setQsExpansion(expansion, panelExpansionFraction, proposedTranslation,
+                squishinessFraction);
+
+        verify(mQSMediaHost).setSquishFraction(1.0f);
+    }
+
+    @Test
     public void setQsExpansion_inSplitShade_setsFooterActionsExpansion_basedOnPanelExpFraction() {
         // Random test values without any meaning. They just have to be different from each other.
         float expansion = 0.123f;

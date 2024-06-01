@@ -98,12 +98,12 @@ constructor(
 
     private fun showNewVolumePanel() {
         activityStarter.dismissKeyguardThenExecute(
-            {
+            /* action = */ {
                 volumePanelGlobalStateInteractor.setVisible(true)
                 false
             },
-            {},
-            true
+            /* cancel = */ {},
+            /* afterKeyguardGone = */ true,
         )
     }
 

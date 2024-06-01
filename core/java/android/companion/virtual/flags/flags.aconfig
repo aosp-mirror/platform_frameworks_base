@@ -64,3 +64,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    namespace: "virtual_devices"
+    name: "intent_interception_action_matching_fix"
+    description: "Do not match intents without actions if the filter has actions"
+    bug: "343805037"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

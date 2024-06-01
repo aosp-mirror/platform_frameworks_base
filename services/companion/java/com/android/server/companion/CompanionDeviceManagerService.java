@@ -34,6 +34,7 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 import static com.android.server.companion.utils.PackageUtils.enforceUsesCompanionDeviceFeature;
 import static com.android.server.companion.utils.PackageUtils.getPackageInfo;
 import static com.android.server.companion.utils.PackageUtils.isRestrictedSettingsAllowed;
+import static com.android.server.companion.utils.PermissionsUtils.checkCallerCanManageCompanionDevice;
 import static com.android.server.companion.utils.PermissionsUtils.enforceCallerCanManageAssociationsForPackage;
 import static com.android.server.companion.utils.PermissionsUtils.enforceCallerIsSystemOr;
 import static com.android.server.companion.utils.PermissionsUtils.enforceCallerIsSystemOrCanInteractWithUserId;
@@ -333,6 +334,12 @@ public class CompanionDeviceManagerService extends SystemService {
         public List<AssociationInfo> getAssociations(String packageName, int userId) {
             enforceCallerCanManageAssociationsForPackage(getContext(), userId, packageName,
                     "get associations");
+
+            if (!checkCallerCanManageCompanionDevice(getContext())) {
+                // If the caller neither is system nor holds MANAGE_COMPANION_DEVICES: it needs to
+                // request the feature (also: the caller is the app itself).
+                enforceUsesCompanionDeviceFeature(getContext(), userId, packageName);
+            }
 
             return mAssociationStore.getActiveAssociationsByPackage(userId, packageName);
         }
