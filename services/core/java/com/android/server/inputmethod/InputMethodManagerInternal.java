@@ -16,6 +16,8 @@
 
 package com.android.server.inputmethod;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -30,6 +32,9 @@ import com.android.internal.inputmethod.InlineSuggestionsRequestInfo;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.server.LocalServices;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,6 +42,16 @@ import java.util.List;
  * Input method manager local system service interface.
  */
 public abstract class InputMethodManagerInternal {
+    /**
+     * Indicates that the method is guaranteed to not require {@link ImfLock}.
+     *
+     * <p>You can call this method without worrying about system_server lock layering.</p>
+     */
+    @Retention(SOURCE)
+    @Target({ElementType.METHOD})
+    public @interface ImfLockFree {
+    }
+
     /**
      * Listener for input method list changed events.
      */
@@ -53,6 +68,7 @@ public abstract class InputMethodManagerInternal {
      *
      * @param interactive the interactive mode parameter
      */
+    @ImfLockFree
     public abstract void setInteractive(boolean interactive);
 
     /**
@@ -61,6 +77,7 @@ public abstract class InputMethodManagerInternal {
      * @param reason               the reason for hiding the current input method
      * @param originatingDisplayId the display ID the request is originated
      */
+    @ImfLockFree
     public abstract void hideAllInputMethods(@SoftInputShowHideReason int reason,
             int originatingDisplayId);
 
@@ -143,6 +160,7 @@ public abstract class InputMethodManagerInternal {
      *
      * @param listener the listener to add
      */
+    @ImfLockFree
     public abstract void registerInputMethodListListener(InputMethodListListener listener);
 
     /**
@@ -178,6 +196,7 @@ public abstract class InputMethodManagerInternal {
      *
      * @param displayId the display hosting the IME window
      */
+    @ImfLockFree
     public abstract void removeImeSurface(int displayId);
 
     /**
@@ -188,12 +207,14 @@ public abstract class InputMethodManagerInternal {
      * @param disableImeIcon indicates whether IME icon should be enabled or not
      * @param displayId      the display for which to update the IME window status
      */
+    @ImfLockFree
     public abstract void updateImeWindowStatus(boolean disableImeIcon, int displayId);
 
     /**
      * Finish stylus handwriting by calling {@link InputMethodService#finishStylusHandwriting()} if
      * there is an ongoing handwriting session.
      */
+    @ImfLockFree
     public abstract void maybeFinishStylusHandwriting();
 
     /**
@@ -240,10 +261,12 @@ public abstract class InputMethodManagerInternal {
      */
     private static final InputMethodManagerInternal NOP =
             new InputMethodManagerInternal() {
+                @ImfLockFree
                 @Override
                 public void setInteractive(boolean interactive) {
                 }
 
+                @ImfLockFree
                 @Override
                 public void hideAllInputMethods(@SoftInputShowHideReason int reason,
                         int originatingDisplayId) {
@@ -282,6 +305,7 @@ public abstract class InputMethodManagerInternal {
                         int deviceId, @Nullable String imeId) {
                 }
 
+                @ImfLockFree
                 @Override
                 public void registerInputMethodListListener(InputMethodListListener listener) {
                 }
@@ -300,10 +324,12 @@ public abstract class InputMethodManagerInternal {
                 public void onImeParentChanged(int displayId) {
                 }
 
+                @ImfLockFree
                 @Override
                 public void removeImeSurface(int displayId) {
                 }
 
+                @ImfLockFree
                 @Override
                 public void updateImeWindowStatus(boolean disableImeIcon, int displayId) {
                 }
@@ -318,6 +344,7 @@ public abstract class InputMethodManagerInternal {
                         @UserIdInt int userId) {
                 }
 
+                @ImfLockFree
                 @Override
                 public void maybeFinishStylusHandwriting() {
                 }
