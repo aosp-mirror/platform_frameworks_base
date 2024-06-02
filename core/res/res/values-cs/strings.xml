@@ -1604,7 +1604,7 @@
     <string name="issued_by" msgid="7872459822431585684">"Vydal:"</string>
     <string name="validity_period" msgid="1717724283033175968">"Platnost:"</string>
     <string name="issued_on" msgid="5855489688152497307">"Datum vydání:"</string>
-    <string name="expires_on" msgid="1623640879705103121">"Platnost vyprší:"</string>
+    <string name="expires_on" msgid="1623640879705103121">"Platnost skončí:"</string>
     <string name="serial_number" msgid="3479576915806623429">"Sériové číslo:"</string>
     <string name="fingerprints" msgid="148690767172613723">"Digitální otisky:"</string>
     <string name="sha256_fingerprint" msgid="7103976380961964600">"Digitální otisk SHA-256"</string>
@@ -2341,9 +2341,9 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Rozložení klávesnice je nastaveno na <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Klepnutím jej změníte."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Fyzické klávesnice byly nakonfigurovány"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Klepnutím zobrazíte klávesnice"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Soukromé"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Soukromý"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Klonovat"</string>
-    <string name="profile_label_work" msgid="3495359133038584618">"Práce"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Pracovní"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Práce 2"</string>
     <string name="profile_label_work_3" msgid="4834572253956798917">"Práce 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
