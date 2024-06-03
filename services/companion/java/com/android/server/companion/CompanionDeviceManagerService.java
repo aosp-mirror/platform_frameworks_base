@@ -72,12 +72,11 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.PowerWhitelistManager;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.os.ResultReceiver;
 import android.os.ServiceManager;
-import android.os.ShellCallback;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -750,16 +749,13 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
-        public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-                String[] args, ShellCallback callback, ResultReceiver resultReceiver)
-                throws RemoteException {
-            enforceCallerCanManageCompanionDevice(getContext(), "onShellCommand");
-
-            final CompanionDeviceShellCommand cmd = new CompanionDeviceShellCommand(
-                    CompanionDeviceManagerService.this,
-                    mAssociationStore,
-                    mDevicePresenceMonitor);
-            cmd.exec(this, in, out, err, args, callback, resultReceiver);
+        public int handleShellCommand(@NonNull ParcelFileDescriptor in,
+                @NonNull ParcelFileDescriptor out, @NonNull ParcelFileDescriptor err,
+                @NonNull String[] args) {
+            return new CompanionDeviceShellCommand(CompanionDeviceManagerService.this,
+                    mAssociationStore, mDevicePresenceMonitor)
+                    .exec(this, in.getFileDescriptor(), out.getFileDescriptor(),
+                            err.getFileDescriptor(), args);
         }
 
         @Override

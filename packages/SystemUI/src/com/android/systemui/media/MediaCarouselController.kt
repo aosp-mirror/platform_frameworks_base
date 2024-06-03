@@ -176,6 +176,7 @@ class MediaCarouselController @Inject constructor(
      * It will be called when the container is out of view.
      */
     lateinit var updateUserVisibility: () -> Unit
+    lateinit var updateHostVisibility: () -> Unit
 
     private val isReorderingAllowed: Boolean
         get() = visualStabilityProvider.isReorderingAllowed

@@ -674,10 +674,11 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             if (bp == null) {
                 return;
             }
-            if (bp.isDynamic()) {
+            if (!bp.isDynamic()) {
                 // TODO: switch this back to SecurityException
                 Slog.wtf(TAG, "Not allowed to modify non-dynamic permission "
                         + permName);
+                return;
             }
             mRegistry.removePermission(permName);
         }

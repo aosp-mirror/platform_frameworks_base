@@ -14,6 +14,7 @@
 
 package com.android.systemui;
 
+import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -28,12 +29,15 @@ import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class SysuiTestableContext extends TestableContext {
 
     @GuardedBy("mRegisteredReceivers")
     private final Set<BroadcastReceiver> mRegisteredReceivers = new ArraySet<>();
+    private final Map<UserHandle, Context> mContextForUser = new HashMap<>();
 
     public SysuiTestableContext(Context base) {
         super(base);
@@ -145,5 +149,23 @@ public class SysuiTestableContext extends TestableContext {
             }
         }
         super.unregisterReceiver(receiver);
+    }
+
+    /**
+     * Sets a Context object that will be returned as the result of {@link #createContextAsUser}
+     * for a specific {@code user}.
+     */
+    public void prepareCreateContextAsUser(UserHandle user, Context context) {
+        mContextForUser.put(user, context);
+    }
+
+    @Override
+    @NonNull
+    public Context createContextAsUser(UserHandle user, int flags) {
+        Context userContext = mContextForUser.get(user);
+        if (userContext != null) {
+            return userContext;
+        }
+        return super.createContextAsUser(user, flags);
     }
 }

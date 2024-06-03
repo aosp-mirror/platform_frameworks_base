@@ -117,6 +117,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 dreamOverlayStateController)
         verify(wakefulnessLifecycle).addObserver(wakefullnessObserver.capture())
         verify(statusBarStateController).addCallback(statusBarCallback.capture())
+        whenever(mediaCarouselController.updateHostVisibility).thenReturn({})
         setupHost(lockHost, MediaHierarchyManager.LOCATION_LOCKSCREEN, LOCKSCREEN_TOP)
         setupHost(qsHost, MediaHierarchyManager.LOCATION_QS, QS_TOP)
         setupHost(qqsHost, MediaHierarchyManager.LOCATION_QQS, QQS_TOP)
@@ -303,6 +304,42 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         whenever(qqsHost.visible).thenReturn(true)
 
         assertThat(mediaHiearchyManager.isCurrentlyInGuidedTransformation()).isFalse()
+    }
+
+    @Test
+    fun keyguardState_allowedOnLockscreen_updateVisibility() {
+        whenever(notificationLockscreenUserManager.shouldShowLockscreenNotifications())
+                .thenReturn(true)
+
+        statusBarCallback.value.onStatePreChange(StatusBarState.SHADE, StatusBarState.KEYGUARD)
+        statusBarCallback.value.onStateChanged(StatusBarState.KEYGUARD)
+
+        verify(mediaCarouselController).updateHostVisibility
+        assertThat(mediaHiearchyManager.isLockedAndHidden()).isFalse()
+    }
+
+    @Test
+    fun keyguardState_notAllowedOnLockscreen_updateVisibility() {
+        whenever(notificationLockscreenUserManager.shouldShowLockscreenNotifications())
+                .thenReturn(false)
+
+        statusBarCallback.value.onStatePreChange(StatusBarState.SHADE, StatusBarState.KEYGUARD)
+        statusBarCallback.value.onStateChanged(StatusBarState.KEYGUARD)
+
+        verify(mediaCarouselController).updateHostVisibility
+        assertThat(mediaHiearchyManager.isLockedAndHidden()).isTrue()
+    }
+
+    @Test
+    fun keyguardGone_updateVisibility() {
+        whenever(notificationLockscreenUserManager.shouldShowLockscreenNotifications())
+                .thenReturn(false)
+
+        statusBarCallback.value.onStatePreChange(StatusBarState.KEYGUARD, StatusBarState.SHADE)
+        statusBarCallback.value.onStateChanged(StatusBarState.SHADE)
+
+        verify(mediaCarouselController).updateHostVisibility
+        assertThat(mediaHiearchyManager.isLockedAndHidden()).isFalse()
     }
 
     private fun enableSplitShade() {

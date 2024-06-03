@@ -22,7 +22,6 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.FrameLayout
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.MediaContainerView
@@ -53,8 +52,6 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var configurationController: ConfigurationController
 
-    @Mock
-    private lateinit var notificationLockscreenUserManager: NotificationLockscreenUserManager
     @JvmField @Rule
     val mockito = MockitoJUnit.rule()
 
@@ -67,15 +64,12 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
         // default state is positive, media should show up
         whenever(mediaHost.visible).thenReturn(true)
         whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
-        whenever(notificationLockscreenUserManager.shouldShowLockscreenNotifications())
-                .thenReturn(true)
         whenever(mediaHost.hostView).thenReturn(hostView)
         hostView.layoutParams = FrameLayout.LayoutParams(100, 100)
         keyguardMediaController = KeyguardMediaController(
             mediaHost,
             bypassController,
             statusBarStateController,
-            notificationLockscreenUserManager,
             context,
             configurationController
         )
@@ -103,16 +97,6 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
         whenever(statusBarStateController.state).thenReturn(state)
         keyguardMediaController.refreshMediaPosition()
         assertThat(mediaContainerView.visibility).isEqualTo(visibility)
-    }
-
-    @Test
-    fun testHiddenOnKeyguard_whenNotificationsAreHidden() {
-        whenever(notificationLockscreenUserManager.shouldShowLockscreenNotifications())
-                .thenReturn(false)
-
-        keyguardMediaController.refreshMediaPosition()
-
-        assertThat(mediaContainerView.visibility).isEqualTo(GONE)
     }
 
     @Test
