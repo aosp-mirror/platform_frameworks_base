@@ -37,6 +37,7 @@ import com.android.systemui.communal.data.repository.fakeCommunalTutorialReposit
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.communalSceneInteractor
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.communal.domain.interactor.communalTutorialInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalScenes
@@ -152,6 +153,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                 kosmos.keyguardInteractor,
                 kosmos.communalSceneInteractor,
                 kosmos.communalInteractor,
+                kosmos.communalSettingsInteractor,
                 kosmos.communalTutorialInteractor,
                 kosmos.shadeInteractor,
                 mediaHost,
