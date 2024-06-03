@@ -2645,9 +2645,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (displayPolicy.areSystemBarsForcedConsumedLw()) {
                 result |= WindowManagerGlobal.RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS;
             }
-            if (!win.isGoneForLayout()) {
-                win.mResizedWhileGone = false;
-            }
 
             if (outFrames != null && outMergedConfiguration != null) {
                 final boolean shouldReportActivityWindowInfo;

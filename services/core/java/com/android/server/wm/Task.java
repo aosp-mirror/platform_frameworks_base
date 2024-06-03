@@ -4559,7 +4559,10 @@ class Task extends TaskFragment {
         }
         final WindowState w = getTopVisibleAppMainWindow();
         if (w != null) {
+            w.mIsSurfacePositionPaused = true;
             w.applyWithNextDraw((d) -> {
+                w.mIsSurfacePositionPaused = false;
+                w.updateSurfacePosition(d);
                 d.merge(t);
             });
         } else {
