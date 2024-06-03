@@ -18,6 +18,7 @@ package com.android.systemui.animation
 
 import android.animation.AnimatorSet
 import android.graphics.drawable.GradientDrawable
+import android.platform.test.annotations.MotionTest
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.test.ext.junit.rules.ActivityScenarioRule
@@ -44,6 +45,7 @@ import platform.test.screenshot.GoldenPathManager
 import platform.test.screenshot.PathConfig
 
 @SmallTest
+@MotionTest
 @RunWith(AndroidJUnit4::class)
 class TransitionAnimatorTest : SysuiTestCase() {
     companion object {
