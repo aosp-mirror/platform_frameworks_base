@@ -60,15 +60,15 @@ import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import perfetto.protos.Protolog;
+import perfetto.protos.ProtologCommon;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import perfetto.protos.Protolog;
-import perfetto.protos.ProtologCommon;
 
 /**
  * Test class for {@link ProtoLogImpl}.
@@ -427,6 +427,38 @@ public class PerfettoProtoLogImplTest {
                     LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, messageHash,
                     0b1110101001010100, null,
                     new Object[]{"test", 1, 2, 3, 0.4, 0.5, 0.6, true});
+            after = SystemClock.elapsedRealtimeNanos();
+        } finally {
+            traceMonitor.stop(mWriter);
+        }
+
+        final ResultReader reader = new ResultReader(mWriter.write(), mTraceConfig);
+        final ProtoLogTrace protolog = reader.readProtoLogTrace();
+
+        Truth.assertThat(protolog.messages).hasSize(1);
+        Truth.assertThat(protolog.messages.getFirst().getTimestamp().getElapsedNanos())
+                .isAtLeast(before);
+        Truth.assertThat(protolog.messages.getFirst().getTimestamp().getElapsedNanos())
+                .isAtMost(after);
+        Truth.assertThat(protolog.messages.getFirst().getMessage())
+                .isEqualTo("My test message :: test, 2, 4, 6, 0.400000, 5.000000e-01, 0.6, true");
+    }
+
+    @Test
+    public void log_noProcessing() throws IOException {
+        PerfettoTraceMonitor traceMonitor =
+                PerfettoTraceMonitor.newBuilder().enableProtoLog().build();
+        long before;
+        long after;
+        try {
+            traceMonitor.start();
+            assertTrue(mProtoLog.isProtoEnabled());
+
+            before = SystemClock.elapsedRealtimeNanos();
+            mProtoLog.log(
+                    LogLevel.INFO, TestProtoLogGroup.TEST_GROUP,
+                    "My test message :: %s, %d, %o, %x, %f, %e, %g, %b",
+                    "test", 1, 2, 3, 0.4, 0.5, 0.6, true);
             after = SystemClock.elapsedRealtimeNanos();
         } finally {
             traceMonitor.stop(mWriter);
