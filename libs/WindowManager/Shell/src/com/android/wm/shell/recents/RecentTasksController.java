@@ -409,10 +409,6 @@ public class RecentTasksController implements TaskStackListenerCallback,
             if (DesktopModeStatus.canEnterDesktopMode(mContext)
                     && mDesktopModeTaskRepository.isPresent()
                     && mDesktopModeTaskRepository.get().isActiveTask(taskInfo.taskId)) {
-                if (mDesktopModeTaskRepository.get().isMinimizedTask(taskInfo.taskId)) {
-                    // Minimized freeform tasks should not be shown at all.
-                    continue;
-                }
                 // Freeform tasks will be added as a separate entry
                 if (mostRecentFreeformTaskIndex == Integer.MAX_VALUE) {
                     mostRecentFreeformTaskIndex = recentTasks.size();
