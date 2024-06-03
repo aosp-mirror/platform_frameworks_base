@@ -98,7 +98,7 @@ public final class ChangeReporter {
     public void reportChange(int uid, long changeId, int state, boolean isLoggableBySdk) {
         boolean isAlreadyReported =
                 checkAndSetIsAlreadyReported(uid, new ChangeReport(changeId, state));
-        if (shouldWriteToStatsLog(isAlreadyReported)) {
+        if (!isAlreadyReported) {
             FrameworkStatsLog.write(FrameworkStatsLog.APP_COMPATIBILITY_CHANGE_REPORTED, uid,
                     changeId, state, mSource);
         }
@@ -136,16 +136,14 @@ public final class ChangeReporter {
     /**
      * Returns whether the next report should be logged to FrameworkStatsLog.
      *
-     * @param isAlreadyReported is the change already reported
+     * @param uid      affected by the change
+     * @param changeId the reported change id
+     * @param state    of the reported change - enabled/disabled/only logged
      * @return true if the report should be logged
      */
     @VisibleForTesting
-    boolean shouldWriteToStatsLog(boolean isAlreadyReported) {
-        // We don't log for system server
-        if (mSource == SOURCE_SYSTEM_SERVER) return false;
-
-        // Don't log if already reported
-        return !isAlreadyReported;
+    boolean shouldWriteToStatsLog(int uid, long changeId, int state) {
+        return !isAlreadyReported(uid, new ChangeReport(changeId, state));
     }
 
     /**
@@ -162,6 +160,8 @@ public final class ChangeReporter {
             boolean isAlreadyReported, int state, boolean isLoggableBySdk) {
         // If log all bit is on, always return true.
         if (mDebugLogAll) return true;
+        // If the change has already been reported, do not write.
+        if (isAlreadyReported) return false;
 
         // If the flag is turned off or the TAG's logging is forced to debug level with
         // `adb setprop log.tag.CompatChangeReporter=DEBUG`, write to debug since the above checks
@@ -222,19 +222,6 @@ public final class ChangeReporter {
 
     private boolean isAlreadyReported(int uid, ChangeReport report) {
         return mReportedChanges.getOrDefault(uid, EMPTY_SET).contains(report);
-    }
-
-    /**
-     * Returns whether the next report should be logged.
-     *
-     * @param uid      affected by the change
-     * @param changeId the reported change id
-     * @param state    of the reported change - enabled/disabled/only logged
-     * @return true if the report should be logged
-     */
-    @VisibleForTesting
-    boolean isAlreadyReported(int uid, long changeId, int state) {
-        return isAlreadyReported(uid, new ChangeReport(changeId, state));
     }
 
     private void markAsReported(int uid, ChangeReport report) {
