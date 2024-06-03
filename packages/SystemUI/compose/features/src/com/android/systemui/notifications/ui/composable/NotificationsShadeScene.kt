@@ -94,6 +94,7 @@ constructor(
                     maxScrimTop = { 0f },
                     shouldPunchHoleBehindScrim = false,
                     shouldFillMaxSize = false,
+                    shouldReserveSpaceForNavBar = false,
                     shadeMode = ShadeMode.Dual,
                     modifier = Modifier.fillMaxWidth(),
                 )

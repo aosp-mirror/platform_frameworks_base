@@ -104,9 +104,9 @@ val SceneContainerTransitions = transitions {
         )
     }
     overscroll(Scenes.NotificationsShade, Orientation.Vertical) {
-        translate(OverlayShade.Elements.Panel, y = { OverlayShade.Dimensions.OverscrollLimit })
+        translate(OverlayShade.Elements.Panel, y = OverlayShade.Dimensions.OverscrollLimit)
     }
     overscroll(Scenes.QuickSettingsShade, Orientation.Vertical) {
-        translate(OverlayShade.Elements.Panel, y = { OverlayShade.Dimensions.OverscrollLimit })
+        translate(OverlayShade.Elements.Panel, y = OverlayShade.Dimensions.OverscrollLimit)
     }
 }
