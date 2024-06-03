@@ -41,8 +41,10 @@ fun transition(
     return object : TransitionState.Transition(from, to), TransitionState.HasOverscrollProperties {
         override val currentScene: SceneKey
             get() = current()
+
         override val progress: Float
             get() = progress()
+
         override val progressVelocity: Float
             get() = progressVelocity()
 
@@ -53,6 +55,8 @@ fun transition(
         override val orientation: Orientation = orientation
         override val overscrollScope: OverscrollScope =
             object : OverscrollScope {
+                override val density: Float = 1f
+                override val fontScale: Float = 1f
                 override val absoluteDistance = 0f
             }
 
