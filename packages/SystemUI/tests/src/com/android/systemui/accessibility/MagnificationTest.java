@@ -43,6 +43,7 @@ import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Display;
+import android.view.IWindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IMagnificationConnection;
 import android.view.accessibility.IMagnificationConnectionCallback;
@@ -93,6 +94,8 @@ public class MagnificationTest extends SysuiTestCase {
     private MagnificationSettingsController mMagnificationSettingsController;
     @Mock
     private AccessibilityLogger mA11yLogger;
+    @Mock
+    private IWindowManager mIWindowManager;
 
     @Before
     public void setUp() throws Exception {
@@ -122,10 +125,10 @@ public class MagnificationTest extends SysuiTestCase {
 
         mCommandQueue = new CommandQueue(getContext(), mDisplayTracker);
         mMagnification = new Magnification(getContext(),
-                getContext().getMainThreadHandler(), getContext().getMainExecutor(),
+                getContext().getMainThreadHandler(), mContext.getMainExecutor(),
                 mCommandQueue, mModeSwitchesController,
                 mSysUiState, mOverviewProxyService, mSecureSettings, mDisplayTracker,
-                getContext().getSystemService(DisplayManager.class), mA11yLogger);
+                getContext().getSystemService(DisplayManager.class), mA11yLogger, mIWindowManager);
         mMagnification.mWindowMagnificationControllerSupplier = new FakeControllerSupplier(
                 mContext.getSystemService(DisplayManager.class), mWindowMagnificationController);
         mMagnification.mMagnificationSettingsSupplier = new FakeSettingsSupplier(
