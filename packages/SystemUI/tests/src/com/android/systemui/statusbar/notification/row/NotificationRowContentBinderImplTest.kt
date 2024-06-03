@@ -20,6 +20,7 @@ import android.content.Context
 import android.os.AsyncTask
 import android.os.Build
 import android.os.CancellationSignal
+import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper.RunWithLooper
 import android.util.TypedValue
 import android.view.View
@@ -35,6 +36,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.BindParams
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationCallback
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag
+import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState
 import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder
 import com.android.systemui.statusbar.policy.SmartReplyStateInflater
@@ -58,6 +60,7 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
+@EnableFlags(NotificationRowContentBinderRefactor.FLAG_NAME)
 class NotificationRowContentBinderImplTest : SysuiTestCase() {
     private lateinit var mNotificationInflater: NotificationRowContentBinderImpl
     private lateinit var mBuilder: Notification.Builder

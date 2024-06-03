@@ -58,6 +58,7 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation
 import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation
+import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor
 import com.android.systemui.statusbar.notification.row.ui.viewbinder.SingleLineConversationViewBinder
 import com.android.systemui.statusbar.notification.row.ui.viewbinder.SingleLineViewBinder
 import com.android.systemui.statusbar.notification.row.ui.viewmodel.SingleLineViewModel
@@ -89,6 +90,11 @@ constructor(
     private val headsUpStyleProvider: HeadsUpStyleProvider,
     private val logger: NotificationRowContentBinderLogger
 ) : NotificationRowContentBinder {
+
+    init {
+        /* check if */ NotificationRowContentBinderRefactor.isUnexpectedlyInLegacyMode()
+    }
+
     private var inflateSynchronously = false
 
     override fun bindContent(
