@@ -1630,16 +1630,17 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     private boolean tryUnderLock(boolean sync, long timeoutMs, Runnable runnable) {
         try {
+            PackageManagerTracedLock.RawLock lock = mLock.getRawLock();
             if (sync) {
-                mLock.lock();
-            } else if (!mLock.tryLock(timeoutMs, TimeUnit.MILLISECONDS)) {
+                lock.lock();
+            } else if (!lock.tryLock(timeoutMs, TimeUnit.MILLISECONDS)) {
                 return false;
             }
             try {
                 runnable.run();
                 return true;
             } finally {
-                mLock.unlock();
+                lock.unlock();
             }
         } catch (InterruptedException e) {
             Slog.e(TAG, "Failed to obtain mLock", e);
@@ -1723,7 +1724,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 (i, pm) -> new PackageDexOptimizer(i.getInstaller(), i.getInstallLock(),
                         i.getContext(), "*dexopt*"),
                 (i, pm) -> new DexManager(i.getContext(), i.getPackageDexOptimizer(),
-                        i.getInstaller(), i.getInstallLock(), i.getDynamicCodeLogger()),
+                        i.getDynamicCodeLogger()),
                 (i, pm) -> new DynamicCodeLogger(i.getInstaller()),
                 (i, pm) -> new ArtManagerService(i.getContext(), i.getInstaller(),
                         i.getInstallLock()),
@@ -2161,7 +2162,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         Computer computer = mLiveComputer;
         // CHECKSTYLE:OFF IndentationCheck
-        synchronized (mInstallLock) {
+        try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
         // writer
         synchronized (mLock) {
             mHandler = injector.getHandler();
@@ -2924,17 +2925,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      * Blocking call to clear all cached app data above quota.
      */
     public void freeAllAppCacheAboveQuota(String volumeUuid) throws IOException {
-        synchronized (mInstallLock) {
+        try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
             // To avoid refactoring Installer.freeCache() and InstalldNativeService.freeCache(),
             // Long.MAX_VALUE is passed as an argument which is used in neither of two methods
             // when FLAG_FREE_CACHE_DEFY_TARGET_FREE_BYTES is set
-            try {
-                mInstaller.freeCache(volumeUuid, Long.MAX_VALUE, Installer.FLAG_FREE_CACHE_V2
-                        | Installer.FLAG_FREE_CACHE_DEFY_TARGET_FREE_BYTES);
-            } catch (InstallerException ignored) {
-            }
+            mInstaller.freeCache(volumeUuid, Long.MAX_VALUE, Installer.FLAG_FREE_CACHE_V2
+                    | Installer.FLAG_FREE_CACHE_DEFY_TARGET_FREE_BYTES);
+        } catch (InstallerException ignored) {
         }
-        return;
     }
 
     /**
@@ -4425,7 +4423,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      */
     void createNewUser(int userId, @Nullable Set<String> userTypeInstallablePackages,
             String[] disallowedPackages) {
-        synchronized (mInstallLock) {
+        try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
             mSettings.createNewUserLI(this, mInstaller, userId,
                     userTypeInstallablePackages, disallowedPackages);
         }
@@ -4751,7 +4749,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                             freezePackage(packageName, UserHandle.USER_ALL,
                                     "clearApplicationProfileData",
                                     ApplicationExitInfo.REASON_OTHER, null /* request */)) {
-                synchronized (mInstallLock) {
+                try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
                     mAppDataHelper.clearAppProfilesLIF(pkg);
                 }
             }
@@ -4797,7 +4795,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     try (PackageFreezer freezer = freezePackage(packageName, UserHandle.USER_ALL,
                             "clearApplicationUserData",
                             ApplicationExitInfo.REASON_USER_REQUESTED, null /* request */)) {
-                        synchronized (mInstallLock) {
+                        try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
                             succeeded = clearApplicationUserDataLIF(snapshotComputer(), packageName,
                                     userId);
                         }
@@ -4940,7 +4938,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                             || hasAccessInstantApps == PackageManager.PERMISSION_GRANTED;
                 }
                 if (doClearData) {
-                    synchronized (mInstallLock) {
+                    try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
                         final int flags = FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL;
                         // Snapshot again after mInstallLock?
                         final AndroidPackage pkg = snapshotComputer().getPackage(packageName);
@@ -8055,16 +8053,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     public void reconcileSdkData(@Nullable String volumeUuid, @NonNull String packageName,
             @NonNull List<String> subDirNames, int userId, int appId, int previousAppId,
             @NonNull String seInfo, int flags) throws IOException {
-        synchronized (mInstallLock) {
-            ReconcileSdkDataArgs args = mInstaller.buildReconcileSdkDataArgs(volumeUuid,
-                    packageName, subDirNames, userId, appId, seInfo,
-                    flags);
-            args.previousAppId = previousAppId;
-            try {
-                mInstaller.reconcileSdkData(args);
-            } catch (InstallerException e) {
-                throw new IOException(e.getMessage());
-            }
+        ReconcileSdkDataArgs args = mInstaller.buildReconcileSdkDataArgs(volumeUuid,
+                packageName, subDirNames, userId, appId, seInfo,
+                flags);
+        args.previousAppId = previousAppId;
+        try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
+            mInstaller.reconcileSdkData(args);
+        } catch (InstallerException e) {
+            throw new IOException(e.getMessage());
         }
     }
 
