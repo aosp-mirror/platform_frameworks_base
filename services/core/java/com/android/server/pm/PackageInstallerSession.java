@@ -966,7 +966,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 getInstallSource().mInstallerPackageName, mInstallerUid);
     }
 
-    private boolean isEmergencyInstallerEnabled(String packageName, Computer snapshot) {
+    static boolean isEmergencyInstallerEnabled(String packageName, Computer snapshot, int userId,
+            int installerUid) {
         final PackageStateInternal ps = snapshot.getPackageStateInternal(packageName);
         if (ps == null || ps.getPkg() == null || !ps.isSystem()) {
             return false;
@@ -974,7 +975,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         int uid = UserHandle.getUid(userId, ps.getAppId());
         String emergencyInstaller = ps.getPkg().getEmergencyInstaller();
         if (emergencyInstaller == null || !ArrayUtils.contains(
-                snapshot.getPackagesForUid(mInstallerUid), emergencyInstaller)) {
+                snapshot.getPackagesForUid(installerUid), emergencyInstaller)) {
             return false;
         }
         // Only system installers can have an emergency installer
@@ -987,7 +988,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return false;
         }
         return (snapshot.checkUidPermission(Manifest.permission.EMERGENCY_INSTALL_PACKAGES,
-                mInstallerUid) == PackageManager.PERMISSION_GRANTED);
+                installerUid) == PackageManager.PERMISSION_GRANTED);
     }
 
     private static final int USER_ACTION_NOT_NEEDED = 0;
@@ -1075,7 +1076,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 getInstallerPackageName());
         final boolean isSelfUpdate = targetPackageUid == mInstallerUid;
         final boolean isEmergencyInstall =
-                isEmergencyInstallerEnabled(packageName, snapshot);
+                isEmergencyInstallerEnabled(packageName, snapshot, userId, mInstallerUid);
         final boolean isPermissionGranted = isInstallPermissionGranted
                 || (isUpdatePermissionGranted && isUpdate)
                 || (isSelfUpdatePermissionGranted && isSelfUpdate)
