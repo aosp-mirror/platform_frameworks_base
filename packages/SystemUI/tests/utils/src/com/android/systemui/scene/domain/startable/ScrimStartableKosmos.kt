@@ -28,7 +28,6 @@ import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.settings.brightness.domain.interactor.brightnessMirrorShowingInteractor
-import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.phone.dozeServiceHost
 import com.android.systemui.statusbar.phone.scrimController
 import com.android.systemui.statusbar.phone.statusBarKeyguardViewManager
@@ -45,7 +44,6 @@ val Kosmos.scrimStartable by Fixture {
         biometricUnlockInteractor = biometricUnlockInteractor,
         statusBarKeyguardViewManager = statusBarKeyguardViewManager,
         alternateBouncerInteractor = alternateBouncerInteractor,
-        shadeInteractor = shadeInteractor,
         brightnessMirrorShowingInteractor = brightnessMirrorShowingInteractor,
         dozeServiceHost = dozeServiceHost,
     )
