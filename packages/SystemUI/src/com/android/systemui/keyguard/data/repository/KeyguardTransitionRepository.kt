@@ -265,7 +265,7 @@ constructor(
         state: TransitionState
     ) {
         if (updateTransitionId != transitionId) {
-            Log.w(TAG, "Attempting to update with old/invalid transitionId: $transitionId")
+            Log.wtf(TAG, "Attempting to update with old/invalid transitionId: $transitionId")
             return
         }
 
