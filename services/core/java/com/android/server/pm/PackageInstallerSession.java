@@ -316,14 +316,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final int INCREMENTAL_STORAGE_UNHEALTHY_MONITORING_MS = 60000;
 
     /**
-     * If an app being installed targets {@link Build.VERSION_CODES#S API 31} and above, the app
-     * can be installed without user action.
+     * If an app being installed targets {@link Build.VERSION_CODES#TIRAMISU API 33} and above,
+     * the app can be installed without user action.
      * See {@link PackageInstaller.SessionParams#setRequireUserAction} for other conditions required
      * to be satisfied for a silent install.
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
-    private static final long SILENT_INSTALL_ALLOWED = 265131695L;
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    private static final long SILENT_INSTALL_ALLOWED = 325888262L;
 
     /**
      * The system supports pre-approval and update ownership features from
