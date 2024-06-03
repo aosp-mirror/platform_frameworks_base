@@ -33,6 +33,13 @@ flag {
 }
 
 flag {
+   name: "notification_row_content_binder_refactor"
+   namespace: "systemui"
+   description: "Convert the NotificationContentInflater to Kotlin and restructure it to support modern views"
+   bug: "343942780"
+}
+
+flag {
    name: "notification_minimalism_prototype"
    namespace: "systemui"
    description: "Prototype of notification minimalism; the new 'Intermediate' lockscreen customization proposal."
