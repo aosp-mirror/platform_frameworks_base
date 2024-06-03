@@ -33,7 +33,6 @@ import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.layout.ApproachLayoutModifierNode
 import androidx.compose.ui.layout.ApproachMeasureScope
 import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.Placeable
@@ -272,13 +271,14 @@ internal class ElementNode(
             val placeable = measurable.measure(constraints)
             sceneState.lastSize = placeable.size()
 
-            this as LookaheadScope
             return layout(placeable.width, placeable.height) {
                 // Update the offset (relative to the SceneTransitionLayout) this element has in
                 // this scene when idle.
                 coordinates?.let { coords ->
-                    sceneState.targetOffset =
-                        lookaheadScopeCoordinates.localLookaheadPositionOf(coords)
+                    with(layoutImpl.lookaheadScope) {
+                        sceneState.targetOffset =
+                            lookaheadScopeCoordinates.localLookaheadPositionOf(coords)
+                    }
                 }
             }
         }
@@ -294,7 +294,6 @@ internal class ElementNode(
                 transition,
                 sceneState,
                 placeable,
-                placementScope = this,
             )
         }
     }
@@ -541,8 +540,7 @@ internal fun shouldDrawOrComposeSharedElement(
             transition = transition,
             fromSceneZIndex = layoutImpl.scenes.getValue(fromScene).zIndex,
             toSceneZIndex = layoutImpl.scenes.getValue(toScene).zIndex,
-        )
-            ?: return false
+        ) ?: return false
 
     return pickedScene == scene || transition.currentOverscrollSpec?.scene == scene
 }
@@ -797,18 +795,15 @@ private fun ContentDrawScope.getDrawScale(
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
-private fun ApproachMeasureScope.place(
+private fun Placeable.PlacementScope.place(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
     element: Element,
     transition: TransitionState.Transition?,
     sceneState: Element.SceneState,
     placeable: Placeable,
-    placementScope: Placeable.PlacementScope,
 ) {
-    this as LookaheadScope
-
-    with(placementScope) {
+    with(layoutImpl.lookaheadScope) {
         // Update the offset (relative to the SceneTransitionLayout) this element has in this scene
         // when idle.
         val coords = coordinates ?: error("Element ${element.key} does not have any coordinates")
@@ -985,10 +980,10 @@ private inline fun <T> computeValue(
 
     val transformation =
         transformation(transition.transformationSpec.transformations(element.key, scene.key))
-        // If there is no transformation explicitly associated to this element value, let's use
-        // the value given by the system (like the current position and size given by the layout
-        // pass).
-        ?: return currentValue()
+            // If there is no transformation explicitly associated to this element value, let's use
+            // the value given by the system (like the current position and size given by the layout
+            // pass).
+            ?: return currentValue()
 
     // Get the transformed value, i.e. the target value at the beginning (for entering elements) or
     // end (for leaving elements) of the transition.
