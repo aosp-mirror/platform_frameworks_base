@@ -995,8 +995,11 @@ public class PipTransition extends PipTransitionController {
         final Rect currentBounds = pipChange.getStartAbsBounds();
 
         int rotationDelta = deltaRotation(startRotation, endRotation);
-        Rect sourceHintRect = PipBoundsAlgorithm.getValidSourceHintRect(
-                taskInfo.pictureInPictureParams, currentBounds, destinationBounds);
+        Rect sourceHintRect = mPipOrganizer.takeSwipeSourceRectHint();
+        if (sourceHintRect == null) {
+            sourceHintRect = PipBoundsAlgorithm.getValidSourceHintRect(
+                    taskInfo.pictureInPictureParams, currentBounds, destinationBounds);
+        }
         if (rotationDelta != Surface.ROTATION_0
                 && endRotation != mPipDisplayLayoutState.getRotation()) {
             // Computes the destination bounds in new rotation.
