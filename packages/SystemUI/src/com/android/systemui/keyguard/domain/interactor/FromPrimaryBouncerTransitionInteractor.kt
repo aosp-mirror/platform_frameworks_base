@@ -222,17 +222,24 @@ constructor(
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
         return ValueAnimator().apply {
             interpolator = Interpolators.LINEAR
-            duration = DEFAULT_DURATION.inWholeMilliseconds
+            duration =
+                when (toState) {
+                    KeyguardState.AOD -> TO_AOD_DURATION
+                    KeyguardState.DOZING -> TO_DOZING_DURATION
+                    KeyguardState.GONE -> TO_GONE_DURATION
+                    KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
+                    else -> DEFAULT_DURATION
+                }.inWholeMilliseconds
         }
     }
 
     companion object {
         private val DEFAULT_DURATION = 300.milliseconds
+        val TO_AOD_DURATION = DEFAULT_DURATION
+        val TO_DOZING_DURATION = DEFAULT_DURATION
         val TO_GONE_DURATION = 500.milliseconds
         val TO_GONE_SHORT_DURATION = 200.milliseconds
-        val TO_AOD_DURATION = DEFAULT_DURATION
-        val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
-        val TO_DOZING_DURATION = DEFAULT_DURATION
+        val TO_LOCKSCREEN_DURATION = 450.milliseconds
         val TO_GONE_SURFACE_BEHIND_VISIBLE_THRESHOLD = 0.5f
     }
 }
