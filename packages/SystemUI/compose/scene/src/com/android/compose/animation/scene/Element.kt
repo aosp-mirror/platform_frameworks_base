@@ -35,6 +35,7 @@ import androidx.compose.ui.layout.ApproachMeasureScope
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
@@ -247,13 +248,34 @@ internal class ElementNode(
     }
 
     @ExperimentalComposeUiApi
+    override fun MeasureScope.measure(
+        measurable: Measurable,
+        constraints: Constraints
+    ): MeasureResult {
+        check(isLookingAhead)
+
+        return measurable.measure(constraints).run {
+            // Update the size this element has in this scene when idle.
+            sceneState.targetSize = size()
+
+            layout(width, height) {
+                // Update the offset (relative to the SceneTransitionLayout) this element has in
+                // this scene when idle.
+                coordinates?.let { coords ->
+                    with(layoutImpl.lookaheadScope) {
+                        sceneState.targetOffset =
+                            lookaheadScopeCoordinates.localLookaheadPositionOf(coords)
+                    }
+                }
+                place(0, 0)
+            }
+        }
+    }
+
     override fun ApproachMeasureScope.approachMeasure(
         measurable: Measurable,
         constraints: Constraints,
     ): MeasureResult {
-        // Update the size this element has in this scene when idle.
-        sceneState.targetSize = lookaheadSize
-
         val transitions = currentTransitions
         val transition = elementTransition(element, transitions)
 
@@ -271,16 +293,7 @@ internal class ElementNode(
             val placeable = measurable.measure(constraints)
             sceneState.lastSize = placeable.size()
 
-            return layout(placeable.width, placeable.height) {
-                // Update the offset (relative to the SceneTransitionLayout) this element has in
-                // this scene when idle.
-                coordinates?.let { coords ->
-                    with(layoutImpl.lookaheadScope) {
-                        sceneState.targetOffset =
-                            lookaheadScopeCoordinates.localLookaheadPositionOf(coords)
-                    }
-                }
-            }
+            return layout(placeable.width, placeable.height) { /* Do not place */ }
         }
 
         val placeable =
@@ -808,7 +821,6 @@ private fun Placeable.PlacementScope.place(
         // when idle.
         val coords = coordinates ?: error("Element ${element.key} does not have any coordinates")
         val targetOffsetInScene = lookaheadScopeCoordinates.localLookaheadPositionOf(coords)
-        sceneState.targetOffset = targetOffsetInScene
 
         // No need to place the element in this scene if we don't want to draw it anyways.
         if (!shouldPlaceElement(layoutImpl, scene, element, transition)) {
