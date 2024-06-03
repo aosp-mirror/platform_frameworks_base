@@ -6168,6 +6168,23 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .isEqualTo(previousManualZenPolicy);
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void addRule_iconIdWithResourceNameTooLong_ignoresIcon() {
+        int resourceId = 999;
+        String veryLongResourceName = "com.android.server.notification:drawable/"
+                + "omg_this_is_one_long_resource_name".repeat(100);
+        when(mResources.getResourceName(resourceId)).thenReturn(veryLongResourceName);
+        when(mResources.getIdentifier(veryLongResourceName, null, null)).thenReturn(resourceId);
+
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(),
+                new AutomaticZenRule.Builder("Rule", CONDITION_ID).setIconResId(resourceId).build(),
+                UPDATE_ORIGIN_APP, "reason", CUSTOM_PKG_UID);
+        AutomaticZenRule storedRule = mZenModeHelper.getAutomaticZenRule(ruleId);
+
+        assertThat(storedRule.getIconResId()).isEqualTo(0);
+    }
+
     private static void addZenRule(ZenModeConfig config, String id, String ownerPkg, int zenMode,
             @Nullable ZenPolicy zenPolicy) {
         ZenRule rule = new ZenRule();
