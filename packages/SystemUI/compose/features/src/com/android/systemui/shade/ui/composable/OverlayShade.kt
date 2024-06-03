@@ -199,7 +199,7 @@ object OverlayShade {
         val PanelCornerRadius = 46.dp
         val PanelWidthMedium = 390.dp
         val PanelWidthLarge = 474.dp
-        val OverscrollLimit = 100f
+        val OverscrollLimit = 32.dp
     }
 
     object Shapes {
