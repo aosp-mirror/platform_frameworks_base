@@ -31,10 +31,12 @@ import com.android.systemui.res.R
 import com.android.systemui.util.kotlin.combine
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 
 /**
  * Models UI of [BiometricPromptLayout.iconView] and [BiometricPromptLayout.biometric_icon_overlay]
@@ -55,8 +57,11 @@ constructor(
     }
 
     /**
-     * Indicates what auth type the UI currently displays. Fingerprint-only auth -> Fingerprint
-     * Face-only auth -> Face Co-ex auth, implicit flow -> Face Co-ex auth, explicit flow -> Coex
+     * Indicates what auth type the UI currently displays.
+     * Fingerprint-only auth -> Fingerprint
+     * Face-only auth -> Face
+     * Co-ex auth, implicit flow -> Face
+     * Co-ex auth, explicit flow -> Coex
      */
     val activeAuthType: Flow<AuthType> =
         combine(
@@ -124,6 +129,35 @@ constructor(
         _previousIconOverlayWasError.value = previousIconOverlayWasError
     }
 
+    /** Called when iconView begins animating. */
+    fun onAnimationStart() {
+        _animationEnded.value = false
+    }
+
+    /** Called when iconView ends animating. */
+    fun onAnimationEnd() {
+        _animationEnded.value = true
+    }
+
+    private val _animationEnded: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+    /**
+     * Whether a face iconView should pulse (i.e. while isAuthenticating and previous animation
+     * ended).
+     */
+    val shouldPulseAnimation: Flow<Boolean> =
+        combine(_animationEnded, promptViewModel.isAuthenticating) {
+                animationEnded,
+                isAuthenticating ->
+                animationEnded && isAuthenticating
+            }
+            .distinctUntilChanged()
+
+    private val _lastPulseLightToDark: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+    /** Tracks whether a face iconView last pulsed light to dark (vs. dark to light) */
+    val lastPulseLightToDark: Flow<Boolean> = _lastPulseLightToDark.asStateFlow()
+
     /** Layout params for fingerprint iconView */
     val fingerprintIconWidth: Flow<Int> = promptViewModel.fingerprintSensorDiameter
     val fingerprintIconHeight: Flow<Int> = promptViewModel.fingerprintSensorDiameter
@@ -165,22 +199,35 @@ constructor(
                         }
                     }
                 AuthType.Face ->
-                    combine(
-                        promptViewModel.isAuthenticated.distinctUntilChanged(),
-                        promptViewModel.isAuthenticating.distinctUntilChanged(),
-                        promptViewModel.isPendingConfirmation.distinctUntilChanged(),
-                        promptViewModel.showingError.distinctUntilChanged()
-                    ) {
-                        authState: PromptAuthState,
-                        isAuthenticating: Boolean,
-                        isPendingConfirmation: Boolean,
-                        showingError: Boolean ->
-                        getFaceIconViewAsset(
-                            authState,
-                            isAuthenticating,
-                            isPendingConfirmation,
-                            showingError
-                        )
+                    shouldPulseAnimation.flatMapLatest { shouldPulseAnimation: Boolean ->
+                        if (shouldPulseAnimation) {
+                            val iconAsset =
+                                if (_lastPulseLightToDark.value) {
+                                    R.drawable.face_dialog_pulse_dark_to_light
+                                } else {
+                                    R.drawable.face_dialog_pulse_light_to_dark
+                                }
+                            _lastPulseLightToDark.value = !_lastPulseLightToDark.value
+                            flowOf(iconAsset)
+                        } else {
+                            combine(
+                                promptViewModel.isAuthenticated.distinctUntilChanged(),
+                                promptViewModel.isAuthenticating.distinctUntilChanged(),
+                                promptViewModel.isPendingConfirmation.distinctUntilChanged(),
+                                promptViewModel.showingError.distinctUntilChanged()
+                            ) {
+                                authState: PromptAuthState,
+                                isAuthenticating: Boolean,
+                                isPendingConfirmation: Boolean,
+                                showingError: Boolean ->
+                                getFaceIconViewAsset(
+                                    authState,
+                                    isAuthenticating,
+                                    isPendingConfirmation,
+                                    showingError
+                                )
+                            }
+                        }
                     }
                 AuthType.Coex ->
                     combine(
@@ -284,7 +331,8 @@ constructor(
         } else if (authState.isAuthenticated) {
             R.drawable.face_dialog_dark_to_checkmark
         } else if (isAuthenticating) {
-            R.raw.face_dialog_authenticating
+            _lastPulseLightToDark.value = false
+            R.drawable.face_dialog_pulse_dark_to_light
         } else if (showingError) {
             R.drawable.face_dialog_dark_to_error
         } else if (_previousIconWasError.value) {
@@ -656,6 +704,16 @@ constructor(
                         }
                     }
                 AuthType.Face -> flowOf(false)
+            }
+        }
+
+    /** Whether the current BiometricPromptLayout.iconView asset animation should be repeated. */
+    val shouldRepeatAnimation: Flow<Boolean> =
+        activeAuthType.flatMapLatest { activeAuthType: AuthType ->
+            when (activeAuthType) {
+                AuthType.Fingerprint,
+                AuthType.Coex -> flowOf(false)
+                AuthType.Face -> promptViewModel.isAuthenticating.map { it }
             }
         }
 
