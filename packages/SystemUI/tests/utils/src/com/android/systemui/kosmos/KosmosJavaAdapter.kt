@@ -50,6 +50,7 @@ import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.domain.startable.scrimStartable
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.shared.model.sceneDataSource
 import com.android.systemui.settings.brightness.domain.interactor.brightnessMirrorShowingInteractor
@@ -59,6 +60,7 @@ import com.android.systemui.shade.shadeController
 import com.android.systemui.statusbar.chips.ui.viewmodel.ongoingActivityChipsViewModel
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
+import com.android.systemui.statusbar.phone.scrimController
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
 import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
@@ -130,4 +132,6 @@ class KosmosJavaAdapter() {
     val shadeInteractor by lazy { kosmos.shadeInteractor }
 
     val ongoingActivityChipsViewModel by lazy { kosmos.ongoingActivityChipsViewModel }
+    val scrimController by lazy { kosmos.scrimController }
+    val scrimStartable by lazy { kosmos.scrimStartable }
 }
