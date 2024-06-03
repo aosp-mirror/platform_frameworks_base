@@ -16,13 +16,14 @@
 
 package com.android.server.display.brightness.clamper;
 
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.hardware.display.DisplayManagerInternal;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
@@ -30,6 +31,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.server.display.DisplayBrightnessState;
+import com.android.server.display.DisplayDeviceConfig;
 import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.utils.DebugUtils;
 
@@ -45,25 +47,30 @@ public class BrightnessLowLuxModifier extends BrightnessModifier {
     // 'adb shell setprop persist.log.tag.BrightnessLowLuxModifier DEBUG && adb reboot'
     private static final String TAG = "BrightnessLowLuxModifier";
     private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
-    private static final float MIN_NITS = 2.0f;
+    private static final float MIN_NITS_DEFAULT = 0.2f;
     private final SettingsObserver mSettingsObserver;
     private final ContentResolver mContentResolver;
     private final Handler mHandler;
     private final BrightnessClamperController.ClamperChangeListener mChangeListener;
     private int mReason;
     private float mBrightnessLowerBound;
+    private float mMinNitsAllowed;
     private boolean mIsActive;
+    private boolean mAutoBrightnessEnabled;
     private float mAmbientLux;
+    private final DisplayDeviceConfig mDisplayDeviceConfig;
 
     @VisibleForTesting
     BrightnessLowLuxModifier(Handler handler,
-            BrightnessClamperController.ClamperChangeListener listener, Context context) {
+            BrightnessClamperController.ClamperChangeListener listener, Context context,
+            DisplayDeviceConfig displayDeviceConfig) {
         super();
 
         mChangeListener = listener;
         mHandler = handler;
         mContentResolver = context.getContentResolver();
         mSettingsObserver = new SettingsObserver(mHandler);
+        mDisplayDeviceConfig = displayDeviceConfig;
         mHandler.post(() -> {
             start();
         });
@@ -78,41 +85,43 @@ public class BrightnessLowLuxModifier extends BrightnessModifier {
         int userId = UserHandle.USER_CURRENT;
         float settingNitsLowerBound = Settings.Secure.getFloatForUser(
                 mContentResolver, Settings.Secure.EVEN_DIMMER_MIN_NITS,
-                /* def= */ MIN_NITS, userId);
+                /* def= */ MIN_NITS_DEFAULT, userId);
 
-        boolean isActive = Settings.Secure.getFloatForUser(mContentResolver,
-                Settings.Secure.EVEN_DIMMER_ACTIVATED,
-                /* def= */ 0, userId) == 1.0f;
+        boolean isActive = isSettingEnabled() && mAutoBrightnessEnabled;
 
-        // TODO: luxBasedNitsLowerBound = mMinLuxToNitsSpline(currentLux);
-        float luxBasedNitsLowerBound = 2.0f;
+        float luxBasedNitsLowerBound = mDisplayDeviceConfig.getMinNitsFromLux(mAmbientLux);
 
-        final float nitsLowerBound = isActive ? Math.max(settingNitsLowerBound,
-                 luxBasedNitsLowerBound) : MIN_NITS;
+        final int reason;
+        float minNitsAllowed = -1f; // undefined, if setting is off.
+        final float minBrightnessAllowed;
 
-        final int reason = settingNitsLowerBound > luxBasedNitsLowerBound
-                ? BrightnessReason.MODIFIER_MIN_USER_SET_LOWER_BOUND
-                : BrightnessReason.MODIFIER_MIN_LUX;
+        if (isActive) {
+            minNitsAllowed = Math.max(settingNitsLowerBound,
+                    luxBasedNitsLowerBound);
+            minBrightnessAllowed = getBrightnessFromNits(minNitsAllowed);
+            reason = settingNitsLowerBound > luxBasedNitsLowerBound
+                    ? BrightnessReason.MODIFIER_MIN_USER_SET_LOWER_BOUND
+                    : BrightnessReason.MODIFIER_MIN_LUX;
+        } else {
+            minBrightnessAllowed = mDisplayDeviceConfig.getEvenDimmerTransitionPoint();
+            reason = 0;
+        }
 
-        // TODO: brightnessLowerBound = nitsToBrightnessSpline(nitsLowerBound);
-        final float brightnessLowerBound = PowerManager.BRIGHTNESS_MIN;
-
-        if (mBrightnessLowerBound != brightnessLowerBound
+        if (mBrightnessLowerBound != minBrightnessAllowed
                 || mReason != reason
                 || mIsActive != isActive) {
             mIsActive = isActive;
             mReason = reason;
             if (DEBUG) {
                 Slog.i(TAG, "isActive: " + isActive
-                        + ", brightnessLowerBound: " + brightnessLowerBound
+                        + ", minBrightnessAllowed: " + minBrightnessAllowed
                         + ", mAmbientLux: " + mAmbientLux
-                        + ", mReason: " + (
-                        mReason == BrightnessReason.MODIFIER_MIN_USER_SET_LOWER_BOUND ? "minSetting"
-                                : "lux")
-                        + ", nitsLowerBound: " + nitsLowerBound
+                        + ", mReason: " + (mReason)
+                        + ", minNitsAllowed: " + minNitsAllowed
                 );
             }
-            mBrightnessLowerBound = brightnessLowerBound;
+            mMinNitsAllowed = minNitsAllowed;
+            mBrightnessLowerBound = minBrightnessAllowed;
             mChangeListener.onChanged();
         }
     }
@@ -177,11 +186,34 @@ public class BrightnessLowLuxModifier extends BrightnessModifier {
     }
 
     @Override
+    public void setAutoBrightnessState(int state) {
+        mAutoBrightnessEnabled = state == AUTO_BRIGHTNESS_ENABLED;
+    }
+
+    @Override
     public void dump(PrintWriter pw) {
         pw.println("BrightnessLowLuxModifier:");
         pw.println("  mIsActive=" + mIsActive);
         pw.println("  mBrightnessLowerBound=" + mBrightnessLowerBound);
         pw.println("  mReason=" + mReason);
+        pw.println("  mAmbientLux=" + mAmbientLux);
+        pw.println("  mMinNitsAllowed=" + mMinNitsAllowed);
+    }
+
+    /**
+     * Defaults to true, on devices where setting is unset.
+     *
+     * @return if setting indicates feature is enabled
+     */
+    private boolean isSettingEnabled() {
+        return Settings.Secure.getFloatForUser(mContentResolver,
+                Settings.Secure.EVEN_DIMMER_ACTIVATED,
+                /* def= */ 1.0f, UserHandle.USER_CURRENT) == 1.0f;
+    }
+
+    private float getBrightnessFromNits(float nits) {
+        return mDisplayDeviceConfig.getBrightnessFromBacklight(
+                mDisplayDeviceConfig.getBacklightFromNits(nits));
     }
 
     private final class SettingsObserver extends ContentObserver {

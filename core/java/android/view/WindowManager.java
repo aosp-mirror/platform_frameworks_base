@@ -104,6 +104,7 @@ import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
@@ -780,7 +781,7 @@ public interface WindowManager extends ViewManager {
      * <p>
      * The metrics describe the size of the area the window would occupy with
      * {@link LayoutParams#MATCH_PARENT MATCH_PARENT} width and height, and the {@link WindowInsets}
-     * such a window would have.
+     * such a window would have. The {@link WindowInsets} are not deducted from the bounds.
      * <p>
      * The value of this is based on the <b>current</b> windowing state of the system.
      *
@@ -810,7 +811,7 @@ public interface WindowManager extends ViewManager {
      * <p>
      * The metrics describe the size of the largest potential area the window might occupy with
      * {@link LayoutParams#MATCH_PARENT MATCH_PARENT} width and height, and the {@link WindowInsets}
-     * such a window would have.
+     * such a window would have. The {@link WindowInsets} are not deducted from the bounds.
      * <p>
      * Note that this might still be smaller than the size of the physical display if certain areas
      * of the display are not available to windows created in this {@link Context}.
@@ -1490,7 +1491,13 @@ public interface WindowManager extends ViewManager {
         }
 
         try {
-            return ActivityTaskManager.supportsMultiWindow(ActivityThread.currentApplication());
+            final Context context = ActivityThread.currentApplication();
+            if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+                // Watch supports multi-window to present essential system UI, but it doesn't need
+                // WM Extensions.
+                return false;
+            }
+            return ActivityTaskManager.supportsMultiWindow(context);
         } catch (Exception e) {
             // In case the PackageManager is not set up correctly in test.
             Log.e("WindowManager", "Unable to read if the device supports multi window", e);
@@ -1558,8 +1565,9 @@ public interface WindowManager extends ViewManager {
      *     android:value="true|false"/&gt;
      * &lt;/activity&gt;
      * </pre>
+     *
+     * @hide
      */
-    @FlaggedApi(Flags.FLAG_UNTRUSTED_EMBEDDING_STATE_SHARING)
     String PROPERTY_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING_STATE_SHARING =
             "android.window.PROPERTY_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING_STATE_SHARING";
 
@@ -3378,6 +3386,12 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_IMMERSIVE_CONFIRMATION_WINDOW = 1 << 17;
 
         /**
+         * Flag to indicate that the window is forcibly to layout under the display cutout.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE = 1 << 18;
+
+        /**
          * Flag to indicate that any window added by an application process that is of type
          * {@link #TYPE_TOAST} or that requires
          * {@link android.app.AppOpsManager#OP_SYSTEM_ALERT_WINDOW} permission should be hidden when
@@ -3431,20 +3445,6 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public static final int PRIVATE_FLAG_CONSUME_IME_INSETS = 1 << 25;
-
-        /**
-         * Flag to indicate that the window is controlling the appearance of system bars. So we
-         * don't need to adjust it by reading its system UI flags for compatibility.
-         * @hide
-         */
-        public static final int PRIVATE_FLAG_APPEARANCE_CONTROLLED = 1 << 26;
-
-        /**
-         * Flag to indicate that the window is controlling the behavior of system bars. So we don't
-         * need to adjust it by reading its window flags or system UI flags for compatibility.
-         * @hide
-         */
-        public static final int PRIVATE_FLAG_BEHAVIOR_CONTROLLED = 1 << 27;
 
         /**
          * Flag to indicate that the window is controlling how it fits window insets on its own.
@@ -3511,14 +3511,13 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS,
                 PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE,
                 PRIVATE_FLAG_IMMERSIVE_CONFIRMATION_WINDOW,
+                PRIVATE_FLAG_OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE,
                 SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
                 PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY,
                 PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION,
                 PRIVATE_FLAG_NOT_MAGNIFIABLE,
                 PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
                 PRIVATE_FLAG_CONSUME_IME_INSETS,
-                PRIVATE_FLAG_APPEARANCE_CONTROLLED,
-                PRIVATE_FLAG_BEHAVIOR_CONTROLLED,
                 PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
                 PRIVATE_FLAG_TRUSTED_OVERLAY,
                 PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME,
@@ -3595,6 +3594,10 @@ public interface WindowManager extends ViewManager {
                         equals = PRIVATE_FLAG_IMMERSIVE_CONFIRMATION_WINDOW,
                         name = "IMMERSIVE_CONFIRMATION_WINDOW"),
                 @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE,
+                        equals = PRIVATE_FLAG_OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE,
+                        name = "OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE"),
+                @ViewDebug.FlagToString(
                         mask = SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
                         equals = SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
                         name = "HIDE_NON_SYSTEM_OVERLAY_WINDOWS"),
@@ -3618,14 +3621,6 @@ public interface WindowManager extends ViewManager {
                         mask = PRIVATE_FLAG_CONSUME_IME_INSETS,
                         equals = PRIVATE_FLAG_CONSUME_IME_INSETS,
                         name = "CONSUME_IME_INSETS"),
-                @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_APPEARANCE_CONTROLLED,
-                        equals = PRIVATE_FLAG_APPEARANCE_CONTROLLED,
-                        name = "APPEARANCE_CONTROLLED"),
-                @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_BEHAVIOR_CONTROLLED,
-                        equals = PRIVATE_FLAG_BEHAVIOR_CONTROLLED,
-                        name = "BEHAVIOR_CONTROLLED"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
                         equals = PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
@@ -4269,11 +4264,9 @@ public interface WindowManager extends ViewManager {
          *         no letterbox is applied."/>
          *
          * <p>
-         * A cutout in the corner is considered to be on the short edge: <br/>
-         * <img src="{@docRoot}reference/android/images/display_cutout/short_edge/fullscreen_corner_no_letterbox.png"
-         * height="720"
-         * alt="Screenshot of a fullscreen activity on a display with a cutout in the corner in
-         *         portrait, no letterbox is applied."/>
+         * A cutout in the corner can be considered to be on different edge in different device
+         * rotations. This behavior may vary from device to device. Use this flag is possible to
+         * letterbox your app if the display cutout is at corner.
          *
          * <p>
          * On the other hand, should the cutout be on the long edge of the display, a letterbox will
@@ -4370,6 +4363,23 @@ public interface WindowManager extends ViewManager {
         public static final int INPUT_FEATURE_SPY = 1 << 2;
 
         /**
+         * Input feature used to indicate that this window is privacy sensitive. This may be used
+         * to redact input interactions from tracing or screen mirroring.
+         * <p>
+         * A window that uses {@link LayoutParams#FLAG_SECURE} will automatically be treated as
+         * a sensitive for input tracing, but this input feature can be set on windows that don't
+         * set FLAG_SECURE. The tracing configuration will determine how these sensitive events
+         * are eventually traced.
+         * <p>
+         * This can only be set for trusted system overlays.
+         * <p>
+         * Note: Input tracing is only available on userdebug and eng builds.
+         *
+         * @hide
+         */
+        public static final int INPUT_FEATURE_SENSITIVE_FOR_PRIVACY = 1 << 3;
+
+        /**
          * An internal annotation for flags that can be specified to {@link #inputFeatures}.
          *
          * NOTE: These are not the same as {@link android.os.InputConfig} flags.
@@ -4381,6 +4391,7 @@ public interface WindowManager extends ViewManager {
                 INPUT_FEATURE_NO_INPUT_CHANNEL,
                 INPUT_FEATURE_DISABLE_USER_ACTIVITY,
                 INPUT_FEATURE_SPY,
+                INPUT_FEATURE_SENSITIVE_FOR_PRIVACY,
         })
         public @interface InputFeatureFlags {
         }

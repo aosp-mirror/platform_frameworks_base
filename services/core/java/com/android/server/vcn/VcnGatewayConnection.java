@@ -2580,8 +2580,12 @@ public class VcnGatewayConnection extends StateMachine {
      * Dumps the state of this VcnGatewayConnection for logging and debugging purposes.
      *
      * <p>PII and credentials MUST NEVER be dumped here.
+     *
+     * <p>This method is not thread safe and MUST run on the VCN thread.
      */
     public void dump(IndentingPrintWriter pw) {
+        mVcnContext.ensureRunningOnLooperThread();
+
         pw.println("VcnGatewayConnection (" + mConnectionConfig.getGatewayConnectionName() + "):");
         pw.increaseIndent();
 
@@ -2601,6 +2605,19 @@ public class VcnGatewayConnection extends StateMachine {
 
         mUnderlyingNetworkController.dump(pw);
         pw.println();
+
+        if (mIkeSession == null) {
+            pw.println("mIkeSession: null");
+        } else {
+            pw.println("mIkeSession:");
+
+            // Add a try catch block in case IkeSession#dump is not thread-safe
+            try {
+                mIkeSession.dump(pw);
+            } catch (Exception e) {
+                Slog.wtf(TAG, "Failed to dump IkeSession: " + e);
+            }
+        }
 
         pw.decreaseIndent();
     }
@@ -2904,6 +2921,11 @@ public class VcnGatewayConnection extends StateMachine {
         /** Sets the underlying network used by the IkeSession. */
         public void setNetwork(@NonNull Network network) {
             mImpl.setNetwork(network);
+        }
+
+        /** Dumps the state of the IkeSession */
+        public void dump(@NonNull IndentingPrintWriter pw) {
+            mImpl.dump(pw);
         }
     }
 

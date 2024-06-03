@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Pasahitzik gabeko etorkizun baterantz goazen arren, pasahitzek sarbide-gakoen bizikide izaten jarraituko dute."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Aukeratu non gorde <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Hautatu informazioa gordetzeko pasahitz-kudeatzaile bat eta hasi saioa bizkorrago hurrengoan"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"<xliff:g id="APPNAME">%1$s</xliff:g> aplikazioan saioa hasteko sarbide-gako bat sortu nahi duzu?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"<xliff:g id="APPNAME">%1$s</xliff:g> aplikazioan saioa hasteko pasahitza gorde nahi duzu?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> aplikazioko saioa hasteko informazioa gorde nahi duzu?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioan saioa hasteko sarbide-gako bat sortu nahi duzu?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioan saioa hasteko pasahitza gorde nahi duzu?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioan saioa hasteko informazioa gorde nahi duzu?"</string>
     <string name="passkey" msgid="632353688396759522">"sarbide-gakoa"</string>
     <string name="password" msgid="6738570945182936667">"pasahitza"</string>
     <string name="passkeys" msgid="5733880786866559847">"sarbide-gakoak"</string>
@@ -68,14 +68,15 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Itzuli aurreko orrira"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Itxi"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Baztertu"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gorde duzun sarbide-gakoa erabili nahi duzu?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gordetako pasahitza erabili nahi duzu?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"<xliff:g id="APP_NAME">%1$s</xliff:g> zerbitzuan saioa hasteko kredentzialak erabili nahi dituzu?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioan saioa hasteko aukerak desblokeatu nahi dituzu?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Erabili <xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gordetako sarbide-gakoa"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Erabili <xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gordetako pasahitza"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Erabili zure kontua <xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Erabili pantailaren blokeoa <xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioan <xliff:g id="USERNAME">%2$s</xliff:g> kontuarekin saioa hasteko"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Desblokeatu <xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioan saioa hasteko aukerak"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Aukeratu <xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gordetako sarbide-gakoa"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Aukeratu <xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gordetako pasahitza"</string>
-    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Aukeratu <xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gordetako kredentzialak"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Aukeratu <xliff:g id="APP_NAME">%1$s</xliff:g> zerbitzuan saioa hasteko kredentzialak"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Aukeratu <xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gordetako saioa hasteko moduak"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"Aukeratu <xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioan erabili nahi duzun kontua"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako aukera bat hautatu nahi duzu?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioan erabili nahi duzu informazio hori?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Hasi saioa beste modu batean"</string>
@@ -88,10 +89,10 @@
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Desblokeatzeko, sakatu hau"</string>
     <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"Ez dago saioa hasteko informaziorik"</string>
     <string name="no_sign_in_info_in" msgid="2641118151920288356">"Ez dago saioa hasteko informaziorik <xliff:g id="SOURCE">%1$s</xliff:g> kontuan"</string>
-    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Kudeatu kredentzialak"</string>
+    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Kudeatu saioa hasteko moduak"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Beste gailu batean gordetakoak"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Erabili beste gailu bat"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"Utzi du bertan behera eskaera <xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioak"</string>
-    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Saioa hasteko aukerak"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Saioa hasteko moduak"</string>
     <string name="more_options_content_description" msgid="1323427365788198808">"Gehiago"</string>
 </resources>

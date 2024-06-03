@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.notification.footer.ui.view.FooterView;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.shared.NotificationHeadsUpCycling;
 import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation;
 
 import java.util.ArrayList;
@@ -75,6 +76,7 @@ public class StackScrollAlgorithm {
     private float mSmallCornerRadius;
     private float mLargeCornerRadius;
     private int mHeadsUpAppearHeightBottom;
+    private int mHeadsUpCyclingPadding;
 
     public StackScrollAlgorithm(
             Context context,
@@ -99,6 +101,8 @@ public class StackScrollAlgorithm {
                 R.dimen.heads_up_status_bar_padding);
         mHeadsUpAppearStartAboveScreen = res.getDimensionPixelSize(
                 R.dimen.heads_up_appear_y_above_screen);
+        mHeadsUpCyclingPadding = context.getResources()
+                .getDimensionPixelSize(R.dimen.heads_up_cycling_padding);
         mPinnedZTranslationExtra = res.getDimensionPixelSize(
                 R.dimen.heads_up_pinned_elevation);
         mGapHeight = res.getDimensionPixelSize(R.dimen.notification_section_divider_height);
@@ -167,6 +171,14 @@ public class StackScrollAlgorithm {
                 } else {
                     viewState.setAlpha(interpolateNotificationContentAlpha(ambientState));
                 }
+            }
+
+            // On the final call to {@link #resetViewState}, the alpha is set back to 1f but
+            // ambientState.isExpansionChanging() is now false. This causes a flicker on the
+            // EmptyShadeView after the shade is collapsed. Make sure the empty shade view
+            // isn't visible unless the shade is expanded.
+            if (view instanceof EmptyShadeView && ambientState.getExpansionFraction() == 0f) {
+                viewState.setAlpha(0f);
             }
 
             // For EmptyShadeView if on keyguard, we need to control the alpha to create
@@ -340,7 +352,8 @@ public class StackScrollAlgorithm {
                     && !firstHeadsUp
                     && (isHeadsUp || child.isHeadsUpAnimatingAway())
                     && newNotificationEnd > firstHeadsUpEnd
-                    && !ambientState.isShadeExpanded()) {
+                    && !ambientState.isShadeExpanded()
+                    && !skipClipBottomForCycling(child, ambientState)) {
                 // The bottom of this view is peeking out from under the previous view.
                 // Clip the part that is peeking out.
                 float overlapAmount = newNotificationEnd - firstHeadsUpEnd;
@@ -360,6 +373,48 @@ public class StackScrollAlgorithm {
                 clipStart = Math.max(clipStart, isHeadsUp ? newYTranslation : newNotificationEnd);
             }
         }
+    }
+
+    /**
+     * @return Should we skip clipping the bottom clipping when new hun has lower bottom line for
+     *         the hun cycling animation.
+     */
+    private boolean skipClipBottomForCycling(ExpandableView view, AmbientState ambientState) {
+        if (!NotificationHeadsUpCycling.isEnabled()) return false;
+        if (!isCyclingOut(view, ambientState)) return false;
+        // skip bottom clipping if we animate the bottom line
+        return NotificationHeadsUpCycling.getAnimateTallToShort();
+    }
+
+    /**
+     * Whether the view is the hun that is cycling out by the notification avalanche.
+     */
+    public boolean isCyclingOut(ExpandableView view, AmbientState ambientState) {
+        if (!NotificationHeadsUpCycling.isEnabled()) return false;
+        if (!(view instanceof ExpandableNotificationRow)) return false;
+        return isCyclingOut((ExpandableNotificationRow) view, ambientState);
+    }
+
+    /**
+     * Whether the row is the hun that is cycling out by the notification avalanche.
+     */
+    public boolean isCyclingOut(ExpandableNotificationRow row, AmbientState ambientState) {
+        if (!NotificationHeadsUpCycling.isEnabled()) return false;
+        if (row.getEntry() == null) return false;
+        if (row.getEntry().getKey() == null) return false;
+        String cyclingOutKey = ambientState.getAvalanchePreviousHunKey();
+        return row.getEntry().getKey().equals(cyclingOutKey);
+    }
+
+    /**
+     * Whether the row is the hun that is cycling in by the notification avalanche.
+     */
+    public boolean isCyclingIn(ExpandableNotificationRow row, AmbientState ambientState) {
+        if (!NotificationHeadsUpCycling.isEnabled()) return false;
+        if (row.getEntry() == null) return false;
+        if (row.getEntry().getKey() == null) return false;
+        String cyclingInKey = ambientState.getAvalancheShowingHunKey();
+        return row.getEntry().getKey().equals(cyclingInKey);
     }
 
     /** Updates the dimmed and hiding sensitive states of the children. */
@@ -594,15 +649,20 @@ public class StackScrollAlgorithm {
         );
         if (view instanceof FooterView) {
             if (FooterViewRefactor.isEnabled()) {
-                final float footerEnd = algorithmState.mCurrentExpandedYPosition
-                        + view.getIntrinsicHeight();
-                final boolean noSpaceForFooter = footerEnd > ambientState.getStackEndHeight();
-                // TODO(b/293167744): May be able to keep only noSpaceForFooter here if we add an
-                //  emission when clearAllNotifications is called, and then use that in the footer
-                //  visibility flow.
-                ((FooterView.FooterViewState) viewState).hideContent =
-                        noSpaceForFooter || (ambientState.isClearAllInProgress()
-                                && !hasNonClearableNotifs(algorithmState));
+                // TODO(b/333445519): shouldBeHidden should reflect whether the shade is closed
+                //  already, so we shouldn't need to use ambientState here. However, currently it
+                //  doesn't get updated quickly enough and can cause the footer to flash when
+                //  closing the shade. As such, we temporarily also check the ambientState directly.
+                if (((FooterView) view).shouldBeHidden() || !ambientState.isShadeExpanded()) {
+                    viewState.hidden = true;
+                } else {
+                    final float footerEnd = algorithmState.mCurrentExpandedYPosition
+                            + view.getIntrinsicHeight();
+                    final boolean noSpaceForFooter = footerEnd > ambientState.getStackEndHeight();
+                    ((FooterView.FooterViewState) viewState).hideContent =
+                            noSpaceForFooter || (ambientState.isClearAllInProgress()
+                                    && !hasNonClearableNotifs(algorithmState));
+                }
 
             } else {
                 final boolean shadeClosed = !ambientState.isShadeExpanded();
@@ -786,6 +846,7 @@ public class StackScrollAlgorithm {
         }
 
         ExpandableNotificationRow topHeadsUpEntry = null;
+        int cyclingInHunHeight = -1;
         for (int i = 0; i < childCount; i++) {
             View child = algorithmState.visibleChildren.get(i);
             if (!(child instanceof ExpandableNotificationRow row)) {
@@ -826,6 +887,13 @@ public class StackScrollAlgorithm {
                 childState.setYTranslation(
                         Math.max(childState.getYTranslation(), headsUpTranslation));
                 childState.height = Math.max(row.getIntrinsicHeight(), childState.height);
+                if (NotificationHeadsUpCycling.isEnabled()) {
+                    if (isCyclingIn(row, ambientState)) {
+                        if (cyclingInHunHeight == -1) {
+                            cyclingInHunHeight = childState.height;
+                        }
+                    }
+                }
                 childState.hidden = false;
                 ExpandableViewState topState =
                         topHeadsUpEntry == null ? null : topHeadsUpEntry.getViewState();
@@ -847,6 +915,26 @@ public class StackScrollAlgorithm {
                 }
             }
             if (row.isHeadsUpAnimatingAway()) {
+                if (NotificationHeadsUpCycling.isEnabled() && isCyclingOut(row, ambientState)) {
+                    // If the two HUNs in the cycling animation have different heights, we need
+                    // an extra y translation to align the animation.
+                    int extraTranslation;
+                    if (NotificationHeadsUpCycling.getAnimateTallToShort()) {
+                        if (cyclingInHunHeight > 0) {
+                            extraTranslation = cyclingInHunHeight - childState.height;
+                        } else {
+                            extraTranslation = 0;
+                        }
+                    } else {
+                        extraTranslation = cyclingInHunHeight >= childState.height
+                                ? cyclingInHunHeight - childState.height : 0;
+                    }
+                    extraTranslation += mHeadsUpCyclingPadding;
+                    float inSpaceTranslation = Math.max(childState.getYTranslation(),
+                            headsUpTranslation);
+                    childState.setYTranslation(inSpaceTranslation + extraTranslation);
+                    cyclingInHunHeight = -1;
+                } else
                 if (NotificationsImprovedHunAnimation.isEnabled() && !ambientState.isDozing()) {
                     if (shouldHunAppearFromBottom(ambientState, childState)) {
                         // move to the bottom of the screen

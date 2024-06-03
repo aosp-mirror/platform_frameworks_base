@@ -1,9 +1,11 @@
 package com.android.systemui.statusbar.notification.stack
 
-import android.testing.AndroidTestingRunner
+import android.platform.test.annotations.DisableFlags
+import android.service.notification.StatusBarNotification
 import android.testing.TestableLooper.RunWithLooper
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
 import com.android.systemui.SysuiTestCase
@@ -14,6 +16,7 @@ import com.android.systemui.res.R
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
@@ -32,7 +35,7 @@ import org.mockito.Mockito.`when` as whenever
 
 /** Tests for {@link NotificationShelf}. */
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 open class NotificationShelfTest : SysuiTestCase() {
 
@@ -67,8 +70,8 @@ open class NotificationShelfTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(NotificationIconContainerRefactor.FLAG_NAME)
     fun testShadeWidth_BasedOnFractionToShade() {
-        mSetFlagsRule.disableFlags(NotificationIconContainerRefactor.FLAG_NAME)
         setFractionToShade(0f)
         setOnLockscreen(true)
 
@@ -83,8 +86,8 @@ open class NotificationShelfTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(NotificationIconContainerRefactor.FLAG_NAME)
     fun testShelfIsLong_WhenNotOnLockscreen() {
-        mSetFlagsRule.disableFlags(NotificationIconContainerRefactor.FLAG_NAME)
         setFractionToShade(0f)
         setOnLockscreen(false)
 
@@ -457,8 +460,13 @@ open class NotificationShelfTest : SysuiTestCase() {
         expansionFraction: Float,
         expectedAlpha: Float
     ) {
+        val sbnMock: StatusBarNotification = mock()
+        val mockEntry = mock<NotificationEntry>().apply {
+            whenever(this.sbn).thenReturn(sbnMock)
+        }
+        val row = ExpandableNotificationRow(mContext, null, mockEntry)
         whenever(ambientState.lastVisibleBackgroundChild)
-            .thenReturn(ExpandableNotificationRow(mContext, null))
+            .thenReturn(row)
         whenever(ambientState.isExpansionChanging).thenReturn(true)
         whenever(ambientState.expansionFraction).thenReturn(expansionFraction)
         whenever(hostLayoutController.speedBumpIndex).thenReturn(0)

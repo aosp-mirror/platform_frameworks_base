@@ -16,6 +16,9 @@
 
 package com.android.server.display.mode
 
+import com.android.server.display.config.RefreshRateData
+import com.android.server.display.config.SupportedModeData
+
 internal fun createVotesSummary(
         isDisplayResolutionRangeVotingEnabled: Boolean = true,
         supportedModesVoteEnabled: Boolean = true,
@@ -24,4 +27,16 @@ internal fun createVotesSummary(
 ): VoteSummary {
     return VoteSummary(isDisplayResolutionRangeVotingEnabled, supportedModesVoteEnabled,
             loggingEnabled, supportsFrameRateOverride)
+}
+
+fun createRefreshRateData(
+        defaultRefreshRate: Int = 60,
+        defaultPeakRefreshRate: Int = 60,
+        defaultRefreshRateInHbmHdr: Int = 60,
+        defaultRefreshRateInHbmSunlight: Int = 60,
+        lowPowerSupportedModes: List<SupportedModeData> = emptyList()
+): RefreshRateData {
+        return RefreshRateData(defaultRefreshRate, defaultPeakRefreshRate,
+                defaultRefreshRateInHbmHdr, defaultRefreshRateInHbmSunlight,
+                lowPowerSupportedModes)
 }

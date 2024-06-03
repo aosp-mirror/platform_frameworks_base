@@ -90,6 +90,9 @@ public final class OomAdjPerfTest extends BasePerfTest {
         TargetPackageUtils.startStubPackage(mContext, STUB_PACKAGE1_NAME);
         TargetPackageUtils.startStubPackage(mContext, STUB_PACKAGE2_NAME);
         TargetPackageUtils.startStubPackage(mContext, STUB_PACKAGE3_NAME);
+
+        Utils.wakeUp();
+        Utils.runShellCommand("wm dismiss-keyguard");
     }
 
     @After

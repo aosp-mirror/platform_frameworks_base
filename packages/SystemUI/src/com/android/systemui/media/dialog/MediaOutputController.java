@@ -78,6 +78,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.InfoMediaManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
+import com.android.settingslib.media.flags.Flags;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.DialogTransitionAnimator;
@@ -124,6 +125,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private static final String ALLOWLIST_REASON = "mediaoutput:remote_transfer";
 
     private final String mPackageName;
+    private final UserHandle mUserHandle;
     private final Context mContext;
     private final MediaSessionManager mMediaSessionManager;
     private final LocalBluetoothManager mLocalBluetoothManager;
@@ -140,6 +142,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private final KeyguardManager mKeyGuardManager;
     private final NearbyMediaDevicesManager mNearbyMediaDevicesManager;
     private final Map<String, Integer> mNearbyDeviceInfoMap = new ConcurrentHashMap<>();
+    private final MediaSession.Token mToken;
 
     @VisibleForTesting
     boolean mIsRefreshing = false;
@@ -177,6 +180,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     public MediaOutputController(
             Context context,
             @Assisted String packageName,
+            @Assisted @Nullable UserHandle userHandle,
+            @Assisted @Nullable MediaSession.Token token,
             MediaSessionManager mediaSessionManager,
             @Nullable LocalBluetoothManager lbm,
             ActivityStarter starter,
@@ -190,6 +195,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             UserTracker userTracker) {
         mContext = context;
         mPackageName = packageName;
+        mUserHandle = userHandle;
         mMediaSessionManager = mediaSessionManager;
         mLocalBluetoothManager = lbm;
         mActivityStarter = starter;
@@ -199,7 +205,9 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mKeyGuardManager = keyGuardManager;
         mFeatureFlags = featureFlags;
         mUserTracker = userTracker;
-        InfoMediaManager imm = InfoMediaManager.createInstance(mContext, packageName, lbm);
+        mToken = token;
+        InfoMediaManager imm =
+                InfoMediaManager.createInstance(mContext, packageName, userHandle, lbm, token);
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
         mDialogTransitionAnimator = dialogTransitionAnimator;
@@ -231,7 +239,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     @AssistedFactory
     public interface Factory {
         /** Construct a MediaOutputController */
-        MediaOutputController create(String packageName);
+        MediaOutputController create(
+                String packageName, UserHandle userHandle, MediaSession.Token token);
     }
 
     protected void start(@NonNull Callback cb) {
@@ -293,23 +302,28 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     private MediaController getMediaController() {
-        for (NotificationEntry entry : mNotifCollection.getAllNotifs()) {
-            final Notification notification = entry.getSbn().getNotification();
-            if (notification.isMediaNotification()
-                    && TextUtils.equals(entry.getSbn().getPackageName(), mPackageName)) {
-                MediaSession.Token token = notification.extras.getParcelable(
-                        Notification.EXTRA_MEDIA_SESSION,
-                        MediaSession.Token.class);
-                return new MediaController(mContext, token);
+        if (mToken != null && Flags.usePlaybackInfoForRoutingControls()) {
+            return new MediaController(mContext, mToken);
+        } else {
+            for (NotificationEntry entry : mNotifCollection.getAllNotifs()) {
+                final Notification notification = entry.getSbn().getNotification();
+                if (notification.isMediaNotification()
+                        && TextUtils.equals(entry.getSbn().getPackageName(), mPackageName)) {
+                    MediaSession.Token token =
+                            notification.extras.getParcelable(
+                                    Notification.EXTRA_MEDIA_SESSION, MediaSession.Token.class);
+                    return new MediaController(mContext, token);
+                }
             }
-        }
-        for (MediaController controller : mMediaSessionManager.getActiveSessionsForUser(null,
-                mUserTracker.getUserHandle())) {
-            if (TextUtils.equals(controller.getPackageName(), mPackageName)) {
-                return controller;
+            for (MediaController controller :
+                    mMediaSessionManager.getActiveSessionsForUser(
+                            null, mUserTracker.getUserHandle())) {
+                if (TextUtils.equals(controller.getPackageName(), mPackageName)) {
+                    return controller;
+                }
             }
+            return null;
         }
-        return null;
     }
 
     @Override
@@ -865,10 +879,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mMetricLogger.logInteractionUnmute(device);
     }
 
-    String getPackageName() {
-        return mPackageName;
-    }
-
     boolean hasAdjustVolumeUserRestriction() {
         if (RestrictedLockUtilsInternal.checkIfRestrictionEnforced(
                 mContext, UserManager.DISALLOW_ADJUST_VOLUME, UserHandle.myUserId()) != null) {
@@ -946,11 +956,23 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     void launchMediaOutputBroadcastDialog(View mediaOutputDialog, BroadcastSender broadcastSender) {
-        MediaOutputController controller = new MediaOutputController(mContext, mPackageName,
-                mMediaSessionManager, mLocalBluetoothManager, mActivityStarter,
-                mNotifCollection, mDialogTransitionAnimator, mNearbyMediaDevicesManager,
-                mAudioManager, mPowerExemptionManager, mKeyGuardManager, mFeatureFlags,
-                mUserTracker);
+        MediaOutputController controller =
+                new MediaOutputController(
+                        mContext,
+                        mPackageName,
+                        mUserHandle,
+                        mToken,
+                        mMediaSessionManager,
+                        mLocalBluetoothManager,
+                        mActivityStarter,
+                        mNotifCollection,
+                        mDialogTransitionAnimator,
+                        mNearbyMediaDevicesManager,
+                        mAudioManager,
+                        mPowerExemptionManager,
+                        mKeyGuardManager,
+                        mFeatureFlags,
+                        mUserTracker);
         MediaOutputBroadcastDialog dialog = new MediaOutputBroadcastDialog(mContext, true,
                 broadcastSender, controller);
         dialog.show();
@@ -1045,7 +1067,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     boolean isBroadcastSupported() {
         LocalBluetoothLeBroadcast broadcast =
                 mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
-        return broadcast != null ? true : false;
+        return broadcast != null;
     }
 
     boolean isBluetoothLeBroadcastEnabled() {
@@ -1179,13 +1201,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         assistant.unregisterServiceCallBack(callback);
     }
 
-    private boolean isPlayBackInfoLocal() {
-        return mMediaController != null
-                && mMediaController.getPlaybackInfo() != null
-                && mMediaController.getPlaybackInfo().getPlaybackType()
-                == MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL;
-    }
-
     boolean isPlaying() {
         if (mMediaController == null) {
             return false;
@@ -1200,9 +1215,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     boolean isVolumeControlEnabled(@NonNull MediaDevice device) {
-        return (isPlayBackInfoLocal()
-                || device.getDeviceType() != MediaDevice.MediaDeviceType.TYPE_CAST_GROUP_DEVICE)
-                && !device.isVolumeFixed();
+        return !device.isVolumeFixed();
     }
 
     @Override

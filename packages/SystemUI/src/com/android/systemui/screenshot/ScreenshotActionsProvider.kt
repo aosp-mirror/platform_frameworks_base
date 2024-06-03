@@ -16,56 +16,161 @@
 
 package com.android.systemui.screenshot
 
+import android.app.assist.AssistContent
 import android.content.Context
-import android.content.Intent
-import android.graphics.drawable.Drawable
-import android.net.Uri
-import android.os.UserHandle
+import android.util.Log
 import androidx.appcompat.content.res.AppCompatResources
+import com.android.internal.logging.UiEventLogger
+import com.android.systemui.log.DebugLogger.debugLog
 import com.android.systemui.res.R
-import javax.inject.Inject
+import com.android.systemui.screenshot.ActionIntentCreator.createEdit
+import com.android.systemui.screenshot.ActionIntentCreator.createShareWithSubject
+import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_EDIT_TAPPED
+import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_PREVIEW_TAPPED
+import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_SHARE_TAPPED
+import com.android.systemui.screenshot.ui.viewmodel.ActionButtonAppearance
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import java.util.UUID
 
 /**
- * Provides static actions for screenshots. This class can be overridden by a vendor-specific SysUI
+ * Provides actions for screenshots. This class can be overridden by a vendor-specific SysUI
  * implementation.
  */
 interface ScreenshotActionsProvider {
-    data class ScreenshotAction(
-        val icon: Drawable?,
-        val text: String?,
-        val overrideTransition: Boolean,
-        val retrieveIntent: (Uri) -> Intent
-    )
+    fun onScrollChipReady(onClick: Runnable)
+    fun onScrollChipInvalidated()
+    fun setCompletedScreenshot(result: ScreenshotSavedResult)
 
-    fun getPreviewAction(context: Context, uri: Uri, user: UserHandle): Intent
-    fun getActions(context: Context, user: UserHandle): List<ScreenshotAction>
+    /**
+     * Provide the AssistContent for the focused task if available, null if the focused task isn't
+     * known or didn't return data.
+     */
+    fun onAssistContent(assistContent: AssistContent?) {}
+
+    interface Factory {
+        fun create(
+            requestId: UUID,
+            request: ScreenshotData,
+            actionExecutor: ActionExecutor,
+            actionsCallback: ScreenshotActionsController.ActionsCallback,
+        ): ScreenshotActionsProvider
+    }
 }
 
-class DefaultScreenshotActionsProvider @Inject constructor() : ScreenshotActionsProvider {
-    override fun getPreviewAction(context: Context, uri: Uri, user: UserHandle): Intent {
-        return ActionIntentCreator.createEdit(uri, context)
-    }
+class DefaultScreenshotActionsProvider
+@AssistedInject
+constructor(
+    private val context: Context,
+    private val uiEventLogger: UiEventLogger,
+    @Assisted val requestId: UUID,
+    @Assisted val request: ScreenshotData,
+    @Assisted val actionExecutor: ActionExecutor,
+    @Assisted val actionsCallback: ScreenshotActionsController.ActionsCallback,
+) : ScreenshotActionsProvider {
+    private var addedScrollChip = false
+    private var onScrollClick: Runnable? = null
+    private var pendingAction: ((ScreenshotSavedResult) -> Unit)? = null
+    private var result: ScreenshotSavedResult? = null
 
-    override fun getActions(
-        context: Context,
-        user: UserHandle
-    ): List<ScreenshotActionsProvider.ScreenshotAction> {
-        val editAction =
-            ScreenshotActionsProvider.ScreenshotAction(
-                AppCompatResources.getDrawable(context, R.drawable.ic_screenshot_edit),
-                context.resources.getString(R.string.screenshot_edit_label),
-                true
-            ) { uri ->
-                ActionIntentCreator.createEdit(uri, context)
+    init {
+        actionsCallback.providePreviewAction {
+            debugLog(LogConfig.DEBUG_ACTIONS) { "Preview tapped" }
+            uiEventLogger.log(SCREENSHOT_PREVIEW_TAPPED, 0, request.packageNameString)
+            onDeferrableActionTapped { result ->
+                actionExecutor.startSharedTransition(
+                    createEdit(result.uri, context),
+                    result.user,
+                    true
+                )
             }
-        val shareAction =
-            ScreenshotActionsProvider.ScreenshotAction(
+        }
+
+        actionsCallback.provideActionButton(
+            ActionButtonAppearance(
                 AppCompatResources.getDrawable(context, R.drawable.ic_screenshot_share),
                 context.resources.getString(R.string.screenshot_share_label),
-                false
-            ) { uri ->
-                ActionIntentCreator.createShare(uri)
+                context.resources.getString(R.string.screenshot_share_description),
+            ),
+            showDuringEntrance = true,
+        ) {
+            debugLog(LogConfig.DEBUG_ACTIONS) { "Share tapped" }
+            uiEventLogger.log(SCREENSHOT_SHARE_TAPPED, 0, request.packageNameString)
+            onDeferrableActionTapped { result ->
+                actionExecutor.startSharedTransition(
+                    createShareWithSubject(result.uri, result.subject),
+                    result.user,
+                    false
+                )
             }
-        return listOf(editAction, shareAction)
+        }
+
+        actionsCallback.provideActionButton(
+            ActionButtonAppearance(
+                AppCompatResources.getDrawable(context, R.drawable.ic_screenshot_edit),
+                context.resources.getString(R.string.screenshot_edit_label),
+                context.resources.getString(R.string.screenshot_edit_description),
+            ),
+            showDuringEntrance = true,
+        ) {
+            debugLog(LogConfig.DEBUG_ACTIONS) { "Edit tapped" }
+            uiEventLogger.log(SCREENSHOT_EDIT_TAPPED, 0, request.packageNameString)
+            onDeferrableActionTapped { result ->
+                actionExecutor.startSharedTransition(
+                    createEdit(result.uri, context),
+                    result.user,
+                    true
+                )
+            }
+        }
+    }
+
+    override fun onScrollChipReady(onClick: Runnable) {
+        onScrollClick = onClick
+        if (!addedScrollChip) {
+            actionsCallback.provideActionButton(
+                ActionButtonAppearance(
+                    AppCompatResources.getDrawable(context, R.drawable.ic_screenshot_scroll),
+                    context.resources.getString(R.string.screenshot_scroll_label),
+                    context.resources.getString(R.string.screenshot_scroll_label),
+                ),
+                showDuringEntrance = true,
+            ) {
+                onScrollClick?.run()
+            }
+            addedScrollChip = true
+        }
+    }
+
+    override fun onScrollChipInvalidated() {
+        onScrollClick = null
+    }
+
+    override fun setCompletedScreenshot(result: ScreenshotSavedResult) {
+        if (this.result != null) {
+            Log.e(TAG, "Got a second completed screenshot for existing request!")
+            return
+        }
+        this.result = result
+        pendingAction?.invoke(result)
+    }
+
+    private fun onDeferrableActionTapped(onResult: (ScreenshotSavedResult) -> Unit) {
+        result?.let { onResult.invoke(it) } ?: run { pendingAction = onResult }
+    }
+
+    @AssistedFactory
+    interface Factory : ScreenshotActionsProvider.Factory {
+        override fun create(
+            requestId: UUID,
+            request: ScreenshotData,
+            actionExecutor: ActionExecutor,
+            actionsCallback: ScreenshotActionsController.ActionsCallback,
+        ): DefaultScreenshotActionsProvider
+    }
+
+    companion object {
+        private const val TAG = "ScreenshotActionsProvider"
     }
 }

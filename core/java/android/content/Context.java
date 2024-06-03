@@ -3256,6 +3256,14 @@ public abstract class Context {
      *
      * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
      *
+     * <p>As of {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the system can <a
+     * href="{@docRoot}develop/background-work/background-tasks/broadcasts#android-14">place
+     * context-registered broadcasts in a queue while the app is in the <a
+     * href="{@docRoot}guide/components/activities/process-lifecycle">cached state</a>.
+     * When the app leaves the cached state, such as returning to the
+     * foreground, the system delivers any queued broadcasts. Multiple instances
+     * of certain broadcasts might be merged into one broadcast.
+     *
      * <p>As of {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH}, receivers
      * registered with this method will correctly respect the
      * {@link Intent#setPackage(String)} specified for an Intent being broadcast.
@@ -3301,6 +3309,14 @@ public abstract class Context {
      *
      * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
      *
+     * <p>As of {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the system can <a
+     * href="{@docRoot}develop/background-work/background-tasks/broadcasts#android-14">place
+     * context-registered broadcasts in a queue while the app is in the <a
+     * href="{@docRoot}guide/components/activities/process-lifecycle">cached state</a>.
+     * When the app leaves the cached state, such as returning to the
+     * foreground, the system delivers any queued broadcasts. Multiple instances
+     * of certain broadcasts might be merged into one broadcast.
+     *
      * <p>As of {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH}, receivers
      * registered with this method will correctly respect the
      * {@link Intent#setPackage(String)} specified for an Intent being broadcast.
@@ -3341,6 +3357,14 @@ public abstract class Context {
      * a different thread than the main application thread.
      *
      * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * <p>As of {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the system can <a
+     * href="{@docRoot}develop/background-work/background-tasks/broadcasts#android-14">place
+     * context-registered broadcasts in a queue while the app is in the <a
+     * href="{@docRoot}guide/components/activities/process-lifecycle">cached state</a>.
+     * When the app leaves the cached state, such as returning to the
+     * foreground, the system delivers any queued broadcasts. Multiple instances
+     * of certain broadcasts might be merged into one broadcast.
      *
      * <p>As of {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH}, receivers
      * registered with this method will correctly respect the
@@ -3384,6 +3408,14 @@ public abstract class Context {
      * for more information.
      *
      * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * <p>As of {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the system can <a
+     * href="{@docRoot}develop/background-work/background-tasks/broadcasts#android-14">place
+     * context-registered broadcasts in a queue while the app is in the <a
+     * href="{@docRoot}guide/components/activities/process-lifecycle">cached state</a>.
+     * When the app leaves the cached state, such as returning to the
+     * foreground, the system delivers any queued broadcasts. Multiple instances
+     * of certain broadcasts might be merged into one broadcast.
      *
      * <p>As of {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH}, receivers
      * registered with this method will correctly respect the
@@ -5067,7 +5099,6 @@ public abstract class Context {
      * {@link android.hardware.fingerprint.FingerprintManager} for handling management
      * of fingerprints.
      *
-     * @removed See {@link android.hardware.biometrics.BiometricPrompt}
      * @see #getSystemService(String)
      * @see android.hardware.fingerprint.FingerprintManager
      */
@@ -5913,15 +5944,6 @@ public abstract class Context {
      * @see android.app.job.JobScheduler
      */
     public static final String JOB_SCHEDULER_SERVICE = "jobscheduler";
-
-    /**
-     * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.app.tare.EconomyManager} instance for understanding economic standing.
-     * @see #getSystemService(String)
-     * @hide
-     * @see android.app.tare.EconomyManager
-     */
-    public static final String RESOURCE_ECONOMY_SERVICE = "tare";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link

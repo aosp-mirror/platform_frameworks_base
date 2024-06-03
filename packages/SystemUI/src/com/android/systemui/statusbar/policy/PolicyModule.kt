@@ -14,6 +14,12 @@
 
 package com.android.systemui.statusbar.policy
 
+import android.hardware.SensorPrivacyManager.Sensors.CAMERA
+import android.hardware.SensorPrivacyManager.Sensors.MICROPHONE
+import android.os.UserManager.DISALLOW_CAMERA_TOGGLE
+import android.os.UserManager.DISALLOW_CONFIG_LOCATION
+import android.os.UserManager.DISALLOW_MICROPHONE_TOGGLE
+import android.os.UserManager.DISALLOW_SHARE_LOCATION
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tileimpl.QSTileImpl
@@ -38,6 +44,11 @@ import com.android.systemui.qs.tiles.impl.location.domain.LocationTileMapper
 import com.android.systemui.qs.tiles.impl.location.domain.interactor.LocationTileDataInteractor
 import com.android.systemui.qs.tiles.impl.location.domain.interactor.LocationTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.location.domain.model.LocationTileModel
+import com.android.systemui.qs.tiles.impl.sensorprivacy.SensorPrivacyToggleTileDataInteractor
+import com.android.systemui.qs.tiles.impl.sensorprivacy.domain.SensorPrivacyToggleTileUserActionInteractor
+import com.android.systemui.qs.tiles.impl.sensorprivacy.domain.model.SensorPrivacyToggleTileModel
+import com.android.systemui.qs.tiles.impl.sensorprivacy.ui.SensorPrivacyTileResources
+import com.android.systemui.qs.tiles.impl.sensorprivacy.ui.SensorPrivacyToggleTileMapper
 import com.android.systemui.qs.tiles.impl.uimodenight.domain.UiModeNightTileMapper
 import com.android.systemui.qs.tiles.impl.uimodenight.domain.interactor.UiModeNightTileDataInteractor
 import com.android.systemui.qs.tiles.impl.uimodenight.domain.interactor.UiModeNightTileUserActionInteractor
@@ -47,6 +58,7 @@ import com.android.systemui.qs.tiles.impl.work.domain.interactor.WorkModeTileUse
 import com.android.systemui.qs.tiles.impl.work.domain.model.WorkModeTileModel
 import com.android.systemui.qs.tiles.impl.work.ui.WorkModeTileMapper
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
+import com.android.systemui.qs.tiles.viewmodel.QSTilePolicy
 import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel
 import com.android.systemui.res.R
@@ -74,6 +86,9 @@ interface PolicyModule {
         const val ALARM_TILE_SPEC = "alarm"
         const val UIMODENIGHT_TILE_SPEC = "dark"
         const val WORK_MODE_TILE_SPEC = "work"
+        const val CAMERA_TOGGLE_TILE_SPEC = "cameratoggle"
+        const val MIC_TOGGLE_TILE_SPEC = "mictoggle"
+        const val DND_TILE_SPEC = "dnd"
 
         /** Inject flashlight config */
         @Provides
@@ -120,6 +135,10 @@ interface PolicyModule {
                         labelRes = R.string.quick_settings_location_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                policy =
+                    QSTilePolicy.Restricted(
+                        listOf(DISALLOW_SHARE_LOCATION, DISALLOW_CONFIG_LOCATION)
+                    )
             )
 
         /** Inject LocationTile into tileViewModelMap in QSModule */
@@ -233,6 +252,87 @@ interface PolicyModule {
                 userActionInteractor,
                 stateInteractor,
                 mapper,
+            )
+
+        /** Inject camera toggle config */
+        @Provides
+        @IntoMap
+        @StringKey(CAMERA_TOGGLE_TILE_SPEC)
+        fun provideCameraToggleTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(CAMERA_TOGGLE_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.qs_camera_access_icon_off,
+                        labelRes = R.string.quick_settings_camera_label,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
+                policy = QSTilePolicy.Restricted(listOf(DISALLOW_CAMERA_TOGGLE)),
+            )
+
+        /** Inject camera toggle tile into tileViewModelMap in QSModule */
+        @Provides
+        @IntoMap
+        @StringKey(CAMERA_TOGGLE_TILE_SPEC)
+        fun provideCameraToggleTileViewModel(
+            factory: QSTileViewModelFactory.Static<SensorPrivacyToggleTileModel>,
+            mapper: SensorPrivacyToggleTileMapper.Factory,
+            stateInteractor: SensorPrivacyToggleTileDataInteractor.Factory,
+            userActionInteractor: SensorPrivacyToggleTileUserActionInteractor.Factory,
+        ): QSTileViewModel =
+            factory.create(
+                TileSpec.create(CAMERA_TOGGLE_TILE_SPEC),
+                userActionInteractor.create(CAMERA),
+                stateInteractor.create(CAMERA),
+                mapper.create(SensorPrivacyTileResources.CameraPrivacyTileResources),
+            )
+
+        /** Inject microphone toggle config */
+        @Provides
+        @IntoMap
+        @StringKey(MIC_TOGGLE_TILE_SPEC)
+        fun provideMicrophoneToggleTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(MIC_TOGGLE_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.qs_mic_access_off,
+                        labelRes = R.string.quick_settings_mic_label,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
+                policy = QSTilePolicy.Restricted(listOf(DISALLOW_MICROPHONE_TOGGLE)),
+            )
+
+        /** Inject microphone toggle tile into tileViewModelMap in QSModule */
+        @Provides
+        @IntoMap
+        @StringKey(MIC_TOGGLE_TILE_SPEC)
+        fun provideMicrophoneToggleTileViewModel(
+            factory: QSTileViewModelFactory.Static<SensorPrivacyToggleTileModel>,
+            mapper: SensorPrivacyToggleTileMapper.Factory,
+            stateInteractor: SensorPrivacyToggleTileDataInteractor.Factory,
+            userActionInteractor: SensorPrivacyToggleTileUserActionInteractor.Factory,
+        ): QSTileViewModel =
+            factory.create(
+                TileSpec.create(MIC_TOGGLE_TILE_SPEC),
+                userActionInteractor.create(MICROPHONE),
+                stateInteractor.create(MICROPHONE),
+                mapper.create(SensorPrivacyTileResources.MicrophonePrivacyTileResources),
+            )
+
+        /** Inject microphone toggle config */
+        @Provides
+        @IntoMap
+        @StringKey(DND_TILE_SPEC)
+        fun provideDndTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(DND_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.qs_dnd_icon_off,
+                        labelRes = R.string.quick_settings_dnd_label,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
             )
     }
 

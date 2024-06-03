@@ -25,6 +25,8 @@ package {
         "//visibility:override",
         "//frameworks/base/packages/SystemUI:__subpackages__",
         "//frameworks/libs/systemui/tracinglib:__subpackages__",
+        "//frameworks/base/services/accessibility:__subpackages__",
+        "//frameworks/base/services/tests:__subpackages__",
         "//platform_testing:__subpackages__",
         "//vendor:__subpackages__",
         "//cts:__subpackages__",
@@ -34,6 +36,7 @@ package {
 aconfig_declarations {
     name: "com_android_systemui_flags",
     package: "com.android.systemui",
+    container: "system",
     srcs: [
         "*.aconfig",
     ],
@@ -42,4 +45,5 @@ aconfig_declarations {
 java_aconfig_library {
     name: "com_android_systemui_flags_lib",
     aconfig_declarations: "com_android_systemui_flags",
+    sdk_version: "system_current",
 }

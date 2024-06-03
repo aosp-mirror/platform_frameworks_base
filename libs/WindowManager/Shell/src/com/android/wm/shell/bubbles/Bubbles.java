@@ -37,8 +37,9 @@ import android.window.ScreenCapture.SynchronousScreenCaptureListener;
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 
-import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.common.bubbles.BubbleBarLocation;
 import com.android.wm.shell.common.bubbles.BubbleBarUpdate;
+import com.android.wm.shell.shared.annotations.ExternalThread;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -296,6 +297,15 @@ public interface Bubbles {
             boolean sensitiveNotificationProtectionActive);
 
     /**
+     * Determines whether Bubbles can show notifications.
+     *
+     * <p>Normally bubble notifications are shown by Bubbles, but in some cases the bubble
+     * notification is suppressed and should be shown by the Notifications pipeline as regular
+     * notifications.
+     */
+    boolean canShowBubbleNotification();
+
+    /**
      * A listener to be notified of bubble state changes, used by launcher to render bubbles in
      * its process.
      */
@@ -304,6 +314,12 @@ public interface Bubbles {
          * Called when the bubbles state changes.
          */
         void onBubbleStateChange(BubbleBarUpdate update);
+
+        /**
+         * Called when bubble bar should temporarily be animated to a new location.
+         * Does not result in a state change.
+         */
+        void animateBubbleBarLocation(BubbleBarLocation location);
     }
 
     /** Listener to find out about stack expansion / collapse events. */

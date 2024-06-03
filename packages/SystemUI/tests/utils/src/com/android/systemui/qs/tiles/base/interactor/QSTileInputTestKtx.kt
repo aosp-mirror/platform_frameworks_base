@@ -17,7 +17,7 @@
 package com.android.systemui.qs.tiles.base.interactor
 
 import android.os.UserHandle
-import android.view.View
+import com.android.systemui.animation.Expandable
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
 
 object QSTileInputTestKtx {
@@ -25,12 +25,12 @@ object QSTileInputTestKtx {
     fun <T> click(
         data: T,
         user: UserHandle = UserHandle.CURRENT,
-        view: View? = null,
-    ): QSTileInput<T> = QSTileInput(user, QSTileUserAction.Click(view), data)
+        expandable: Expandable? = null,
+    ): QSTileInput<T> = QSTileInput(user, QSTileUserAction.Click(expandable), data)
 
     fun <T> longClick(
         data: T,
         user: UserHandle = UserHandle.CURRENT,
-        view: View? = null,
-    ): QSTileInput<T> = QSTileInput(user, QSTileUserAction.LongClick(view), data)
+        expandable: Expandable? = null,
+    ): QSTileInput<T> = QSTileInput(user, QSTileUserAction.LongClick(expandable), data)
 }

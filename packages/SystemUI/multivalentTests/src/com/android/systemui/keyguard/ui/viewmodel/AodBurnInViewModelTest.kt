@@ -23,10 +23,12 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.burnInInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
+import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -58,17 +60,16 @@ class AodBurnInViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val keyguardClockRepository = kosmos.fakeKeyguardClockRepository
     private lateinit var underTest: AodBurnInViewModel
-
-    private var burnInParameters =
-        BurnInParameters(
-            clockControllerProvider = { clockController },
-        )
+    // assign a smaller value to minViewY to avoid overflow
+    private var burnInParameters = BurnInParameters(minViewY = Int.MAX_VALUE / 2)
     private val burnInFlow = MutableStateFlow(BurnInModel())
 
     @Before
     fun setUp() {
         mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_COMPOSE_LOCKSCREEN)
 
         MockitoAnnotations.initMocks(this)
         whenever(burnInInteractor.burnIn(anyInt(), anyInt())).thenReturn(burnInFlow)
@@ -76,6 +77,7 @@ class AodBurnInViewModelTest : SysuiTestCase() {
         whenever(goneToAodTransitionViewModel.enterFromTopTranslationY(anyInt()))
             .thenReturn(emptyFlow())
         kosmos.goneToAodTransitionViewModel = goneToAodTransitionViewModel
+        kosmos.fakeKeyguardClockRepository.setCurrentClock(clockController)
 
         underTest = kosmos.aodBurnInViewModel
     }
@@ -294,9 +296,144 @@ class AodBurnInViewModelTest : SysuiTestCase() {
                     scale = 0.5f,
                 )
 
-            assertThat(movement?.translationX).isEqualTo(0)
-            assertThat(movement?.translationY).isEqualTo(0)
+            assertThat(movement?.translationX).isEqualTo(20)
+            assertThat(movement?.translationY).isEqualTo(30)
             assertThat(movement?.scale).isEqualTo(0.5f)
             assertThat(movement?.scaleClockOnly).isEqualTo(false)
+        }
+
+    @Test
+    fun translationAndScale_composeFlagOff_weatherLargeClock() =
+        testBurnInViewModelForClocks(
+            isSmallClock = false,
+            isWeatherClock = true,
+            expectedScaleOnly = false,
+            enableMigrateClocksToBlueprintFlag = true,
+            enableComposeLockscreenFlag = false
+        )
+
+    @Test
+    fun translationAndScale_composeFlagOff_weatherSmallClock() =
+        testBurnInViewModelForClocks(
+            isSmallClock = true,
+            isWeatherClock = true,
+            expectedScaleOnly = false,
+            enableMigrateClocksToBlueprintFlag = true,
+            enableComposeLockscreenFlag = false
+        )
+
+    @Test
+    fun translationAndScale_composeFlagOff_nonWeatherLargeClock() =
+        testBurnInViewModelForClocks(
+            isSmallClock = false,
+            isWeatherClock = false,
+            expectedScaleOnly = true,
+            enableMigrateClocksToBlueprintFlag = true,
+            enableComposeLockscreenFlag = false
+        )
+
+    @Test
+    fun translationAndScale_composeFlagOff_nonWeatherSmallClock() =
+        testBurnInViewModelForClocks(
+            isSmallClock = true,
+            isWeatherClock = false,
+            expectedScaleOnly = false,
+            enableMigrateClocksToBlueprintFlag = true,
+            enableComposeLockscreenFlag = false
+        )
+
+    @Test
+    fun translationAndScale_composeFlagOn_weatherLargeClock() =
+        testBurnInViewModelForClocks(
+            isSmallClock = false,
+            isWeatherClock = true,
+            expectedScaleOnly = false,
+            enableMigrateClocksToBlueprintFlag = true,
+            enableComposeLockscreenFlag = true
+        )
+
+    @Test
+    fun translationAndScale_composeFlagOn_weatherSmallClock() =
+        testBurnInViewModelForClocks(
+            isSmallClock = true,
+            isWeatherClock = true,
+            expectedScaleOnly = false,
+            enableMigrateClocksToBlueprintFlag = true,
+            enableComposeLockscreenFlag = true
+        )
+
+    @Test
+    fun translationAndScale_composeFlagOn_nonWeatherLargeClock() =
+        testBurnInViewModelForClocks(
+            isSmallClock = false,
+            isWeatherClock = false,
+            expectedScaleOnly = true,
+            enableMigrateClocksToBlueprintFlag = true,
+            enableComposeLockscreenFlag = true
+        )
+
+    @Test
+    fun translationAndScale_composeFlagOn_nonWeatherSmallClock() =
+        testBurnInViewModelForClocks(
+            isSmallClock = true,
+            isWeatherClock = false,
+            expectedScaleOnly = false,
+            enableMigrateClocksToBlueprintFlag = true,
+            enableComposeLockscreenFlag = true
+        )
+
+    private fun testBurnInViewModelForClocks(
+        isSmallClock: Boolean,
+        isWeatherClock: Boolean,
+        expectedScaleOnly: Boolean,
+        enableMigrateClocksToBlueprintFlag: Boolean,
+        enableComposeLockscreenFlag: Boolean
+    ) =
+        testScope.runTest {
+            if (enableMigrateClocksToBlueprintFlag) {
+                mSetFlagsRule.enableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+            } else {
+                mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+            }
+
+            if (enableComposeLockscreenFlag) {
+                mSetFlagsRule.enableFlags(AConfigFlags.FLAG_COMPOSE_LOCKSCREEN)
+            } else {
+                mSetFlagsRule.disableFlags(AConfigFlags.FLAG_COMPOSE_LOCKSCREEN)
+            }
+            if (isSmallClock) {
+                keyguardClockRepository.setClockSize(ClockSize.SMALL)
+                // we need the following step to update stateFlow value
+                kosmos.testScope.collectLastValue(kosmos.keyguardClockViewModel.clockSize)
+            }
+
+            whenever(clockController.config.useAlternateSmartspaceAODTransition)
+                .thenReturn(if (isWeatherClock) true else false)
+
+            val movement by collectLastValue(underTest.movement(burnInParameters))
+
+            // Set to dozing (on AOD)
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.AOD,
+                    value = 1f,
+                    transitionState = TransitionState.FINISHED
+                ),
+                validateStep = false,
+            )
+
+            // Trigger a change to the burn-in model
+            burnInFlow.value =
+                BurnInModel(
+                    translationX = 20,
+                    translationY = 30,
+                    scale = 0.5f,
+                )
+
+            assertThat(movement?.translationX).isEqualTo(20)
+            assertThat(movement?.translationY).isEqualTo(30)
+            assertThat(movement?.scale).isEqualTo(0.5f)
+            assertThat(movement?.scaleClockOnly).isEqualTo(expectedScaleOnly)
         }
 }

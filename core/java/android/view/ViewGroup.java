@@ -49,7 +49,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.SystemClock;
-import android.service.autofill.Flags;
 import android.util.AttributeSet;
 import android.util.IntArray;
 import android.util.Log;
@@ -2652,10 +2651,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             // Check for interception.
             final boolean intercepted;
-            if (actionMasked == MotionEvent.ACTION_DOWN
-                    || mFirstTouchTarget != null) {
+            ViewRootImpl viewRootImpl = getViewRootImpl();
+            if (actionMasked == MotionEvent.ACTION_DOWN || mFirstTouchTarget != null) {
                 final boolean disallowIntercept = (mGroupFlags & FLAG_DISALLOW_INTERCEPT) != 0;
-                if (!disallowIntercept) {
+                final boolean isBackGestureInProgress = (viewRootImpl != null
+                        && viewRootImpl.getOnBackInvokedDispatcher().isBackGestureInProgress());
+                if (!disallowIntercept || isBackGestureInProgress) {
+                    // Allow back to intercept touch
                     intercepted = onInterceptTouchEvent(ev);
                     ev.setAction(action); // restore action in case it was changed
                 } else {

@@ -23,6 +23,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.qs.external.FakeCustomTileStatePersister
 import com.android.systemui.qs.external.tileServices
+import com.android.systemui.qs.external.tileServicesFacade
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.base.actions.FakeQSTileIntentUserInputHandler
 import com.android.systemui.qs.tiles.base.logging.QSTileLogger
@@ -38,10 +39,10 @@ import com.android.systemui.qs.tiles.viewmodel.QSTileConfigTestBuilder
 import com.android.systemui.user.data.repository.userRepository
 import com.android.systemui.util.mockito.mock
 
-var Kosmos.tileSpec: TileSpec.CustomTileSpec by Kosmos.Fixture()
+var Kosmos.customTileSpec: TileSpec.CustomTileSpec by Kosmos.Fixture()
 
 var Kosmos.customTileQsTileConfig: QSTileConfig by
-    Kosmos.Fixture { QSTileConfigTestBuilder.build { tileSpec = this@Fixture.tileSpec } }
+    Kosmos.Fixture { QSTileConfigTestBuilder.build { tileSpec = this@Fixture.customTileSpec } }
 val Kosmos.qsTileLogger: QSTileLogger by Kosmos.Fixture { mock {} }
 
 val Kosmos.customTileStatePersister: FakeCustomTileStatePersister by
@@ -50,7 +51,7 @@ val Kosmos.customTileStatePersister: FakeCustomTileStatePersister by
 val Kosmos.customTileInteractor: CustomTileInteractor by
     Kosmos.Fixture {
         CustomTileInteractor(
-            tileSpec,
+            customTileSpec,
             customTileDefaultsRepository,
             customTileRepository,
             testScope.backgroundScope,
@@ -61,7 +62,7 @@ val Kosmos.customTileInteractor: CustomTileInteractor by
 val Kosmos.customTileRepository: FakeCustomTileRepository by
     Kosmos.Fixture {
         FakeCustomTileRepository(
-            tileSpec,
+            customTileSpec,
             customTileStatePersister,
             packageManagerAdapterFacade,
             testScope.testScheduler,
@@ -75,18 +76,18 @@ val Kosmos.customTilePackagesUpdatesRepository: FakeCustomTilePackageUpdatesRepo
     Kosmos.Fixture { FakeCustomTilePackageUpdatesRepository() }
 
 val Kosmos.packageManagerAdapterFacade: FakePackageManagerAdapterFacade by
-    Kosmos.Fixture { FakePackageManagerAdapterFacade(tileSpec.componentName) }
+    Kosmos.Fixture { FakePackageManagerAdapterFacade(customTileSpec.componentName) }
 
 val Kosmos.customTileServiceInteractor: CustomTileServiceInteractor by
     Kosmos.Fixture {
         CustomTileServiceInteractor(
-            tileSpec,
+            customTileSpec,
             activityStarter,
             { customTileUserActionInteractor },
             customTileInteractor,
             userRepository,
             qsTileLogger,
-            tileServices,
+            tileServicesFacade.tileServices,
             testScope.backgroundScope,
         )
     }
@@ -95,7 +96,7 @@ val Kosmos.customTileUserActionInteractor: CustomTileUserActionInteractor by
     Kosmos.Fixture {
         CustomTileUserActionInteractor(
             testCase.context,
-            tileSpec,
+            customTileSpec,
             qsTileLogger,
             mock {},
             mock {},

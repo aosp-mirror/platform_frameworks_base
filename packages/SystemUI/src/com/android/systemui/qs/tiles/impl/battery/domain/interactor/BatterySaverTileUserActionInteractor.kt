@@ -39,12 +39,12 @@ constructor(
             when (action) {
                 is QSTileUserAction.Click -> {
                     if (!data.isPluggedIn) {
-                        batteryController.setPowerSaveMode(!data.isPowerSaving, action.view)
+                        batteryController.setPowerSaveMode(!data.isPowerSaving, action.expandable)
                     }
                 }
                 is QSTileUserAction.LongClick -> {
                     qsTileIntentUserActionHandler.handle(
-                        action.view,
+                        action.expandable,
                         Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS)
                     )
                 }

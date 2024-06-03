@@ -19,11 +19,11 @@ package com.android.wm.shell.flicker.bubble
 import android.content.Context
 import android.graphics.Point
 import android.platform.test.annotations.Presubmit
-import android.tools.flicker.subject.layers.LayersTraceSubject
-import android.tools.traces.component.ComponentNameMatcher
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.subject.layers.LayersTraceSubject
+import android.tools.traces.component.ComponentNameMatcher
 import android.util.DisplayMetrics
 import android.view.WindowManager
 import androidx.test.uiautomator.By
@@ -35,7 +35,7 @@ import org.junit.runners.Parameterized
 /**
  * Test launching a new activity from bubble.
  *
- * To run this test: `atest WMShellFlickerTests:DismissBubbleScreen`
+ * To run this test: `atest WMShellFlickerTestsBubbles:DragToDismissBubbleScreenTest`
  *
  * Actions:
  * ```

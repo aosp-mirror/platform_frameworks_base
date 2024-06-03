@@ -24,11 +24,9 @@ import static android.accessibilityservice.AccessibilityService.SHOW_MODE_IGNORE
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_MASK;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
-import static android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 
 import android.accessibilityservice.AccessibilityService.SoftKeyboardShowMode;
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -53,7 +51,6 @@ import android.view.accessibility.IAccessibilityManagerClient;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
-import com.android.internal.accessibility.common.ShortcutConstants;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -779,15 +776,22 @@ class AccessibilityUserState {
      * @param shortcutType The shortcut type.
      * @return The array set of the strings
      */
-    public ArraySet<String> getShortcutTargetsLocked(@ShortcutType int shortcutType) {
-        if (shortcutType == ACCESSIBILITY_SHORTCUT_KEY) {
+    public ArraySet<String> getShortcutTargetsLocked(@UserShortcutType int shortcutType) {
+        if (shortcutType == UserShortcutType.HARDWARE) {
             return mAccessibilityShortcutKeyTargets;
-        } else if (shortcutType == ACCESSIBILITY_BUTTON) {
+        } else if (shortcutType == UserShortcutType.SOFTWARE) {
             return mAccessibilityButtonTargets;
-        } else if (shortcutType == ShortcutConstants.UserShortcutType.QUICK_SETTINGS) {
+        } else if (shortcutType == UserShortcutType.QUICK_SETTINGS) {
             return getA11yQsTargets();
+        } else if ((shortcutType == UserShortcutType.TRIPLETAP
+                && isMagnificationSingleFingerTripleTapEnabledLocked()) || (
+                shortcutType == UserShortcutType.TWOFINGER_DOUBLETAP
+                        && isMagnificationTwoFingerTripleTapEnabledLocked())) {
+            ArraySet<String> targets = new ArraySet<>();
+            targets.add(MAGNIFICATION_CONTROLLER_NAME);
+            return targets;
         }
-        return null;
+        return new ArraySet<>();
     }
 
     /**
@@ -830,8 +834,16 @@ class AccessibilityUserState {
      * @param target The component name of the shortcut target.
      * @return true if the shortcut target is removed.
      */
-    public boolean removeShortcutTargetLocked(@ShortcutType int shortcutType,
-            ComponentName target) {
+    public boolean removeShortcutTargetLocked(
+            @UserShortcutType int shortcutType, ComponentName target) {
+        if (shortcutType == UserShortcutType.TRIPLETAP
+                || shortcutType == UserShortcutType.TWOFINGER_DOUBLETAP) {
+            throw new UnsupportedOperationException(
+                    "removeShortcutTargetLocked only support shortcut type: "
+                            + "software and hardware and quick settings for now"
+            );
+        }
+
         Set<String> targets = getShortcutTargetsLocked(shortcutType);
         boolean result = targets.removeIf(name -> {
             ComponentName componentName;
@@ -841,7 +853,7 @@ class AccessibilityUserState {
             }
             return componentName.equals(target);
         });
-        if (shortcutType == ShortcutConstants.UserShortcutType.QUICK_SETTINGS) {
+        if (shortcutType == UserShortcutType.QUICK_SETTINGS) {
             updateA11yQsTargetLocked(targets);
         }
 

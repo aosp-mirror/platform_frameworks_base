@@ -1,0 +1,4 @@
+<app-metadata-bundles version="123456">
+<system-app-safety-label url="www.example.com">
+</system-app-safety-label>
+</app-metadata-bundles>

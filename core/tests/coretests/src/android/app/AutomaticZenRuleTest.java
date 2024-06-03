@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.fail;
 
@@ -173,6 +175,28 @@ public class AutomaticZenRuleTest {
                 () -> new AutomaticZenRule.Builder(null, Uri.parse("condition")));
         assertThrows(NullPointerException.class,
                 () -> new AutomaticZenRule.Builder("name", null));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void constructor_defaultTypeUnknown() {
+        AutomaticZenRule rule = new AutomaticZenRule("name", new ComponentName("pkg", "cps"), null,
+                Uri.parse("conditionId"), null, NotificationManager.INTERRUPTION_FILTER_PRIORITY,
+                true);
+
+        assertThat(rule.getType()).isEqualTo(AutomaticZenRule.TYPE_UNKNOWN);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void builder_defaultsAreSensible() {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("name",
+                Uri.parse("conditionId")).build();
+
+        assertThat(rule.getType()).isEqualTo(AutomaticZenRule.TYPE_UNKNOWN);
+        assertThat(rule.getInterruptionFilter()).isEqualTo(
+                NotificationManager.INTERRUPTION_FILTER_PRIORITY);
+        assertThat(rule.isEnabled()).isTrue();
     }
 
     @Test

@@ -1,17 +1,11 @@
 package: "android.os.vibrator"
+container: "system"
 
 flag {
     namespace: "haptics"
     name: "use_vibrator_haptic_feedback"
     description: "Enables performHapticFeedback to directly use the vibrator service instead of going through the window session"
     bug: "295459081"
-}
-
-flag {
-    namespace: "haptics"
-    name: "haptics_customization_enabled"
-    description: "Enables the haptics customization feature"
-    bug: "241918098"
 }
 
 flag {

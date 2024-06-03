@@ -35,10 +35,10 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.annotation.ColorInt;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
@@ -55,6 +55,8 @@ import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepositor
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.kotlin.JavaAdapter;
 
+import kotlinx.coroutines.test.TestScope;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,10 +66,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import kotlinx.coroutines.test.TestScope;
-
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class LightBarControllerTest extends SysuiTestCase {
 

@@ -47,12 +47,14 @@ internal fun transitionsImpl(
     return SceneTransitions(
         impl.defaultSwipeSpec,
         impl.transitionSpecs,
-        impl.transitionOverscrollSpecs
+        impl.transitionOverscrollSpecs,
+        impl.interruptionHandler,
     )
 }
 
 private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
     override var defaultSwipeSpec: SpringSpec<Float> = SceneTransitions.DefaultSwipeSpec
+    override var interruptionHandler: InterruptionHandler = DefaultInterruptionHandler
 
     val transitionSpecs = mutableListOf<TransitionSpecImpl>()
     val transitionOverscrollSpecs = mutableListOf<OverscrollSpecImpl>()

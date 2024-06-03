@@ -24,9 +24,12 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
+import com.android.systemui.deviceentry.shared.model.DeviceUnlockSource
+import com.android.systemui.deviceentry.shared.model.DeviceUnlockStatus
 import com.android.systemui.flags.EnableSceneContainer
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
@@ -49,9 +52,9 @@ class PanelExpansionInteractorImplTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val deviceEntryRepository = kosmos.fakeDeviceEntryRepository
-    private val deviceUnlockedInteractor = kosmos.deviceUnlockedInteractor
-    private val sceneInteractor = kosmos.sceneInteractor
+    private val deviceUnlockedInteractor by lazy { kosmos.deviceUnlockedInteractor }
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
+    private val shadeAnimationInteractor by lazy { kosmos.shadeAnimationInteractor }
     private val transitionState =
         MutableStateFlow<ObservableTransitionState>(
             ObservableTransitionState.Idle(Scenes.Lockscreen)
@@ -70,7 +73,6 @@ class PanelExpansionInteractorImplTest : SysuiTestCase() {
     fun legacyPanelExpansion_whenIdle_whenLocked() =
         testScope.runTest {
             underTest = kosmos.panelExpansionInteractorImpl
-            setUnlocked(false)
             val panelExpansion by collectLastValue(underTest.legacyPanelExpansion)
 
             changeScene(Scenes.Lockscreen) { assertThat(panelExpansion).isEqualTo(1f) }
@@ -94,7 +96,15 @@ class PanelExpansionInteractorImplTest : SysuiTestCase() {
     fun legacyPanelExpansion_whenIdle_whenUnlocked() =
         testScope.runTest {
             underTest = kosmos.panelExpansionInteractorImpl
-            setUnlocked(true)
+            val unlockStatus by collectLastValue(deviceUnlockedInteractor.deviceUnlockStatus)
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
+
+            assertThat(unlockStatus)
+                .isEqualTo(DeviceUnlockStatus(true, DeviceUnlockSource.Fingerprint))
+
             val panelExpansion by collectLastValue(underTest.legacyPanelExpansion)
 
             changeScene(Scenes.Gone) { assertThat(panelExpansion).isEqualTo(0f) }
@@ -112,13 +122,39 @@ class PanelExpansionInteractorImplTest : SysuiTestCase() {
             changeScene(Scenes.Communal) { assertThat(panelExpansion).isEqualTo(1f) }
             assertThat(panelExpansion).isEqualTo(1f)
         }
-    private fun TestScope.setUnlocked(isUnlocked: Boolean) {
-        val isDeviceUnlocked by collectLastValue(deviceUnlockedInteractor.isDeviceUnlocked)
-        deviceEntryRepository.setUnlocked(isUnlocked)
-        runCurrent()
 
-        assertThat(isDeviceUnlocked).isEqualTo(isUnlocked)
-    }
+    @Test
+    @EnableSceneContainer
+    fun shouldHideStatusBarIconsWhenExpanded_goneScene() =
+        testScope.runTest {
+            underTest = kosmos.panelExpansionInteractorImpl
+            shadeAnimationInteractor.setIsLaunchingActivity(false)
+            changeScene(Scenes.Gone)
+
+            assertThat(underTest.shouldHideStatusBarIconsWhenExpanded()).isFalse()
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun shouldHideStatusBarIconsWhenExpanded_lockscreenScene() =
+        testScope.runTest {
+            underTest = kosmos.panelExpansionInteractorImpl
+            shadeAnimationInteractor.setIsLaunchingActivity(false)
+            changeScene(Scenes.Lockscreen)
+
+            assertThat(underTest.shouldHideStatusBarIconsWhenExpanded()).isTrue()
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun shouldHideStatusBarIconsWhenExpanded_activityLaunch() =
+        testScope.runTest {
+            underTest = kosmos.panelExpansionInteractorImpl
+            changeScene(Scenes.Gone)
+            shadeAnimationInteractor.setIsLaunchingActivity(true)
+
+            assertThat(underTest.shouldHideStatusBarIconsWhenExpanded()).isFalse()
+        }
 
     private fun TestScope.changeScene(
         toScene: SceneKey,
@@ -130,6 +166,7 @@ class PanelExpansionInteractorImplTest : SysuiTestCase() {
             ObservableTransitionState.Transition(
                 fromScene = checkNotNull(currentScene),
                 toScene = toScene,
+                currentScene = flowOf(checkNotNull(currentScene)),
                 progress = progressFlow,
                 isInitiatedByUserInput = true,
                 isUserInputOngoing = flowOf(true),

@@ -16,12 +16,18 @@
 
 package com.google.android.test.windowinsetstests;
 
-import android.app.Activity;
+import static android.view.WindowInsets.Type.displayCutout;
+import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowInsets.Type.navigationBars;
+import static android.view.WindowInsets.Type.statusBars;
+import static android.view.WindowInsets.Type.systemBars;
+import static android.view.WindowInsets.Type.systemGestures;
+
 import android.graphics.Insets;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowInsets;
-import android.view.WindowInsets.Type;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimationControlListener;
 import android.view.WindowInsetsAnimationController;
 import android.widget.AdapterView;
@@ -32,7 +38,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-public class ControllerActivity extends Activity implements View.OnApplyWindowInsetsListener {
+import androidx.appcompat.app.AppCompatActivity;
+
+public class ControllerActivity extends AppCompatActivity {
 
     private ToggleButton mToggleStatus;
     private SeekBar mSeekStatus;
@@ -48,6 +56,29 @@ public class ControllerActivity extends Activity implements View.OnApplyWindowIn
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.controller_activity);
+        setSupportActionBar(findViewById(R.id.toolbar));
+        getWindow().setDecorFitsSystemWindows(false);
+        findViewById(R.id.root).setOnApplyWindowInsetsListener(
+                (v, insets) -> {
+                    final int visibleTypes = systemBars() | displayCutout();
+                    final Insets i = insets.getInsets(visibleTypes);
+                    v.setPadding(i.left, i.top, i.right, i.bottom);
+
+                    // Make the content view not obscured by gesture insets to prevent triggering
+                    // system gestures while controlling seek bars.
+                    final Insets gi = Insets.subtract(
+                            insets.getInsets(systemGestures() | visibleTypes), i);
+                    findViewById(R.id.content).setPadding(gi.left, gi.top, gi.right, gi.bottom);
+
+                    mNotFromUser[0] = true;
+                    updateWidgets(insets, statusBars(), mToggleStatus, mSeekStatus);
+                    updateWidgets(insets, navigationBars(), mToggleNavigation, mSeekNavigation);
+                    updateWidgets(insets, ime(), mToggleIme, mSeekIme);
+                    mLastInsets = insets;
+                    mNotFromUser[0] = false;
+
+                    return WindowInsets.CONSUMED;
+                });
         final Spinner spinnerBehavior = findViewById(R.id.spinnerBehavior);
         ArrayAdapter<CharSequence> adapterBehavior = ArrayAdapter.createFromResource(this,
                 R.array.behaviors, android.R.layout.simple_spinner_item);
@@ -66,45 +97,27 @@ public class ControllerActivity extends Activity implements View.OnApplyWindowIn
         });
         mToggleStatus = findViewById(R.id.toggleButtonStatus);
         mToggleStatus.setTag(mNotFromUser);
-        mToggleStatus.setOnCheckedChangeListener(new ToggleListener(Type.statusBars()));
+        mToggleStatus.setOnCheckedChangeListener(new ToggleListener(statusBars()));
         mSeekStatus = findViewById(R.id.seekBarStatus);
-        mSeekStatus.setOnSeekBarChangeListener(new SeekBarListener(Type.statusBars()));
+        mSeekStatus.setOnSeekBarChangeListener(new SeekBarListener(statusBars()));
         mToggleNavigation = findViewById(R.id.toggleButtonNavigation);
         mToggleNavigation.setTag(mNotFromUser);
-        mToggleNavigation.setOnCheckedChangeListener(new ToggleListener(Type.navigationBars()));
+        mToggleNavigation.setOnCheckedChangeListener(new ToggleListener(navigationBars()));
         mSeekNavigation = findViewById(R.id.seekBarNavigation);
-        mSeekNavigation.setOnSeekBarChangeListener(new SeekBarListener(Type.navigationBars()));
+        mSeekNavigation.setOnSeekBarChangeListener(new SeekBarListener(navigationBars()));
         mToggleIme = findViewById(R.id.toggleButtonIme);
         mToggleIme.setTag(mNotFromUser);
-        mToggleIme.setOnCheckedChangeListener(new ToggleListener(Type.ime()));
+        mToggleIme.setOnCheckedChangeListener(new ToggleListener(ime()));
         mSeekIme = findViewById(R.id.seekBarIme);
-        mSeekIme.setOnSeekBarChangeListener(new SeekBarListener(Type.ime()));
+        mSeekIme.setOnSeekBarChangeListener(new SeekBarListener(ime()));
         mTextControllableInsets = findViewById(R.id.textViewControllableInsets);
-        final View contentView = findViewById(R.id.content);
-        contentView.setOnApplyWindowInsetsListener(this);
-        contentView.getWindowInsetsController().addOnControllableInsetsChangedListener(
+        mTextControllableInsets.getWindowInsetsController().addOnControllableInsetsChangedListener(
                 (c, types) -> mTextControllableInsets.setText(
                         "ControllableInsetsTypes:\n" + insetsTypesToString(types)));
     }
 
     private static String insetsTypesToString(int types) {
         return types == 0 ? "none" : WindowInsets.Type.toString(types);
-    }
-
-    @Override
-    public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
-        mNotFromUser[0] = true;
-        updateWidgets(insets, Type.statusBars(), mToggleStatus, mSeekStatus);
-        updateWidgets(insets, Type.navigationBars(), mToggleNavigation, mSeekNavigation);
-        updateWidgets(insets, Type.ime(), mToggleIme, mSeekIme);
-        mLastInsets = insets;
-        mNotFromUser[0] = false;
-
-        // Prevent triggering system gestures while controlling seek bars.
-        final Insets gestureInsets =  insets.getInsets(Type.systemGestures());
-        v.setPadding(gestureInsets.left, 0, gestureInsets.right, 0);
-
-        return v.onApplyWindowInsets(insets);
     }
 
     private void updateWidgets(WindowInsets insets, int types, ToggleButton toggle, SeekBar seek) {
@@ -121,7 +134,7 @@ public class ControllerActivity extends Activity implements View.OnApplyWindowIn
 
     private static class ToggleListener implements CompoundButton.OnCheckedChangeListener {
 
-        private final @Type.InsetsType int mTypes;
+        private final @InsetsType int mTypes;
 
         ToggleListener(int types) {
             mTypes = types;
@@ -143,7 +156,7 @@ public class ControllerActivity extends Activity implements View.OnApplyWindowIn
 
     private static class SeekBarListener implements SeekBar.OnSeekBarChangeListener {
 
-        private final @Type.InsetsType int mTypes;
+        private final @InsetsType int mTypes;
 
         private WindowInsetsAnimationController mController;
 

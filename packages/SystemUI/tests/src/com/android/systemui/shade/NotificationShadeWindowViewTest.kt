@@ -22,7 +22,7 @@ import android.view.MotionEvent
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityContainerController
-import com.android.keyguard.LockIconViewController
+import com.android.keyguard.LegacyLockIconViewController
 import com.android.keyguard.dagger.KeyguardBouncerComponent
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
@@ -36,9 +36,12 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyevent.domain.interactor.SysUIKeyEventHandler
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.statusbar.DragDownHelper
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.NotificationInsetsController
@@ -56,7 +59,6 @@ import com.android.systemui.statusbar.phone.DozeServiceHost
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
-import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -91,7 +93,8 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock private lateinit var dozeServiceHost: DozeServiceHost
     @Mock private lateinit var dozeScrimController: DozeScrimController
     @Mock private lateinit var dockManager: DockManager
-    @Mock private lateinit var notificationPanelViewController: NotificationPanelViewController
+    @Mock private lateinit var shadeViewController: ShadeViewController
+    @Mock private lateinit var panelExpansionInteractor: PanelExpansionInteractor
     @Mock private lateinit var notificationStackScrollLayout: NotificationStackScrollLayout
     @Mock private lateinit var notificationShadeDepthController: NotificationShadeDepthController
     @Mock private lateinit var notificationShadeWindowController: NotificationShadeWindowController
@@ -103,7 +106,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock private lateinit var statusBarWindowStateController: StatusBarWindowStateController
     @Mock
     private lateinit var lockscreenShadeTransitionController: LockscreenShadeTransitionController
-    @Mock private lateinit var lockIconViewController: LockIconViewController
+    @Mock private lateinit var lockIconViewController: LegacyLockIconViewController
     @Mock private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
     @Mock private lateinit var ambientState: AmbientState
     @Mock private lateinit var shadeLogger: ShadeLogger
@@ -149,12 +152,10 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
         whenever(statusBarStateController.isDozing).thenReturn(false)
         mDependency.injectTestDependency(ShadeController::class.java, shadeController)
         whenever(dockManager.isDocked).thenReturn(false)
-        whenever(keyguardTransitionInteractor.lockscreenToDreamingTransition)
+        whenever(keyguardTransitionInteractor.transition(Edge.create(LOCKSCREEN, DREAMING)))
             .thenReturn(emptyFlow())
 
         val featureFlags = FakeFeatureFlags()
-        featureFlags.set(Flags.TRACKPAD_GESTURE_COMMON, true)
-        featureFlags.set(Flags.TRACKPAD_GESTURE_FEATURES, false)
         featureFlags.set(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
         featureFlags.set(Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false)
         mSetFlagsRule.disableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
@@ -168,7 +169,8 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 dockManager,
                 notificationShadeDepthController,
                 underTest,
-                notificationPanelViewController,
+                shadeViewController,
+                panelExpansionInteractor,
                 ShadeExpansionStateManager(),
                 notificationStackScrollLayoutController,
                 statusBarKeyguardViewManager,
@@ -195,9 +197,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 quickSettingsController,
                 primaryBouncerInteractor,
                 alternateBouncerInteractor,
-                { Mockito.mock(JavaAdapter::class.java) },
-                { Mockito.mock(AlternateBouncerDependencies::class.java) },
-                mock()
+                mock(),
             )
 
         controller.setupExpandedStatusBar()

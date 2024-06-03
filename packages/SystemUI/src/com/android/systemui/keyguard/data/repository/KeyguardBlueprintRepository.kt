@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.data.repository
 
 import android.os.Handler
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
@@ -57,21 +58,7 @@ constructor(
         TreeMap<String, KeyguardBlueprint>().apply { putAll(blueprints.associateBy { it.id }) }
     val blueprint: MutableStateFlow<KeyguardBlueprint> = MutableStateFlow(blueprintIdMap[DEFAULT]!!)
     val refreshTransition = MutableSharedFlow<Config>(extraBufferCapacity = 1)
-    private var targetTransitionConfig: Config? = null
-
-    /**
-     * Emits the blueprint value to the collectors.
-     *
-     * @param blueprintId
-     * @return whether the transition has succeeded.
-     */
-    fun applyBlueprint(index: Int): Boolean {
-        ArrayList(blueprintIdMap.values)[index]?.let {
-            applyBlueprint(it)
-            return true
-        }
-        return false
-    }
+    @VisibleForTesting var targetTransitionConfig: Config? = null
 
     /**
      * Emits the blueprint value to the collectors.
@@ -81,27 +68,21 @@ constructor(
      */
     fun applyBlueprint(blueprintId: String?): Boolean {
         val blueprint = blueprintIdMap[blueprintId]
-        return if (blueprint != null) {
-            applyBlueprint(blueprint)
-            true
-        } else {
+        if (blueprint == null) {
             Log.e(
                 TAG,
                 "Could not find blueprint with id: $blueprintId. " +
                     "Perhaps it was not added to KeyguardBlueprintModule?"
             )
-            false
+            return false
         }
-    }
 
-    /** Emits the blueprint value to the collectors. */
-    fun applyBlueprint(blueprint: KeyguardBlueprint?) {
         if (blueprint == this.blueprint.value) {
-            refreshBlueprint()
-            return
+            return true
         }
 
-        blueprint?.let { this.blueprint.value = it }
+        this.blueprint.value = blueprint
+        return true
     }
 
     /**
@@ -110,9 +91,9 @@ constructor(
      */
     fun refreshBlueprint(config: Config = Config.DEFAULT) {
         fun scheduleCallback() {
-            // We use a handler here instead of a CoroutineDipsatcher because the one provided by
+            // We use a handler here instead of a CoroutineDispatcher because the one provided by
             // @Main CoroutineDispatcher is currently Dispatchers.Main.immediate, which doesn't
-            // delay the callback, and instead runs it imemdiately.
+            // delay the callback, and instead runs it immediately.
             handler.post {
                 assert.isMainThread()
                 targetTransitionConfig?.let {

@@ -17,6 +17,7 @@
 package com.android.systemui.communal.widgets
 
 import android.appwidget.AppWidgetHostView
+import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.graphics.Outline
 import android.graphics.Rect
@@ -48,6 +49,11 @@ class CommunalAppWidgetHostView(context: Context) : AppWidgetHostView(context), 
         super.onLayout(changed, l, t, r, b)
 
         enforceRoundedCorners()
+    }
+
+    override fun setAppWidget(appWidgetId: Int, info: AppWidgetProviderInfo?) {
+        super.setAppWidget(appWidgetId, info)
+        setPadding(0, 0, 0, 0)
     }
 
     private val cornerRadiusEnforcementOutline: ViewOutlineProvider =

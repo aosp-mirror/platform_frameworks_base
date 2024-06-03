@@ -13,14 +13,12 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
-    <!-- Since this layer list has just one layer, we can remove it and replace with the inner
-         layer drawable. However this should only be done when the flag
-         com.android.systemui.qs_tile_focus_state has completed all its stages and this drawable
-         fully replaces the previous one to ensure consistency with code sections searching for
-         specific ids in drawable hierarchy -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/qs_tile_ripple_color">
     <item
-        android:id="@id/background">
+        android:id="@android:id/mask"
+        android:drawable="@drawable/qs_tile_background_shape" />
+    <item android:id="@id/background">
         <layer-list>
             <item
                 android:id="@+id/qs_tile_background_base"
@@ -28,24 +26,10 @@
             <item android:id="@+id/qs_tile_background_overlay">
                 <selector>
                     <item
-                        android:state_hovered="true"
-                        android:drawable="@drawable/qs_tile_background_shape" />
-                </selector>
-            </item>
-            <!-- In the layer below we have negative insets because we need the focus outline
-                 to draw outside the bounds, around the main background. We use 5dp because
-                 the outline stroke is 3dp and the required padding is 2dp.-->
-            <item
-                android:top="-5dp"
-                android:right="-5dp"
-                android:left="-5dp"
-                android:bottom="-5dp">
-                <selector>
-                    <item
-                        android:state_focused="true"
-                        android:drawable="@drawable/qs_tile_focused_background"/>
+                        android:drawable="@drawable/qs_tile_background_shape"
+                        android:state_hovered="true" />
                 </selector>
             </item>
         </layer-list>
     </item>
-</layer-list>
+</ripple>

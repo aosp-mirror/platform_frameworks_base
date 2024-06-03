@@ -24,6 +24,7 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.window.TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
@@ -51,6 +52,7 @@ import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.shared.IHomeTransitionListener;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 
@@ -156,6 +158,25 @@ public class HomeTransitionObserverTest extends ShellTestCase {
         when(info.getChanges()).thenReturn(new ArrayList<>(List.of(change)));
 
         setupTransitionInfo(taskInfo, change, ACTIVITY_TYPE_UNDEFINED, TRANSIT_TO_BACK, false);
+
+        mHomeTransitionObserver.onTransitionReady(mock(IBinder.class),
+                info,
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class));
+
+        verify(mListener, times(0)).onHomeVisibilityChanged(anyBoolean());
+    }
+
+    @Test
+    public void testStartDragToDesktopDoesNotTriggerCallback() throws RemoteException {
+        TransitionInfo info = mock(TransitionInfo.class);
+        TransitionInfo.Change change = mock(TransitionInfo.Change.class);
+        ActivityManager.RunningTaskInfo taskInfo = mock(ActivityManager.RunningTaskInfo.class);
+        when(change.getTaskInfo()).thenReturn(taskInfo);
+        when(info.getChanges()).thenReturn(new ArrayList<>(List.of(change)));
+        when(info.getType()).thenReturn(TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP);
+
+        setupTransitionInfo(taskInfo, change, ACTIVITY_TYPE_HOME, TRANSIT_OPEN, true);
 
         mHomeTransitionObserver.onTransitionReady(mock(IBinder.class),
                 info,

@@ -142,21 +142,33 @@ class MobileConnectionRepositoryImpl(
                 val callback =
                     object :
                         TelephonyCallback(),
-                        TelephonyCallback.ServiceStateListener,
-                        TelephonyCallback.SignalStrengthsListener,
-                        TelephonyCallback.DataConnectionStateListener,
-                        TelephonyCallback.DataActivityListener,
                         TelephonyCallback.CarrierNetworkListener,
+                        TelephonyCallback.CarrierRoamingNtnModeListener,
+                        TelephonyCallback.DataActivityListener,
+                        TelephonyCallback.DataConnectionStateListener,
+                        TelephonyCallback.DataEnabledListener,
                         TelephonyCallback.DisplayInfoListener,
-                        TelephonyCallback.DataEnabledListener {
-                        override fun onServiceStateChanged(serviceState: ServiceState) {
-                            logger.logOnServiceStateChanged(serviceState, subId)
-                            trySend(CallbackEvent.OnServiceStateChanged(serviceState))
+                        TelephonyCallback.ServiceStateListener,
+                        TelephonyCallback.SignalStrengthsListener {
+
+                        override fun onCarrierNetworkChange(active: Boolean) {
+                            logger.logOnCarrierNetworkChange(active, subId)
+                            trySend(CallbackEvent.OnCarrierNetworkChange(active))
                         }
 
-                        override fun onSignalStrengthsChanged(signalStrength: SignalStrength) {
-                            logger.logOnSignalStrengthsChanged(signalStrength, subId)
-                            trySend(CallbackEvent.OnSignalStrengthChanged(signalStrength))
+                        override fun onCarrierRoamingNtnModeChanged(active: Boolean) {
+                            logger.logOnCarrierRoamingNtnModeChanged(active)
+                            trySend(CallbackEvent.OnCarrierRoamingNtnModeChanged(active))
+                        }
+
+                        override fun onDataActivity(direction: Int) {
+                            logger.logOnDataActivity(direction, subId)
+                            trySend(CallbackEvent.OnDataActivity(direction))
+                        }
+
+                        override fun onDataEnabledChanged(enabled: Boolean, reason: Int) {
+                            logger.logOnDataEnabledChanged(enabled, subId)
+                            trySend(CallbackEvent.OnDataEnabledChanged(enabled))
                         }
 
                         override fun onDataConnectionStateChanged(
@@ -167,16 +179,6 @@ class MobileConnectionRepositoryImpl(
                             trySend(CallbackEvent.OnDataConnectionStateChanged(dataState))
                         }
 
-                        override fun onDataActivity(direction: Int) {
-                            logger.logOnDataActivity(direction, subId)
-                            trySend(CallbackEvent.OnDataActivity(direction))
-                        }
-
-                        override fun onCarrierNetworkChange(active: Boolean) {
-                            logger.logOnCarrierNetworkChange(active, subId)
-                            trySend(CallbackEvent.OnCarrierNetworkChange(active))
-                        }
-
                         override fun onDisplayInfoChanged(
                             telephonyDisplayInfo: TelephonyDisplayInfo
                         ) {
@@ -184,9 +186,14 @@ class MobileConnectionRepositoryImpl(
                             trySend(CallbackEvent.OnDisplayInfoChanged(telephonyDisplayInfo))
                         }
 
-                        override fun onDataEnabledChanged(enabled: Boolean, reason: Int) {
-                            logger.logOnDataEnabledChanged(enabled, subId)
-                            trySend(CallbackEvent.OnDataEnabledChanged(enabled))
+                        override fun onServiceStateChanged(serviceState: ServiceState) {
+                            logger.logOnServiceStateChanged(serviceState, subId)
+                            trySend(CallbackEvent.OnServiceStateChanged(serviceState))
+                        }
+
+                        override fun onSignalStrengthsChanged(signalStrength: SignalStrength) {
+                            logger.logOnSignalStrengthsChanged(signalStrength, subId)
+                            trySend(CallbackEvent.OnSignalStrengthChanged(signalStrength))
                         }
                     }
                 telephonyManager.registerTelephonyCallback(bgDispatcher.asExecutor(), callback)
@@ -229,8 +236,8 @@ class MobileConnectionRepositoryImpl(
 
     override val isNonTerrestrial =
         callbackEvents
-            .mapNotNull { it.onServiceStateChanged }
-            .map { it.serviceState.isUsingNonTerrestrialNetwork }
+            .mapNotNull { it.onCarrierRoamingNtnModeChanged }
+            .map { it.active }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val isGsm =
@@ -302,8 +309,10 @@ class MobileConnectionRepositoryImpl(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), UnknownNetworkType)
 
+    override val inflateSignalStrength = systemUiCarrierConfig.shouldInflateSignalStrength
+
     override val numberOfLevels =
-        systemUiCarrierConfig.shouldInflateSignalStrength
+        inflateSignalStrength
             .map { shouldInflate ->
                 if (shouldInflate) {
                     DEFAULT_NUM_LEVELS + 1
@@ -358,7 +367,13 @@ class MobileConnectionRepositoryImpl(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), telephonyManager.simCarrierId)
 
-    /** BroadcastDispatcher does not handle sticky broadcasts, so we can't use it here */
+    /**
+     * BroadcastDispatcher does not handle sticky broadcasts, so we can't use it here. Note that we
+     * now use the [SharingStarted.Eagerly] strategy, because there have been cases where the sticky
+     * broadcast does not represent the correct state.
+     *
+     * See b/322432056 for context.
+     */
     @SuppressLint("RegisterReceiverViaContext")
     override val networkName: StateFlow<NetworkNameModel> =
         conflatedCallbackFlow {
@@ -388,7 +403,7 @@ class MobileConnectionRepositoryImpl(
                 awaitClose { context.unregisterReceiver(receiver) }
             }
             .flowOn(bgDispatcher)
-            .stateIn(scope, SharingStarted.WhileSubscribed(), defaultNetworkName)
+            .stateIn(scope, SharingStarted.Eagerly, defaultNetworkName)
 
     override val dataEnabled = run {
         val initial = telephonyManager.isDataConnectionAllowed
@@ -442,9 +457,6 @@ class MobileConnectionRepositoryImpl(
             .flowOn(bgDispatcher)
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
-    override val satelliteConnectionHysteresisSeconds: StateFlow<Int> =
-        systemUiCarrierConfig.satelliteConnectionHysteresisSeconds
-
     class Factory
     @Inject
     constructor(
@@ -497,6 +509,8 @@ private fun Intent.carrierId(): Int =
 sealed interface CallbackEvent {
     data class OnCarrierNetworkChange(val active: Boolean) : CallbackEvent
 
+    data class OnCarrierRoamingNtnModeChanged(val active: Boolean) : CallbackEvent
+
     data class OnDataActivity(val direction: Int) : CallbackEvent
 
     data class OnDataConnectionStateChanged(val dataState: Int) : CallbackEvent
@@ -517,6 +531,7 @@ sealed interface CallbackEvent {
 data class TelephonyCallbackState(
     val onDataActivity: CallbackEvent.OnDataActivity? = null,
     val onCarrierNetworkChange: CallbackEvent.OnCarrierNetworkChange? = null,
+    val onCarrierRoamingNtnModeChanged: CallbackEvent.OnCarrierRoamingNtnModeChanged? = null,
     val onDataConnectionStateChanged: CallbackEvent.OnDataConnectionStateChanged? = null,
     val onDataEnabledChanged: CallbackEvent.OnDataEnabledChanged? = null,
     val onDisplayInfoChanged: CallbackEvent.OnDisplayInfoChanged? = null,
@@ -526,6 +541,9 @@ data class TelephonyCallbackState(
     fun applyEvent(event: CallbackEvent): TelephonyCallbackState {
         return when (event) {
             is CallbackEvent.OnCarrierNetworkChange -> copy(onCarrierNetworkChange = event)
+            is CallbackEvent.OnCarrierRoamingNtnModeChanged -> {
+                copy(onCarrierRoamingNtnModeChanged = event)
+            }
             is CallbackEvent.OnDataActivity -> copy(onDataActivity = event)
             is CallbackEvent.OnDataConnectionStateChanged ->
                 copy(onDataConnectionStateChanged = event)

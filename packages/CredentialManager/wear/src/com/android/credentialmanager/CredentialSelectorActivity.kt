@@ -21,7 +21,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.wear.compose.material.MaterialTheme
+import com.android.credentialmanager.ui.theme.WearCredentialSelectorTheme
 import com.android.credentialmanager.ui.WearApp
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import dagger.hilt.android.AndroidEntryPoint
@@ -36,9 +36,9 @@ class CredentialSelectorActivity : Hilt_CredentialSelectorActivity() {
         super.onCreate(savedInstanceState)
         setTheme(android.R.style.Theme_DeviceDefault)
         setContent {
-            MaterialTheme {
+            WearCredentialSelectorTheme {
                 WearApp(
-                    viewModel = viewModel,
+                    flowEngine = viewModel,
                     onCloseApp = { finish() },
                 )
             }

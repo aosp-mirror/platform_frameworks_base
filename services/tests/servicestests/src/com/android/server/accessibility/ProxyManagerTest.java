@@ -50,6 +50,7 @@ import android.graphics.Region;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.test.FakePermissionEnforcer;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
@@ -113,6 +114,7 @@ public class ProxyManagerTest {
     @Mock private IBinder mMockServiceAsBinder;
     @Mock private VirtualDeviceManagerInternal mMockVirtualDeviceManagerInternal;
     @Mock private IVirtualDeviceManager mMockIVirtualDeviceManager;
+    FakePermissionEnforcer mFakePermissionEnforcer  = new FakePermissionEnforcer();
 
     private int mFocusStrokeWidthDefaultValue;
     private int mFocusColorDefaultValue;
@@ -122,8 +124,6 @@ public class ProxyManagerTest {
 
     @Before
     public void setup() throws RemoteException {
-        mSetFlagsRule.initAllFlagsToReleaseConfigDefault();
-
         MockitoAnnotations.initMocks(this);
         final Resources resources = InstrumentationRegistry.getContext().getResources();
 
@@ -134,6 +134,8 @@ public class ProxyManagerTest {
         when(mMockContext.getMainExecutor())
                 .thenReturn(InstrumentationRegistry.getTargetContext().getMainExecutor());
 
+        when(mMockContext.getSystemService(Context.PERMISSION_ENFORCER_SERVICE))
+                .thenReturn(mFakePermissionEnforcer);
         when(mMockVirtualDeviceManagerInternal.getDeviceIdsForUid(anyInt())).thenReturn(
                 new ArraySet(Set.of(DEVICE_ID)));
         LocalServices.removeServiceForTest(VirtualDeviceManagerInternal.class);
@@ -587,6 +589,12 @@ public class ProxyManagerTest {
 
         @Override
         public void onKeyEvent(KeyEvent event, int sequence) throws RemoteException {
+
+        }
+
+        @Override
+        public void onMagnificationSystemUIConnectionChanged(boolean connected)
+                throws RemoteException {
 
         }
 

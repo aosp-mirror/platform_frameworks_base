@@ -76,6 +76,7 @@
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"נשלחה תמונה"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"המערכת שומרת את צילום המסך..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"צילום המסך נשמר בפרופיל העבודה…"</string>
+    <string name="screenshot_saving_private_profile" msgid="8934706048497093297">"צילום המסך נשמר בפרופיל האישי"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"צילום המסך נשמר"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"לא ניתן היה לשמור את צילום המסך"</string>
     <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"תצוגה במסך חיצוני"</string>
@@ -86,6 +87,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"‏יצירת צילומי המסך נחסמה על ידי מנהל ה-IT"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"עריכה"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"עריכת צילום מסך"</string>
+    <string name="screenshot_share_label" msgid="1653061117238861559">"שיתוף"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"שיתוף של צילום מסך"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"צילום תוכן נוסף"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"סגירת צילום מסך"</string>
@@ -96,6 +98,7 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"<xliff:g id="PERCENT">%1$d</xliff:g> אחוז מהשוליים השמאליים"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"<xliff:g id="PERCENT">%1$d</xliff:g> אחוז מהשוליים הימניים"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"נשמר באפליקציה <xliff:g id="APP">%1$s</xliff:g> בתוך פרופיל העבודה"</string>
+    <string name="screenshot_private_profile_notification" msgid="1704440899154243171">"נשמר באפליקציה <xliff:g id="APP">%1$s</xliff:g> בפרופיל הפרטי"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"קבצים"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"האפליקציה <xliff:g id="APPNAME">%1$s</xliff:g> זיהתה את צילום המסך הזה."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"האפליקציה <xliff:g id="APPNAME">%1$s</xliff:g> ואפליקציות פתוחות נוספות זיהו את צילום המסך הזה."</string>
@@ -150,6 +153,9 @@
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"סורק פנים"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"שליחה"</string>
     <string name="cancel" msgid="1089011503403416730">"ביטול"</string>
+    <string name="biometric_dialog_logo" msgid="7681107853070774595">"לוגו של האפליקציה"</string>
+  <string-array name="biometric_dialog_package_names_for_logo_with_overrides">
+  </string-array>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"אישור"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ניסיון נוסף"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"יש להקיש כדי לבטל את האימות"</string>
@@ -164,6 +170,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"הפנים זוהו. להמשך יש ללחוץ על סמל ביטול הנעילה."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"מאומת"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"ביטול האימות"</string>
+    <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"אפשרויות נוספות"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"שימוש בקוד אימות"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"שימוש בקו ביטול נעילה"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"שימוש בסיסמה"</string>
@@ -232,7 +239,7 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"לוח התראות."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"הגדרות מהירות."</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"הגדרות מהירות ולוח ההתראות."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"מסך נעילה."</string>
+    <string name="accessibility_desc_lock_screen" msgid="409034672704273634">"מסך הנעילה"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"מסך נעילה של עבודה"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"סגירה"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"השתקה מוחלטת"</string>
@@ -265,14 +272,17 @@
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"אפשר להקיש כדי להתחבר למכשיר או להתנתק ממנו"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"התאמה של מכשיר חדש"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"הצגת הכול"</string>
-    <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth"</string>
+    <string name="turn_on_bluetooth" msgid="5681370462180289071">"‏שימוש ב-Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"מחובר"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"שיתוף אודיו"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"נשמר"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ניתוק"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"הפעלה"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"החיבור יופעל שוב אוטומטית מחר"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"‏תכונות כמו \'שיתוף מהיר\', \'איפה המכשיר שלי\' ומיקום המכשיר משתמשות בחיבור Bluetooth"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"‏‫Bluetooth יופעל מחר בשעה 5 בבוקר"</string>
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"‏תכונות כמו \'שיתוף מהיר\' ו\'איפה המכשיר שלי\' משתמשות ב-Bluetooth"</string>
+    <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"‏חיבור ה-Bluetooth יופעל מחר בבוקר"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"שיתוף אודיו"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"מתבצע שיתוף של האודיו"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> סוללה"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"אודיו"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"אוזניות"</string>
@@ -295,8 +305,8 @@
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"אין רשתות זמינות"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"‏אין רשתות Wi-Fi זמינות"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"בתהליך הפעלה…"</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"‏הפעלת Cast למסך"</string>
-    <string name="quick_settings_casting" msgid="1435880708719268055">"‏מתבצעת העברה (cast)"</string>
+    <string name="quick_settings_cast_title" msgid="3033553249449938182">"‏העברה (cast)"</string>
+    <string name="quick_settings_casting" msgid="1435880708719268055">"‏מופעל Cast"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"מכשיר ללא שם"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"אין מכשירים זמינים"</string>
     <string name="quick_settings_cast_no_network" msgid="3863016850468559522">"‏אין חיבור ל-Wi-Fi או לאתרנט"</string>
@@ -326,7 +336,7 @@
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"אפליקציות לעבודה"</string>
     <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"בהשהיה"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"תאורת לילה"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"התכונה מופעלת בשקיעה"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"מופעלת בשקיעה"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"עד הזריחה"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"תופעל בשעה <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"עד <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -347,6 +357,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"תיעוד הבעיה"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"התחלה"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"עצירה"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"דיווח על באג"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"איזה חלק בחוויית השימוש שלך במכשיר הושפע?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"בחירה בסוג הבעיה"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"הקלטת המסך"</string>
@@ -356,10 +367,13 @@
     <item msgid="8309220355268900335">"סוללה"</item>
   </string-array>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"מצב שימוש ביד אחת"</string>
-    <string name="quick_settings_contrast_label" msgid="988087460210159123">"ניגודיות"</string>
-    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"רגילה"</string>
-    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"בינונית"</string>
-    <string name="quick_settings_contrast_high" msgid="656049259587494499">"גבוהה"</string>
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"מכשירי שמיעה"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"מכשירי שמיעה"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"התאמה של מכשיר חדש"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"צריך ללחוץ כדי להתאים מכשיר חדש"</string>
+    <string name="hearing_devices_presets_error" msgid="350363093458408536">"לא ניתן לעדכן את ההגדרה הקבועה מראש"</string>
+    <!-- no translation found for hearing_devices_preset_label (7878267405046232358) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"לבטל את חסימת המיקרופון של המכשיר?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"לבטל את חסימת המצלמה של המכשיר?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"לבטל את חסימת המצלמה והמיקרופון של המכשיר?"</string>
@@ -425,6 +439,7 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה מהירה • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה איטית • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
+    <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"ווידג\'טים במסך הנעילה"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"אפשר להחליק שמאלה כדי להפעיל את המדריך המשותף"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"התאמה אישית"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"סגירה"</string>
@@ -433,14 +448,23 @@
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"לוחצים לחיצה ארוכה כדי להתאים אישית את הווידג\'טים"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"התאמה אישית של ווידג\'טים"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"סמל האפליקציה לווידג\'ט שהושבת"</string>
+    <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"סמל האפליקציה של ווידג\'ט בתהליך התקנה"</string>
     <string name="edit_widget" msgid="9030848101135393954">"עריכת הווידג\'ט"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"הסרה"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"הוספת ווידג\'ט"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"סיום"</string>
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"הוספת ווידג\'טים"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"קבלת גישה מהירה לווידג\'טים של האפליקציות המועדפות עליך בלי לבטל את נעילת הטאבלט."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"לאפשר להציג כל ווידג\'ט במסך הנעילה?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"לפתיחת ההגדרות"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"להפעיל את האפליקציות לעבודה?"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"ביטול ההשהיה"</string>
+    <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"סגירת ווידג\'טים במסך הנעילה"</string>
+    <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"התאמה אישית של ווידג\'טים"</string>
+    <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"ווידג\'טים במסך הנעילה"</string>
+    <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"צריך לבחור ווידג\'ט"</string>
+    <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"הסרת הווידג\'ט"</string>
+    <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"צריך למקם את הווידג\'ט שנבחר"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"החלפת משתמש"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"תפריט במשיכה למטה"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"כל האפליקציות והנתונים בסשן הזה יימחקו."</string>
@@ -456,25 +480,25 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"להסיר את המשתמש?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"כל האפליקציות והנתונים של המשתמש הזה יימחקו."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"הסרה"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"‏להתחיל להקליט או להעביר (cast) באמצעות <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"‏לאפליקציית <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> תהיה גישה לכל המידע הגלוי במסך שלך ולכל תוכן שמופעל במכשיר שלך בזמן הקלטה או העברה (cast). המידע הזה כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
-    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"‏להתחיל להקליט או להעביר (cast)?"</string>
-    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"‏לשירות שמספק את הפונקציה הזו תהיה גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך בזמן הקלטה או העברה (cast) – כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"‏להתחיל להקליט או להפעיל Cast דרך <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"‏לאפליקציית <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> תהיה גישה לכל המידע הגלוי במסך שלך ולכל תוכן שמופעל במכשיר שלך בזמן הקלטה או הפעלת Cast. המידע הזה כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"‏להתחיל הקלטה או הפעלת Cast?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"‏לשירות שמספק את הפונקציה הזו תהיה גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך בזמן הקלטה או הפעלת Cast – כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
     <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"כל המסך"</string>
     <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"אפליקציה אחת"</string>
     <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"שיתוף או הקלטה של אפליקציה"</string>
-    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"‏להתחיל להקליט או להעביר (cast) באמצעות <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"‏בזמן שיתוף, הקלטה או העברה (cast) תהיה ל-<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"‏בזמן שיתוף, הקלטה או העברה (cast) של אפליקציה, תהיה ל-<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> גישה לכל מה שגלוי באפליקציה או מופעל מהאפליקציה. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"‏להתחיל להקליט או להפעיל Cast דרך <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"‏בזמן שיתוף, הקלטה או הפעלת Cast תהיה ל-<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"‏בזמן שיתוף, הקלטה או הפעלת Cast של אפליקציה, תהיה ל-<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> גישה לכל מה שגלוי באפליקציה או מופעל מהאפליקציה. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"התחלה"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> השביתה את האפשרות הזו"</string>
-    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"להתחיל את ההעברה?"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"‏בזמן העברה (cast), תהיה ל-Android גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"‏בזמן העברה (cast) של אפליקציה, תהיה ל-Android גישה לכל מה שגלוי באפליקציה או מופעל מהאפליקציה. כדאי להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
-    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"‏התחלת ההעברה (cast)"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"‏להפעיל Cast?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"‏בזמן הפעלת Cast, תהיה ל-Android גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"‏בזמן Cast מאפליקציה, תהיה ל-Android גישה לכל מה שמופיע באפליקציה ולכל מדיה שפועלת בה. כדאי להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"‏הפעלת Cast"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"להתחיל את השיתוף?"</string>
-    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"‏בזמן שיתוף, הקלטה או העברה (cast) תהיה ל-Android גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
-    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"‏בזמן שיתוף, הקלטה או העברה (cast) של אפליקציה, תהיה ל-Android גישה לכל מה שגלוי באפליקציה או מופעל מהאפליקציה. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"‏בזמן שיתוף, הקלטה או הפעלת Cast תהיה ל-Android גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"‏בזמן שיתוף, הקלטה או הפעלת Cast של אפליקציה, תהיה ל-Android גישה לכל מה שגלוי באפליקציה או מופעל מהאפליקציה. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"התחלה"</string>
     <string name="media_projection_task_switcher_text" msgid="590885489897412359">"השיתוף מושהה כשמחליפים אפליקציות"</string>
     <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"שיתוף של האפליקציה הזו במקום"</string>
@@ -538,7 +562,8 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"מכשיר זה מנוהל על ידי ההורה שלך. להורה שלך יש אפשרות לצפות בפרטים כמו האפליקציות שבשימוש, המיקום וזמן המסך שלך, ולנהל אותם."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"הנעילה נמנעת על ידי סביבה מהימנה"</string>
-    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"הגנה מפני גניבה\nהמכשיר ננעל, יותר מדי ניסיונות לביטול הנעילה"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"המכשיר ננעל, יותר מדי ניסיונות אימות"</string>
+    <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"המכשיר ננעל\nהאימות נכשל"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>‏. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"הגדרות צליל"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"הוספת כתוביות באופן אוטומטי למדיה"</string>
@@ -583,16 +608,14 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"השתקה"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"‏הפעלת Cast"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"לא זמין כי הצלצול מושתק"</string>
-    <!-- no translation found for stream_alarm_unavailable (4059817189292197839) -->
-    <skip />
-    <!-- no translation found for stream_media_unavailable (6823020894438959853) -->
-    <skip />
+    <string name="stream_alarm_unavailable" msgid="4059817189292197839">"לא זמין כי התכונה \'נא לא להפריע\' מופעלת"</string>
+    <string name="stream_media_unavailable" msgid="6823020894438959853">"לא זמין כי התכונה \'נא לא להפריע\' מופעלת"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"‏%1$s. יש להקיש כדי לבטל את ההשתקה."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"‏%1$s. צריך להקיש כדי להגדיר רטט. ייתכן ששירותי הנגישות מושתקים."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"‏%1$s. יש להקיש כדי להשתיק. ייתכן ששירותי הנגישות יושתקו."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"‏%1$s. יש להקיש כדי להעביר למצב רטט."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"‏%1$s. יש להקיש כדי להשתיק."</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"בקרת הרעש"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"בקרת רעש"</string>
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"אודיו מרחבי"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"השבתה"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"מצב קבוע"</string>
@@ -603,18 +626,16 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"רטט"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"‏בקרי עוצמת קול של %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"הטלפון יצלצל כשמתקבלות שיחות והתראות (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
-    <!-- no translation found for volume_panel_enter_media_output_settings (8824244246272552669) -->
-    <skip />
-    <!-- no translation found for volume_panel_expanded_sliders (1885750987768506271) -->
-    <skip />
-    <!-- no translation found for volume_panel_collapsed_sliders (1413383759434791450) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_mute (6962563028495243738) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_unmute (7489063242934477382) -->
-    <skip />
+    <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"הזנה של הגדרות הפלט"</string>
+    <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"פסי ההזזה של עוצמת הקול במצב מורחב"</string>
+    <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"פסי ההזזה של עוצמת הקול במצב מכווץ"</string>
+    <string name="volume_panel_hint_mute" msgid="2153922288568199077">"‏השתקה של %s"</string>
+    <string name="volume_panel_hint_unmute" msgid="4831850937582282340">"‏ביטול ההשתקה של %s"</string>
+    <string name="volume_panel_hint_muted" msgid="1124844870181285320">"השתקה"</string>
+    <string name="volume_panel_hint_vibrate" msgid="4136223145435914132">"רטט"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"הפעלה של <xliff:g id="LABEL">%s</xliff:g> במכשיר"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"האודיו יופעל במכשיר"</string>
+    <string name="media_output_title_ongoing_call" msgid="208426888064112006">"מתבצעת שיחה במכשיר"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"שורת סטטוס"</string>
     <string name="demo_mode" msgid="263484519766901593">"מצב הדגמה בממשק המשתמש של המערכת"</string>
@@ -642,6 +663,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"לוויין, חיבור באיכות ירודה"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"לוויין, חיבור באיכות טובה"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"לוויין, יש חיבור זמין"</string>
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"תקשורת לוויינית למצב חירום"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"פרופיל עבודה"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"מהנה בשביל חלק מהאנשים, אבל לא בשביל כולם"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"‏התכונה System UI Tuner מספקת לך דרכים נוספות להתאים אישית את ממשק המשתמש של Android. התכונות הניסיוניות האלה עשויות להשתנות, לא לעבוד כראוי או להיעלם בגרסאות עתידיות. יש להמשיך בזהירות."</string>
@@ -738,7 +760,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"החלפה של פריסת מקלדת"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"או"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"ניקוי שאילתת החיפוש"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"מקשי קיצור"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"מקשי קיצור"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"חיפוש מקשי קיצור"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"לא נמצאו מקשי קיצור"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"מערכת"</string>
@@ -750,7 +772,7 @@
     <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"מוצגים: קיצורי הדרך של הקלט"</string>
     <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"מוצגים: קיצורי הדרך לפתיחת אפליקציות"</string>
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"מוצגים: קיצורי הדרך של האפליקציה הנוכחית"</string>
-    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"הצגת הודעות"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"הצגת התראות"</string>
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"צילום המסך"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"הצגת מקשי הקיצור"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"חזרה"</string>
@@ -759,15 +781,16 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"דפדוף קדימה באפליקציות האחרונות"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"דפדוף אחורה באפליקציות האחרונות"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"פתיחה של רשימת האפליקציות"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"הצגת סרגל האפליקציות"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"פתיחת ההגדרות"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"‏לפתיחת Google Assistant"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"מסך הנעילה"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"כתיבת הערה"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"ריבוי משימות מערכת"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"‏כניסה למסך מפוצל עם האפליקציה הנוכחית ל-RHS"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"‏כניסה למסך מפוצל עם האפליקציה הנוכחית ל-LHS"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"ריבוי משימות"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"שימוש במסך מפוצל כשהאפליקציה הנוכחית בצד ימין"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"שימוש במסך מפוצל כשהאפליקציה הנוכחית בצד שמאל"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"החלפה ממסך מפוצל למסך מלא"</string>
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"מעבר לאפליקציה משמאל או למטה בזמן שימוש במסך מפוצל"</string>
+    <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"מעבר לאפליקציה מימין או למעלה בזמן שימוש במסך מפוצל"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"כשהמסך מפוצל: החלפה בין אפליקציה אחת לאחרת"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"קלט"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"מעבר לשפה הבאה"</string>
@@ -839,15 +862,16 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"הצגת סמלי התראות בעדיפות נמוכה"</string>
     <string name="other" msgid="429768510980739978">"אחר"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"הסרת האריח"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"הוספת האריח בסוף הרשימה"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"העברת האריח"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"הוספת אריח"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"הסרת הלחצן"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"הוספת הלחצן בסוף הרשימה"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"העברת הלחצן"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"הוספת לחצן"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"העברה למיקום <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"הוספה למיקום <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"המיקום לא תקין."</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"מיקום <xliff:g id="POSITION">%1$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"האריח נוסף"</string>
-    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"האריח הוסר"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"הלחצן נוסף"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"הלחצן הוסר"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"עורך הגדרות מהירות."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"התראות <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"פתיחת הגדרות."</string>
@@ -1069,8 +1093,8 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"משהו השתבש. יש לנסות שוב."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"בטעינה"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"טאבלט"</string>
-    <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"‏העברה (cast) של מדיה"</string>
-    <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"‏מתבצעת העברה (cast) של <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
+    <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"‏הפעלת Cast של מדיה"</string>
+    <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"‏מופעל Cast של <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"לא פעיל, יש לבדוק את האפליקציה"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"לא נמצא"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"הפקד לא זמין"</string>
@@ -1089,7 +1113,7 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(מנותק)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"לא ניתן להחליף. צריך להקיש כדי לנסות שוב."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"חיבור מכשיר"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"‏כדי להעביר (cast) את הסשן הזה, צריך לפתוח את האפליקציה."</string>
+    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"‏כדי להפעיל Cast של הסשן הזה, צריך לפתוח את האפליקציה."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"אפליקציה לא ידועה"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"‏עצירת ההעברה (casting)"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"מכשירים זמינים לפלט אודיו."</string>
@@ -1179,9 +1203,9 @@
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"כדי לעבור בין רשתות, צריך לנתק את האתרנט"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"‏כדי לשפר את חוויית השימוש במכשיר, אפליקציות ושירותים יוכלו לחפש רשתות Wi-Fi בכל שלב, גם כאשר ה-Wi-Fi כבוי. אפשר לשנות זאת בהגדרות של חיפוש נקודות Wi-Fi. "<annotation id="link">"שינוי"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"השבתה של מצב טיסה"</string>
-    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"האפליקציה <xliff:g id="APPNAME">%1$s</xliff:g> מבקשת להוסיף להגדרות המהירות את האריח הבא"</string>
-    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"הוספת אריח"</string>
-    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"לא להוסיף אריח"</string>
+    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"אפליקציית <xliff:g id="APPNAME">%1$s</xliff:g> מבקשת להוסיף להגדרות המהירות את הלחצן הבא"</string>
+    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"להוסיף לחצן"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"לא להוסיף לחצן"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"בחירת משתמש"</string>
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{אפליקציה אחת (#) פעילה}one{# אפליקציות פעילות}two{# אפליקציות פעילות}other{# אפליקציות פעילות}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"מידע חדש"</string>
@@ -1239,7 +1263,7 @@
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• יש לפחות מכשיר אחד או פאנל מכשיר אחד זמינים"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"צריך לבחור אפליקציית פתקים שתיפתח כברירת מחדל כשייעשה שימוש במקש הקיצור לכתיבת פתקים"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"בחירת אפליקציה"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"מקש קיצור ללחיצה ארוכה"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"צריך ללחוץ לחיצה ארוכה על הלחצן"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ביטול"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"כן, אני רוצה להחליף בין המסכים"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"פתיחת הטלפון"</string>
@@ -1266,8 +1290,7 @@
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"המצלמה חסומה"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"המצלמה והמיקרופון חסומים"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"המיקרופון חסום"</string>
-    <!-- no translation found for priority_mode_dream_overlay_content_description (3361628029609329182) -->
-    <skip />
+    <string name="priority_mode_dream_overlay_content_description" msgid="3361628029609329182">"נא לא להפריע"</string>
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"נוכחות המשתמש זוהתה"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"צריך להגדיר את אפליקציית ברירת המחדל לפתקים ב\'הגדרות\'"</string>
     <string name="install_app" msgid="5066668100199613936">"התקנת האפליקציה"</string>
@@ -1297,6 +1320,6 @@
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"נעשה שימוש לאחרונה על ידי <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"התאורה האחורית במקלדת"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"‏רמה %1$d מתוך %2$d"</string>
-    <string name="home_controls_dream_label" msgid="6567105701292324257">"ממשק השליטה במכשירים"</string>
+    <string name="home_controls_dream_label" msgid="6567105701292324257">"שליטה במכשירים"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"גישה מהירה לממשק השליטה במכשירים כשומר מסך"</string>
 </resources>

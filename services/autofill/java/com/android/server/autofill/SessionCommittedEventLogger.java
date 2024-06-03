@@ -17,21 +17,15 @@
 package com.android.server.autofill;
 
 import static android.view.autofill.AutofillManager.COMMIT_REASON_UNKNOWN;
+
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SESSION_COMMITTED;
 import static com.android.server.autofill.Helper.sVerbose;
 
-import android.annotation.IntDef;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.Slog;
 import android.view.autofill.AutofillManager.AutofillCommitReason;
+
 import com.android.internal.util.FrameworkStatsLog;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.Optional;
 
 /**
@@ -91,6 +85,14 @@ public final class SessionCommittedEventLogger {
     });
   }
 
+  /** Set autofill_service_uid as long as mEventInternal presents. */
+  public void maybeSetAutofillServiceUid(int uid) {
+        mEventInternal.ifPresent(
+                event -> {
+                    event.mServiceUid = uid;
+                });
+  }
+
   /**
    * Log an AUTOFILL_SESSION_COMMITTED event.
    */
@@ -106,7 +108,8 @@ public final class SessionCommittedEventLogger {
           + " mComponentPackageUid=" + event.mComponentPackageUid
           + " mRequestCount=" + event.mRequestCount
           + " mCommitReason=" + event.mCommitReason
-          + " mSessionDurationMillis=" + event.mSessionDurationMillis);
+          + " mSessionDurationMillis=" + event.mSessionDurationMillis
+          + " mServiceUid=" + event.mServiceUid);
     }
     FrameworkStatsLog.write(
         AUTOFILL_SESSION_COMMITTED,
@@ -114,7 +117,8 @@ public final class SessionCommittedEventLogger {
         event.mComponentPackageUid,
         event.mRequestCount,
         event.mCommitReason,
-        event.mSessionDurationMillis);
+        event.mSessionDurationMillis,
+        event.mServiceUid);
     mEventInternal = Optional.empty();
   }
 
@@ -123,6 +127,7 @@ public final class SessionCommittedEventLogger {
     int mRequestCount = 0;
     int mCommitReason = COMMIT_REASON_UNKNOWN;
     long mSessionDurationMillis = 0;
+    int mServiceUid = -1;
 
     SessionCommittedEventInternal() {
     }

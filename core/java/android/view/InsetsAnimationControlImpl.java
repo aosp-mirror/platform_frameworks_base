@@ -95,7 +95,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     private final Matrix mTmpMatrix = new Matrix();
     private final InsetsState mInitialInsetsState;
     private final @AnimationType int mAnimationType;
-    private final @LayoutInsetsDuringAnimation int mLayoutInsetsDuringAnimation;
+    private @LayoutInsetsDuringAnimation int mLayoutInsetsDuringAnimation;
     private final @InsetsType int mTypes;
     private @InsetsType int mControllingTypes;
     private final InsetsAnimationControlCallbacks mController;
@@ -374,6 +374,12 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     @Override
     public WindowInsetsAnimation getAnimation() {
         return mAnimation;
+    }
+
+    @Override
+    public void updateLayoutInsetsDuringAnimation(
+            @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation) {
+        mLayoutInsetsDuringAnimation = layoutInsetsDuringAnimation;
     }
 
     @Override

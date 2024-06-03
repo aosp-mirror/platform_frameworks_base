@@ -1,4 +1,5 @@
 package: "android.app"
+container: "system"
 
 flag {
      namespace: "systemui"

@@ -29,13 +29,12 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.provider.Settings;
 import android.util.Log;
 
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 /**
  * Manages the creation of dialogs to be shown for biometric re enroll notifications.
@@ -61,7 +60,8 @@ public class BiometricNotificationDialogFactory {
     }
 
     Dialog createReenrollDialog(
-            int userId, ActivityStarter activityStarter, BiometricSourceType biometricSourceType) {
+            int userId, ActivityStarter activityStarter, BiometricSourceType biometricSourceType,
+            boolean isReenrollForced) {
         SystemUIDialog sysuiDialog = mSystemUIDialogFactory.create();
         if (biometricSourceType == BiometricSourceType.FACE) {
             sysuiDialog.setTitle(mResources.getString(R.string.face_re_enroll_dialog_title));
@@ -80,8 +80,12 @@ public class BiometricNotificationDialogFactory {
         sysuiDialog.setPositiveButton(R.string.biometric_re_enroll_dialog_confirm,
                 (dialog, which) -> onReenrollDialogConfirm(
                         userId, biometricSourceType, activityStarter));
-        sysuiDialog.setNegativeButton(R.string.biometric_re_enroll_dialog_cancel,
-                (dialog, which) -> {});
+        if (!isReenrollForced) {
+            sysuiDialog.setNegativeButton(R.string.biometric_re_enroll_dialog_cancel,
+                    (dialog, which) -> {
+                    });
+        }
+        sysuiDialog.setCanceledOnTouchOutside(!isReenrollForced);
         return sysuiDialog;
     }
 

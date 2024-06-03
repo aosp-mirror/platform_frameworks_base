@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="accessibility_menu_service_name" msgid="730136711554740131">"Toegankelijkheids­menu"</string>
-    <string name="accessibility_menu_intro" msgid="3164193281544042394">"Het toegankelijkheidsmenu is een groot menu op het scherm waarmee je je apparaat kunt bedienen. Je kunt onder meer je apparaat vergrendelen, het volume en de helderheid beheren en screenshots maken."</string>
+    <string name="accessibility_menu_service_name" msgid="730136711554740131">"toegankelijkheids­menu"</string>
+    <string name="accessibility_menu_intro" msgid="3164193281544042394">"Het toegankelijkheidsmenu is een groot menu op het scherm waarmee je je apparaat kunt bedienen. Je kunt onder meer je apparaat vergrendelen, het volume en de helderheid aanpassen en screenshots maken."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Assistent"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"Assistent"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"Instellingen voor toegankelijkheid"</string>
@@ -21,7 +21,7 @@
     <string name="previous_button_content_description" msgid="840869171117765966">"Ga naar vorig scherm"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"Ga naar volgend scherm"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"Het toegankelijkheidsmenu is een groot menu op het scherm waarmee je je apparaat kunt bedienen. Je kunt onder meer je apparaat vergrendelen, het volume en de helderheid aanpassen en screenshots maken."</string>
-    <string name="accessibility_menu_summary" msgid="340071398148208130">"Bedien apparaat via groot menu"</string>
+    <string name="accessibility_menu_summary" msgid="340071398148208130">"Bedien het apparaat via een groot menu"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Instellingen toegankelijkheidsmenu"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Grote knoppen"</string>
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Vergroot knoppen in het toegankelijkheidsmenu"</string>

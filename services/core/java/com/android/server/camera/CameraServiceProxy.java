@@ -37,6 +37,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
+import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.hardware.CameraExtensionSessionStats;
 import android.hardware.CameraSessionStats;
@@ -61,6 +62,9 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
+import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -69,6 +73,7 @@ import android.stats.camera.nano.CameraProtos.CameraStreamProto;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Range;
 import android.util.Slog;
 import android.view.Display;
 import android.view.IDisplayWindowListener;
@@ -85,6 +90,8 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.wm.WindowManagerInternal;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -243,6 +250,7 @@ public class CameraServiceProxy extends SystemService
         public int mVideoStabilizationMode;
         public boolean mUsedUltraWide;
         public boolean mUsedZoomOverride;
+        public Range<Integer> mMostRequestedFpsRange;
         public final long mLogId;
         public final int mSessionIndex;
 
@@ -265,13 +273,15 @@ public class CameraServiceProxy extends SystemService
             mDeviceError = deviceError;
             mLogId = logId;
             mSessionIndex = sessionIdx;
+            mMostRequestedFpsRange = new Range<Integer>(0, 0);
         }
 
         public void markCompleted(int internalReconfigure, long requestCount,
                 long resultErrorCount, boolean deviceError,
                 List<CameraStreamStats>  streamStats, String userTag,
                 int videoStabilizationMode, boolean usedUltraWide,
-                boolean usedZoomOverride, CameraExtensionSessionStats extStats) {
+                boolean usedZoomOverride, Range<Integer> mostRequestedFpsRange,
+                CameraExtensionSessionStats extStats) {
             if (mCompleted) {
                 return;
             }
@@ -287,6 +297,7 @@ public class CameraServiceProxy extends SystemService
             mUsedUltraWide = usedUltraWide;
             mUsedZoomOverride = usedZoomOverride;
             mExtSessionStats = extStats;
+            mMostRequestedFpsRange = mostRequestedFpsRange;
             if (CameraServiceProxy.DEBUG) {
                 Slog.v(TAG, "A camera facing " + cameraFacingToString(mCameraFacing) +
                         " was in use by " + mClientName + " for " +
@@ -637,6 +648,60 @@ public class CameraServiceProxy extends SystemService
                 Binder.restoreCallingIdentity(ident);
             }
         }
+
+        @Override
+        public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+                String[] args, ShellCallback callback, ResultReceiver resultReceiver)
+                throws RemoteException {
+            new CSPShellCmd(CameraServiceProxy.this)
+                .exec(this, in, out, err, args, callback, resultReceiver);
+        }
+
+        private static class CSPShellCmd extends ShellCommand {
+            private static final String TAG = "CSPShellCmd";
+            private static final String USAGE = """
+                    usage: cmd media.camera.proxy SUBCMD [args]
+
+                    SUBCMDs:
+                        dump_events: Write out all collected camera usage events to statsd.
+                            Does not print to terminal.
+                        help: You're reading it.
+                    """;
+
+            private final CameraServiceProxy mCameraServiceProxy;
+
+            CSPShellCmd(CameraServiceProxy proxy) {
+                mCameraServiceProxy = proxy;
+            }
+
+            @Override
+            public int onCommand(String cmd) {
+                if (cmd == null) {
+                    return handleDefaultCommands(cmd);
+                }
+                final PrintWriter pw = getOutPrintWriter();
+                try {
+                    switch (cmd.replace('-', '_')) {
+                        case "dump_events":
+                            int eventCount = mCameraServiceProxy.getUsageEventCount();
+                            mCameraServiceProxy.dumpUsageEvents();
+                            pw.println("Camera usage events dumped: " + eventCount);
+                            break;
+                        default:
+                            return handleDefaultCommands(cmd);
+                    }
+                } catch (Exception e) {
+                    Slog.e(mCameraServiceProxy.TAG, "Error running shell command", e);
+                    return 1;
+                }
+                return 0;
+            }
+
+            @Override
+            public void onHelp() {
+                getOutPrintWriter().println(USAGE);
+            }
+        }
     };
 
     private final FoldStateListener mFoldStateListener;
@@ -842,6 +907,7 @@ public class CameraServiceProxy extends SystemService
 
             int extensionType = FrameworkStatsLog.CAMERA_ACTION_EVENT__EXT_TYPE__EXTENSION_NONE;
             boolean extensionIsAdvanced = false;
+            int extensionCaptureFormat = ImageFormat.UNKNOWN;
             if (e.mExtSessionStats != null) {
                 switch (e.mExtSessionStats.type) {
                     case CameraExtensionSessionStats.Type.EXTENSION_AUTOMATIC:
@@ -868,6 +934,9 @@ public class CameraServiceProxy extends SystemService
                         Slog.w(TAG, "Unknown extension type: " + e.mExtSessionStats.type);
                 }
                 extensionIsAdvanced = e.mExtSessionStats.isAdvanced;
+                if (Flags.analytics24q3()) {
+                    extensionCaptureFormat = e.mExtSessionStats.captureFormat;
+                }
             }
 
             int streamCount = 0;
@@ -880,6 +949,12 @@ public class CameraServiceProxy extends SystemService
                         : "";
                 String zoomOverrideDebug = Flags.logZoomOverrideUsage()
                         ? ", zoomOverrideUsage " + e.mUsedZoomOverride
+                        : "";
+                String mostRequestedFpsRangeDebug = Flags.analytics24q3()
+                        ? ", mostRequestedFpsRange " + e.mMostRequestedFpsRange
+                        : "";
+                String extensionCaptureFormatDebug = Flags.analytics24q3()
+                        ? " extensionCaptureFormat " + e.mExtSessionStats.captureFormat
                         : "";
 
                 Slog.v(TAG, "CAMERA_ACTION_EVENT: action " + e.mAction
@@ -900,11 +975,14 @@ public class CameraServiceProxy extends SystemService
                         + ", videoStabilizationMode " + e.mVideoStabilizationMode
                         + ultrawideDebug
                         + zoomOverrideDebug
+                        + mostRequestedFpsRangeDebug
                         + ", logId " + e.mLogId
                         + ", sessionIndex " + e.mSessionIndex
                         + ", mExtSessionStats {type " + extensionType
-                        + " isAdvanced " + extensionIsAdvanced + "}");
+                        + " isAdvanced " + extensionIsAdvanced
+                        + extensionCaptureFormatDebug + "}");
             }
+
             // Convert from CameraStreamStats to CameraStreamProto
             CameraStreamProto[] streamProtos = new CameraStreamProto[MAX_STREAM_STATISTICS];
             for (int i = 0; i < MAX_STREAM_STATISTICS; i++) {
@@ -966,7 +1044,18 @@ public class CameraServiceProxy extends SystemService
                     e.mUserTag, e.mVideoStabilizationMode,
                     e.mLogId, e.mSessionIndex,
                     extensionType, extensionIsAdvanced, e.mUsedUltraWide,
-                    e.mUsedZoomOverride);
+                    e.mUsedZoomOverride,
+                    e.mMostRequestedFpsRange.getLower(), e.mMostRequestedFpsRange.getUpper(),
+                    extensionCaptureFormat);
+        }
+    }
+
+    /**
+     * Get camera usage event count
+     */
+    int getUsageEventCount() {
+        synchronized (mLock) {
+            return mCameraUsageHistory.size();
         }
     }
 
@@ -1173,6 +1262,10 @@ public class CameraServiceProxy extends SystemService
         long logId = cameraState.getLogId();
         int sessionIdx = cameraState.getSessionIndex();
         CameraExtensionSessionStats extSessionStats = cameraState.getExtensionSessionStats();
+        Range<Integer> mostRequestedFpsRange = Flags.analytics24q3()
+                ? cameraState.getMostRequestedFpsRange()
+                : new Range<Integer>(0, 0);
+
         synchronized(mLock) {
             // Update active camera list and notify NFC if necessary
             boolean wasEmpty = mActiveCameraUsage.isEmpty();
@@ -1228,7 +1321,8 @@ public class CameraServiceProxy extends SystemService
                         oldEvent.markCompleted(/*internalReconfigure*/0, /*requestCount*/0,
                                 /*resultErrorCount*/0, /*deviceError*/false, streamStats,
                                 /*userTag*/"", /*videoStabilizationMode*/-1, /*usedUltraWide*/false,
-                                /*usedZoomOverride*/false, new CameraExtensionSessionStats());
+                                /*usedZoomOverride*/false, new Range<Integer>(0, 0),
+                                new CameraExtensionSessionStats());
                         mCameraUsageHistory.add(oldEvent);
                     }
                     break;
@@ -1240,7 +1334,7 @@ public class CameraServiceProxy extends SystemService
                         doneEvent.markCompleted(internalReconfigureCount, requestCount,
                                 resultErrorCount, deviceError, streamStats, userTag,
                                 videoStabilizationMode, usedUltraWide, usedZoomOverride,
-                                extSessionStats);
+                                mostRequestedFpsRange, extSessionStats);
                         mCameraUsageHistory.add(doneEvent);
                         // Do not double count device error
                         deviceError = false;

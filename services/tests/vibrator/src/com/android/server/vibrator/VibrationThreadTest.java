@@ -251,9 +251,9 @@ public class VibrationThreadTest {
 
         VibrationEffect effect = VibrationEffect.createWaveform(
                 new long[]{5, 5, 5}, new int[]{1, 1, 1}, -1);
-        CompletableFuture<Void> mRequestVibrationParamsFuture = CompletableFuture.runAsync(() -> {
-            mVibrationScaler.updateAdaptiveHapticsScale(USAGE_RINGTONE, 0.5f);
-        });
+        mVibrationScaler.updateAdaptiveHapticsScale(USAGE_RINGTONE, 0.5f);
+        CompletableFuture<Void> mRequestVibrationParamsFuture = CompletableFuture.completedFuture(
+                null);
         long vibrationId = startThreadAndDispatcher(effect, mRequestVibrationParamsFuture,
                 USAGE_RINGTONE);
         waitForCompletion();

@@ -32,7 +32,6 @@ import com.android.internal.annotations.GuardedBy;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Implementation of {@link DevicePolicyCache}, to which {@link DevicePolicyManagerService} pushes
@@ -48,18 +47,11 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     private final Object mLock = new Object();
 
     /**
-     * Indicates which user is screen capture disallowed on. Can be {@link UserHandle#USER_NULL},
-     * {@link UserHandle#USER_ALL} or a concrete user ID.
-     */
-    @GuardedBy("mLock")
-    private int mScreenCaptureDisallowedUser = UserHandle.USER_NULL;
-
-    /**
      * Indicates if screen capture is disallowed on a specific user or all users if
      * it contains {@link UserHandle#USER_ALL}.
      */
     @GuardedBy("mLock")
-    private Set<Integer> mScreenCaptureDisallowedUsers = new HashSet<>();
+    private final Set<Integer> mScreenCaptureDisallowedUsers = new HashSet<>();
 
     @GuardedBy("mLock")
     private final SparseIntArray mPasswordQuality = new SparseIntArray();
@@ -70,9 +62,8 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     @GuardedBy("mLock")
     private ArrayMap<String, String> mLauncherShortcutOverrides = new ArrayMap<>();
 
-
     /** Maps to {@code ActiveAdmin.mAdminCanGrantSensorsPermissions}. */
-    private final AtomicBoolean mCanGrantSensorsPermissions = new AtomicBoolean(false);
+    private volatile boolean mCanGrantSensorsPermissions = false;
 
     @GuardedBy("mLock")
     private final SparseIntArray mContentProtectionPolicy = new SparseIntArray();
@@ -87,26 +78,10 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
 
     @Override
     public boolean isScreenCaptureAllowed(int userHandle) {
-        return isScreenCaptureAllowedInPolicyEngine(userHandle);
-    }
-
-    private boolean isScreenCaptureAllowedInPolicyEngine(int userHandle) {
         // This won't work if resolution mechanism is not strictest applies, but it's ok for now.
         synchronized (mLock) {
             return !mScreenCaptureDisallowedUsers.contains(userHandle)
                     && !mScreenCaptureDisallowedUsers.contains(UserHandle.USER_ALL);
-        }
-    }
-
-    public int getScreenCaptureDisallowedUser() {
-        synchronized (mLock) {
-            return mScreenCaptureDisallowedUser;
-        }
-    }
-
-    public void setScreenCaptureDisallowedUser(int userHandle) {
-        synchronized (mLock) {
-            mScreenCaptureDisallowedUser = userHandle;
         }
     }
 
@@ -170,12 +145,12 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
 
     @Override
     public boolean canAdminGrantSensorsPermissions() {
-        return mCanGrantSensorsPermissions.get();
+        return mCanGrantSensorsPermissions;
     }
 
     /** Sets admin control over permission grants. */
     public void setAdminCanGrantSensorsPermissions(boolean canGrant) {
-        mCanGrantSensorsPermissions.set(canGrant);
+        mCanGrantSensorsPermissions = canGrant;
     }
 
     @Override
@@ -205,7 +180,7 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
             pw.println("Password quality: " + mPasswordQuality);
             pw.println("Permission policy: " + mPermissionPolicy);
             pw.println("Content protection policy: " + mContentProtectionPolicy);
-            pw.println("Admin can grant sensors permission: " + mCanGrantSensorsPermissions.get());
+            pw.println("Admin can grant sensors permission: " + mCanGrantSensorsPermissions);
             pw.print("Shortcuts overrides: ");
             pw.println(mLauncherShortcutOverrides);
             pw.decreaseIndent();

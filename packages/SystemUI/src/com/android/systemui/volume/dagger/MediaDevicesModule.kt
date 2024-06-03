@@ -18,7 +18,6 @@ package com.android.systemui.volume.dagger
 
 import android.media.session.MediaSessionManager
 import com.android.settingslib.bluetooth.LocalBluetoothManager
-import com.android.settingslib.volume.data.repository.LocalMediaRepository
 import com.android.settingslib.volume.data.repository.MediaControllerRepository
 import com.android.settingslib.volume.data.repository.MediaControllerRepositoryImpl
 import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
@@ -27,6 +26,8 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.volume.panel.component.mediaoutput.data.repository.LocalMediaRepositoryFactory
 import com.android.systemui.volume.panel.component.mediaoutput.data.repository.LocalMediaRepositoryFactoryImpl
+import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaControllerInteractor
+import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaControllerInteractorImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -41,13 +42,12 @@ interface MediaDevicesModule {
         impl: LocalMediaRepositoryFactoryImpl
     ): LocalMediaRepositoryFactory
 
-    companion object {
+    @Binds
+    fun bindMediaControllerInteractor(
+        impl: MediaControllerInteractorImpl
+    ): MediaControllerInteractor
 
-        @Provides
-        @SysUISingleton
-        fun provideLocalMediaRepository(
-            factory: LocalMediaRepositoryFactory
-        ): LocalMediaRepository = factory.create(null)
+    companion object {
 
         @Provides
         @SysUISingleton

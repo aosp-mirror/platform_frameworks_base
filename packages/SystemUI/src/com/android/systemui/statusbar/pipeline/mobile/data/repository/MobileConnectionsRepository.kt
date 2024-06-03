@@ -21,6 +21,7 @@ import android.telephony.SubscriptionManager
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.MobileMappings
 import com.android.settingslib.mobile.MobileMappings.Config
+import com.android.systemui.statusbar.pipeline.mobile.data.model.ServiceStateModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -90,6 +91,19 @@ interface MobileConnectionsRepository {
 
     /** Fallback [MobileIconGroup] in the case where there is no icon in the mapping */
     val defaultMobileIconGroup: Flow<MobileIconGroup>
+
+    /**
+     * [deviceServiceState] is equivalent to the last [Intent.ACTION_SERVICE_STATE] broadcast with a
+     * subscriptionId of -1 (aka [SubscriptionManager.INVALID_SUBSCRIPTION_ID]).
+     *
+     * While each [MobileConnectionsRepository] listens for the service state of each subscription,
+     * there is potentially a service state associated with the device itself. This value can be
+     * used to calculate e.g., the emergency calling capability of the device (as opposed to the
+     * emergency calling capability of an individual mobile connection)
+     *
+     * Note: this is a [StateFlow] using an eager sharing strategy.
+     */
+    val deviceServiceState: StateFlow<ServiceStateModel?>
 
     /**
      * If any active SIM on the device is in

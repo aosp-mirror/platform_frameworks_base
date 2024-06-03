@@ -16,12 +16,12 @@
 
 package com.android.server.display.brightness.strategy;
 
-import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManager;
 
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.brightness.BrightnessUtils;
+import com.android.server.display.brightness.StrategyExecutionRequest;
 import com.android.server.display.brightness.StrategySelectionNotifyRequest;
 
 import java.io.PrintWriter;
@@ -37,7 +37,7 @@ public class BoostBrightnessStrategy implements DisplayBrightnessStrategy {
     // Set the brightness to the maximum value when display brightness boost is requested
     @Override
     public DisplayBrightnessState updateBrightness(
-            DisplayManagerInternal.DisplayPowerRequest displayPowerRequest) {
+            StrategyExecutionRequest strategyExecutionRequest) {
         // Todo(b/241308599): Introduce a validator class and add validations before setting
         // the brightness
         DisplayBrightnessState displayBrightnessState =
@@ -50,6 +50,11 @@ public class BoostBrightnessStrategy implements DisplayBrightnessStrategy {
     @Override
     public String getName() {
         return "BoostBrightnessStrategy";
+    }
+
+    @Override
+    public int getReason() {
+        return BrightnessReason.REASON_BOOST;
     }
 
     @Override

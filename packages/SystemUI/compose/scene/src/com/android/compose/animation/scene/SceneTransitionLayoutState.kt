@@ -16,6 +16,11 @@
 
 package com.android.compose.animation.scene
 
+import android.util.Log
+import androidx.annotation.VisibleForTesting
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastForEach
 import com.android.compose.animation.scene.transition.link.LinkedTransition
@@ -33,6 +39,7 @@ import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
 
 /**
  * The state of a [SceneTransitionLayout].
@@ -50,9 +57,20 @@ sealed interface SceneTransitionLayoutState {
      */
     val transitionState: TransitionState
 
-    /** The current transition, or `null` if we are idle. */
+    /**
+     * The current transition, or `null` if we are idle.
+     *
+     * Note: If you need to handle interruptions and multiple transitions running in parallel, use
+     * [currentTransitions] instead.
+     */
     val currentTransition: TransitionState.Transition?
         get() = transitionState as? TransitionState.Transition
+
+    /**
+     * The list of [TransitionState.Transition] currently running. This will be the empty list if we
+     * are idle.
+     */
+    val currentTransitions: List<TransitionState.Transition>
 
     /** The [SceneTransitions] used when animating this state. */
     val transitions: SceneTransitions
@@ -101,6 +119,9 @@ sealed interface MutableSceneTransitionLayoutState : SceneTransitionLayoutState 
         coroutineScope: CoroutineScope,
         transitionKey: TransitionKey? = null,
     ): TransitionState.Transition?
+
+    /** Immediately snap to the given [scene]. */
+    fun snapToScene(scene: SceneKey)
 }
 
 /**
@@ -120,12 +141,14 @@ fun MutableSceneTransitionLayoutState(
     transitions: SceneTransitions = SceneTransitions.Empty,
     canChangeScene: (SceneKey) -> Boolean = { true },
     stateLinks: List<StateLink> = emptyList(),
+    enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,
 ): MutableSceneTransitionLayoutState {
     return MutableSceneTransitionLayoutStateImpl(
         initialScene,
         transitions,
         canChangeScene,
         stateLinks,
+        enableInterruptions,
     )
 }
 
@@ -154,6 +177,7 @@ fun updateSceneTransitionLayoutState(
     transitions: SceneTransitions = SceneTransitions.Empty,
     canChangeScene: (SceneKey) -> Boolean = { true },
     stateLinks: List<StateLink> = emptyList(),
+    enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,
 ): SceneTransitionLayoutState {
     return remember {
             HoistedSceneTransitionLayoutState(
@@ -162,9 +186,19 @@ fun updateSceneTransitionLayoutState(
                 onChangeScene,
                 canChangeScene,
                 stateLinks,
+                enableInterruptions,
             )
         }
-        .apply { update(currentScene, onChangeScene, canChangeScene, transitions, stateLinks) }
+        .apply {
+            update(
+                currentScene,
+                onChangeScene,
+                canChangeScene,
+                transitions,
+                stateLinks,
+                enableInterruptions,
+            )
+        }
 }
 
 @Stable
@@ -198,11 +232,44 @@ sealed interface TransitionState {
          */
         abstract val progress: Float
 
+        /** The current velocity of [progress], in progress units. */
+        abstract val progressVelocity: Float
+
         /** Whether the transition was triggered by user input rather than being programmatic. */
         abstract val isInitiatedByUserInput: Boolean
 
         /** Whether user input is currently driving the transition. */
         abstract val isUserInputOngoing: Boolean
+
+        /**
+         * The current [TransformationSpecImpl] and [OverscrollSpecImpl] associated to this
+         * transition.
+         *
+         * Important: These will be set exactly once, when this transition is
+         * [started][BaseSceneTransitionLayoutState.startTransition].
+         */
+        internal var transformationSpec: TransformationSpecImpl = TransformationSpec.Empty
+        private var fromOverscrollSpec: OverscrollSpecImpl? = null
+        private var toOverscrollSpec: OverscrollSpecImpl? = null
+
+        /** The current [OverscrollSpecImpl], if this transition is currently overscrolling. */
+        internal val currentOverscrollSpec: OverscrollSpecImpl?
+            get() {
+                if (this !is HasOverscrollProperties) return null
+                val progress = progress
+                val bouncingScene = bouncingScene
+                return when {
+                    progress < 0f || bouncingScene == fromScene -> fromOverscrollSpec
+                    progress > 1f || bouncingScene == toScene -> toOverscrollSpec
+                    else -> null
+                }
+            }
+
+        /**
+         * An animatable that animates from 1f to 0f. This will be used to nicely animate the sudden
+         * jump of values when this transitions interrupts another one.
+         */
+        private var interruptionDecay: Animatable<Float, AnimationVector1D>? = null
 
         init {
             check(fromScene != toScene)
@@ -231,6 +298,41 @@ sealed interface TransitionState {
         fun isTransitioningBetween(scene: SceneKey, other: SceneKey): Boolean {
             return isTransitioning(from = scene, to = other) ||
                 isTransitioning(from = other, to = scene)
+        }
+
+        internal fun updateOverscrollSpecs(
+            fromSpec: OverscrollSpecImpl?,
+            toSpec: OverscrollSpecImpl?,
+        ) {
+            fromOverscrollSpec = fromSpec
+            toOverscrollSpec = toSpec
+        }
+
+        internal open fun interruptionProgress(
+            layoutImpl: SceneTransitionLayoutImpl,
+        ): Float {
+            if (!layoutImpl.state.enableInterruptions) {
+                return 0f
+            }
+
+            fun create(): Animatable<Float, AnimationVector1D> {
+                val animatable = Animatable(1f, visibilityThreshold = ProgressVisibilityThreshold)
+                layoutImpl.coroutineScope.launch {
+                    val swipeSpec = layoutImpl.state.transitions.defaultSwipeSpec
+                    val progressSpec =
+                        spring(
+                            stiffness = swipeSpec.stiffness,
+                            dampingRatio = swipeSpec.dampingRatio,
+                            visibilityThreshold = ProgressVisibilityThreshold,
+                        )
+                    animatable.animateTo(0f, progressSpec)
+                }
+
+                return animatable
+            }
+
+            val animatable = interruptionDecay ?: create().also { interruptionDecay = it }
+            return animatable.value
         }
     }
 
@@ -270,38 +372,44 @@ sealed interface TransitionState {
 internal abstract class BaseSceneTransitionLayoutState(
     initialScene: SceneKey,
     protected var stateLinks: List<StateLink>,
+
+    // TODO(b/290930950): Remove this flag.
+    internal var enableInterruptions: Boolean,
 ) : SceneTransitionLayoutState {
-    override var transitionState: TransitionState by
-        mutableStateOf(TransitionState.Idle(initialScene))
-        protected set
+    private val creationThread: Thread = Thread.currentThread()
 
     /**
-     * The current [transformationSpec] associated to [transitionState]. Accessing this value makes
-     * sense only if [transitionState] is a [TransitionState.Transition].
+     * The current [TransitionState]. This list will either be:
+     * 1. A list with a single [TransitionState.Idle] element, when we are idle.
+     * 2. A list with one or more [TransitionState.Transition], when we are transitioning.
      */
-    internal var transformationSpec: TransformationSpecImpl = TransformationSpec.Empty
+    @VisibleForTesting
+    internal var transitionStates: List<TransitionState> by
+        mutableStateOf(listOf(TransitionState.Idle(initialScene)))
+        private set
 
-    private var fromOverscrollSpec: OverscrollSpecImpl? = null
-    private var toOverscrollSpec: OverscrollSpecImpl? = null
+    override val transitionState: TransitionState
+        get() = transitionStates.last()
 
-    /**
-     * @return the overscroll [OverscrollSpecImpl] if it is defined for the current
-     *   [transitionState] and we are currently over scrolling.
-     */
-    internal val currentOverscrollSpec: OverscrollSpecImpl?
+    private val activeTransitionLinks = mutableMapOf<StateLink, LinkedTransition>()
+
+    override val currentTransitions: List<TransitionState.Transition>
         get() {
-            val transition = currentTransition ?: return null
-            if (transition !is TransitionState.HasOverscrollProperties) return null
-            val progress = transition.progress
-            val bouncingScene = transition.bouncingScene
-            return when {
-                progress < 0f || bouncingScene == transition.fromScene -> fromOverscrollSpec
-                progress > 1f || bouncingScene == transition.toScene -> toOverscrollSpec
-                else -> null
+            if (transitionStates.last() is TransitionState.Idle) {
+                check(transitionStates.size == 1)
+                return emptyList()
+            } else {
+                @Suppress("UNCHECKED_CAST")
+                return transitionStates as List<TransitionState.Transition>
             }
         }
 
-    private val activeTransitionLinks = mutableMapOf<StateLink, LinkedTransition>()
+    /**
+     * The mapping of transitions that are finished, i.e. for which [finishTransition] was called,
+     * to their idle scene.
+     */
+    @VisibleForTesting
+    internal val finishedTransitions = mutableMapOf<TransitionState.Transition, SceneKey>()
 
     /** Whether we can transition to the given [scene]. */
     internal abstract fun canChangeScene(scene: SceneKey): Boolean
@@ -314,6 +422,20 @@ internal abstract class BaseSceneTransitionLayoutState(
      */
     internal abstract fun CoroutineScope.onChangeScene(scene: SceneKey)
 
+    internal fun checkThread() {
+        val current = Thread.currentThread()
+        if (current !== creationThread) {
+            error(
+                """
+                    Only the original thread that created a SceneTransitionLayoutState can mutate it
+                      Expected: ${creationThread.name}
+                      Current: ${current.name}
+                """
+                    .trimIndent()
+            )
+        }
+    }
+
     override fun isTransitioning(from: SceneKey?, to: SceneKey?): Boolean {
         val transition = currentTransition ?: return false
         return transition.isTransitioning(from, to)
@@ -324,22 +446,101 @@ internal abstract class BaseSceneTransitionLayoutState(
         return transition.isTransitioningBetween(scene, other)
     }
 
-    /** Start a new [transition], instantly interrupting any ongoing transition if there was one. */
+    /**
+     * Start a new [transition].
+     *
+     * If [chain] is `true`, then the transitions will simply be added to [currentTransitions] and
+     * will run in parallel to the current transitions. If [chain] is `false`, then the list of
+     * [currentTransitions] will be cleared and [transition] will be the only running transition.
+     *
+     * Important: you *must* call [finishTransition] once the transition is finished.
+     */
     internal fun startTransition(
         transition: TransitionState.Transition,
-        transitionKey: TransitionKey?,
+        transitionKey: TransitionKey? = null,
+        chain: Boolean = true,
     ) {
+        checkThread()
+
         // Compute the [TransformationSpec] when the transition starts.
         val fromScene = transition.fromScene
         val toScene = transition.toScene
         val orientation = (transition as? TransitionState.HasOverscrollProperties)?.orientation
-        transformationSpec =
+
+        // Update the transition specs.
+        transition.transformationSpec =
             transitions.transitionSpec(fromScene, toScene, key = transitionKey).transformationSpec()
-        fromOverscrollSpec = orientation?.let { transitions.overscrollSpec(fromScene, it) }
-        toOverscrollSpec = orientation?.let { transitions.overscrollSpec(toScene, it) }
+        if (orientation != null) {
+            transition.updateOverscrollSpecs(
+                fromSpec = transitions.overscrollSpec(fromScene, orientation),
+                toSpec = transitions.overscrollSpec(toScene, orientation),
+            )
+        } else {
+            transition.updateOverscrollSpecs(fromSpec = null, toSpec = null)
+        }
+
+        // Handle transition links.
         cancelActiveTransitionLinks()
         setupTransitionLinks(transition)
-        transitionState = transition
+
+        if (!enableInterruptions) {
+            // Set the current transition.
+            check(transitionStates.size == 1)
+            transitionStates = listOf(transition)
+            return
+        }
+
+        when (val currentState = transitionStates.last()) {
+            is TransitionState.Idle -> {
+                // Replace [Idle] by [transition].
+                check(transitionStates.size == 1)
+                transitionStates = listOf(transition)
+            }
+            is TransitionState.Transition -> {
+                // Force the current transition to finish to currentScene. The transition will call
+                // [finishTransition] once it's finished.
+                currentState.finish()
+
+                val tooManyTransitions = transitionStates.size >= MAX_CONCURRENT_TRANSITIONS
+                val clearCurrentTransitions = !chain || tooManyTransitions
+                if (clearCurrentTransitions) {
+                    if (tooManyTransitions) logTooManyTransitions()
+
+                    // Force finish all transitions.
+                    while (currentTransitions.isNotEmpty()) {
+                        val transition = transitionStates[0] as TransitionState.Transition
+                        finishTransition(transition, transition.currentScene)
+                    }
+
+                    // We finished all transitions, so we are now idle. We remove this state so that
+                    // we end up only with the new transition after appending it.
+                    check(transitionStates.size == 1)
+                    check(transitionStates[0] is TransitionState.Idle)
+                    transitionStates = listOf(transition)
+                } else {
+                    // Append the new transition.
+                    transitionStates = transitionStates + transition
+                }
+            }
+        }
+    }
+
+    private fun logTooManyTransitions() {
+        Log.wtf(
+            TAG,
+            buildString {
+                appendLine("Potential leak detected in SceneTransitionLayoutState!")
+                appendLine("  Some transition(s) never called STLState.finishTransition().")
+                appendLine("  Transitions (size=${transitionStates.size}):")
+                transitionStates.fastForEach { state ->
+                    val transition = state as TransitionState.Transition
+                    val from = transition.fromScene
+                    val to = transition.toScene
+                    val indicator = if (finishedTransitions.contains(transition)) "x" else " "
+                    appendLine("  [$indicator] $from => $to ($transition)")
+                }
+            }
+        )
     }
 
     private fun cancelActiveTransitionLinks() {
@@ -379,13 +580,74 @@ internal abstract class BaseSceneTransitionLayoutState(
      * nothing if [transition] was interrupted since it was started.
      */
     internal fun finishTransition(transition: TransitionState.Transition, idleScene: SceneKey) {
-        resolveActiveTransitionLinks(idleScene)
-        if (transitionState == transition) {
-            transitionState = TransitionState.Idle(idleScene)
+        checkThread()
+
+        val existingIdleScene = finishedTransitions[transition]
+        if (existingIdleScene != null) {
+            // This transition was already finished.
+            check(idleScene == existingIdleScene) {
+                "Transition $transition was finished multiple times with different " +
+                    "idleScene ($existingIdleScene != $idleScene)"
+            }
+            return
+        }
+
+        val transitionStates = this.transitionStates
+        if (!transitionStates.contains(transition)) {
+            // This transition was already removed from transitionStates.
+            return
+        }
+
+        check(transitionStates.fastAll { it is TransitionState.Transition })
+
+        // Mark this transition as finished and save the scene it is settling at.
+        finishedTransitions[transition] = idleScene
+
+        // Finish all linked transitions.
+        finishActiveTransitionLinks(idleScene)
+
+        // Keep a reference to the idle scene of the last removed transition, in case we remove all
+        // transitions and should settle to Idle.
+        var lastRemovedIdleScene: SceneKey? = null
+
+        // Remove all first n finished transitions.
+        var i = 0
+        val nStates = transitionStates.size
+        while (i < nStates) {
+            val t = transitionStates[i]
+            if (!finishedTransitions.contains(t)) {
+                // Stop here.
+                break
+            }
+
+            // Remove the transition from the set of finished transitions.
+            lastRemovedIdleScene = finishedTransitions.remove(t)
+            i++
+        }
+
+        // If all transitions are finished, we are idle.
+        if (i == nStates) {
+            check(finishedTransitions.isEmpty())
+            this.transitionStates = listOf(TransitionState.Idle(checkNotNull(lastRemovedIdleScene)))
+        } else if (i > 0) {
+            this.transitionStates = transitionStates.subList(fromIndex = i, toIndex = nStates)
         }
     }
 
-    private fun resolveActiveTransitionLinks(idleScene: SceneKey) {
+    fun snapToScene(scene: SceneKey) {
+        checkThread()
+
+        // Force finish all transitions.
+        while (currentTransitions.isNotEmpty()) {
+            val transition = transitionStates[0] as TransitionState.Transition
+            finishTransition(transition, transition.currentScene)
+        }
+
+        check(transitionStates.size == 1)
+        transitionStates = listOf(TransitionState.Idle(scene))
+    }
+
+    private fun finishActiveTransitionLinks(idleScene: SceneKey) {
         val previousTransition = this.transitionState as? TransitionState.Transition ?: return
         for ((link, linkedTransition) in activeTransitionLinks) {
             if (previousTransition.fromScene == idleScene) {
@@ -406,20 +668,39 @@ internal abstract class BaseSceneTransitionLayoutState(
      * Check if a transition is in progress. If the progress value is near 0 or 1, immediately snap
      * to the closest scene.
      *
+     * Important: Snapping to the closest scene will instantly finish *all* ongoing transitions,
+     * only the progress of the last transition will be checked.
+     *
      * @return true if snapped to the closest scene.
      */
     internal fun snapToIdleIfClose(threshold: Float): Boolean {
         val transition = currentTransition ?: return false
         val progress = transition.progress
+
         fun isProgressCloseTo(value: Float) = (progress - value).absoluteValue <= threshold
+
+        fun finishAllTransitions(lastTransitionIdleScene: SceneKey) {
+            // Force finish all transitions.
+            while (currentTransitions.isNotEmpty()) {
+                val transition = transitionStates[0] as TransitionState.Transition
+                val idleScene =
+                    if (transitionStates.size == 1) {
+                        lastTransitionIdleScene
+                    } else {
+                        transition.currentScene
+                    }
+
+                finishTransition(transition, idleScene)
+            }
+        }
 
         return when {
             isProgressCloseTo(0f) -> {
-                finishTransition(transition, transition.fromScene)
+                finishAllTransitions(transition.fromScene)
                 true
             }
             isProgressCloseTo(1f) -> {
-                finishTransition(transition, transition.toScene)
+                finishAllTransitions(transition.toScene)
                 true
             }
             else -> false
@@ -437,7 +718,8 @@ internal class HoistedSceneTransitionLayoutState(
     private var changeScene: (SceneKey) -> Unit,
     private var canChangeScene: (SceneKey) -> Boolean,
     stateLinks: List<StateLink> = emptyList(),
-) : BaseSceneTransitionLayoutState(initialScene, stateLinks) {
+    enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,
+) : BaseSceneTransitionLayoutState(initialScene, stateLinks, enableInterruptions) {
     private val targetSceneChannel = Channel<SceneKey>(Channel.CONFLATED)
 
     override fun canChangeScene(scene: SceneKey): Boolean = canChangeScene.invoke(scene)
@@ -451,12 +733,14 @@ internal class HoistedSceneTransitionLayoutState(
         canChangeScene: (SceneKey) -> Boolean,
         transitions: SceneTransitions,
         stateLinks: List<StateLink>,
+        enableInterruptions: Boolean,
     ) {
         SideEffect {
             this.changeScene = onChangeScene
             this.canChangeScene = canChangeScene
             this.transitions = transitions
             this.stateLinks = stateLinks
+            this.enableInterruptions = enableInterruptions
 
             targetSceneChannel.trySend(currentScene)
         }
@@ -482,12 +766,17 @@ internal class MutableSceneTransitionLayoutStateImpl(
     override var transitions: SceneTransitions,
     private val canChangeScene: (SceneKey) -> Boolean = { true },
     stateLinks: List<StateLink> = emptyList(),
-) : MutableSceneTransitionLayoutState, BaseSceneTransitionLayoutState(initialScene, stateLinks) {
+    enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,
+) :
+    MutableSceneTransitionLayoutState,
+    BaseSceneTransitionLayoutState(initialScene, stateLinks, enableInterruptions) {
     override fun setTargetScene(
         targetScene: SceneKey,
         coroutineScope: CoroutineScope,
         transitionKey: TransitionKey?,
     ): TransitionState.Transition? {
+        checkThread()
+
         return coroutineScope.animateToScene(
             layoutState = this@MutableSceneTransitionLayoutStateImpl,
             target = targetScene,
@@ -501,3 +790,15 @@ internal class MutableSceneTransitionLayoutStateImpl(
         setTargetScene(scene, coroutineScope = this)
     }
 }
+
+private const val TAG = "SceneTransitionLayoutState"
+
+/** Whether support for interruptions in enabled by default. */
+internal const val DEFAULT_INTERRUPTIONS_ENABLED = true
+
+/**
+ * The max number of concurrent transitions. If the number of transitions goes past this number,
+ * this probably means that there is a leak and we will Log.wtf before clearing the list of
+ * transitions.
+ */
+private const val MAX_CONCURRENT_TRANSITIONS = 100

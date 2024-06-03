@@ -50,6 +50,7 @@ import android.view.WindowInfo;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.inputmethod.ImeTracker;
 import android.window.ScreenCapture;
+import android.window.ScreenCapture.ScreenshotHardwareBuffer;
 
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.server.input.InputManagerService;
@@ -160,7 +161,7 @@ public abstract class WindowManagerInternal {
 
         /**
          * Called when the windows for accessibility changed. This is called if
-         * {@link com.android.server.accessibility.Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y} is
+         * {@link com.android.server.accessibility.Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y_V2} is
          * false.
          *
          * @param forceSend Send the windows for accessibility even if they haven't changed.
@@ -173,7 +174,7 @@ public abstract class WindowManagerInternal {
 
         /**
          * Called when the windows for accessibility changed. This is called if
-         * {@link com.android.server.accessibility.Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y} is
+         * {@link com.android.server.accessibility.Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y_V2} is
          * true.
          * TODO(b/322444245): Remove screenSize parameter by getting it from
          *  DisplayManager#getDisplay(int).getRealSize() on the a11y side.
@@ -302,6 +303,18 @@ public abstract class WindowManagerInternal {
                 int taskId,
                 boolean visible,
                 boolean wereRevealedFromSwipeOnSystemBar);
+    }
+
+    /**
+     * An interface to be notified on window removal.
+     */
+    public interface OnWindowRemovedListener {
+        /**
+         * Called when a window is removed.
+         *
+         * @param token the client token
+         */
+        void onWindowRemoved(IBinder token);
     }
 
     /**
@@ -1043,6 +1056,13 @@ public abstract class WindowManagerInternal {
             int[] fromOrientations, int[] toOrientations);
 
     /**
+     * Set current screen capture session id that will be used during sensitive content protections.
+     *
+     * @param sessionId Session id for this screen capture protection
+     */
+    public abstract void setBlockScreenCaptureForAppsSessionId(long sessionId);
+
+    /**
      * Set whether screen capture should be disabled for all windows of a specific app windows based
      * on sensitive content protections.
      *
@@ -1068,13 +1088,28 @@ public abstract class WindowManagerInternal {
     public abstract void clearBlockedApps();
 
     /**
+     * Register a listener to receive a callback on window removal.
+     *
+     * @param listener the listener to be registered.
+     */
+    public abstract void registerOnWindowRemovedListener(OnWindowRemovedListener listener);
+
+    /**
+     * Removes the listener.
+     *
+     * @param listener the listener to be removed.
+     */
+    public abstract void unregisterOnWindowRemovedListener(OnWindowRemovedListener listener);
+
+    /**
      * Moves the current focus to the adjacent activity if it has the latest created window.
      */
     public abstract boolean moveFocusToAdjacentEmbeddedActivityIfNeeded();
 
     /**
-     * Returns an instance of {@link ScreenCapture.ScreenshotHardwareBuffer} containing the current
+     * Returns an instance of {@link ScreenshotHardwareBuffer} containing the current
      * screenshot.
      */
-    public abstract ScreenCapture.ScreenshotHardwareBuffer takeAssistScreenshot();
+    public abstract ScreenshotHardwareBuffer takeAssistScreenshot(
+            Set<Integer> windowTypesToExclude);
 }

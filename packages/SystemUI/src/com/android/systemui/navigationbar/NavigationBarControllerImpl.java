@@ -74,7 +74,6 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
-
 @SysUISingleton
 public class NavigationBarControllerImpl implements
         ConfigurationController.ConfigurationListener,
@@ -162,14 +161,11 @@ public class NavigationBarControllerImpl implements
         mIsLargeScreen = isLargeScreen(mContext);
         boolean willApplyConfig = mConfigChanges.applyNewConfig(mContext.getResources());
         boolean largeScreenChanged = mIsLargeScreen != isOldConfigLargeScreen;
-        // TODO(b/243765256): Disable this logging once b/243765256 is fixed.
+        // TODO(b/332635834): Disable this logging once b/332635834 is fixed.
         Log.i(DEBUG_MISSING_GESTURE_TAG, "NavbarController: newConfig=" + newConfig
                 + " mTaskbarDelegate initialized=" + mTaskbarDelegate.isInitialized()
                 + " willApplyConfigToNavbars=" + willApplyConfig
                 + " navBarCount=" + mNavigationBars.size());
-        if (mTaskbarDelegate.isInitialized()) {
-            mTaskbarDelegate.onConfigurationChanged(newConfig);
-        }
         // If we folded/unfolded while in 3 button, show navbar in folded state, hide in unfolded
         if (largeScreenChanged && updateNavbarForTaskbar()) {
             return;

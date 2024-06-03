@@ -16,9 +16,13 @@
 
 package com.android.settingslib.volume.data.repository
 
+import android.content.ContentResolver
+import android.database.ContentObserver
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.media.AudioManager.OnCommunicationDeviceChangedListener
+import android.provider.Settings
+import androidx.concurrent.futures.DirectExecutor
 import com.android.internal.util.ConcurrentUtils
 import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
 import com.android.settingslib.volume.shared.model.AudioManagerEvent
@@ -33,12 +37,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -72,23 +77,43 @@ interface AudioRepository {
 
     suspend fun setVolume(audioStream: AudioStream, volume: Int)
 
-    suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean)
+    /**
+     * Mutes and un-mutes [audioStream]. Returns true when the state changes and false the
+     * otherwise.
+     */
+    suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean): Boolean
+
+    suspend fun setRingerMode(audioStream: AudioStream, mode: RingerMode)
 }
 
 class AudioRepositoryImpl(
     private val audioManagerEventsReceiver: AudioManagerEventsReceiver,
     private val audioManager: AudioManager,
+    private val contentResolver: ContentResolver,
     private val backgroundCoroutineContext: CoroutineContext,
     private val coroutineScope: CoroutineScope,
 ) : AudioRepository {
 
+    private val streamSettingNames: Map<AudioStream, String> =
+        mapOf(
+            AudioStream(AudioManager.STREAM_VOICE_CALL) to Settings.System.VOLUME_VOICE,
+            AudioStream(AudioManager.STREAM_SYSTEM) to Settings.System.VOLUME_SYSTEM,
+            AudioStream(AudioManager.STREAM_RING) to Settings.System.VOLUME_RING,
+            AudioStream(AudioManager.STREAM_MUSIC) to Settings.System.VOLUME_MUSIC,
+            AudioStream(AudioManager.STREAM_ALARM) to Settings.System.VOLUME_ALARM,
+            AudioStream(AudioManager.STREAM_NOTIFICATION) to Settings.System.VOLUME_NOTIFICATION,
+            AudioStream(AudioManager.STREAM_BLUETOOTH_SCO) to Settings.System.VOLUME_BLUETOOTH_SCO,
+            AudioStream(AudioManager.STREAM_ACCESSIBILITY) to Settings.System.VOLUME_ACCESSIBILITY,
+            AudioStream(AudioManager.STREAM_ASSISTANT) to Settings.System.VOLUME_ASSISTANT,
+        )
+
     override val mode: StateFlow<Int> =
         callbackFlow {
-                val listener =
-                    AudioManager.OnModeChangedListener { newMode -> launch { send(newMode) } }
+                val listener = AudioManager.OnModeChangedListener { newMode -> trySend(newMode) }
                 audioManager.addOnModeChangedListener(ConcurrentUtils.DIRECT_EXECUTOR, listener)
                 awaitClose { audioManager.removeOnModeChangedListener(listener) }
             }
+            .onStart { emit(audioManager.mode) }
             .flowOn(backgroundCoroutineContext)
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), audioManager.mode)
 
@@ -96,6 +121,7 @@ class AudioRepositoryImpl(
         audioManagerEventsReceiver.events
             .filterIsInstance(AudioManagerEvent.InternalRingerModeChanged::class)
             .map { RingerMode(audioManager.ringerModeInternal) }
+            .onStart { emit(RingerMode(audioManager.ringerModeInternal)) }
             .flowOn(backgroundCoroutineContext)
             .stateIn(
                 coroutineScope,
@@ -116,6 +142,7 @@ class AudioRepositoryImpl(
                 }
                 .filterNotNull()
                 .map { audioManager.communicationDevice }
+                .onStart { emit(audioManager.communicationDevice) }
                 .flowOn(backgroundCoroutineContext)
                 .stateIn(
                     coroutineScope,
@@ -124,17 +151,18 @@ class AudioRepositoryImpl(
                 )
 
     override fun getAudioStream(audioStream: AudioStream): Flow<AudioStreamModel> {
-        return audioManagerEventsReceiver.events
-            .filter {
-                if (it is StreamAudioManagerEvent) {
-                    it.audioStream == audioStream
-                } else {
-                    true
-                }
-            }
+        return merge(
+                audioManagerEventsReceiver.events.filter {
+                    if (it is StreamAudioManagerEvent) {
+                        it.audioStream == audioStream
+                    } else {
+                        true
+                    }
+                },
+                volumeSettingChanges(audioStream),
+            )
             .map { getCurrentAudioStream(audioStream) }
             .onStart { emit(getCurrentAudioStream(audioStream)) }
-            .conflate()
             .flowOn(backgroundCoroutineContext)
     }
 
@@ -144,8 +172,9 @@ class AudioRepositoryImpl(
             minVolume = getMinVolume(audioStream),
             maxVolume = audioManager.getStreamMaxVolume(audioStream.value),
             volume = audioManager.getStreamVolume(audioStream.value),
+            isAffectedByMute = audioManager.isStreamAffectedByMute(audioStream.value),
             isAffectedByRingerMode = audioManager.isStreamAffectedByRingerMode(audioStream.value),
-            isMuted = audioManager.isStreamMute(audioStream.value)
+            isMuted = audioManager.isStreamMute(audioStream.value),
         )
     }
 
@@ -160,14 +189,24 @@ class AudioRepositoryImpl(
             audioManager.setStreamVolume(audioStream.value, volume, 0)
         }
 
-    override suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean) =
-        withContext(backgroundCoroutineContext) {
-            audioManager.adjustStreamVolume(
-                audioStream.value,
-                if (isMuted) AudioManager.ADJUST_MUTE else AudioManager.ADJUST_UNMUTE,
-                0,
-            )
+    override suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean): Boolean {
+        return withContext(backgroundCoroutineContext) {
+            if (isMuted == audioManager.isStreamMute(audioStream.value)) {
+                false
+            } else {
+                audioManager.adjustStreamVolume(
+                    audioStream.value,
+                    if (isMuted) AudioManager.ADJUST_MUTE else AudioManager.ADJUST_UNMUTE,
+                    0,
+                )
+                true
+            }
         }
+    }
+
+    override suspend fun setRingerMode(audioStream: AudioStream, mode: RingerMode) {
+        withContext(backgroundCoroutineContext) { audioManager.ringerMode = mode.value }
+    }
 
     private fun getMinVolume(stream: AudioStream): Int =
         try {
@@ -178,4 +217,19 @@ class AudioRepositoryImpl(
             // return STREAM_VOICE_CALL in getAudioStream
             audioManager.getStreamMinVolume(AudioManager.STREAM_VOICE_CALL)
         }
+
+    private fun volumeSettingChanges(audioStream: AudioStream): Flow<Unit> {
+        val uri = streamSettingNames[audioStream]?.let(Settings.System::getUriFor)
+        uri ?: return emptyFlow()
+        return callbackFlow {
+            val observer =
+                object : ContentObserver(DirectExecutor.INSTANCE, 0) {
+                    override fun onChange(selfChange: Boolean) {
+                        launch { send(Unit) }
+                    }
+                }
+            contentResolver.registerContentObserver(uri, false, observer)
+            awaitClose { contentResolver.unregisterContentObserver(observer) }
+        }
+    }
 }

@@ -23,12 +23,15 @@ import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVi
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardSurfaceBehindModel
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
+import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.kotlin.toPx
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 
 /**
  * Distance over which the surface behind the keyguard is animated in during a Y-translation
@@ -96,13 +99,24 @@ constructor(
             .distinctUntilChanged()
 
     /**
+     * Whether a notification launch animation is running when we're not already in the GONE state.
+     */
+    private val isNotificationLaunchAnimationRunningOnKeyguard =
+        notificationLaunchInteractor.isLaunchAnimationRunning
+            .sample(transitionInteractor.finishedKeyguardState, ::Pair)
+            .map { (animationRunning, finishedState) ->
+                animationRunning && finishedState != KeyguardState.GONE
+            }
+            .onStart { emit(false) }
+
+    /**
      * Whether we're animating the surface, or a notification launch animation is running (which
      * means we're going to animate the surface, even if animators aren't yet running).
      */
     val isAnimatingSurface =
         combine(
             repository.isAnimatingSurface,
-            notificationLaunchInteractor.isLaunchAnimationRunning
+            isNotificationLaunchAnimationRunningOnKeyguard,
         ) { animatingSurface, animatingLaunch ->
             animatingSurface || animatingLaunch
         }

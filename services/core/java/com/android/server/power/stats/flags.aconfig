@@ -1,7 +1,9 @@
 package: "com.android.server.power.optimization"
+container: "system"
 
 flag {
     name: "power_monitor_api"
+    is_exported: true
     namespace: "backstage_power"
     description: "Feature flag for ODPM API"
     bug: "295027807"
@@ -27,4 +29,11 @@ flag {
     namespace: "backstage_power"
     description: "Feature flag for streamlined connectivity battery stats"
     bug: "323970018"
+}
+
+flag {
+    name: "streamlined_misc_battery_stats"
+    namespace: "backstage_power"
+    description: "Feature flag for streamlined misc (excluding CPU, Cell, Wifi, BT) battery stats"
+    bug: "333941740"
 }

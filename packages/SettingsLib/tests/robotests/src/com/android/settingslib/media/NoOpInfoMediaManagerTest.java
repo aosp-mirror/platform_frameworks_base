@@ -46,7 +46,9 @@ public class NoOpInfoMediaManagerTest {
                 new NoOpInfoMediaManager(
                         mContext,
                         /* packageName */ "FAKE_PACKAGE_NAME",
-                        /* localBluetoothManager */ null);
+                        mContext.getUser(),
+                        /* localBluetoothManager */ null,
+                        /* mediaController */ null);
     }
 
     @Test

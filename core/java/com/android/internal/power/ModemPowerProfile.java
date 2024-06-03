@@ -17,14 +17,16 @@
 package com.android.internal.power;
 
 import android.annotation.IntDef;
-import android.content.res.XmlResourceParser;
+import android.os.BatteryStats;
 import android.telephony.ModemActivityInfo;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseDoubleArray;
 
+import com.android.internal.os.PowerProfile;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -94,6 +96,8 @@ public class ModemPowerProfile {
      * {@link ModemRatType} and {@link ModemNrFrequencyRange} (when applicable).
      */
     public static final int MODEM_DRAIN_TYPE_TX = 0x3000_0000;
+
+    private static final int IGNORE = -1;
 
     @IntDef(prefix = {"MODEM_DRAIN_TYPE_"}, value = {
             MODEM_DRAIN_TYPE_SLEEP,
@@ -256,7 +260,7 @@ public class ModemPowerProfile {
     /**
      * Generates a ModemPowerProfile object from the <modem /> element of a power_profile.xml
      */
-    public void parseFromXml(XmlResourceParser parser) throws IOException,
+    public void parseFromXml(XmlPullParser parser) throws IOException,
             XmlPullParserException {
         final int depth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, depth)) {
@@ -286,7 +290,7 @@ public class ModemPowerProfile {
     }
 
     /** Parse the <active /> XML element */
-    private void parseActivePowerConstantsFromXml(XmlResourceParser parser)
+    private void parseActivePowerConstantsFromXml(XmlPullParser parser)
             throws IOException, XmlPullParserException {
         // Parse attributes to get the type of active modem usage the power constants are for.
         final int ratType;
@@ -339,7 +343,7 @@ public class ModemPowerProfile {
         }
     }
 
-    private static int getTypeFromAttribute(XmlResourceParser parser, String attr,
+    private static int getTypeFromAttribute(XmlPullParser parser, String attr,
             SparseArray<String> names) {
         final String value = XmlUtils.readStringAttribute(parser, attr);
         if (value == null) {
@@ -380,6 +384,84 @@ public class ModemPowerProfile {
             Slog.e(TAG, "Failed to set power constant 0x" + Integer.toHexString(
                     key) + "(" + keyToString(key) + ") to " + value, e);
         }
+    }
+
+    public static long getAverageBatteryDrainKey(@ModemDrainType int drainType,
+            @BatteryStats.RadioAccessTechnology int rat, @ServiceState.FrequencyRange int freqRange,
+            int txLevel) {
+        long key = PowerProfile.SUBSYSTEM_MODEM;
+
+        // Attach Modem drain type to the key if specified.
+        if (drainType != IGNORE) {
+            key |= drainType;
+        }
+
+        // Attach RadioAccessTechnology to the key if specified.
+        switch (rat) {
+            case IGNORE:
+                // do nothing
+                break;
+            case BatteryStats.RADIO_ACCESS_TECHNOLOGY_OTHER:
+                key |= MODEM_RAT_TYPE_DEFAULT;
+                break;
+            case BatteryStats.RADIO_ACCESS_TECHNOLOGY_LTE:
+                key |= MODEM_RAT_TYPE_LTE;
+                break;
+            case BatteryStats.RADIO_ACCESS_TECHNOLOGY_NR:
+                key |= MODEM_RAT_TYPE_NR;
+                break;
+            default:
+                Log.w(TAG, "Unexpected RadioAccessTechnology : " + rat);
+        }
+
+        // Attach NR Frequency Range to the key if specified.
+        switch (freqRange) {
+            case IGNORE:
+                // do nothing
+                break;
+            case ServiceState.FREQUENCY_RANGE_UNKNOWN:
+                key |= MODEM_NR_FREQUENCY_RANGE_DEFAULT;
+                break;
+            case ServiceState.FREQUENCY_RANGE_LOW:
+                key |= MODEM_NR_FREQUENCY_RANGE_LOW;
+                break;
+            case ServiceState.FREQUENCY_RANGE_MID:
+                key |= MODEM_NR_FREQUENCY_RANGE_MID;
+                break;
+            case ServiceState.FREQUENCY_RANGE_HIGH:
+                key |= MODEM_NR_FREQUENCY_RANGE_HIGH;
+                break;
+            case ServiceState.FREQUENCY_RANGE_MMWAVE:
+                key |= MODEM_NR_FREQUENCY_RANGE_MMWAVE;
+                break;
+            default:
+                Log.w(TAG, "Unexpected NR frequency range : " + freqRange);
+        }
+
+        // Attach transmission level to the key if specified.
+        switch (txLevel) {
+            case IGNORE:
+                // do nothing
+                break;
+            case 0:
+                key |= MODEM_TX_LEVEL_0;
+                break;
+            case 1:
+                key |= MODEM_TX_LEVEL_1;
+                break;
+            case 2:
+                key |= MODEM_TX_LEVEL_2;
+                break;
+            case 3:
+                key |= MODEM_TX_LEVEL_3;
+                break;
+            case 4:
+                key |= MODEM_TX_LEVEL_4;
+                break;
+            default:
+                Log.w(TAG, "Unexpected transmission level : " + txLevel);
+        }
+        return key;
     }
 
     /**
@@ -444,6 +526,7 @@ public class ModemPowerProfile {
         }
         return sb.toString();
     }
+
     private static void appendFieldToString(StringBuilder sb, String fieldName,
             SparseArray<String> names, int key) {
         sb.append(fieldName);

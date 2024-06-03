@@ -84,7 +84,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"モバイル ネットワークにアクセスできません"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"タップして、優先ネットワークを変更してください。"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"緊急通報は利用できません"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Wi‑Fi では緊急通報ができません"</string>
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"緊急通報にはモバイル ネットワークが必要です"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"通知"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"電話の転送"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"緊急通報待機モード"</string>
@@ -153,16 +153,19 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>:<xliff:g id="DIALING_NUMBER">{1}</xliff:g> (<xliff:g id="TIME_DELAY">{2}</xliff:g>秒後)"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>:転送できません"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>:転送できません"</string>
-    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"モバイル ネットワークのセキュリティ"</string>
-    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"設定を確認する"</string>
-    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"デバイス ID にアクセスしました"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> 接続のネットワークは、<xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g>～<xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>の間にデバイスの一意の ID（IMSI）を <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> 回記録しました。"</string>
-    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> への接続が暗号化されています"</string>
-    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"より安全なモバイル ネットワークに接続しました。"</string>
-    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> への接続が暗号化されていません"</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"接続先のモバイル ネットワークは暗号化されていません。通話、メッセージ、データが傍受に対し脆弱です。"</string>
-    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"モバイル セキュリティの設定"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"モバイル ネットワーク セキュリティ"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"暗号化、暗号化されていないネットワークに関する通知"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"デバイス ID へのアクセスが発生しました"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>、<xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> の SIM の使用中に付近のネットワークでお使いのデバイスの一意の ID（IMSI または IMEI）が記録されました"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>、<xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> の SIM の使用中に付近のネットワークでお使いのデバイスの一意の ID（IMSI または IMEI）が記録されました。\n\nつまり、あなたの位置情報、アクティビティ、身元などが記録されことになります。これはよくある事象ですが、プライバシーに不安を持たれている人にとっては問題になる可能性があります。"</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"暗号化されたネットワーク（<xliff:g id="NETWORK_NAME">%1$s</xliff:g>）に接続しました"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> の SIM 接続のセキュリティが強化されました"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"接続先のネットワークが暗号化されていません"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"現在、通話、メッセージ、データは、<xliff:g id="NETWORK_NAME">%1$s</xliff:g> の SIM の使用中に脆弱性が高くなっています"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"現在、通話、メッセージ、データは、<xliff:g id="NETWORK_NAME">%1$s</xliff:g> の SIM の使用中に脆弱性が高くなっています。\n\n接続が再び暗号化されましたら、改めてお知らせします。"</string>
+    <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"モバイル ネットワーク セキュリティの設定"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"詳細"</string>
+    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"OK"</string>
     <string name="fcComplete" msgid="1080909484660507044">"機能コードが完了しました。"</string>
     <string name="fcError" msgid="5325116502080221346">"接続エラーまたは無効な機能コードです。"</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -196,8 +199,10 @@
     <string name="work_profile_deleted" msgid="5891181538182009328">"仕事用プロファイルが削除されました"</string>
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"仕事用プロファイルの管理アプリがないか、破損しています。そのため仕事用プロファイルと関連データが削除されました。管理者にサポートをご依頼ください。"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"お使いの仕事用プロファイルはこのデバイスで使用できなくなりました"</string>
-    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"パスワード入力回数が上限を超えました"</string>
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"パスワード入力回数が上限に達しました"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"管理者により、デバイスの個人使用が許可されました"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"プライベート スペースの削除"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"この管理対象デバイス上のプライベート スペースは組織で許可されていません。"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"管理対象のデバイス"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"このデバイスは組織によって管理され、ネットワーク トラフィックが監視される場合があります。詳しくはタップしてください。"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"アプリに位置情報へのアクセスを許可しました"</string>
@@ -280,6 +285,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"音声アシスト"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"ロックダウン"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"返信"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"新しい通知"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"物理キーボード"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"セキュリティ"</string>
@@ -356,6 +362,7 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"スクリーンショットの撮影"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ディスプレイのスクリーンショットを撮影できます。"</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"プレビュー - <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
+    <string name="dream_accessibility_action_click" msgid="7392398629967797805">"閉じる"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"ステータスバーの無効化や変更"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ステータスバーの無効化、システムアイコンの追加や削除をアプリに許可します。"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ステータスバーへの表示"</string>
@@ -662,7 +669,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"指紋を認識できません"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"指紋を認識できません"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"顔を認識できません。指紋認証を使用してください。"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5590293588784953188">"顔を認識できません。指紋認証を使用してください。"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"指紋認証を完了しました"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"顔を認証しました"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"顔を認証しました。[確認] を押してください"</string>
@@ -671,8 +678,8 @@
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"指紋の設定がタイムアウトしました。もう一度お試しください。"</string>
     <string name="fingerprint_error_canceled" msgid="5541771463159727513">"指紋認証操作がキャンセルされました"</string>
     <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"指紋認証操作がユーザーによりキャンセルされました"</string>
-    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"試行回数が上限を超えました。代わりに画面ロックを使用してください。"</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"試行回数が上限を超えました。代わりに画面ロックを使用してください。"</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"試行回数が上限に達しました。代わりに画面ロックを使用してください。"</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"試行回数が上限に達しました。代わりに画面ロックを使用してください。"</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"指紋を処理できません。もう一度お試しください。"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"指紋が登録されていません"</string>
     <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"このデバイスには指紋認証センサーがありません"</string>
@@ -734,8 +741,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"顔の操作をキャンセルしました。"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"顔認証はユーザーによりキャンセルされました"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"試行回数の上限です。後でもう一度お試しください。"</string>
-    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"試行回数が上限を超えました。顔認証を利用できません。"</string>
-    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"試行回数が上限を超えました。代わりに画面ロック解除を入力してください。"</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"試行回数が上限に達しました。顔認証を利用できません。"</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"試行回数が上限に達しました。代わりに画面ロック解除を入力してください。"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"顔を確認できません。もう一度お試しください。"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"顔認証を設定していません"</string>
     <string name="face_error_hw_not_present" msgid="7940978724978763011">"このデバイスは顔認証に対応していません"</string>
@@ -828,14 +835,14 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"パスワードルールの設定"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"画面ロックのパスワードとPINの長さと使用できる文字を制御します。"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"画面ロック解除試行の監視"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"画面のロック解除に正しくないパスワードを入力した回数を監視し、回数が多すぎる場合はタブレットをロックするかタブレットのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合は Android TV デバイスをロックするか Android TV デバイスのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"画面のロック解除に正しくないパスワードを入力した回数を監視し、回数が多すぎる場合はインフォテインメント システムをロックするかインフォテインメント システムのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"画面のロック解除に正しくないパスワードを入力した回数を監視し、回数が多すぎる場合はモバイルデバイスをロックするかモバイルデバイスのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合はタブレットをロックするかこのユーザーのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合は Android TV デバイスをロックするかこのユーザーのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"画面のロック解除に正しくないパスワードを入力した回数を監視し、回数が多すぎる場合はインフォテインメント システムをロックするかこのプロファイルのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合はスマートフォンをロックするかこのユーザーのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"画面のロック解除に失敗した回数を監視し、多すぎる場合はタブレットをロックするかタブレットのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"画面のロック解除に失敗した回数を監視し、多すぎる場合は Android TV デバイスをロックするか Android TV デバイスのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"画面のロック解除に失敗した回数を監視し、多すぎる場合はインフォテインメント システムをロックするかインフォテインメント システムのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"画面のロック解除に失敗した回数を監視し、多すぎる場合はモバイルデバイスをロックするかモバイルデバイスのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"画面のロック解除に失敗した回数を監視し、多すぎる場合はタブレットをロックするかこのユーザーのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"画面のロック解除に失敗した回数を監視し、多すぎる場合は Android TV デバイスをロックするかこのユーザーのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"画面のロック解除に失敗した回数を監視し、多すぎる場合はインフォテインメント システムをロックするかこのプロファイルのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"画面のロック解除に失敗した回数を監視し、多すぎる場合はスマートフォンをロックするかこのユーザーのデータをすべて消去します。"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"画面ロックの変更"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"画面ロックを変更します。"</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"画面のロック"</string>
@@ -1183,6 +1190,8 @@
     <string name="deleteText" msgid="4200807474529938112">"削除"</string>
     <string name="inputMethod" msgid="1784759500516314751">"入力方法"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"テキスト操作"</string>
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"この欄は手書き入力には対応していません"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"パスワードの欄は手書き入力には対応していません"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"戻る"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"入力方法の切り替え"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"空き容量わずか"</string>
@@ -1418,7 +1427,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"共有しない"</string>
     <string name="select_input_method" msgid="3971267998568587025">"入力方法の選択"</string>
     <string name="show_ime" msgid="6406112007347443383">"物理キーボードが有効になっていても画面に表示させます"</string>
-    <string name="hardware" msgid="3611039921284836033">"画面キーボードの使用"</string>
+    <string name="hardware" msgid="3611039921284836033">"画面キーボードを使用"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g>の設定"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"物理キーボードの設定"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"タップして言語とレイアウトを選択してください"</string>
@@ -1894,7 +1903,7 @@
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"オフライン再生を解除する前にPINの入力を求める"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"画面固定を解除する前にロック解除パターンの入力を求める"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"オフライン再生を解除する前にパスワードの入力を求める"</string>
-    <string name="package_installed_device_owner" msgid="7035926868974878525">"管理者によりインストールされています"</string>
+    <string name="package_installed_device_owner" msgid="8684974629306529138">"管理者によりインストールされています。\n付与された権限を確認するには、設定に移動してください"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"管理者により更新されています"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"管理者により削除されています"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
@@ -1927,6 +1936,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> によって管理されています"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ON"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"OFF"</string>
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">"、 "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>～<xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"すべてのカレンダー"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> により一部の音はミュートに設定"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"デバイスで内部的な問題が発生しました。データが初期化されるまで不安定になる可能性があります。"</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"デバイスで内部的な問題が発生しました。詳しくはメーカーにお問い合わせください。"</string>
@@ -2135,6 +2147,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ルーティン モード情報の通知"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"バッテリー セーバーが ON になりました"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"バッテリー使用量を減らし、バッテリー駆動時間を延ばします"</string>
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"バッテリー セーバーが ON になっています"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"バッテリーを長持ちさせるためにバッテリー セーバーが ON になっています"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"バッテリー セーバー"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"バッテリー セーバーが OFF になりました"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"スマートフォンが十分に充電されました。機能は制限されなくなりました。"</string>
@@ -2182,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"D-pad: 左"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"D-pad: 右"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"D-pad: 中央"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> のキャプション バーです。"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> は RESTRICTED バケットに移動しました。"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"画像を送信しました"</string>
@@ -2209,6 +2222,8 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"仕事用アプリに切り替えますか？"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"組織では、仕事用アプリからの通話のみ許可されています"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"組織では、仕事用アプリからのメッセージ送信のみ許可されています"</string>
+    <string name="miniresolver_private_space_phone_information" msgid="4469511223312488570">"電話は個人用の電話アプリからのみかけることができます。個人用の電話アプリを使った通話は、個人用の通話履歴に追加されます。"</string>
+    <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"SMS メッセージは個人用のメッセージ アプリからのみ送信できます。"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"個人用ブラウザを使用"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"仕事用ブラウザを使用"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"通話"</string>
@@ -2368,8 +2383,8 @@
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"デュアル スクリーン"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"デュアル スクリーン: ON"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>は 2 画面でコンテンツを表示しています"</string>
-    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"デバイスが熱くなりすぎています"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"スマートフォンが熱くなりすぎているため、デュアル スクリーンを使用できません"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"デバイスが熱くなっています"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"スマートフォンが熱いため、デュアル スクリーンを使用できません"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"デュアル スクリーンを使用できません"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"バッテリー セーバーが ON のため、デュアル スクリーンを使用できません。この動作は設定で OFF にできます。"</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"設定に移動"</string>
@@ -2381,17 +2396,32 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"キーボードのレイアウトは<xliff:g id="LAYOUT_1">%1$s</xliff:g>、<xliff:g id="LAYOUT_2">%2$s</xliff:g>、<xliff:g id="LAYOUT_3">%3$s</xliff:g>などに設定されています。タップで変更できます。"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"物理キーボードの設定完了"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"タップするとキーボードを表示できます"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"非公開"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"プライベート"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"複製"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"仕事用"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"仕事用 2"</string>
     <string name="profile_label_work_3" msgid="4834572253956798917">"仕事用 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"テスト"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"共用"</string>
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"仕事用プロファイル"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"プライベート スペース"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"複製"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"共用"</string>
+    <string name="redacted_notification_message" msgid="1520587845842228816">"プライベートな通知内容は表示されません"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"セキュリティ上、画面共有ではアプリの内容は非表示となります"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"衛星に自動接続しました"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"モバイル ネットワークや Wi-Fi ネットワークを使わずにメッセージを送受信できます"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"メッセージ アプリを開く"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"仕組み"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"保留中..."</string>
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"指紋認証をもう一度設定してください"</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> は正常に機能せず、削除されました"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> と <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> は正常に機能せず、削除されました"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> が正常に機能せず、削除されました。指紋認証でスマートフォンのロックを解除するには、設定し直してください。"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> と <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> が正常に機能せず、削除されました。指紋認証でスマートフォンのロックを解除するには、設定し直してください。"</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"顔認証をもう一度設定してください"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"顔モデルが正常に機能せず、削除されました。顔認証でスマートフォンのロックを解除するには、設定し直してください。"</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"設定"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"後で"</string>
 </resources>

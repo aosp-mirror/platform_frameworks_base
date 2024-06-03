@@ -41,7 +41,7 @@
         android:visibility="gone"
         />
 
-    <com.android.internal.widget.CachingIconView
+    <com.android.internal.widget.NotificationRowIconView
         android:id="@+id/icon"
         android:layout_width="@dimen/notification_icon_circle_size"
         android:layout_height="@dimen/notification_icon_circle_size"
@@ -80,6 +80,7 @@
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
         android:importantForAccessibility="no"
+        android:focusable="false"
         />
 
     <include layout="@layout/notification_expand_button"

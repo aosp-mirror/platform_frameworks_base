@@ -47,6 +47,21 @@ public class SystemProperties_host {
     @GuardedBy("sLock")
     private static SparseArray<String> sKeyHandles = new SparseArray<>();
 
+    /**
+     * Basically the same as {@link #native_init$ravenwood}, but it'll only run if no values are
+     * set yet.
+     */
+    public static void initializeIfNeeded(Map<String, String> values,
+            Predicate<String> keyReadablePredicate, Predicate<String> keyWritablePredicate) {
+        synchronized (sLock) {
+            if (sValues != null) {
+                return; // Already initialized.
+            }
+            native_init$ravenwood(values, keyReadablePredicate, keyWritablePredicate,
+                    () -> {});
+        }
+    }
+
     public static void native_init$ravenwood(Map<String, String> values,
             Predicate<String> keyReadablePredicate, Predicate<String> keyWritablePredicate,
             Runnable changeCallback) {

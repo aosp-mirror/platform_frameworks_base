@@ -72,7 +72,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> از داده‌های برنامه را نگه‌دارید."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"می‌خواهید این برنامه را حذف کنید؟"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"می‌خواهید این برنامه را حذف نصب کنید؟ همسانه <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> هم حذف خواهد شد."</string>
-    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"می‌خواهید این برنامه از فضای خصوصی حذف نصب شود؟"</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"می‌خواهید این برنامه را از فضای خصوصی حذف نصب کنید؟"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"حذف‌نصب‌های درحال انجام"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"حذف‌نصب‌های ناموفق"</string>
     <string name="uninstalling" msgid="8709566347688966845">"درحال حذف نصب..."</string>
@@ -122,7 +122,7 @@
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"برای بازیابی این برنامه، مراحل بعدی را دنبال کنید"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> غیرفعال است"</string>
     <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"برای بازیابی این برنامه، <xliff:g id="INSTALLERNAME">%1$s</xliff:g> را در «تنظیمات» فعال کنید"</string>
-    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> حذف نصب شده است"</string>
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"‫<xliff:g id="INSTALLERNAME">%1$s</xliff:g> حذف نصب شده است"</string>
     <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"برای بازیابی این برنامه، باید <xliff:g id="INSTALLERNAME">%1$s</xliff:g> را نصب کنید"</string>
     <string name="unarchive_action_required_continue" msgid="5711202111224184257">"ادامه دادن"</string>
     <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"پاک کردن فضای ذخیره‌سازی"</string>

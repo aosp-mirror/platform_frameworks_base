@@ -21,8 +21,8 @@ import static com.google.common.truth.Truth.assertThat;
 import android.app.AutomaticZenRule;
 import android.provider.Settings;
 import android.service.notification.ZenPolicy;
-import android.test.suitebuilder.annotation.SmallTest;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.os.dnd.ActiveRuleType;

@@ -51,6 +51,16 @@ public class ToggleSeekBar extends SeekBar {
         return super.onTouchEvent(event);
     }
 
+    @Override
+    public boolean onHoverEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_HOVER_ENTER) {
+            setHovered(true);
+        } else if (event.getAction() == MotionEvent.ACTION_HOVER_EXIT) {
+            setHovered(false);
+        }
+        return true;
+    }
+
     public void setAccessibilityLabel(String label) {
         mAccessibilityLabel = label;
     }

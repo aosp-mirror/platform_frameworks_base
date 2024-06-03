@@ -90,7 +90,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.res.R;
 import com.android.systemui.screenshot.scroll.ScrollCaptureController;
 import com.android.systemui.shared.system.InputChannelCompat;
@@ -260,16 +259,8 @@ public class ScreenshotView extends FrameLayout implements
         if (DEBUG_SCROLL) {
             Log.d(TAG, "Showing Scroll option");
         }
-        mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_IMPRESSION, 0, packageName);
         mScrollChip.setVisibility(VISIBLE);
-        mScrollChip.setOnClickListener((v) -> {
-            if (DEBUG_INPUT) {
-                Log.d(TAG, "scroll chip tapped");
-            }
-            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_REQUESTED, 0,
-                    packageName);
-            onClick.run();
-        });
+        mScrollChip.setOnClickListener((v) -> onClick.run());
     }
 
     @Override // ViewTreeObserver.OnComputeInternalInsetsListener
@@ -789,15 +780,8 @@ public class ScreenshotView extends FrameLayout implements
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SHARE_TAPPED, 0, mPackageName);
             prepareSharedTransition();
 
-            Intent shareIntent;
-            if (mFlags.isEnabled(Flags.SCREENSHOT_METADATA) && mScreenshotData != null
-                    && mScreenshotData.getContextUrl() != null) {
-                shareIntent = ActionIntentCreator.INSTANCE.createShareWithText(
-                        imageData.uri, mScreenshotData.getContextUrl().toString());
-            } else {
-                shareIntent = ActionIntentCreator.INSTANCE.createShareWithSubject(
-                        imageData.uri, imageData.subject);
-            }
+            Intent shareIntent = ActionIntentCreator.INSTANCE.createShareWithSubject(
+                    imageData.uri, imageData.subject);
             mCallbacks.onAction(shareIntent, imageData.owner, false);
 
         });

@@ -21,6 +21,7 @@ import android.content.Context
 import com.android.settingslib.Utils
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -39,6 +40,7 @@ import kotlinx.coroutines.flow.onStart
 
 /** Models the UI state for the device entry icon foreground view (displayed icon). */
 @ExperimentalCoroutinesApi
+@SysUISingleton
 class DeviceEntryForegroundViewModel
 @Inject
 constructor(
@@ -62,13 +64,6 @@ constructor(
         }
     }
 
-    private val color: Flow<Int> =
-        deviceEntryIconViewModel.useBackgroundProtection.flatMapLatest { useBgProtection ->
-            configurationInteractor.onAnyConfigurationChange
-                .map { getColor(useBgProtection) }
-                .onStart { emit(getColor(useBgProtection)) }
-        }
-
     // While dozing, the display can show the AOD UI; show the AOD udfps when dozing
     private val useAodIconVariant: Flow<Boolean> =
         deviceEntryUdfpsInteractor.isUdfpsEnrolledAndEnabled.flatMapLatest { udfspEnrolled ->
@@ -78,6 +73,22 @@ constructor(
                 flowOf(false)
             }
         }
+
+    private val color: Flow<Int> =
+        useAodIconVariant
+            .flatMapLatest { useAodVariant ->
+                if (useAodVariant) {
+                    flowOf(android.graphics.Color.WHITE)
+                } else {
+                    deviceEntryIconViewModel.useBackgroundProtection.flatMapLatest { useBgProtection
+                        ->
+                        configurationInteractor.onAnyConfigurationChange
+                            .map { getColor(useBgProtection) }
+                            .onStart { emit(getColor(useBgProtection)) }
+                    }
+                }
+            }
+            .distinctUntilChanged()
 
     private val padding: Flow<Int> =
         deviceEntryUdfpsInteractor.isUdfpsSupported.flatMapLatest { udfpsSupported ->

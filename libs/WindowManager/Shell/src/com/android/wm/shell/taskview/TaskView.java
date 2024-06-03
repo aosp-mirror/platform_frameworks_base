@@ -30,7 +30,6 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Handler;
-import android.os.Looper;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -121,6 +120,11 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
 
     @Override
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
+        if (mTaskViewTaskController.isUsingShellTransitions()) {
+            // No need for additional work as it is already taken care of during
+            // prepareOpenAnimation().
+            return;
+        }
         onLocationChanged();
         if (taskInfo.taskDescription != null) {
             final int bgColor = taskInfo.taskDescription.getBackgroundColor();

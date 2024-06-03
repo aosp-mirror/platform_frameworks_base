@@ -359,14 +359,12 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         } catch (KeyStoreException keyStoreException) {
             GeneralSecurityException e = KeyStoreCryptoOperationUtils.getExceptionForCipherInit(
                     mKey, keyStoreException);
-            if (e != null) {
-                if (e instanceof InvalidKeyException) {
-                    throw (InvalidKeyException) e;
-                } else if (e instanceof InvalidAlgorithmParameterException) {
-                    throw (InvalidAlgorithmParameterException) e;
-                } else {
-                    throw new ProviderException("Unexpected exception type", e);
-                }
+            if (e instanceof InvalidKeyException) {
+                throw (InvalidKeyException) e;
+            } else if (e instanceof InvalidAlgorithmParameterException) {
+                throw (InvalidAlgorithmParameterException) e;
+            } else {
+                throw new ProviderException("Unexpected exception type", e);
             }
         }
 

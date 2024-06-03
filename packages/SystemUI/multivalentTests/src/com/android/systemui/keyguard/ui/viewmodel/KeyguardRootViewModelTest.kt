@@ -19,27 +19,30 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.platform.test.flag.junit.FlagsParameterization
 import android.view.View
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.Flags.FLAG_NEW_AOD_TRANSITION
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.communal.data.repository.communalRepository
+import com.android.systemui.communal.data.repository.communalSceneRepository
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
-import com.android.systemui.flags.Flags
-import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.flags.DisableSceneContainer
+import com.android.systemui.flags.EnableSceneContainer
+import com.android.systemui.flags.parameterizeSceneContainerFlag
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.shade.data.repository.fakeShadeRepository
+import com.android.systemui.scene.data.repository.sceneContainerRepository
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.dozeParameters
 import com.android.systemui.statusbar.phone.screenOffAnimationController
@@ -50,39 +53,61 @@ import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class KeyguardRootViewModelTest : SysuiTestCase() {
-    private val kosmos =
-        testKosmos().apply {
-            fakeFeatureFlagsClassic.apply { set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false) }
-        }
+@RunWith(ParameterizedAndroidJunit4::class)
+class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
+    private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
-    private val keyguardInteractor = kosmos.keyguardInteractor
-    private val keyguardRepository = kosmos.fakeKeyguardRepository
-    private val communalRepository = kosmos.communalRepository
-    private val screenOffAnimationController = kosmos.screenOffAnimationController
-    private val deviceEntryRepository = kosmos.fakeDeviceEntryRepository
-    private val notificationsKeyguardInteractor = kosmos.notificationsKeyguardInteractor
-    private val dozeParameters = kosmos.dozeParameters
-    private val shadeRepository = kosmos.fakeShadeRepository
+    private val keyguardTransitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
+    private val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
+    private val communalRepository by lazy { kosmos.communalSceneRepository }
+    private val screenOffAnimationController by lazy { kosmos.screenOffAnimationController }
+    private val deviceEntryRepository by lazy { kosmos.fakeDeviceEntryRepository }
+    private val notificationsKeyguardInteractor by lazy { kosmos.notificationsKeyguardInteractor }
+    private val dozeParameters by lazy { kosmos.dozeParameters }
+    private val shadeTestUtil by lazy { kosmos.shadeTestUtil }
     private val underTest by lazy { kosmos.keyguardRootViewModel }
 
     private val viewState = ViewStateAccessor()
 
+    private val transitionState =
+        MutableStateFlow<ObservableTransitionState>(
+            ObservableTransitionState.Idle(Scenes.Lockscreen)
+        )
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return parameterizeSceneContainerFlag()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
+
     @Before
     fun setUp() {
-        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
         mSetFlagsRule.enableFlags(FLAG_NEW_AOD_TRANSITION)
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+        if (!SceneContainerFlag.isEnabled) {
+            mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
+            mSetFlagsRule.disableFlags(
+                AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT,
+            )
+        }
+        kosmos.sceneContainerRepository.setTransitionState(transitionState)
     }
 
     @Test
@@ -296,6 +321,32 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableSceneContainer
+    fun alpha_transitionToHub_isZero_scene_container() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.alpha(viewState))
+
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Lockscreen,
+                    toScene = Scenes.Communal,
+                    emptyFlow(),
+                    emptyFlow(),
+                    false,
+                    emptyFlow()
+                )
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.UNDEFINED,
+                testScope,
+            )
+
+            assertThat(alpha).isEqualTo(0f)
+        }
+
+    @Test
+    @DisableSceneContainer
     fun alpha_transitionToHub_isZero() =
         testScope.runTest {
             val alpha by collectLastValue(underTest.alpha(viewState))
@@ -340,10 +391,10 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
                 testScope,
             )
 
-            shadeRepository.setQsExpansion(0f)
+            shadeTestUtil.setQsExpansion(0f)
             assertThat(alpha).isEqualTo(1f)
 
-            shadeRepository.setQsExpansion(0.5f)
+            shadeTestUtil.setQsExpansion(0.5f)
             assertThat(alpha).isEqualTo(0f)
         }
 
@@ -360,11 +411,11 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
             )
 
             // Open the shade.
-            shadeRepository.setQsExpansion(1f)
+            shadeTestUtil.setQsExpansion(1f)
             assertThat(alpha).isEqualTo(0f)
 
             // Close the shade, alpha returns to 1.
-            shadeRepository.setQsExpansion(0f)
+            shadeTestUtil.setQsExpansion(0f)
             assertThat(alpha).isEqualTo(1f)
         }
 
@@ -381,11 +432,11 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
             )
 
             // Open the shade.
-            shadeRepository.setQsExpansion(1f)
+            shadeTestUtil.setQsExpansion(1f)
             assertThat(alpha).isEqualTo(0f)
 
             // Close the shade, alpha is still 0 since we're not on the lockscreen.
-            shadeRepository.setQsExpansion(0f)
+            shadeTestUtil.setQsExpansion(0f)
             assertThat(alpha).isEqualTo(0f)
         }
 
@@ -404,7 +455,7 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
             assertThat(alpha).isEqualTo(0f)
 
             // Try pulling down shade and ensure the value doesn't change
-            shadeRepository.setQsExpansion(0.5f)
+            shadeTestUtil.setQsExpansion(0.5f)
             assertThat(alpha).isEqualTo(0f)
         }
 
@@ -423,7 +474,26 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
             assertThat(alpha).isEqualTo(0f)
 
             // Try pulling down shade and ensure the value doesn't change
-            shadeRepository.setQsExpansion(0.5f)
+            shadeTestUtil.setQsExpansion(0.5f)
+            assertThat(alpha).isEqualTo(0f)
+        }
+
+    @Test
+    fun alpha_idleOnDream_isZero() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.alpha(viewState))
+            assertThat(alpha).isEqualTo(1f)
+
+            // Go to GONE state
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.DREAMING,
+                testScope = testScope,
+            )
+            assertThat(alpha).isEqualTo(0f)
+
+            // Try pulling down shade and ensure the value doesn't change
+            shadeTestUtil.setQsExpansion(0.5f)
             assertThat(alpha).isEqualTo(0f)
         }
 }

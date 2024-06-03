@@ -33,7 +33,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,6 +48,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.Easings
 import com.android.compose.grid.VerticalGrid
 import com.android.compose.modifiers.thenIf
@@ -74,12 +74,13 @@ fun PinPad(
 ) {
     DisposableEffect(Unit) { onDispose { viewModel.onHidden() } }
 
-    val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsState()
-    val backspaceButtonAppearance by viewModel.backspaceButtonAppearance.collectAsState()
-    val confirmButtonAppearance by viewModel.confirmButtonAppearance.collectAsState()
-    val animateFailure: Boolean by viewModel.animateFailure.collectAsState()
+    val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsStateWithLifecycle()
+    val backspaceButtonAppearance by
+        viewModel.backspaceButtonAppearance.collectAsStateWithLifecycle()
+    val confirmButtonAppearance by viewModel.confirmButtonAppearance.collectAsStateWithLifecycle()
+    val animateFailure: Boolean by viewModel.animateFailure.collectAsStateWithLifecycle()
     val isDigitButtonAnimationEnabled: Boolean by
-        viewModel.isDigitButtonAnimationEnabled.collectAsState()
+        viewModel.isDigitButtonAnimationEnabled.collectAsStateWithLifecycle()
 
     val buttonScaleAnimatables = remember { List(12) { Animatable(1f) } }
     LaunchedEffect(animateFailure) {

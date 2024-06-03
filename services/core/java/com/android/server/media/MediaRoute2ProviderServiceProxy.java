@@ -81,6 +81,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
 
     MediaRoute2ProviderServiceProxy(
             @NonNull Context context,
+            @NonNull Looper looper,
             @NonNull ComponentName componentName,
             boolean isSelfScanOnlyProvider,
             int userId) {
@@ -88,7 +89,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         mContext = Objects.requireNonNull(context, "Context must not be null.");
         mIsSelfScanOnlyProvider = isSelfScanOnlyProvider;
         mUserId = userId;
-        mHandler = new Handler(Looper.myLooper());
+        mHandler = new Handler(looper);
     }
 
     public void setManagerScanning(boolean managerScanning) {
@@ -102,13 +103,14 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     public void requestCreateSession(
             long requestId,
             String packageName,
-            String routeId,
+            String routeOriginalId,
             Bundle sessionHints,
             @RoutingSessionInfo.TransferReason int transferReason,
             @NonNull UserHandle transferInitiatorUserHandle,
             @NonNull String transferInitiatorPackageName) {
         if (mConnectionReady) {
-            mActiveConnection.requestCreateSession(requestId, packageName, routeId, sessionHints);
+            mActiveConnection.requestCreateSession(
+                    requestId, packageName, routeOriginalId, sessionHints);
             updateBinding();
         }
     }
@@ -152,35 +154,35 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
             long requestId,
             @NonNull UserHandle transferInitiatorUserHandle,
             @NonNull String transferInitiatorPackageName,
-            String sessionId,
-            String routeId,
+            String sessionOriginalId,
+            String routeOriginalId,
             @RoutingSessionInfo.TransferReason int transferReason) {
         if (mConnectionReady) {
-            mActiveConnection.transferToRoute(requestId, sessionId, routeId);
+            mActiveConnection.transferToRoute(requestId, sessionOriginalId, routeOriginalId);
         }
     }
 
     @Override
-    public void setRouteVolume(long requestId, String routeId, int volume) {
+    public void setRouteVolume(long requestId, String routeOriginalId, int volume) {
         if (mConnectionReady) {
-            mActiveConnection.setRouteVolume(requestId, routeId, volume);
+            mActiveConnection.setRouteVolume(requestId, routeOriginalId, volume);
             updateBinding();
         }
     }
 
     @Override
-    public void setSessionVolume(long requestId, String sessionId, int volume) {
+    public void setSessionVolume(long requestId, String sessionOriginalId, int volume) {
         if (mConnectionReady) {
-            mActiveConnection.setSessionVolume(requestId, sessionId, volume);
+            mActiveConnection.setSessionVolume(requestId, sessionOriginalId, volume);
             updateBinding();
         }
     }
 
     @Override
-    public void prepareReleaseSession(@NonNull String sessionId) {
+    public void prepareReleaseSession(@NonNull String sessionUniqueId) {
         synchronized (mLock) {
             for (RoutingSessionInfo session : mSessionInfos) {
-                if (TextUtils.equals(session.getId(), sessionId)) {
+                if (TextUtils.equals(session.getId(), sessionUniqueId)) {
                     mSessionInfos.remove(session);
                     mReleasingSessions.add(session);
                     break;
@@ -232,7 +234,9 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         if (!mRunning) {
             return false;
         }
-        if (!getSessionInfos().isEmpty() || mIsManagerScanning) {
+        boolean bindDueToManagerScan =
+                mIsManagerScanning && !Flags.enablePreventionOfManagerScansWhenNoAppsScan();
+        if (!getSessionInfos().isEmpty() || bindDueToManagerScan) {
             // We bind if any manager is scanning (regardless of whether an app is scanning) to give
             // the opportunity for providers to publish routing sessions that were established
             // directly between the app and the provider (typically via AndroidX MediaRouter). See
@@ -662,7 +666,9 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         }
 
         @Override
-        public void notifyProviderUpdated(MediaRoute2ProviderInfo providerInfo) {
+        public void notifyProviderUpdated(@NonNull MediaRoute2ProviderInfo providerInfo) {
+            Objects.requireNonNull(providerInfo, "providerInfo must not be null");
+
             for (MediaRoute2Info route : providerInfo.getRoutes()) {
                 if (route.isSystemRoute()) {
                     throw new SecurityException(

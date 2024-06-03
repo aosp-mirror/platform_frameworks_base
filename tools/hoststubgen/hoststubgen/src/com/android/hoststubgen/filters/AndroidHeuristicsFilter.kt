@@ -25,6 +25,7 @@ class AndroidHeuristicsFilter(
         val aidlPolicy: FilterPolicyWithReason?,
         val featureFlagsPolicy: FilterPolicyWithReason?,
         val syspropsPolicy: FilterPolicyWithReason?,
+        val rFilePolicy: FilterPolicyWithReason?,
         fallback: OutputFilter
 ) : DelegatingFilter(fallback) {
     override fun getPolicyForClass(className: String): FilterPolicyWithReason {
@@ -36,6 +37,9 @@ class AndroidHeuristicsFilter(
         }
         if (syspropsPolicy != null && classes.isSyspropsClass(className)) {
             return syspropsPolicy
+        }
+        if (rFilePolicy != null && classes.isRClass(className)) {
+            return rFilePolicy
         }
         return super.getPolicyForClass(className)
     }
@@ -51,6 +55,8 @@ private fun ClassNodes.isAidlClass(className: String): Boolean {
 }
 
 /**
+ * Effectively apply @RavenwoodKeepWholeClass to all classes with these names
+ *
  * @return if a given class "seems like" an feature flags class.
  */
 private fun ClassNodes.isFeatureFlagsClass(className: String): Boolean {
@@ -59,6 +65,7 @@ private fun ClassNodes.isFeatureFlagsClass(className: String): Boolean {
     return className.endsWith("/Flags")
             || className.endsWith("/FeatureFlags")
             || className.endsWith("/FeatureFlagsImpl")
+            || className.endsWith("/CustomFeatureFlags")
             || className.endsWith("/FakeFeatureFlagsImpl");
 }
 
@@ -70,4 +77,11 @@ private fun ClassNodes.isSyspropsClass(className: String): Boolean {
     // https://cs.android.com/android/platform/superproject/main/+/main:system/tools/sysprop/
     return className.startsWith("android/sysprop/")
             && className.endsWith("Properties")
+}
+
+/**
+ * @return if a given class "seems like" an R class or its nested classes.
+ */
+private fun ClassNodes.isRClass(className: String): Boolean {
+    return className.endsWith("/R") || className.contains("/R$")
 }

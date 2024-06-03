@@ -20,8 +20,10 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
 import android.util.Log
-import androidx.core.content.ContextCompat
+import androidx.annotation.VisibleForTesting
 import java.io.File
+
+private fun defaultVerbose() = Build.TYPE == "eng"
 
 /**
  * [SharedPreferences] based storage.
@@ -43,24 +45,35 @@ import java.io.File
  * @param verbose Verbose logging on key/value pairs during backup/restore. Enable for dev only!
  * @param filter Filter of key/value pairs for backup and restore.
  */
-class SharedPreferencesStorage
+open class SharedPreferencesStorage
 @JvmOverloads
 constructor(
     context: Context,
     override val name: String,
-    mode: Int,
-    private val verbose: Boolean = (Build.TYPE == "eng"),
+    @get:VisibleForTesting internal val sharedPreferences: SharedPreferences,
+    private val codec: BackupCodec? = null,
+    private val verbose: Boolean = defaultVerbose(),
     private val filter: (String, Any?) -> Boolean = { _, _ -> true },
 ) :
     BackupRestoreFileStorage(context, context.getSharedPreferencesFilePath(name)),
     KeyedObservable<String> by KeyedDataObservable() {
 
-    private val sharedPreferences = context.getSharedPreferences(name, mode)
+    @JvmOverloads
+    constructor(
+        context: Context,
+        name: String,
+        mode: Int,
+        codec: BackupCodec? = null,
+        verbose: Boolean = defaultVerbose(),
+        filter: (String, Any?) -> Boolean = { _, _ -> true },
+    ) : this(context, name, context.getSharedPreferences(name, mode), codec, verbose, filter)
 
     /** Name of the intermediate SharedPreferences. */
-    private val intermediateName: String
+    @VisibleForTesting
+    internal val intermediateName: String
         get() = "_br_$name"
 
+    @Suppress("DEPRECATION")
     private val intermediateSharedPreferences: SharedPreferences
         get() {
             // use MODE_MULTI_PROCESS to ensure a reload
@@ -70,10 +83,10 @@ constructor(
     private val sharedPreferencesListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             if (key != null) {
-                notifyChange(key, ChangeReason.UPDATE)
+                notifyChange(key, DataChangeReason.UPDATE)
             } else {
                 // On Android >= R, SharedPreferences.Editor.clear() will trigger this case
-                notifyChange(ChangeReason.DELETE)
+                notifyChange(DataChangeReason.DELETE)
             }
         }
 
@@ -82,12 +95,15 @@ constructor(
         sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferencesListener)
     }
 
+    override fun defaultCodec() = codec ?: super.defaultCodec()
+
     override val backupFile: File
         // use a different file to avoid multi-thread file write
         get() = context.getSharedPreferencesFile(intermediateName)
 
     override fun prepareBackup(file: File) {
-        val editor = intermediateSharedPreferences.merge(sharedPreferences.all, "Backup")
+        val editor =
+            mergeSharedPreferences(intermediateSharedPreferences, sharedPreferences.all, "Backup")
         // commit to ensure data is write to disk synchronously
         if (!editor.commit()) {
             Log.w(LOG_TAG, "[$name] fail to commit")
@@ -104,8 +120,8 @@ constructor(
         // observers consistently once restore finished.
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(sharedPreferencesListener)
         val restored = intermediateSharedPreferences
-        val editor = sharedPreferences.merge(restored.all, "Restore")
-        editor.apply() // apply to avoid blocking
+        val editor = mergeSharedPreferences(sharedPreferences, restored.all, "Restore")
+        editor.commit() // commit to avoid race condition
         sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferencesListener)
         // clear the intermediate SharedPreferences
         restored.delete(intermediateName)
@@ -115,7 +131,7 @@ constructor(
         if (deleteSharedPreferences(name)) {
             Log.i(LOG_TAG, "SharedPreferences $name deleted")
         } else {
-            edit().clear().apply()
+            edit().clear().commit() // commit to avoid potential race condition
         }
     }
 
@@ -126,11 +142,13 @@ constructor(
             false
         }
 
-    private fun SharedPreferences.merge(
+    @VisibleForTesting
+    internal open fun mergeSharedPreferences(
+        sharedPreferences: SharedPreferences,
         entries: Map<String, Any?>,
-        operation: String
+        operation: String,
     ): SharedPreferences.Editor {
-        val editor = edit()
+        val editor = sharedPreferences.edit()
         for ((key, value) in entries) {
             if (!filter.invoke(key, value)) {
                 if (verbose) Log.v(LOG_TAG, "[$name] $operation skips $key=$value")
@@ -184,7 +202,7 @@ constructor(
     companion object {
         private fun Context.getSharedPreferencesFilePath(name: String): String {
             val file = getSharedPreferencesFile(name)
-            return file.relativeTo(ContextCompat.getDataDir(this)!!).toString()
+            return file.relativeTo(dataDirCompat).toString()
         }
 
         /** Returns the absolute path of shared preferences file. */

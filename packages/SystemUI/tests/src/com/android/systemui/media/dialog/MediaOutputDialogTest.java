@@ -137,11 +137,23 @@ public class MediaOutputDialogTest extends SysuiTestCase {
                 Mockito.eq(userHandle))).thenReturn(
                 mMediaControllers);
 
-        mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
-                mMediaSessionManager, mLocalBluetoothManager, mStarter,
-                mNotifCollection, mDialogTransitionAnimator,
-                mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
-                mKeyguardManager, mFlags, mUserTracker);
+        mMediaOutputController =
+                new MediaOutputController(
+                        mContext,
+                        TEST_PACKAGE,
+                        mContext.getUser(),
+                        /* token */ null,
+                        mMediaSessionManager,
+                        mLocalBluetoothManager,
+                        mStarter,
+                        mNotifCollection,
+                        mDialogTransitionAnimator,
+                        mNearbyMediaDevicesManager,
+                        mAudioManager,
+                        mPowerExemptionManager,
+                        mKeyguardManager,
+                        mFlags,
+                        mUserTracker);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         mMediaOutputDialog = makeTestDialog(mMediaOutputController);
         mMediaOutputDialog.show();

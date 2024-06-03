@@ -28,7 +28,6 @@ import android.graphics.RectF;
 import android.graphics.text.PositionedGlyphs;
 import android.graphics.text.TextRunShaper;
 import android.os.Build;
-import android.os.Trace;
 import android.text.Layout.Directions;
 import android.text.Layout.TabStops;
 import android.text.style.CharacterStyle;
@@ -56,8 +55,6 @@ import java.util.ArrayList;
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public class TextLine {
     private static final boolean DEBUG = false;
-
-    private static final boolean TRACE_TEXTLINE = Build.isDebuggable();
 
     private static final char TAB_CHAR = '\t';
 
@@ -433,36 +430,27 @@ public class TextLine {
      * @param bottom the bottom of the line
      */
     void draw(Canvas c, float x, int top, int y, int bottom) {
-        if (TRACE_TEXTLINE) {
-            Trace.beginSection("TextLine#draw");
-        }
-        try {
-            float h = 0;
-            final int runCount = mDirections.getRunCount();
-            for (int runIndex = 0; runIndex < runCount; runIndex++) {
-                final int runStart = mDirections.getRunStart(runIndex);
-                if (runStart > mLen) break;
-                final int runLimit = Math.min(runStart + mDirections.getRunLength(runIndex), mLen);
-                final boolean runIsRtl = mDirections.isRunRtl(runIndex);
+        float h = 0;
+        final int runCount = mDirections.getRunCount();
+        for (int runIndex = 0; runIndex < runCount; runIndex++) {
+            final int runStart = mDirections.getRunStart(runIndex);
+            if (runStart > mLen) break;
+            final int runLimit = Math.min(runStart + mDirections.getRunLength(runIndex), mLen);
+            final boolean runIsRtl = mDirections.isRunRtl(runIndex);
 
-                final int runFlag = calculateRunFlag(runIndex, runCount, mDir);
+            final int runFlag = calculateRunFlag(runIndex, runCount, mDir);
 
-                int segStart = runStart;
-                for (int j = mHasTabs ? runStart : runLimit; j <= runLimit; j++) {
-                    if (j == runLimit || charAt(j) == TAB_CHAR) {
-                        h += drawRun(c, segStart, j, runIsRtl, x + h, top, y, bottom,
-                                runIndex != (runCount - 1) || j != mLen, runFlag);
+            int segStart = runStart;
+            for (int j = mHasTabs ? runStart : runLimit; j <= runLimit; j++) {
+                if (j == runLimit || charAt(j) == TAB_CHAR) {
+                    h += drawRun(c, segStart, j, runIsRtl, x + h, top, y, bottom,
+                            runIndex != (runCount - 1) || j != mLen, runFlag);
 
-                        if (j != runLimit) {  // charAt(j) == TAB_CHAR
-                            h = mDir * nextTab(h * mDir);
-                        }
-                        segStart = j + 1;
+                    if (j != runLimit) {  // charAt(j) == TAB_CHAR
+                        h = mDir * nextTab(h * mDir);
                     }
+                    segStart = j + 1;
                 }
-            }
-        } finally {
-            if (TRACE_TEXTLINE) {
-                Trace.endSection();
             }
         }
     }
@@ -489,7 +477,12 @@ public class TextLine {
             }
             drawBounds.setEmpty();
             float w = measure(mLen, false, fmi, drawBounds, lineInfo);
-            float boundsWidth = drawBounds.width();
+            float boundsWidth;
+            if (w >= 0) {
+                boundsWidth = Math.max(drawBounds.right, w) - Math.min(0, drawBounds.left);
+            } else {
+                boundsWidth = Math.max(drawBounds.right, 0) - Math.min(w, drawBounds.left);
+            }
             if (Math.abs(w) > boundsWidth) {
                 return w;
             } else {
@@ -576,76 +569,63 @@ public class TextLine {
      */
     public float measure(@IntRange(from = 0) int offset, boolean trailing,
             @NonNull FontMetricsInt fmi, @Nullable RectF drawBounds, @Nullable LineInfo lineInfo) {
-        if (TRACE_TEXTLINE) {
-            Trace.beginSection("TextLine#measure");
+        if (offset > mLen) {
+            throw new IndexOutOfBoundsException(
+                    "offset(" + offset + ") should be less than line limit(" + mLen + ")");
         }
-        try {
-            if (offset > mLen) {
-                throw new IndexOutOfBoundsException(
-                        "offset(" + offset + ") should be less than line limit(" + mLen + ")");
-            }
-            if (lineInfo != null) {
-                lineInfo.setClusterCount(0);
-            }
-            final int target = trailing ? offset - 1 : offset;
-            if (target < 0) {
-                return 0;
-            }
+        if (lineInfo != null) {
+            lineInfo.setClusterCount(0);
+        }
+        final int target = trailing ? offset - 1 : offset;
+        if (target < 0) {
+            return 0;
+        }
 
-            float h = 0;
-            final int runCount = mDirections.getRunCount();
-            for (int runIndex = 0; runIndex < runCount; runIndex++) {
-                final int runStart = mDirections.getRunStart(runIndex);
-                if (runStart > mLen) break;
-                final int runLimit = Math.min(runStart + mDirections.getRunLength(runIndex), mLen);
-                final boolean runIsRtl = mDirections.isRunRtl(runIndex);
-                final int runFlag = calculateRunFlag(runIndex, runCount, mDir);
+        float h = 0;
+        final int runCount = mDirections.getRunCount();
+        for (int runIndex = 0; runIndex < runCount; runIndex++) {
+            final int runStart = mDirections.getRunStart(runIndex);
+            if (runStart > mLen) break;
+            final int runLimit = Math.min(runStart + mDirections.getRunLength(runIndex), mLen);
+            final boolean runIsRtl = mDirections.isRunRtl(runIndex);
+            final int runFlag = calculateRunFlag(runIndex, runCount, mDir);
 
-                int segStart = runStart;
-                for (int j = mHasTabs ? runStart : runLimit; j <= runLimit; j++) {
-                    if (j == runLimit || charAt(j) == TAB_CHAR) {
-                        final boolean targetIsInThisSegment = target >= segStart && target < j;
-                        final boolean sameDirection =
-                                (mDir == Layout.DIR_RIGHT_TO_LEFT) == runIsRtl;
+            int segStart = runStart;
+            for (int j = mHasTabs ? runStart : runLimit; j <= runLimit; j++) {
+                if (j == runLimit || charAt(j) == TAB_CHAR) {
+                    final boolean targetIsInThisSegment = target >= segStart && target < j;
+                    final boolean sameDirection = (mDir == Layout.DIR_RIGHT_TO_LEFT) == runIsRtl;
 
-                        if (targetIsInThisSegment && sameDirection) {
-                            return h + measureRun(segStart, offset, j, runIsRtl, fmi, drawBounds,
-                                    null,
-                                    0, h, lineInfo, runFlag);
-                        }
-
-                        final float segmentWidth = measureRun(segStart, j, j, runIsRtl, fmi,
-                                drawBounds,
-                                null, 0, h, lineInfo, runFlag);
-                        h += sameDirection ? segmentWidth : -segmentWidth;
-
-                        if (targetIsInThisSegment) {
-                            return h + measureRun(segStart, offset, j, runIsRtl, null, null, null,
-                                    0,
-                                    h, lineInfo, runFlag);
-                        }
-
-                        if (j != runLimit) {  // charAt(j) == TAB_CHAR
-                            if (offset == j) {
-                                return h;
-                            }
-                            h = mDir * nextTab(h * mDir);
-                            if (target == j) {
-                                return h;
-                            }
-                        }
-
-                        segStart = j + 1;
+                    if (targetIsInThisSegment && sameDirection) {
+                        return h + measureRun(segStart, offset, j, runIsRtl, fmi, drawBounds, null,
+                                0, h, lineInfo, runFlag);
                     }
+
+                    final float segmentWidth = measureRun(segStart, j, j, runIsRtl, fmi, drawBounds,
+                            null, 0, h, lineInfo, runFlag);
+                    h += sameDirection ? segmentWidth : -segmentWidth;
+
+                    if (targetIsInThisSegment) {
+                        return h + measureRun(segStart, offset, j, runIsRtl, null, null,  null, 0,
+                                h, lineInfo, runFlag);
+                    }
+
+                    if (j != runLimit) {  // charAt(j) == TAB_CHAR
+                        if (offset == j) {
+                            return h;
+                        }
+                        h = mDir * nextTab(h * mDir);
+                        if (target == j) {
+                            return h;
+                        }
+                    }
+
+                    segStart = j + 1;
                 }
             }
-
-            return h;
-        } finally {
-            if (TRACE_TEXTLINE) {
-                Trace.endSection();
-            }
         }
+
+        return h;
     }
 
     /**

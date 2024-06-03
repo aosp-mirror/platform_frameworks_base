@@ -16,6 +16,8 @@
 
 package com.android.server.companion.utils;
 
+import static android.Manifest.permission.BLUETOOTH_CONNECT;
+import static android.Manifest.permission.BLUETOOTH_SCAN;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_COMPANION_DEVICES;
 import static android.Manifest.permission.REQUEST_COMPANION_SELF_MANAGED;
@@ -39,7 +41,6 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
 import android.content.Context;
@@ -208,9 +209,11 @@ public final class PermissionsUtils {
     /**
      * Require the caller to hold necessary permission to observe device presence by UUID.
      */
-    public static void enforceCallerCanObservingDevicePresenceByUuid(@NonNull Context context) {
+    public static void enforceCallerCanObserveDevicePresenceByUuid(@NonNull Context context) {
         if (context.checkCallingPermission(REQUEST_OBSERVE_DEVICE_UUID_PRESENCE)
-                != PERMISSION_GRANTED) {
+                != PERMISSION_GRANTED
+                || context.checkCallingPermission(BLUETOOTH_SCAN) != PERMISSION_GRANTED
+                || context.checkCallingPermission(BLUETOOTH_CONNECT) != PERMISSION_GRANTED) {
             throw new SecurityException("Caller (uid=" + getCallingUid() + ") does not have "
                     + "permissions to request observing device presence base on the UUID");
         }
@@ -233,23 +236,6 @@ public final class PermissionsUtils {
         if (!checkCallerCanInteractWithUserId(context, userId)) return false;
 
         return checkCallerCanManageCompanionDevice(context);
-    }
-
-    /**
-     * Check if CDM can trust the context to process the association.
-     */
-    @Nullable
-    public static AssociationInfo sanitizeWithCallerChecks(@NonNull Context context,
-            @Nullable AssociationInfo association) {
-        if (association == null) return null;
-
-        final int userId = association.getUserId();
-        final String packageName = association.getPackageName();
-        if (!checkCallerCanManageAssociationsForPackage(context, userId, packageName)) {
-            return null;
-        }
-
-        return association;
     }
 
     private static boolean checkPackage(@UserIdInt int uid, @NonNull String packageName) {

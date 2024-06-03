@@ -1,7 +1,9 @@
 package: "android.view.flags"
+container: "system"
 
 flag {
     name: "view_velocity_api"
+    is_exported: true
     namespace: "toolkit"
     description: "Feature flag for view content velocity api"
     bug: "293513816"
@@ -16,6 +18,7 @@ flag {
 
 flag {
     name: "toolkit_set_frame_rate_read_only"
+    is_exported: true
     namespace: "toolkit"
     description: "Feature flag for toolkit to set frame rate"
     bug: "293512962"
@@ -24,6 +27,7 @@ flag {
 
 flag {
     name: "expected_presentation_time_api"
+    is_exported: true
     namespace: "toolkit"
     description: "Feature flag for using expected presentation time of the Choreographer"
     bug: "278730197"
@@ -31,6 +35,7 @@ flag {
 
 flag {
     name: "expected_presentation_time_read_only"
+    is_exported: true
     namespace: "toolkit"
     description: "Feature flag for using expected presentation time of the Choreographer"
     bug: "278730197"
@@ -56,7 +61,7 @@ flag {
     name: "toolkit_frame_rate_default_normal_read_only"
     namespace: "toolkit"
     description: "Feature flag for setting frame rate category as NORMAL for default"
-    bug: "239979904"
+    bug: "335874198"
     is_fixed_read_only: true
 }
 
@@ -64,7 +69,7 @@ flag {
     name: "toolkit_frame_rate_by_size_read_only"
     namespace: "toolkit"
     description: "Feature flag for setting frame rate category based on size"
-    bug: "239979904"
+    bug: "335874198"
     is_fixed_read_only: true
 }
 
@@ -72,7 +77,15 @@ flag {
     name: "toolkit_frame_rate_velocity_mapping_read_only"
     namespace: "toolkit"
     description: "Feature flag for setting frame rate based on velocity"
-    bug: "239979904"
+    bug: "335874198"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "toolkit_frame_rate_small_uses_percent_read_only"
+    namespace: "toolkit"
+    description: "VRR uses percent of size to consider a view to be small"
+    bug: "335874198"
     is_fixed_read_only: true
 }
 
@@ -80,6 +93,22 @@ flag {
     name: "toolkit_frame_rate_typing_read_only"
     namespace: "toolkit"
     description: "Feature flag for suppressing boost on typing"
-    bug: "239979904"
+    bug: "335874198"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "toolkit_frame_rate_function_enabling_read_only"
+    namespace: "toolkit"
+    description: "Feature flag to enable the functionality of the dVRR feature"
+    bug: "335874198"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "toolkit_frame_rate_view_enabling_read_only"
+    namespace: "toolkit"
+    description: "Feature flag to enable the functionality on views for the dVRR feature"
+    bug: "335874198"
     is_fixed_read_only: true
 }

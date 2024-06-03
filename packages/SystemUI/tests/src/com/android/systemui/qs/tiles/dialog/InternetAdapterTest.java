@@ -20,9 +20,11 @@ import android.widget.LinearLayout;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 import com.android.wifitrackerlib.WifiEntry;
+
+import kotlinx.coroutines.CoroutineScope;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -50,6 +52,8 @@ public class InternetAdapterTest extends SysuiTestCase {
     public MockitoRule mRule = MockitoJUnit.rule();
     @Spy
     private Context mSpyContext = mContext;
+    @Mock
+    CoroutineScope mScope;
 
     @Mock
     private WifiEntry mInternetWifiEntry;
@@ -81,7 +85,7 @@ public class InternetAdapterTest extends SysuiTestCase {
         when(mWifiEntry.getTitle()).thenReturn(WIFI_TITLE);
         when(mWifiEntry.getSummary(false)).thenReturn(WIFI_SUMMARY);
 
-        mInternetAdapter = new InternetAdapter(mInternetDialogController);
+        mInternetAdapter = new InternetAdapter(mInternetDialogController, mScope);
         mViewHolder = mInternetAdapter.onCreateViewHolder(new LinearLayout(mContext), 0);
         mInternetAdapter.setWifiEntries(Arrays.asList(mWifiEntry), 1 /* wifiEntriesCount */);
     }

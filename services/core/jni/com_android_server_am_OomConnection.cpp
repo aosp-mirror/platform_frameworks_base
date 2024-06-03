@@ -44,6 +44,12 @@ static MemEventListener memevent_listener(MemEventClient::AMS);
  * @throws java.lang.RuntimeException
  */
 static jobjectArray android_server_am_OomConnection_waitOom(JNIEnv* env, jobject) {
+    if (!memevent_listener.ok()) {
+        memevent_listener.deregisterAllEvents();
+        jniThrowRuntimeException(env, "Failed to initialize memevents listener");
+        return nullptr;
+    }
+
     if (!memevent_listener.registerEvent(MEM_EVENT_OOM_KILL)) {
         memevent_listener.deregisterAllEvents();
         jniThrowRuntimeException(env, "listener failed to register to OOM events");
@@ -86,9 +92,11 @@ static jobjectArray android_server_am_OomConnection_waitOom(JNIEnv* env, jobject
             memevent_listener.deregisterAllEvents();
             jniThrowRuntimeException(env, "Failed creating java string for process name");
         }
-        jobject java_oom_kill = env->NewObject(sOomKillRecordInfo.clazz, sOomKillRecordInfo.ctor,
-                                               oom_kill.timestamp_ms, oom_kill.pid, oom_kill.uid,
-                                               process_name, oom_kill.oom_score_adj);
+        jobject java_oom_kill =
+                env->NewObject(sOomKillRecordInfo.clazz, sOomKillRecordInfo.ctor,
+                               oom_kill.timestamp_ms, oom_kill.pid, oom_kill.uid, process_name,
+                               oom_kill.oom_score_adj, oom_kill.total_vm_kb, oom_kill.anon_rss_kb,
+                               oom_kill.file_rss_kb, oom_kill.shmem_rss_kb, oom_kill.pgtables_kb);
         if (java_oom_kill == NULL) {
             memevent_listener.deregisterAllEvents();
             jniThrowRuntimeException(env, "Failed to create OomKillRecord object");
@@ -109,8 +117,8 @@ int register_android_server_am_OomConnection(JNIEnv* env) {
     sOomKillRecordInfo.clazz = FindClassOrDie(env, "android/os/OomKillRecord");
     sOomKillRecordInfo.clazz = MakeGlobalRefOrDie(env, sOomKillRecordInfo.clazz);
 
-    sOomKillRecordInfo.ctor =
-            GetMethodIDOrDie(env, sOomKillRecordInfo.clazz, "<init>", "(JIILjava/lang/String;S)V");
+    sOomKillRecordInfo.ctor = GetMethodIDOrDie(env, sOomKillRecordInfo.clazz, "<init>",
+                                               "(JIILjava/lang/String;SJJJJJ)V");
 
     return RegisterMethodsOrDie(env, "com/android/server/am/OomConnection", sOomConnectionMethods,
                                 NELEM(sOomConnectionMethods));

@@ -163,20 +163,20 @@ class ShortcutPackage extends ShortcutPackageItem {
     /**
      * An in-memory copy of shortcuts for this package that was loaded from xml, keyed on IDs.
      */
-    @GuardedBy("mLock")
+    @GuardedBy("mPackageItemLock")
     private final ArrayMap<String, ShortcutInfo> mShortcuts = new ArrayMap<>();
 
     /**
      * A temporary copy of shortcuts that are to be cleared once persisted into AppSearch, keyed on
      * IDs.
      */
-    @GuardedBy("mLock")
+    @GuardedBy("mPackageItemLock")
     private final ArrayMap<String, ShortcutInfo> mTransientShortcuts = new ArrayMap<>(0);
 
     /**
      * All the share targets from the package
      */
-    @GuardedBy("mLock")
+    @GuardedBy("mPackageItemLock")
     private final ArrayList<ShareTargetInfo> mShareTargets = new ArrayList<>(0);
 
     /**
@@ -193,10 +193,10 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     private long mLastKnownForegroundElapsedTime;
 
-    @GuardedBy("mLock")
+    @GuardedBy("mPackageItemLock")
     private long mLastReportedTime;
 
-    @GuardedBy("mLock")
+    @GuardedBy("mPackageItemLock")
     private boolean mIsAppSearchSchemaUpToDate;
 
     private ShortcutPackage(ShortcutUser shortcutUser,
@@ -233,7 +233,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     public int getShortcutCount() {
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             return mShortcuts.size();
         }
     }
@@ -276,7 +276,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     @Nullable
     public ShortcutInfo findShortcutById(@Nullable final String id) {
         if (id == null) return null;
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             return mShortcuts.get(id);
         }
     }
@@ -354,7 +354,7 @@ class ShortcutPackage extends ShortcutPackageItem {
      */
     private ShortcutInfo forceDeleteShortcutInner(@NonNull String id) {
         final ShortcutInfo shortcut;
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             shortcut = mShortcuts.remove(id);
             if (shortcut != null) {
                 removeIcon(shortcut);
@@ -409,7 +409,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         if (newShortcut.isExcludedFromSurfaces(ShortcutInfo.SURFACE_LAUNCHER)) {
             if (isAppSearchEnabled()) {
-                synchronized (mLock) {
+                synchronized (mPackageItemLock) {
                     mTransientShortcuts.put(newShortcut.getId(), newShortcut);
                 }
             }
@@ -482,7 +482,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         if (newShortcut.isExcludedFromSurfaces(ShortcutInfo.SURFACE_LAUNCHER)) {
             if (isAppSearchEnabled()) {
-                synchronized (mLock) {
+                synchronized (mPackageItemLock) {
                     mTransientShortcuts.put(newShortcut.getId(), newShortcut);
                 }
             }
@@ -506,7 +506,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         final ShortcutService service = mShortcutUser.mService;
         // Ensure the total number of shortcuts doesn't exceed the hard limit per app.
         final int maxShortcutPerApp = service.getMaxAppShortcuts();
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             final List<ShortcutInfo> appShortcuts = mShortcuts.values().stream().filter(si ->
                     !si.isPinned()).collect(Collectors.toList());
             if (appShortcuts.size() >= maxShortcutPerApp) {
@@ -555,7 +555,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     public List<ShortcutInfo> deleteAllDynamicShortcuts() {
         final long now = mShortcutUser.mService.injectCurrentTimeMillis();
         boolean changed = false;
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             for (int i = mShortcuts.size() - 1; i >= 0; i--) {
                 ShortcutInfo si = mShortcuts.valueAt(i);
                 if (si.isDynamic() && si.isVisibleToPublisher()) {
@@ -850,6 +850,8 @@ class ShortcutPackage extends ShortcutPackageItem {
             @Nullable Predicate<ShortcutInfo> filter, int cloneFlag,
             @Nullable String callingLauncher, int launcherUserId, boolean getPinnedByAnyLauncher) {
         if (getPackageInfo().isShadow()) {
+            Log.d(TAG, "findAll() returned empty results because " + getPackageName()
+                    + " isn't installed yet");
             // Restored and the app not installed yet, so don't return any.
             return;
         }
@@ -877,6 +879,8 @@ class ShortcutPackage extends ShortcutPackageItem {
         if (!getPinnedByAnyLauncher) {
             if (si.isFloating() && !si.isCached()) {
                 if (!isPinnedByCaller) {
+                    Log.d(TAG, si.getId() + " ignored because it isn't pinned by "
+                            + callingLauncher);
                     return;
                 }
             }
@@ -914,7 +918,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     List<ShortcutManager.ShareShortcutInfo> getMatchingShareTargets(
             @NonNull final IntentFilter filter, @Nullable final String pkgName) {
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             final List<ShareTargetInfo> matchedTargets = new ArrayList<>();
             for (int i = 0; i < mShareTargets.size(); i++) {
                 final ShareTargetInfo target = mShareTargets.get(i);
@@ -967,7 +971,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     public boolean hasShareTargets() {
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             return !mShareTargets.isEmpty();
         }
     }
@@ -978,7 +982,7 @@ class ShortcutPackage extends ShortcutPackageItem {
      * the app's Xml resource.
      */
     int getSharingShortcutCount() {
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             if (mShareTargets.isEmpty()) {
                 return 0;
             }
@@ -1017,7 +1021,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     /**
      * Return the filenames (excluding path names) of icon bitmap files from this package.
      */
-    @GuardedBy("mLock")
+    @GuardedBy("mPackageItemLock")
     private ArraySet<String> getUsedBitmapFilesLocked() {
         final ArraySet<String> usedFiles = new ArraySet<>(1);
         forEachShortcut(si -> {
@@ -1029,7 +1033,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     public void cleanupDanglingBitmapFiles(@NonNull File path) {
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             mShortcutBitmapSaver.waitForAllSavesLocked();
             final ArraySet<String> usedFiles = getUsedBitmapFilesLocked();
 
@@ -1136,7 +1140,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         // Now prepare to publish manifest shortcuts.
         List<ShortcutInfo> newManifestShortcutList = null;
         int shareTargetSize = 0;
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             try {
                 shareTargetSize = mShareTargets.size();
                 newManifestShortcutList = ShortcutParser.parseShortcuts(mShortcutUser.mService,
@@ -1680,7 +1684,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     void reportShortcutUsed(@NonNull final UsageStatsManagerInternal usageStatsManagerInternal,
             @NonNull final String shortcutId) {
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             final long currentTS = SystemClock.elapsedRealtime();
             final ShortcutService s = mShortcutUser.mService;
             if (currentTS - mLastReportedTime > s.mSaveDelayMillis) {
@@ -1757,7 +1761,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         pw.println(")");
 
         pw.println();
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             mShortcutBitmapSaver.dumpLocked(pw, "  ");
         }
     }
@@ -1827,7 +1831,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     @Override
     public void saveToXml(@NonNull TypedXmlSerializer out, boolean forBackup)
             throws IOException, XmlPullParserException {
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             final int size = mShortcuts.size();
             final int shareTargetSize = mShareTargets.size();
 
@@ -2037,7 +2041,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         final ShortcutPackage ret = new ShortcutPackage(shortcutUser,
                 shortcutUser.getUserId(), packageName);
-        synchronized (ret.mLock) {
+        synchronized (ret.mPackageItemLock) {
             ret.mIsAppSearchSchemaUpToDate = ShortcutService.parseIntAttribute(
                     parser, ATTR_SCHEMA_VERSON, 0) == AppSearchShortcutInfo.SCHEMA_VERSION;
 
@@ -2283,7 +2287,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     @VisibleForTesting
     List<ShareTargetInfo> getAllShareTargetsForTest() {
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             return new ArrayList<>(mShareTargets);
         }
     }
@@ -2404,7 +2408,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             @NonNull final Consumer<ShortcutInfo> transform) {
         Objects.requireNonNull(id);
         Objects.requireNonNull(transform);
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             if (shortcut != null) {
                 transform.accept(shortcut);
             }
@@ -2424,7 +2428,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     private void saveShortcut(@NonNull final Collection<ShortcutInfo> shortcuts) {
         Objects.requireNonNull(shortcuts);
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             for (ShortcutInfo si : shortcuts) {
                 mShortcuts.put(si.getId(), si);
             }
@@ -2433,7 +2437,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     @Nullable
     List<ShortcutInfo> findAll(@NonNull final Collection<String> ids) {
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             return ids.stream().map(mShortcuts::get)
                     .filter(Objects::nonNull).collect(Collectors.toList());
         }
@@ -2455,7 +2459,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     private void forEachShortcutStopWhen(
             @NonNull final Function<ShortcutInfo, Boolean> cb) {
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             for (int i = mShortcuts.size() - 1; i >= 0; i--) {
                 final ShortcutInfo si = mShortcuts.valueAt(i);
                 if (cb.apply(si)) {
@@ -2600,7 +2604,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                         })));
     }
 
-    @GuardedBy("mLock")
+    @GuardedBy("mPackageItemLock")
     @Override
     void scheduleSaveToAppSearchLocked() {
         final Map<String, ShortcutInfo> copy = new ArrayMap<>(mShortcuts);
@@ -2684,7 +2688,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                     .penaltyLog() // TODO: change this to penaltyDeath to fix the call-site
                     .build());
             future = mShortcutUser.getAppSearch(searchContext);
-            synchronized (mLock) {
+            synchronized (mPackageItemLock) {
                 if (!mIsAppSearchSchemaUpToDate) {
                     future = future.thenCompose(this::setupSchema);
                 }

@@ -33,6 +33,8 @@ import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.util.time.SystemClock;
 
+import java.util.concurrent.Executor;
+
 import javax.inject.Inject;
 
 /**
@@ -58,23 +60,33 @@ public class RowInflaterTask implements InflationTask, AsyncLayoutInflater.OnInf
     }
 
     /**
-     * Inflates a new notificationView. This should not be called twice on this object
+     * Inflates a new notificationView asynchronously, calling the {@code listener} on the main
+     * thread when done. This should not be called twice on this object.
      */
     public void inflate(Context context, ViewGroup parent, NotificationEntry entry,
             RowInflationFinishedListener listener) {
+        inflate(context, parent, entry, null, listener);
+    }
+
+    /**
+     * Inflates a new notificationView asynchronously, calling the {@code listener} on the supplied
+     * {@code listenerExecutor} (or the main thread if null) when done. This should not be called
+     * twice on this object.
+     */
+    @VisibleForTesting
+    public void inflate(Context context, ViewGroup parent, NotificationEntry entry,
+            @Nullable Executor listenerExecutor, RowInflationFinishedListener listener) {
         if (TRACE_ORIGIN) {
             mInflateOrigin = new Throwable("inflate requested here");
         }
         mListener = listener;
-        AsyncLayoutInflater inflater = com.android.systemui.Flags.notificationRowUserContext()
-                ? new AsyncLayoutInflater(context, makeRowInflater(entry))
-                : new AsyncLayoutInflater(context);
+        AsyncLayoutInflater inflater = new AsyncLayoutInflater(context, makeRowInflater(entry));
         mEntry = entry;
         entry.setInflationTask(this);
 
         mLogger.logInflateStart(entry);
         mInflateStartTimeMs = mSystemClock.elapsedRealtime();
-        inflater.inflate(R.layout.status_bar_notification_row, parent, this);
+        inflater.inflate(R.layout.status_bar_notification_row, parent, listenerExecutor, this);
     }
 
     private RowAsyncLayoutInflater makeRowInflater(NotificationEntry entry) {
@@ -82,12 +94,12 @@ public class RowInflaterTask implements InflationTask, AsyncLayoutInflater.OnInf
     }
 
     @VisibleForTesting
-    static class RowAsyncLayoutInflater implements AsyncLayoutFactory {
+    public static class RowAsyncLayoutInflater implements AsyncLayoutFactory {
         private final NotificationEntry mEntry;
         private final SystemClock mSystemClock;
         private final RowInflaterTaskLogger mLogger;
 
-        RowAsyncLayoutInflater(NotificationEntry entry, SystemClock systemClock,
+        public RowAsyncLayoutInflater(NotificationEntry entry, SystemClock systemClock,
                 RowInflaterTaskLogger logger) {
             mEntry = entry;
             mSystemClock = systemClock;

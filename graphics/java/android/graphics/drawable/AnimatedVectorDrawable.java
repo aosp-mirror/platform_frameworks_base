@@ -1266,6 +1266,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         private final IntArray mPendingAnimationActions = new IntArray();
         private final AnimatedVectorDrawable mDrawable;
         private long mTotalDuration;
+        private AnimatorListener mThreadedRendererAnimatorListener;
 
         VectorDrawableAnimatorRT(AnimatedVectorDrawable drawable) {
             mDrawable = drawable;
@@ -1689,6 +1690,9 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             if (mListener != null) {
                 mListener.onAnimationStart(null);
             }
+            if (mThreadedRendererAnimatorListener != null) {
+                mThreadedRendererAnimatorListener.onAnimationStart(null);
+            }
         }
 
         // This should only be called after animator has been added to the RenderNode target.
@@ -1717,11 +1721,19 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             if (mListener != null) {
                 mListener.onAnimationStart(null);
             }
+            if (mThreadedRendererAnimatorListener != null) {
+                mThreadedRendererAnimatorListener.onAnimationStart(null);
+            }
         }
 
         @Override
         public long getAnimatorNativePtr() {
             return mSetPtr;
+        }
+
+        @Override
+        public void setThreadedRendererAnimatorListener(AnimatorListener animatorListener) {
+            mThreadedRendererAnimatorListener = animatorListener;
         }
 
         @Override
@@ -1787,6 +1799,9 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             invalidateOwningView();
             if (mListener != null) {
                 mListener.onAnimationEnd(null);
+            }
+            if (mThreadedRendererAnimatorListener != null) {
+                mThreadedRendererAnimatorListener.onAnimationEnd(null);
             }
         }
 

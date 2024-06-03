@@ -389,6 +389,14 @@ status_t JMediaCodec::setSurface(
     return err;
 }
 
+status_t JMediaCodec::detachOutputSurface() {
+    status_t err = mCodec->detachOutputSurface();
+    if (err == OK) {
+        mSurfaceTextureClient.clear();
+    }
+    return err;
+}
+
 status_t JMediaCodec::createInputSurface(
         sp<IGraphicBufferProducer>* bufferProducer) {
     return mCodec->createInputSurface(bufferProducer);
@@ -1798,6 +1806,20 @@ static void android_media_MediaCodec_native_setSurface(
     throwExceptionAsNecessary(env, err, codec);
 }
 
+static void android_media_MediaCodec_native_detachOutputSurface(
+        JNIEnv *env,
+        jobject thiz) {
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL || codec->initCheck() != OK) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION, codec);
+        return;
+    }
+
+    status_t err = codec->detachOutputSurface();
+    throwExceptionAsNecessary(env, err, codec);
+}
+
 sp<PersistentSurface> android_media_MediaCodec_getPersistentInputSurface(
         JNIEnv* env, jobject object) {
     sp<PersistentSurface> persistentSurface;
@@ -2066,23 +2088,24 @@ static status_t extractInfosFromObject(
             }
             return BAD_VALUE;
         }
-        size_t offset = static_cast<size_t>(env->GetIntField(param, gFields.bufferInfoOffset));
-        size_t size = static_cast<size_t>(env->GetIntField(param, gFields.bufferInfoSize));
+        ssize_t offset = static_cast<ssize_t>(env->GetIntField(param, gFields.bufferInfoOffset));
+        ssize_t size = static_cast<ssize_t>(env->GetIntField(param, gFields.bufferInfoSize));
         uint32_t flags = static_cast<uint32_t>(env->GetIntField(param, gFields.bufferInfoFlags));
-        if (flags == 0 && size == 0) {
-            if (errorDetailMsg) {
-                *errorDetailMsg = "Error: Queuing an empty BufferInfo";
-            }
-            return BAD_VALUE;
-        }
         if (i == 0) {
             *initialOffset = offset;
         }
-        if (CC_UNLIKELY((offset >  UINT32_MAX)
-                || ((long)(offset + size) > UINT32_MAX)
-                || ((offset - *initialOffset) != *totalSize))) {
+        if (CC_UNLIKELY((offset < 0)
+                || (size < 0)
+                || ((INT32_MAX - offset) < size)
+                || ((offset - (*initialOffset)) != *totalSize))) {
             if (errorDetailMsg) {
                 *errorDetailMsg = "Error: offset/size in BufferInfo";
+            }
+            return BAD_VALUE;
+        }
+        if (flags == 0 && size == 0) {
+            if (errorDetailMsg) {
+                *errorDetailMsg = "Error: Queuing an empty BufferInfo";
             }
             return BAD_VALUE;
         }
@@ -2864,6 +2887,10 @@ static void extractMemoryFromContext(
         jint offset,
         jint size,
         sp<hardware::HidlMemory> *memory) {
+    if ((offset + size) > context->capacity()) {
+        ALOGW("extractMemoryFromContext: offset + size provided exceed capacity");
+        return;
+    }
     *memory = context->toHidlMemory();
     if (*memory == nullptr) {
         if (!context->mBlock) {
@@ -2871,23 +2898,26 @@ static void extractMemoryFromContext(
             return;
         }
         ALOGD("extractMemoryFromContext: realloc & copying from C2Block to IMemory (cap=%zu)",
-              context->capacity());
+                context->capacity());
         if (!obtain(context, context->capacity(),
                     context->mCodecNames, true /* secure */)) {
             ALOGW("extractMemoryFromContext: failed to obtain secure block");
             return;
         }
-        C2WriteView view = context->mBlock->map().get();
-        if (view.error() != C2_OK) {
-            ALOGW("extractMemoryFromContext: failed to map C2Block (%d)", view.error());
-            return;
-        }
-        uint8_t *memoryPtr = static_cast<uint8_t *>(context->mMemory->unsecurePointer());
-        memcpy(memoryPtr + offset, view.base() + offset, size);
-        context->mBlock.reset();
-        context->mReadWriteMapping.reset();
         *memory = context->toHidlMemory();
     }
+    if (context->mBlock == nullptr || context->mReadWriteMapping == nullptr) {
+        ALOGW("extractMemoryFromContext: Cannot extract memory as C2Block is not created/mapped");
+        return;
+    }
+    if (context->mReadWriteMapping->error() != C2_OK) {
+        ALOGW("extractMemoryFromContext: failed to map C2Block (%d)",
+                context->mReadWriteMapping->error());
+        return;
+    }
+    // We are proceeding to extract memory from C2Block
+    uint8_t *memoryPtr = static_cast<uint8_t *>(context->mMemory->unsecurePointer());
+    memcpy(memoryPtr + offset, context->mReadWriteMapping->base() + offset, size);
 }
 
 static void extractBufferFromContext(
@@ -4106,6 +4136,10 @@ static const JNINativeMethod gMethods[] = {
     { "native_setSurface",
       "(Landroid/view/Surface;)V",
       (void *)android_media_MediaCodec_native_setSurface },
+
+    { "native_detachOutputSurface",
+      "()V",
+      (void *)android_media_MediaCodec_native_detachOutputSurface },
 
     { "createInputSurface", "()Landroid/view/Surface;",
       (void *)android_media_MediaCodec_createInputSurface },

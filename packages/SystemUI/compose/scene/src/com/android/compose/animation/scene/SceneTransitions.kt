@@ -44,6 +44,7 @@ internal constructor(
     internal val defaultSwipeSpec: SpringSpec<Float>,
     internal val transitionSpecs: List<TransitionSpecImpl>,
     internal val overscrollSpecs: List<OverscrollSpecImpl>,
+    internal val interruptionHandler: InterruptionHandler,
 ) {
     private val transitionCache =
         mutableMapOf<
@@ -145,6 +146,7 @@ internal constructor(
                 defaultSwipeSpec = DefaultSwipeSpec,
                 transitionSpecs = emptyList(),
                 overscrollSpecs = emptyList(),
+                interruptionHandler = DefaultInterruptionHandler,
             )
     }
 }

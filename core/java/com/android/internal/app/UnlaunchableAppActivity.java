@@ -68,6 +68,7 @@ public class UnlaunchableAppActivity extends Activity
         mTarget = intent.getParcelableExtra(Intent.EXTRA_INTENT,
                 android.content.IntentSender.class);
         String targetPackageName = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
+        Log.i(TAG, "Unlaunchable activity for target package: " + targetPackageName);
         final UserManager userManager = UserManager.get(this);
 
         if (mUserId == UserHandle.USER_NULL) {

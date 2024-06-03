@@ -31,7 +31,6 @@ import android.annotation.UserIdInt;
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.companion.AssociationInfo;
-import android.companion.DeviceNotAssociatedException;
 import android.companion.IOnMessageReceivedListener;
 import android.companion.ISystemDataTransferCallback;
 import android.companion.datatransfer.PermissionSyncRequest;
@@ -56,7 +55,6 @@ import com.android.server.companion.CompanionDeviceManagerService;
 import com.android.server.companion.association.AssociationStore;
 import com.android.server.companion.transport.CompanionTransportManager;
 import com.android.server.companion.utils.PackageUtils;
-import com.android.server.companion.utils.PermissionsUtils;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -120,28 +118,10 @@ public class SystemDataTransferProcessor {
     }
 
     /**
-     * Resolve the requested association, throwing if the caller doesn't have
-     * adequate permissions.
-     */
-    @NonNull
-    private AssociationInfo resolveAssociation(String packageName, int userId,
-            int associationId) {
-        AssociationInfo association = mAssociationStore.getAssociationById(associationId);
-        association = PermissionsUtils.sanitizeWithCallerChecks(mContext, association);
-        if (association == null) {
-            throw new DeviceNotAssociatedException("Association "
-                    + associationId + " is not associated with the app " + packageName
-                    + " for user " + userId);
-        }
-        return association;
-    }
-
-    /**
      * Return whether the user has consented to the permission transfer for the association.
      */
-    public boolean isPermissionTransferUserConsented(String packageName, @UserIdInt int userId,
-            int associationId) {
-        resolveAssociation(packageName, userId, associationId);
+    public boolean isPermissionTransferUserConsented(int associationId) {
+        mAssociationStore.getAssociationWithCallerChecks(associationId);
 
         PermissionSyncRequest request = getPermissionSyncRequest(associationId);
         if (request == null) {
@@ -155,7 +135,7 @@ public class SystemDataTransferProcessor {
      */
     public PendingIntent buildPermissionTransferUserConsentIntent(String packageName,
             @UserIdInt int userId, int associationId) {
-        if (PackageUtils.isPackageAllowlisted(mContext, mPackageManager, packageName)) {
+        if (PackageUtils.isPermSyncAutoEnabled(mContext, mPackageManager, packageName)) {
             Slog.i(LOG_TAG, "User consent Intent should be skipped. Returning null.");
             // Auto enable perm sync for the allowlisted packages, but don't override user decision
             PermissionSyncRequest request = getPermissionSyncRequest(associationId);
@@ -167,7 +147,8 @@ public class SystemDataTransferProcessor {
             return null;
         }
 
-        final AssociationInfo association = resolveAssociation(packageName, userId, associationId);
+        final AssociationInfo association = mAssociationStore.getAssociationWithCallerChecks(
+                associationId);
 
         Slog.i(LOG_TAG, "Creating permission sync intent for userId [" + userId
                 + "] associationId [" + associationId + "]");
@@ -207,7 +188,7 @@ public class SystemDataTransferProcessor {
         Slog.i(LOG_TAG, "Start system data transfer for package [" + packageName
                 + "] userId [" + userId + "] associationId [" + associationId + "]");
 
-        final AssociationInfo association = resolveAssociation(packageName, userId, associationId);
+        mAssociationStore.getAssociationWithCallerChecks(associationId);
 
         // Check if the request has been consented by the user.
         PermissionSyncRequest request = getPermissionSyncRequest(associationId);
@@ -239,24 +220,20 @@ public class SystemDataTransferProcessor {
      * Enable perm sync for the association
      */
     public void enablePermissionsSync(int associationId) {
-        Binder.withCleanCallingIdentity(() -> {
-            int userId = mAssociationStore.getAssociationById(associationId).getUserId();
-            PermissionSyncRequest request = new PermissionSyncRequest(associationId);
-            request.setUserConsented(true);
-            mSystemDataTransferRequestStore.writeRequest(userId, request);
-        });
+        int userId = mAssociationStore.getAssociationWithCallerChecks(associationId).getUserId();
+        PermissionSyncRequest request = new PermissionSyncRequest(associationId);
+        request.setUserConsented(true);
+        mSystemDataTransferRequestStore.writeRequest(userId, request);
     }
 
     /**
      * Disable perm sync for the association
      */
     public void disablePermissionsSync(int associationId) {
-        Binder.withCleanCallingIdentity(() -> {
-            int userId = mAssociationStore.getAssociationById(associationId).getUserId();
-            PermissionSyncRequest request = new PermissionSyncRequest(associationId);
-            request.setUserConsented(false);
-            mSystemDataTransferRequestStore.writeRequest(userId, request);
-        });
+        int userId = mAssociationStore.getAssociationWithCallerChecks(associationId).getUserId();
+        PermissionSyncRequest request = new PermissionSyncRequest(associationId);
+        request.setUserConsented(false);
+        mSystemDataTransferRequestStore.writeRequest(userId, request);
     }
 
     /**
@@ -264,18 +241,17 @@ public class SystemDataTransferProcessor {
      */
     @Nullable
     public PermissionSyncRequest getPermissionSyncRequest(int associationId) {
-        return Binder.withCleanCallingIdentity(() -> {
-            int userId = mAssociationStore.getAssociationById(associationId).getUserId();
-            List<SystemDataTransferRequest> requests =
-                    mSystemDataTransferRequestStore.readRequestsByAssociationId(userId,
-                            associationId);
-            for (SystemDataTransferRequest request : requests) {
-                if (request instanceof PermissionSyncRequest) {
-                    return (PermissionSyncRequest) request;
-                }
+        int userId = mAssociationStore.getAssociationWithCallerChecks(associationId)
+                .getUserId();
+        List<SystemDataTransferRequest> requests =
+                mSystemDataTransferRequestStore.readRequestsByAssociationId(userId,
+                        associationId);
+        for (SystemDataTransferRequest request : requests) {
+            if (request instanceof PermissionSyncRequest) {
+                return (PermissionSyncRequest) request;
             }
-            return null;
-        });
+        }
+        return null;
     }
 
     /**

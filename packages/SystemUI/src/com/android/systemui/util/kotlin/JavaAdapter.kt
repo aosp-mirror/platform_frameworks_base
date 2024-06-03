@@ -88,12 +88,21 @@ fun <T> collectFlow(
     flow: Flow<T>,
     consumer: Consumer<T>,
     state: Lifecycle.State = Lifecycle.State.CREATED,
-) {
-    lifecycle.coroutineScope.launch {
+): Job {
+    return lifecycle.coroutineScope.launch {
         lifecycle.repeatOnLifecycle(state) { flow.collect { consumer.accept(it) } }
     }
 }
 
 fun <A, B, R> combineFlows(flow1: Flow<A>, flow2: Flow<B>, bifunction: (A, B) -> R): Flow<R> {
     return combine(flow1, flow2, bifunction)
+}
+
+fun <A, B, C, R> combineFlows(
+    flow1: Flow<A>,
+    flow2: Flow<B>,
+    flow3: Flow<C>,
+    trifunction: (A, B, C) -> R
+): Flow<R> {
+    return combine(flow1, flow2, flow3, trifunction)
 }

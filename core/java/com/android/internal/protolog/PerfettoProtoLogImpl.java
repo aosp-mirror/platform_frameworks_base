@@ -16,33 +16,34 @@
 
 package com.android.internal.protolog;
 
-import static perfetto.protos.PerfettoTrace.InternedData.PROTOLOG_STACKTRACE;
-import static perfetto.protos.PerfettoTrace.InternedData.PROTOLOG_STRING_ARGS;
-import static perfetto.protos.PerfettoTrace.InternedString.IID;
-import static perfetto.protos.PerfettoTrace.InternedString.STR;
-import static perfetto.protos.PerfettoTrace.ProtoLogMessage.BOOLEAN_PARAMS;
-import static perfetto.protos.PerfettoTrace.ProtoLogMessage.DOUBLE_PARAMS;
-import static perfetto.protos.PerfettoTrace.ProtoLogMessage.MESSAGE_ID;
-import static perfetto.protos.PerfettoTrace.ProtoLogMessage.SINT64_PARAMS;
-import static perfetto.protos.PerfettoTrace.ProtoLogMessage.STACKTRACE_IID;
-import static perfetto.protos.PerfettoTrace.ProtoLogMessage.STR_PARAM_IIDS;
-import static perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.GROUPS;
-import static perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.Group.ID;
-import static perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.Group.NAME;
-import static perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.Group.TAG;
-import static perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.MESSAGES;
-import static perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.MessageData.GROUP_ID;
-import static perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.MessageData.LEVEL;
-import static perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.MessageData.MESSAGE;
-import static perfetto.protos.PerfettoTrace.TracePacket.INTERNED_DATA;
-import static perfetto.protos.PerfettoTrace.TracePacket.PROTOLOG_MESSAGE;
-import static perfetto.protos.PerfettoTrace.TracePacket.PROTOLOG_VIEWER_CONFIG;
-import static perfetto.protos.PerfettoTrace.TracePacket.SEQUENCE_FLAGS;
-import static perfetto.protos.PerfettoTrace.TracePacket.SEQ_INCREMENTAL_STATE_CLEARED;
-import static perfetto.protos.PerfettoTrace.TracePacket.SEQ_NEEDS_INCREMENTAL_STATE;
-import static perfetto.protos.PerfettoTrace.TracePacket.TIMESTAMP;
+import static android.internal.perfetto.protos.InternedDataOuterClass.InternedData.PROTOLOG_STACKTRACE;
+import static android.internal.perfetto.protos.InternedDataOuterClass.InternedData.PROTOLOG_STRING_ARGS;
+import static android.internal.perfetto.protos.ProfileCommon.InternedString.IID;
+import static android.internal.perfetto.protos.ProfileCommon.InternedString.STR;
+import static android.internal.perfetto.protos.Protolog.ProtoLogMessage.BOOLEAN_PARAMS;
+import static android.internal.perfetto.protos.Protolog.ProtoLogMessage.DOUBLE_PARAMS;
+import static android.internal.perfetto.protos.Protolog.ProtoLogMessage.MESSAGE_ID;
+import static android.internal.perfetto.protos.Protolog.ProtoLogMessage.SINT64_PARAMS;
+import static android.internal.perfetto.protos.Protolog.ProtoLogMessage.STACKTRACE_IID;
+import static android.internal.perfetto.protos.Protolog.ProtoLogMessage.STR_PARAM_IIDS;
+import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.GROUPS;
+import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.Group.ID;
+import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.Group.NAME;
+import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.Group.TAG;
+import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MESSAGES;
+import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.GROUP_ID;
+import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.LEVEL;
+import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.MESSAGE;
+import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket.INTERNED_DATA;
+import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket.PROTOLOG_MESSAGE;
+import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket.PROTOLOG_VIEWER_CONFIG;
+import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket.SEQUENCE_FLAGS;
+import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket.SEQ_INCREMENTAL_STATE_CLEARED;
+import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket.SEQ_NEEDS_INCREMENTAL_STATE;
+import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket.TIMESTAMP;
 
 import android.annotation.Nullable;
+import android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -51,6 +52,8 @@ import android.tracing.perfetto.DataSourceParams;
 import android.tracing.perfetto.InitArguments;
 import android.tracing.perfetto.Producer;
 import android.tracing.perfetto.TracingContext;
+import android.util.ArrayMap;
+import android.util.Log;
 import android.util.LongArray;
 import android.util.Slog;
 import android.util.proto.ProtoInputStream;
@@ -65,16 +68,16 @@ import com.android.internal.protolog.common.LogLevel;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.MessageData;
 
 /**
  * A service for the ProtoLog logging system.
@@ -84,18 +87,22 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     private final AtomicInteger mTracingInstances = new AtomicInteger();
 
     private final ProtoLogDataSource mDataSource = new ProtoLogDataSource(
-            this.mTracingInstances::incrementAndGet,
+            this::onTracingInstanceStart,
             this::dumpTransitionTraceConfig,
-            this.mTracingInstances::decrementAndGet
+            this::onTracingInstanceStop
     );
     private final ProtoLogViewerConfigReader mViewerConfigReader;
     private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider;
     private final TreeMap<String, IProtoLogGroup> mLogGroups;
+    private final Runnable mCacheUpdater;
 
-    private final ExecutorService mBackgroundLoggingService = Executors.newCachedThreadPool();
+    private final Map<LogLevel, Integer> mDefaultLogLevelCounts = new ArrayMap<>();
+    private final Map<IProtoLogGroup, Map<LogLevel, Integer>> mLogLevelCounts = new ArrayMap<>();
+
+    private final ExecutorService mBackgroundLoggingService = Executors.newSingleThreadExecutor();
 
     public PerfettoProtoLogImpl(String viewerConfigFilePath,
-            TreeMap<String, IProtoLogGroup> logGroups) {
+            TreeMap<String, IProtoLogGroup> logGroups, Runnable cacheUpdater) {
         this(() -> {
             try {
                 return new ProtoInputStream(new FileInputStream(viewerConfigFilePath));
@@ -103,28 +110,38 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 Slog.w(LOG_TAG, "Failed to load viewer config file " + viewerConfigFilePath, e);
                 return null;
             }
-        }, logGroups);
+        }, logGroups, cacheUpdater);
     }
 
     public PerfettoProtoLogImpl(
             ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
-            TreeMap<String, IProtoLogGroup> logGroups
+            TreeMap<String, IProtoLogGroup> logGroups,
+            Runnable cacheUpdater
     ) {
         this(viewerConfigInputStreamProvider,
-                new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider), logGroups);
+                new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider), logGroups,
+                cacheUpdater);
     }
 
     @VisibleForTesting
     public PerfettoProtoLogImpl(
             ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
             ProtoLogViewerConfigReader viewerConfigReader,
-            TreeMap<String, IProtoLogGroup> logGroups
+            TreeMap<String, IProtoLogGroup> logGroups,
+            Runnable cacheUpdater
     ) {
         Producer.init(InitArguments.DEFAULTS);
-        mDataSource.register(DataSourceParams.DEFAULTS);
+        DataSourceParams params =
+                new DataSourceParams.Builder()
+                        .setBufferExhaustedPolicy(
+                                DataSourceParams
+                                        .PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_DROP)
+                        .build();
+        mDataSource.register(params);
         this.mViewerConfigInputStreamProvider = viewerConfigInputStreamProvider;
         this.mViewerConfigReader = viewerConfigReader;
         this.mLogGroups = logGroups;
+        this.mCacheUpdater = cacheUpdater;
     }
 
     /**
@@ -157,76 +174,86 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         }
 
         mDataSource.trace(ctx -> {
-            final ProtoOutputStream os = ctx.newTracePacket();
+            try {
+                final ProtoOutputStream os = ctx.newTracePacket();
 
-            os.write(TIMESTAMP, SystemClock.elapsedRealtimeNanos());
+                os.write(TIMESTAMP, SystemClock.elapsedRealtimeNanos());
 
-            final long outProtologViewerConfigToken = os.start(PROTOLOG_VIEWER_CONFIG);
-            while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
-                if (pis.getFieldNumber() == (int) MESSAGES) {
-                    final long inMessageToken = pis.start(MESSAGES);
-                    final long outMessagesToken = os.start(MESSAGES);
-
-                    while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
-                        switch (pis.getFieldNumber()) {
-                            case (int) MessageData.MESSAGE_ID:
-                                os.write(MessageData.MESSAGE_ID,
-                                        pis.readLong(MessageData.MESSAGE_ID));
-                                break;
-                            case (int) MESSAGE:
-                                os.write(MESSAGE, pis.readString(MESSAGE));
-                                break;
-                            case (int) LEVEL:
-                                os.write(LEVEL, pis.readInt(LEVEL));
-                                break;
-                            case (int) GROUP_ID:
-                                os.write(GROUP_ID, pis.readInt(GROUP_ID));
-                                break;
-                            default:
-                                throw new RuntimeException(
-                                        "Unexpected field id " + pis.getFieldNumber());
-                        }
+                final long outProtologViewerConfigToken = os.start(PROTOLOG_VIEWER_CONFIG);
+                while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+                    if (pis.getFieldNumber() == (int) MESSAGES) {
+                        writeViewerConfigMessage(pis, os);
                     }
 
-                    pis.end(inMessageToken);
-                    os.end(outMessagesToken);
-                }
-
-                if (pis.getFieldNumber() == (int) GROUPS) {
-                    final long inGroupToken = pis.start(GROUPS);
-                    final long outGroupToken = os.start(GROUPS);
-
-                    while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
-                        switch (pis.getFieldNumber()) {
-                            case (int) ID:
-                                int id = pis.readInt(ID);
-                                os.write(ID, id);
-                                break;
-                            case (int) NAME:
-                                String name = pis.readString(NAME);
-                                os.write(NAME, name);
-                                break;
-                            case (int) TAG:
-                                String tag = pis.readString(TAG);
-                                os.write(TAG, tag);
-                                break;
-                            default:
-                                throw new RuntimeException(
-                                        "Unexpected field id " + pis.getFieldNumber());
-                        }
+                    if (pis.getFieldNumber() == (int) GROUPS) {
+                        writeViewerConfigGroup(pis, os);
                     }
-
-                    pis.end(inGroupToken);
-                    os.end(outGroupToken);
                 }
+
+                os.end(outProtologViewerConfigToken);
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Failed to read ProtoLog viewer config to dump on tracing end", e);
             }
-
-            os.end(outProtologViewerConfigToken);
-
-            ctx.flush();
         });
+    }
 
-        mDataSource.flush();
+    private static void writeViewerConfigGroup(
+            ProtoInputStream pis, ProtoOutputStream os) throws IOException {
+        final long inGroupToken = pis.start(GROUPS);
+        final long outGroupToken = os.start(GROUPS);
+
+        while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (pis.getFieldNumber()) {
+                case (int) ID:
+                    int id = pis.readInt(ID);
+                    os.write(ID, id);
+                    break;
+                case (int) NAME:
+                    String name = pis.readString(NAME);
+                    os.write(NAME, name);
+                    break;
+                case (int) TAG:
+                    String tag = pis.readString(TAG);
+                    os.write(TAG, tag);
+                    break;
+                default:
+                    throw new RuntimeException(
+                            "Unexpected field id " + pis.getFieldNumber());
+            }
+        }
+
+        pis.end(inGroupToken);
+        os.end(outGroupToken);
+    }
+
+    private static void writeViewerConfigMessage(
+            ProtoInputStream pis, ProtoOutputStream os) throws IOException {
+        final long inMessageToken = pis.start(MESSAGES);
+        final long outMessagesToken = os.start(MESSAGES);
+
+        while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (pis.getFieldNumber()) {
+                case (int) MessageData.MESSAGE_ID:
+                    os.write(MessageData.MESSAGE_ID,
+                            pis.readLong(MessageData.MESSAGE_ID));
+                    break;
+                case (int) MESSAGE:
+                    os.write(MESSAGE, pis.readString(MESSAGE));
+                    break;
+                case (int) LEVEL:
+                    os.write(LEVEL, pis.readInt(LEVEL));
+                    break;
+                case (int) GROUP_ID:
+                    os.write(GROUP_ID, pis.readInt(GROUP_ID));
+                    break;
+                default:
+                    throw new RuntimeException(
+                            "Unexpected field id " + pis.getFieldNumber());
+            }
+        }
+
+        pis.end(inMessageToken);
+        os.end(outMessagesToken);
     }
 
     private void logToLogcat(String tag, LogLevel level, long messageHash,
@@ -414,7 +441,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         return sw.toString();
     }
 
-    private int internStacktraceString(TracingContext<ProtoLogDataSource.Instance,
+    private int internStacktraceString(TracingContext<
+            ProtoLogDataSource.Instance,
             ProtoLogDataSource.TlsState,
             ProtoLogDataSource.IncrementalState> ctx,
             String stacktrace) {
@@ -424,9 +452,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     }
 
     private int internStringArg(
-            TracingContext<ProtoLogDataSource.Instance,
-            ProtoLogDataSource.TlsState,
-            ProtoLogDataSource.IncrementalState> ctx,
+            TracingContext<ProtoLogDataSource.Instance, ProtoLogDataSource.TlsState,
+                    ProtoLogDataSource.IncrementalState> ctx,
             String string
     ) {
         final ProtoLogDataSource.IncrementalState incrementalState = ctx.getIncrementalState();
@@ -435,9 +462,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     }
 
     private int internString(
-            TracingContext<ProtoLogDataSource.Instance,
-                ProtoLogDataSource.TlsState,
-                ProtoLogDataSource.IncrementalState> ctx,
+            TracingContext<ProtoLogDataSource.Instance, ProtoLogDataSource.TlsState,
+                    ProtoLogDataSource.IncrementalState> ctx,
             Map<String, Integer> internMap,
             long fieldId,
             String string
@@ -495,6 +521,29 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         return setTextLogging(false, logger, groups);
     }
 
+    @Override
+    public boolean isEnabled(IProtoLogGroup group, LogLevel level) {
+        return group.isLogToLogcat() || getLogFromLevel(group).ordinal() <= level.ordinal();
+    }
+
+    private LogLevel getLogFromLevel(IProtoLogGroup group) {
+        if (mLogLevelCounts.containsKey(group)) {
+            for (LogLevel logLevel : LogLevel.values()) {
+                if (mLogLevelCounts.get(group).getOrDefault(logLevel, 0) > 0) {
+                    return logLevel;
+                }
+            }
+        } else {
+            for (LogLevel logLevel : LogLevel.values()) {
+                if (mDefaultLogLevelCounts.getOrDefault(logLevel, 0) > 0) {
+                    return logLevel;
+                }
+            }
+        }
+
+        return LogLevel.WTF;
+    }
+
     /**
      * Start logging the stack trace of the when the log message happened for target groups
      * @return status code
@@ -522,6 +571,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 return -1;
             }
         }
+
+        mCacheUpdater.run();
         return 0;
     }
 
@@ -566,6 +617,61 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         pw.println("  enable-text [group...]: Enable logcat logging for given groups");
         pw.println("  disable-text [group...]: Disable logcat logging for given groups");
         return -1;
+    }
+
+    private synchronized void onTracingInstanceStart(ProtoLogDataSource.ProtoLogConfig config) {
+        this.mTracingInstances.incrementAndGet();
+
+        final LogLevel defaultLogFrom = config.getDefaultGroupConfig().logFrom;
+        mDefaultLogLevelCounts.put(defaultLogFrom,
+                mDefaultLogLevelCounts.getOrDefault(defaultLogFrom, 0) + 1);
+
+        final Set<String> overriddenGroupTags = config.getGroupTagsWithOverriddenConfigs();
+
+        for (String overriddenGroupTag : overriddenGroupTags) {
+            IProtoLogGroup group = mLogGroups.get(overriddenGroupTag);
+
+            mLogLevelCounts.putIfAbsent(group, new ArrayMap<>());
+            final Map<LogLevel, Integer> logLevelsCountsForGroup = mLogLevelCounts.get(group);
+
+            final LogLevel logFromLevel = config.getConfigFor(overriddenGroupTag).logFrom;
+            logLevelsCountsForGroup.put(logFromLevel,
+                    logLevelsCountsForGroup.getOrDefault(logFromLevel, 0) + 1);
+        }
+
+        mCacheUpdater.run();
+    }
+
+    private synchronized void onTracingInstanceStop(ProtoLogDataSource.ProtoLogConfig config) {
+        this.mTracingInstances.decrementAndGet();
+
+        final LogLevel defaultLogFrom = config.getDefaultGroupConfig().logFrom;
+        mDefaultLogLevelCounts.put(defaultLogFrom,
+                mDefaultLogLevelCounts.get(defaultLogFrom) - 1);
+        if (mDefaultLogLevelCounts.get(defaultLogFrom) <= 0) {
+            mDefaultLogLevelCounts.remove(defaultLogFrom);
+        }
+
+        final Set<String> overriddenGroupTags = config.getGroupTagsWithOverriddenConfigs();
+
+        for (String overriddenGroupTag : overriddenGroupTags) {
+            IProtoLogGroup group = mLogGroups.get(overriddenGroupTag);
+
+            mLogLevelCounts.putIfAbsent(group, new ArrayMap<>());
+            final Map<LogLevel, Integer> logLevelsCountsForGroup = mLogLevelCounts.get(group);
+
+            final LogLevel logFromLevel = config.getConfigFor(overriddenGroupTag).logFrom;
+            logLevelsCountsForGroup.put(logFromLevel,
+                    logLevelsCountsForGroup.get(logFromLevel) - 1);
+            if (logLevelsCountsForGroup.get(logFromLevel) <= 0) {
+                logLevelsCountsForGroup.remove(logFromLevel);
+            }
+            if (logLevelsCountsForGroup.isEmpty()) {
+                mLogLevelCounts.remove(group);
+            }
+        }
+
+        mCacheUpdater.run();
     }
 
     static void logAndPrintln(@Nullable PrintWriter pw, String msg) {

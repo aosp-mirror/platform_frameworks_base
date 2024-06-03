@@ -16,7 +16,7 @@
 
 package com.android.systemui.controls.ui
 
-import android.test.suitebuilder.annotation.SmallTest
+import androidx.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import android.view.HapticFeedbackConstants
 import com.android.systemui.SysuiTestCase

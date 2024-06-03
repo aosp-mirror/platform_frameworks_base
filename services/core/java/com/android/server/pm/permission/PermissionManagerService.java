@@ -76,11 +76,10 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.function.QuadFunction;
-import com.android.internal.util.function.TriFunction;
 import com.android.server.LocalServices;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.pm.UserManagerService;
+import com.android.server.pm.permission.PermissionManagerServiceInternal.CheckPermissionDelegate;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.HotwordDetectionServiceProvider;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
@@ -88,7 +87,6 @@ import com.android.server.pm.pkg.PackageState;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -323,6 +321,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         return true;
     }
 
+    private void setCheckPermissionDelegateInternal(CheckPermissionDelegate delegate) {
+        synchronized (mLock) {
+            mCheckPermissionDelegate = delegate;
+        }
+    }
+
     private boolean checkAutoRevokeAccess(AndroidPackage pkg, int callingUid) {
         final boolean isCallerPrivileged = mContext.checkCallingOrSelfPermission(
                 Manifest.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS)
@@ -367,42 +371,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
-    }
-
-    private void startShellPermissionIdentityDelegationInternal(int uid,
-            @NonNull String packageName, @Nullable List<String> permissionNames) {
-        synchronized (mLock) {
-            final CheckPermissionDelegate oldDelegate = mCheckPermissionDelegate;
-            if (oldDelegate != null && oldDelegate.getDelegatedUid() != uid) {
-                throw new SecurityException(
-                        "Shell can delegate permissions only to one UID at a time");
-            }
-            final ShellDelegate delegate = new ShellDelegate(uid, packageName, permissionNames);
-            setCheckPermissionDelegateLocked(delegate);
-        }
-    }
-
-    private void stopShellPermissionIdentityDelegationInternal() {
-        synchronized (mLock) {
-            setCheckPermissionDelegateLocked(null);
-        }
-    }
-
-    @Nullable
-    private List<String> getDelegatedShellPermissionsInternal() {
-        synchronized (mLock) {
-            if (mCheckPermissionDelegate == null) {
-                return Collections.EMPTY_LIST;
-            }
-            return mCheckPermissionDelegate.getDelegatedPermissionNames();
-        }
-    }
-
-    private void setCheckPermissionDelegateLocked(@Nullable CheckPermissionDelegate delegate) {
-        if (delegate != null || mCheckPermissionDelegate != null) {
-            PackageManager.invalidatePackageInfoCache();
-        }
-        mCheckPermissionDelegate = delegate;
     }
 
     @NonNull
@@ -491,6 +459,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     public boolean isRegisteredAttributionSource(@NonNull AttributionSourceState source) {
         return mAttributionSourceRegistry
                 .isRegisteredAttributionSource(new AttributionSource(source));
+    }
+
+    @Override
+    public int getRegisteredAttributionSourceCount(int uid) {
+        return mAttributionSourceRegistry.getRegisteredAttributionSourceCount(uid);
     }
 
     @Override
@@ -660,24 +633,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         @Override
         public int checkUidPermission(int uid, @NonNull String permissionName, int deviceId) {
             return PermissionManagerService.this.checkUidPermission(uid, permissionName, deviceId);
-        }
-
-        @Override
-        public void startShellPermissionIdentityDelegation(int uid, @NonNull String packageName,
-                @Nullable List<String> permissionNames) {
-            Objects.requireNonNull(packageName, "packageName");
-            startShellPermissionIdentityDelegationInternal(uid, packageName, permissionNames);
-        }
-
-        @Override
-        public void stopShellPermissionIdentityDelegation() {
-            stopShellPermissionIdentityDelegationInternal();
-        }
-
-        @Override
-        @NonNull
-        public List<String> getDelegatedShellPermissions() {
-            return getDelegatedShellPermissionsInternal();
         }
 
         @Override
@@ -891,6 +846,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     .getAllPermissionsWithProtectionFlags(protectionFlags);
         }
 
+        @Override
+        public void setCheckPermissionDelegate(CheckPermissionDelegate delegate) {
+            setCheckPermissionDelegateInternal(delegate);
+        }
+
         /* End of delegate methods to PermissionManagerServiceInterface */
     }
 
@@ -902,120 +862,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private int[] getAllUserIds() {
         return UserManagerService.getInstance().getUserIdsIncludingPreCreated();
     }
-
-    /**
-     * Interface to intercept permission checks and optionally pass through to the original
-     * implementation.
-     */
-    private interface CheckPermissionDelegate {
-        /**
-         * Get the UID whose permission checks is being delegated.
-         *
-         * @return the UID
-         */
-        int getDelegatedUid();
-
-        /**
-         * Check whether the given package has been granted the specified permission.
-         *
-         * @param packageName the name of the package to be checked
-         * @param permissionName the name of the permission to be checked
-         * @param persistentDeviceId The persistent device ID
-         * @param userId the user ID
-         * @param superImpl the original implementation that can be delegated to
-         * @return {@link android.content.pm.PackageManager#PERMISSION_GRANTED} if the package has
-         * the permission, or {@link android.content.pm.PackageManager#PERMISSION_DENIED} otherwise
-         *
-         * @see android.content.pm.PackageManager#checkPermission(String, String)
-         */
-        int checkPermission(@NonNull String packageName, @NonNull String permissionName,
-                String persistentDeviceId, @UserIdInt int userId,
-                @NonNull QuadFunction<String, String, String, Integer, Integer> superImpl);
-
-        /**
-         * Check whether the given UID has been granted the specified permission.
-         *
-         * @param uid the UID to be checked
-         * @param permissionName the name of the permission to be checked
-         * @param persistentDeviceId The persistent device ID
-         * @param superImpl the original implementation that can be delegated to
-         * @return {@link android.content.pm.PackageManager#PERMISSION_GRANTED} if the package has
-         * the permission, or {@link android.content.pm.PackageManager#PERMISSION_DENIED} otherwise
-         */
-        int checkUidPermission(int uid, @NonNull String permissionName, String persistentDeviceId,
-                TriFunction<Integer, String, String, Integer> superImpl);
-
-        /**
-         * @return list of delegated permissions
-         */
-        List<String> getDelegatedPermissionNames();
-    }
-
-    private class ShellDelegate implements CheckPermissionDelegate {
-        private final int mDelegatedUid;
-        @NonNull
-        private final String mDelegatedPackageName;
-        @Nullable
-        private final List<String> mDelegatedPermissionNames;
-
-        public ShellDelegate(int delegatedUid, @NonNull String delegatedPackageName,
-                @Nullable List<String> delegatedPermissionNames) {
-            mDelegatedUid = delegatedUid;
-            mDelegatedPackageName = delegatedPackageName;
-            mDelegatedPermissionNames = delegatedPermissionNames;
-        }
-
-        @Override
-        public int getDelegatedUid() {
-            return mDelegatedUid;
-        }
-
-        @Override
-        public int checkPermission(@NonNull String packageName, @NonNull String permissionName,
-                String persistentDeviceId, int userId,
-                @NonNull QuadFunction<String, String, String, Integer, Integer> superImpl) {
-            if (mDelegatedPackageName.equals(packageName)
-                    && isDelegatedPermission(permissionName)) {
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    return superImpl.apply("com.android.shell", permissionName, persistentDeviceId,
-                            userId);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-            return superImpl.apply(packageName, permissionName, persistentDeviceId, userId);
-        }
-
-        @Override
-        public int checkUidPermission(int uid, @NonNull String permissionName,
-                String persistentDeviceId,
-                @NonNull TriFunction<Integer, String, String, Integer> superImpl) {
-            if (uid == mDelegatedUid && isDelegatedPermission(permissionName)) {
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    return superImpl.apply(Process.SHELL_UID, permissionName, persistentDeviceId);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-            return superImpl.apply(uid, permissionName, persistentDeviceId);
-        }
-
-        @Override
-        public List<String> getDelegatedPermissionNames() {
-            return mDelegatedPermissionNames == null
-                    ? null
-                    : new ArrayList<>(mDelegatedPermissionNames);
-        }
-
-        private boolean isDelegatedPermission(@NonNull String permissionName) {
-            // null permissions means all permissions are targeted
-            return mDelegatedPermissionNames == null
-                    || mDelegatedPermissionNames.contains(permissionName);
-        }
-    }
-
     private static final class AttributionSourceRegistry {
         private final Object mLock = new Object();
 
@@ -1094,6 +940,25 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     return cachedSource.equalsExceptToken(source);
                 }
                 return false;
+            }
+        }
+
+        public int getRegisteredAttributionSourceCount(int uid) {
+            mContext.enforceCallingOrSelfPermission(UPDATE_APP_OPS_STATS,
+                    "getting the number of registered AttributionSources requires "
+                            + "UPDATE_APP_OPS_STATS");
+            // Influence the system to perform a garbage collection, so the provided number is as
+            // accurate as possible
+            System.gc();
+            System.gc();
+            synchronized (mLock) {
+                int numForUid = 0;
+                for (Map.Entry<IBinder, AttributionSource> entry : mAttributions.entrySet()) {
+                    if (entry.getValue().getUid() == uid) {
+                        numForUid++;
+                    }
+                }
+                return numForUid;
             }
         }
 

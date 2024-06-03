@@ -150,7 +150,11 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
     @Override
     public void onWindowInfosChanged(InputWindowHandle[] windowHandles,
             DisplayInfo[] displayInfos) {
-        mHandler.post(() -> onWindowInfosChangedInternal(windowHandles, displayInfos));
+        if (com.android.server.accessibility.Flags.removeOnWindowInfosChangedHandler()) {
+            onWindowInfosChangedInternal(windowHandles, displayInfos);
+        } else {
+            mHandler.post(() -> onWindowInfosChangedInternal(windowHandles, displayInfos));
+        }
     }
 
     private void onWindowInfosChangedInternal(InputWindowHandle[] windowHandles,
@@ -722,7 +726,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             }
 
             // Compute system bar insets frame if needed.
-            if (com.android.server.accessibility.Flags.computeWindowChangesOnA11y()
+            if (com.android.server.accessibility.Flags.computeWindowChangesOnA11yV2()
                     && windowState != null && instance.isUntouchableNavigationBar()) {
                 final InsetsSourceProvider provider =
                         windowState.getControllableInsetProvider();

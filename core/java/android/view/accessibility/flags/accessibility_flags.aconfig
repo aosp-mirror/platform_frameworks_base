@@ -1,9 +1,11 @@
 package: "android.view.accessibility"
+container: "system"
 
 # NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
 
 flag {
     name: "a11y_overlay_callbacks"
+    is_exported: true
     namespace: "accessibility"
     description: "Whether to allow the passing of result callbacks when attaching a11y overlays."
     bug: "304478691"
@@ -26,6 +28,7 @@ flag {
 flag {
     namespace: "accessibility"
     name: "braille_display_hid"
+    is_exported: true
     description: "Enables new APIs for an AccessibilityService to communicate with a HID Braille display"
     bug: "303522222"
 }
@@ -40,6 +43,7 @@ flag {
 flag {
     namespace: "accessibility"
     name: "collection_info_item_counts"
+    is_exported: true
     description: "Fields for total items and the number of important for accessibility items in a collection"
     bug: "302376158"
 }
@@ -53,14 +57,18 @@ flag {
 
 flag {
     namespace: "accessibility"
-    name: "fix_merged_content_change_event"
+    name: "fix_merged_content_change_event_v2"
     description: "Fixes event type and source of content change event merged in ViewRootImpl"
     bug: "277305460"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
     namespace: "accessibility"
     name: "flash_notification_system_api"
+    is_exported: true
     description: "Makes flash notification APIs as system APIs for calling from mainline module"
     bug: "303131332"
 }
@@ -73,7 +81,18 @@ flag {
 }
 
 flag {
+    name: "migrate_enable_shortcuts"
+    namespace: "accessibility"
+    description: "Refactors deprecated code to use AccessibilityManager#enableShortcutsForTargets."
+    bug: "332006721"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "motion_event_observing"
+    is_exported: true
     namespace: "accessibility"
     description: "Allows accessibility services to intercept but not consume motion events from specified sources."
     bug: "297595990"
@@ -82,6 +101,7 @@ flag {
 flag {
     namespace: "accessibility"
     name: "granular_scrolling"
+    is_exported: true
     description: "Allow the use of granular scrolling. This allows scrollable nodes to scroll by increments other than a full screen"
     bug: "302376158"
 }
@@ -103,6 +123,8 @@ flag {
 flag {
     namespace: "accessibility"
     name: "add_type_window_control"
+    is_exported: true
+    is_fixed_read_only: true
     description: "adds new TYPE_WINDOW_CONTROL to AccessibilityWindowInfo for detecting Window Decorations"
     bug: "320445550"
 }
@@ -122,8 +144,38 @@ flag {
 }
 
 flag {
+    name: "prevent_leaking_viewrootimpl"
+    namespace: "accessibility"
+    description: "Clear pending messages and callbacks of the handler in AccessibilityInteractionController when the ViewRootImpl is detached from Window to prevent leaking ViewRootImpl"
+    bug: "320701910"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "restore_a11y_shortcut_target_service"
+    namespace: "accessibility"
+    description: "Perform merging and other bug fixes for SettingsProvider restore of ACCESSIBILITY_SHORTCUT_TARGET_SERVICES secure setting"
+    bug: "341374402"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "support_system_pinch_zoom_opt_out_apis"
     namespace: "accessibility"
     description: "Feature flag for declaring system pinch zoom opt-out apis"
     bug: "315089687"
+}
+
+flag {
+    name: "wait_magnification_system_ui_connection_to_notify_service_connected"
+    namespace: "accessibility"
+    description: "Decide whether AccessibilityService needs to wait until magnification system ui connection is ready to trigger onServiceConnected"
+    bug: "337800504"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

@@ -2015,7 +2015,7 @@ public class AccountManager {
      *     null for no callback
      * @param handler {@link Handler} identifying the callback thread,
      *     null for the main thread
-     * @return An {@link AccountManagerFuture} which resolves to a Boolean indicated wether it
+     * @return An {@link AccountManagerFuture} which resolves to a Boolean indicated whether it
      * succeeded.
      * @hide
      */

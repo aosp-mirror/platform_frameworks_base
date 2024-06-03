@@ -165,7 +165,7 @@ public final class Rect implements Parcelable {
     public String toShortString() {
         return toShortString(new StringBuilder(32));
     }
-    
+
     /**
      * Return a string representation of the rectangle in a compact form.
      * @hide
@@ -184,7 +184,7 @@ public final class Rect implements Parcelable {
      *
      * <p>You can later recover the Rect from this string through
      * {@link #unflattenFromString(String)}.
-     * 
+     *
      * @return Returns a new String of the form "left top right bottom"
      */
     @NonNull
@@ -314,7 +314,7 @@ public final class Rect implements Parcelable {
     public final int height() {
         return bottom - top;
     }
-    
+
     /**
      * @return the horizontal center of the rectangle. If the computed value
      *         is fractional, this method returns the largest integer that is
@@ -323,7 +323,7 @@ public final class Rect implements Parcelable {
     public final int centerX() {
         return (left + right) >> 1;
     }
-    
+
     /**
      * @return the vertical center of the rectangle. If the computed value
      *         is fractional, this method returns the largest integer that is
@@ -332,14 +332,14 @@ public final class Rect implements Parcelable {
     public final int centerY() {
         return (top + bottom) >> 1;
     }
-    
+
     /**
      * @return the exact horizontal center of the rectangle as a float.
      */
     public final float exactCenterX() {
         return (left + right) * 0.5f;
     }
-    
+
     /**
      * @return the exact vertical center of the rectangle as a float.
      */
@@ -493,7 +493,7 @@ public final class Rect implements Parcelable {
      * @param top The top of the rectangle being tested for containment
      * @param right The right side of the rectangle being tested for containment
      * @param bottom The bottom of the rectangle being tested for containment
-     * @return true iff the the 4 specified sides of a rectangle are inside or
+     * @return true iff the 4 specified sides of a rectangle are inside or
      *              equal to this rectangle
      */
     public boolean contains(int left, int top, int right, int bottom) {
@@ -548,7 +548,7 @@ public final class Rect implements Parcelable {
         }
         return false;
     }
-    
+
     /**
      * If the specified rectangle intersects this rectangle, return true and set
      * this rectangle to that intersection, otherwise return false and do not
@@ -670,7 +670,7 @@ public final class Rect implements Parcelable {
     public void union(@NonNull Rect r) {
         union(r.left, r.top, r.right, r.bottom);
     }
-    
+
     /**
      * Update this Rect to enclose itself and the [x,y] coordinate. There is no
      * check to see that this rectangle is non-empty.

@@ -371,6 +371,24 @@ public class BackupManagerMonitorDumpsysUtils {
                     "V to U restore pkg not eligible";
             case BackupManagerMonitor.LOG_EVENT_ID_V_TO_U_RESTORE_SET_LIST ->
                     "V to U restore lists";
+            case BackupManagerMonitor.LOG_EVENT_ID_RESTORE_AT_INSTALL_INVOKED ->
+                    "Invoked restore at install";
+            case BackupManagerMonitor.LOG_EVENT_ID_SKIP_RESTORE_AT_INSTALL ->
+                    "Skip restore at install";
+            case BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_ACCEPTED_FOR_RESTORE ->
+                    "Pkg accepted for restore";
+            case BackupManagerMonitor.LOG_EVENT_ID_RESTORE_DATA_DOES_NOT_BELONG_TO_PACKAGE ->
+                    "Restore data does not belong to package";
+            case BackupManagerMonitor.LOG_EVENT_ID_UNABLE_TO_CREATE_AGENT_FOR_RESTORE ->
+                    "Unable to create Agent";
+            case BackupManagerMonitor.LOG_EVENT_ID_AGENT_CRASHED_BEFORE_RESTORE_DATA_IS_SENT ->
+                    "Agent crashed before restore data is streamed";
+            case BackupManagerMonitor.LOG_EVENT_ID_FAILED_TO_SEND_DATA_TO_AGENT_DURING_RESTORE ->
+                    "Failed to send data to agent";
+            case BackupManagerMonitor.LOG_EVENT_ID_AGENT_FAILURE_DURING_RESTORE ->
+                    "Agent failure during restore";
+            case BackupManagerMonitor.LOG_EVENT_ID_FAILED_TO_READ_DATA_FROM_TRANSPORT ->
+                    "Failed to read data from Transport";
             default -> "Unknown log event ID: " + code;
         };
         return id;

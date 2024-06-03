@@ -112,6 +112,9 @@ public abstract class BaseBroadcastQueueTest {
     @Mock
     ProcessList mProcessList;
 
+    @Mock
+    AppStartInfoTracker mAppStartInfoTracker;
+
     Context mContext;
     ActivityManagerService mAms;
     BroadcastConstants mConstants;
@@ -172,6 +175,8 @@ public abstract class BaseBroadcastQueueTest {
         mSkipPolicy = spy(new BroadcastSkipPolicy(mAms));
         doReturn(null).when(mSkipPolicy).shouldSkipMessage(any(), any());
         doReturn(false).when(mSkipPolicy).disallowBackgroundStart(any());
+
+        doReturn(mAppStartInfoTracker).when(mProcessList).getAppStartInfoTracker();
     }
 
     public void tearDown() throws Exception {

@@ -19,12 +19,12 @@ import static junit.framework.Assert.assertEquals;
 
 import android.content.res.ColorStateList;
 import android.service.quicksettings.Tile;
-import android.test.suitebuilder.annotation.SmallTest;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 
 import org.junit.Before;
 import org.junit.Test;

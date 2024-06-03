@@ -145,6 +145,7 @@ java_library_static {
     defaults: [
         "platform_service_defaults",
         "android.hardware.power-java_shared",
+        "latest_android_hardware_broadcastradio_java_static",
     ],
     srcs: [
         ":android.hardware.tv.hdmi.connection-V1-java-source",
@@ -182,6 +183,7 @@ java_library_static {
         "android.hardware.vibrator-V2-java",
         "app-compat-annotations",
         "framework-tethering.stubs.module_lib",
+        "keepanno-annotations",
         "service-art.stubs.system_server",
         "service-permission.stubs.system_server",
         "service-rkp.stubs.system_server",
@@ -206,14 +208,15 @@ java_library_static {
         "android.hardware.boot-V1.2-java", // HIDL
         "android.hardware.boot-V1-java", // AIDL
         "android.hardware.broadcastradio-V2.0-java", // HIDL
-        "android.hardware.broadcastradio-V2-java", // AIDL
         "android.hardware.health-V1.0-java", // HIDL
         "android.hardware.health-V2.0-java", // HIDL
         "android.hardware.health-V2.1-java", // HIDL
         "android.hardware.health-V3-java", // AIDL
         "android.hardware.health-translate-java",
         "android.hardware.light-V1-java",
+        "android.hardware.security.authgraph-V1-java",
         "android.hardware.security.rkp-V3-java",
+        "android.hardware.security.secretkeeper-V1-java",
         "android.hardware.tv.cec-V1.1-java",
         "android.hardware.tv.hdmi.cec-V1-java",
         "android.hardware.tv.hdmi.connection-V1-java",
@@ -231,7 +234,6 @@ java_library_static {
         "android.hidl.manager-V1.2-java",
         "cbor-java",
         "com.android.media.audio-aconfig-java",
-        "dropbox_flags_lib",
         "icu4j_calendar_astronomer",
         "android.security.aaid_aidl-java",
         "netd-client",
@@ -240,13 +242,13 @@ java_library_static {
         "com.android.sysprop.watchdog",
         "securebox",
         "apache-commons-math",
-        "backstage_power_flags_lib",
+        "battery_saver_flag_lib",
         "notification_flags_lib",
         "power_hint_flags_lib",
         "biometrics_flags_lib",
         "am_flags_lib",
         "com_android_server_accessibility_flags_lib",
-        "com_android_systemui_shared_flags_lib",
+        "//frameworks/libs/systemui:com_android_systemui_shared_flags_lib",
         "com_android_wm_shell_flags_lib",
         "com.android.server.utils_aconfig-java",
         "service-jobscheduler-deviceidle.flags-aconfig-java",
@@ -254,6 +256,9 @@ java_library_static {
         "net_flags_lib",
         "stats_flags_lib",
         "core_os_flags_lib",
+        "connectivity_flags_lib",
+        "dreams_flags_lib",
+        "aconfig_new_storage_flags_lib",
     ],
     javac_shard_size: 50,
     javacflags: [

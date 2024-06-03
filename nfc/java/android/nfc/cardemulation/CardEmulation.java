@@ -36,6 +36,7 @@ import android.nfc.Constants;
 import android.nfc.Flags;
 import android.nfc.INfcCardEmulation;
 import android.nfc.NfcAdapter;
+import android.os.Build;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -271,30 +272,31 @@ public final class CardEmulation {
     }
 
     /**
+     * <p>
      * Returns whether the user has allowed AIDs registered in the
      * specified category to be handled by a service that is preferred
      * by the foreground application, instead of by a pre-configured default.
      *
      * Foreground applications can set such preferences using the
      * {@link #setPreferredService(Activity, ComponentName)} method.
+     * <p class="note">
+     * Starting with {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}, this method will always
+     * return true.
      *
      * @param category The category, e.g. {@link #CATEGORY_PAYMENT}
      * @return whether AIDs in the category can be handled by a service
      *         specified by the foreground app.
-     *
-     * @deprecated see {@link android.app.role.RoleManager#ROLE_WALLET}. The definition of the
-     * Preferred Payment service is no longer valid. All routings will be done in a AID
-     * category agnostic manner.
      */
     @SuppressWarnings("NonUserGetterCalled")
-    @Deprecated
     public boolean categoryAllowsForegroundPreference(String category) {
         Context contextAsUser = mContext.createContextAsUser(
                 UserHandle.of(UserHandle.myUserId()), 0);
+
         RoleManager roleManager = contextAsUser.getSystemService(RoleManager.class);
         if (roleManager.isRoleAvailable(RoleManager.ROLE_WALLET)) {
             return true;
         }
+
         if (CATEGORY_PAYMENT.equals(category)) {
             boolean preferForeground = false;
             try {
@@ -319,14 +321,14 @@ public final class CardEmulation {
      *    every time what service they would like to use in this category.
      * <p>{@link #SELECTION_MODE_ASK_IF_CONFLICT} the user will only be asked
      *    to pick a service if there is a conflict.
+     *
+     * <p class="note">
+     * Starting with {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}, the default service defined
+     * by the holder of {@link android.app.role.RoleManager#ROLE_WALLET} and is category agnostic.
+     *
      * @param category The category, for example {@link #CATEGORY_PAYMENT}
      * @return the selection mode for the passed in category
-     *
-     * @deprecated see {@link android.app.role.RoleManager#ROLE_WALLET}. The definition of the
-     * Preferred Payment service is no longer valid. All routings will be done in a AID
-     * category agnostic manner.
      */
-    @Deprecated
     public int getSelectionModeForCategory(String category) {
         if (CATEGORY_PAYMENT.equals(category)) {
             boolean paymentRegistered = false;
@@ -919,6 +921,13 @@ public final class CardEmulation {
     /**
      * Retrieves the route destination for the preferred payment service.
      *
+     * <p class="note">
+     * Starting with {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}, the preferred payment service
+     * no longer exists and is replaced by {@link android.app.role.RoleManager#ROLE_WALLET}. This
+     * will return the route for one of the services registered by the role holder (if any). If
+     * there are multiple services registered, it is unspecified which of those will be used to
+     * determine the route.
+     *
      * @return The route destination secure element name of the preferred payment service.
      *         HCE payment: "Host"
      *         OffHost payment: 1. String with prefix SIM or prefix eSE string.
@@ -931,15 +940,8 @@ public final class CardEmulation {
      *                                               (e.g. eSE/eSE1, eSE2, etc.).
      *                          2. "OffHost" if the payment service does not specify secure element
      *                             name.
-     *
-     * @deprecated see {@link android.app.role.RoleManager#ROLE_WALLET}. The definition of the
-     * Preferred Payment service is no longer valid. All routings will go to the Wallet Holder app.
-     * A payment service will be selected automatically based on registered AIDs. In the case of
-     * multiple services that register for the same payment AID, the selection will be done on
-     * an alphabetical order based on the component names.
      */
     @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO)
-    @Deprecated
     @Nullable
     public String getRouteDestinationForPreferredPaymentService() {
         try {
@@ -981,16 +983,16 @@ public final class CardEmulation {
     /**
      * Returns a user-visible description of the preferred payment service.
      *
-     * @return the preferred payment service description
+     * <p class="note">
+     * Starting with {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}, the preferred payment service
+     * no longer exists and is replaced by {@link android.app.role.RoleManager#ROLE_WALLET}. This
+     * will return the description for one of the services registered by the role holder (if any).
+     * If there are multiple services registered, it is unspecified which of those will be used
+     * to obtain the service description here.
      *
-     * @deprecated see {@link android.app.role.RoleManager#ROLE_WALLET}. The definition of the
-     * Preferred Payment service is no longer valid. All routings will go to the Wallet Holder app.
-     * A payment service will be selected automatically based on registered AIDs. In the case of
-     * multiple services that register for the same payment AID, the selection will be done on
-     * an alphabetical order based on the component names.
+     * @return the preferred payment service description
      */
     @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO)
-    @Deprecated
     @Nullable
     public CharSequence getDescriptionForPreferredPaymentService() {
         try {
@@ -1210,16 +1212,16 @@ public final class CardEmulation {
      *
      * @param service The ComponentName of the service
      * @param status  true to enable, false to disable
+     * @param userId the user handle of the user whose information is being requested.
      * @return set service for the category and true if service is already set return false.
      *
      * @hide
      */
-    public boolean setServiceEnabledForCategoryOther(ComponentName service, boolean status) {
+    public boolean setServiceEnabledForCategoryOther(ComponentName service, boolean status,
+                                                     int userId) {
         if (service == null) {
             throw new NullPointerException("activity or service or category is null");
         }
-        int userId = mContext.getUser().getIdentifier();
-
         try {
             return sService.setServiceEnabledForCategoryOther(userId, service, status);
         } catch (RemoteException e) {

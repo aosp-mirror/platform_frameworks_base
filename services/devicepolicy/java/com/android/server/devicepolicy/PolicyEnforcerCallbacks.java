@@ -16,10 +16,14 @@
 
 package com.android.server.devicepolicy;
 
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
@@ -29,14 +33,18 @@ import android.app.admin.PackagePermissionPolicyKey;
 import android.app.admin.PackagePolicyKey;
 import android.app.admin.PolicyKey;
 import android.app.admin.UserRestrictionPolicyKey;
+import android.app.admin.flags.Flags;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
+import android.os.Bundle;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -64,6 +72,10 @@ import java.util.concurrent.atomic.AtomicReference;
 final class PolicyEnforcerCallbacks {
 
     private static final String LOG_TAG = "PolicyEnforcerCallbacks";
+
+    static <T> boolean noOp(T value, Context context, Integer userId, PolicyKey policyKey) {
+        return true;
+    }
 
     static boolean setAutoTimezoneEnabled(@Nullable Boolean enabled, @NonNull Context context) {
         if (!DevicePolicyManagerService.isUnicornFlagEnabled()) {
@@ -166,6 +178,29 @@ final class PolicyEnforcerCallbacks {
         return true;
     }
 
+
+    /**
+     * Application restrictions are stored and retrieved from DPMS, so no enforcing (aka pushing
+     * it to UMS) is required. Only need to send broadcast to the target user here as we rely on
+     * the inheritable policy propagation logic in PolicyEngine to apply this policy to multiple
+     * profiles. The broadcast should only be sent when an application restriction is set, so we
+     * rely on the POLICY_FLAG_SKIP_ENFORCEMENT_IF_UNCHANGED flag so DPE only invokes this callback
+     * when the policy is set, and not during system boot or other situations.
+     */
+    static boolean setApplicationRestrictions(Bundle bundle, Context context, Integer userId,
+            PolicyKey policyKey) {
+        Binder.withCleanCallingIdentity(() -> {
+            PackagePolicyKey key = (PackagePolicyKey) policyKey;
+            String packageName = key.getPackageName();
+            Objects.requireNonNull(packageName);
+            Intent changeIntent = new Intent(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED);
+            changeIntent.setPackage(packageName);
+            changeIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            context.sendBroadcastAsUser(changeIntent, UserHandle.of(userId));
+        });
+        return true;
+    }
+
     private static class BlockingCallback {
         private final CountDownLatch mLatch = new CountDownLatch(1);
         private final AtomicReference<Boolean> mValue = new AtomicReference<>();
@@ -182,18 +217,60 @@ final class PolicyEnforcerCallbacks {
         }
     }
 
+    // TODO: when a local policy exists for a user, this callback will be invoked for this user
+    // individually as well as for USER_ALL. This can be optimized by separating local and global
+    // enforcement in the policy engine.
     static boolean setUserControlDisabledPackages(
-            @Nullable Set<String> packages, int userId) {
+            @Nullable Set<String> packages, Context context, int userId, PolicyKey policyKey) {
         Binder.withCleanCallingIdentity(() -> {
-            LocalServices.getService(PackageManagerInternal.class)
-                    .setOwnerProtectedPackages(
-                            userId,
-                            packages == null ? null : packages.stream().toList());
+            PackageManagerInternal pmi =
+                    LocalServices.getService(PackageManagerInternal.class);
+            AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
+
+            pmi.setOwnerProtectedPackages(userId,
+                    packages == null ? null : packages.stream().toList());
             LocalServices.getService(UsageStatsManagerInternal.class)
-                            .setAdminProtectedPackages(
+                    .setAdminProtectedPackages(
                             packages == null ? null : new ArraySet<>(packages), userId);
+
+            if (packages == null || packages.isEmpty()) {
+                return;
+            }
+
+            for (int user : resolveUsers(userId)) {
+                if (Flags.disallowUserControlBgUsageFix()) {
+                    setBgUsageAppOp(packages, pmi, user, appOpsManager);
+                }
+                if (Flags.disallowUserControlStoppedStateFix()) {
+                    for (String packageName : packages) {
+                        pmi.setPackageStoppedState(packageName, false, user);
+                    }
+                }
+            }
         });
         return true;
+    }
+
+    /** Handles USER_ALL expanding it into the list of all intact users. */
+    private static List<Integer> resolveUsers(int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            UserManagerInternal userManager = LocalServices.getService(UserManagerInternal.class);
+            return userManager.getUsers(/* excludeDying= */ true)
+                    .stream().map(ui -> ui.id).toList();
+        } else {
+            return List.of(userId);
+        }
+    }
+
+    private static void setBgUsageAppOp(Set<String> packages, PackageManagerInternal pmi,
+            int userId, AppOpsManager appOpsManager) {
+        for (var pkg : packages) {
+            int packageFlags = MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
+            final var appInfo = pmi.getApplicationInfo(pkg, packageFlags, Process.myUid(), userId);
+            if (appInfo != null) {
+                DevicePolicyManagerService.setBgUsageAppOp(appOpsManager, appInfo);
+            }
+        }
     }
 
     static boolean addPersistentPreferredActivity(
@@ -335,6 +412,7 @@ final class PolicyEnforcerCallbacks {
     private static void suspendPersonalAppsInPackageManager(Context context, int userId) {
         final String[] appsToSuspend = PersonalAppsSuspensionHelper.forUser(context, userId)
                 .getPersonalAppsForSuspension();
+        Slogf.i(LOG_TAG, "Suspending personal apps: %s", String.join(",", appsToSuspend));
         final String[] failedApps = LocalServices.getService(PackageManagerInternal.class)
                 .setPackagesSuspendedByAdmin(userId, appsToSuspend, true);
         if (!ArrayUtils.isEmpty(failedApps)) {

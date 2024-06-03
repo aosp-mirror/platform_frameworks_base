@@ -61,13 +61,15 @@ public final class Font {
     private static final int STYLE_ITALIC = 1;
     private static final int STYLE_NORMAL = 0;
 
-    private static final NativeAllocationRegistry BUFFER_REGISTRY =
-            NativeAllocationRegistry.createMalloced(
-                    ByteBuffer.class.getClassLoader(), nGetReleaseNativeFont());
+    private static class NoImagePreloadHolder {
+        private static final NativeAllocationRegistry BUFFER_REGISTRY =
+                NativeAllocationRegistry.createMalloced(
+                        ByteBuffer.class.getClassLoader(), nGetReleaseNativeFont());
 
-    private static final NativeAllocationRegistry FONT_REGISTRY =
-            NativeAllocationRegistry.createMalloced(Font.class.getClassLoader(),
-                    nGetReleaseNativeFont());
+        private static final NativeAllocationRegistry FONT_REGISTRY =
+                NativeAllocationRegistry.createMalloced(Font.class.getClassLoader(),
+                        nGetReleaseNativeFont());
+    }
 
     /**
      * A builder class for creating new Font.
@@ -530,7 +532,7 @@ public final class Font {
     public Font(long nativePtr) {
         mNativePtr = nativePtr;
 
-        FONT_REGISTRY.registerNativeAllocation(this, mNativePtr);
+        NoImagePreloadHolder.FONT_REGISTRY.registerNativeAllocation(this, mNativePtr);
     }
 
     /**
@@ -551,7 +553,7 @@ public final class Font {
                 ByteBuffer fromNative = nNewByteBuffer(mNativePtr);
 
                 // Bind ByteBuffer's lifecycle with underlying font object.
-                BUFFER_REGISTRY.registerNativeAllocation(fromNative, ref);
+                NoImagePreloadHolder.BUFFER_REGISTRY.registerNativeAllocation(fromNative, ref);
 
                 // JNI NewDirectBuffer creates writable ByteBuffer even if it is mmaped readonly.
                 mBuffer = fromNative.asReadOnlyBuffer();
@@ -787,7 +789,7 @@ public final class Font {
             return false;
         }
 
-        // ByteBuffer#equals compares all bytes which is not performant for e.g HashMap. Since
+        // ByteBuffer#equals compares all bytes which is not performant for e.g. HashMap. Since
         // underlying native font object holds buffer address, check if this buffer points exactly
         // the same address as a shortcut of equality. For being compatible with of API30 or before,
         // check buffer position even if the buffer points the same address.

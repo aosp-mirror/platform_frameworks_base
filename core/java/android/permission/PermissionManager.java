@@ -23,6 +23,7 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.os.Build.VERSION_CODES.S;
+import static android.permission.flags.Flags.FLAG_SHOULD_REGISTER_ATTRIBUTION_SOURCE;
 import static android.permission.flags.Flags.serverSideAttributionRegistration;
 
 import android.Manifest;
@@ -111,7 +112,7 @@ public final class PermissionManager {
     public static final int PERMISSION_GRANTED = 0;
 
     /**
-     * The permission is denied. Applicable only to runtime and app op permissions.
+     * The permission is denied. Applicable only to runtime permissions.
      * <p>
      * The app isn't expecting the permission to be denied so that a "no-op" action should be taken,
      * such as returning an empty result.
@@ -238,6 +239,16 @@ public final class PermissionManager {
     @SystemApi
     public static final String EXTRA_PERMISSION_USAGES =
             "android.permission.extra.PERMISSION_USAGES";
+
+    /**
+     * Specify what permissions are device aware. Only device aware permissions can be granted to
+     * a remote device.
+     * @hide
+     */
+    public static final Set<String> DEVICE_AWARE_PERMISSIONS =
+            Flags.deviceAwarePermissionsEnabled()
+                    ? Set.of(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
+                    : Collections.emptySet();
 
     private final @NonNull Context mContext;
 
@@ -1652,6 +1663,8 @@ public final class PermissionManager {
      *
      * @hide
      */
+    @TestApi
+    @FlaggedApi(FLAG_SHOULD_REGISTER_ATTRIBUTION_SOURCE)
     public boolean isRegisteredAttributionSource(@NonNull AttributionSource source) {
         try {
             return mPermissionManager.isRegisteredAttributionSource(source.asState());
@@ -1659,6 +1672,21 @@ public final class PermissionManager {
             e.rethrowFromSystemServer();
         }
         return false;
+    }
+
+    /**
+     * Gets the number of currently registered attribution sources for a particular UID. This should
+     * only be used for testing purposes.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.UPDATE_APP_OPS_STATS)
+    public int getRegisteredAttributionSourceCountForTest(int uid) {
+        try {
+            return mPermissionManager.getRegisteredAttributionSourceCount(uid);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return -1;
     }
 
     /**

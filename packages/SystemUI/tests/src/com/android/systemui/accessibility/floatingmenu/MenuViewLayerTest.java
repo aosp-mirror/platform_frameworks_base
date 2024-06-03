@@ -165,7 +165,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
         mMenuView = spy(
                 new MenuView(mSpyContext, mMenuViewModel, menuViewAppearance, mSecureSettings));
         // Ensure tests don't actually update metrics.
-        doNothing().when(mMenuView).incrementTexMetric(any(), anyInt());
+        doNothing().when(mMenuView).incrementTexMetric(any());
 
         mMenuViewLayer = spy(new MenuViewLayer(mSpyContext, mStubWindowManager,
                 mStubAccessibilityManager, mMenuViewModel, menuViewAppearance, mMenuView,
@@ -232,7 +232,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
         final List<String> stubShortcutTargets = new ArrayList<>();
         stubShortcutTargets.add(TEST_SELECT_TO_SPEAK_COMPONENT_NAME.flattenToString());
         when(mStubAccessibilityManager.getAccessibilityShortcutTargets(
-                AccessibilityManager.ACCESSIBILITY_BUTTON)).thenReturn(stubShortcutTargets);
+                ShortcutConstants.UserShortcutType.SOFTWARE)).thenReturn(stubShortcutTargets);
 
         mMenuViewLayer.mDismissMenuAction.run();
 
@@ -271,7 +271,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
         final List<String> stubShortcutTargets = new ArrayList<>();
         stubShortcutTargets.add(TEST_SELECT_TO_SPEAK_COMPONENT_NAME.flattenToString());
         when(mStubAccessibilityManager.getAccessibilityShortcutTargets(
-                AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY)).thenReturn(stubShortcutTargets);
+                ShortcutConstants.UserShortcutType.HARDWARE)).thenReturn(stubShortcutTargets);
 
         mMenuViewLayer.mDismissMenuAction.run();
         final String value = Settings.Secure.getString(mSpyContext.getContentResolver(),
@@ -414,40 +414,32 @@ public class MenuViewLayerTest extends SysuiTestCase {
     @Test
     @EnableFlags(Flags.FLAG_FLOATING_MENU_DRAG_TO_EDIT)
     public void onDismissAction_incrementsTexMetricDismiss() {
-        int uid1 = 1234, uid2 = 5678;
         mMenuViewModel.onTargetFeaturesChanged(
-                List.of(new TestAccessibilityTarget(mSpyContext, uid1),
-                        new TestAccessibilityTarget(mSpyContext, uid2)));
+                List.of(new TestAccessibilityTarget(mSpyContext, 1234),
+                        new TestAccessibilityTarget(mSpyContext, 5678)));
 
         mMenuViewLayer.dispatchAccessibilityAction(R.id.action_remove_menu);
 
-        ArgumentCaptor<Integer> uidCaptor = ArgumentCaptor.forClass(Integer.class);
-        verify(mMenuView, times(2)).incrementTexMetric(eq(MenuViewLayer.TEX_METRIC_DISMISS),
-                uidCaptor.capture());
-        assertThat(uidCaptor.getAllValues()).containsExactly(uid1, uid2);
+        verify(mMenuView, times(1)).incrementTexMetric(eq(MenuViewLayer.TEX_METRIC_DISMISS));
     }
 
     @Test
     @EnableFlags(Flags.FLAG_FLOATING_MENU_DRAG_TO_EDIT)
     public void onEditAction_incrementsTexMetricEdit() {
-        int uid1 = 1234, uid2 = 5678;
         mMenuViewModel.onTargetFeaturesChanged(
-                List.of(new TestAccessibilityTarget(mSpyContext, uid1),
-                        new TestAccessibilityTarget(mSpyContext, uid2)));
+                List.of(new TestAccessibilityTarget(mSpyContext, 1234),
+                        new TestAccessibilityTarget(mSpyContext, 5678)));
 
         mMenuViewLayer.dispatchAccessibilityAction(R.id.action_edit);
 
-        ArgumentCaptor<Integer> uidCaptor = ArgumentCaptor.forClass(Integer.class);
-        verify(mMenuView, times(2)).incrementTexMetric(eq(MenuViewLayer.TEX_METRIC_EDIT),
-                uidCaptor.capture());
-        assertThat(uidCaptor.getAllValues()).containsExactly(uid1, uid2);
+        verify(mMenuView, times(1)).incrementTexMetric(eq(MenuViewLayer.TEX_METRIC_EDIT));
     }
 
     /** Simplified AccessibilityTarget for testing MenuViewLayer. */
     private static class TestAccessibilityTarget extends AccessibilityTarget {
         TestAccessibilityTarget(Context context, int uid) {
             // Set fields unused by tests to defaults that allow test compilation.
-            super(context, AccessibilityManager.ACCESSIBILITY_BUTTON, 0, false,
+            super(context, ShortcutConstants.UserShortcutType.SOFTWARE, 0, false,
                     TEST_SELECT_TO_SPEAK_COMPONENT_NAME.flattenToString(), uid, null, null, null);
         }
     }

@@ -16,6 +16,7 @@
 package com.android.systemui.shade.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.shade.shared.model.ShadeMode
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +29,7 @@ interface ShadeRepository {
      * Amount qs has expanded, [0-1]. 0 means fully collapsed, 1 means fully expanded. Quick
      * Settings can be expanded without the full shade expansion.
      */
-    val qsExpansion: StateFlow<Float>
+    @Deprecated("Use ShadeInteractor.qsExpansion instead") val qsExpansion: StateFlow<Float>
 
     /** Amount shade has expanded with regard to the UDFPS location */
     val udfpsTransitionToFullShadeProgress: StateFlow<Float>
@@ -219,7 +220,7 @@ class ShadeRepositoryImpl @Inject constructor() : ShadeRepository {
     @Deprecated("Use ShadeInteractor instead")
     override val legacyQsFullscreen: StateFlow<Boolean> = _legacyQsFullscreen.asStateFlow()
 
-    val _shadeMode = MutableStateFlow<ShadeMode>(ShadeMode.Single)
+    val _shadeMode = MutableStateFlow(if (DualShade.isEnabled) ShadeMode.Dual else ShadeMode.Single)
     override val shadeMode: StateFlow<ShadeMode> = _shadeMode.asStateFlow()
 
     override fun setShadeMode(shadeMode: ShadeMode) {

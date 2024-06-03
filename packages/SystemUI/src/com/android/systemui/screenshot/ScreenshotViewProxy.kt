@@ -46,7 +46,7 @@ interface ScreenshotViewProxy {
     fun createScreenshotDropInAnimation(screenRect: Rect, showFlash: Boolean): Animator
     fun addQuickShareChip(quickShareAction: Notification.Action)
     fun setChipIntents(imageData: ScreenshotController.SavedImageData)
-    fun requestDismissal(event: ScreenshotEvent)
+    fun requestDismissal(event: ScreenshotEvent?)
 
     fun showScrollChip(packageName: String, onClick: Runnable)
     fun hideScrollChip()
@@ -63,6 +63,7 @@ interface ScreenshotViewProxy {
         longScreenshot: ScrollCaptureController.LongScreenshot
     )
     fun restoreNonScrollingUi()
+    fun fadeForSharedTransition()
 
     fun stopInputListening()
     fun requestFocus()

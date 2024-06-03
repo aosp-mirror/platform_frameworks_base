@@ -1,8 +1,10 @@
 package: "android.app"
+container: "system"
 
 flag {
      namespace: "system_performance"
      name: "app_start_info"
+     is_exported: true
      description: "Control collecting of ApplicationStartInfo records and APIs."
      bug: "247814855"
 }
@@ -10,6 +12,7 @@ flag {
 flag {
      namespace: "backstage_power"
      name: "get_binding_uid_importance"
+     is_exported: true
      description: "API to get importance of UID that's binding to the caller"
      bug: "292533010"
 }
@@ -17,6 +20,7 @@ flag {
 flag {
     namespace: "backstage_power"
     name: "app_restrictions_api"
+    is_exported: true
     description: "API to track and query restrictions applied to apps"
     bug: "320150834"
 }
@@ -24,6 +28,7 @@ flag {
 flag {
      namespace: "backstage_power"
      name: "uid_importance_listener_for_uids"
+     is_exported: true
      description: "API to add OnUidImportanceListener with targetted UIDs"
      bug: "286258140"
 }
@@ -31,13 +36,48 @@ flag {
 flag {
      namespace: "backstage_power"
      name: "introduce_new_service_ontimeout_callback"
+     is_exported: true
      description: "Add a new callback in Service to indicate a FGS has reached its timeout."
      bug: "317799821"
 }
 
 flag {
-    name: "bcast_event_timestamps"
-    namespace: "backstage_power"
-    description: "Add APIs for clients to provide broadcast event trigger timestamps"
-    bug: "325136414"
+     namespace: "system_performance"
+     name: "app_start_info_timestamps"
+     description: "Additional timestamps."
+     bug: "287153617"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}
+
+flag {
+     namespace: "backstage_power"
+     name: "gate_fgs_timeout_anr_behavior"
+     description: "Gate the new behavior where an ANR is thrown once an FGS times out."
+     bug: "339315145"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}
+
+flag {
+     namespace: "backstage_power"
+     name: "enable_fgs_timeout_crash_behavior"
+     description: "Enable the new behavior where the app is crashed once an FGS times out."
+     bug: "339526947"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}
+
+flag {
+     namespace: "backstage_power"
+     name: "skip_bg_mem_trim_on_fg_app"
+     description: "Skip background memory trim event on foreground processes."
+     is_fixed_read_only: true
+     bug: "308927629"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
 }

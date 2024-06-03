@@ -16,7 +16,11 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.os.UserHandle
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.service.notification.StatusBarNotification
 import androidx.test.filters.SmallTest
@@ -25,14 +29,17 @@ import com.android.server.notification.Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDIN
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
+import com.android.systemui.statusbar.RankingBuilder
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.DynamicPrivacyController
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -44,6 +51,8 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.withArgCaptor
 import dagger.BindsInstance
 import dagger.Component
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
@@ -111,6 +120,49 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
         onSensitiveStateChangedListener.run()
 
         verify(invalidationListener).onPluggableInvalidated(eq(invalidator), any())
+    }
+
+    @Test
+    @DisableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    fun screenshareSecretFilter_flagDisabled_filterNoAdded() {
+        coordinator.attach(pipeline)
+
+        verify(pipeline, never()).addFinalizeFilter(any(NotifFilter::class.java))
+    }
+
+    @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    fun screenshareSecretFilter_sensitiveInctive_noFiltersSecret() {
+        whenever(sensitiveNotificationProtectionController.isSensitiveStateActive)
+            .thenReturn(false)
+
+        coordinator.attach(pipeline)
+        val filter = withArgCaptor<NotifFilter> { verify(pipeline).addFinalizeFilter(capture()) }
+
+        val defaultNotification = createNotificationEntry("test", false, false)
+        val notificationWithSecretVisibility = createNotificationEntry("test", true, false)
+        val notificationOnSecretChannel = createNotificationEntry("test", false, true)
+
+        assertFalse(filter.shouldFilterOut(defaultNotification, 0))
+        assertFalse(filter.shouldFilterOut(notificationWithSecretVisibility, 0))
+        assertFalse(filter.shouldFilterOut(notificationOnSecretChannel, 0))
+    }
+
+    @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    fun screenshareSecretFilter_sensitiveActive_filtersSecret() {
+        whenever(sensitiveNotificationProtectionController.isSensitiveStateActive).thenReturn(true)
+
+        coordinator.attach(pipeline)
+        val filter = withArgCaptor<NotifFilter> { verify(pipeline).addFinalizeFilter(capture()) }
+
+        val defaultNotification = createNotificationEntry("test", false, false)
+        val notificationWithSecretVisibility = createNotificationEntry("test", true, false)
+        val notificationOnSecretChannel = createNotificationEntry("test", false, true)
+
+        assertFalse(filter.shouldFilterOut(defaultNotification, 0))
+        assertTrue(filter.shouldFilterOut(notificationWithSecretVisibility, 0))
+        assertTrue(filter.shouldFilterOut(notificationOnSecretChannel, 0))
     }
 
     @Test
@@ -637,6 +689,32 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
         return object : ListEntry("key", 0) {
             override fun getRepresentativeEntry(): NotificationEntry = mockEntry
         }
+    }
+
+    private fun createNotificationEntry(
+        packageName: String,
+        secretVisibility: Boolean = false,
+        secretChannelVisibility: Boolean = false,
+    ): NotificationEntry {
+        val notification = Notification()
+        if (secretVisibility) {
+            // Developer has marked notification as public
+            notification.visibility = Notification.VISIBILITY_SECRET
+        }
+        val notificationEntry =
+            NotificationEntryBuilder().setNotification(notification).setPkg(packageName).build()
+        val channel = NotificationChannel("1", "1", NotificationManager.IMPORTANCE_HIGH)
+        if (secretChannelVisibility) {
+            // User doesn't allow notifications at the channel level
+            channel.lockscreenVisibility = Notification.VISIBILITY_SECRET
+        }
+        notificationEntry.setRanking(
+            RankingBuilder(notificationEntry.ranking)
+                .setChannel(channel)
+                .setVisibilityOverride(NotificationManager.VISIBILITY_NO_OVERRIDE)
+                .build()
+        )
+        return notificationEntry
     }
 }
 

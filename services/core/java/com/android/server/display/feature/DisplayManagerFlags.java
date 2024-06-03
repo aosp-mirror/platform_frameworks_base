@@ -96,6 +96,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_RESTRICT_DISPLAY_MODES,
             Flags::enableRestrictDisplayModes);
 
+    private final FlagState mResolutionBackupRestore = new FlagState(
+            Flags.FLAG_RESOLUTION_BACKUP_RESTORE,
+            Flags::resolutionBackupRestore);
+
     private final FlagState mVsyncLowPowerVote = new FlagState(
             Flags.FLAG_ENABLE_VSYNC_LOW_POWER_VOTE,
             Flags::enableVsyncLowPowerVote);
@@ -140,12 +144,40 @@ public class DisplayManagerFlags {
             Flags::idleScreenRefreshRateTimeout
     );
 
-
     private final FlagState mRefactorDisplayPowerController = new FlagState(
             Flags.FLAG_REFACTOR_DISPLAY_POWER_CONTROLLER,
             Flags::refactorDisplayPowerController
     );
 
+    private final FlagState mUseFusionProxSensor = new FlagState(
+            Flags.FLAG_USE_FUSION_PROX_SENSOR,
+            Flags::useFusionProxSensor
+    );
+
+    private final FlagState mOffloadControlsDozeAutoBrightness = new FlagState(
+            Flags.FLAG_OFFLOAD_CONTROLS_DOZE_AUTO_BRIGHTNESS,
+            Flags::offloadControlsDozeAutoBrightness
+    );
+
+    private final FlagState mPeakRefreshRatePhysicalLimit = new FlagState(
+            Flags.FLAG_ENABLE_PEAK_REFRESH_RATE_PHYSICAL_LIMIT,
+            Flags::enablePeakRefreshRatePhysicalLimit
+    );
+
+    private final FlagState mIgnoreAppPreferredRefreshRate = new FlagState(
+            Flags.FLAG_IGNORE_APP_PREFERRED_REFRESH_RATE_REQUEST,
+            Flags::ignoreAppPreferredRefreshRateRequest
+    );
+
+    private final FlagState mSynthetic60hzModes = new FlagState(
+            Flags.FLAG_ENABLE_SYNTHETIC_60HZ_MODES,
+            Flags::enableSynthetic60hzModes
+    );
+
+    private final FlagState mOffloadDozeOverrideHoldsWakelock = new FlagState(
+            Flags.FLAG_OFFLOAD_DOZE_OVERRIDE_HOLDS_WAKELOCK,
+            Flags::offloadDozeOverrideHoldsWakelock
+    );
 
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
@@ -246,6 +278,10 @@ public class DisplayManagerFlags {
         return mRestrictDisplayModes.isEnabled();
     }
 
+    public boolean isResolutionBackupRestoreEnabled() {
+        return mResolutionBackupRestore.isEnabled();
+    }
+
     public boolean isVsyncLowPowerVoteEnabled() {
         return mVsyncLowPowerVote.isEnabled();
     }
@@ -293,6 +329,40 @@ public class DisplayManagerFlags {
         return mRefactorDisplayPowerController.isEnabled();
     }
 
+    public boolean isUseFusionProxSensorEnabled() {
+        return mUseFusionProxSensor.isEnabled();
+    }
+
+    public String getUseFusionProxSensorFlagName() {
+        return mUseFusionProxSensor.getName();
+    }
+
+    /**
+     * @return Whether DisplayOffload should control auto-brightness in doze
+     */
+    public boolean offloadControlsDozeAutoBrightness() {
+        return mOffloadControlsDozeAutoBrightness.isEnabled();
+    }
+
+    public boolean isPeakRefreshRatePhysicalLimitEnabled() {
+        return mPeakRefreshRatePhysicalLimit.isEnabled();
+    }
+
+    public boolean isOffloadDozeOverrideHoldsWakelockEnabled() {
+        return mOffloadDozeOverrideHoldsWakelock.isEnabled();
+    }
+
+    /**
+     * @return Whether to ignore preferredRefreshRate app request conversion to display mode or not
+     */
+    public boolean ignoreAppPreferredRefreshRateRequest() {
+        return mIgnoreAppPreferredRefreshRate.isEnabled();
+    }
+
+    public boolean isSynthetic60HzModesEnabled() {
+        return mSynthetic60hzModes.isEnabled();
+    }
+
     /**
      * dumps all flagstates
      * @param pw printWriter
@@ -309,6 +379,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mHdrClamperFlagState);
         pw.println(" " + mNbmControllerFlagState);
         pw.println(" " + mPowerThrottlingClamperFlagState);
+        pw.println(" " + mEvenDimmerFlagState);
         pw.println(" " + mSmallAreaDetectionFlagState);
         pw.println(" " + mBrightnessIntRangeUserPerceptionFlagState);
         pw.println(" " + mRestrictDisplayModes);
@@ -321,6 +392,13 @@ public class DisplayManagerFlags {
         pw.println(" " + mSensorBasedBrightnessThrottling);
         pw.println(" " + mIdleScreenRefreshRateTimeout);
         pw.println(" " + mRefactorDisplayPowerController);
+        pw.println(" " + mResolutionBackupRestore);
+        pw.println(" " + mUseFusionProxSensor);
+        pw.println(" " + mOffloadControlsDozeAutoBrightness);
+        pw.println(" " + mPeakRefreshRatePhysicalLimit);
+        pw.println(" " + mIgnoreAppPreferredRefreshRate);
+        pw.println(" " + mSynthetic60hzModes);
+        pw.println(" " + mOffloadDozeOverrideHoldsWakelock);
     }
 
     private static class FlagState {
@@ -334,6 +412,10 @@ public class DisplayManagerFlags {
         private FlagState(String name, Supplier<Boolean> flagFunction) {
             mName = name;
             mFlagFunction = flagFunction;
+        }
+
+        private String getName() {
+            return mName;
         }
 
         private boolean isEnabled() {

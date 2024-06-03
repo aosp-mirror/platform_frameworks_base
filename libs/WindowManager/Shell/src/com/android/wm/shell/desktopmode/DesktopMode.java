@@ -18,7 +18,7 @@ package com.android.wm.shell.desktopmode;
 
 import android.graphics.Region;
 
-import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.shared.annotations.ExternalThread;
 
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;

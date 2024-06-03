@@ -16,24 +16,28 @@
 
 package com.android.systemui.qs.ui.composable
 
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.MovableElementScenePicker
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.TransitionState
 import com.android.compose.animation.scene.ValueKey
 import com.android.compose.modifiers.thenIf
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.Companion.Collapsing
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.Expanding
@@ -68,7 +72,7 @@ object QuickSettings {
 
 private fun SceneScope.stateForQuickSettingsContent(
     isSplitShade: Boolean,
-    squishiness: Float = QuickSettings.SharedValues.SquishinessValues.Default
+    squishiness: () -> Float = { QuickSettings.SharedValues.SquishinessValues.Default }
 ): QSSceneAdapter.State {
     return when (val transitionState = layoutState.transitionState) {
         is TransitionState.Idle -> {
@@ -124,9 +128,9 @@ fun SceneScope.QuickSettings(
     heightProvider: () -> Int,
     isSplitShade: Boolean,
     modifier: Modifier = Modifier,
-    squishiness: Float = QuickSettings.SharedValues.SquishinessValues.Default,
+    squishiness: () -> Float = { QuickSettings.SharedValues.SquishinessValues.Default },
 ) {
-    val contentState = stateForQuickSettingsContent(isSplitShade, squishiness)
+    val contentState = { stateForQuickSettingsContent(isSplitShade, squishiness) }
     val transitionState = layoutState.transitionState
     val isClosing =
         transitionState is TransitionState.Transition &&
@@ -143,10 +147,12 @@ fun SceneScope.QuickSettings(
     MovableElement(
         key = QuickSettings.Elements.Content,
         modifier =
-            modifier.fillMaxWidth().layout { measurable, constraints ->
+            modifier.sysuiResTag("quick_settings_panel").fillMaxWidth().layout {
+                measurable,
+                constraints ->
                 val placeable = measurable.measure(constraints)
                 // Use the height of the correct view based on the scene it is being composed in
-                val height = heightProvider()
+                val height = heightProvider().coerceAtLeast(0)
 
                 layout(placeable.width, height) { placeable.placeRelative(0, 0) }
             }
@@ -158,11 +164,11 @@ fun SceneScope.QuickSettings(
 @Composable
 private fun QuickSettingsContent(
     qsSceneAdapter: QSSceneAdapter,
-    state: QSSceneAdapter.State,
+    state: () -> QSSceneAdapter.State,
     modifier: Modifier = Modifier,
 ) {
-    val qsView by qsSceneAdapter.qsView.collectAsState(null)
-    val isCustomizing by qsSceneAdapter.isCustomizing.collectAsState()
+    val qsView by qsSceneAdapter.qsView.collectAsStateWithLifecycle()
+    val isCustomizing by qsSceneAdapter.isCustomizerShowing.collectAsStateWithLifecycle()
     QuickSettingsTheme {
         val context = LocalContext.current
 
@@ -174,15 +180,34 @@ private fun QuickSettingsContent(
         qsView?.let { view ->
             Box(
                 modifier =
-                    modifier.fillMaxWidth().thenIf(isCustomizing) { Modifier.fillMaxHeight() }
+                    modifier
+                        .fillMaxWidth()
+                        .thenIf(isCustomizing) { Modifier.fillMaxHeight() }
+                        .drawWithContent {
+                            qsSceneAdapter.applyLatestExpansionAndSquishiness()
+                            drawContent()
+                        }
             ) {
                 AndroidView(
                     modifier = Modifier.fillMaxWidth(),
-                    factory = { _ ->
-                        qsSceneAdapter.setState(state)
-                        view
+                    factory = { context ->
+                        qsSceneAdapter.setState(state())
+                        FrameLayout(context).apply {
+                            (view.parent as? ViewGroup)?.removeView(view)
+                            addView(view)
+                        }
                     },
-                    update = { qsSceneAdapter.setState(state) }
+                    // When the view changes (e.g. due to a theme change), this will be recomposed
+                    // if needed and the new view will be attached to the FrameLayout here.
+                    update = {
+                        qsSceneAdapter.setState(state())
+                        if (view.parent != it) {
+                            it.removeAllViews()
+                            (view.parent as? ViewGroup)?.removeView(view)
+                            it.addView(view)
+                        }
+                    },
+                    onRelease = { it.removeAllViews() }
                 )
             }
         }

@@ -18,6 +18,7 @@ package com.android.wm.shell.bubbles
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ShortcutInfo
+import android.content.res.Resources
 import android.graphics.Insets
 import android.graphics.PointF
 import android.graphics.Rect
@@ -43,6 +44,9 @@ class BubblePositionerTest {
 
     private lateinit var positioner: BubblePositioner
     private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val resources: Resources
+        get() = context.resources
+
     private val defaultDeviceConfig =
         DeviceConfig(
             windowBounds = Rect(0, 0, 1000, 2000),
@@ -202,6 +206,56 @@ class BubblePositionerTest {
         assertThat(positioner.hasUserModifiedDefaultPosition()).isFalse()
         positioner.restingPosition = PointF(0f, 100f)
         assertThat(positioner.hasUserModifiedDefaultPosition()).isTrue()
+    }
+
+    @Test
+    fun testBubbleBarExpandedViewHeightAndWidth() {
+        val deviceConfig =
+            defaultDeviceConfig.copy(
+                // portrait orientation
+                isLandscape = false,
+                isLargeScreen = true,
+                insets = Insets.of(10, 20, 5, 15),
+                windowBounds = Rect(0, 0, 1800, 2600)
+            )
+
+        positioner.setShowingInBubbleBar(true)
+        positioner.update(deviceConfig)
+        positioner.bubbleBarTopOnScreen = 2500
+
+        val spaceBetweenTopInsetAndBubbleBarInLandscape = 1680
+        val expandedViewVerticalSpacing =
+            resources.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding)
+        val expectedHeight =
+            spaceBetweenTopInsetAndBubbleBarInLandscape - 2 * expandedViewVerticalSpacing
+        val expectedWidth = resources.getDimensionPixelSize(R.dimen.bubble_bar_expanded_view_width)
+
+        assertThat(positioner.getExpandedViewWidthForBubbleBar(false)).isEqualTo(expectedWidth)
+        assertThat(positioner.getExpandedViewHeightForBubbleBar(false)).isEqualTo(expectedHeight)
+    }
+
+    @Test
+    fun testBubbleBarExpandedViewHeightAndWidth_screenWidthTooSmall() {
+        val screenWidth = 300
+        val deviceConfig =
+            defaultDeviceConfig.copy(
+                // portrait orientation
+                isLandscape = false,
+                isLargeScreen = true,
+                insets = Insets.of(10, 20, 5, 15),
+                windowBounds = Rect(0, 0, screenWidth, 2600)
+            )
+        positioner.setShowingInBubbleBar(true)
+        positioner.update(deviceConfig)
+        positioner.bubbleBarTopOnScreen = 2500
+
+        val spaceBetweenTopInsetAndBubbleBarInLandscape = 180
+        val expandedViewSpacing =
+            resources.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding)
+        val expectedHeight = spaceBetweenTopInsetAndBubbleBarInLandscape - 2 * expandedViewSpacing
+        val expectedWidth = screenWidth - 15 /* horizontal insets */ - 2 * expandedViewSpacing
+        assertThat(positioner.getExpandedViewWidthForBubbleBar(false)).isEqualTo(expectedWidth)
+        assertThat(positioner.getExpandedViewHeightForBubbleBar(false)).isEqualTo(expectedHeight)
     }
 
     @Test
@@ -541,16 +595,19 @@ class BubblePositionerTest {
 
     private fun testGetBubbleBarExpandedViewBounds(onLeft: Boolean, isOverflow: Boolean) {
         positioner.setShowingInBubbleBar(true)
+        val windowBounds = Rect(0, 0, 2000, 2600)
+        val insets = Insets.of(10, 20, 5, 15)
         val deviceConfig =
             defaultDeviceConfig.copy(
                 isLargeScreen = true,
                 isLandscape = true,
-                insets = Insets.of(10, 20, 5, 15),
-                windowBounds = Rect(0, 0, 2000, 2600)
+                insets = insets,
+                windowBounds = windowBounds
             )
         positioner.update(deviceConfig)
 
-        positioner.bubbleBarBounds = getBubbleBarBounds(onLeft, deviceConfig)
+        val bubbleBarHeight = 100
+        positioner.bubbleBarTopOnScreen = windowBounds.bottom - insets.bottom - bubbleBarHeight
 
         val expandedViewPadding =
             context.resources.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding)
@@ -568,7 +625,7 @@ class BubblePositionerTest {
             left = right - positioner.getExpandedViewWidthForBubbleBar(isOverflow)
         }
         // Above the bubble bar
-        val bottom = positioner.bubbleBarBounds.top - expandedViewPadding
+        val bottom = positioner.bubbleBarTopOnScreen - expandedViewPadding
         // Calculate right and top based on size
         val top = bottom - positioner.getExpandedViewHeightForBubbleBar(isOverflow)
         val expectedBounds = Rect(left, top, right, bottom)
@@ -610,21 +667,4 @@ class BubblePositionerTest {
                 positioner.getAllowableStackPositionRegion(1 /* bubbleCount */)
             return allowableStackRegion.top + allowableStackRegion.height() * offsetPercent
         }
-
-    private fun getBubbleBarBounds(onLeft: Boolean, deviceConfig: DeviceConfig): Rect {
-        val width = 200
-        val height = 100
-        val bottom = deviceConfig.windowBounds.bottom - deviceConfig.insets.bottom
-        val top = bottom - height
-        val left: Int
-        val right: Int
-        if (onLeft) {
-            left = deviceConfig.insets.left
-            right = left + width
-        } else {
-            right = deviceConfig.windowBounds.right - deviceConfig.insets.right
-            left = right - width
-        }
-        return Rect(left, top, right, bottom)
-    }
 }

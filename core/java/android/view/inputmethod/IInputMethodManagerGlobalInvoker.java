@@ -40,6 +40,7 @@ import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.InputBindResult;
+import com.android.internal.inputmethod.InputMethodInfoSafeList;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
@@ -242,7 +243,12 @@ final class IInputMethodManagerGlobalInvoker {
             return new ArrayList<>();
         }
         try {
-            return service.getInputMethodList(userId, directBootAwareness);
+            if (Flags.useInputMethodInfoSafeList()) {
+                return InputMethodInfoSafeList.extractFrom(
+                        service.getInputMethodList(userId, directBootAwareness));
+            } else {
+                return service.getInputMethodListLegacy(userId, directBootAwareness);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -257,7 +263,12 @@ final class IInputMethodManagerGlobalInvoker {
             return new ArrayList<>();
         }
         try {
-            return service.getEnabledInputMethodList(userId);
+            if (Flags.useInputMethodInfoSafeList()) {
+                return InputMethodInfoSafeList.extractFrom(
+                        service.getEnabledInputMethodList(userId));
+            } else {
+                return service.getEnabledInputMethodListLegacy(userId);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -754,6 +765,19 @@ final class IInputMethodManagerGlobalInvoker {
         }
     }
 
+    /** @see com.android.server.inputmethod.ImeTrackerService#onDispatched */
+    static void onDispatched(@NonNull ImeTracker.Token statsToken) {
+        final IImeTracker service = getImeTrackerService();
+        if (service == null) {
+            return;
+        }
+        try {
+            service.onDispatched(statsToken);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** @see com.android.server.inputmethod.ImeTrackerService#hasPendingImeVisibilityRequests */
     @AnyThread
     @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
@@ -764,6 +788,20 @@ final class IInputMethodManagerGlobalInvoker {
         }
         try {
             return service.hasPendingImeVisibilityRequests();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
+    @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
+    static void finishTrackingPendingImeVisibilityRequests() {
+        final var service = getImeTrackerService();
+        if (service == null) {
+            return;
+        }
+        try {
+            service.finishTrackingPendingImeVisibilityRequests();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

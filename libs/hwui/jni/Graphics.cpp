@@ -211,11 +211,7 @@ static jclass   gRegion_class;
 static jfieldID gRegion_nativeInstanceID;
 static jmethodID gRegion_constructorMethodID;
 
-static jclass    gByte_class;
-static jobject   gVMRuntime;
-static jclass    gVMRuntime_class;
-static jmethodID gVMRuntime_newNonMovableArray;
-static jmethodID gVMRuntime_addressOf;
+static jclass gByte_class;
 
 static jclass gColorSpace_class;
 static jmethodID gColorSpace_getMethodID;
@@ -788,13 +784,6 @@ int register_android_graphics_Graphics(JNIEnv* env)
     c = env->FindClass("java/lang/Byte");
     gByte_class = (jclass) env->NewGlobalRef(
         env->GetStaticObjectField(c, env->GetStaticFieldID(c, "TYPE", "Ljava/lang/Class;")));
-
-    gVMRuntime_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "dalvik/system/VMRuntime"));
-    m = env->GetStaticMethodID(gVMRuntime_class, "getRuntime", "()Ldalvik/system/VMRuntime;");
-    gVMRuntime = env->NewGlobalRef(env->CallStaticObjectMethod(gVMRuntime_class, m));
-    gVMRuntime_newNonMovableArray = GetMethodIDOrDie(env, gVMRuntime_class, "newNonMovableArray",
-                                                     "(Ljava/lang/Class;I)Ljava/lang/Object;");
-    gVMRuntime_addressOf = GetMethodIDOrDie(env, gVMRuntime_class, "addressOf", "(Ljava/lang/Object;)J");
 
     gColorSpace_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/ColorSpace"));
     gColorSpace_getMethodID = GetStaticMethodIDOrDie(env, gColorSpace_class,

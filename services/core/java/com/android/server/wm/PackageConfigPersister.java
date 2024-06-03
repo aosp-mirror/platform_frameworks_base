@@ -169,6 +169,8 @@ public class PackageConfigPersister {
                         LocaleOverlayHelper.combineLocalesIfOverlayExists(
                         modifiedRecord.mLocales, mAtm.getGlobalConfiguration().getLocales()),
                         modifiedRecord.mGrammaticalGender);
+            } else {
+                container.applyAppSpecificConfig(null, null, null);
             }
         }
     }

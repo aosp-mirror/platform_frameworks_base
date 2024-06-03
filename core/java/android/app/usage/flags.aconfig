@@ -1,7 +1,9 @@
 package: "android.app.usage"
+container: "system"
 
 flag {
     name: "user_interaction_type_api"
+    is_exported: true
     namespace: "backstage_power"
     description: "Feature flag for user interaction event report/query API"
     bug: "296061232"
@@ -9,6 +11,7 @@ flag {
 
 flag {
     name: "report_usage_stats_permission"
+    is_exported: true
     namespace: "backstage_power"
     description: "Feature flag for the new REPORT_USAGE_STATS permission."
     bug: "296056771"
@@ -31,6 +34,7 @@ flag {
 
 flag {
     name: "filter_based_event_query_api"
+    is_exported: true
     namespace: "backstage_power"
     description: " Feature flag to support filter based event query API"
     bug: "194321117"
@@ -38,7 +42,19 @@ flag {
 
 flag {
     name: "get_app_bytes_by_data_type_api"
+    is_exported: true
     namespace: "system_performance"
     description: "Feature flag for collecting app data size by file type API"
     bug: "294088945"
+}
+
+flag {
+    name: "disable_idle_check"
+    namespace: "backstage_power"
+    description: "disable idle check for USER_SYSTEM during boot up"
+    is_fixed_read_only: true
+    bug: "337864590"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

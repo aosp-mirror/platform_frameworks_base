@@ -52,11 +52,11 @@ class UserDataPreparer {
     private static final String TAG = "UserDataPreparer";
     private static final String XATTR_SERIAL = "user.serial";
 
-    private final Object mInstallLock;
+    private final PackageManagerTracedLock mInstallLock;
     private final Context mContext;
     private final Installer mInstaller;
 
-    UserDataPreparer(Installer installer, Object installLock, Context context) {
+    UserDataPreparer(Installer installer, PackageManagerTracedLock installLock, Context context) {
         mInstallLock = installLock;
         mContext = context;
         mInstaller = installer;

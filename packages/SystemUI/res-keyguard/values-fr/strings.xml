@@ -23,7 +23,7 @@
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Saisissez votre code"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"Saisissez le code"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Tracez votre schéma"</string>
-    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Dessinez un schéma"</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Dessinez le schéma"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Saisissez votre mot de passe"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"Saisissez le mot de passe"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Carte non valide."</string>
@@ -111,12 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Pour plus de sécurité, utilisez plutôt un schéma"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Pour plus de sécurité, utilisez plutôt un code"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Pour plus de sécurité, utilisez plutôt un mot de passe"</string>
-    <!-- no translation found for kg_prompt_added_security_pin (5487992065995475528) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_pattern (1017068086102168544) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_password (6053156069765029006) -->
-    <skip />
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Veuillez saisir le code pour renforcer la sécurité"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Veuillez dessiner le schéma pour renforcer la sécurité"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Veuillez saisir le mot de passe pour renforcer la sécurité"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Appareil verrouillé par l\'administrateur"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Appareil verrouillé manuellement"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Non reconnu"</string>

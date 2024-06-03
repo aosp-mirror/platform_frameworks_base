@@ -58,6 +58,11 @@ import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.SystemClock;
 
+import kotlinx.coroutines.flow.Flow;
+import kotlinx.coroutines.flow.MutableStateFlow;
+import kotlinx.coroutines.flow.StateFlow;
+import kotlinx.coroutines.flow.StateFlowKt;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -67,11 +72,6 @@ import java.util.Set;
 import java.util.Stack;
 
 import javax.inject.Inject;
-
-import kotlinx.coroutines.flow.Flow;
-import kotlinx.coroutines.flow.MutableStateFlow;
-import kotlinx.coroutines.flow.StateFlow;
-import kotlinx.coroutines.flow.StateFlowKt;
 
 /** A implementation of HeadsUpManager for phone. */
 @SysUISingleton
@@ -86,12 +86,15 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     private final List<OnHeadsUpPhoneListenerChange> mHeadsUpPhoneListeners = new ArrayList<>();
     private final VisualStabilityProvider mVisualStabilityProvider;
 
+    private final AvalancheController mAvalancheController;
+
     // TODO(b/328393698) move the topHeadsUpRow logic to an interactor
     private final MutableStateFlow<HeadsUpRowRepository> mTopHeadsUpRow =
             StateFlowKt.MutableStateFlow(null);
     private final MutableStateFlow<Set<HeadsUpRowRepository>> mHeadsUpNotificationRows =
             StateFlowKt.MutableStateFlow(new HashSet<>());
-    private final MutableStateFlow<Boolean> mHeadsUpGoingAway = StateFlowKt.MutableStateFlow(false);
+    private final MutableStateFlow<Boolean> mHeadsUpAnimatingAway =
+            StateFlowKt.MutableStateFlow(false);
     private boolean mReleaseOnExpandFinish;
     private boolean mTrackingHeadsUp;
     private final HashSet<String> mSwipedOutKeys = new HashSet<>();
@@ -154,6 +157,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         mBypassController = bypassController;
         mGroupMembershipManager = groupMembershipManager;
         mVisualStabilityProvider = visualStabilityProvider;
+        mAvalancheController = avalancheController;
 
         updateResources();
         configurationController.addCallback(new ConfigurationController.ConfigurationListener() {
@@ -167,7 +171,10 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
                 updateResources();
             }
         });
-        javaAdapter.alwaysCollectFlow(shadeInteractor.isAnyExpanded(), this::onShadeOrQsExpanded);
+        if (!NotificationsHeadsUpRefactor.isEnabled()) {
+            javaAdapter.alwaysCollectFlow(shadeInteractor.isAnyExpanded(),
+                    this::onShadeOrQsExpanded);
+        }
     }
 
     public void setAnimationStateHandler(AnimationStateHandler handler) {
@@ -184,7 +191,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     //  Public methods:
 
     /**
-     * Add a listener to receive callbacks onHeadsUpGoingAway
+     * Add a listener to receive callbacks {@link #setHeadsUpAnimatingAway(boolean)}
      */
     @Override
     public void addHeadsUpPhoneListener(OnHeadsUpPhoneListenerChange listener) {
@@ -245,7 +252,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
             for (NotificationEntry entry : mEntriesToRemoveAfterExpand) {
                 if (isHeadsUpEntry(entry.getKey())) {
                     // Maybe the heads-up was removed already
-                    removeEntry(entry.getKey());
+                    removeEntry(entry.getKey(), "onExpandingFinished");
                 }
             }
         }
@@ -261,10 +268,11 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     }
 
     private void onShadeOrQsExpanded(Boolean isExpanded) {
+        NotificationsHeadsUpRefactor.assertInLegacyMode();
         if (isExpanded != mIsExpanded) {
             mIsExpanded = isExpanded;
             if (isExpanded) {
-                mHeadsUpGoingAway.setValue(false);
+                mHeadsUpAnimatingAway.setValue(false);
             }
         }
     }
@@ -274,18 +282,13 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
      * animating out. This is used to keep the touchable regions in a reasonable state.
      */
     @Override
-    public void setHeadsUpGoingAway(boolean headsUpGoingAway) {
-        if (headsUpGoingAway != mHeadsUpGoingAway.getValue()) {
+    public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
+        if (headsUpAnimatingAway != mHeadsUpAnimatingAway.getValue()) {
             for (OnHeadsUpPhoneListenerChange listener : mHeadsUpPhoneListeners) {
-                listener.onHeadsUpGoingAwayStateChanged(headsUpGoingAway);
+                listener.onHeadsUpAnimatingAwayStateChanged(headsUpAnimatingAway);
             }
-            mHeadsUpGoingAway.setValue(headsUpGoingAway);
+            mHeadsUpAnimatingAway.setValue(headsUpAnimatingAway);
         }
-    }
-
-    @Override
-    public boolean isHeadsUpGoingAway() {
-        return mHeadsUpGoingAway.getValue();
     }
 
     /**
@@ -381,7 +384,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         for (NotificationEntry entry : mEntriesToRemoveWhenReorderingAllowed) {
             if (isHeadsUpEntry(entry.getKey())) {
                 // Maybe the heads-up was removed already
-                removeEntry(entry.getKey());
+                removeEntry(entry.getKey(), "mOnReorderingAllowedListener");
             }
         }
         mEntriesToRemoveWhenReorderingAllowed.clear();
@@ -504,8 +507,13 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
 
     @Override
     @NonNull
-    public Flow<Boolean> getHeadsUpAnimatingAway() {
-        return mHeadsUpGoingAway;
+    public StateFlow<Boolean> isHeadsUpAnimatingAway() {
+        return mHeadsUpAnimatingAway;
+    }
+
+    @Override
+    public boolean isHeadsUpAnimatingAwayValue() {
+        return mHeadsUpAnimatingAway.getValue();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -567,7 +575,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
                 } else if (mTrackingHeadsUp) {
                     mEntriesToRemoveAfterExpand.add(entry);
                 } else {
-                    removeEntry(entry.getKey());
+                    removeEntry(entry.getKey(), "createRemoveRunnable");
                 }
             };
         }
@@ -648,15 +656,16 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
             boolean wasKeyguard = mStatusBarState == StatusBarState.KEYGUARD;
             boolean isKeyguard = newState == StatusBarState.KEYGUARD;
             mStatusBarState = newState;
+
             if (wasKeyguard && !isKeyguard && mBypassController.getBypassEnabled()) {
                 ArrayList<String> keysToRemove = new ArrayList<>();
-                for (HeadsUpEntry entry : mHeadsUpEntryMap.values()) {
+                for (HeadsUpEntry entry : getHeadsUpEntryList()) {
                     if (entry.mEntry != null && entry.mEntry.isBubble() && !entry.isSticky()) {
                         keysToRemove.add(entry.mEntry.getKey());
                     }
                 }
                 for (String key : keysToRemove) {
-                    removeEntry(key);
+                    removeEntry(key, "mStatusBarStateListener");
                 }
             }
         }
@@ -666,7 +675,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
             if (!isDozing) {
                 // Let's make sure all huns we got while dozing time out within the normal timeout
                 // duration. Otherwise they could get stuck for a very long time
-                for (HeadsUpEntry entry : mHeadsUpEntryMap.values()) {
+                for (HeadsUpEntry entry : getHeadsUpEntryList()) {
                     entry.updateEntry(true /* updatePostTime */, "onDozingChanged(false)");
                 }
             }

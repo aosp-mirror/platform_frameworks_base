@@ -53,6 +53,7 @@ import android.media.RoutingSessionInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -70,6 +71,7 @@ import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
+import com.android.media.flags.Flags;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
 import com.android.server.pm.UserManagerInternal;
@@ -94,6 +96,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         implements Watchdog.Monitor {
     private static final String TAG = "MediaRouterService";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final String WORKER_THREAD_NAME = "MediaRouterServiceThread";
 
     /**
      * Timeout in milliseconds for a selected route to transition from a disconnected state to a
@@ -110,6 +113,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     private static final long CONNECTED_TIMEOUT = 60000;
 
     private final Context mContext;
+    private final Looper mLooper;
 
     // State guarded by mLock.
     private final Object mLock = new Object();
@@ -125,7 +129,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     private final IAudioService mAudioService;
     private final AudioPlayerStateMonitor mAudioPlayerStateMonitor;
-    private final Handler mHandler = new Handler();
+    private final Handler mHandler;
     private final IntArray mActivePlayerMinPriorityQueue = new IntArray();
     private final IntArray mActivePlayerUidMinPriorityQueue = new IntArray();
 
@@ -141,7 +145,15 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     @RequiresPermission(Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS)
     public MediaRouterService(Context context) {
-        mService2 = new MediaRouter2ServiceImpl(context);
+        if (Flags.enableMr2ServiceNonMainBgThread()) {
+            HandlerThread handlerThread = new HandlerThread(WORKER_THREAD_NAME);
+            handlerThread.start();
+            mLooper = handlerThread.getLooper();
+        } else {
+            mLooper = Looper.myLooper();
+        }
+        mHandler = new Handler(mLooper);
+        mService2 = new MediaRouter2ServiceImpl(context, mLooper);
         mContext = context;
         Watchdog.getInstance().addMonitor(this);
         Resources res = context.getResources();
@@ -255,9 +267,11 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public boolean showMediaOutputSwitcher(String packageName) {
-        if (!validatePackageName(Binder.getCallingUid(), packageName)) {
+        int uid = Binder.getCallingUid();
+        if (!validatePackageName(uid, packageName)) {
             throw new SecurityException("packageName must match the calling identity");
         }
+        UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
         final long token = Binder.clearCallingIdentity();
         try {
             if (mContext.getSystemService(ActivityManager.class).getPackageImportance(packageName)
@@ -268,7 +282,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             synchronized (mLock) {
                 StatusBarManagerInternal statusBar =
                         LocalServices.getService(StatusBarManagerInternal.class);
-                statusBar.showMediaOutputSwitcher(packageName);
+                statusBar.showMediaOutputSwitcher(packageName, userHandle);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -411,15 +425,21 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public List<MediaRoute2Info> getSystemRoutes() {
-        return mService2.getSystemRoutes();
+    public List<MediaRoute2Info> getSystemRoutes(@NonNull String callerPackageName,
+            boolean isProxyRouter) {
+        if (!validatePackageName(Binder.getCallingUid(), callerPackageName)) {
+            throw new SecurityException("callerPackageName does not match calling uid.");
+        }
+        return mService2.getSystemRoutes(callerPackageName, isProxyRouter);
     }
 
     // Binder call
     @Override
     public RoutingSessionInfo getSystemSessionInfo() {
         return mService2.getSystemSessionInfo(
-                null /* packageName */, false /* setDeviceRouteSelected */);
+                /* callerPackageName */ null,
+                /* targetPackageName */ null, /* setDeviceRouteSelected */
+                false);
     }
 
     // Binder call
@@ -475,18 +495,9 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             long managerRequestId,
             RoutingSessionInfo oldSession,
             MediaRoute2Info route,
-            Bundle sessionHints,
-            @Nullable UserHandle transferInitiatorUserHandle,
-            @Nullable String transferInitiatorPackageName) {
+            Bundle sessionHints) {
         mService2.requestCreateSessionWithRouter2(
-                router,
-                requestId,
-                managerRequestId,
-                oldSession,
-                route,
-                sessionHints,
-                transferInitiatorUserHandle,
-                transferInitiatorPackageName);
+                router, requestId, managerRequestId, oldSession, route, sessionHints);
     }
 
     // Binder call
@@ -530,16 +541,22 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public RoutingSessionInfo getSystemSessionInfoForPackage(@Nullable String packageName) {
+    public RoutingSessionInfo getSystemSessionInfoForPackage(
+            @NonNull String callerPackageName, @Nullable String targetPackageName) {
         final int uid = Binder.getCallingUid();
         final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
+
+        if (!validatePackageName(uid, callerPackageName)) {
+            throw new SecurityException("callerPackageName does not match calling uid.");
+        }
+
         boolean setDeviceRouteSelected = false;
         synchronized (mLock) {
             UserRecord userRecord = mUserRecords.get(userId);
             List<ClientRecord> userClientRecords =
                     userRecord != null ? userRecord.mClientRecords : Collections.emptyList();
             for (ClientRecord clientRecord : userClientRecords) {
-                if (TextUtils.equals(clientRecord.mPackageName, packageName)) {
+                if (TextUtils.equals(clientRecord.mPackageName, targetPackageName)) {
                     if (mDefaultAudioRouteId.equals(clientRecord.mSelectedRouteId)) {
                         setDeviceRouteSelected = true;
                         break;
@@ -547,7 +564,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                 }
             }
         }
-        return mService2.getSystemSessionInfo(packageName, setDeviceRouteSelected);
+        return mService2.getSystemSessionInfo(
+                callerPackageName, targetPackageName, setDeviceRouteSelected);
     }
 
     // Binder call
@@ -1091,7 +1109,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
         public UserRecord(int userId) {
             mUserId = userId;
-            mHandler = new UserHandler(MediaRouterService.this, this);
+            mHandler = new UserHandler(MediaRouterService.this, this, mLooper);
         }
 
         public void dump(final PrintWriter pw, String prefix) {
@@ -1199,8 +1217,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         private long mConnectionTimeoutStartTime;
         private boolean mClientStateUpdateScheduled;
 
-        public UserHandler(MediaRouterService service, UserRecord userRecord) {
-            super(Looper.getMainLooper(), null, true);
+        private UserHandler(MediaRouterService service, UserRecord userRecord, Looper looper) {
+            super(looper, null, true);
             mService = service;
             mUserRecord = userRecord;
             mWatcher = new RemoteDisplayProviderWatcher(service.mContext, this,

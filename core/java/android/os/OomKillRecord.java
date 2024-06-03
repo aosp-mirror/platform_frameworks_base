@@ -25,7 +25,7 @@ import com.android.internal.util.FrameworkStatsLog;
  * Note that this class fields' should be equivalent to the struct
  * <b>OomKill</b> inside
  * <pre>
- * system/memory/libmeminfo/libmemevents/include/memevents.h
+ * system/memory/libmeminfo/libmemevents/include/memevents/bpf_types.h
  * </pre>
  *
  * @hide
@@ -36,14 +36,27 @@ public final class OomKillRecord {
     private int mUid;
     private String mProcessName;
     private short mOomScoreAdj;
+    private long mTotalVmInKb;
+    private long mAnonRssInKb;
+    private long mFileRssInKb;
+    private long mShmemRssInKb;
+    private long mPgTablesInKb;
 
     public OomKillRecord(long timeStampInMillis, int pid, int uid,
-                            String processName, short oomScoreAdj) {
+                            String processName, short oomScoreAdj,
+                            long totalVmInKb, long anonRssInKb,
+                            long fileRssInKb, long shmemRssInKb,
+                            long pgTablesInKb) {
         this.mTimeStampInMillis = timeStampInMillis;
         this.mPid = pid;
         this.mUid = uid;
         this.mProcessName = processName;
         this.mOomScoreAdj = oomScoreAdj;
+        this.mTotalVmInKb = totalVmInKb;
+        this.mAnonRssInKb = anonRssInKb;
+        this.mFileRssInKb = fileRssInKb;
+        this.mShmemRssInKb = shmemRssInKb;
+        this.mPgTablesInKb = pgTablesInKb;
     }
 
     /**
@@ -55,7 +68,8 @@ public final class OomKillRecord {
         FrameworkStatsLog.write(
                 FrameworkStatsLog.KERNEL_OOM_KILL_OCCURRED,
                 mUid, mPid, mOomScoreAdj, mTimeStampInMillis,
-                mProcessName);
+                mProcessName, mTotalVmInKb, mAnonRssInKb,
+                mFileRssInKb, mShmemRssInKb, mPgTablesInKb);
     }
 
     public long getTimestampMilli() {

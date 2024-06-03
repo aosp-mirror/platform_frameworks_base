@@ -298,6 +298,32 @@ public class UnfoldTransitionHandlerTest {
     }
 
     @Test
+    public void fold_animationInProgress_finishesTransition() {
+        TransitionRequestInfo requestInfo = createUnfoldTransitionRequestInfo();
+        TransitionFinishCallback finishCallback = mock(TransitionFinishCallback.class);
+
+        // Unfold
+        mShellUnfoldProgressProvider.onFoldStateChanged(/* isFolded= */ false);
+        mUnfoldTransitionHandler.handleRequest(mTransition, requestInfo);
+        mUnfoldTransitionHandler.startAnimation(
+                mTransition,
+                mock(TransitionInfo.class),
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class),
+                finishCallback
+        );
+
+        // Start animation but don't finish it
+        mShellUnfoldProgressProvider.onStateChangeStarted();
+        mShellUnfoldProgressProvider.onStateChangeProgress(0.5f);
+
+        // Fold
+        mShellUnfoldProgressProvider.onFoldStateChanged(/* isFolded= */ true);
+
+        verify(finishCallback).onTransitionFinished(any());
+    }
+
+    @Test
     public void mergeAnimation_eatsDisplayOnlyTransitions() {
         TransitionRequestInfo requestInfo = createUnfoldTransitionRequestInfo();
         mUnfoldTransitionHandler.handleRequest(mTransition, requestInfo);

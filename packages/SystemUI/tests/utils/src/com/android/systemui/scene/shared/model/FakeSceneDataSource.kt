@@ -42,6 +42,10 @@ class FakeSceneDataSource(
         }
     }
 
+    override fun snapToScene(toScene: SceneKey) {
+        changeScene(toScene)
+    }
+
     /**
      * Pauses scene changes.
      *

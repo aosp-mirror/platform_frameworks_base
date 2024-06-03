@@ -19,6 +19,7 @@ package com.android.internal.net;
 import android.annotation.NonNull;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Binder;
@@ -153,8 +154,11 @@ public class ConnectivityBlobStore {
         final List<String> names = new ArrayList<String>();
         try (Cursor cursor = mDb.query(TABLENAME,
                 new String[] {"name"} /* columns */,
-                "owner=? AND name LIKE ?" /* selection */,
-                new String[] {Integer.toString(ownerUid), prefix + "%"} /* selectionArgs */,
+                "owner=? AND name LIKE ? ESCAPE '\\'" /* selection */,
+                new String[] {
+                        Integer.toString(ownerUid),
+                        DatabaseUtils.escapeForLike(prefix) + "%"
+                } /* selectionArgs */,
                 null /* groupBy */,
                 null /* having */,
                 "name ASC" /* orderBy */)) {

@@ -17,6 +17,7 @@
 package android.view;
 
 import static com.android.text.flags.Flags.handwritingCursorPosition;
+import static com.android.text.flags.Flags.handwritingUnsupportedMessage;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
@@ -226,7 +227,10 @@ public class HandwritingInitiator {
                             mState.mStylusDownY, /* isHover */ false);
                     if (candidateView != null && candidateView.isEnabled()) {
                         boolean candidateHasFocus = candidateView.hasFocus();
-                        if (shouldShowHandwritingUnavailableMessageForView(candidateView)) {
+                        if (!candidateView.isStylusHandwritingAvailable()) {
+                            mState.mShouldInitHandwriting = false;
+                            return false;
+                        } else if (shouldShowHandwritingUnavailableMessageForView(candidateView)) {
                             int messagesResId = (candidateView instanceof TextView tv
                                     && tv.isAnyPasswordInputType())
                                     ? R.string.error_handwriting_unsupported_password
@@ -607,7 +611,9 @@ public class HandwritingInitiator {
             final View candidateView = findBestCandidateView(hoverX, hoverY, /* isHover */ true);
 
             if (candidateView != null) {
-                mCachedHoverTarget = new WeakReference<>(candidateView);
+                if (!handwritingUnsupportedMessage()) {
+                    mCachedHoverTarget = new WeakReference<>(candidateView);
+                }
                 return candidateView;
             }
         }

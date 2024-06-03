@@ -23,7 +23,6 @@ import com.android.settingslib.spa.widget.ui.SettingsSwitch
 @Composable
 fun TwoTargetSwitchPreference(
     model: SwitchPreferenceModel,
-    icon: @Composable (() -> Unit)? = null,
     primaryEnabled: () -> Boolean = { true },
     primaryOnClick: (() -> Unit)?,
 ) {
@@ -33,11 +32,12 @@ fun TwoTargetSwitchPreference(
             summary = model.summary,
             primaryEnabled = primaryEnabled,
             primaryOnClick = primaryOnClick,
-            icon = icon,
+            icon = model.icon,
         ) {
             SettingsSwitch(
                 checked = model.checked(),
                 changeable = model.changeable,
+                contentDescription = model.title,
                 onCheckedChange = model.onCheckedChange,
             )
         }

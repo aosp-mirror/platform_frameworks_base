@@ -36,17 +36,16 @@ import static com.android.server.inputmethod.InputMethodManagerService.TAG;
 
 import android.Manifest;
 import android.annotation.BinderThread;
-import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.util.Slog;
+import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
@@ -56,6 +55,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 import android.window.ImeOnBackInvokedDispatcher;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.DirectBootAwareness;
 import com.android.internal.inputmethod.IBooleanListener;
 import com.android.internal.inputmethod.IConnectionlessHandwritingCallback;
@@ -64,6 +64,7 @@ import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.InputBindResult;
+import com.android.internal.inputmethod.InputMethodInfoSafeList;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
@@ -76,22 +77,25 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.function.BooleanSupplier;
 
 /**
  * A proxy that processes all {@link IInputMethodManager} calls asynchronously.
- * @hide
  */
-public class ZeroJankProxy extends IInputMethodManager.Stub {
+final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
 
-    private final IInputMethodManager mInner;
+    interface Callback extends IInputMethodManagerImpl.Callback {
+        @GuardedBy("ImfLock.class")
+        ClientState getClientStateLocked(IInputMethodClient client);
+        @GuardedBy("ImfLock.class")
+        boolean isInputShownLocked();
+    }
+
+    private final Callback mInner;
     private final Executor mExecutor;
-    private final BooleanSupplier mIsInputShown;
 
-    ZeroJankProxy(Executor executor, IInputMethodManager inner, BooleanSupplier isInputShown) {
+    ZeroJankProxy(Executor executor, Callback inner) {
         mInner = inner;
         mExecutor = executor;
-        mIsInputShown = isInputShown;
     }
 
     private void offload(ThrowingRunnable r) {
@@ -126,45 +130,54 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
 
     @Override
     public void addClient(IInputMethodClient client, IRemoteInputConnection inputConnection,
-            int selfReportedDisplayId) throws RemoteException {
+            int selfReportedDisplayId) {
         offload(() -> mInner.addClient(client, inputConnection, selfReportedDisplayId));
     }
 
     @Override
-    public InputMethodInfo getCurrentInputMethodInfoAsUser(int userId) throws RemoteException {
+    public InputMethodInfo getCurrentInputMethodInfoAsUser(int userId) {
         return mInner.getCurrentInputMethodInfoAsUser(userId);
     }
 
     @Override
-    public List<InputMethodInfo> getInputMethodList(
-            int userId, @DirectBootAwareness int directBootAwareness) throws RemoteException {
+    public InputMethodInfoSafeList getInputMethodList(
+            int userId, @DirectBootAwareness int directBootAwareness) {
         return mInner.getInputMethodList(userId, directBootAwareness);
     }
 
     @Override
-    public List<InputMethodInfo> getEnabledInputMethodList(int userId) throws RemoteException {
+    public InputMethodInfoSafeList getEnabledInputMethodList(int userId) {
         return mInner.getEnabledInputMethodList(userId);
     }
 
     @Override
+    public List<InputMethodInfo> getInputMethodListLegacy(
+            int userId, @DirectBootAwareness int directBootAwareness) {
+        return mInner.getInputMethodListLegacy(userId, directBootAwareness);
+    }
+
+    @Override
+    public List<InputMethodInfo> getEnabledInputMethodListLegacy(int userId) {
+        return mInner.getEnabledInputMethodListLegacy(userId);
+    }
+
+    @Override
     public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(String imiId,
-            boolean allowsImplicitlyEnabledSubtypes, int userId)
-            throws RemoteException {
+            boolean allowsImplicitlyEnabledSubtypes, int userId) {
         return mInner.getEnabledInputMethodSubtypeList(imiId, allowsImplicitlyEnabledSubtypes,
                 userId);
     }
 
     @Override
-    public InputMethodSubtype getLastInputMethodSubtype(int userId) throws RemoteException {
+    public InputMethodSubtype getLastInputMethodSubtype(int userId) {
         return mInner.getLastInputMethodSubtype(userId);
     }
 
     @Override
     public boolean showSoftInput(IInputMethodClient client, IBinder windowToken,
             @Nullable ImeTracker.Token statsToken, @InputMethodManager.ShowFlags int flags,
-            int lastClickTooType, ResultReceiver resultReceiver,
-            @SoftInputShowHideReason int reason)
-            throws RemoteException {
+            @MotionEvent.ToolType int lastClickToolType, ResultReceiver resultReceiver,
+            @SoftInputShowHideReason int reason) {
         offload(
                 () -> {
                     if (!mInner.showSoftInput(
@@ -172,7 +185,7 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
                             windowToken,
                             statsToken,
                             flags,
-                            lastClickTooType,
+                            lastClickToolType,
                             resultReceiver,
                             reason)) {
                         sendResultReceiverFailure(resultReceiver);
@@ -184,8 +197,7 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
     @Override
     public boolean hideSoftInput(IInputMethodClient client, IBinder windowToken,
             @Nullable ImeTracker.Token statsToken, @InputMethodManager.HideFlags int flags,
-            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason)
-            throws RemoteException {
+            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
         offload(
                 () -> {
                     if (!mInner.hideSoftInput(
@@ -196,18 +208,23 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
         return true;
     }
 
-    private void sendResultReceiverFailure(ResultReceiver resultReceiver) {
-        resultReceiver.send(
-                mIsInputShown.getAsBoolean()
+    private void sendResultReceiverFailure(@Nullable ResultReceiver resultReceiver) {
+        if (resultReceiver == null) {
+            return;
+        }
+        final boolean isInputShown;
+        synchronized (ImfLock.class) {
+            isInputShown = mInner.isInputShownLocked();
+        }
+        resultReceiver.send(isInputShown
                         ? InputMethodManager.RESULT_UNCHANGED_SHOWN
                         : InputMethodManager.RESULT_UNCHANGED_HIDDEN,
                 null);
     }
 
     @Override
-    @EnforcePermission(Manifest.permission.TEST_INPUT_METHOD)
-    public void hideSoftInputFromServerForTest() throws RemoteException {
-        super.hideSoftInputFromServerForTest_enforcePermission();
+    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.TEST_INPUT_METHOD)
+    public void hideSoftInputFromServerForTest() {
         mInner.hideSoftInputFromServerForTest();
     }
 
@@ -222,8 +239,7 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
             IRemoteInputConnection inputConnection,
             IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion, @UserIdInt int userId,
-            @NonNull ImeOnBackInvokedDispatcher imeDispatcher, int startInputSeq)
-            throws RemoteException {
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher, int startInputSeq) {
         offload(() -> {
             InputBindResult result = mInner.startInputOrWindowGainedFocus(startInputReason, client,
                     windowToken, startInputFlags, softInputMode, windowFlags,
@@ -246,99 +262,92 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
             IRemoteInputConnection inputConnection,
             IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion, @UserIdInt int userId,
-            @NonNull ImeOnBackInvokedDispatcher imeDispatcher)
-            throws RemoteException {
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
         // Should never be called when flag is enabled i.e. when this proxy is used.
         return null;
     }
 
     @Override
     public void showInputMethodPickerFromClient(IInputMethodClient client,
-            int auxiliarySubtypeMode)
-            throws RemoteException {
+            int auxiliarySubtypeMode) {
         offload(() -> mInner.showInputMethodPickerFromClient(client, auxiliarySubtypeMode));
     }
 
-    @EnforcePermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.WRITE_SECURE_SETTINGS)
     @Override
-    public void showInputMethodPickerFromSystem(int auxiliarySubtypeMode, int displayId)
-            throws RemoteException {
+    public void showInputMethodPickerFromSystem(int auxiliarySubtypeMode, int displayId) {
         mInner.showInputMethodPickerFromSystem(auxiliarySubtypeMode, displayId);
     }
 
-    @EnforcePermission(Manifest.permission.TEST_INPUT_METHOD)
+    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.TEST_INPUT_METHOD)
     @Override
-    public boolean isInputMethodPickerShownForTest() throws RemoteException {
-        super.isInputMethodPickerShownForTest_enforcePermission();
+    public boolean isInputMethodPickerShownForTest() {
         return mInner.isInputMethodPickerShownForTest();
     }
 
     @Override
-    public InputMethodSubtype getCurrentInputMethodSubtype(int userId) throws RemoteException {
+    public InputMethodSubtype getCurrentInputMethodSubtype(int userId) {
         return mInner.getCurrentInputMethodSubtype(userId);
     }
 
     @Override
     public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes,
-            @UserIdInt int userId) throws RemoteException {
+            @UserIdInt int userId) {
         mInner.setAdditionalInputMethodSubtypes(imiId, subtypes, userId);
     }
 
     @Override
     public void setExplicitlyEnabledInputMethodSubtypes(String imeId,
-            @NonNull int[] subtypeHashCodes, @UserIdInt int userId) throws RemoteException {
+            @NonNull int[] subtypeHashCodes, @UserIdInt int userId) {
         mInner.setExplicitlyEnabledInputMethodSubtypes(imeId, subtypeHashCodes, userId);
     }
 
     @Override
-    public int getInputMethodWindowVisibleHeight(IInputMethodClient client)
-            throws RemoteException {
+    public int getInputMethodWindowVisibleHeight(IInputMethodClient client) {
         return mInner.getInputMethodWindowVisibleHeight(client);
     }
 
     @Override
-    public void reportPerceptibleAsync(IBinder windowToken, boolean perceptible)
-            throws RemoteException {
+    public void reportPerceptibleAsync(IBinder windowToken, boolean perceptible) {
         // Already async TODO(b/293640003): ordering issues?
         mInner.reportPerceptibleAsync(windowToken, perceptible);
     }
 
-    @EnforcePermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
+    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
     @Override
-    public void removeImeSurface() throws RemoteException {
+    public void removeImeSurface() {
         mInner.removeImeSurface();
     }
 
     @Override
-    public void removeImeSurfaceFromWindowAsync(IBinder windowToken) throws RemoteException {
+    public void removeImeSurfaceFromWindowAsync(IBinder windowToken) {
         mInner.removeImeSurfaceFromWindowAsync(windowToken);
     }
 
     @Override
-    public void startProtoDump(byte[] bytes, int i, String s) throws RemoteException {
+    public void startProtoDump(byte[] bytes, int i, String s) {
         mInner.startProtoDump(bytes, i, s);
     }
 
     @Override
-    public boolean isImeTraceEnabled() throws RemoteException {
+    public boolean isImeTraceEnabled() {
         return mInner.isImeTraceEnabled();
     }
 
-    @EnforcePermission(Manifest.permission.CONTROL_UI_TRACING)
+    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.CONTROL_UI_TRACING)
     @Override
-    public void startImeTrace() throws RemoteException {
+    public void startImeTrace() {
         mInner.startImeTrace();
     }
 
-    @EnforcePermission(Manifest.permission.CONTROL_UI_TRACING)
+    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.CONTROL_UI_TRACING)
     @Override
-    public void stopImeTrace() throws RemoteException {
+    public void stopImeTrace() {
         mInner.stopImeTrace();
     }
 
     @Override
-    public void startStylusHandwriting(IInputMethodClient client)
-            throws RemoteException {
+    public void startStylusHandwriting(IInputMethodClient client) {
         offload(() -> mInner.startStylusHandwriting(client));
     }
 
@@ -346,7 +355,7 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
     public void startConnectionlessStylusHandwriting(IInputMethodClient client, int userId,
             @Nullable CursorAnchorInfo cursorAnchorInfo, @Nullable String delegatePackageName,
             @Nullable String delegatorPackageName,
-            @NonNull IConnectionlessHandwritingCallback callback) throws RemoteException {
+            @NonNull IConnectionlessHandwritingCallback callback) {
         offload(() -> mInner.startConnectionlessStylusHandwriting(
                 client, userId, cursorAnchorInfo, delegatePackageName, delegatorPackageName,
                 callback));
@@ -360,14 +369,11 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
             @NonNull String delegatorPackageName,
             @InputMethodManager.HandwritingDelegateFlags int flags) {
         try {
-            return CompletableFuture.supplyAsync(() -> {
-                try {
-                    return mInner.acceptStylusHandwritingDelegation(
-                            client, userId, delegatePackageName, delegatorPackageName, flags);
-                } catch (RemoteException e) {
-                    throw new RuntimeException(e);
-                }
-            }, this::offload).get();
+            return CompletableFuture.supplyAsync(() ->
+                            mInner.acceptStylusHandwritingDelegation(
+                                    client, userId, delegatePackageName, delegatorPackageName,
+                                    flags),
+                    this::offload).get();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } catch (ExecutionException e) {
@@ -381,8 +387,7 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
             @UserIdInt int userId,
             @NonNull String delegatePackageName,
             @NonNull String delegatorPackageName,
-            @InputMethodManager.HandwritingDelegateFlags int flags, IBooleanListener callback)
-            throws RemoteException {
+            @InputMethodManager.HandwritingDelegateFlags int flags, IBooleanListener callback) {
         offload(() -> mInner.acceptStylusHandwritingDelegationAsync(
                 client, userId, delegatePackageName, delegatorPackageName, flags, callback));
     }
@@ -398,52 +403,45 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
     }
 
     @Override
-    public boolean isStylusHandwritingAvailableAsUser(int userId, boolean connectionless)
-            throws RemoteException {
+    public boolean isStylusHandwritingAvailableAsUser(int userId, boolean connectionless) {
         return mInner.isStylusHandwritingAvailableAsUser(userId, connectionless);
     }
 
-    @EnforcePermission("android.permission.TEST_INPUT_METHOD")
+    @IInputMethodManagerImpl.PermissionVerified("android.permission.TEST_INPUT_METHOD")
     @Override
-    public void addVirtualStylusIdForTestSession(IInputMethodClient client)
-            throws RemoteException {
+    public void addVirtualStylusIdForTestSession(IInputMethodClient client) {
         mInner.addVirtualStylusIdForTestSession(client);
     }
 
-    @EnforcePermission("android.permission.TEST_INPUT_METHOD")
+    @IInputMethodManagerImpl.PermissionVerified("android.permission.TEST_INPUT_METHOD")
     @Override
-    public void setStylusWindowIdleTimeoutForTest(IInputMethodClient client, long timeout)
-            throws RemoteException {
+    public void setStylusWindowIdleTimeoutForTest(IInputMethodClient client, long timeout) {
         mInner.setStylusWindowIdleTimeoutForTest(client, timeout);
     }
 
     @Override
-    public IImeTracker getImeTrackerService() throws RemoteException {
+    public IImeTracker getImeTrackerService() {
         return mInner.getImeTrackerService();
     }
 
     @BinderThread
     @Override
     public void onShellCommand(@Nullable FileDescriptor in, @Nullable FileDescriptor out,
-            @Nullable FileDescriptor err,
-            @NonNull String[] args, @Nullable ShellCallback callback,
-            @NonNull ResultReceiver resultReceiver) throws RemoteException {
-        ((InputMethodManagerService) mInner).onShellCommand(
-                in, out, err, args, callback, resultReceiver);
+            @Nullable FileDescriptor err, @NonNull String[] args, @Nullable ShellCallback callback,
+            @NonNull ResultReceiver resultReceiver, @NonNull Binder self) {
+        mInner.onShellCommand(in, out, err, args, callback, resultReceiver, self);
     }
 
     @Override
-    protected void dump(@NonNull FileDescriptor fd,
-            @NonNull PrintWriter fout,
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter fout,
             @Nullable String[] args) {
-        ((InputMethodManagerService) mInner).dump(fd, fout, args);
+        mInner.dump(fd, fout, args);
     }
 
     private void sendOnStartInputResult(
             IInputMethodClient client, InputBindResult res, int startInputSeq) {
         synchronized (ImfLock.class) {
-            InputMethodManagerService service = (InputMethodManagerService) mInner;
-            final ClientState cs = service.getClientState(client);
+            final ClientState cs = mInner.getClientStateLocked(client);
             if (cs != null && cs.mClient != null) {
                 cs.mClient.onStartInputResult(res, startInputSeq);
             } else {

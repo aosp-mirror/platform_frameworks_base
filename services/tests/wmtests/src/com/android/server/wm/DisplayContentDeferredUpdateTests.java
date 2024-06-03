@@ -31,6 +31,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
+import android.os.Message;
 import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
 
@@ -60,11 +61,10 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
     private int mColorMode;
     private int mLogicalDensityDpi;
 
+    private final Message mScreenUnblocker = mock(Message.class);
+
     @Override
     protected void onBeforeSystemServicesCreated() {
-        // Set other flags to their default values
-        mSetFlagsRule.initAllFlagsToReleaseConfigDefault();
-
         mSetFlagsRule.enableFlags(Flags.FLAG_DEFER_DISPLAY_UPDATES);
     }
 
@@ -73,12 +73,11 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
         doReturn(true).when(mDisplayContent).getLastHasContent();
         mockTransitionsController(/* enabled= */ true);
         mockRemoteDisplayChangeController();
+        performInitialDisplayUpdate();
     }
 
     @Test
     public void testUpdate_deferrableFieldChangedTransitionStarted_deferrableFieldUpdated() {
-        performInitialDisplayUpdate();
-
         mUniqueId = "old";
         Runnable onUpdated = mock(Runnable.class);
         mDisplayContent.requestDisplayUpdate(onUpdated);
@@ -107,8 +106,6 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
 
     @Test
     public void testUpdate_nonDeferrableUpdateAndTransitionDeferred_nonDeferrableFieldUpdated() {
-        performInitialDisplayUpdate();
-
         // Update only color mode (non-deferrable field) and keep the same unique id
         mUniqueId = "initial_unique_id";
         mColorMode = 123;
@@ -121,8 +118,6 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
 
     @Test
     public void testUpdate_nonDeferrableUpdateTwiceAndTransitionDeferred_fieldHasLatestValue() {
-        performInitialDisplayUpdate();
-
         // Update only color mode (non-deferrable field) and keep the same unique id
         mUniqueId = "initial_unique_id";
         mColorMode = 123;
@@ -163,7 +158,6 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
 
     @Test
     public void testUpdate_deferrableFieldUpdatedTransitionPending_fieldNotUpdated() {
-        performInitialDisplayUpdate();
         mUniqueId = "old";
         Runnable onUpdated = mock(Runnable.class);
         mDisplayContent.requestDisplayUpdate(onUpdated);
@@ -181,7 +175,6 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
 
     @Test
     public void testTwoDisplayUpdates_transitionStarted_displayUpdated() {
-        performInitialDisplayUpdate();
         mUniqueId = "old";
         Runnable onUpdated = mock(Runnable.class);
         mDisplayContent.requestDisplayUpdate(onUpdated);
@@ -212,6 +205,51 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
         assertThat(mDisplayContent.getDisplayInfo().uniqueId).isEqualTo("new2");
     }
 
+    @Test
+    public void testWaitForTransition_displaySwitching_waitsForTransitionToBeStarted() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_WAIT_FOR_TRANSITION_ON_DISPLAY_SWITCH);
+        mDisplayContent.mDisplayUpdater.onDisplaySwitching(/* switching= */ true);
+        boolean willWait = mDisplayContent.mDisplayUpdater.waitForTransition(mScreenUnblocker);
+        assertThat(willWait).isTrue();
+        mUniqueId = "new";
+        mDisplayContent.requestDisplayUpdate(mock(Runnable.class));
+        when(mDisplayContent.mTransitionController.inTransition()).thenReturn(true);
+        captureStartTransitionCollection().getValue().onCollectStarted(/* deferred= */ true);
+
+        // Verify that screen is not unblocked yet as the start transaction hasn't been presented
+        verify(mScreenUnblocker, never()).sendToTarget();
+
+        when(mDisplayContent.mTransitionController.inTransition()).thenReturn(false);
+        final Transition transition = captureRequestedTransition().getValue();
+        makeTransitionTransactionCompleted(transition);
+
+        // Verify that screen is unblocked as start transaction of the transition
+        // has been completed
+        verify(mScreenUnblocker).sendToTarget();
+    }
+
+    @Test
+    public void testWaitForTransition_displayNotSwitching_doesNotWait() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_WAIT_FOR_TRANSITION_ON_DISPLAY_SWITCH);
+        mDisplayContent.mDisplayUpdater.onDisplaySwitching(/* switching= */ false);
+
+        boolean willWait = mDisplayContent.mDisplayUpdater.waitForTransition(mScreenUnblocker);
+
+        assertThat(willWait).isFalse();
+        verify(mScreenUnblocker, never()).sendToTarget();
+    }
+
+    @Test
+    public void testWaitForTransition_displayIsSwitchingButFlagDisabled_doesNotWait() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_WAIT_FOR_TRANSITION_ON_DISPLAY_SWITCH);
+        mDisplayContent.mDisplayUpdater.onDisplaySwitching(/* switching= */ true);
+
+        boolean willWait = mDisplayContent.mDisplayUpdater.waitForTransition(mScreenUnblocker);
+
+        assertThat(willWait).isFalse();
+        verify(mScreenUnblocker, never()).sendToTarget();
+    }
+
     private void mockTransitionsController(boolean enabled) {
         spyOn(mDisplayContent.mTransitionController);
         when(mDisplayContent.mTransitionController.isShellTransitionsEnabled()).thenReturn(enabled);
@@ -231,6 +269,23 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
         verify(mDisplayContent.mTransitionController, atLeast(1)).startCollectOrQueue(any(),
                 callbackCaptor.capture());
         return callbackCaptor;
+    }
+
+    private ArgumentCaptor<Transition> captureRequestedTransition() {
+        ArgumentCaptor<Transition> callbackCaptor =
+                ArgumentCaptor.forClass(Transition.class);
+        verify(mDisplayContent.mTransitionController, atLeast(1))
+                .requestStartTransition(callbackCaptor.capture(), any(), any(), any());
+        return callbackCaptor;
+    }
+
+    private void makeTransitionTransactionCompleted(Transition transition) {
+        if (transition.mTransactionCompletedListeners != null) {
+            for (int i = 0; i < transition.mTransactionCompletedListeners.size(); i++) {
+                final Runnable listener = transition.mTransactionCompletedListeners.get(i);
+                listener.run();
+            }
+        }
     }
 
     private void performInitialDisplayUpdate() {

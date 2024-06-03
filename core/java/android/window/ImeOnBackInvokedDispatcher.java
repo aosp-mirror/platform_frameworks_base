@@ -16,6 +16,8 @@
 
 package android.window;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
@@ -26,6 +28,8 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.ViewRootImpl;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 
@@ -48,10 +52,17 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
     static final String RESULT_KEY_PRIORITY = "priority";
     static final int RESULT_CODE_REGISTER = 0;
     static final int RESULT_CODE_UNREGISTER = 1;
+    static final int RESULT_CODE_START_DISPATCHING = 2;
+    static final int RESULT_CODE_STOP_DISPATCHING = 3;
     @NonNull
     private final ResultReceiver mResultReceiver;
     @NonNull
     private final BackProgressAnimator mProgressAnimator = new BackProgressAnimator();
+    @NonNull
+    private final BackTouchTracker mTouchTracker = new BackTouchTracker();
+    // The handler to run callbacks on. This should be on the same thread
+    // the ViewRootImpl holding IME's WindowOnBackInvokedDispatcher is created on.
+    private Handler mHandler;
 
     public ImeOnBackInvokedDispatcher(Handler handler) {
         mResultReceiver = new ResultReceiver(handler) {
@@ -78,6 +89,10 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
         mResultReceiver = in.readTypedObject(ResultReceiver.CREATOR);
     }
 
+    void setHandler(@NonNull Handler handler) {
+        mHandler = handler;
+    }
+
     @Override
     public void registerOnBackInvokedCallback(
             @OnBackInvokedDispatcher.Priority int priority,
@@ -89,8 +104,13 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
         // the app process, which may treat the IME callback as weakly referenced. This will not
         // cause a memory leak because the app side already clears the reference correctly.
         final IOnBackInvokedCallback iCallback =
-                new WindowOnBackInvokedDispatcher.OnBackInvokedCallbackWrapper(
-                        callback, mProgressAnimator, false /* useWeakRef */);
+                new ImeOnBackInvokedCallbackWrapper(
+                        callback,
+                        mTouchTracker,
+                        mProgressAnimator,
+                        this,
+                        mHandler != null ? mHandler : Handler.getMain(),
+                        false /* useWeakRef */);
         bundle.putBinder(RESULT_KEY_CALLBACK, iCallback.asBinder());
         bundle.putInt(RESULT_KEY_PRIORITY, priority);
         bundle.putInt(RESULT_KEY_ID, callback.hashCode());
@@ -115,6 +135,12 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
         dest.writeTypedObject(mResultReceiver, flags);
     }
 
+    /** Sets the progress thresholds for touch tracking */
+    public void setProgressThresholds(float linearDistance, float maxDistance,
+            float nonLinearFactor) {
+        mTouchTracker.setProgressThresholds(linearDistance, maxDistance, nonLinearFactor);
+    }
+
     @NonNull
     public static final Parcelable.Creator<ImeOnBackInvokedDispatcher> CREATOR =
             new Parcelable.Creator<ImeOnBackInvokedDispatcher>() {
@@ -131,15 +157,20 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
     private void receive(
             int resultCode, Bundle resultData,
             @NonNull WindowOnBackInvokedDispatcher receivingDispatcher) {
-        final int callbackId = resultData.getInt(RESULT_KEY_ID);
         if (resultCode == RESULT_CODE_REGISTER) {
+            final int callbackId = resultData.getInt(RESULT_KEY_ID);
             int priority = resultData.getInt(RESULT_KEY_PRIORITY);
             final IOnBackInvokedCallback callback = IOnBackInvokedCallback.Stub.asInterface(
                     resultData.getBinder(RESULT_KEY_CALLBACK));
             registerReceivedCallback(
                     callback, priority, callbackId, receivingDispatcher);
         } else if (resultCode == RESULT_CODE_UNREGISTER) {
+            final int callbackId = resultData.getInt(RESULT_KEY_ID);
             unregisterReceivedCallback(callbackId, receivingDispatcher);
+        } else if (resultCode == RESULT_CODE_START_DISPATCHING) {
+            receiveStartDispatching(receivingDispatcher);
+        } else if (resultCode == RESULT_CODE_STOP_DISPATCHING) {
+            receiveStopDispatching(receivingDispatcher);
         }
     }
 
@@ -148,8 +179,17 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
             @OnBackInvokedDispatcher.Priority int priority,
             int callbackId,
             @NonNull WindowOnBackInvokedDispatcher receivingDispatcher) {
-        final ImeOnBackInvokedCallback imeCallback =
-                new ImeOnBackInvokedCallback(iCallback, callbackId, priority);
+        final ImeOnBackInvokedCallback imeCallback;
+        if (priority == PRIORITY_SYSTEM) {
+            // A callback registration with PRIORITY_SYSTEM indicates that a predictive back
+            // animation can be played on the IME. Therefore register the
+            // DefaultImeOnBackInvokedCallback with the receiving dispatcher and override the
+            // priority to PRIORITY_DEFAULT.
+            priority = PRIORITY_DEFAULT;
+            imeCallback = new DefaultImeOnBackAnimationCallback(iCallback, callbackId, priority);
+        } else {
+            imeCallback = new ImeOnBackInvokedCallback(iCallback, callbackId, priority);
+        }
         mImeCallbacks.add(imeCallback);
         receivingDispatcher.registerOnBackInvokedCallbackUnchecked(imeCallback, priority);
     }
@@ -172,6 +212,63 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
         mImeCallbacks.remove(callback);
     }
 
+    static class ImeOnBackInvokedCallbackWrapper extends
+            WindowOnBackInvokedDispatcher.OnBackInvokedCallbackWrapper {
+        @NonNull
+        private final ImeOnBackInvokedDispatcher mDispatcher;
+
+        ImeOnBackInvokedCallbackWrapper(
+                @NonNull OnBackInvokedCallback callback,
+                @NonNull BackTouchTracker touchTracker,
+                @NonNull BackProgressAnimator progressAnimator,
+                @NonNull ImeOnBackInvokedDispatcher dispatcher,
+                @NonNull Handler handler,
+                boolean useWeakRef) {
+            super(callback, touchTracker, progressAnimator, handler, useWeakRef);
+            mDispatcher = dispatcher;
+        }
+
+        @Override
+        public void onBackStarted(BackMotionEvent backEvent) {
+            super.onBackStarted(backEvent);
+            mDispatcher.sendStartDispatching();
+        }
+
+        @Override
+        public void onBackCancelled() {
+            super.onBackCancelled();
+            mDispatcher.sendStopDispatching();
+        }
+
+        @Override
+        public void onBackInvoked() throws RemoteException {
+            super.onBackInvoked();
+            mDispatcher.sendStopDispatching();
+        }
+    }
+
+    /** Notifies the app process that we've stopped dispatching to an IME callback */
+    private void sendStopDispatching() {
+        mResultReceiver.send(RESULT_CODE_STOP_DISPATCHING, null /* unused bundle */);
+    }
+
+    /** Notifies the app process that we've started dispatching to an IME callback */
+    private void sendStartDispatching() {
+        mResultReceiver.send(RESULT_CODE_START_DISPATCHING, null /* unused bundle */);
+    }
+
+    /** Receives IME's message that dispatching has started. */
+    private void receiveStopDispatching(
+            @NonNull WindowOnBackInvokedDispatcher receivingDispatcher) {
+        receivingDispatcher.onStopImeDispatching();
+    }
+
+    /** Receives IME's message that dispatching has stopped. */
+    private void receiveStartDispatching(
+            @NonNull WindowOnBackInvokedDispatcher receivingDispatcher) {
+        receivingDispatcher.onStartImeDispatching();
+    }
+
     /** Clears all registered callbacks on the instance. */
     public void clear() {
         // Unregister previously registered callbacks if there's any.
@@ -184,9 +281,11 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
         // We should also stop running animations since all callbacks have been removed.
         // note: mSpring.skipToEnd(), in ProgressAnimator.reset(), requires the main handler.
         Handler.getMain().post(mProgressAnimator::reset);
+        sendStopDispatching();
     }
 
-    static class ImeOnBackInvokedCallback implements OnBackInvokedCallback {
+    @VisibleForTesting(visibility = PACKAGE)
+    public static class ImeOnBackInvokedCallback implements OnBackInvokedCallback {
         @NonNull
         private final IOnBackInvokedCallback mIOnBackInvokedCallback;
         /**
@@ -226,6 +325,18 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
         public String toString() {
             return "ImeCallback=ImeOnBackInvokedCallback@" + mId
                     + " Callback=" + mIOnBackInvokedCallback;
+        }
+    }
+
+    /**
+     * Subclass of ImeOnBackInvokedCallback indicating that a predictive IME back animation may be
+     * played instead of invoking the callback.
+     */
+    @VisibleForTesting(visibility = PACKAGE)
+    public static class DefaultImeOnBackAnimationCallback extends ImeOnBackInvokedCallback {
+        DefaultImeOnBackAnimationCallback(@NonNull IOnBackInvokedCallback iCallback, int id,
+                int priority) {
+            super(iCallback, id, priority);
         }
     }
 

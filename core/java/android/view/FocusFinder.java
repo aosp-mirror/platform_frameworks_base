@@ -129,7 +129,7 @@ public class FocusFinder {
         }
         ViewGroup effective = null;
         ViewParent nextParent = focused.getParent();
-        do {
+        while (nextParent instanceof ViewGroup) {
             if (nextParent == root) {
                 return effective != null ? effective : root;
             }
@@ -143,7 +143,7 @@ public class FocusFinder {
                 effective = vg;
             }
             nextParent = nextParent.getParent();
-        } while (nextParent instanceof ViewGroup);
+        }
         return root;
     }
 

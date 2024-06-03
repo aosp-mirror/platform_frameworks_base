@@ -1409,39 +1409,39 @@
         <font weight="400" style="normal">NotoSansSymbols-Regular-Subsetted.ttf</font>
     </family>
     <family lang="zh-Hans">
-        <font weight="100" style="normal" index="2" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="100" style="normal" index="2" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="100"/>
         </font>
-        <font weight="200" style="normal" index="2" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="200" style="normal" index="2" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="200"/>
         </font>
-        <font weight="300" style="normal" index="2" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="300" style="normal" index="2" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="300"/>
         </font>
-        <font weight="400" style="normal" index="2" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="400" style="normal" index="2" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="400"/>
         </font>
-        <font weight="500" style="normal" index="2" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="500" style="normal" index="2" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="500"/>
         </font>
-        <font weight="600" style="normal" index="2" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="600" style="normal" index="2" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="600"/>
         </font>
-        <font weight="700" style="normal" index="2" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="700" style="normal" index="2" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="700"/>
         </font>
-        <font weight="800" style="normal" index="2" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="800" style="normal" index="2" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="800"/>
         </font>
-        <font weight="900" style="normal" index="2" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="900" style="normal" index="2" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="900"/>
         </font>
@@ -1450,39 +1450,39 @@
         </font>
     </family>
     <family lang="zh-Hant,zh-Bopo">
-        <font weight="100" style="normal" index="3" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="100" style="normal" index="3" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="100"/>
         </font>
-        <font weight="200" style="normal" index="3" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="200" style="normal" index="3" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="200"/>
         </font>
-        <font weight="300" style="normal" index="3" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="300" style="normal" index="3" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="300"/>
         </font>
-        <font weight="400" style="normal" index="3" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="400" style="normal" index="3" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="400"/>
         </font>
-        <font weight="500" style="normal" index="3" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="500" style="normal" index="3" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="500"/>
         </font>
-        <font weight="600" style="normal" index="3" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="600" style="normal" index="3" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="600"/>
         </font>
-        <font weight="700" style="normal" index="3" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="700" style="normal" index="3" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="700"/>
         </font>
-        <font weight="800" style="normal" index="3" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="800" style="normal" index="3" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="800"/>
         </font>
-        <font weight="900" style="normal" index="3" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="900" style="normal" index="3" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="900"/>
         </font>
@@ -1491,39 +1491,39 @@
         </font>
     </family>
     <family lang="ja">
-        <font weight="100" style="normal" index="0" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="100" style="normal" index="0" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="100"/>
         </font>
-        <font weight="200" style="normal" index="0" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="200" style="normal" index="0" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="200"/>
         </font>
-        <font weight="300" style="normal" index="0" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="300" style="normal" index="0" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="300"/>
         </font>
-        <font weight="400" style="normal" index="0" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="400" style="normal" index="0" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="400"/>
         </font>
-        <font weight="500" style="normal" index="0" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="500" style="normal" index="0" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="500"/>
         </font>
-        <font weight="600" style="normal" index="0" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="600" style="normal" index="0" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="600"/>
         </font>
-        <font weight="700" style="normal" index="0" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="700" style="normal" index="0" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="700"/>
         </font>
-        <font weight="800" style="normal" index="0" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="800" style="normal" index="0" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="800"/>
         </font>
-        <font weight="900" style="normal" index="0" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="900" style="normal" index="0" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="900"/>
         </font>
@@ -1542,39 +1542,39 @@
         </font>
     </family>
     <family lang="ko">
-        <font weight="100" style="normal" index="1" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="100" style="normal" index="1" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="100"/>
         </font>
-        <font weight="200" style="normal" index="1" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="200" style="normal" index="1" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="200"/>
         </font>
-        <font weight="300" style="normal" index="1" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="300" style="normal" index="1" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="300"/>
         </font>
-        <font weight="400" style="normal" index="1" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="400" style="normal" index="1" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="400"/>
         </font>
-        <font weight="500" style="normal" index="1" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="500" style="normal" index="1" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="500"/>
         </font>
-        <font weight="600" style="normal" index="1" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="600" style="normal" index="1" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="600"/>
         </font>
-        <font weight="700" style="normal" index="1" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="700" style="normal" index="1" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="700"/>
         </font>
-        <font weight="800" style="normal" index="1" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="800" style="normal" index="1" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="800"/>
         </font>
-        <font weight="900" style="normal" index="1" postScriptName="NotoSansCJKjp-Thin">
+        <font weight="900" style="normal" index="1" postScriptName="NotoSansCJKJP-Regular">
             NotoSansCJK-Regular.ttc
             <axis tag="wght" stylevalue="900"/>
         </font>

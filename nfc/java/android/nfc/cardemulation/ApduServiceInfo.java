@@ -410,7 +410,12 @@ public final class ApduServiceInfo implements Parcelable {
                     boolean autoTransact = a.getBoolean(
                             com.android.internal.R.styleable.PollingLoopFilter_autoTransact,
                             false);
-                    mAutoTransact.put(plf, autoTransact);
+                    if (!mOnHost && !autoTransact) {
+                        Log.e(TAG, "Ignoring polling-loop-filter " + plf
+                                + " for offhost service that isn't autoTranact");
+                    } else {
+                        mAutoTransact.put(plf, autoTransact);
+                    }
                     a.recycle();
                 } else if (eventType == XmlPullParser.START_TAG
                         && "polling-loop-pattern-filter".equals(tagName) && currentGroup == null) {
@@ -422,7 +427,12 @@ public final class ApduServiceInfo implements Parcelable {
                     boolean autoTransact = a.getBoolean(
                             com.android.internal.R.styleable.PollingLoopFilter_autoTransact,
                             false);
-                    mAutoTransactPatterns.put(Pattern.compile(plf), autoTransact);
+                    if (!mOnHost && !autoTransact) {
+                        Log.e(TAG, "Ignoring polling-loop-filter " + plf
+                                + " for offhost service that isn't autoTranact");
+                    } else {
+                        mAutoTransactPatterns.put(Pattern.compile(plf), autoTransact);
+                    }
                     a.recycle();
                 }
             }
@@ -723,13 +733,16 @@ public final class ApduServiceInfo implements Parcelable {
      * delivered to {@link HostApduService#processPollingFrames(List)}. Adding a key with this
      * multiple times will cause the value to be overwritten each time.
      * @param pollingLoopFilter the polling loop filter to add, must be a valid hexadecimal string
-     * @param autoTransact whether Observe Mode should be disabled when this filter matches or not
+     * @param autoTransact when true, disable observe mode when this filter matches, when false,
+     *                     matching does not change the observe mode state
      */
     @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
     public void addPollingLoopFilter(@NonNull String pollingLoopFilter,
             boolean autoTransact) {
+        if (!mOnHost && !autoTransact) {
+            return;
+        }
         mAutoTransact.put(pollingLoopFilter, autoTransact);
-
     }
 
     /**
@@ -748,13 +761,16 @@ public final class ApduServiceInfo implements Parcelable {
      * multiple times will cause the value to be overwritten each time.
      * @param pollingLoopPatternFilter the polling loop pattern filter to add, must be a valid
      *                                regex to match a hexadecimal string
-     * @param autoTransact whether Observe Mode should be disabled when this filter matches or not
+     * @param autoTransact when true, disable observe mode when this filter matches, when false,
+     *                     matching does not change the observe mode state
      */
     @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
     public void addPollingLoopPatternFilter(@NonNull String pollingLoopPatternFilter,
             boolean autoTransact) {
+        if (!mOnHost && !autoTransact) {
+            return;
+        }
         mAutoTransactPatterns.put(Pattern.compile(pollingLoopPatternFilter), autoTransact);
-
     }
 
     /**

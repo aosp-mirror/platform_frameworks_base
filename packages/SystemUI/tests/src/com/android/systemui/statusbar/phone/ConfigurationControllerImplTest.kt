@@ -21,7 +21,7 @@ import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.content.res.Configuration.UI_MODE_TYPE_CAR
 import android.os.LocaleList
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
@@ -36,7 +36,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import java.util.Locale
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class ConfigurationControllerImplTest : SysuiTestCase() {
 

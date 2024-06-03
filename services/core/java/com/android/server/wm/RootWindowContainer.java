@@ -31,6 +31,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_OCCLUDING;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_SLEEP;
@@ -71,7 +72,6 @@ import static com.android.server.wm.RootWindowContainerProto.KEYGUARD_CONTROLLER
 import static com.android.server.wm.RootWindowContainerProto.WINDOW_CONTAINER;
 import static com.android.server.wm.Task.REPARENT_LEAVE_ROOT_TASK_IN_PLACE;
 import static com.android.server.wm.Task.REPARENT_MOVE_ROOT_TASK_TO_FRONT;
-import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_INVISIBLE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -174,6 +174,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     private static final int SET_SCREEN_BRIGHTNESS_OVERRIDE = 1;
     private static final int SET_USER_ACTIVITY_TIMEOUT = 2;
     private static final int MSG_SEND_SLEEP_TRANSITION = 3;
+    private static final int PINNED_TASK_ABORT_TIMEOUT = 1000;
 
     static final String TAG_TASKS = TAG + POSTFIX_TASKS;
     static final String TAG_STATES = TAG + POSTFIX_STATES;
@@ -269,8 +270,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     private int mTmpTaskLayerRank;
     private final RankTaskLayersRunnable mRankTaskLayersRunnable = new RankTaskLayersRunnable();
 
-    private final AttachApplicationHelper mAttachApplicationHelper = new AttachApplicationHelper();
-
     private String mDestroyAllActivitiesReason;
     private final Runnable mDestroyAllActivitiesRunnable = new Runnable() {
         @Override
@@ -296,6 +295,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
     };
+
+    // TODO: b/335866033 Remove the abort PiP on timeout once PiP2 flag is on.
+    @Nullable private Runnable mMaybeAbortPipEnterRunnable = null;
 
     private final FindTaskResult mTmpFindTaskResult = new FindTaskResult();
 
@@ -909,7 +911,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             dc.getInputMonitor().updateInputWindowsLw(true /*force*/);
             dc.updateSystemGestureExclusion();
             dc.updateKeepClearAreas();
-            dc.updateTouchExcludeRegion();
         });
 
         // Check to see if we are now in a state where the screen should
@@ -1837,11 +1838,39 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     boolean attachApplication(WindowProcessController app) throws RemoteException {
-        try {
-            return mAttachApplicationHelper.process(app);
-        } finally {
-            mAttachApplicationHelper.reset();
+        final ArrayList<ActivityRecord> activities = mService.mStartingProcessActivities;
+        RemoteException remoteException = null;
+        boolean hasActivityStarted = false;
+        for (int i = activities.size() - 1; i >= 0; i--) {
+            final ActivityRecord r = activities.get(i);
+            if (app.mUid != r.info.applicationInfo.uid || !app.mName.equals(r.processName)) {
+                // The attaching process does not match the starting activity.
+                continue;
+            }
+            // Consume the pending record.
+            activities.remove(i);
+            final TaskFragment tf = r.getTaskFragment();
+            if (tf == null || r.finishing || r.app != null
+                    // Ignore keyguard because the app may use show-when-locked when creating.
+                    || !r.shouldBeVisible(true /* ignoringKeyguard */)
+                    || !r.showToCurrentUser()) {
+                continue;
+            }
+            try {
+                final boolean canResume = r.isFocusable() && r == tf.topRunningActivity();
+                if (mTaskSupervisor.realStartActivityLocked(r, app, canResume,
+                        true /* checkConfig */)) {
+                    hasActivityStarted = true;
+                }
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Exception in new process when starting " + r, e);
+                remoteException = e;
+            }
         }
+        if (remoteException != null) {
+            throw remoteException;
+        }
+        return hasActivityStarted;
     }
 
     /**
@@ -2243,12 +2272,69 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             newTransition.setReady(rootTask, true /* ready */);
         }
 
-        if (!isPip2ExperimentEnabled()) {
-            resumeFocusedTasksTopActivities();
-        }
+        resumeFocusedTasksTopActivities();
 
         notifyActivityPipModeChanged(r.getTask(), r);
+
+        if (!isPip2ExperimentEnabled()) {
+            // TODO: b/335866033 Remove the abort PiP on timeout once PiP2 flag is on.
+            // Set up a timeout callback to potentially abort PiP enter if in an inconsistent state.
+            scheduleTimeoutAbortPipEnter(rootTask);
+        }
     }
+
+    private void scheduleTimeoutAbortPipEnter(Task rootTask) {
+        if (mMaybeAbortPipEnterRunnable != null) {
+            // If there is an abort enter PiP check pending already remove it and abort
+            // immediately since we are trying to enter PiP in an inconsistent state
+            mHandler.removeCallbacks(mMaybeAbortPipEnterRunnable);
+            mMaybeAbortPipEnterRunnable.run();
+        }
+        // Snapshot a throwable early on to display the callstack upon abort later on timeout.
+        final Throwable enterPipThrowable = new Throwable();
+        // Set up a timeout to potentially roll back the task change to PINNED mode
+        // by aborting PiP.
+        mMaybeAbortPipEnterRunnable = new Runnable() {
+            @Override
+            public void run() {
+                synchronized (mService.mGlobalLock) {
+                    if (mTransitionController.inTransition()) {
+                        // If this task is a part an active transition aborting PiP might break
+                        // it; so run the timeout callback directly once idle.
+
+                        final Runnable expectedMaybeAbortAtTimeout = mMaybeAbortPipEnterRunnable;
+                        mTransitionController.mStateValidators.add(() -> {
+                            // If a second PiP transition comes in, it runs the abort runnable for
+                            // the first transition pre-emptively, so we need to avoid calling
+                            // the same runnable twice when validating states.
+                            if (expectedMaybeAbortAtTimeout != mMaybeAbortPipEnterRunnable) return;
+                            mMaybeAbortPipEnterRunnable = null;
+                            run();
+                        });
+                        return;
+                    } else {
+                        mMaybeAbortPipEnterRunnable = null;
+                    }
+                    mService.deferWindowLayout();
+                    final ActivityRecord top = rootTask.getTopMostActivity();
+                    final ActivityManager.RunningTaskInfo beforeTaskInfo =
+                            rootTask.getTaskInfo();
+                    if (top != null && !top.inPinnedWindowingMode()
+                            && rootTask.abortPipEnter(top)) {
+                        Slog.wtf(TAG, "Enter PiP was aborted via a scheduled timeout"
+                                        + "task_state_before=" + beforeTaskInfo
+                                        + "task_state_after=" + rootTask.getTaskInfo(),
+                                enterPipThrowable);
+                    }
+                    mService.continueWindowLayout();
+                }
+            }
+        };
+        mHandler.postDelayed(mMaybeAbortPipEnterRunnable, PINNED_TASK_ABORT_TIMEOUT);
+        Slog.d(TAG, "a delayed check for potentially aborting PiP if "
+                + "in a wrong state is scheduled.");
+    }
+
 
     /**
      * Notifies when an activity enters or leaves PIP mode.
@@ -2390,6 +2476,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final DisplayContent display = getChildAt(displayNdx);
             final boolean curResult = result;
             boolean[] resumedOnDisplay = new boolean[1];
+            final ActivityRecord topOfDisplay = display.topRunningActivity();
             display.forAllRootTasks(rootTask -> {
                 final ActivityRecord topRunningActivity = rootTask.topRunningActivity();
                 if (!rootTask.isFocusableAndVisible() || topRunningActivity == null) {
@@ -2403,8 +2490,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     resumedOnDisplay[0] |= curResult;
                     return;
                 }
-                if (topRunningActivity.isState(RESUMED)
-                        && topRunningActivity == rootTask.getDisplayArea().topRunningActivity()) {
+                if (topRunningActivity.isState(RESUMED) && topRunningActivity == topOfDisplay) {
                     // Kick off any lingering app transitions form the MoveTaskToFront operation,
                     // but only consider the top activity on that display.
                     rootTask.executeAppTransition(targetOptions);
@@ -2496,15 +2582,17 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // Use NONE if keyguard is not showing.
                 int transit = TRANSIT_NONE;
                 Task startTask = null;
+                int flags = 0;
+                if (display.isKeyguardOccluded()) {
+                    startTask = display.getTaskOccludingKeyguard();
+                    flags = TRANSIT_FLAG_KEYGUARD_OCCLUDING;
+                    transit = WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
+                }
                 if (wasSleeping) {
                     transit = TRANSIT_WAKE;
-                } else if (display.isKeyguardOccluded()) {
-                    // The display was awake so this is resuming activity for occluding keyguard.
-                    transit = WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
-                    startTask = display.getTaskOccludingKeyguard();
                 }
                 display.mTransitionController.requestStartTransition(
-                        display.mTransitionController.createTransition(transit),
+                        display.mTransitionController.createTransition(transit, flags),
                         startTask, null /* remoteTransition */, null /* displayChange */);
             }
             // Set the sleeping state of the root tasks on the display.
@@ -2864,6 +2952,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     void scheduleDestroyAllActivities(String reason) {
         mDestroyAllActivitiesReason = reason;
         mService.mH.post(mDestroyAllActivitiesRunnable);
+    }
+
+    void removeAllMaybeAbortPipEnterRunnable() {
+        if (mMaybeAbortPipEnterRunnable == null) {
+            return;
+        }
+        mHandler.removeCallbacks(mMaybeAbortPipEnterRunnable);
+        mMaybeAbortPipEnterRunnable = null;
     }
 
     // Tries to put all activity tasks to sleep. Returns true if all tasks were
@@ -3737,69 +3833,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     rankTaskLayers();
                 }
             }
-        }
-    }
-
-    private class AttachApplicationHelper implements Consumer<Task>, Predicate<ActivityRecord> {
-        private boolean mHasActivityStarted;
-        private RemoteException mRemoteException;
-        private WindowProcessController mApp;
-        private ActivityRecord mTop;
-
-        void reset() {
-            mHasActivityStarted = false;
-            mRemoteException = null;
-            mApp = null;
-            mTop = null;
-        }
-
-        boolean process(WindowProcessController app) throws RemoteException {
-            mApp = app;
-            for (int displayNdx = getChildCount() - 1; displayNdx >= 0; --displayNdx) {
-                getChildAt(displayNdx).forAllRootTasks(this);
-                if (mRemoteException != null) {
-                    throw mRemoteException;
-                }
-            }
-            if (!mHasActivityStarted) {
-                ensureActivitiesVisible();
-            }
-            return mHasActivityStarted;
-        }
-
-        @Override
-        public void accept(Task rootTask) {
-            if (mRemoteException != null) {
-                return;
-            }
-            if (rootTask.getVisibility(null /* starting */)
-                    == TASK_FRAGMENT_VISIBILITY_INVISIBLE) {
-                return;
-            }
-            mTop = rootTask.topRunningActivity();
-            rootTask.forAllActivities(this);
-        }
-
-        @Override
-        public boolean test(ActivityRecord r) {
-            if (r.finishing || !r.showToCurrentUser() || !r.visibleIgnoringKeyguard
-                    || r.app != null || mApp.mUid != r.info.applicationInfo.uid
-                    || !mApp.mName.equals(r.processName)) {
-                return false;
-            }
-
-            try {
-                if (mTaskSupervisor.realStartActivityLocked(r, mApp,
-                        mTop == r && r.getTask().canBeResumed(r) /* andResume */,
-                        true /* checkConfig */)) {
-                    mHasActivityStarted = true;
-                }
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Exception in new application when starting activity " + mTop, e);
-                mRemoteException = e;
-                return true;
-            }
-            return false;
         }
     }
 }

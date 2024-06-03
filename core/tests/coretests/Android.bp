@@ -116,12 +116,14 @@ android_test {
     ],
     jni_libs: [
         "libpowermanagertest_jni",
+        "libviewRootImplTest_jni",
         "libworksourceparceltest_jni",
     ],
 
     sdk_version: "core_platform",
     test_suites: [
         "device-tests",
+        "device-platinum-tests",
         "automotive-tests",
     ],
 
@@ -134,6 +136,8 @@ android_test {
         ":BinderDeathRecipientHelperApp1",
         ":BinderDeathRecipientHelperApp2",
         ":com.android.cts.helpers.aosp",
+        ":BinderProxyCountingTestApp",
+        ":BinderProxyCountingTestService",
     ],
 }
 
@@ -150,6 +154,12 @@ android_app {
     libs: [
         "framework-res",
         "android.test.runner",
+        "org.apache.http.legacy",
+    ],
+    uses_libs: [
+        "android.test.runner",
+    ],
+    optional_uses_libs: [
         "org.apache.http.legacy",
     ],
     sdk_version: "core_platform",
@@ -251,6 +261,7 @@ android_ravenwood_test {
         "src/com/android/internal/os/**/*.java",
         "src/com/android/internal/util/**/*.java",
         "src/com/android/internal/power/EnergyConsumerStatsTest.java",
+        "src/com/android/internal/ravenwood/**/*.java",
 
         // Pull in R.java from FrameworksCoreTests-resonly, not from FrameworksCoreTests,
         // to avoid having a dependency to FrameworksCoreTests.
@@ -265,5 +276,10 @@ android_ravenwood_test {
         generate_get_transaction_name: true,
         local_include_dirs: ["aidl"],
     },
+    java_resources: [
+        "res/xml/power_profile_test.xml",
+        "res/xml/power_profile_test_cpu_legacy.xml",
+        "res/xml/power_profile_test_modem.xml",
+    ],
     auto_gen_config: true,
 }

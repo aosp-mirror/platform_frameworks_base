@@ -130,7 +130,7 @@ public class AssociationRequestsProcessor {
     private final @NonNull PackageManagerInternal mPackageManagerInternal;
     private final @NonNull AssociationStore mAssociationStore;
     @NonNull
-    private final ComponentName mCompanionDeviceActivity;
+    private final ComponentName mCompanionAssociationActivity;
 
     public AssociationRequestsProcessor(@NonNull Context context,
             @NonNull PackageManagerInternal packageManagerInternal,
@@ -138,14 +138,15 @@ public class AssociationRequestsProcessor {
         mContext = context;
         mPackageManagerInternal = packageManagerInternal;
         mAssociationStore = associationStore;
-        mCompanionDeviceActivity = createRelative(
+        mCompanionAssociationActivity = createRelative(
                 mContext.getString(R.string.config_companionDeviceManagerPackage),
-                ".CompanionDeviceActivity");
+                ".CompanionAssociationActivity");
     }
 
     /**
      * Handle incoming {@link AssociationRequest}s, sent via
-     * {@link android.companion.ICompanionDeviceManager#associate(AssociationRequest, IAssociationRequestCallback, String, int)}
+     * {@link android.companion.ICompanionDeviceManager#associate(AssociationRequest,
+     * IAssociationRequestCallback, String, int)}
      */
     public void processNewAssociationRequest(@NonNull AssociationRequest request,
             @NonNull String packageName, @UserIdInt int userId,
@@ -203,7 +204,7 @@ public class AssociationRequestsProcessor {
         extras.putParcelable(EXTRA_RESULT_RECEIVER, prepareForIpc(mOnRequestConfirmationReceiver));
 
         final Intent intent = new Intent();
-        intent.setComponent(mCompanionDeviceActivity);
+        intent.setComponent(mCompanionAssociationActivity);
         intent.putExtras(extras);
 
         // 2b.3. Create a PendingIntent.
@@ -212,7 +213,8 @@ public class AssociationRequestsProcessor {
         // 2b.4. Send the PendingIntent back to the app.
         try {
             callback.onAssociationPending(pendingIntent);
-        } catch (RemoteException ignore) { }
+        } catch (RemoteException ignore) {
+        }
     }
 
     /**
@@ -230,7 +232,7 @@ public class AssociationRequestsProcessor {
         extras.putBoolean(EXTRA_FORCE_CANCEL_CONFIRMATION, true);
 
         final Intent intent = new Intent();
-        intent.setComponent(mCompanionDeviceActivity);
+        intent.setComponent(mCompanionAssociationActivity);
         intent.putExtras(extras);
 
         return createPendingIntent(packageUid, intent);
@@ -252,7 +254,8 @@ public class AssociationRequestsProcessor {
             // forward it back to the application via the callback.
             try {
                 callback.onFailure(e.getMessage());
-            } catch (RemoteException ignore) { }
+            } catch (RemoteException ignore) {
+            }
             return;
         }
 
@@ -281,7 +284,7 @@ public class AssociationRequestsProcessor {
             @Nullable String deviceProfile, @Nullable AssociatedDevice associatedDevice,
             boolean selfManaged, @Nullable IAssociationRequestCallback callback,
             @Nullable ResultReceiver resultReceiver) {
-        final int id = mAssociationStore.getNextId(userId);
+        final int id = mAssociationStore.getNextId();
         final long timestamp = System.currentTimeMillis();
 
         final AssociationInfo association = new AssociationInfo(id, userId, packageName,
@@ -322,7 +325,8 @@ public class AssociationRequestsProcessor {
      * Enable system data sync.
      */
     public void enableSystemDataSync(int associationId, int flags) {
-        AssociationInfo association = mAssociationStore.getAssociationById(associationId);
+        AssociationInfo association = mAssociationStore.getAssociationWithCallerChecks(
+                associationId);
         AssociationInfo updated = (new AssociationInfo.Builder(association))
                 .setSystemDataSyncFlags(association.getSystemDataSyncFlags() | flags).build();
         mAssociationStore.updateAssociation(updated);
@@ -332,10 +336,21 @@ public class AssociationRequestsProcessor {
      * Disable system data sync.
      */
     public void disableSystemDataSync(int associationId, int flags) {
-        AssociationInfo association = mAssociationStore.getAssociationById(associationId);
+        AssociationInfo association = mAssociationStore.getAssociationWithCallerChecks(
+                associationId);
         AssociationInfo updated = (new AssociationInfo.Builder(association))
                 .setSystemDataSyncFlags(association.getSystemDataSyncFlags() & (~flags)).build();
         mAssociationStore.updateAssociation(updated);
+    }
+
+    /**
+     * Set association tag.
+     */
+    public void setAssociationTag(int associationId, String tag) {
+        AssociationInfo association = mAssociationStore.getAssociationWithCallerChecks(
+                associationId);
+        association = (new AssociationInfo.Builder(association)).setTag(tag).build();
+        mAssociationStore.updateAssociation(association);
     }
 
     private void sendCallbackAndFinish(@Nullable AssociationInfo association,
@@ -396,14 +411,14 @@ public class AssociationRequestsProcessor {
         // If the application already has a pending association request, that PendingIntent
         // will be cancelled except application wants to cancel the request by the system.
         return Binder.withCleanCallingIdentity(() ->
-            PendingIntent.getActivityAsUser(
-                    mContext, /*requestCode */ packageUid, intent,
-                    FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE,
-                    ActivityOptions.makeBasic()
-                            .setPendingIntentCreatorBackgroundActivityStartMode(
-                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
-                            .toBundle(),
-                    UserHandle.CURRENT)
+                PendingIntent.getActivityAsUser(
+                        mContext, /*requestCode */ packageUid, intent,
+                        FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE,
+                        ActivityOptions.makeBasic()
+                                .setPendingIntentCreatorBackgroundActivityStartMode(
+                                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                                .toBundle(),
+                        UserHandle.CURRENT)
         );
     }
 

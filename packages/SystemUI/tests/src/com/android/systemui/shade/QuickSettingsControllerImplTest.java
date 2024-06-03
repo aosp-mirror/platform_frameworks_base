@@ -35,6 +35,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.platform.test.annotations.EnableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
@@ -43,6 +44,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.res.R;
+import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -285,16 +287,43 @@ public class QuickSettingsControllerImplTest extends QuickSettingsControllerImpl
     }
 
     @Test
-    public void updateQsState_fullscreenTrue() {
+    @EnableFlags(FooterViewRefactor.FLAG_NAME)
+    public void updateExpansion_partiallyExpanded_fullscreenFalse() {
+        // WHEN QS are only partially expanded
         mQsController.setExpanded(true);
-        mQsController.updateQsState();
+        when(mQs.getDesiredHeight()).thenReturn(123);
+        mQsController.setQs(mQs);
+        mQsController.onHeightChanged();
+        mQsController.setExpansionHeight(100);
+
+        // THEN they are not full screen
+        mQsController.updateExpansion();
+        assertThat(mShadeRepository.getLegacyQsFullscreen().getValue()).isFalse();
+    }
+
+    @Test
+    public void updateExpansion_fullyExpanded_fullscreenTrue() {
+        // WHEN QS are fully expanded
+        mQsController.setExpanded(true);
+        when(mQs.getDesiredHeight()).thenReturn(123);
+        mQsController.setQs(mQs);
+        mQsController.onHeightChanged();
+        mQsController.setExpansionHeight(123);
+
+        // THEN they are full screen
         assertThat(mShadeRepository.getLegacyQsFullscreen().getValue()).isTrue();
     }
 
     @Test
-    public void updateQsState_fullscreenFalse() {
+    public void updateExpansion_notExpanded_fullscreenFalse() {
+        // WHEN QS are not expanded
         mQsController.setExpanded(false);
-        mQsController.updateQsState();
+        when(mQs.getDesiredHeight()).thenReturn(123);
+        mQsController.setQs(mQs);
+        mQsController.onHeightChanged();
+        mQsController.setExpansionHeight(0);
+
+        // THEN they are not full screen
         assertThat(mShadeRepository.getLegacyQsFullscreen().getValue()).isFalse();
     }
 

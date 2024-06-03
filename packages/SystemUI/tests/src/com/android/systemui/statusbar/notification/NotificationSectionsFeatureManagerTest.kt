@@ -16,15 +16,17 @@
 
 package com.android.systemui.statusbar.notification
 
+import android.platform.test.annotations.DisableFlags
 import android.provider.DeviceConfig
 import android.provider.Settings
-import android.testing.AndroidTestingRunner
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NOTIFICATIONS_USE_PEOPLE_FILTERING
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.notification.shared.PriorityPeopleSection
 import com.android.systemui.util.DeviceConfigProxyFake
 import com.android.systemui.util.Utils
 import com.android.systemui.util.mockito.any
@@ -39,8 +41,9 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoSession
 import org.mockito.quality.Strictness
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
+@DisableFlags(PriorityPeopleSection.FLAG_NAME)  // this class has no logic with the flag enabled
 class NotificationSectionsFeatureManagerTest : SysuiTestCase() {
     var manager: NotificationSectionsFeatureManager? = null
     val proxyFake = DeviceConfigProxyFake()

@@ -16,32 +16,44 @@
 
 package com.android.systemui.biometrics.ui.viewmodel
 
+import android.app.ActivityManager.RunningTaskInfo
+import android.app.ActivityTaskManager
+import android.content.ComponentName
+import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Point
 import android.graphics.drawable.BitmapDrawable
+import android.hardware.biometrics.BiometricFingerprintConstants
 import android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT
 import android.hardware.biometrics.PromptContentItemBulletedText
 import android.hardware.biometrics.PromptContentView
+import android.hardware.biometrics.PromptContentViewWithMoreOptionsButton
 import android.hardware.biometrics.PromptInfo
 import android.hardware.biometrics.PromptVerticalListContentView
 import android.hardware.face.FaceSensorPropertiesInternal
 import android.hardware.fingerprint.FingerprintSensorProperties
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
+import android.platform.test.annotations.EnableFlags
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
+import com.android.launcher3.icons.IconProvider
 import com.android.systemui.Flags.FLAG_BP_TALKBACK
 import com.android.systemui.Flags.FLAG_CONSTRAINT_BP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.UdfpsUtils
+import com.android.systemui.biometrics.data.repository.FakeBiometricStatusRepository
 import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
+import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteractor
+import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
@@ -50,6 +62,7 @@ import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.biometrics.extractAuthenticatorTypes
 import com.android.systemui.biometrics.faceSensorPropertiesInternal
 import com.android.systemui.biometrics.fingerprintSensorPropertiesInternal
+import com.android.systemui.biometrics.shared.model.AuthenticationReason
 import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
 import com.android.systemui.biometrics.shared.model.DisplayRotation
@@ -58,6 +71,7 @@ import com.android.systemui.biometrics.shared.model.toSensorType
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.display.data.repository.FakeDisplayRepository
+import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
 import com.android.systemui.res.R
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -82,10 +96,12 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 
 private const val USER_ID = 4
+private const val REQUEST_ID = 4L
 private const val CHALLENGE = 2L
 private const val DELAY = 1000L
 private const val OP_PACKAGE_NAME = "biometric.testapp"
 private const val OP_PACKAGE_NAME_NO_ICON = "biometric.testapp.noicon"
+private const val OP_PACKAGE_NAME_CAN_NOT_BE_FOUND = "can.not.be.found"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -99,29 +115,39 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @Mock private lateinit var selectedUserInteractor: SelectedUserInteractor
     @Mock private lateinit var udfpsUtils: UdfpsUtils
     @Mock private lateinit var packageManager: PackageManager
+    @Mock private lateinit var iconProvider: IconProvider
     @Mock private lateinit var applicationInfoWithIcon: ApplicationInfo
     @Mock private lateinit var applicationInfoNoIcon: ApplicationInfo
+    @Mock private lateinit var activityTaskManager: ActivityTaskManager
+    @Mock private lateinit var activityInfo: ActivityInfo
+    @Mock private lateinit var runningTaskInfo: RunningTaskInfo
 
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
     private val testScope = TestScope()
     private val defaultLogoIcon = context.getDrawable(R.drawable.ic_android)
+    private val defaultLogoIconWithOverrides = context.getDrawable(R.drawable.ic_add)
     private val logoResFromApp = R.drawable.ic_cake
     private val logoFromApp = context.getDrawable(logoResFromApp)
     private val logoBitmapFromApp = Bitmap.createBitmap(400, 400, Bitmap.Config.RGB_565)
     private val defaultLogoDescription = "Test Android App"
     private val logoDescriptionFromApp = "Test Cake App"
+    private val packageNameForLogoWithOverrides = "should.use.overridden.logo"
 
     private lateinit var fingerprintRepository: FakeFingerprintPropertyRepository
     private lateinit var promptRepository: FakePromptRepository
     private lateinit var displayStateRepository: FakeDisplayStateRepository
+    private lateinit var biometricStatusRepository: FakeBiometricStatusRepository
     private lateinit var displayRepository: FakeDisplayRepository
     private lateinit var displayStateInteractor: DisplayStateInteractor
     private lateinit var udfpsOverlayInteractor: UdfpsOverlayInteractor
+    private lateinit var biometricStatusInteractor: BiometricStatusInteractor
 
     private lateinit var selector: PromptSelectorInteractor
     private lateinit var viewModel: PromptViewModel
     private lateinit var iconViewModel: PromptIconViewModel
     private lateinit var promptContentView: PromptContentView
+    private lateinit var promptContentViewWithMoreOptionsButton:
+        PromptContentViewWithMoreOptionsButton
 
     @Before
     fun setup() {
@@ -154,37 +180,52 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                 selectedUserInteractor,
                 testScope.backgroundScope
             )
-        selector =
-            PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
-        selector.resetPrompt()
+        biometricStatusRepository = FakeBiometricStatusRepository()
+        biometricStatusInteractor =
+            BiometricStatusInteractorImpl(
+                activityTaskManager,
+                biometricStatusRepository,
+                fingerprintRepository
+            )
+
         promptContentView =
             PromptVerticalListContentView.Builder()
                 .addListItem(PromptContentItemBulletedText("content item 1"))
                 .addListItem(PromptContentItemBulletedText("content item 2"), 1)
                 .build()
 
-        viewModel =
-            PromptViewModel(
-                displayStateInteractor,
-                selector,
-                mContext,
-                udfpsOverlayInteractor,
-                udfpsUtils
-            )
-        iconViewModel = viewModel.iconViewModel
+        promptContentViewWithMoreOptionsButton =
+            PromptContentViewWithMoreOptionsButton.Builder()
+                .setDescription("test")
+                .setMoreOptionsButtonListener(fakeExecutor) { _, _ -> }
+                .build()
 
-        // Set up default logo icon and app customized icon
+        // Set up default logo info and app customized info
         whenever(packageManager.getApplicationInfo(eq(OP_PACKAGE_NAME_NO_ICON), anyInt()))
             .thenReturn(applicationInfoNoIcon)
         whenever(packageManager.getApplicationInfo(eq(OP_PACKAGE_NAME), anyInt()))
             .thenReturn(applicationInfoWithIcon)
+        whenever(packageManager.getApplicationInfo(eq(packageNameForLogoWithOverrides), anyInt()))
+            .thenReturn(applicationInfoWithIcon)
+        whenever(packageManager.getApplicationInfo(eq(OP_PACKAGE_NAME_CAN_NOT_BE_FOUND), anyInt()))
+            .thenThrow(NameNotFoundException())
+
+        whenever(packageManager.getActivityInfo(any(), anyInt())).thenReturn(activityInfo)
+        whenever(iconProvider.getIcon(activityInfo)).thenReturn(defaultLogoIconWithOverrides)
         whenever(packageManager.getApplicationIcon(applicationInfoWithIcon))
             .thenReturn(defaultLogoIcon)
         whenever(packageManager.getApplicationLabel(applicationInfoWithIcon))
             .thenReturn(defaultLogoDescription)
+        whenever(packageManager.getUserBadgedIcon(any(), any())).then { it.getArgument(0) }
+        whenever(packageManager.getUserBadgedLabel(any(), any())).then { it.getArgument(0) }
+
         context.setMockPackageManager(packageManager)
         val resources = context.getOrCreateTestableResources()
         resources.addOverride(logoResFromApp, logoFromApp)
+        resources.addOverride(
+            R.array.biometric_dialog_package_names_for_logo_with_overrides,
+            arrayOf(packageNameForLogoWithOverrides)
+        )
     }
 
     @Test
@@ -1044,8 +1085,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     fun auto_confirm_authentication_when_finger_down() = runGenericTest {
         val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
 
-        // No icon button when face only, can't confirm before auth
-        if (!testCase.isFaceOnly) {
+        if (testCase.isCoex) {
             viewModel.onOverlayTouch(obtainMotionEvent(MotionEvent.ACTION_DOWN))
         }
         viewModel.showAuthenticated(testCase.authenticatedModality, 0)
@@ -1060,14 +1100,18 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         assertThat(canTryAgain).isFalse()
         assertThat(authenticated?.isAuthenticated).isTrue()
 
-        if (testCase.isFaceOnly && expectConfirmation) {
-            assertThat(size).isEqualTo(PromptSize.MEDIUM)
-            assertButtonsVisible(
-                cancel = true,
-                confirm = true,
-            )
+        if (expectConfirmation) {
+            if (testCase.isFaceOnly) {
+                assertThat(size).isEqualTo(PromptSize.MEDIUM)
+                assertButtonsVisible(
+                    cancel = true,
+                    confirm = true,
+                )
 
-            viewModel.confirmAuthenticated()
+                viewModel.confirmAuthenticated()
+            } else if (testCase.isCoex) {
+                assertThat(authenticated?.isAuthenticatedAndConfirmed).isTrue()
+            }
             assertThat(message).isEqualTo(PromptMessage.Empty)
             assertButtonsVisible()
         }
@@ -1077,8 +1121,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     fun cannot_auto_confirm_authentication_when_finger_up() = runGenericTest {
         val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
 
-        // No icon button when face only, can't confirm before auth
-        if (!testCase.isFaceOnly) {
+        if (testCase.isCoex) {
             viewModel.onOverlayTouch(obtainMotionEvent(MotionEvent.ACTION_DOWN))
             viewModel.onOverlayTouch(obtainMotionEvent(MotionEvent.ACTION_UP))
         }
@@ -1231,8 +1274,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
+    @EnableFlags(FLAG_BP_TALKBACK)
     fun hint_for_talkback_guidance() = runGenericTest {
-        mSetFlagsRule.enableFlags(FLAG_BP_TALKBACK)
         val hint by collectLastValue(viewModel.accessibilityHint)
 
         // Touches should fall outside of sensor area
@@ -1254,10 +1297,9 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun descriptionOverriddenByContentView() =
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    fun descriptionOverriddenByVerticalListContentView() =
         runGenericTest(contentView = promptContentView, description = "test description") {
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
             val contentView by collectLastValue(viewModel.contentView)
             val description by collectLastValue(viewModel.description)
 
@@ -1266,10 +1308,23 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    fun descriptionOverriddenByContentViewWithMoreOptionsButton() =
+        runGenericTest(
+            contentView = promptContentViewWithMoreOptionsButton,
+            description = "test description"
+        ) {
+            val contentView by collectLastValue(viewModel.contentView)
+            val description by collectLastValue(viewModel.description)
+
+            assertThat(description).isEqualTo("")
+            assertThat(contentView).isEqualTo(promptContentViewWithMoreOptionsButton)
+        }
+
+    @Test
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun descriptionWithoutContentView() =
         runGenericTest(description = "test description") {
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
             val contentView by collectLastValue(viewModel.contentView)
             val description by collectLastValue(viewModel.description)
 
@@ -1278,62 +1333,84 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    fun logoIsNullIfPackageNameNotFound() =
-        runGenericTest(packageName = OP_PACKAGE_NAME_NO_ICON) {
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    fun logo_nullIfPkgNameNotFound() =
+        runGenericTest(packageName = OP_PACKAGE_NAME_CAN_NOT_BE_FOUND) {
             val logo by collectLastValue(viewModel.logo)
             assertThat(logo).isNull()
         }
 
     @Test
-    fun defaultLogoIfNoLogoSet() = runGenericTest {
-        mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-        mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    fun logo_defaultWithOverrides() =
+        runGenericTest(packageName = packageNameForLogoWithOverrides) {
+            val logo by collectLastValue(viewModel.logo)
+
+            // 1. PM.getApplicationInfo(packageNameForLogoWithOverrides) is set to return
+            // applicationInfoWithIcon with defaultLogoIcon,
+            // 2. iconProvider.getIcon() is set to return defaultLogoIconForGMSCore
+            // For the apps with packageNameForLogoWithOverrides, 2 should be called instead of 1
+            assertThat(logo).isEqualTo(defaultLogoIconWithOverrides)
+        }
+
+    @Test
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    fun logo_defaultIsNull() =
+        runGenericTest(packageName = OP_PACKAGE_NAME_NO_ICON) {
+            val logo by collectLastValue(viewModel.logo)
+            assertThat(logo).isNull()
+        }
+
+    @Test
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    fun logo_default() = runGenericTest {
         val logo by collectLastValue(viewModel.logo)
         assertThat(logo).isEqualTo(defaultLogoIcon)
     }
 
     @Test
-    fun logoResSetByApp() =
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    fun logo_resSetByApp() =
         runGenericTest(logoRes = logoResFromApp) {
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
             val logo by collectLastValue(viewModel.logo)
             assertThat(logo).isEqualTo(logoFromApp)
         }
 
     @Test
-    fun logoBitmapSetByApp() =
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    fun logo_bitmapSetByApp() =
         runGenericTest(logoBitmap = logoBitmapFromApp) {
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
             val logo by collectLastValue(viewModel.logo)
             assertThat((logo as BitmapDrawable).bitmap).isEqualTo(logoBitmapFromApp)
         }
 
     @Test
-    fun logoDescriptionIsEmptyIfPackageNameNotFound() =
-        runGenericTest(packageName = OP_PACKAGE_NAME_NO_ICON) {
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    fun logoDescription_emptyIfPkgNameNotFound() =
+        runGenericTest(packageName = OP_PACKAGE_NAME_CAN_NOT_BE_FOUND) {
             val logoDescription by collectLastValue(viewModel.logoDescription)
             assertThat(logoDescription).isEqualTo("")
         }
 
     @Test
-    fun defaultLogoDescriptionIfNoLogoDescriptionSet() = runGenericTest {
-        mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-        mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    fun logoDescription_defaultIsEmpty() =
+        runGenericTest(packageName = OP_PACKAGE_NAME_NO_ICON) {
+            val logoDescription by collectLastValue(viewModel.logoDescription)
+            assertThat(logoDescription).isEqualTo("")
+        }
+
+    @Test
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    fun logoDescription_default() = runGenericTest {
         val logoDescription by collectLastValue(viewModel.logoDescription)
         assertThat(logoDescription).isEqualTo(defaultLogoDescription)
     }
 
     @Test
-    fun logoDescriptionSetByApp() =
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    fun logoDescription_setByApp() =
         runGenericTest(logoDescription = logoDescriptionFromApp) {
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
             val logoDescription by collectLastValue(viewModel.logoDescription)
             assertThat(logoDescription).isEqualTo(logoDescriptionFromApp)
         }
@@ -1376,6 +1453,31 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         packageName: String = OP_PACKAGE_NAME,
         block: suspend TestScope.() -> Unit,
     ) {
+        val topActivity = ComponentName(packageName, "test app")
+        runningTaskInfo.topActivity = topActivity
+        whenever(activityTaskManager.getTasks(1)).thenReturn(listOf(runningTaskInfo))
+        selector =
+            PromptSelectorInteractorImpl(
+                fingerprintRepository,
+                displayStateInteractor,
+                promptRepository,
+                lockPatternUtils
+            )
+        selector.resetPrompt(REQUEST_ID)
+
+        viewModel =
+            PromptViewModel(
+                displayStateInteractor,
+                selector,
+                mContext,
+                udfpsOverlayInteractor,
+                biometricStatusInteractor,
+                udfpsUtils,
+                iconProvider,
+                activityTaskManager
+            )
+        iconViewModel = viewModel.iconViewModel
+
         selector.initializePrompt(
             requireConfirmation = testCase.confirmationRequested,
             allowCredentialFallback = allowCredentialFallback,
@@ -1389,6 +1491,12 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             packageName = packageName,
         )
 
+        biometricStatusRepository.setFingerprintAcquiredStatus(
+            AcquiredFingerprintAuthenticationStatus(
+                AuthenticationReason.BiometricPromptAuthentication,
+                BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_UNKNOWN
+            )
+        )
         // put the view model in the initial authenticating state, unless explicitly skipped
         val startMode =
             when {
@@ -1583,12 +1691,15 @@ private fun PromptSelectorInteractor.initializePrompt(
             isConfirmationRequested = requireConfirmation
         }
 
-    useBiometricsForAuthentication(
+    setPrompt(
         info,
         USER_ID,
-        CHALLENGE,
+        REQUEST_ID,
         BiometricModalities(fingerprintProperties = fingerprint, faceProperties = face),
+        CHALLENGE,
         packageName,
+        onSwitchToCredential = false,
+        isLandscape = false,
     )
 }
 

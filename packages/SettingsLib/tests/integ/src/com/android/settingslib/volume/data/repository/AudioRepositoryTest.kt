@@ -16,6 +16,8 @@
 
 package com.android.settingslib.volume.data.repository
 
+import android.content.ContentResolver
+import android.database.ContentObserver
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -38,6 +40,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Captor
 import org.mockito.Mock
@@ -55,9 +58,11 @@ class AudioRepositoryTest {
     @Captor
     private lateinit var communicationDeviceListenerCaptor:
         ArgumentCaptor<AudioManager.OnCommunicationDeviceChangedListener>
+    @Captor private lateinit var contentObserver: ArgumentCaptor<ContentObserver>
 
     @Mock private lateinit var audioManager: AudioManager
     @Mock private lateinit var communicationDevice: AudioDeviceInfo
+    @Mock private lateinit var contentResolver: ContentResolver
 
     private val eventsReceiver = FakeAudioManagerEventsReceiver()
     private val volumeByStream: MutableMap<Int, Int> = mutableMapOf()
@@ -80,6 +85,7 @@ class AudioRepositoryTest {
             val streamType = it.arguments[0] as Int
             volumeByStream[it.arguments[0] as Int] = it.arguments[1] as Int
             triggerEvent(AudioManagerEvent.StreamVolumeChanged(AudioStream(streamType)))
+            triggerSettingChange()
         }
         `when`(audioManager.adjustStreamVolume(anyInt(), anyInt(), anyInt())).then {
             val streamType = it.arguments[0] as Int
@@ -100,6 +106,7 @@ class AudioRepositoryTest {
             AudioRepositoryImpl(
                 eventsReceiver,
                 audioManager,
+                contentResolver,
                 testScope.testScheduler,
                 testScope.backgroundScope,
             )
@@ -173,6 +180,7 @@ class AudioRepositoryTest {
                         volume = 50,
                         minVolume = MIN_VOLUME,
                         maxVolume = MAX_VOLUME,
+                        isAffectedByMute = false,
                         isAffectedByRingerMode = false,
                         isMuted = false,
                     )
@@ -201,6 +209,7 @@ class AudioRepositoryTest {
                         volume = 0,
                         minVolume = MIN_VOLUME,
                         maxVolume = MAX_VOLUME,
+                        isAffectedByMute = false,
                         isAffectedByRingerMode = false,
                         isMuted = true,
                     )
@@ -230,6 +239,7 @@ class AudioRepositoryTest {
                         volume = 0,
                         minVolume = MIN_VOLUME,
                         maxVolume = MAX_VOLUME,
+                        isAffectedByMute = false,
                         isAffectedByRingerMode = false,
                         isMuted = false,
                     )
@@ -249,6 +259,12 @@ class AudioRepositoryTest {
     private fun triggerModeChange(mode: Int) {
         verify(audioManager).addOnModeChangedListener(any(), modeListenerCaptor.capture())
         modeListenerCaptor.value.onModeChanged(mode)
+    }
+
+    private fun triggerSettingChange(selfChange: Boolean = false) {
+        verify(contentResolver)
+            .registerContentObserver(any(), anyBoolean(), contentObserver.capture())
+        contentObserver.value.onChange(selfChange)
     }
 
     private fun triggerEvent(event: AudioManagerEvent) {

@@ -84,7 +84,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ମୋବାଇଲ୍‌ ନେଟ୍‌ୱର୍କ ମିଳୁନାହିଁ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ନିଜ ପସନ୍ଦର ନେଟ୍‌ୱର୍କକୁ ଯିବାପାଇଁ ଚେଷ୍ଟା କରନ୍ତୁ। ବଦଳାଇବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ଜରୁରୀକାଳୀନ କଲ୍ ଉପଲବ୍ଧ ନାହିଁ"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"ୱାଇ-ଫାଇ ସାହାଯ୍ୟରେ ଜରୁରୀକାଳୀନ କଲ୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"ଜରୁରୀକାଳୀନ କଲ କରିବା ପାଇଁ ଏକ ମୋବାଇଲ ନେଟୱାର୍କ ଆବଶ୍ୟକ"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ଆଲର୍ଟ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"କଲ୍‌ ଫରୱାର୍ଡିଂ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"ଜରୁରୀକାଳୀନ କଲବ୍ୟାକ୍‍ ମୋଡ୍‍"</string>
@@ -153,16 +153,19 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> ସେକେଣ୍ଡ ପରେ"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ଫରୱାର୍ଡ କରାଯାଇନାହିଁ"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ଫର୍‌ୱର୍ଡ କରାଗଲା ନାହିଁ"</string>
-    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"ସେଲୁଲାର ନେଟୱାର୍କ ସୁରକ୍ଷା"</string>
-    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"ସେଟିଂସର ସମୀକ୍ଷା କରନ୍ତୁ"</string>
-    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"ଡିଭାଇସ ଚିହ୍ନଟକାରୀକୁ ଆକ୍ସେସ କରାଯାଇଛି"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> କନେକ୍ସନରେ ଥିବା ଏକ ନେଟୱାର୍କ <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> ଏବଂ <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> ମଧ୍ୟରେ ଥିବା ଅବଧିରେ <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> ଥର ଆପଣଙ୍କ ଡିଭାଇସର ସ୍ୱତନ୍ତ୍ର ଚିହ୍ନଟକାରୀ (IMSI)କୁ ରେକର୍ଡ କରିଛି।"</string>
-    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ସହ ଏନକ୍ରିପ୍ଟ କରାଯାଇଥିବା କନେକ୍ସନ"</string>
-    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"ଆପଣ ବର୍ତ୍ତମାନ ଅଧିକ ସୁରକ୍ଷିତ ଏକ ସେଲୁଲାର ନେଟୱାର୍କ ସହ କନେକ୍ଟ ଅଛନ୍ତି।"</string>
-    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ସହ ଅଣ-ଏନକ୍ରିପ୍ଟ କରାଯାଇଥିବା କନେକ୍ସନ"</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"ଆପଣ ଏକ ଅଣ-ଏନକ୍ରିପ୍ଟ କରାଯାଇଥିବା ସେଲୁଲାର ନେଟୱାର୍କ ସହ କନେକ୍ଟ ଅଛନ୍ତି। ଆପଣଙ୍କ କଲ, ମେସେଜ ଏବଂ ଡାଟା ଇଣ୍ଟରସେପସନ ପାଇଁ ଅସୁରକ୍ଷିତ ଅଟେ।"</string>
-    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"ସେଲୁଲାର ସୁରକ୍ଷା ସେଟିଂସ"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"ମୋବାଇଲ ନେଟୱାର୍କ ସୁରକ୍ଷା"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"ଏନକ୍ରିପସନ, ଏନକ୍ରିପ୍ଟ କରାଯାଇନଥିବା ନେଟୱାର୍କ ପାଇଁ ବିଜ୍ଞପ୍ତି"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"ଡିଭାଇସ ID ଆକ୍ସେସ କରାଯାଇଛି"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"ଆପଣଙ୍କ <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> SIM ବ୍ୟବହାର କରିବା ସମୟରେ <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>ରେ ଏକ ଆଖପାଖର ନେଟୱାର୍କ ଆପଣଙ୍କ ଡିଭାଇସର ସ୍ୱତନ୍ତ୍ର ID (IMSI କିମ୍ବା IMEI) ରେକର୍ଡ କରିଛି"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"ଆପଣଙ୍କ <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> SIM ବ୍ୟବହାର କରିବା ସମୟରେ <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>ରେ ଏକ ଆଖପାଖର ନେଟୱାର୍କ ଆପଣଙ୍କ ଡିଭାଇସର ସ୍ୱତନ୍ତ୍ର ID (IMSI କିମ୍ବା IMEI) ରେକର୍ଡ କରିଛି। \n\nଏହାର ଅର୍ଥ ହେଉଛି ଯେ ଆପଣଙ୍କ ଲୋକେସନ, କାର୍ଯ୍ୟକଳାପ କିମ୍ବା ପରିଚୟକୁ ଲଗ କରାଯାଇଛି। ଏହା ସାଧାରଣ ଅଭ୍ୟାସ ଅଟେ କିନ୍ତୁ ଗୋପନୀୟତା ବିଷୟରେ ଚିନ୍ତିତ ଲୋକମାନଙ୍କ ପାଇଁ ଏହା ଏକ ସମସ୍ୟା ହୋଇପାରେ।"</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"ଏନକ୍ରିପ୍ଟ କରାଯାଇଥିବା ନେଟୱାର୍କ <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ସହ କନେକ୍ଟ କରାଯାଇଛି"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM କନେକ୍ସନ ବର୍ତ୍ତମାନ ଅଧିକ ସୁରକ୍ଷିତ ଅଟେ"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"ଏନକ୍ରିପ୍ଟ କରାଯାଇନଥିବା ନେଟୱାର୍କ ସହ କନେକ୍ଟ କରାଯାଇଛି"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"ଆପଣଙ୍କ <xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM ବ୍ୟବହାର କରିବା ସମୟରେ କଲ, ମେସେଜ ଏବଂ ଡାଟା ବର୍ତ୍ତମାନ ଅଧିକ ଅସୁରକ୍ଷିତ ଅଟେ"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"ଆପଣଙ୍କ <xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM ବ୍ୟବହାର କରିବା ସମୟରେ କଲ, ମେସେଜ ଏବଂ ଡାଟା ବର୍ତ୍ତମାନ ଅଧିକ ଅସୁରକ୍ଷିତ ଅଟେ।\n\nଆପଣଙ୍କ କନେକ୍ସନକୁ ପୁଣି ଏନକ୍ରିପ୍ଟ କରାଯିବା ସମୟରେ ଆପଣ ଅନ୍ୟ ଏକ ବିଜ୍ଞପ୍ତି ପାଇବେ।"</string>
+    <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"ମୋବାଇଲ ନେଟୱାର୍କ ସୁରକ୍ଷା ସେଟିଂସ"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"ଅଧିକ ଜାଣନ୍ତୁ"</string>
+    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"ବୁଝିଗଲି"</string>
     <string name="fcComplete" msgid="1080909484660507044">"ଫିଚର୍ କୋଡ୍ ସମ୍ପୂର୍ଣ୍ଣ।"</string>
     <string name="fcError" msgid="5325116502080221346">"ସଂଯୋଗରେ ସମସ୍ୟା କିମ୍ୱା ଅମାନ୍ୟ ଫିଚର୍ କୋଡ୍।"</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ଠିକ ଅଛି"</string>
@@ -198,6 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"ଏହି ଡିଭାଇସରେ ଆପଣଙ୍କ ୱର୍କ ପ୍ରୋଫାଇଲ୍‍ ଆଉ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"ବହୁତ ଥର ଭୁଲ ପାସ୍‌ୱର୍ଡ ଲେଖିଛନ୍ତି"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"ବ୍ୟକ୍ତିଗତ ବ୍ୟବହାର ପାଇଁ ଆଡ୍‌ମିନ୍ ଡିଭାଇସ୍‌କୁ ଅଲଗା କରିଛନ୍ତି"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"ପ୍ରାଇଭେଟ ସ୍ପେସ କାଢ଼ି ଦିଆଯାଇଛି"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"ଆପଣଙ୍କ ସଂସ୍ଥା ଏହି ପରିଚାଳିତ ଡିଭାଇସରେ ପ୍ରାଇଭେଟ ସ୍ପେସକୁ ଅନୁମତି ଦିଏ ନାହିଁ।"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ଡିଭାଇସକୁ ପରିଚାଳନା କରାଯାଉଛି"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ଆପଣଙ୍କ ସଂସ୍ଥା ଏହି ଡିଭାଇସକୁ ପରିଚାଳନା କରନ୍ତି ଏବଂ ନେଟୱର୍କ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କରନ୍ତି। ବିବରଣୀ ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ଆପଗୁଡ଼ିକ ଆପଣଙ୍କ ଲୋକେସନକୁ ଆକ୍ସେସ୍ କରିପାରିବ"</string>
@@ -280,6 +285,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"ଭଏସ୍‌ ସହାୟକ"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"ଲକ୍ କରନ୍ତୁ"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"ପ୍ରତ୍ୟୁତ୍ତର ଦିଅ"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"ନୂଆ ବିଜ୍ଞପ୍ତି"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"ଫିଜିକଲ୍ କୀ’ବୋର୍ଡ"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"ସୁରକ୍ଷା"</string>
@@ -356,6 +362,7 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ସ୍କ୍ରିନସଟ୍ ନିଅନ୍ତୁ"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ଡିସପ୍ଲେର ଏକ ସ୍କ୍ରିନସଟ୍ ନିଆଯାଇପାରେ।"</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"ପ୍ରିଭ୍ୟୁ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
+    <string name="dream_accessibility_action_click" msgid="7392398629967797805">"ଖାରଜ କରନ୍ତୁ"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"ଷ୍ଟାଟସ୍‌ ବାର୍‌କୁ ଅକ୍ଷମ କିମ୍ୱା ସଂଶୋଧନ କରନ୍ତୁ"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ଆପ୍‍କୁ, ସ୍ଥିତି ବାର୍‍ ଅକ୍ଷମ କରିବାକୁ କିମ୍ବା ସିଷ୍ଟମ୍‍ ଆଇକନ୍‍ ଯୋଡ଼ିବା କିମ୍ବା ବାହାର କରିବାକୁ ଦେଇଥାଏ।"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ଷ୍ଟାଟସ୍‍ ବାର୍‍ ରହିବାକୁ ଦିଅନ୍ତୁ"</string>
@@ -662,7 +669,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ଟିପଚିହ୍ନ ଚିହ୍ନଟ ହେଲା ନାହିଁ"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"ଟିପଚିହ୍ନ ଚିହ୍ନଟ ହେଲା ନାହିଁ"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"ଫେସ୍ ଚିହ୍ନଟ କରିହେବ ନାହିଁ। ଟିପଚିହ୍ନ ବ୍ୟବହାର କରନ୍ତୁ।"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5590293588784953188">"ଫେସ ଚିହ୍ନଟ କରାଯାଇନାହିଁ। ଟିପଚିହ୍ନ ବ୍ୟବହାର କରନ୍ତୁ।"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ଟିପଚିହ୍ନ ପ୍ରମାଣିତ ହେଲା"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ମୁହଁ ଚିହ୍ନଟ ହୋଇଛି"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ମୁହଁ ଚିହ୍ନଟ ହୋଇଛି, ଦୟାକରି ସୁନିଶ୍ଚିତ ଦବାନ୍ତୁ"</string>
@@ -828,10 +835,10 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"ପାସ୍‌ୱର୍ଡ ନିୟମାବଳୀ ସେଟ୍ କରନ୍ତୁ"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"ଲକ୍‍ ସ୍କ୍ରୀନ୍‍ ପାସ୍‌ୱର୍ଡ ଓ PINରେ ଅନୁମୋଦିତ ଦୀର୍ଘତା ଓ ବର୍ଣ୍ଣ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ।"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ସ୍କ୍ରିନ-ଅନଲକ କରିବା ଉଦ୍ୟମ ନୀରିକ୍ଷଣ କରିବା"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"ସ୍କ୍ରୀନ୍‍ ଅନଲକ୍‍ କରିବାବେଳେ ଟାଇପ୍‍ କରିଥିବା ଭୁଲ ପାସୱର୍ଡର ସଂଖ୍ୟାକୁ ନୀରିକ୍ଷଣ କରେ ଏବଂ ଟାବଲେଟ୍‍କୁ ଲକ୍‍ କରିଦିଏ କିମ୍ବା ଯଦି ଅନେକ ଭୁଲ ପାସୱର୍ଡ ଟାଇପ୍‍ କରାଯାଇଥାଏ, ତେବେ ଟାବଲେଟ୍‍ର ସମସ୍ତ ଡାଟା ଲିଭାଇଦିଏ।"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"ସ୍କ୍ରିନ ଅନଲକ କରିବା ସମୟରେ ଟାଇପ ହୋଇଥିବା ଭୁଲ ପାସୱାର୍ଡ ସଂଖ୍ୟା ମନିଟର କରେ ଏବଂ ଟାବଲେଟକୁ ଲକ କରିଦିଏ କିମ୍ବା ଯଦି ଅନେକ ଭୁଲ ପାସୱର୍ଡ ଟାଇପ କରାଯାଇଥାଏ, ତେବେ ଟାବଲେଟର ସବୁ ଡାଟା ଖାଲି ହୋଇଯାଏ।"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"ସ୍କ୍ରିନ୍ ଅନ୍‌ଲକ୍ କରିବା ସମୟରେ ଟାଇପ୍ କରାଯାଇଥିବା ଭୁଲ ପାସ୍‌ୱାର୍ଡଗୁଡ଼ିକର ସଂଖ୍ୟାକୁ ନିରୀକ୍ଷଣ କରନ୍ତୁ ଏବଂ ଆପଣଙ୍କର Android TV ଡିଭାଇସ୍‌କୁ ଲକ୍ କରନ୍ତୁ କିମ୍ବା ଯଦି ଅନେକ ଭୁଲ ପାସ୍‌ୱାର୍ଡ ଟାଇପ୍ କରାଯାଇଥାଏ, ତେବେ ଆପଣଙ୍କ Android TV ଡିଭାଇସ୍‌ର ସମସ୍ତ ଡାଟା ଲିଭାଇ ଦିଅନ୍ତୁ।"</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"ସ୍କ୍ରିନ ଅନଲକ କରିବା ସମୟରେ ଟାଇପ କରାଯାଇଥିବା ଭୁଲ ପାସୱାର୍ଡର ସଂଖ୍ୟାକୁ ମନିଟର କରନ୍ତୁ ଏବଂ ଇନଫୋଟେନମେଣ୍ଟ ସିଷ୍ଟମକୁ ଲକ କରନ୍ତୁ କିମ୍ବା ଯଦି ଅନେକଗୁଡ଼ିଏ ଭୁଲ ପାସୱାର୍ଡ ଟାଇପ କରାଯାଇଥାଏ ତେବେ ଇନଫୋଟେନମେଣ୍ଟ ସିଷ୍ଟମର ସମସ୍ତ ଡାଟା ଖାଲି କରନ୍ତୁ।"</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"ଟାଇପ କରାଯାଇଥିବା ଭୁଲ ପାସୱର୍ଡର ସଂଖ୍ୟାକୁ ନୀରିକ୍ଷଣ କରେ। ସ୍କ୍ରିନ ଅନଲକ କରିବାବେଳେ ଏବଂ ଫୋନକୁ ଲକ କରିବା ସମୟରେ ଯଦି ଅନେକ ଭୁଲ ପାସୱର୍ଡ ଟାଇପ କରାଯାଇଥାଏ, ତେବେ ଫୋନର ସମସ୍ତ ଡାଟା ଡିଲିଟ କରେ।"</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"ଫୋନ ଅନଲକ କରିବା ବେଳେ ଟାଇପ କରାଯାଇଥିବା ଭୁଲ ପାସୱାର୍ଡର ସଂଖ୍ୟାକୁ ନୀରିକ୍ଷଣ କରିବା ଏବଂ ଯଦି ଏକାଧିକ ଥର ଭୁଲ ପାସୱାର୍ଡ ଟାଇପ କରାଯାଇଥାଏ ତେବେ ଫୋନକୁ ଲକ କରିବା ବା ଫୋନର ସମସ୍ତ ଡାଟା ଇରେଜ କରିବା।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"ସ୍କ୍ରୀନ୍‍ ଅନଲକ୍‍ କରିବାବେଳେ ଟାଇପ୍‍ କରାଯାଇଥିବା ଭୁଲ ପାସ୍‌ୱର୍ଡର ସଂଖ୍ୟାକୁ ନୀରିକ୍ଷଣ କରେ ଏବଂ ଟାବଲେଟ୍‍କୁ ଲକ୍‍ କରିଦିଏ କିମ୍ବା ଯଦି ଅନେକ ଭୁଲ ପାସ୍‌ୱର୍ଡ ଟାଇପ୍‍ କରାଯାଇଥାଏ, ତେବେ ସମସ୍ତ ଡାଟା ଲିଭାଇଦିଏ।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"ସ୍କ୍ରିନ୍ ଅନ୍‌ଲକ୍ କରିବା ସମୟରେ ଟାଇପ୍ କରାଯାଇଥିବା ଭୁଲ ପାସ୍‌ୱାର୍ଡଗୁଡ଼ିକର ସଂଖ୍ୟାକୁ ନିରୀକ୍ଷଣ କରନ୍ତୁ ଏବଂ ଆପଣଙ୍କର Android TV ଡିଭାଇସ୍‌କୁ ଲକ୍ କରନ୍ତୁ କିମ୍ବା ଯଦି ଅନେକ ଭୁଲ ପାସ୍‌ୱାର୍ଡ ଟାଇପ୍ କରାଯାଇଥାଏ, ତେବେ ସମସ୍ତ ଡାଟା ଲିଭାଇ ଦିଅନ୍ତୁ।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"ସ୍କ୍ରିନ ଅନଲକ କରିବା ସମୟରେ ଟାଇପ କରାଯାଇଥିବା ଭୁଲ ପାସୱାର୍ଡର ସଂଖ୍ୟାକୁ ମନିଟର କରନ୍ତୁ ଏବଂ ଇନଫୋଟେନମେଣ୍ଟ ସିଷ୍ଟମକୁ ଲକ କରନ୍ତୁ କିମ୍ବା ଯଦି ଅନେକଗୁଡ଼ିଏ ଭୁଲ ପାସୱାର୍ଡ ଟାଇପ କରାଯାଇଥାଏ ତେବେ ଏହି ପ୍ରୋଫାଇଲର ସମସ୍ତ ଡାଟା ଖାଲି କରନ୍ତୁ।"</string>
@@ -841,10 +848,10 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"ସ୍କ୍ରିନ୍ ଲକ୍‌ କରିବା"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"ସ୍କ୍ରିନ୍ କିପରି ଓ କେତେବେଳେ ଲକ୍‍ କରାଯିବ, ତାହା ନିୟନ୍ତ୍ରଣ କରେ।"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"ସମସ୍ତ ଡାଟା ଖାଲି କରିବା"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ବିନା ଚେତାବନୀରେ ଫ୍ୟାକ୍ଟୋରୀ ସେଟିଙ୍ଗ କରାଇ ଟାବ୍‍ଲେଟ୍‍ର ଡାଟା ଲିଭାଇଥାଏ।"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ଫେକ୍ଟୋରୀ ଡାଟା ରିସେଟ କରି ବିନା ଚେତାବନୀରେ ଟାବଲେଟର ଡାଟା ଖାଲି କରନ୍ତୁ।"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"ଏକ ଫ୍ୟାକ୍ଟୋରୀ ଡାଟା ରିସେଟ୍ କରି ବିନା ଚେତାବନୀରେ ଆପଣଙ୍କର Android TV ଡିଭାଇସ୍‌ର ଡାଟା ଲିଭାନ୍ତୁ।"</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"ଏକ ଫ୍ୟାକ୍ଟୋରୀ ଡାଟା ରିସେଟ କରି ବିନା ଚେତାବନୀରେ ଇନଫୋଟେନମେଣ୍ଟ ସିଷ୍ଟମର ଡାଟା ଖାଲି କରନ୍ତୁ।"</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ବିନା ଚେତାବନୀରେ ଫ୍ୟାକ୍ଟୋରୀ ଡାଟା ରିସେଟ କରି ଫୋନର ଡାଟା ଲିଭାଇଥାଏ।"</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ବିନା ଚେତାବନୀରେ ଫେକ୍ଟୋରୀ ଡାଟା ରିସେଟ କରି ଫୋନର ଡାଟା ଇରେଜ କରିବା।"</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"ପ୍ରୋଫାଇଲ ଡାଟା ଖାଲି କରନ୍ତୁ"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"ୟୁଜର୍‍ ଡାଟା ଲିଭାନ୍ତୁ"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"ବିନା ଚେତାବନୀରେ ଏହି ଟାବଲେଟରେ ଥିବା ଏହି ୟୁଜରଙ୍କ ଡାଟା ଲିଭାଇ ଦିଅନ୍ତୁ।"</string>
@@ -995,7 +1002,7 @@
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"ଠିକ୍!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
-    <string name="lockscreen_storage_locked" msgid="634993789186443380">"ସମସ୍ତ ସୁବିଧା ତଥା ଡାଟା ପାଇଁ ଅନଲକ୍‍ କରନ୍ତୁ"</string>
+    <string name="lockscreen_storage_locked" msgid="634993789186443380">"ସବୁ ଫିଚର ଓ ଡାଟା ପାଇଁ ଅନଲକ କରନ୍ତୁ"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"ସର୍ବାଧିକ ଫେସ୍ ଅନଲକ୍‍ ପ୍ରଚେଷ୍ଟା ଅତିକ୍ରମ କରିଛି"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"କୌଣସି SIM ନାହିଁ"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"ଟାବଲେଟରେ କୌଣସି SIM ନାହିଁ।"</string>
@@ -1183,6 +1190,8 @@
     <string name="deleteText" msgid="4200807474529938112">"ଡିଲିଟ କରନ୍ତୁ"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ଇନପୁଟ୍ ପଦ୍ଧତି"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"ଟେକ୍ସଟ୍‌ କାର୍ଯ୍ୟ"</string>
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"ଏହି ଫିଲ୍ଡରେ ହେଣ୍ଡରାଇଟିଂ ସମର୍ଥିତ ନୁହେଁ"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"ପାସୱାର୍ଡ ଫିଲ୍ଡଗୁଡ଼ିକରେ ହେଣ୍ଡରାଇଟିଂ ସମର୍ଥିତ ନୁହେଁ"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"ପଛକୁ ଫେରନ୍ତୁ"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ଇନପୁଟ ପଦ୍ଧତି ସ୍ୱିଚ କରନ୍ତୁ"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"ଷ୍ଟୋରେଜ୍‌ ସ୍ପେସ୍‌ ଶେଷ ହେବାରେ ଲାଗିଛି"</string>
@@ -1752,7 +1761,7 @@
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"ଫିଚରଗୁଡ଼ିକ ମଧ୍ୟରେ ସ୍ୱିଚ୍ କରିବାକୁ ଆକ୍ସେସିବିଲିଟୀ ବଟନ୍ ସ୍ପର୍ଶ କରି ଧରି ରଖନ୍ତୁ।"</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"ଫିଚରଗୁଡ଼ିକ ମଧ୍ୟରେ ସ୍ୱିଚ୍ କରିବାକୁ ଦୁଇଟି ଆଙ୍ଗୁଠିରେ ଉପରକୁ ସ୍ୱାଇପ୍ କରି ଧରି ରଖନ୍ତୁ।"</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ଫିଚରଗୁଡ଼ିକ ମଧ୍ୟରେ ସ୍ୱିଚ୍ କରିବାକୁ, ତିନୋଟି ଆଙ୍ଗୁଠିରେ ଉପରକୁ ସ୍ୱାଇପ୍ କରି ଧରି ରଖନ୍ତୁ।"</string>
-    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ମ୍ୟାଗ୍ନିଫିକେସନ୍‍"</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ମେଗ୍ନିଫିକେସନ"</string>
     <string name="user_switched" msgid="7249833311585228097">"ବର୍ତ୍ତମାନର ୟୁଜର୍‌ ହେଉଛନ୍ତି <xliff:g id="NAME">%1$s</xliff:g>।"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>ରେ ସ୍ୱିଚ କରନ୍ତୁ…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g>ଙ୍କୁ ଲଗଆଉଟ୍‍ କରାଯାଉଛି…"</string>
@@ -1894,7 +1903,7 @@
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ଅନପିନ୍‌ କରିବା ପୂର୍ବରୁ PIN ପଚାରନ୍ତୁ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"ଅନପିନ୍‌ କରିବା ପୂର୍ବରୁ ଲକ୍‌ ଖୋଲିବା ପାଟର୍ନ ପଚାରନ୍ତୁ"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ଅନପିନ୍‌ କରିବା ପୂର୍ବରୁ ପାସ୍‌ୱର୍ଡ ପଚାରନ୍ତୁ"</string>
-    <string name="package_installed_device_owner" msgid="7035926868974878525">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଇନଷ୍ଟଲ୍‍ କରିଛନ୍ତି"</string>
+    <string name="package_installed_device_owner" msgid="8684974629306529138">"ଆପଣଙ୍କ ଆଡମିନଙ୍କ ଦ୍ୱାରା ଇନଷ୍ଟଲ କରାଯାଇଛି।\nଅନୁମୋଦିତ ଅମୁମତିଗୁଡ଼ିକ ଭ୍ୟୁ କରିବା ପାଇଁ ସେଟିଂସକୁ ଯାଆନ୍ତୁ"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଅପଡେଟ୍‍ କରିଛନ୍ତି"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଡିଲିଟ୍‍ କରିଛନ୍ତି"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ଠିକ ଅଛି"</string>
@@ -1927,6 +1936,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> ଦ୍ୱାରା ପରିଚାଳିତ"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ଚାଲୁ ଅଛି"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ବନ୍ଦ ଅଛି"</string>
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ଯେକୌଣସି କ୍ୟାଲେଣ୍ଡର୍‌"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> କିଛି ସାଉଣ୍ଡକୁ ମ୍ୟୁଟ୍ କରୁଛି"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ଆପଣଙ୍କ ଡିଭାଇସ୍‍ରେ ଏକ ସମସ୍ୟା ରହିଛି ଏବଂ ଆପଣ ଫ୍ୟାକ୍ଟୋରୀ ଡାଟା ରିସେଟ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଅସ୍ଥିର ରହିପାରେ।"</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଏକ ସମସ୍ୟା ରହିଛି। ବିବରଣୀ ପାଇଁ ଆପଣଙ୍କ ଉତ୍ପାଦକଙ୍କ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
@@ -1971,7 +1983,7 @@
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"ନିରୀକ୍ଷିତ ୟୁଜର ଯୋଗ କରନ୍ତୁ"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ଏକ ଭାଷା ଯୋଗ କରନ୍ତୁ"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"ପସନ୍ଦର ଅଞ୍ଚଳ"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"ଭାଷାର ନାମ ଟାଇପ୍‍ କରନ୍ତୁ"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"ଭାଷାର ନାମ ଟାଇପ କରନ୍ତୁ"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"ପ୍ରସ୍ତାବିତ"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"ପ୍ରସ୍ତାବିତ"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"ପ୍ରସ୍ତାବିତ ଭାଷାଗୁଡ଼ିକ"</string>
@@ -2135,6 +2147,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ନିୟମିତ ମୋଡ୍‍ ସୂଚନା ବିଜ୍ଞପ୍ତି"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"ବେଟେରୀ ସେଭର ଚାଲୁ କରାଯାଇଛି"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"ବ୍ୟାଟେରୀ ଲାଇଫ ବଢ଼ାଇବା ପାଇଁ ବ୍ୟାଟେରୀ ବ୍ୟବହାର କମ୍ କରିବା"</string>
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"ବେଟେରୀ ସେଭର ଚାଲୁ ଅଛି"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"ବେଟେରୀ ଲାଇଫକୁ ବଢ଼ାଇବା ପାଇଁ ବେଟେରୀ ସେଭରକୁ ଚାଲୁ କରାଯାଇଛି"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ବେଟେରୀ ସେଭର"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ବ୍ୟାଟେରୀ ସେଭର୍ ବନ୍ଦ ଅଛି"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ଫୋନରେ ଯଥେଷ୍ଟ ଚାର୍ଜ ଅଛି। ଫିଚରଗୁଡ଼ିକ ଆଉ ପ୍ରତିବନ୍ଧିତ ନୁହେଁ।"</string>
@@ -2182,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad ବାମ"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad ଡାହାଣ"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad କେନ୍ଦ୍ର"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>ର କ୍ୟାପ୍ସନ୍ ବାର୍।"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>କୁ ପ୍ରତିବନ୍ଧିତ ବକେଟରେ ରଖାଯାଇଛି"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"ଏକ ଛବି ପଠାଯାଇଛି"</string>
@@ -2209,6 +2222,8 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"ୱାର୍କ ଆପକୁ ସୁଇଚ କରିବେ?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"ଆପଣଙ୍କ ସଂସ୍ଥା ଆପଣଙ୍କୁ କେବଳ ୱାର୍କ ଆପ୍ସରୁ କଲ କରିବାକୁ ଅନୁମତି ଦିଏ"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"ଆପଣଙ୍କ ସଂସ୍ଥା ଆପଣଙ୍କୁ କେବଳ ୱାର୍କ ଆପ୍ସରୁ ମେସେଜ ପଠାଇବା ପାଇଁ ଅନୁମତି ଦିଏ"</string>
+    <string name="miniresolver_private_space_phone_information" msgid="4469511223312488570">"ଆପଣ କେବଳ ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ ଫୋନ ଆପରୁ ଫୋନ କଲ କରିପାରିବେ। ବ୍ୟକ୍ତିଗତ ଫୋନ ମାଧ୍ୟମରେ କରାଯାଇଥିବା କଲଗୁଡ଼ିକ ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ କଲ ଇତିହାସରେ ଯୋଗ କରାଯିବ।"</string>
+    <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"ଆପଣ କେବଳ ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ Messages ଆପରୁ SMS ମେସେଜଗୁଡ଼ିକ ପଠାଇପାରିବେ।"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ବ୍ୟକ୍ତିଗତ ବ୍ରାଉଜର୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ୱାର୍କ ବ୍ରାଉଜର୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"କଲ କରନ୍ତୁ"</string>
@@ -2388,10 +2403,25 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"ୱାର୍କ 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"ଟେଷ୍ଟ"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"କମ୍ୟୁନାଲ"</string>
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"ୱାର୍କ ପ୍ରୋଫାଇଲ"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"ପ୍ରାଇଭେଟ ସ୍ପେସ"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"କ୍ଲୋନ"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"କମ୍ୟୁନାଲ"</string>
+    <string name="redacted_notification_message" msgid="1520587845842228816">"ସମ୍ୱେଦନଶୀଳ ବିଜ୍ଞପ୍ତି ବିଷୟବସ୍ତୁକୁ ଲୁଚାଯାଇଛି"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ସୁରକ୍ଷା ପାଇଁ ସ୍କ୍ରିନ ସେୟାରରୁ ଆପ ବିଷୟବସ୍ତୁକୁ ଲୁଚାଯାଇଛି"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"ସାଟେଲାଇଟ ସହ ସ୍ୱତଃ କନେକ୍ଟ ହୋଇଛି"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"ଏକ ମୋବାଇଲ କିମ୍ବା ୱାଇ-ଫାଇ ନେଟୱାର୍କ ବିନା ଆପଣ ମେସେଜ ପଠାଇପାରିବେ ଏବଂ ପାଇପାରିବେ"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ଖୋଲନ୍ତୁ"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ଏହା କିପରି କାମ କରେ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"ବାକି ଅଛି…"</string>
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ଫିଙ୍ଗରପ୍ରିଣ୍ଟ ଅନଲକ ପୁଣି ସେଟ ଅପ କରନ୍ତୁ"</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> ସଠିକ ଭାବେ କାମ କରୁନାହିଁ ଏବଂ ଏହାକୁ ଡିଲିଟ କରାଯାଇଛି"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ଏବଂ <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ସଠିକ ଭାବେ କାମ କରୁନାହିଁ ଏବଂ ଏଗୁଡ଼ିକୁ ଡିଲିଟ କରାଯାଇଛି"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ସଠିକ ଭାବେ କାମ କରୁନାହିଁ ଏବଂ ଏହାକୁ ଡିଲିଟ କରାଯାଇଛି। ଟିପଚିହ୍ନ ମାଧ୍ୟମରେ ଆପଣଙ୍କ ଫୋନକୁ ଅନଲକ କରିବାକୁ ଏହାକୁ ପୁଣି ସେଟ ଅପ କରନ୍ତୁ।"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ଏବଂ <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ସଠିକ ଭାବେ କାମ କରୁନାହିଁ ଏବଂ ଏଗୁଡ଼ିକୁ ଡିଲିଟ କରାଯାଇଛି। ଆପଣଙ୍କ ଟିପଚିହ୍ନ ମାଧ୍ୟମରେ ଆପଣଙ୍କ ଫୋନକୁ ଅନଲକ କରିବାକୁ ଏଗୁଡ଼ିକୁ ପୁଣି ସେଟ ଅପ କରନ୍ତୁ।"</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"ଫେସ୍ ଅନଲକ୍ ପୁଣି ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"ଆପଣଙ୍କ ଫେସ ମଡେଲ ସଠିକ ଭାବେ କାମ କରୁନାହିଁ ଏବଂ ଏହାକୁ ଡିଲିଟ କରାଯାଇଛି। ଫେସ ମାଧ୍ୟମରେ ଆପଣଙ୍କ ଫୋନକୁ ଅନଲକ କରିବାକୁ ଏହାକୁ ପୁଣି ସେଟ ଅପ କରନ୍ତୁ।"</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"ସେଟ ଅପ କରନ୍ତୁ"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"ବର୍ତ୍ତମାନ ନୁହେଁ"</string>
 </resources>

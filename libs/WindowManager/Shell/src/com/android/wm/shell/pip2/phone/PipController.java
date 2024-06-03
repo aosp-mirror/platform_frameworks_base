@@ -16,25 +16,31 @@
 
 package com.android.wm.shell.pip2.phone;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_PIP;
 
+import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
 
 import androidx.annotation.BinderThread;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.util.Preconditions;
 import com.android.wm.shell.R;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
@@ -42,6 +48,8 @@ import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
+import com.android.wm.shell.common.TaskStackListenerCallback;
+import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.pip.IPip;
 import com.android.wm.shell.common.pip.IPipAnimationListener;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
@@ -50,17 +58,24 @@ import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ConfigurationChangeListener;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+
+import java.io.PrintWriter;
 
 /**
  * Manages the picture-in-picture (PIP) UI and states for Phones.
  */
 public class PipController implements ConfigurationChangeListener,
+        PipTransitionState.PipTransitionStateChangedListener,
         DisplayController.OnDisplaysChangedListener, RemoteCallable<PipController> {
     private static final String TAG = PipController.class.getSimpleName();
+    private static final String SWIPE_TO_PIP_APP_BOUNDS = "pip_app_bounds";
+    private static final String SWIPE_TO_PIP_OVERLAY = "swipe_to_pip_overlay";
 
     private final Context mContext;
+    private final ShellCommandHandler mShellCommandHandler;
     private final ShellController mShellController;
     private final DisplayController mDisplayController;
     private final DisplayInsetsController mDisplayInsetsController;
@@ -68,6 +83,9 @@ public class PipController implements ConfigurationChangeListener,
     private final PipBoundsAlgorithm mPipBoundsAlgorithm;
     private final PipDisplayLayoutState mPipDisplayLayoutState;
     private final PipScheduler mPipScheduler;
+    private final TaskStackListenerImpl mTaskStackListener;
+    private final ShellTaskOrganizer mShellTaskOrganizer;
+    private final PipTransitionState mPipTransitionState;
     private final ShellExecutor mMainExecutor;
 
     // Wrapper for making Binder calls into PiP animation listener hosted in launcher's Recents.
@@ -97,6 +115,7 @@ public class PipController implements ConfigurationChangeListener,
 
     private PipController(Context context,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             ShellController shellController,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
@@ -104,8 +123,12 @@ public class PipController implements ConfigurationChangeListener,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipDisplayLayoutState pipDisplayLayoutState,
             PipScheduler pipScheduler,
+            TaskStackListenerImpl taskStackListener,
+            ShellTaskOrganizer shellTaskOrganizer,
+            PipTransitionState pipTransitionState,
             ShellExecutor mainExecutor) {
         mContext = context;
+        mShellCommandHandler = shellCommandHandler;
         mShellController = shellController;
         mDisplayController = displayController;
         mDisplayInsetsController = displayInsetsController;
@@ -113,6 +136,10 @@ public class PipController implements ConfigurationChangeListener,
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipDisplayLayoutState = pipDisplayLayoutState;
         mPipScheduler = pipScheduler;
+        mTaskStackListener = taskStackListener;
+        mShellTaskOrganizer = shellTaskOrganizer;
+        mPipTransitionState = pipTransitionState;
+        mPipTransitionState.addPipTransitionStateChangedListener(this);
         mMainExecutor = mainExecutor;
 
         if (PipUtils.isPip2ExperimentEnabled()) {
@@ -125,6 +152,7 @@ public class PipController implements ConfigurationChangeListener,
      */
     public static PipController create(Context context,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             ShellController shellController,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
@@ -132,18 +160,23 @@ public class PipController implements ConfigurationChangeListener,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipDisplayLayoutState pipDisplayLayoutState,
             PipScheduler pipScheduler,
+            TaskStackListenerImpl taskStackListener,
+            ShellTaskOrganizer shellTaskOrganizer,
+            PipTransitionState pipTransitionState,
             ShellExecutor mainExecutor) {
         if (!context.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
             ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: Device doesn't support Pip feature", TAG);
             return null;
         }
-        return new PipController(context, shellInit, shellController, displayController,
-                displayInsetsController, pipBoundsState, pipBoundsAlgorithm, pipDisplayLayoutState,
-                pipScheduler, mainExecutor);
+        return new PipController(context, shellInit, shellCommandHandler, shellController,
+                displayController, displayInsetsController, pipBoundsState, pipBoundsAlgorithm,
+                pipDisplayLayoutState, pipScheduler, taskStackListener, shellTaskOrganizer,
+                pipTransitionState, mainExecutor);
     }
 
     private void onInit() {
+        mShellCommandHandler.addDumpCallback(this::dump, this);
         // Ensure that we have the display info in case we get calls to update the bounds before the
         // listener calls back
         mPipDisplayLayoutState.setDisplayId(mContext.getDisplayId());
@@ -164,6 +197,17 @@ public class PipController implements ConfigurationChangeListener,
         mShellController.addExternalInterface(KEY_EXTRA_SHELL_PIP,
                 this::createExternalInterface, this);
         mShellController.addConfigurationChangeListener(this);
+
+        mTaskStackListener.addListener(new TaskStackListenerCallback() {
+            @Override
+            public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
+                    boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
+                if (task.getWindowingMode() != WINDOWING_MODE_PINNED) {
+                    return;
+                }
+                mPipScheduler.scheduleExitPipViaExpand();
+            }
+        });
     }
 
     private ExternalInterfaceBinder createExternalInterface() {
@@ -245,9 +289,44 @@ public class PipController implements ConfigurationChangeListener,
             Rect destinationBounds, SurfaceControl overlay, Rect appBounds) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "onSwipePipToHomeAnimationStart: %s", componentName);
-        mPipScheduler.setInSwipePipToHomeTransition(true);
+        Bundle extra = new Bundle();
+        extra.putParcelable(SWIPE_TO_PIP_OVERLAY, overlay);
+        extra.putParcelable(SWIPE_TO_PIP_APP_BOUNDS, appBounds);
+        mPipTransitionState.setState(PipTransitionState.SWIPING_TO_PIP, extra);
+        if (overlay != null) {
+            // Shell transitions might use a root animation leash, which will be removed when
+            // the Recents transition is finished. Launcher attaches the overlay leash to this
+            // animation target leash; thus, we need to reparent it to the actual Task surface now.
+            // PipTransition is responsible to fade it out and cleanup when finishing the enter PIP
+            // transition.
+            SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+            mShellTaskOrganizer.reparentChildSurfaceToTask(taskId, overlay, tx);
+            tx.setLayer(overlay, Integer.MAX_VALUE);
+            tx.apply();
+        }
         mPipRecentsAnimationListener.onPipAnimationStarted();
-        // TODO: cache the overlay if provided for reparenting later.
+    }
+
+    @Override
+    public void onPipTransitionStateChanged(@PipTransitionState.TransitionState int oldState,
+            @PipTransitionState.TransitionState int newState, @Nullable Bundle extra) {
+        if (newState == PipTransitionState.SWIPING_TO_PIP) {
+            Preconditions.checkState(extra != null,
+                    "No extra bundle for " + mPipTransitionState);
+
+            SurfaceControl overlay = extra.getParcelable(
+                    SWIPE_TO_PIP_OVERLAY, SurfaceControl.class);
+            Rect appBounds = extra.getParcelable(
+                    SWIPE_TO_PIP_APP_BOUNDS, Rect.class);
+
+            Preconditions.checkState(appBounds != null,
+                    "App bounds can't be null for " + mPipTransitionState);
+            mPipTransitionState.setSwipePipToHomeState(overlay, appBounds);
+        } else if (newState == PipTransitionState.ENTERED_PIP) {
+            if (mPipTransitionState.isInSwipePipToHomeTransition()) {
+                mPipTransitionState.resetSwipePipToHomeState();
+            }
+        }
     }
 
     //
@@ -265,6 +344,14 @@ public class PipController implements ConfigurationChangeListener,
                     mContext.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius),
                     mContext.getResources().getDimensionPixelSize(R.dimen.pip_shadow_radius));
         }
+    }
+
+    private void dump(PrintWriter pw, String prefix) {
+        final String innerPrefix = "  ";
+        pw.println(TAG);
+        mPipBoundsAlgorithm.dump(pw, innerPrefix);
+        mPipBoundsState.dump(pw, innerPrefix);
+        mPipDisplayLayoutState.dump(pw, innerPrefix);
     }
 
     /**

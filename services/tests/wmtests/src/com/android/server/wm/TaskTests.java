@@ -833,8 +833,11 @@ public class TaskTests extends WindowTestsBase {
         final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task).build();
         final ActivityRecord.CompatDisplayInsets compatInsets =
                 new ActivityRecord.CompatDisplayInsets(
-                        display, activity, /* fixedOrientationBounds= */ null);
-        task.computeConfigResourceOverrides(inOutConfig, parentConfig, compatInsets);
+                        display, activity, /* letterboxedContainerBounds */ null,
+                        /* useOverrideInsets */ false);
+        final TaskFragment.ConfigOverrideHint overrideHint = new TaskFragment.ConfigOverrideHint();
+        overrideHint.mTmpCompatInsets = compatInsets;
+        task.computeConfigResourceOverrides(inOutConfig, parentConfig, overrideHint);
 
         assertEquals(largerLandscapeBounds, inOutConfig.windowConfiguration.getAppBounds());
         final float density = parentConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
@@ -1958,6 +1961,27 @@ public class TaskTests extends WindowTestsBase {
         mSupervisor.mUserLeaving = true;
         task.pauseActivityIfNeeded(null /* resuming */, "test");
         verify(task).startPausing(eq(true) /* userLeaving */, anyBoolean(), any(), any());
+    }
+
+    @Test
+    public void testGetBottomMostActivityInSamePackage() {
+        final String packageName = "homePackage";
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final Task task = new TaskBuilder(mSupervisor).setCreateActivity(false).build();
+        task.realActivity = new ComponentName(packageName, packageName + ".root_activity");
+        doNothing().when(task).sendTaskFragmentParentInfoChangedIfNeeded();
+
+        final TaskFragment fragment1 = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final ActivityRecord activityDifferentPackage =
+                new ActivityBuilder(mAtm).setTask(task).build();
+        final ActivityRecord activitySamePackage =
+                new ActivityBuilder(mAtm)
+                        .setComponent(new ComponentName(packageName, packageName + ".activity2"))
+                        .setTask(task).build();
+
+        assertEquals(fragment1.getChildAt(0), task.getBottomMostActivity());
+        assertEquals(activitySamePackage, task.getBottomMostActivityInSamePackage());
+        assertNotEquals(activityDifferentPackage, task.getBottomMostActivityInSamePackage());
     }
 
     private Task getTestTask() {

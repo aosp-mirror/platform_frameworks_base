@@ -24,22 +24,23 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
-import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
-import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
+import com.android.systemui.bouncer.data.repository.keyguardBouncerRepository
+import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.keyguard.data.repository.FakeCommandQueue
+import com.android.systemui.flags.EnableSceneContainer
+import com.android.systemui.keyguard.data.repository.fakeCommandQueue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.power.domain.interactor.PowerInteractorFactory
+import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -62,27 +63,16 @@ class KeyguardInteractorTest : SysuiTestCase() {
     private val repository by lazy { kosmos.fakeKeyguardRepository }
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val fromGoneTransitionInteractor by lazy { kosmos.fromGoneTransitionInteractor }
-    private val commandQueue by lazy { FakeCommandQueue() }
-    private val bouncerRepository = FakeKeyguardBouncerRepository()
-    private val shadeRepository = FakeShadeRepository()
-    private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val commandQueue by lazy { kosmos.fakeCommandQueue }
+    private val configRepository by lazy { kosmos.fakeConfigurationRepository }
+    private val bouncerRepository by lazy { kosmos.keyguardBouncerRepository }
+    private val shadeRepository by lazy { kosmos.shadeRepository }
+    private val keyguardTransitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
+
     private val transitionState: MutableStateFlow<ObservableTransitionState> =
         MutableStateFlow(ObservableTransitionState.Idle(Scenes.Gone))
 
-    private val underTest by lazy {
-        KeyguardInteractor(
-            repository = repository,
-            commandQueue = commandQueue,
-            powerInteractor = PowerInteractorFactory.create().powerInteractor,
-            sceneContainerFlags = kosmos.fakeSceneContainerFlags,
-            bouncerRepository = bouncerRepository,
-            configurationInteractor = ConfigurationInteractor(FakeConfigurationRepository()),
-            shadeRepository = shadeRepository,
-            keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor,
-            sceneInteractorProvider = { sceneInteractor },
-            fromGoneTransitionInteractor = { fromGoneTransitionInteractor },
-        )
-    }
+    private val underTest by lazy { kosmos.keyguardInteractor }
 
     @Before
     fun setUp() {
@@ -209,14 +199,16 @@ class KeyguardInteractorTest : SysuiTestCase() {
             )
 
             repository.setStatusBarState(StatusBarState.KEYGUARD)
-            shadeRepository.setLegacyShadeExpansion(1f)
+            // User begins to swipe up
+            shadeRepository.setLegacyShadeExpansion(0.99f)
 
             // When not dismissable, no alpha value (null) should emit
             repository.setKeyguardDismissible(false)
             assertThat(dismissAlpha).isNull()
 
             repository.setKeyguardDismissible(true)
-            assertThat(dismissAlpha).isGreaterThan(0.95f)
+            shadeRepository.setLegacyShadeExpansion(0.98f)
+            assertThat(dismissAlpha).isGreaterThan(0.5f)
         }
 
     @Test
@@ -241,9 +233,109 @@ class KeyguardInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun keyguardTranslationY_whenGoneEmitsZero() =
+        testScope.runTest {
+            val keyguardTranslationY by collectLastValue(underTest.keyguardTranslationY)
+
+            configRepository.setDimensionPixelSize(
+                R.dimen.keyguard_translate_distance_on_swipe_up,
+                100
+            )
+            configRepository.onAnyConfigurationChange()
+
+            shadeRepository.setLegacyShadeExpansion(0f)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.AOD,
+                to = KeyguardState.GONE,
+                testScope,
+            )
+
+            assertThat(keyguardTranslationY).isEqualTo(0f)
+        }
+
+    @Test
+    fun keyguardTranslationY_whenNotGoneAndShadeIsFullyCollapsedEmitsZero() =
+        testScope.runTest {
+            val keyguardTranslationY by collectLastValue(underTest.keyguardTranslationY)
+
+            configRepository.setDimensionPixelSize(
+                R.dimen.keyguard_translate_distance_on_swipe_up,
+                100
+            )
+            configRepository.onAnyConfigurationChange()
+
+            shadeRepository.setLegacyShadeExpansion(0f)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.AOD,
+                to = KeyguardState.LOCKSCREEN,
+                testScope,
+            )
+
+            assertThat(keyguardTranslationY).isEqualTo(0f)
+        }
+
+    @Test
+    fun keyguardTranslationY_whenNotGoneAndShadeIsReesetEmitsZero() =
+        testScope.runTest {
+            val keyguardTranslationY by collectLastValue(underTest.keyguardTranslationY)
+
+            configRepository.setDimensionPixelSize(
+                R.dimen.keyguard_translate_distance_on_swipe_up,
+                100
+            )
+            configRepository.onAnyConfigurationChange()
+
+            shadeRepository.setLegacyShadeExpansion(1f)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.AOD,
+                to = KeyguardState.LOCKSCREEN,
+                testScope,
+            )
+
+            assertThat(keyguardTranslationY).isEqualTo(0f)
+        }
+
+    @Test
+    fun keyguardTranslationY_whenTransitioningToGoneAndShadeIsExpandingEmitsNonZero() =
+        testScope.runTest {
+            val keyguardTranslationY by collectLastValue(underTest.keyguardTranslationY)
+
+            configRepository.setDimensionPixelSize(
+                R.dimen.keyguard_translate_distance_on_swipe_up,
+                100
+            )
+            configRepository.onAnyConfigurationChange()
+
+            shadeRepository.setLegacyShadeExpansion(0.5f)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                listOf(
+                    TransitionStep(
+                        from = KeyguardState.AOD,
+                        to = KeyguardState.GONE,
+                        value = 0f,
+                        transitionState = TransitionState.STARTED,
+                    ),
+                    TransitionStep(
+                        from = KeyguardState.AOD,
+                        to = KeyguardState.GONE,
+                        value = 0.1f,
+                        transitionState = TransitionState.RUNNING,
+                    ),
+                ),
+                testScope,
+            )
+
+            assertThat(keyguardTranslationY).isGreaterThan(0f)
+        }
+
+    @Test
+    @EnableSceneContainer
     fun animationDozingTransitions() =
         testScope.runTest {
-            kosmos.fakeSceneContainerFlags.enabled = true
             val isAnimate by collectLastValue(underTest.animateDozingTransitions)
 
             underTest.setAnimateDozingTransitions(true)
@@ -259,6 +351,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     fromScene = Scenes.Gone,
                     toScene = Scenes.Lockscreen,
+                    currentScene = flowOf(Scenes.Lockscreen),
                     progress = flowOf(0f),
                     isInitiatedByUserInput = false,
                     isUserInputOngoing = flowOf(false),

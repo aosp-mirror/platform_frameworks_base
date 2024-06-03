@@ -19,10 +19,14 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.util.MathUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow.FlowBuilder
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.statusbar.SysuiStatusBarStateController
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,14 +41,18 @@ class LockscreenToGoneTransitionViewModel
 @Inject
 constructor(
     animationFlow: KeyguardTransitionAnimationFlow,
+    private val statusBarStateController: SysuiStatusBarStateController,
 ) : DeviceEntryIconTransition {
 
     private val transitionAnimation: FlowBuilder =
-        animationFlow.setup(
-            duration = FromLockscreenTransitionInteractor.TO_GONE_DURATION,
-            from = KeyguardState.LOCKSCREEN,
-            to = KeyguardState.GONE,
-        )
+        animationFlow
+            .setup(
+                duration = FromLockscreenTransitionInteractor.TO_GONE_DURATION,
+                edge = Edge.create(from = LOCKSCREEN, to = Scenes.Gone),
+            )
+            .setupWithoutSceneContainer(
+                edge = Edge.create(from = LOCKSCREEN, to = GONE),
+            )
 
     val shortcutsAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
@@ -53,6 +61,26 @@ constructor(
             onFinish = { 0f },
             onCancel = { 1f },
         )
+
+    fun notificationAlpha(viewState: ViewStateAccessor): Flow<Float> {
+        var startAlpha = 1f
+        var leaveShadeOpen = false
+
+        return transitionAnimation.sharedFlow(
+            duration = 200.milliseconds,
+            onStart = {
+                leaveShadeOpen = statusBarStateController.leaveOpenOnKeyguardHide()
+                startAlpha = viewState.alpha()
+            },
+            onStep = {
+                if (leaveShadeOpen) {
+                    1f
+                } else {
+                    MathUtils.lerp(startAlpha, 0f, it)
+                }
+            },
+        )
+    }
 
     fun lockscreenAlpha(viewState: ViewStateAccessor): Flow<Float> {
         var startAlpha = 1f

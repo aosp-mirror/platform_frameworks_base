@@ -37,12 +37,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
-import com.android.systemui.keyguard.data.repository.keyguardRepository
-import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
+import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject.Companion.assertThat
 import com.android.systemui.kosmos.testScope
@@ -86,7 +86,7 @@ class FromDreamingTransitionInteractorTest : SysuiTestCase() {
                 to = KeyguardState.DREAMING,
                 testScope
             )
-            kosmos.keyguardRepository.setBiometricUnlockState(BiometricUnlockModel.NONE)
+            kosmos.fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockMode.NONE)
             reset(transitionRepository)
         }
     }
@@ -158,6 +158,19 @@ class FromDreamingTransitionInteractorTest : SysuiTestCase() {
                 .startedTransition(
                     from = KeyguardState.DREAMING,
                     to = KeyguardState.LOCKSCREEN,
+                )
+        }
+
+    @Test
+    fun testTransitionToAlternateBouncer() =
+        testScope.runTest {
+            kosmos.fakeKeyguardBouncerRepository.setAlternateVisible(true)
+            runCurrent()
+
+            assertThat(transitionRepository)
+                .startedTransition(
+                    from = KeyguardState.DREAMING,
+                    to = KeyguardState.ALTERNATE_BOUNCER,
                 )
         }
 }

@@ -19,35 +19,43 @@ package com.android.systemui.qs.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.Back
+import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
+import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.media.controls.data.repository.mediaFilterRepository
+import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
+import com.android.systemui.media.controls.domain.pipeline.interactor.mediaCarouselInteractor
+import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.sceneBackInteractor
+import com.android.systemui.scene.domain.interactor.sceneContainerStartable
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shade.domain.interactor.privacyChipInteractor
-import com.android.systemui.shade.domain.interactor.shadeHeaderClockInteractor
-import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
+import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModel
+import com.android.systemui.shade.ui.viewmodel.shadeHeaderViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
-import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
-import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
-import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor
-import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
-import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
-import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -57,12 +65,11 @@ import org.mockito.Mockito.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableSceneContainer
 class QuickSettingsSceneViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
-    private val flags = FakeFeatureFlagsClassic().also { it.set(Flags.NEW_NETWORK_SLICE_UI, false) }
     private val qsFlexiglassAdapter = FakeQSSceneAdapter({ mock() })
     private val footerActionsViewModel = mock<FooterActionsViewModel>()
     private val footerActionsViewModelFactory =
@@ -71,109 +78,156 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
         }
     private val footerActionsController = mock<FooterActionsController>()
 
-    private var mobileIconsViewModel: MobileIconsViewModel =
-        MobileIconsViewModel(
-            logger = mock(),
-            verboseLogger = mock(),
-            interactor = mobileIconsInteractor,
-            airplaneModeInteractor =
-                AirplaneModeInteractor(
-                    FakeAirplaneModeRepository(),
-                    FakeConnectivityRepository(),
-                    FakeMobileConnectionsRepository(),
-                ),
-            constants = mock(),
-            flags,
-            scope = testScope.backgroundScope,
-        )
+    private val sceneInteractor = kosmos.sceneInteractor
+    private val sceneBackInteractor = kosmos.sceneBackInteractor
+    private val sceneContainerStartable = kosmos.sceneContainerStartable
 
-    private lateinit var shadeHeaderViewModel: ShadeHeaderViewModel
+    private val mediaDataManager = mock<MediaDataManager>()
 
     private lateinit var underTest: QuickSettingsSceneViewModel
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setUp() {
-        shadeHeaderViewModel =
-            ShadeHeaderViewModel(
-                applicationScope = testScope.backgroundScope,
-                context = context,
-                mobileIconsInteractor = mobileIconsInteractor,
-                mobileIconsViewModel = mobileIconsViewModel,
-                privacyChipInteractor = kosmos.privacyChipInteractor,
-                clockInteractor = kosmos.shadeHeaderClockInteractor,
-                broadcastDispatcher = fakeBroadcastDispatcher,
-            )
+        kosmos.fakeFeatureFlagsClassic.set(Flags.NEW_NETWORK_SLICE_UI, false)
 
+        sceneContainerStartable.start()
         underTest =
             QuickSettingsSceneViewModel(
-                shadeHeaderViewModel = shadeHeaderViewModel,
+                applicationScope = testScope.backgroundScope,
+                deviceEntryInteractor = kosmos.deviceEntryInteractor,
+                brightnessMirrorViewModel = kosmos.brightnessMirrorViewModel,
+                shadeHeaderViewModel = kosmos.shadeHeaderViewModel,
                 qsSceneAdapter = qsFlexiglassAdapter,
                 notifications = kosmos.notificationsPlaceholderViewModel,
                 footerActionsViewModelFactory = footerActionsViewModelFactory,
                 footerActionsController = footerActionsController,
+                sceneBackInteractor = sceneBackInteractor,
+                mediaCarouselInteractor = kosmos.mediaCarouselInteractor,
             )
     }
 
     @Test
-    fun destinationsNotCustomizing() =
+    fun destinations_whenNotCustomizing_unlocked() =
         testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, false)
             val destinations by collectLastValue(underTest.destinationScenes)
             qsFlexiglassAdapter.setCustomizing(false)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
 
             assertThat(destinations)
                 .isEqualTo(
                     mapOf(
                         Back to UserActionResult(Scenes.Shade),
                         Swipe(SwipeDirection.Up) to UserActionResult(Scenes.Shade),
+                        Swipe(
+                            fromSource = Edge.Bottom,
+                            direction = SwipeDirection.Up,
+                        ) to UserActionResult(Scenes.Gone)
                     )
                 )
         }
 
     @Test
-    fun destinationsCustomizing() =
+    fun destinations_whenNotCustomizing_withPreviousSceneLockscreen() =
         testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, false)
+            qsFlexiglassAdapter.setCustomizing(false)
             val destinations by collectLastValue(underTest.destinationScenes)
-            qsFlexiglassAdapter.setCustomizing(true)
+
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val backScene by collectLastValue(sceneBackInteractor.backScene)
+            sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
+            sceneInteractor.changeScene(Scenes.QuickSettings, "reason")
+            assertThat(currentScene).isEqualTo(Scenes.QuickSettings)
+            assertThat(backScene).isEqualTo(Scenes.Lockscreen)
 
             assertThat(destinations)
                 .isEqualTo(
                     mapOf(
-                        Back to UserActionResult(Scenes.QuickSettings),
+                        Back to UserActionResult(Scenes.Lockscreen),
+                        Swipe(SwipeDirection.Up) to UserActionResult(Scenes.Lockscreen),
+                        Swipe(
+                            fromSource = Edge.Bottom,
+                            direction = SwipeDirection.Up,
+                        ) to UserActionResult(Scenes.Lockscreen)
                     )
                 )
         }
 
     @Test
-    fun destinations_whenNotCustomizing_inSplitShade() =
+    fun destinations_whenNotCustomizing_authMethodSwipe_lockscreenNotDismissed() =
         testScope.runTest {
-            overrideResource(R.bool.config_use_split_notification_shade, true)
+            overrideResource(R.bool.config_use_split_notification_shade, false)
             val destinations by collectLastValue(underTest.destinationScenes)
             qsFlexiglassAdapter.setCustomizing(false)
+            kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.None
+            )
 
             assertThat(destinations)
                 .isEqualTo(
                     mapOf(
                         Back to UserActionResult(Scenes.Shade),
                         Swipe(SwipeDirection.Up) to UserActionResult(Scenes.Shade),
+                        Swipe(
+                            fromSource = Edge.Bottom,
+                            direction = SwipeDirection.Up,
+                        ) to UserActionResult(Scenes.Lockscreen)
                     )
                 )
         }
 
     @Test
-    fun destinations_whenCustomizing_inSplitShade() =
+    fun destinations_whenCustomizing_noDestinations() =
+        testScope.runTest {
+            overrideResource(R.bool.config_use_split_notification_shade, false)
+            val destinations by collectLastValue(underTest.destinationScenes)
+            qsFlexiglassAdapter.setCustomizing(true)
+
+            assertThat(destinations).isEmpty()
+        }
+
+    @Test
+    fun destinations_whenNotCustomizing_inSplitShade_unlocked() =
+        testScope.runTest {
+            overrideResource(R.bool.config_use_split_notification_shade, true)
+            val destinations by collectLastValue(underTest.destinationScenes)
+            qsFlexiglassAdapter.setCustomizing(false)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+
+            assertThat(destinations)
+                .isEqualTo(
+                    mapOf(
+                        Back to UserActionResult(Scenes.Shade),
+                        Swipe(SwipeDirection.Up) to UserActionResult(Scenes.Shade),
+                        Swipe(
+                            fromSource = Edge.Bottom,
+                            direction = SwipeDirection.Up,
+                        ) to UserActionResult(Scenes.Gone),
+                    )
+                )
+        }
+
+    @Test
+    fun destinations_whenCustomizing_inSplitShade_noDestinations() =
         testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, true)
             val destinations by collectLastValue(underTest.destinationScenes)
             qsFlexiglassAdapter.setCustomizing(true)
 
-            assertThat(destinations)
-                .isEqualTo(
-                    mapOf(
-                        Back to UserActionResult(Scenes.QuickSettings),
-                    )
-                )
+            assertThat(destinations).isEmpty()
         }
 
     @Test
@@ -183,4 +237,36 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
 
         verify(footerActionsController, times(1)).init()
     }
+
+    @Test
+    fun addAndRemoveMedia_mediaVisibilityIsUpdated() =
+        testScope.runTest {
+            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
+            val isMediaVisible by collectLastValue(underTest.isMediaVisible)
+            val userMedia = MediaData(active = true)
+
+            assertThat(isMediaVisible).isFalse()
+
+            kosmos.mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
+
+            assertThat(isMediaVisible).isTrue()
+
+            kosmos.mediaFilterRepository.removeSelectedUserMediaEntry(userMedia.instanceId)
+
+            assertThat(isMediaVisible).isFalse()
+        }
+
+    @Test
+    fun addInactiveMedia_mediaVisibilityIsUpdated() =
+        testScope.runTest {
+            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
+            val isMediaVisible by collectLastValue(underTest.isMediaVisible)
+            val userMedia = MediaData(active = false)
+
+            assertThat(isMediaVisible).isFalse()
+
+            kosmos.mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
+
+            assertThat(isMediaVisible).isTrue()
+        }
 }

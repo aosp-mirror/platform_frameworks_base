@@ -310,6 +310,11 @@ public class PowerWhitelistManager {
      * @hide
      */
     public static final int REASON_SHELL = PowerExemptionManager.REASON_SHELL;
+    /**
+     * Tile onClick event
+     * @hide
+     */
+    public static final int REASON_TILE_ONCLICK = PowerExemptionManager.REASON_TILE_ONCLICK;
 
     /**
      * The list of BG-FGS-Launch and temp-allowlist reason code.

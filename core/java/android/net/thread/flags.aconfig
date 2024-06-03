@@ -1,4 +1,5 @@
 package: "com.android.net.thread.platform.flags"
+container: "system"
 
 # This file contains aconfig flags used from platform code
 # Flags used for module APIs must be in aconfig files under each modules

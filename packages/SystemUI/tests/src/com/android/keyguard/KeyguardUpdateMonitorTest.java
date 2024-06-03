@@ -19,6 +19,7 @@ package com.android.keyguard;
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT_PERMANENT;
 import static android.hardware.biometrics.SensorProperties.STRENGTH_CONVENIENCE;
@@ -41,6 +42,8 @@ import static com.android.systemui.statusbar.policy.DevicePostureController.DEVI
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
+
+import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -82,7 +85,6 @@ import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
-import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -106,10 +108,11 @@ import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.text.TextUtils;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.foldables.FoldGracePeriodProvider;
@@ -304,7 +307,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mInteractionJankMonitor = mKosmos.getInteractionJankMonitor();
         MockitoAnnotations.initMocks(this);
         when(mSessionTracker.getSessionId(SESSION_KEYGUARD)).thenReturn(mKeyguardInstanceId);
-
+        when(mFaceAuthInteractor.isAuthenticated()).thenReturn(MutableStateFlow(false));
+        when(mFaceAuthInteractor.isLockedOut()).thenReturn(MutableStateFlow(false));
         when(mUserManager.isUserUnlocked(anyInt())).thenReturn(true);
         currentUserIsSystem();
         when(mStrongAuthTracker.getStub()).thenReturn(mock(IStrongAuthTracker.Stub.class));
@@ -1081,7 +1085,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(true /* isClass3Biometric */))
                 .thenReturn(true);
         when(mFaceAuthInteractor.isFaceAuthStrong()).thenReturn(true);
-        when(mFaceAuthInteractor.isAuthenticated()).thenReturn(true);
+        when(mFaceAuthInteractor.isAuthenticated()).thenReturn(MutableStateFlow(true));
 
         assertThat(mKeyguardUpdateMonitor.getUserCanSkipBouncer(user)).isTrue();
     }
@@ -1092,7 +1096,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 .thenReturn(false);
         int user = mSelectedUserInteractor.getSelectedUserId();
         when(mFaceAuthInteractor.isFaceAuthStrong()).thenReturn(false);
-        when(mFaceAuthInteractor.isAuthenticated()).thenReturn(true);
+        when(mFaceAuthInteractor.isAuthenticated()).thenReturn(MutableStateFlow(true));
 
         assertThat(mKeyguardUpdateMonitor.getUserCanSkipBouncer(user)).isFalse();
     }
@@ -1476,7 +1480,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
 
         // WHEN face authenticated
-        when(mFaceAuthInteractor.isAuthenticated()).thenReturn(true);
+        when(mFaceAuthInteractor.isAuthenticated()).thenReturn(MutableStateFlow(true));
 
         // THEN we shouldn't listen for udfps
         assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isEqualTo(false);
@@ -1530,7 +1534,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         verifyFingerprintAuthenticateCall();
 
-        when(mFaceAuthInteractor.isAuthenticated()).thenReturn(true);
+        when(mFaceAuthInteractor.isAuthenticated()).thenReturn(MutableStateFlow(true));
         when(mFaceAuthInteractor.isFaceAuthStrong()).thenReturn(false);
         when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(false /* isClass3Biometric */))
                 .thenReturn(false);
@@ -2015,6 +2019,16 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void unfoldFromPostureChange_sendActionToFaceAuthInteractor() {
+        // WHEN device posture changes to unfold
+        deviceInPostureStateOpened();
+        mTestableLooper.processAllMessages();
+
+        // THEN request face auth
+        verify(mFaceAuthInteractor).onDeviceUnfolded();
+    }
+
+    @Test
     public void detectFingerprint_onTemporaryLockoutReset_authenticateFingerprint() {
         ArgumentCaptor<FingerprintManager.LockoutResetCallback> fpLockoutResetCallbackCaptor =
                 ArgumentCaptor.forClass(FingerprintManager.LockoutResetCallback.class);
@@ -2263,10 +2277,9 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     private void faceAuthLockOut() {
-        when(mFaceAuthInteractor.isLockedOut()).thenReturn(true);
+        when(mFaceAuthInteractor.isLockedOut()).thenReturn(MutableStateFlow(true));
         mFaceAuthenticationListener.getValue().onAuthenticationStatusChanged(
-                new ErrorFaceAuthenticationStatus(FaceManager.FACE_ERROR_LOCKOUT_PERMANENT, "",
-                        0L));
+                new ErrorFaceAuthenticationStatus(FACE_ERROR_LOCKOUT_PERMANENT, "", 0L));
     }
 
     private void statusBarShadeIsNotLocked() {

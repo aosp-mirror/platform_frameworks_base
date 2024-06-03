@@ -119,7 +119,8 @@ oneway interface IApplicationThread {
     void scheduleSuicide();
     void dispatchPackageBroadcast(int cmd, in String[] packages);
     void scheduleCrash(in String msg, int typeId, in Bundle extras);
-    void dumpHeap(boolean managed, boolean mallocInfo, boolean runGc, in String path,
+    void dumpHeap(boolean managed, boolean mallocInfo, boolean runGc,
+            in String dumpBitmaps, in String path,
             in ParcelFileDescriptor fd, in RemoteCallback finishCallback);
     void dumpActivity(in ParcelFileDescriptor fd, IBinder servicetoken, in String prefix,
             in String[] args);

@@ -62,6 +62,7 @@ import android.content.pm.dex.ArtManager;
 import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
 import android.graphics.drawable.AdaptiveIconDrawable;
@@ -74,6 +75,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
@@ -265,6 +267,24 @@ public abstract class PackageManager {
      */
     public static final String PROPERTY_LEGACY_UPDATE_OWNERSHIP_DENYLIST =
             "android.app.PROPERTY_LEGACY_UPDATE_OWNERSHIP_DENYLIST";
+
+    /**
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager
+     * .Property} for a app to inform the installer that a file containing the app's android
+     * safety label data is bundled into the APK as a raw resource.
+     *
+     * <p>For example:
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.content.PROPERTY_ANDROID_SAFETY_LABEL"
+     *     android:resource="@raw/app-metadata"/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     * @hide
+     */
+    public static final String PROPERTY_ANDROID_SAFETY_LABEL =
+            "android.content.PROPERTY_ANDROID_SAFETY_LABEL";
 
     /**
      * A property value set within the manifest.
@@ -3263,6 +3283,16 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: This device is capable of launching apps in automotive display
+     * compatibility mode.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CAR_DISPLAY_COMPATIBILITY =
+            "android.software.car.display_compatibility";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature(String, int)}: If this feature is supported, the device supports
      * {@link android.security.identity.IdentityCredentialStore} implemented in secure hardware
      * at the given feature version.
@@ -4367,8 +4397,6 @@ public abstract class PackageManager {
      * {@link #hasSystemFeature}: The device supports freeform window management.
      * Windows have title bars and can be moved and resized.
      */
-    // If this feature is present, you also need to set
-    // com.android.internal.R.config_freeformWindowManagement to true in your configuration overlay.
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_FREEFORM_WINDOW_MANAGEMENT
             = "android.software.freeform_window_management";
@@ -4824,6 +4852,16 @@ public abstract class PackageManager {
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_ROTARY_ENCODER_LOW_RES =
             "android.hardware.rotaryencoder.lowres";
+
+  /**
+   * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
+   * support for contextual search helper.
+   *
+   * @hide
+   */
+  @SdkConstant(SdkConstantType.FEATURE)
+  public static final String FEATURE_CONTEXTUAL_SEARCH_HELPER =
+      "android.software.contextualsearch";
 
     /** @hide */
     public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;
@@ -11713,5 +11751,39 @@ public abstract class PackageManager {
             @NonNull Function<XmlResourceParser, T> parserFunction) throws IOException {
         throw new UnsupportedOperationException(
                 "parseAndroidManifest not implemented in subclass");
+    }
+
+    /**
+     * Similar to {@link #parseAndroidManifest(File, Function)}, but accepting a file descriptor
+     * instead of a File object.
+     *
+     * @param apkFileDescriptor The file descriptor of an application apk.
+     * The parserFunction will be invoked with the XmlResourceParser object
+     *        after getting the AndroidManifest.xml of an application package.
+     *
+     * @return Returns the result of the {@link Function#apply(Object)}.
+     *
+     * @throws IOException if the AndroidManifest.xml of an application package cannot be
+     *             read or accessed.
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_GET_PACKAGE_INFO_WITH_FD)
+    @WorkerThread
+    public <T> T parseAndroidManifest(@NonNull ParcelFileDescriptor apkFileDescriptor,
+            @NonNull Function<XmlResourceParser, T> parserFunction) throws IOException {
+        throw new UnsupportedOperationException(
+                "parseAndroidManifest not implemented in subclass");
+    }
+
+    /**
+     * @param info    The {@link ServiceInfo} to pull the attributes from.
+     * @param name    The name of the Xml metadata where the attributes are stored.
+     * @param rootTag The root tag of the attributes.
+     * @return A {@link TypedArray} of attributes if successful, {@code null} otherwise.
+     * @hide
+     */
+    public TypedArray extractPackageItemInfoAttributes(PackageItemInfo info, String name,
+            String rootTag, int[] attributes) {
+        throw new UnsupportedOperationException(
+                "parseServiceMetadata not implemented in subclass");
     }
 }

@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,7 +46,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -55,7 +53,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.android.compose.theme.LocalAndroidColorScheme
-import com.android.credentialmanager.R
 import com.android.credentialmanager.ui.theme.EntryShape
 import com.android.credentialmanager.ui.theme.Shapes
 
@@ -321,6 +318,8 @@ fun CtaButtonRow(
 fun MoreOptionTopAppBar(
     text: String,
     onNavigationIconClicked: () -> Unit,
+    navigationIcon: ImageVector,
+    navigationIconContentDescription: String,
     bottomPadding: Dp,
 ) {
     Row(
@@ -336,10 +335,8 @@ fun MoreOptionTopAppBar(
                     contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                        imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = stringResource(
-                                R.string.accessibility_back_arrow_button
-                        ),
+                        imageVector = navigationIcon,
+                        contentDescription = navigationIconContentDescription,
                         modifier = Modifier.size(24.dp).autoMirrored(),
                         tint = LocalAndroidColorScheme.current.onSurfaceVariant,
                 )

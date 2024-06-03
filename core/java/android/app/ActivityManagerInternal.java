@@ -148,6 +148,13 @@ public abstract class ActivityManagerInternal {
     public abstract void onUserRemoved(@UserIdInt int userId);
 
     /**
+     * Start user, if it is not already running, but don't bring it to foreground.
+     * @param userId ID of the user to start
+     * @return true if the user has been successfully started
+     */
+    public abstract boolean startUserInBackground(int userId);
+
+    /**
      * Kill foreground apps from the specified user.
      */
     public abstract void killForegroundAppsForUser(@UserIdInt int userId);
@@ -1263,4 +1270,27 @@ public abstract class ActivityManagerInternal {
      * @hide
      */
     public abstract boolean shouldDelayHomeLaunch(int userId);
+
+    /**
+     * Add a startup timestamp to the most recent start of the specified process.
+     *
+     * @param key The {@link ApplicationStartInfo} start timestamp key of the timestamp to add.
+     * @param timestampNs The clock monotonic timestamp to add in nanoseconds.
+     * @param uid The UID of the process to add this timestamp to.
+     * @param pid The process id of the process to add this timestamp to.
+     * @param userId The userId in the multi-user environment.
+     */
+    public abstract void addStartInfoTimestamp(int key, long timestampNs, int uid, int pid,
+            int userId);
+
+    /**
+     * It is similar {@link IActivityManager#killApplication(String, int, int, String, int)} but
+     * it immediately stop the package.
+     *
+     * <p>Note: Do not call this method from inside PMS's lock, otherwise it'll run into
+     * watchdog reset.
+     * @hide
+     */
+    public abstract void killApplicationSync(String pkgName, int appId, int userId,
+            String reason, int exitInfoReason);
 }

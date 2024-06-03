@@ -66,7 +66,12 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
                     "ImeInsetsSourceConsumer#onAnimationFinished",
                     mController.getHost().getInputMethodManager(), null /* icProto */);
         }
-        final boolean insetsChanged = super.onAnimationStateChanged(running);
+        boolean insetsChanged = super.onAnimationStateChanged(running);
+        if (running && !isShowRequested() && mController.isPredictiveBackImeHideAnimInProgress()) {
+            // IME predictive back animation switched from pre-commit to post-commit.
+            insetsChanged |= applyLocalVisibilityOverride();
+        }
+
         if (!isShowRequested()) {
             mIsRequestedVisibleAwaitingLeash = false;
             if (!running && !mHasPendingRequest) {
@@ -196,11 +201,11 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         if (!super.setControl(control, showTypes, hideTypes)) {
             return false;
         }
-        final boolean hasLeash = control != null && control.getLeash() != null;
-        if (!hasLeash && !mIsRequestedVisibleAwaitingLeash) {
+        if (control == null && !mIsRequestedVisibleAwaitingLeash) {
             mController.setRequestedVisibleTypes(0 /* visibleTypes */, getType());
             removeSurface();
         }
+        final boolean hasLeash = control != null && control.getLeash() != null;
         if (hasLeash) {
             mIsRequestedVisibleAwaitingLeash = false;
         }
@@ -243,7 +248,8 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
      * {@link InputMethodManager#showSoftInput(View, int)} is called.
      */
     public void onShowRequested() {
-        if (mAnimationState == ANIMATION_STATE_HIDE) {
+        if (mAnimationState == ANIMATION_STATE_HIDE
+                || mController.isPredictiveBackImeHideAnimInProgress()) {
             mHasPendingRequest = true;
         }
     }

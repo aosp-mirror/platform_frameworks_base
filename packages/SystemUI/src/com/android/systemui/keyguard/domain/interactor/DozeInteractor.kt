@@ -19,6 +19,10 @@ package com.android.systemui.keyguard.domain.interactor
 import android.graphics.Point
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
+import dagger.Lazy
 import javax.inject.Inject
 
 @SysUISingleton
@@ -26,7 +30,16 @@ class DozeInteractor
 @Inject
 constructor(
     private val keyguardRepository: KeyguardRepository,
+    // TODO(b/336364825) Remove Lazy when SceneContainerFlag is released -
+    // while the flag is off, creating this object too early results in a crash
+    private val sceneInteractor: Lazy<SceneInteractor>,
 ) {
+    fun canDozeFromCurrentScene(): Boolean {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
+            return false
+        }
+        return sceneInteractor.get().currentScene.value == Scenes.Lockscreen
+    }
 
     fun setAodAvailable(value: Boolean) {
         keyguardRepository.setAodAvailable(value)

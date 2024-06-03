@@ -96,6 +96,7 @@ class BLASTSyncEngine {
     interface TransactionReadyListener {
         void onTransactionReady(int mSyncId, SurfaceControl.Transaction transaction);
         default void onTransactionCommitTimeout() {}
+        default void onReadyTimeout() {}
     }
 
     /**
@@ -410,6 +411,7 @@ class BLASTSyncEngine {
             if (allFinished && !mReady) {
                 Slog.w(TAG, "Sync group " + mSyncId + " timed-out because not ready. If you see "
                         + "this, please file a bug.");
+                mListener.onReadyTimeout();
             }
             finishNow();
             removeFromDependencies(this);

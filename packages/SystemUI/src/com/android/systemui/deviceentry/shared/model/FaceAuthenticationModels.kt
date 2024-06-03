@@ -16,6 +16,12 @@
 
 package com.android.systemui.deviceentry.shared.model
 
+import android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_CANCELED
+import android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE
+import android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT
+import android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT
+import android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_TIMEOUT
+import android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_UNABLE_TO_PROCESS
 import android.hardware.face.FaceManager
 import android.os.SystemClock.elapsedRealtime
 
@@ -62,24 +68,22 @@ data class ErrorFaceAuthenticationStatus(
      * Method that checks if [msgId] is a lockout error. A lockout error means that face
      * authentication is locked out.
      */
-    fun isLockoutError() =
-        msgId == FaceManager.FACE_ERROR_LOCKOUT_PERMANENT || msgId == FaceManager.FACE_ERROR_LOCKOUT
+    fun isLockoutError() = msgId == FACE_ERROR_LOCKOUT_PERMANENT || msgId == FACE_ERROR_LOCKOUT
 
     /**
      * Method that checks if [msgId] is a cancellation error. This means that face authentication
      * was cancelled before it completed.
      */
-    fun isCancellationError() = msgId == FaceManager.FACE_ERROR_CANCELED
+    fun isCancellationError() = msgId == FACE_ERROR_CANCELED
 
-    fun isUnableToProcessError() = msgId == FaceManager.FACE_ERROR_UNABLE_TO_PROCESS
+    fun isUnableToProcessError() = msgId == FACE_ERROR_UNABLE_TO_PROCESS
 
     /** Method that checks if [msgId] is a hardware error. */
     fun isHardwareError() =
-        msgId == FaceManager.FACE_ERROR_HW_UNAVAILABLE ||
-            msgId == FaceManager.FACE_ERROR_UNABLE_TO_PROCESS
+        msgId == FACE_ERROR_HW_UNAVAILABLE || msgId == FACE_ERROR_UNABLE_TO_PROCESS
 
     /** Method that checks if [msgId] is a timeout error. */
-    fun isTimeoutError() = msgId == FaceManager.FACE_ERROR_TIMEOUT
+    fun isTimeoutError() = msgId == FACE_ERROR_TIMEOUT
 
     companion object {
         /**

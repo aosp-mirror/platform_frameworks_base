@@ -1041,6 +1041,7 @@ public class AppWidgetManager {
      */
     public AppWidgetProviderInfo getAppWidgetInfo(int appWidgetId) {
         if (mService == null) {
+            Log.e(TAG, "Service wasn't initialized, appWidgetId=" + appWidgetId);
             return null;
         }
         try {
@@ -1048,6 +1049,9 @@ public class AppWidgetManager {
             if (info != null) {
                 // Converting complex to dp.
                 info.updateDimensions(mDisplayMetrics);
+            } else {
+                Log.e(TAG, "App widget provider info is null. PackageName=" + mPackageName
+                        + " appWidgetId-" + appWidgetId);
             }
             return info;
         } catch (RemoteException e) {
@@ -1384,7 +1388,8 @@ public class AppWidgetManager {
      *
      * @return {@code TRUE} if the launcher supports this feature. Note the API will return without
      *    waiting for the user to respond, so getting {@code TRUE} from this API does *not* mean
-     *    the shortcut is pinned. {@code FALSE} if the launcher doesn't support this feature.
+     *    the shortcut is pinned. {@code FALSE} if the launcher doesn't support this feature or if
+     *    calling app belongs to a user-profile with items restricted on home screen.
      *
      * @see android.content.pm.ShortcutManager#isRequestPinShortcutSupported()
      * @see android.content.pm.ShortcutManager#requestPinShortcut(ShortcutInfo, IntentSender)

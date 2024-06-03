@@ -34,7 +34,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_alignParentStart="true"
-                    android:paddingLeft="@dimen/autofill_view_left_padding"
+                    android:paddingStart="@dimen/autofill_view_left_padding"
                     app:tint="?androidprv:attr/materialColorOnSurface"
                     android:background="@null"/>
 
@@ -46,6 +46,7 @@
                     android:paddingEnd="@dimen/autofill_view_right_padding"
                     android:paddingTop="@dimen/autofill_view_top_padding"
                     android:paddingBottom="@dimen/autofill_view_bottom_padding"
+                    android:textDirection="locale"
                     android:orientation="vertical">
 
                         <TextView
@@ -53,6 +54,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="?androidprv:attr/materialColorOnSurface"
+                            android:textDirection="locale"
                             style="@style/autofill.TextTitle"/>
 
                         <TextView
@@ -60,6 +62,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="?androidprv:attr/materialColorOnSurfaceVariant"
+                            android:textDirection="locale"
                             style="@style/autofill.TextSubtitle"/>
 
                 </LinearLayout>

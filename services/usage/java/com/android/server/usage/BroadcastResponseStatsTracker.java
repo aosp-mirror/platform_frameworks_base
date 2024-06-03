@@ -181,7 +181,7 @@ class BroadcastResponseStatsTracker {
                 // We only need to look at the broadcast events that occurred before
                 // this notification related event.
                 while (dispatchTimestampsMs.size() > 0
-                        && dispatchTimestampsMs.peekFirst() < timestampMs) {
+                        && dispatchTimestampsMs.peekFirst() <= timestampMs) {
                     final long dispatchTimestampMs = dispatchTimestampsMs.peekFirst();
                     final long elapsedDurationMs = timestampMs - dispatchTimestampMs;
                     // Only increment the counts if the broadcast was sent not too long ago, as

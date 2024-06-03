@@ -134,6 +134,31 @@ public class BackProgressAnimatorTest {
         assertEquals(0, cancelCallbackCalled.getCount());
     }
 
+    @Test
+    public void testCancelFinishCallbackNotInvokedWhenRemoved() throws InterruptedException {
+        // Give the animator some progress.
+        final BackMotionEvent backEvent = backMotionEventFrom(100, mTargetProgress);
+        mMainThreadHandler.post(
+                () -> mProgressAnimator.onBackProgressed(backEvent));
+        mTargetProgressCalled.await(1, TimeUnit.SECONDS);
+        assertNotNull(mReceivedBackEvent);
+
+        // call onBackCancelled (which animates progress to 0 before invoking the finishCallback)
+        CountDownLatch finishCallbackCalled = new CountDownLatch(1);
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                () -> mProgressAnimator.onBackCancelled(finishCallbackCalled::countDown));
+
+        // remove onBackCancelled finishCallback (while progress is still animating to 0)
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                () -> mProgressAnimator.removeOnBackCancelledFinishCallback());
+
+        // call reset (which triggers the finishCallback invocation, if one is present)
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> mProgressAnimator.reset());
+
+        // verify that finishCallback is not invoked
+        assertEquals(1, finishCallbackCalled.getCount());
+    }
+
     private void onGestureProgress(BackEvent backEvent) {
         if (mTargetProgress == backEvent.getProgress()) {
             mReceivedBackEvent = backEvent;

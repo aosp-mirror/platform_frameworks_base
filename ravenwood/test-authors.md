@@ -17,6 +17,7 @@ android_ravenwood_test {
     name: "MyTestsRavenwood",
     static_libs: [
         "androidx.annotation_annotation",
+        "androidx.test.ext.junit",
         "androidx.test.rules",
     ],
     srcs: [
@@ -34,7 +35,7 @@ android_ravenwood_test {
 import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

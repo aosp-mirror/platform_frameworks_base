@@ -22,6 +22,8 @@ import android.app.IUidObserver
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Person
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.service.notification.NotificationListenerService.REASON_USER_STOPPED
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -104,7 +106,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
     fun setUp() {
         allowTestableLooperAsMainThread()
         TestableLooper.get(this).runWithLooper {
-            chipView = LayoutInflater.from(mContext).inflate(R.layout.ongoing_call_chip, null)
+            chipView = LayoutInflater.from(mContext).inflate(R.layout.ongoing_activity_chip, null)
         }
 
         MockitoAnnotations.initMocks(this)
@@ -193,6 +195,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
     /** Regression test for b/192379214. */
     @Test
+    @DisableFlags(android.app.Flags.FLAG_SORT_SECTION_BY_TIME)
     fun onEntryUpdated_notificationWhenIsZero_timeHidden() {
         val notification = NotificationEntryBuilder(createOngoingCallNotifEntry())
         notification.modifyNotification(context).setWhen(0)
@@ -203,8 +206,24 @@ class OngoingCallControllerTest : SysuiTestCase() {
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         )
 
-        assertThat(chipView.findViewById<View>(R.id.ongoing_call_chip_time)?.measuredWidth)
+        assertThat(chipView.findViewById<View>(R.id.ongoing_activity_chip_time)?.measuredWidth)
                 .isEqualTo(0)
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_SORT_SECTION_BY_TIME)
+    fun onEntryUpdated_notificationWhenIsZero_timeShown() {
+        val notification = NotificationEntryBuilder(createOngoingCallNotifEntry())
+        notification.modifyNotification(context).setWhen(0)
+
+        notifCollectionListener.onEntryUpdated(notification.build())
+        chipView.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
+
+        assertThat(chipView.findViewById<View>(R.id.ongoing_activity_chip_time)?.measuredWidth)
+                .isGreaterThan(0)
     }
 
     @Test
@@ -218,7 +237,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         )
 
-        assertThat(chipView.findViewById<View>(R.id.ongoing_call_chip_time)?.measuredWidth)
+        assertThat(chipView.findViewById<View>(R.id.ongoing_activity_chip_time)?.measuredWidth)
                 .isGreaterThan(0)
     }
 
@@ -453,7 +472,10 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
         lateinit var newChipView: View
         TestableLooper.get(this).runWithLooper {
-            newChipView = LayoutInflater.from(mContext).inflate(R.layout.ongoing_call_chip, null)
+            newChipView = LayoutInflater.from(mContext).inflate(
+                    R.layout.ongoing_activity_chip,
+                    null
+            )
         }
 
         // Change the chip view associated with the controller.

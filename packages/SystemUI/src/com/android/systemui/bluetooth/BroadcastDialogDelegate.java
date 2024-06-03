@@ -217,10 +217,14 @@ public class BroadcastDialogDelegate implements SystemUIDialog.Delegate {
         mSwitchBroadcast.setText(mContext.getString(
                 R.string.bt_le_audio_broadcast_dialog_switch_app, switchBroadcastApp), null);
         mSwitchBroadcast.setOnClickListener((view) -> startSwitchBroadcast());
-        changeOutput.setOnClickListener((view) -> {
-            mMediaOutputDialogManager.createAndShow(mOutputPackageName, true, null);
-            dialog.dismiss();
-        });
+        changeOutput.setOnClickListener(
+                (view) -> {
+                    // TODO: b/321969740 - Take the userHandle as a parameter and pass it through.
+                    //  The package name is not sufficient to unambiguously identify an app.
+                    mMediaOutputDialogManager.createAndShow(
+                            mOutputPackageName, true, null, null, null);
+                    dialog.dismiss();
+                });
         cancelBtn.setOnClickListener((view) -> {
             if (DEBUG) {
                 Log.d(TAG, "BroadcastDialog dismiss.");

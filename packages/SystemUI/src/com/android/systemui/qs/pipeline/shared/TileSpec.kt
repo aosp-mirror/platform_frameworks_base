@@ -60,6 +60,7 @@ sealed class TileSpec private constructor(open val spec: String) {
 
     companion object {
         /** Create a [TileSpec] from the string [spec]. */
+        @JvmStatic
         fun create(spec: String): TileSpec {
             return if (TextUtils.isEmpty(spec)) {
                 Invalid

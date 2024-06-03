@@ -43,7 +43,6 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.util.SparseArray;
-import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
@@ -51,6 +50,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.CollectionUtils;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.nano.SystemUIProtoDump;
 import com.android.systemui.flags.FakeFeatureFlags;
@@ -734,7 +734,7 @@ public class QSTileHostTest extends SysuiTestCase {
         }
 
         @Override
-        protected void handleClick(@Nullable View view) {}
+        protected void handleClick(@Nullable Expandable expandable) {}
 
         @Override
         protected void handleUpdateState(State state, Object arg) {}

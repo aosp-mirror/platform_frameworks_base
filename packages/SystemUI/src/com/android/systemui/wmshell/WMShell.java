@@ -21,6 +21,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_B
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DIALOG_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DISABLE_GESTURE_SPLIT_INVOCATION;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ONE_HANDED_ACTIVE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
@@ -43,6 +44,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.CoreStartable;
+import com.android.systemui.communal.ui.viewmodel.CommunalTransitionViewModel;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -55,6 +57,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -95,7 +98,7 @@ public final class WMShell implements
         CoreStartable,
         CommandQueue.Callbacks {
     private static final String TAG = WMShell.class.getName();
-    private static final int INVALID_SYSUI_STATE_MASK =
+    private static final long INVALID_SYSUI_STATE_MASK =
             SYSUI_STATE_DIALOG_SHOWING
                     | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
                     | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED
@@ -124,6 +127,8 @@ public final class WMShell implements
     private final UserTracker mUserTracker;
     private final DisplayTracker mDisplayTracker;
     private final NoteTaskInitializer mNoteTaskInitializer;
+    private final CommunalTransitionViewModel mCommunalTransitionViewModel;
+    private final JavaAdapter mJavaAdapter;
     private final Executor mSysUiMainExecutor;
 
     // Listeners and callbacks. Note that we prefer member variable over anonymous class here to
@@ -187,6 +192,8 @@ public final class WMShell implements
             UserTracker userTracker,
             DisplayTracker displayTracker,
             NoteTaskInitializer noteTaskInitializer,
+            CommunalTransitionViewModel communalTransitionViewModel,
+            JavaAdapter javaAdapter,
             @Main Executor sysUiMainExecutor) {
         mContext = context;
         mShell = shell;
@@ -205,6 +212,8 @@ public final class WMShell implements
         mUserTracker = userTracker;
         mDisplayTracker = displayTracker;
         mNoteTaskInitializer = noteTaskInitializer;
+        mCommunalTransitionViewModel = communalTransitionViewModel;
+        mJavaAdapter = javaAdapter;
         mSysUiMainExecutor = sysUiMainExecutor;
     }
 
@@ -265,6 +274,13 @@ public final class WMShell implements
                 splitScreen.setSplitscreenFocus(leftOrTop);
             }
         });
+        splitScreen.registerSplitAnimationListener(new SplitScreen.SplitInvocationListener() {
+            @Override
+            public void onSplitAnimationInvoked(boolean animationRunning) {
+                mSysUiState.setFlag(SYSUI_STATE_DISABLE_GESTURE_SPLIT_INVOCATION, animationRunning)
+                        .commitUpdate(mDisplayTracker.getDefaultDisplayId());
+            }
+        }, mSysUiMainExecutor);
     }
 
     @VisibleForTesting
@@ -381,6 +397,8 @@ public final class WMShell implements
     void initRecentTasks(RecentTasks recentTasks) {
         recentTasks.addAnimationStateListener(mSysUiMainExecutor,
                 mCommandQueue::onRecentsAnimationStateChanged);
+        mJavaAdapter.alwaysCollectFlow(mCommunalTransitionViewModel.getRecentsBackgroundColor(),
+                recentTasks::setTransitionBackgroundColor);
     }
 
     @Override

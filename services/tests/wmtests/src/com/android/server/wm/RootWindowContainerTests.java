@@ -74,6 +74,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
@@ -235,6 +236,24 @@ public class RootWindowContainerTests extends WindowTestsBase {
         // The activities with process should be removed because WindowProcessController#isRemoved.
         assertFalse(task.hasChild());
         assertFalse(wpc.hasActivities());
+    }
+
+    @Test
+    public void testAttachApplication() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        activity.detachFromProcess();
+        mAtm.startProcessAsync(activity, false /* knownToBeDead */,
+                true /* isTop */, "test" /* hostingType */);
+        final WindowProcessController proc = mSystemServicesTestRule.addProcess(
+                activity.packageName, activity.processName,
+                6789 /* pid */, activity.info.applicationInfo.uid);
+        try {
+            mRootWindowContainer.attachApplication(proc);
+            verify(mSupervisor).realStartActivityLocked(eq(activity), eq(proc), anyBoolean(),
+                    anyBoolean());
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
     }
 
     /**
@@ -813,7 +832,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         // Assume the task is at the topmost position
         assertFalse(rootTask.isTopRootTaskInDisplayArea());
-        doReturn(taskDisplayArea.getHomeActivity()).when(taskDisplayArea).topRunningActivity();
+        doReturn(taskDisplayArea.getHomeActivity()).when(taskDisplayArea).topRunningActivity(
+                anyBoolean());
 
         // Use the task as target to resume.
         mRootWindowContainer.resumeFocusedTasksTopActivities();

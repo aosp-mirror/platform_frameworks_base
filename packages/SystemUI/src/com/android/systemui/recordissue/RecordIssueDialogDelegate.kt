@@ -63,6 +63,7 @@ constructor(
     private val mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
     private val userFileManager: UserFileManager,
     private val screenCaptureDisabledDialogDelegate: ScreenCaptureDisabledDialogDelegate,
+    private val issueRecordingState: IssueRecordingState,
     @Assisted private val onStarted: Consumer<IssueRecordingConfig>,
 ) : SystemUIDialog.Delegate {
 
@@ -74,6 +75,7 @@ constructor(
     }
 
     @SuppressLint("UseSwitchCompatOrMaterialCode") private lateinit var screenRecordSwitch: Switch
+    @SuppressLint("UseSwitchCompatOrMaterialCode") private lateinit var bugReportSwitch: Switch
     private lateinit var issueTypeButton: Button
 
     @MainThread
@@ -86,6 +88,7 @@ constructor(
             setPositiveButton(
                 R.string.qs_record_issue_start,
                 { _, _ ->
+                    issueRecordingState.takeBugReport = bugReportSwitch.isChecked
                     onStarted.accept(
                         IssueRecordingConfig(
                             screenRecordSwitch.isChecked,
@@ -113,6 +116,7 @@ constructor(
                     bgExecutor.execute { onScreenRecordSwitchClicked() }
                 }
             }
+            bugReportSwitch = requireViewById(R.id.bugreport_switch)
             val startButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
             issueTypeButton = requireViewById(R.id.issue_type_button)
             issueTypeButton.setOnClickListener {
@@ -131,7 +135,7 @@ constructor(
                     .isScreenCaptureCompletelyDisabled(UserHandle.of(userTracker.userId))
         ) {
             mainExecutor.execute {
-                screenCaptureDisabledDialogDelegate.createDialog().show()
+                screenCaptureDisabledDialogDelegate.createSysUIDialog().show()
                 screenRecordSwitch.isChecked = false
             }
             return

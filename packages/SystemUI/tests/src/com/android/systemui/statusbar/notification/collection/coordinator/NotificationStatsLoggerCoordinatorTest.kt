@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.platform.test.annotations.EnableFlags
 import android.service.notification.NotificationListenerService.REASON_CANCEL
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
@@ -36,7 +36,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @EnableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
 class NotificationStatsLoggerCoordinatorTest : SysuiTestCase() {
 

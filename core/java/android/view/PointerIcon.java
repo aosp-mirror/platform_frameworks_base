@@ -16,8 +16,10 @@
 
 package android.view;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.annotation.XmlRes;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -36,8 +38,10 @@ import android.graphics.drawable.VectorDrawable;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.PointerIconType;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.flags.Flags;
 
 import com.android.internal.util.XmlUtils;
 
@@ -52,10 +56,10 @@ public final class PointerIcon implements Parcelable {
     private static final String TAG = "PointerIcon";
 
     /** {@hide} Type constant: Custom icon with a user-supplied bitmap. */
-    public static final int TYPE_CUSTOM = -1;
+    public static final int TYPE_CUSTOM = PointerIconType.CUSTOM;
 
     /** Type constant: Null icon.  It has no bitmap. */
-    public static final int TYPE_NULL = 0;
+    public static final int TYPE_NULL = PointerIconType.TYPE_NULL;
 
     /**
      * Type constant: no icons are specified. If all views uses this, then the pointer icon falls
@@ -63,63 +67,63 @@ public final class PointerIcon implements Parcelable {
      * to have the default icon.
      * @hide
      */
-    public static final int TYPE_NOT_SPECIFIED = 1;
+    public static final int TYPE_NOT_SPECIFIED = PointerIconType.NOT_SPECIFIED;
 
     /** Type constant: Arrow icon.  (Default mouse pointer) */
-    public static final int TYPE_ARROW = 1000;
+    public static final int TYPE_ARROW = PointerIconType.ARROW;
 
     /** {@hide} Type constant: Spot hover icon for touchpads. */
-    public static final int TYPE_SPOT_HOVER = 2000;
+    public static final int TYPE_SPOT_HOVER = PointerIconType.SPOT_HOVER;
 
     /** {@hide} Type constant: Spot touch icon for touchpads. */
-    public static final int TYPE_SPOT_TOUCH = 2001;
+    public static final int TYPE_SPOT_TOUCH = PointerIconType.SPOT_TOUCH;
 
     /** {@hide} Type constant: Spot anchor icon for touchpads. */
-    public static final int TYPE_SPOT_ANCHOR = 2002;
+    public static final int TYPE_SPOT_ANCHOR = PointerIconType.SPOT_ANCHOR;
 
     // Type constants for additional predefined icons for mice.
     /** Type constant: context-menu. */
-    public static final int TYPE_CONTEXT_MENU = 1001;
+    public static final int TYPE_CONTEXT_MENU = PointerIconType.CONTEXT_MENU;
 
     /** Type constant: hand. */
-    public static final int TYPE_HAND = 1002;
+    public static final int TYPE_HAND = PointerIconType.HAND;
 
     /** Type constant: help. */
-    public static final int TYPE_HELP = 1003;
+    public static final int TYPE_HELP = PointerIconType.HELP;
 
     /** Type constant: wait. */
-    public static final int TYPE_WAIT = 1004;
+    public static final int TYPE_WAIT = PointerIconType.WAIT;
 
     /** Type constant: cell. */
-    public static final int TYPE_CELL = 1006;
+    public static final int TYPE_CELL = PointerIconType.CELL;
 
     /** Type constant: crosshair. */
-    public static final int TYPE_CROSSHAIR = 1007;
+    public static final int TYPE_CROSSHAIR = PointerIconType.CROSSHAIR;
 
     /** Type constant: text. */
-    public static final int TYPE_TEXT = 1008;
+    public static final int TYPE_TEXT = PointerIconType.TEXT;
 
     /** Type constant: vertical-text. */
-    public static final int TYPE_VERTICAL_TEXT = 1009;
+    public static final int TYPE_VERTICAL_TEXT = PointerIconType.VERTICAL_TEXT;
 
     /** Type constant: alias (indicating an alias of/shortcut to something is
       * to be created. */
-    public static final int TYPE_ALIAS = 1010;
+    public static final int TYPE_ALIAS = PointerIconType.ALIAS;
 
     /** Type constant: copy. */
-    public static final int TYPE_COPY = 1011;
+    public static final int TYPE_COPY = PointerIconType.COPY;
 
     /** Type constant: no-drop. */
-    public static final int TYPE_NO_DROP = 1012;
+    public static final int TYPE_NO_DROP = PointerIconType.NO_DROP;
 
     /** Type constant: all-scroll. */
-    public static final int TYPE_ALL_SCROLL = 1013;
+    public static final int TYPE_ALL_SCROLL = PointerIconType.ALL_SCROLL;
 
     /** Type constant: horizontal double arrow mainly for resizing. */
-    public static final int TYPE_HORIZONTAL_DOUBLE_ARROW = 1014;
+    public static final int TYPE_HORIZONTAL_DOUBLE_ARROW = PointerIconType.HORIZONTAL_DOUBLE_ARROW;
 
     /** Type constant: vertical double arrow mainly for resizing. */
-    public static final int TYPE_VERTICAL_DOUBLE_ARROW = 1015;
+    public static final int TYPE_VERTICAL_DOUBLE_ARROW = PointerIconType.VERTICAL_DOUBLE_ARROW;
 
     /** Type constant: diagonal double arrow -- top-right to bottom-left. */
     public static final int TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW = 1016;
@@ -128,19 +132,19 @@ public final class PointerIcon implements Parcelable {
     public static final int TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW = 1017;
 
     /** Type constant: zoom-in. */
-    public static final int TYPE_ZOOM_IN = 1018;
+    public static final int TYPE_ZOOM_IN = PointerIconType.ZOOM_IN;
 
     /** Type constant: zoom-out. */
-    public static final int TYPE_ZOOM_OUT = 1019;
+    public static final int TYPE_ZOOM_OUT = PointerIconType.ZOOM_OUT;
 
     /** Type constant: grab. */
-    public static final int TYPE_GRAB = 1020;
+    public static final int TYPE_GRAB = PointerIconType.GRAB;
 
     /** Type constant: grabbing. */
-    public static final int TYPE_GRABBING = 1021;
+    public static final int TYPE_GRABBING = PointerIconType.GRABBING;
 
     /** Type constant: handwriting. */
-    public static final int TYPE_HANDWRITING = 1022;
+    public static final int TYPE_HANDWRITING = PointerIconType.HANDWRITING;
 
     // OEM private types should be defined starting at this range to avoid
     // conflicts with any system types that may be defined in the future.
@@ -230,7 +234,7 @@ public final class PointerIcon implements Parcelable {
         }
 
         int typeIndex = getSystemIconTypeIndex(type);
-        if (typeIndex == 0) {
+        if (typeIndex < 0) {
             typeIndex = getSystemIconTypeIndex(TYPE_DEFAULT);
         }
 
@@ -284,7 +288,7 @@ public final class PointerIcon implements Parcelable {
         if (bitmap == null) {
             throw new IllegalArgumentException("bitmap must not be null");
         }
-        validateHotSpot(bitmap, hotSpotX, hotSpotY);
+        validateHotSpot(bitmap, hotSpotX, hotSpotY, false /* isScaled */);
 
         PointerIcon icon = new PointerIcon(TYPE_CUSTOM);
         icon.mBitmap = bitmap;
@@ -517,7 +521,9 @@ public final class PointerIcon implements Parcelable {
 
         BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
         final Bitmap bitmap = getBitmapFromDrawable(bitmapDrawable);
-        validateHotSpot(bitmap, hotSpotX, hotSpotY);
+        // The bitmap and hotspot are loaded from the context, which means it is implicitly scaled
+        // to the current display density, so treat this as a scaled icon when verifying hotspot.
+        validateHotSpot(bitmap, hotSpotX, hotSpotY, true /* isScaled */);
         // Set the properties now that we have successfully loaded the icon.
         mBitmap = bitmap;
         mHotSpotX = hotSpotX;
@@ -531,11 +537,16 @@ public final class PointerIcon implements Parcelable {
                 + ", hotspotX=" + mHotSpotX + ", hotspotY=" + mHotSpotY + "}";
     }
 
-    private static void validateHotSpot(Bitmap bitmap, float hotSpotX, float hotSpotY) {
-        if (hotSpotX < 0 || hotSpotX >= bitmap.getWidth()) {
+    private static void validateHotSpot(Bitmap bitmap, float hotSpotX, float hotSpotY,
+            boolean isScaled) {
+        // Be more lenient when checking the hotspot for scaled icons to account for the restriction
+        // that bitmaps must have an integer size.
+        if (hotSpotX < 0 || (isScaled ? (int) hotSpotX > bitmap.getWidth()
+                : hotSpotX >= bitmap.getWidth())) {
             throw new IllegalArgumentException("x hotspot lies outside of the bitmap area");
         }
-        if (hotSpotY < 0 || hotSpotY >= bitmap.getHeight()) {
+        if (hotSpotY < 0 || (isScaled ? (int) hotSpotY > bitmap.getHeight()
+                : hotSpotY >= bitmap.getHeight())) {
             throw new IllegalArgumentException("y hotspot lies outside of the bitmap area");
         }
     }
@@ -595,7 +606,7 @@ public final class PointerIcon implements Parcelable {
             case TYPE_HANDWRITING:
                 return com.android.internal.R.styleable.Pointer_pointerIconHandwriting;
             default:
-                return 0;
+                return -1;
         }
     }
 
@@ -635,5 +646,16 @@ public final class PointerIcon implements Parcelable {
             case TYPE_HANDWRITING: return "HANDWRITING";
             default: return Integer.toString(type);
         }
+    }
+
+    /**
+     * Sets whether drop shadow will draw in the native code.
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(Flags.FLAG_ENABLE_VECTOR_CURSORS)
+    public void setDrawNativeDropShadow(boolean drawNativeDropShadow) {
+        mDrawNativeDropShadow = drawNativeDropShadow;
     }
 }

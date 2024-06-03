@@ -97,7 +97,7 @@ filegroup {
         // AIDL sources from external directories
         ":android.frameworks.location.altitude-V2-java-source",
         ":android.hardware.biometrics.common-V4-java-source",
-        ":android.hardware.biometrics.fingerprint-V3-java-source",
+        ":android.hardware.biometrics.fingerprint-V5-java-source",
         ":android.hardware.biometrics.face-V4-java-source",
         ":android.hardware.gnss-V2-java-source",
         ":android.hardware.graphics.common-V3-java-source",
@@ -150,7 +150,6 @@ filegroup {
         ":framework-javastream-protos",
         ":statslog-framework-java-gen", // FrameworkStatsLog.java
         ":audio_policy_configuration_V7_0",
-        ":perfetto_trace_javastream_protos",
     ],
 }
 
@@ -389,7 +388,6 @@ java_defaults {
         // TODO(b/120066492): remove gps_debug and protolog.conf.json when the build
         // system propagates "required" properly.
         "gps_debug.conf",
-        "core.protolog.pb",
         "framework-res",
         // any install dependencies should go into framework-minus-apex-install-dependencies
         // rather than here to avoid bloating incremental build time
@@ -426,6 +424,8 @@ java_defaults {
         "audiopolicy-aidl-java",
         "sounddose-aidl-java",
         "modules-utils-expresslog",
+        "perfetto_trace_javastream_protos_jarjar",
+        "libaconfig_java_proto_nano",
     ],
 }
 
@@ -663,6 +663,16 @@ filegroup {
         "**/package.html",
     ],
     visibility: ["//frameworks/base/api"],
+}
+
+java_library {
+    name: "perfetto_trace_javastream_protos_jarjar",
+    srcs: [
+        ":perfetto_trace_javastream_protos",
+    ],
+    jarjar_rules: ":framework-jarjar-rules",
+    sdk_version: "core_platform",
+    installable: false,
 }
 
 build = [

@@ -130,7 +130,8 @@ class AnrTimerService {
      * constructor is also given the notifier callback, and two cookies for the callback: the
      * traditional void* and an int.
      */
-    AnrTimerService(char const* label, notifier_t notifier, void* cookie, jweak jtimer, Ticker*);
+    AnrTimerService(char const* label, notifier_t notifier, void* cookie, jweak jtimer, Ticker*,
+                    bool extend);
 
     // Delete the service and clean up memory.
     ~AnrTimerService();
@@ -138,7 +139,7 @@ class AnrTimerService {
     // Start a timer and return the associated timer ID.  It does not matter if the same pid/uid
     // are already in the running list.  Once start() is called, one of cancel(), accept(), or
     // discard() must be called to clean up the internal data structures.
-    timer_id_t start(int pid, int uid, nsecs_t timeout, bool extend);
+    timer_id_t start(int pid, int uid, nsecs_t timeout);
 
     // Cancel a timer and remove it from all lists.  This is called when the event being timed
     // has occurred.  If the timer was Running, the function returns true.  The other
@@ -161,13 +162,13 @@ class AnrTimerService {
     // A timer has expired.
     void expire(timer_id_t);
 
-    // Dump a small amount of state to the log file.
-    void dump(bool verbose) const;
-
     // Return the Java object associated with this instance.
     jweak jtimer() const {
         return notifierObject_;
     }
+
+    // Return the per-instance statistics.
+    std::vector<std::string> getDump() const;
 
   private:
     // The service cannot be copied.
@@ -192,6 +193,9 @@ class AnrTimerService {
     void* notifierCookie_;
     jweak notifierObject_;
 
+    // True if extensions can be granted to expired timers.
+    const bool extend_;
+
     // The global lock
     mutable Mutex lock_;
 
@@ -199,7 +203,7 @@ class AnrTimerService {
     std::set<Timer> running_;
 
     // The maximum number of active timers.
-    size_t maxActive_;
+    size_t maxRunning_;
 
     // Simple counters
     struct Counters {
@@ -209,6 +213,7 @@ class AnrTimerService {
         size_t accepted;
         size_t discarded;
         size_t expired;
+        size_t extended;
 
         // The number of times there were zero active timers.
         size_t drained;
@@ -437,7 +442,9 @@ class AnrTimerService::Ticker {
 
     // Construct the ticker.  This creates the timerfd file descriptor and starts the monitor
     // thread.  The monitor thread is given a unique name.
-    Ticker() {
+    Ticker() :
+            id_(idGen_.fetch_add(1))
+    {
         timerFd_ = timer_create();
         if (timerFd_ < 0) {
             ALOGE("failed to create timerFd: %s", strerror(errno));
@@ -487,7 +494,6 @@ class AnrTimerService::Ticker {
         timer_id_t front = headTimerId();
         auto found = running_.find(key);
         if (found != running_.end()) running_.erase(found);
-        if (front != headTimerId()) restartLocked();
     }
 
     // Remove every timer associated with the service.
@@ -501,7 +507,11 @@ class AnrTimerService::Ticker {
                 i++;
             }
         }
-        if (front != headTimerId()) restartLocked();
+    }
+
+    // The unique ID of this particular ticker. Used for debug and logging.
+    size_t id() const {
+        return id_;
     }
 
     // Return the number of timers still running.
@@ -619,19 +629,28 @@ class AnrTimerService::Ticker {
     // The list of timers that are scheduled.  This set is sorted by timeout and then by timer
     // ID.  A set is sufficient (as opposed to a multiset) because timer IDs are unique.
     std::set<Entry> running_;
+
+    // A unique ID assigned to this instance.
+    const size_t id_;
+
+    // The ID generator.
+    static std::atomic<size_t> idGen_;
 };
 
+std::atomic<size_t> AnrTimerService::Ticker::idGen_;
 
-AnrTimerService::AnrTimerService(char const* label,
-            notifier_t notifier, void* cookie, jweak jtimer, Ticker* ticker) :
+
+AnrTimerService::AnrTimerService(char const* label, notifier_t notifier, void* cookie,
+            jweak jtimer, Ticker* ticker, bool extend) :
         label_(label),
         notifier_(notifier),
         notifierCookie_(cookie),
         notifierObject_(jtimer),
+        extend_(extend),
         ticker_(ticker) {
 
     // Zero the statistics
-    maxActive_ = 0;
+    maxRunning_ = 0;
     memset(&counters_, 0, sizeof(counters_));
 
     ALOGI_IF(DEBUG, "initialized %s", label);
@@ -652,11 +671,10 @@ char const *AnrTimerService::statusString(Status s) {
     return "unknown";
 }
 
-AnrTimerService::timer_id_t AnrTimerService::start(int pid, int uid,
-        nsecs_t timeout, bool extend) {
+AnrTimerService::timer_id_t AnrTimerService::start(int pid, int uid, nsecs_t timeout) {
     ALOGI_IF(DEBUG, "starting");
     AutoMutex _l(lock_);
-    Timer t(pid, uid, timeout, extend);
+    Timer t(pid, uid, timeout, extend_);
     insert(t);
     counters_.started++;
 
@@ -741,6 +759,12 @@ void AnrTimerService::expire(timer_id_t timerId) {
         elapsed = now() - t.started;
     }
 
+    if (expired) {
+        counters_.expired++;
+    } else {
+        counters_.extended++;
+    }
+
     // Deliver the notification outside of the lock.
     if (expired) {
         if (!notifier_(timerId, pid, uid, elapsed, notifierCookie_, notifierObject_)) {
@@ -758,8 +782,8 @@ void AnrTimerService::insert(const Timer& t) {
     if (t.status == Running) {
         // Only forward running timers to the ticker.  Expired timers are handled separately.
         ticker_->insert(t.scheduled, t.id, this);
-        maxActive_ = std::max(maxActive_, running_.size());
     }
+    maxRunning_ = std::max(maxRunning_, running_.size());
 }
 
 AnrTimerService::Timer AnrTimerService::remove(timer_id_t timerId) {
@@ -769,29 +793,32 @@ AnrTimerService::Timer AnrTimerService::remove(timer_id_t timerId) {
         Timer result = *found;
         running_.erase(found);
         ticker_->remove(result.scheduled, result.id);
+        if (running_.size() == 0) counters_.drained++;
         return result;
     }
     return Timer();
 }
 
-void AnrTimerService::dump(bool verbose) const {
+std::vector<std::string> AnrTimerService::getDump() const {
+    std::vector<std::string> r;
     AutoMutex _l(lock_);
-    ALOGI("timer %s ops started=%zu canceled=%zu accepted=%zu discarded=%zu expired=%zu",
-          label_.c_str(),
-          counters_.started, counters_.canceled, counters_.accepted,
-          counters_.discarded, counters_.expired);
-    ALOGI("timer %s stats max-active=%zu/%zu running=%zu/%zu errors=%zu",
-          label_.c_str(),
-          maxActive_, ticker_->maxRunning(), running_.size(), ticker_->running(),
-          counters_.error);
-
-    if (verbose) {
-        nsecs_t time = now();
-        for (auto i = running_.begin(); i != running_.end(); i++) {
-            Timer t = *i;
-            ALOGI("   running %s", t.toString(time).c_str());
-        }
-    }
+    r.push_back(StringPrintf("started:%zu canceled:%zu accepted:%zu discarded:%zu expired:%zu",
+                             counters_.started,
+                             counters_.canceled,
+                             counters_.accepted,
+                             counters_.discarded,
+                             counters_.expired));
+    r.push_back(StringPrintf("extended:%zu drained:%zu error:%zu running:%zu maxRunning:%zu",
+                             counters_.extended,
+                             counters_.drained,
+                             counters_.error,
+                             running_.size(),
+                             maxRunning_));
+    r.push_back(StringPrintf("ticker:%zu ticking:%zu maxTicking:%zu",
+                             ticker_->id(),
+                             ticker_->running(),
+                             ticker_->maxRunning()));
+    return r;
 }
 
 /**
@@ -803,7 +830,8 @@ bool nativeSupportEnabled = false;
 /**
  * Singleton/globals for the anr timer.  Among other things, this includes a Ticker* and a use
  * count.  The JNI layer creates a single Ticker for all operational AnrTimers.  The Ticker is
- * created when the first AnrTimer is created, and is deleted when the last AnrTimer is closed.
+ * created when the first AnrTimer is created; this means that the Ticker is only created if
+ * native anr timers are used.
  */
 static Mutex gAnrLock;
 struct AnrArgs {
@@ -811,7 +839,6 @@ struct AnrArgs {
     jmethodID func = NULL;
     JavaVM* vm = NULL;
     AnrTimerService::Ticker* ticker = nullptr;
-    int tickerUseCount = 0;;
 };
 static AnrArgs gAnrArgs;
 
@@ -840,18 +867,17 @@ jboolean anrTimerSupported(JNIEnv* env, jclass) {
     return nativeSupportEnabled;
 }
 
-jlong anrTimerCreate(JNIEnv* env, jobject jtimer, jstring jname) {
+jlong anrTimerCreate(JNIEnv* env, jobject jtimer, jstring jname, jboolean extend) {
     if (!nativeSupportEnabled) return 0;
     AutoMutex _l(gAnrLock);
-    if (!gAnrArgs.ticker) {
+    if (gAnrArgs.ticker == nullptr) {
         gAnrArgs.ticker = new AnrTimerService::Ticker();
     }
-    gAnrArgs.tickerUseCount++;
 
     ScopedUtfChars name(env, jname);
     jobject timer = env->NewWeakGlobalRef(jtimer);
-    AnrTimerService* service =
-            new AnrTimerService(name.c_str(), anrNotify, &gAnrArgs, timer, gAnrArgs.ticker);
+    AnrTimerService* service = new AnrTimerService(name.c_str(),
+            anrNotify, &gAnrArgs, timer, gAnrArgs.ticker, extend);
     return reinterpret_cast<jlong>(service);
 }
 
@@ -866,19 +892,14 @@ jint anrTimerClose(JNIEnv* env, jclass, jlong ptr) {
     AnrTimerService *s = toService(ptr);
     env->DeleteWeakGlobalRef(s->jtimer());
     delete s;
-    if (--gAnrArgs.tickerUseCount <= 0) {
-        delete gAnrArgs.ticker;
-        gAnrArgs.ticker = nullptr;
-    }
     return 0;
 }
 
-jint anrTimerStart(JNIEnv* env, jclass, jlong ptr,
-        jint pid, jint uid, jlong timeout, jboolean extend) {
+jint anrTimerStart(JNIEnv* env, jclass, jlong ptr, jint pid, jint uid, jlong timeout) {
     if (!nativeSupportEnabled) return 0;
     // On the Java side, timeouts are expressed in milliseconds and must be converted to
     // nanoseconds before being passed to the library code.
-    return toService(ptr)->start(pid, uid, milliseconds_to_nanoseconds(timeout), extend);
+    return toService(ptr)->start(pid, uid, milliseconds_to_nanoseconds(timeout));
 }
 
 jboolean anrTimerCancel(JNIEnv* env, jclass, jlong ptr, jint timerId) {
@@ -896,21 +917,26 @@ jboolean anrTimerDiscard(JNIEnv* env, jclass, jlong ptr, jint timerId) {
     return toService(ptr)->discard(timerId);
 }
 
-jint anrTimerDump(JNIEnv *env, jclass, jlong ptr, jboolean verbose) {
-    if (!nativeSupportEnabled) return -1;
-    toService(ptr)->dump(verbose);
-    return 0;
+jobjectArray anrTimerDump(JNIEnv *env, jclass, jlong ptr) {
+    if (!nativeSupportEnabled) return nullptr;
+    std::vector<std::string> stats = toService(ptr)->getDump();
+    jclass sclass = env->FindClass("java/lang/String");
+    jobjectArray r = env->NewObjectArray(stats.size(), sclass, nullptr);
+    for (size_t i = 0; i < stats.size(); i++) {
+        env->SetObjectArrayElement(r, i, env->NewStringUTF(stats[i].c_str()));
+    }
+    return r;
 }
 
 static const JNINativeMethod methods[] = {
     {"nativeAnrTimerSupported", "()Z",  (void*) anrTimerSupported},
-    {"nativeAnrTimerCreate", "(Ljava/lang/String;)J", (void*) anrTimerCreate},
-    {"nativeAnrTimerClose", "(J)I",     (void*) anrTimerClose},
-    {"nativeAnrTimerStart", "(JIIJZ)I", (void*) anrTimerStart},
-    {"nativeAnrTimerCancel", "(JI)Z",   (void*) anrTimerCancel},
-    {"nativeAnrTimerAccept", "(JI)Z",   (void*) anrTimerAccept},
-    {"nativeAnrTimerDiscard", "(JI)Z",  (void*) anrTimerDiscard},
-    {"nativeAnrTimerDump", "(JZ)V",     (void*) anrTimerDump},
+    {"nativeAnrTimerCreate",   "(Ljava/lang/String;Z)J", (void*) anrTimerCreate},
+    {"nativeAnrTimerClose",    "(J)I",     (void*) anrTimerClose},
+    {"nativeAnrTimerStart",    "(JIIJ)I",  (void*) anrTimerStart},
+    {"nativeAnrTimerCancel",   "(JI)Z",    (void*) anrTimerCancel},
+    {"nativeAnrTimerAccept",   "(JI)Z",    (void*) anrTimerAccept},
+    {"nativeAnrTimerDiscard",  "(JI)Z",    (void*) anrTimerDiscard},
+    {"nativeAnrTimerDump",     "(J)[Ljava/lang/String;", (void*) anrTimerDump},
 };
 
 } // anonymous namespace
@@ -920,12 +946,15 @@ int register_android_server_utils_AnrTimer(JNIEnv* env)
     static const char *className = "com/android/server/utils/AnrTimer";
     jniRegisterNativeMethods(env, className, methods, NELEM(methods));
 
+    nativeSupportEnabled = NATIVE_SUPPORT;
+
+    // Do not perform any further initialization if native support is not enabled.
+    if (!nativeSupportEnabled) return 0;
+
     jclass service = FindClassOrDie(env, className);
     gAnrArgs.clazz = MakeGlobalRefOrDie(env, service);
     gAnrArgs.func = env->GetMethodID(gAnrArgs.clazz, "expire", "(IIIJ)Z");
     env->GetJavaVM(&gAnrArgs.vm);
-
-    nativeSupportEnabled = NATIVE_SUPPORT;
 
     return 0;
 }

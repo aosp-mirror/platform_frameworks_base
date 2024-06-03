@@ -16,8 +16,10 @@
 
 package com.android.systemui.biometrics.dagger
 
+import android.content.Context
 import android.content.res.Resources
 import com.android.internal.R
+import com.android.launcher3.icons.IconProvider
 import com.android.systemui.CoreStartable
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.EllipseOverlapDetectorParams
@@ -39,6 +41,7 @@ import com.android.systemui.biometrics.udfps.EllipseOverlapDetector
 import com.android.systemui.biometrics.udfps.OverlapDetector
 import com.android.systemui.biometrics.ui.binder.SideFpsOverlayViewBinder
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.ui.binder.AlternateBouncerViewBinder
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import com.android.systemui.util.concurrency.ThreadFactory
 import dagger.Binds
@@ -68,6 +71,11 @@ interface BiometricsModule {
     @IntoMap
     @ClassKey(SideFpsOverlayViewBinder::class)
     fun bindsSideFpsOverlayViewBinder(viewBinder: SideFpsOverlayViewBinder): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(AlternateBouncerViewBinder::class)
+    fun bindAlternateBouncerViewBinder(viewBinder: AlternateBouncerViewBinder): CoreStartable
 
     @Binds
     @SysUISingleton
@@ -103,6 +111,9 @@ interface BiometricsModule {
             threadFactory.buildExecutorOnNewThread("biometrics")
 
         @Provides fun providesUdfpsUtils(): UdfpsUtils = UdfpsUtils()
+
+        @Provides
+        fun provideIconProvider(context: Context): IconProvider = IconProvider(context)
 
         @Provides
         @SysUISingleton

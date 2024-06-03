@@ -18,10 +18,8 @@
 
 package com.android.compose.animation.scene
 
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -35,6 +33,7 @@ import com.android.compose.animation.scene.TransitionState.HasOverscrollProperti
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
@@ -145,23 +144,13 @@ internal class DraggableHandlerImpl(
         }
 
         val transitionState = layoutImpl.state.transitionState
-        if (transitionState is TransitionState.Transition) {
-            // TODO(b/290184746): Better handle interruptions here if state != idle.
-            Log.w(
-                TAG,
-                "start from TransitionState.Transition is not fully supported: from" +
-                    " ${transitionState.fromScene} to ${transitionState.toScene} " +
-                    "(progress ${transitionState.progress})"
-            )
-        }
-
         val fromScene = layoutImpl.scene(transitionState.currentScene)
         val swipes = computeSwipes(fromScene, startedPosition, pointersDown)
         val result =
             swipes.findUserActionResult(fromScene, overSlop, true)
-            // As we were unable to locate a valid target scene, the initial SwipeTransition
-            // cannot be defined. Consequently, a simple NoOp Controller will be returned.
-            ?: return NoOpDragController
+                // As we were unable to locate a valid target scene, the initial SwipeTransition
+                // cannot be defined. Consequently, a simple NoOp Controller will be returned.
+                ?: return NoOpDragController
 
         return updateDragController(
             swipes = swipes,
@@ -269,19 +258,6 @@ private class DragControllerImpl(
     fun updateTransition(newTransition: SwipeTransition, force: Boolean = false) {
         if (isDrivingTransition || force) {
             layoutState.startTransition(newTransition, newTransition.key)
-
-            // Initialize SwipeTransition.transformationSpec and .swipeSpec. Note that this must be
-            // called right after layoutState.startTransition() is called, because it computes the
-            // current layoutState.transformationSpec().
-            val transformationSpec = layoutState.transformationSpec
-            newTransition.transformationSpec = transformationSpec
-            newTransition.swipeSpec =
-                transformationSpec.swipeSpec ?: layoutState.transitions.defaultSwipeSpec
-        } else {
-            // We were not driving the transition and we don't force the update, so the specs won't
-            // be used and it doesn't matter which ones we set here.
-            newTransition.transformationSpec = TransformationSpec.Empty
-            newTransition.swipeSpec = SceneTransitions.DefaultSwipeSpec
         }
 
         swipeTransition = newTransition
@@ -305,7 +281,7 @@ private class DragControllerImpl(
             swipes.findUserActionResult(
                 fromScene = fromScene,
                 directionOffset = swipeTransition.dragOffset,
-                updateSwipesResults = isNewFromScene
+                updateSwipesResults = isNewFromScene,
             )
 
         if (result == null) {
@@ -313,13 +289,14 @@ private class DragControllerImpl(
             return
         }
 
-        swipeTransition.dragOffset += acceleratedOffset
-
         if (
             isNewFromScene ||
                 result.toScene != swipeTransition.toScene ||
                 result.transitionKey != swipeTransition.key
         ) {
+            // Make sure the current transition will finish to the right current scene.
+            swipeTransition._currentScene = fromScene
+
             val swipeTransition =
                 SwipeTransition(
                         layoutState = layoutState,
@@ -330,7 +307,7 @@ private class DragControllerImpl(
                         layoutImpl = draggableHandler.layoutImpl,
                         orientation = draggableHandler.orientation,
                     )
-                    .apply { dragOffset = swipeTransition.dragOffset }
+                    .apply { dragOffset = swipeTransition.dragOffset + acceleratedOffset }
 
             updateTransition(swipeTransition)
         }
@@ -544,6 +521,7 @@ private fun SwipeTransition(
         }
 
     return SwipeTransition(
+        layoutImpl = layoutImpl,
         layoutState = layoutState,
         coroutineScope = coroutineScope,
         key = result.transitionKey,
@@ -557,6 +535,7 @@ private fun SwipeTransition(
 
 private fun SwipeTransition(old: SwipeTransition): SwipeTransition {
     return SwipeTransition(
+            layoutImpl = old.layoutImpl,
             layoutState = old.layoutState,
             coroutineScope = old.coroutineScope,
             key = old.key,
@@ -573,6 +552,7 @@ private fun SwipeTransition(old: SwipeTransition): SwipeTransition {
 }
 
 private class SwipeTransition(
+    val layoutImpl: SceneTransitionLayoutImpl,
     val layoutState: BaseSceneTransitionLayoutState,
     val coroutineScope: CoroutineScope,
     val key: TransitionKey?,
@@ -603,6 +583,18 @@ private class SwipeTransition(
             return offset / distance
         }
 
+    override val progressVelocity: Float
+        get() {
+            val animatable = offsetAnimation?.animatable ?: return 0f
+            val distance = distance()
+            if (distance == DistanceUnspecified) {
+                return 0f
+            }
+
+            val velocityInDistanceUnit = animatable.velocity
+            return velocityInDistanceUnit / distance.absoluteValue
+        }
+
     override val isInitiatedByUserInput = true
 
     override var bouncingScene: SceneKey? = null
@@ -616,20 +608,14 @@ private class SwipeTransition(
     override val isUserInputOngoing: Boolean
         get() = offsetAnimation == null
 
-    /**
-     * The [TransformationSpecImpl] associated to this transition.
-     *
-     * Note: This is lateinit because this [SwipeTransition] is needed by
-     * [BaseSceneTransitionLayoutState] to compute the [TransitionSpec], and it will be set right
-     * after [BaseSceneTransitionLayoutState.startTransition] is called with this transition.
-     */
-    lateinit var transformationSpec: TransformationSpecImpl
-
-    /** The spec to use when animating this transition to either [fromScene] or [toScene]. */
-    lateinit var swipeSpec: SpringSpec<Float>
-
     override val overscrollScope: OverscrollScope =
         object : OverscrollScope {
+            override val density: Float
+                get() = layoutImpl.density.density
+
+            override val fontScale: Float
+                get() = layoutImpl.density.fontScale
+
             override val absoluteDistance: Float
                 get() = distance().absoluteValue
         }
@@ -694,13 +680,36 @@ private class SwipeTransition(
         targetOffset: Float,
         targetScene: SceneKey,
     ): OffsetAnimation {
+        // Skip the animation if we have already reached the target scene and the overscroll does
+        // not animate anything.
+        val hasReachedTargetScene =
+            (targetScene == toScene && progress >= 1f) ||
+                (targetScene == fromScene && progress <= 0f)
+        val skipAnimation =
+            hasReachedTargetScene &&
+                currentOverscrollSpec?.transformationSpec?.transformations?.isEmpty() == true
+
         return startOffsetAnimation {
             val animatable = Animatable(dragOffset, OffsetVisibilityThreshold)
             val isTargetGreater = targetOffset > animatable.value
             val job =
                 coroutineScope
-                    .launch {
+                    // Important: We start atomically to make sure that we start the coroutine even
+                    // if it is cancelled right after it is launched, so that snapToScene() is
+                    // correctly called. Otherwise, this transition will never be stopped and we
+                    // will never settle to Idle.
+                    .launch(start = CoroutineStart.ATOMIC) {
+                        // TODO(b/327249191): Refactor the code so that we don't even launch a
+                        // coroutine if we don't need to animate.
+                        if (skipAnimation) {
+                            snapToScene(targetScene)
+                            return@launch
+                        }
+
                         try {
+                            val swipeSpec =
+                                transformationSpec.swipeSpec
+                                    ?: layoutState.transitions.defaultSwipeSpec
                             animatable.animateTo(
                                 targetValue = targetOffset,
                                 animationSpec = swipeSpec,
@@ -715,23 +724,31 @@ private class SwipeTransition(
                                         }
                                     if (isBouncing) {
                                         bouncingScene = targetScene
+
+                                        // Immediately stop this transition if we are bouncing on a
+                                        // scene that does not bounce.
+                                        val overscrollSpec = currentOverscrollSpec
+                                        if (
+                                            overscrollSpec != null &&
+                                                overscrollSpec.transformationSpec.transformations
+                                                    .isEmpty()
+                                        ) {
+                                            snapToScene(targetScene)
+                                        }
                                     }
                                 }
                             }
                         } finally {
                             bouncingScene = null
+                            snapToScene(targetScene)
                         }
                     }
-                    // Make sure that we settle to target scene at the end of the animation or if
-                    // the animation is cancelled.
-                    .apply { invokeOnCompletion { snapToScene(targetScene) } }
 
             OffsetAnimation(animatable, job)
         }
     }
 
     fun snapToScene(scene: SceneKey) {
-        if (layoutState.transitionState != this) return
         cancelOffsetAnimation()
         layoutState.finishTransition(this, idleScene = scene)
     }
@@ -871,6 +888,7 @@ internal class NestedScrollHandlerImpl(
     private val orientation: Orientation,
     private val topOrLeftBehavior: NestedScrollBehavior,
     private val bottomOrRightBehavior: NestedScrollBehavior,
+    private val isExternalOverscrollGesture: () -> Boolean,
 ) {
     private val layoutState = layoutImpl.state
     private val draggableHandler = layoutImpl.draggableHandler(orientation)
@@ -926,7 +944,8 @@ internal class NestedScrollHandlerImpl(
         return PriorityNestedScrollConnection(
             orientation = orientation,
             canStartPreScroll = { offsetAvailable, offsetBeforeStart ->
-                canChangeScene = offsetBeforeStart == 0f
+                canChangeScene =
+                    if (isExternalOverscrollGesture()) false else offsetBeforeStart == 0f
 
                 val canInterceptSwipeTransition =
                     canChangeScene &&
@@ -956,7 +975,8 @@ internal class NestedScrollHandlerImpl(
                         else -> return@PriorityNestedScrollConnection false
                     }
 
-                val isZeroOffset = offsetBeforeStart == 0f
+                val isZeroOffset =
+                    if (isExternalOverscrollGesture()) false else offsetBeforeStart == 0f
 
                 val canStart =
                     when (behavior) {

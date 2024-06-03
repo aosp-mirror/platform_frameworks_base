@@ -1,0 +1,9 @@
+<safety-labels version="12345">
+    <data-labels>
+        <data-shared dataCategory="location"
+            dataType="approx_location"
+            isSharingOptional="false"
+            ephemeral="false"
+            purposes="app_functionality" />
+    </data-labels>
+</safety-labels>

@@ -20,10 +20,13 @@ import com.android.app.animation.Interpolators.EMPHASIZED
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.StateToValue
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -45,11 +48,14 @@ constructor(
     animationFlow: KeyguardTransitionAnimationFlow,
 ) {
     private val transitionAnimation =
-        animationFlow.setup(
-            duration = FromLockscreenTransitionInteractor.TO_GLANCEABLE_HUB_DURATION,
-            from = KeyguardState.LOCKSCREEN,
-            to = KeyguardState.GLANCEABLE_HUB,
-        )
+        animationFlow
+            .setup(
+                duration = FromLockscreenTransitionInteractor.TO_GLANCEABLE_HUB_DURATION,
+                edge = Edge.create(from = LOCKSCREEN, to = Scenes.Communal),
+            )
+            .setupWithoutSceneContainer(
+                edge = Edge.create(from = LOCKSCREEN, to = GLANCEABLE_HUB),
+            )
 
     val keyguardAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(

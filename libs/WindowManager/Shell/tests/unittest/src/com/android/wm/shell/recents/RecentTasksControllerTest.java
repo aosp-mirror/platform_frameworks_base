@@ -35,6 +35,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -45,23 +46,29 @@ import static java.lang.Integer.MAX_VALUE;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
-import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.shared.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -69,10 +76,13 @@ import com.android.wm.shell.sysui.ShellSharedConstants;
 import com.android.wm.shell.util.GroupedRecentTaskInfo;
 import com.android.wm.shell.util.SplitBounds;
 
+import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -81,7 +91,9 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
- * Tests for {@link RecentTasksController}.
+ * Tests for {@link RecentTasksController}
+ *
+ * Usage: atest WMShellUnitTests:RecentTasksControllerTest
  */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -99,6 +111,11 @@ public class RecentTasksControllerTest extends ShellTestCase {
     private ActivityTaskManager mActivityTaskManager;
     @Mock
     private DisplayInsetsController mDisplayInsetsController;
+    @Mock
+    private IRecentTasksListener mRecentTasksListener;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private ShellTaskOrganizer mShellTaskOrganizer;
     private RecentTasksController mRecentTasksController;
@@ -106,9 +123,15 @@ public class RecentTasksControllerTest extends ShellTestCase {
     private ShellInit mShellInit;
     private ShellController mShellController;
     private TestShellExecutor mMainExecutor;
+    private static StaticMockitoSession sMockitoSession;
 
     @Before
     public void setUp() {
+        sMockitoSession = mockitoSession().initMocks(this).strictness(Strictness.LENIENT)
+                .mockStatic(DesktopModeStatus.class).startMocking();
+        ExtendedMockito.doReturn(true)
+                .when(() -> DesktopModeStatus.canEnterDesktopMode(any()));
+
         mMainExecutor = new TestShellExecutor();
         when(mContext.getPackageManager()).thenReturn(mock(PackageManager.class));
         mShellInit = spy(new ShellInit(mMainExecutor));
@@ -122,6 +145,11 @@ public class RecentTasksControllerTest extends ShellTestCase {
                 null /* sizeCompatUI */, Optional.empty(), Optional.of(mRecentTasksController),
                 mMainExecutor);
         mShellInit.init();
+    }
+
+    @After
+    public void tearDown() {
+        sMockitoSession.finishMocking();
     }
 
     @Test
@@ -263,10 +291,6 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
     @Test
     public void testGetRecentTasks_hasActiveDesktopTasks_proto2Enabled_groupFreeformTasks() {
-        StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
-                DesktopModeStatus.class).startMocking();
-        when(DesktopModeStatus.isEnabled()).thenReturn(true);
-
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
         ActivityManager.RecentTaskInfo t3 = makeTaskInfo(3);
@@ -297,16 +321,10 @@ public class RecentTasksControllerTest extends ShellTestCase {
         // Check single entries
         assertEquals(t2, singleGroup1.getTaskInfo1());
         assertEquals(t4, singleGroup2.getTaskInfo1());
-
-        mockitoSession.finishMocking();
     }
 
     @Test
     public void testGetRecentTasks_hasActiveDesktopTasks_proto2Enabled_freeformTaskOrder() {
-        StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
-                DesktopModeStatus.class).startMocking();
-        when(DesktopModeStatus.isEnabled()).thenReturn(true);
-
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
         ActivityManager.RecentTaskInfo t3 = makeTaskInfo(3);
@@ -345,15 +363,12 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
         // Check single entry
         assertEquals(t4, singleGroup.getTaskInfo1());
-
-        mockitoSession.finishMocking();
     }
 
     @Test
     public void testGetRecentTasks_hasActiveDesktopTasks_proto2Disabled_doNotGroupFreeformTasks() {
-        StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
-                DesktopModeStatus.class).startMocking();
-        when(DesktopModeStatus.isEnabled()).thenReturn(false);
+        ExtendedMockito.doReturn(false)
+                .when(() -> DesktopModeStatus.canEnterDesktopMode(any()));
 
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
@@ -378,8 +393,45 @@ public class RecentTasksControllerTest extends ShellTestCase {
         assertEquals(t2, recentTasks.get(1).getTaskInfo1());
         assertEquals(t3, recentTasks.get(2).getTaskInfo1());
         assertEquals(t4, recentTasks.get(3).getTaskInfo1());
+    }
 
-        mockitoSession.finishMocking();
+    @Test
+    public void testGetRecentTasks_proto2Enabled_ignoresMinimizedFreeformTasks() {
+        ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
+        ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
+        ActivityManager.RecentTaskInfo t3 = makeTaskInfo(3);
+        ActivityManager.RecentTaskInfo t4 = makeTaskInfo(4);
+        ActivityManager.RecentTaskInfo t5 = makeTaskInfo(5);
+        setRawList(t1, t2, t3, t4, t5);
+
+        when(mDesktopModeTaskRepository.isActiveTask(1)).thenReturn(true);
+        when(mDesktopModeTaskRepository.isActiveTask(3)).thenReturn(true);
+        when(mDesktopModeTaskRepository.isActiveTask(5)).thenReturn(true);
+        when(mDesktopModeTaskRepository.isMinimizedTask(3)).thenReturn(true);
+
+        ArrayList<GroupedRecentTaskInfo> recentTasks = mRecentTasksController.getRecentTasks(
+                MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);
+
+        // 2 freeform tasks should be grouped into one, 1 task should be skipped, 3 total recents
+        // entries
+        assertEquals(3, recentTasks.size());
+        GroupedRecentTaskInfo freeformGroup = recentTasks.get(0);
+        GroupedRecentTaskInfo singleGroup1 = recentTasks.get(1);
+        GroupedRecentTaskInfo singleGroup2 = recentTasks.get(2);
+
+        // Check that groups have expected types
+        assertEquals(GroupedRecentTaskInfo.TYPE_FREEFORM, freeformGroup.getType());
+        assertEquals(GroupedRecentTaskInfo.TYPE_SINGLE, singleGroup1.getType());
+        assertEquals(GroupedRecentTaskInfo.TYPE_SINGLE, singleGroup2.getType());
+
+        // Check freeform group entries
+        assertEquals(2, freeformGroup.getTaskInfoList().size());
+        assertEquals(t1, freeformGroup.getTaskInfoList().get(0));
+        assertEquals(t5, freeformGroup.getTaskInfoList().get(1));
+
+        // Check single entries
+        assertEquals(t2, singleGroup1.getTaskInfo1());
+        assertEquals(t4, singleGroup2.getTaskInfo1());
     }
 
     @Test
@@ -423,6 +475,85 @@ public class RecentTasksControllerTest extends ShellTestCase {
         mShellTaskOrganizer.onTaskInfoChanged(rt2MultiWIndow);
 
         verify(mRecentTasksController).notifyRecentTasksChanged();
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
+            Flags.FLAG_ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS})
+    public void onTaskAdded_desktopModeRunningAppsEnabled_triggersOnRunningTaskAppeared()
+            throws Exception {
+        mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
+        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+
+        mRecentTasksControllerReal.onTaskAdded(taskInfo);
+
+        verify(mRecentTasksListener).onRunningTaskAppeared(taskInfo);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS)
+    public void onTaskAdded_desktopModeRunningAppsDisabled_doesNotTriggerOnRunningTaskAppeared()
+            throws Exception {
+        mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
+        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+
+        mRecentTasksControllerReal.onTaskAdded(taskInfo);
+
+        verify(mRecentTasksListener, never()).onRunningTaskAppeared(any());
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
+            Flags.FLAG_ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS})
+    public void taskWindowingModeChanged_desktopRunningAppsEnabled_triggersOnRunningTaskChanged()
+            throws Exception {
+        mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
+        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+
+        mRecentTasksControllerReal.onTaskRunningInfoChanged(taskInfo);
+
+        verify(mRecentTasksListener).onRunningTaskChanged(taskInfo);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS)
+    public void
+            taskWindowingModeChanged_desktopRunningAppsDisabled_doesNotTriggerOnRunningTaskChanged()
+            throws Exception {
+        mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
+        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+
+        mRecentTasksControllerReal.onTaskRunningInfoChanged(taskInfo);
+
+        verify(mRecentTasksListener, never()).onRunningTaskChanged(any());
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
+            Flags.FLAG_ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS})
+    public void onTaskRemoved_desktopModeRunningAppsEnabled_triggersOnRunningTaskVanished()
+            throws Exception {
+        mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
+        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+
+        mRecentTasksControllerReal.onTaskRemoved(taskInfo);
+
+        verify(mRecentTasksListener).onRunningTaskVanished(taskInfo);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS)
+    public void onTaskRemoved_desktopModeRunningAppsDisabled_doesNotTriggerOnRunningTaskVanished()
+            throws Exception {
+        mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
+        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+
+        mRecentTasksControllerReal.onTaskRemoved(taskInfo);
+
+        verify(mRecentTasksListener, never()).onRunningTaskVanished(any());
     }
 
     @Test
@@ -471,6 +602,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
     private ActivityManager.RunningTaskInfo makeRunningTaskInfo(int taskId) {
         ActivityManager.RunningTaskInfo info = new ActivityManager.RunningTaskInfo();
         info.taskId = taskId;
+        info.realActivity = new ComponentName("testPackage", "testClass");
         return info;
     }
 

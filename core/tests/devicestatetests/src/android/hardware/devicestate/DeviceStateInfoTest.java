@@ -38,6 +38,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -73,8 +74,8 @@ public final class DeviceStateInfoTest {
 
     @Test
     public void create() {
-        final List<DeviceState> supportedStates = List.of(DEVICE_STATE_0, DEVICE_STATE_1,
-                DEVICE_STATE_2);
+        final ArrayList<DeviceState> supportedStates = new ArrayList<>(
+                List.of(DEVICE_STATE_0, DEVICE_STATE_1, DEVICE_STATE_2));
         final DeviceState baseState = DEVICE_STATE_0;
         final DeviceState currentState = DEVICE_STATE_2;
 
@@ -87,8 +88,8 @@ public final class DeviceStateInfoTest {
 
     @Test
     public void equals() {
-        final List<DeviceState> supportedStates = List.of(DEVICE_STATE_0, DEVICE_STATE_1,
-                DEVICE_STATE_2);
+        final ArrayList<DeviceState> supportedStates = new ArrayList<>(
+                List.of(DEVICE_STATE_0, DEVICE_STATE_1, DEVICE_STATE_2));
         final DeviceState baseState = DEVICE_STATE_0;
         final DeviceState currentState = DEVICE_STATE_2;
 
@@ -100,15 +101,14 @@ public final class DeviceStateInfoTest {
         Assert.assertEquals(info, sameInfo);
 
         final DeviceStateInfo differentInfo = new DeviceStateInfo(
-                List.of(DEVICE_STATE_0, DEVICE_STATE_2), baseState,
-                currentState);
+                new ArrayList<>(List.of(DEVICE_STATE_0, DEVICE_STATE_2)), baseState, currentState);
         assertNotEquals(info, differentInfo);
     }
 
     @Test
     public void diff_sameObject() {
-        final List<DeviceState> supportedStates = List.of(DEVICE_STATE_0, DEVICE_STATE_1,
-                DEVICE_STATE_2);
+        final ArrayList<DeviceState> supportedStates = new ArrayList<>(
+                List.of(DEVICE_STATE_0, DEVICE_STATE_1, DEVICE_STATE_2));
         final DeviceState baseState = DEVICE_STATE_0;
         final DeviceState currentState = DEVICE_STATE_2;
 
@@ -118,10 +118,10 @@ public final class DeviceStateInfoTest {
 
     @Test
     public void diff_differentSupportedStates() {
-        final DeviceStateInfo info = new DeviceStateInfo(List.of(DEVICE_STATE_1), DEVICE_STATE_0,
-                DEVICE_STATE_0);
-        final DeviceStateInfo otherInfo = new DeviceStateInfo(List.of(DEVICE_STATE_2),
+        final DeviceStateInfo info = new DeviceStateInfo(new ArrayList<>(List.of(DEVICE_STATE_1)),
                 DEVICE_STATE_0, DEVICE_STATE_0);
+        final DeviceStateInfo otherInfo = new DeviceStateInfo(
+                new ArrayList<>(List.of(DEVICE_STATE_2)), DEVICE_STATE_0, DEVICE_STATE_0);
         final int diff = info.diff(otherInfo);
         assertTrue((diff & DeviceStateInfo.CHANGED_SUPPORTED_STATES) > 0);
         assertFalse((diff & DeviceStateInfo.CHANGED_BASE_STATE) > 0);
@@ -130,10 +130,10 @@ public final class DeviceStateInfoTest {
 
     @Test
     public void diff_differentNonOverrideState() {
-        final DeviceStateInfo info = new DeviceStateInfo(List.of(DEVICE_STATE_1), DEVICE_STATE_1,
-                DEVICE_STATE_0);
-        final DeviceStateInfo otherInfo = new DeviceStateInfo(List.of(DEVICE_STATE_1),
-                DEVICE_STATE_2, DEVICE_STATE_0);
+        final DeviceStateInfo info = new DeviceStateInfo(new ArrayList<>(List.of(DEVICE_STATE_1)),
+                DEVICE_STATE_1, DEVICE_STATE_0);
+        final DeviceStateInfo otherInfo = new DeviceStateInfo(
+                new ArrayList<>(List.of(DEVICE_STATE_1)), DEVICE_STATE_2, DEVICE_STATE_0);
         final int diff = info.diff(otherInfo);
         assertFalse((diff & DeviceStateInfo.CHANGED_SUPPORTED_STATES) > 0);
         assertTrue((diff & DeviceStateInfo.CHANGED_BASE_STATE) > 0);
@@ -142,10 +142,10 @@ public final class DeviceStateInfoTest {
 
     @Test
     public void diff_differentState() {
-        final DeviceStateInfo info = new DeviceStateInfo(List.of(DEVICE_STATE_1), DEVICE_STATE_0,
-                DEVICE_STATE_1);
-        final DeviceStateInfo otherInfo = new DeviceStateInfo(List.of(DEVICE_STATE_1),
-                DEVICE_STATE_0, DEVICE_STATE_2);
+        final DeviceStateInfo info = new DeviceStateInfo(new ArrayList<>(List.of(DEVICE_STATE_1)),
+                DEVICE_STATE_0, DEVICE_STATE_1);
+        final DeviceStateInfo otherInfo = new DeviceStateInfo(
+                new ArrayList<>(List.of(DEVICE_STATE_1)), DEVICE_STATE_0, DEVICE_STATE_2);
         final int diff = info.diff(otherInfo);
         assertFalse((diff & DeviceStateInfo.CHANGED_SUPPORTED_STATES) > 0);
         assertFalse((diff & DeviceStateInfo.CHANGED_BASE_STATE) > 0);
@@ -154,8 +154,8 @@ public final class DeviceStateInfoTest {
 
     @Test
     public void writeToParcel() {
-        final List<DeviceState> supportedStates = List.of(DEVICE_STATE_0, DEVICE_STATE_1,
-                DEVICE_STATE_2);
+        final ArrayList<DeviceState> supportedStates = new ArrayList<>(
+                List.of(DEVICE_STATE_0, DEVICE_STATE_1, DEVICE_STATE_2));
         final DeviceState nonOverrideState = DEVICE_STATE_0;
         final DeviceState state = DEVICE_STATE_2;
         final DeviceStateInfo originalInfo =

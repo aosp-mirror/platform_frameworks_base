@@ -162,12 +162,21 @@ public final class IkeSessionParamsUtils {
         result.putInt(IP_VERSION_KEY, params.getIpVersion());
         result.putInt(ENCAP_TYPE_KEY, params.getEncapType());
 
-        // TODO: b/185941731 Make sure IkeSessionParamsUtils is automatically updated when a new
-        // IKE_OPTION is defined in IKE module and added in the IkeSessionParams
         final List<Integer> enabledIkeOptions = new ArrayList<>();
-        for (int option : IKE_OPTIONS) {
-            if (isIkeOptionValid(option) && params.hasIkeOption(option)) {
-                enabledIkeOptions.add(option);
+
+        try {
+            // TODO: b/328844044: Ideally this code should gate the behavior by checking the
+            // com.android.ipsec.flags.enabled_ike_options_api flag but that flag is not accessible
+            // right now. We should either update the code when the flag is accessible or remove the
+            // legacy behavior after VIC SDK finalization
+            enabledIkeOptions.addAll(params.getIkeOptions());
+        } catch (Exception e) {
+            // getIkeOptions throws. It means the API is not available
+            enabledIkeOptions.clear();
+            for (int option : IKE_OPTIONS) {
+                if (isIkeOptionValid(option) && params.hasIkeOption(option)) {
+                    enabledIkeOptions.add(option);
+                }
             }
         }
 

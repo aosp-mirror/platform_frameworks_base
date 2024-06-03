@@ -21,6 +21,8 @@ import android.content.Intent
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.RemoteViews.RemoteResponse
+import androidx.core.util.component1
+import androidx.core.util.component2
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -29,6 +31,7 @@ import com.android.systemui.util.mockito.eq
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.refEq
 import org.mockito.Mock
 import org.mockito.Mockito.isNull
 import org.mockito.Mockito.notNull
@@ -62,14 +65,18 @@ class WidgetInteractionHandlerTest : SysuiTestCase() {
         val parent = FrameLayout(context)
         val view = CommunalAppWidgetHostView(context)
         parent.addView(view)
+        val (fillInIntent, activityOptions) = testResponse.getLaunchOptions(view)
 
         underTest.onInteraction(view, testIntent, testResponse)
 
         verify(activityStarter)
             .startPendingIntentMaybeDismissingKeyguard(
                 eq(testIntent),
+                eq(false),
                 isNull(),
                 notNull(),
+                refEq(fillInIntent),
+                refEq(activityOptions.toBundle()),
             )
     }
 
@@ -78,10 +85,18 @@ class WidgetInteractionHandlerTest : SysuiTestCase() {
         val parent = FrameLayout(context)
         val view = View(context)
         parent.addView(view)
+        val (fillInIntent, activityOptions) = testResponse.getLaunchOptions(view)
 
         underTest.onInteraction(view, testIntent, testResponse)
 
         verify(activityStarter)
-            .startPendingIntentMaybeDismissingKeyguard(eq(testIntent), isNull(), isNull())
+            .startPendingIntentMaybeDismissingKeyguard(
+                eq(testIntent),
+                eq(false),
+                isNull(),
+                isNull(),
+                refEq(fillInIntent),
+                refEq(activityOptions.toBundle()),
+            )
     }
 }

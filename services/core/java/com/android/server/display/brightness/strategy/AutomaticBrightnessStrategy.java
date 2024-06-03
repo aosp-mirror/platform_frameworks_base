@@ -15,7 +15,8 @@
  */
 package com.android.server.display.brightness.strategy;
 
-import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -27,9 +28,13 @@ import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.AutomaticBrightnessController;
+import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessEvent;
 import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.brightness.BrightnessUtils;
+import com.android.server.display.brightness.StrategyExecutionRequest;
+import com.android.server.display.brightness.StrategySelectionNotifyRequest;
+import com.android.server.display.feature.DisplayManagerFlags;
 
 import java.io.PrintWriter;
 
@@ -40,7 +45,8 @@ import java.io.PrintWriter;
  * that it is being executed from the power thread, and hence doesn't synchronize
  * any of its resources
  */
-public class AutomaticBrightnessStrategy {
+public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
+        implements DisplayBrightnessStrategy{
     private final Context mContext;
     // The DisplayId of the associated logical display
     private final int mDisplayId;
@@ -88,12 +94,30 @@ public class AutomaticBrightnessStrategy {
     @Nullable
     private BrightnessConfiguration mBrightnessConfiguration;
 
-    public AutomaticBrightnessStrategy(Context context, int displayId) {
+    // Indicates if the strategy is already configured for a request, in which case we wouldn't
+    // want to re-evaluate the auto-brightness state
+    private boolean mIsConfigured;
+
+    private Injector mInjector;
+
+    private DisplayManagerFlags mDisplayManagerFlags;
+
+    @VisibleForTesting
+    AutomaticBrightnessStrategy(Context context, int displayId, Injector injector,
+            DisplayManagerFlags displayManagerFlags) {
+        super(context, displayId);
         mContext = context;
         mDisplayId = displayId;
         mAutoBrightnessAdjustment = getAutoBrightnessAdjustmentSetting();
         mPendingAutoBrightnessAdjustment = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         mTemporaryAutoBrightnessAdjustment = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        mDisplayManagerFlags  = displayManagerFlags;
+        mInjector = (injector == null) ? new RealInjector() : injector;
+    }
+
+    public AutomaticBrightnessStrategy(Context context, int displayId,
+            DisplayManagerFlags displayManagerFlags) {
+        this(context, displayId, null, displayManagerFlags);
     }
 
     /**
@@ -103,8 +127,11 @@ public class AutomaticBrightnessStrategy {
     public void setAutoBrightnessState(int targetDisplayState,
             boolean allowAutoBrightnessWhileDozingConfig, int brightnessReason, int policy,
             float lastUserSetScreenBrightness, boolean userSetBrightnessChanged) {
+        // We are still in the process of updating the power state, so there's no need to trigger
+        // an update again
+        switchMode(targetDisplayState, /* sendUpdate= */ false);
         final boolean autoBrightnessEnabledInDoze =
-                allowAutoBrightnessWhileDozingConfig && policy == POLICY_DOZE;
+                allowAutoBrightnessWhileDozingConfig && Display.isDozeState(targetDisplayState);
         mIsAutoBrightnessEnabled = shouldUseAutoBrightness()
                 && (targetDisplayState == Display.STATE_ON || autoBrightnessEnabledInDoze)
                 && brightnessReason != BrightnessReason.REASON_OVERRIDE
@@ -112,7 +139,7 @@ public class AutomaticBrightnessStrategy {
         mAutoBrightnessDisabledDueToDisplayOff = shouldUseAutoBrightness()
                 && !(targetDisplayState == Display.STATE_ON || autoBrightnessEnabledInDoze);
         final int autoBrightnessState = mIsAutoBrightnessEnabled
-                    && brightnessReason != BrightnessReason.REASON_FOLLOWER
+                && brightnessReason != BrightnessReason.REASON_FOLLOWER
                 ? AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED
                 : mAutoBrightnessDisabledDueToDisplayOff
                         ? AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE
@@ -120,10 +147,33 @@ public class AutomaticBrightnessStrategy {
 
         accommodateUserBrightnessChanges(userSetBrightnessChanged, lastUserSetScreenBrightness,
                 policy, targetDisplayState, mBrightnessConfiguration, autoBrightnessState);
+        mIsConfigured = true;
+    }
+
+    public void setIsConfigured(boolean configure) {
+        mIsConfigured = configure;
     }
 
     public boolean isAutoBrightnessEnabled() {
         return mIsAutoBrightnessEnabled;
+    }
+
+    /**
+     * Validates if the auto-brightness strategy is valid or not considering the current system
+     * state.
+     */
+    public boolean isAutoBrightnessValid() {
+        boolean isValid = false;
+        if (isAutoBrightnessEnabled()) {
+            float brightness = getAutomaticScreenBrightness(null,
+                    /* isAutomaticBrightnessAdjusted = */ false);
+            if (BrightnessUtils.isValidBrightnessValue(brightness)
+                    || brightness == PowerManager.BRIGHTNESS_OFF_FLOAT) {
+                isValid = true;
+            }
+        }
+        setAutoBrightnessApplied(isValid);
+        return isValid;
     }
 
     public boolean isAutoBrightnessDisabledDueToDisplayOff() {
@@ -217,6 +267,39 @@ public class AutomaticBrightnessStrategy {
         mTemporaryAutoBrightnessAdjustment = temporaryAutoBrightnessAdjustment;
     }
 
+    @Override
+    public DisplayBrightnessState updateBrightness(
+            StrategyExecutionRequest strategyExecutionRequest) {
+        BrightnessReason brightnessReason = new BrightnessReason();
+        brightnessReason.setReason(BrightnessReason.REASON_AUTOMATIC);
+        BrightnessEvent brightnessEvent = mInjector.getBrightnessEvent(mDisplayId);
+
+        // AutoBrightness adjustments were already applied while checking the validity of this
+        // strategy. Reapplying them again will result in incorrect adjustment reason flags as we
+        // might end up assuming no adjustments are applied
+        float brightness = getAutomaticScreenBrightness(brightnessEvent,
+                /* isAutomaticBrightnessAdjusted = */ true);
+        return new DisplayBrightnessState.Builder()
+                .setBrightness(brightness)
+                .setSdrBrightness(brightness)
+                .setBrightnessReason(brightnessReason)
+                .setDisplayBrightnessStrategyName(getName())
+                .setIsSlowChange(hasAppliedAutoBrightness()
+                        && !getAutoBrightnessAdjustmentChanged())
+                .setBrightnessEvent(brightnessEvent)
+                .setBrightnessAdjustmentFlag(mAutoBrightnessAdjustmentReasonsFlags)
+                .setShouldUpdateScreenBrightnessSetting(
+                        brightness != strategyExecutionRequest.getCurrentScreenBrightness())
+                .setIsUserInitiatedChange(getAutoBrightnessAdjustmentChanged()
+                        || strategyExecutionRequest.isUserSetBrightnessChanged())
+                .build();
+    }
+
+    @Override
+    public String getName() {
+        return "AutomaticBrightnessStrategy";
+    }
+
     /**
      * Dumps the state of this class.
      */
@@ -236,6 +319,26 @@ public class AutomaticBrightnessStrategy {
         writer.println("  mWasShortTermModelActive=" + mIsShortTermModelActive);
         writer.println("  mAutoBrightnessAdjustmentReasonsFlags="
                 + mAutoBrightnessAdjustmentReasonsFlags);
+    }
+
+    @Override
+    public void strategySelectionPostProcessor(
+            StrategySelectionNotifyRequest strategySelectionNotifyRequest) {
+        if (!mIsConfigured) {
+            setAutoBrightnessState(strategySelectionNotifyRequest.getTargetDisplayState(),
+                    strategySelectionNotifyRequest.isAllowAutoBrightnessWhileDozingConfig(),
+                    strategySelectionNotifyRequest.getSelectedDisplayBrightnessStrategy()
+                            .getReason(),
+                    strategySelectionNotifyRequest.getDisplayPowerRequest().policy,
+                    strategySelectionNotifyRequest.getLastUserSetScreenBrightness(),
+                    strategySelectionNotifyRequest.isUserSetBrightnessChanged());
+        }
+        mIsConfigured = false;
+    }
+
+    @Override
+    public int getReason() {
+        return BrightnessReason.REASON_AUTOMATIC;
     }
 
     /**
@@ -258,36 +361,15 @@ public class AutomaticBrightnessStrategy {
      * @param brightnessEvent Event object to populate with details about why the specific
      *                        brightness was chosen.
      */
-    public float getAutomaticScreenBrightness(BrightnessEvent brightnessEvent) {
+    public float getAutomaticScreenBrightness(BrightnessEvent brightnessEvent,
+            boolean isAutomaticBrightnessAdjusted) {
         float brightness = (mAutomaticBrightnessController != null)
                 ? mAutomaticBrightnessController.getAutomaticScreenBrightness(brightnessEvent)
                 : PowerManager.BRIGHTNESS_INVALID_FLOAT;
-        adjustAutomaticBrightnessStateIfValid(brightness);
+        if (!isAutomaticBrightnessAdjusted) {
+            adjustAutomaticBrightnessStateIfValid(brightness);
+        }
         return brightness;
-    }
-
-    /**
-     * Get the automatic screen brightness based on the last observed lux reading. Used e.g. when
-     * entering doze - we disable the light sensor, invalidate the lux, but we still need to set
-     * the initial brightness in doze mode.
-     * @param brightnessEvent Event object to populate with details about why the specific
-     *                        brightness was chosen.
-     */
-    public float getAutomaticScreenBrightnessBasedOnLastObservedLux(
-            BrightnessEvent brightnessEvent) {
-        float brightness = (mAutomaticBrightnessController != null)
-                ? mAutomaticBrightnessController
-                .getAutomaticScreenBrightnessBasedOnLastObservedLux(brightnessEvent)
-                : PowerManager.BRIGHTNESS_INVALID_FLOAT;
-        adjustAutomaticBrightnessStateIfValid(brightness);
-        return brightness;
-    }
-
-    /**
-     * Gets the auto-brightness adjustment flag change reason
-     */
-    public int getAutoBrightnessAdjustmentReasonsFlags() {
-        return mAutoBrightnessAdjustmentReasonsFlags;
     }
 
     /**
@@ -398,6 +480,14 @@ public class AutomaticBrightnessStrategy {
             mIsShortTermModelActive = mAutomaticBrightnessController.hasUserDataPoints();
         }
     }
+    private void switchMode(int state, boolean sendUpdate) {
+        if (mDisplayManagerFlags.areAutoBrightnessModesEnabled()
+                && mAutomaticBrightnessController != null
+                && !mAutomaticBrightnessController.isInIdleMode()) {
+            mAutomaticBrightnessController.switchMode(Display.isDozeState(state)
+                    ? AUTO_BRIGHTNESS_MODE_DOZE : AUTO_BRIGHTNESS_MODE_DEFAULT, sendUpdate);
+        }
+    }
 
     /**
      * Evaluates if there are any temporary auto-brightness adjustments which is not applied yet.
@@ -420,5 +510,16 @@ public class AutomaticBrightnessStrategy {
         final float adj = Settings.System.getFloatForUser(mContext.getContentResolver(),
                 Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, 0.0f, UserHandle.USER_CURRENT);
         return Float.isNaN(adj) ? 0.0f : BrightnessUtils.clampBrightnessAdjustment(adj);
+    }
+
+    @VisibleForTesting
+    interface Injector {
+        BrightnessEvent getBrightnessEvent(int displayId);
+    }
+
+    static class RealInjector implements Injector {
+        public BrightnessEvent getBrightnessEvent(int displayId) {
+            return new BrightnessEvent(displayId);
+        }
     }
 }

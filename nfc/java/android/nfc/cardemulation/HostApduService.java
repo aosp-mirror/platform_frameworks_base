@@ -20,6 +20,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -325,15 +326,12 @@ public abstract class HostApduService extends Service {
                 }
                 break;
                 case MSG_POLLING_LOOP:
-                    ArrayList<Bundle> frames =
-                            msg.getData().getParcelableArrayList(KEY_POLLING_LOOP_FRAMES_BUNDLE,
-                            Bundle.class);
-                    ArrayList<PollingFrame> pollingFrames =
-                            new ArrayList<PollingFrame>(frames.size());
-                    for (Bundle frame : frames) {
-                        pollingFrames.add(new PollingFrame(frame));
+                    if (android.nfc.Flags.nfcReadPollingLoop()) {
+                        ArrayList<PollingFrame> pollingFrames =
+                                msg.getData().getParcelableArrayList(
+                                    KEY_POLLING_LOOP_FRAMES_BUNDLE, PollingFrame.class);
+                        processPollingFrames(pollingFrames);
                     }
-                    processPollingFrames(pollingFrames);
                     break;
             default:
                 super.handleMessage(msg);
@@ -407,6 +405,7 @@ public abstract class HostApduService extends Service {
      *
      * @param frame A description of the polling frame.
      */
+    @SuppressLint("OnNameExpected")
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
     public void processPollingFrames(@NonNull List<PollingFrame> frame) {
     }

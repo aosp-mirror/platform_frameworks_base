@@ -244,8 +244,8 @@ interface IDevicePolicyManager {
     void setDefaultSmsApplication(in ComponentName admin, String callerPackageName, String packageName, boolean parent);
     void setDefaultDialerApplication(String packageName);
 
-    void setApplicationRestrictions(in ComponentName who, in String callerPackage, in String packageName, in Bundle settings);
-    Bundle getApplicationRestrictions(in ComponentName who, in String callerPackage, in String packageName);
+    void setApplicationRestrictions(in ComponentName who, in String callerPackage, in String packageName, in Bundle settings, in boolean parent);
+    Bundle getApplicationRestrictions(in ComponentName who, in String callerPackage, in String packageName, in boolean parent);
     boolean setApplicationRestrictionsManagingPackage(in ComponentName admin, in String packageName);
     String getApplicationRestrictionsManagingPackage(in ComponentName admin);
     boolean isCallerApplicationRestrictionsManagingPackage(in String callerPackage);
@@ -623,8 +623,10 @@ interface IDevicePolicyManager {
 
     int[] getSubscriptionIds(String callerPackageName);
 
-    void setMaxPolicyStorageLimit(String packageName, int storageLimit);
-    int getMaxPolicyStorageLimit(String packageName);
+    void setMaxPolicyStorageLimit(String callerPackageName, int storageLimit);
+    void forceSetMaxPolicyStorageLimit(String callerPackageName, int storageLimit);
+    int getMaxPolicyStorageLimit(String callerPackageName);
+    int getPolicySizeForAdmin(String callerPackageName, in EnforcingAdmin admin);
 
     int getHeadlessDeviceOwnerMode(String callerPackageName);
 }

@@ -72,4 +72,8 @@ interface PanelExpansionInteractor {
 
     /** Returns the StatusBarState. Note: System UI was formerly known simply as Status Bar. */
     @Deprecated("Use SceneInteractor or ShadeInteractor instead") val barState: Int
+
+    /** Returns whether status bar icons should be hidden when the shade is expanded. */
+    @Deprecated("No longer supported. Do not add new calls to this.")
+    fun shouldHideStatusBarIconsWhenExpanded(): Boolean
 }

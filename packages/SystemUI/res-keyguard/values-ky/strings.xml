@@ -49,7 +49,7 @@
     <string name="disable_carrier_button_text" msgid="7153361131709275746">"eSIM-картаны өчүрүү"</string>
     <string name="error_disable_esim_title" msgid="3802652622784813119">"eSIM-картаны өчүрүүгө болбойт"</string>
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"Катадан улам eSIM-картаны өчүрүүгө болбойт."</string>
-    <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Киргизүү"</string>
+    <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Enter"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Графикалык ачкыч туура эмес"</string>
     <string name="kg_wrong_pattern_try_again" msgid="3603524940234151881">"Графклк ачкч тура эмс. Кайтлап крүңз."</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Сырсөз туура эмес"</string>
@@ -80,9 +80,9 @@
     <string name="kg_face_locked_out" msgid="2751559491287575">"Жүз менен кулпусу ачылбай жатат. Өтө көп жолу аракет кылдыңыз."</string>
     <string name="kg_fp_locked_out" msgid="6228277682396768830">"Манжа изи менен кулпусу ачылбай жатат. Өтө көп жолу аракет кылдыңыз."</string>
     <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"Ишеним агенти жеткиликсиз"</string>
-    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Туура эмес PIN код менен өтө көп аракет"</string>
-    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Туура эмес графикалык ачкыч менен өтө көп аракет"</string>
-    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Туура эмес сырсөз менен өтө көп аракет"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"PIN код өтө көп жолу туура эмес киргизилди."</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Графикалык ачкыч өтө көп жолу туура эмес тартылды."</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Сырсөздү өтө көп жолу туура эмес киргиздиңиз."</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{# секунддан кийин кайталаңыз.}other{# секунддан кийин кайталаңыз.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"SIM-картанын PIN кодун киргизиңиз."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" SIM-картасынын PIN кодун киргизиңиз."</string>
@@ -111,12 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Кошумча коопсуздук үчүн анын ордуна графикалык ачкычты колдонуңуз"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Кошумча коопсуздук үчүн анын ордуна PIN кодду колдонуңуз"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Кошумча коопсуздук үчүн анын ордуна сырсөздү колдонуңуз"</string>
-    <!-- no translation found for kg_prompt_added_security_pin (5487992065995475528) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_pattern (1017068086102168544) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_password (6053156069765029006) -->
-    <skip />
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Коопсуздукту бекемдөө үчүн PIN код талап кылынат"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Коопсуздукту бекемдөө үчүн графикалык ачкыч талап кылынат"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Коопсуздукту бекемдөө үчүн сырсөз талап кылынат"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Түзмөктү администратор кулпулап койгон"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Түзмөк кол менен кулпуланды"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Таанылган жок"</string>

@@ -23,6 +23,7 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import kotlinx.coroutines.flow.StateFlow
 
@@ -43,6 +44,9 @@ interface MobileConnectionRepository {
 
     /** The carrierId for this connection. See [TelephonyManager.getSimCarrierId] */
     val carrierId: StateFlow<Int>
+
+    /** Reflects the value from the carrier config INFLATE_SIGNAL_STRENGTH for this connection */
+    val inflateSignalStrength: StateFlow<Boolean>
 
     /**
      * The table log buffer created for this connection. Will have the name "MobileConnectionLog
@@ -73,7 +77,17 @@ interface MobileConnectionRepository {
      */
     val isInService: StateFlow<Boolean>
 
-    /** Reflects [android.telephony.ServiceState.isUsingNonTerrestrialNetwork] */
+    /**
+     * True if this subscription is actively connected to a non-terrestrial network and false
+     * otherwise. Reflects [android.telephony.ServiceState.isUsingNonTerrestrialNetwork].
+     *
+     * Notably: This value reflects that this subscription is **currently** using a non-terrestrial
+     * network, because some subscriptions can switch between terrestrial and non-terrestrial
+     * networks. [SubscriptionModel.isExclusivelyNonTerrestrial] reflects whether a subscription is
+     * configured to exclusively connect to non-terrestrial networks. [isNonTerrestrial] can change
+     * during the lifetime of a subscription but [SubscriptionModel.isExclusivelyNonTerrestrial]
+     * will stay constant.
+     */
     val isNonTerrestrial: StateFlow<Boolean>
 
     /** True if [android.telephony.SignalStrength] told us that this connection is using GSM */
@@ -140,9 +154,6 @@ interface MobileConnectionRepository {
      * network slice
      */
     val hasPrioritizedNetworkCapabilities: StateFlow<Boolean>
-
-    /** Duration in seconds of the hysteresis to use when losing satellite connection. */
-    val satelliteConnectionHysteresisSeconds: StateFlow<Int>
 
     /**
      * True if this connection is in emergency callback mode.

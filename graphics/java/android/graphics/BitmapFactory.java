@@ -143,7 +143,7 @@ public class BitmapFactory {
          * the decoder will try to pick the best matching config based on the
          * system's screen depth, and characteristics of the original image such
          * as if it has per-pixel alpha (requiring a config that also does).
-         * 
+         *
          * Image are loaded with the {@link Bitmap.Config#ARGB_8888} config by
          * default.
          */
@@ -183,7 +183,7 @@ public class BitmapFactory {
 
         /**
          * If true (which is the default), the resulting bitmap will have its
-         * color channels pre-multipled by the alpha channel.
+         * color channels pre-multiplied by the alpha channel.
          *
          * <p>This should NOT be set to false for images to be directly drawn by
          * the view system or through a {@link Canvas}. The view system and
@@ -221,9 +221,9 @@ public class BitmapFactory {
          * if {@link #inScaled} is set (which it is by default} and this
          * density does not match {@link #inTargetDensity}, then the bitmap
          * will be scaled to the target density before being returned.
-         * 
+         *
          * <p>If this is 0,
-         * {@link BitmapFactory#decodeResource(Resources, int)}, 
+         * {@link BitmapFactory#decodeResource(Resources, int)},
          * {@link BitmapFactory#decodeResource(Resources, int, android.graphics.BitmapFactory.Options)},
          * and {@link BitmapFactory#decodeResourceStream}
          * will fill in the density associated with the resource.  The other
@@ -242,29 +242,29 @@ public class BitmapFactory {
          * This is used in conjunction with {@link #inDensity} and
          * {@link #inScaled} to determine if and how to scale the bitmap before
          * returning it.
-         * 
+         *
          * <p>If this is 0,
-         * {@link BitmapFactory#decodeResource(Resources, int)}, 
+         * {@link BitmapFactory#decodeResource(Resources, int)},
          * {@link BitmapFactory#decodeResource(Resources, int, android.graphics.BitmapFactory.Options)},
          * and {@link BitmapFactory#decodeResourceStream}
          * will fill in the density associated the Resources object's
          * DisplayMetrics.  The other
          * functions will leave it as-is and no scaling for density will be
          * performed.
-         * 
+         *
          * @see #inDensity
          * @see #inScreenDensity
          * @see #inScaled
          * @see android.util.DisplayMetrics#densityDpi
          */
         public int inTargetDensity;
-        
+
         /**
          * The pixel density of the actual screen that is being used.  This is
          * purely for applications running in density compatibility code, where
          * {@link #inTargetDensity} is actually the density the application
          * sees rather than the real screen density.
-         * 
+         *
          * <p>By setting this, you
          * allow the loading code to avoid scaling a bitmap that is currently
          * in the screen density up/down to the compatibility density.  Instead,
@@ -274,18 +274,18 @@ public class BitmapFactory {
          * Bitmap.getScaledWidth} and {@link Bitmap#getScaledHeight
          * Bitmap.getScaledHeight} to account for any different between the
          * bitmap's density and the target's density.
-         * 
+         *
          * <p>This is never set automatically for the caller by
          * {@link BitmapFactory} itself.  It must be explicitly set, since the
          * caller must deal with the resulting bitmap in a density-aware way.
-         * 
+         *
          * @see #inDensity
          * @see #inTargetDensity
          * @see #inScaled
          * @see android.util.DisplayMetrics#densityDpi
          */
         public int inScreenDensity;
-        
+
         /**
          * When this flag is set, if {@link #inDensity} and
          * {@link #inTargetDensity} are not 0, the
@@ -345,7 +345,7 @@ public class BitmapFactory {
          * ignored.
          *
          * In {@link android.os.Build.VERSION_CODES#KITKAT} and below, this
-         * field works in conjuction with inPurgeable. If inPurgeable is false,
+         * field works in conjunction with inPurgeable. If inPurgeable is false,
          * then this field is ignored. If inPurgeable is true, then this field
          * determines whether the bitmap can share a reference to the input
          * data (inputstream, array, etc.) or if it must make a deep copy.
@@ -583,11 +583,11 @@ public class BitmapFactory {
                 opts.inDensity = density;
             }
         }
-        
+
         if (opts.inTargetDensity == 0 && res != null) {
             opts.inTargetDensity = res.getDisplayMetrics().densityDpi;
         }
-        
+
         return decodeStream(is, pad, opts);
     }
 
@@ -611,8 +611,8 @@ public class BitmapFactory {
     public static Bitmap decodeResource(Resources res, int id, Options opts) {
         validate(opts);
         Bitmap bm = null;
-        InputStream is = null; 
-        
+        InputStream is = null;
+
         try {
             final TypedValue value = new TypedValue();
             is = res.openRawResource(id, value);

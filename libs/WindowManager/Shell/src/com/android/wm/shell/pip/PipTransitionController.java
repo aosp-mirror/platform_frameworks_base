@@ -49,12 +49,12 @@ import com.android.wm.shell.common.pip.PipMenuController;
 import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.DefaultMixedHandler;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Responsible supplying PiP Transitions.
@@ -68,6 +68,7 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     protected final Transitions mTransitions;
     private final List<PipTransitionCallback> mPipTransitionCallbacks = new ArrayList<>();
     protected PipTaskOrganizer mPipOrganizer;
+    protected DefaultMixedHandler mMixedHandler;
 
     protected final PipAnimationController.PipAnimationCallback mPipAnimationCallback =
             new PipAnimationController.PipAnimationCallback() {
@@ -125,12 +126,8 @@ public abstract class PipTransitionController implements Transitions.TransitionH
 
     /**
      * Called when the Shell wants to start resizing Pip transition/animation.
-     *
-     * @param onFinishResizeCallback callback guaranteed to execute when animation ends and
-     *                               client completes any potential draws upon WM state updates.
      */
-    public void startResizeTransition(WindowContainerTransaction wct,
-            Consumer<Rect> onFinishResizeCallback) {
+    public void startResizeTransition(WindowContainerTransaction wct) {
         // Default implementation does nothing.
     }
 
@@ -171,6 +168,14 @@ public abstract class PipTransitionController implements Transitions.TransitionH
 
     void setPipOrganizer(PipTaskOrganizer pto) {
         mPipOrganizer = pto;
+    }
+
+    public void setMixedHandler(DefaultMixedHandler mixedHandler) {
+        mMixedHandler = mixedHandler;
+    }
+
+    public void applyTransaction(WindowContainerTransaction wct) {
+        mShellTaskOrganizer.applyTransaction(wct);
     }
 
     /**
@@ -266,9 +271,9 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     }
 
     /** Whether a particular package is same as current pip package. */
-    public boolean isInPipPackage(String packageName) {
+    public boolean isPackageActiveInPip(String packageName) {
         final TaskInfo inPipTask = mPipOrganizer.getTaskInfo();
-        return packageName != null && inPipTask != null
+        return packageName != null && inPipTask != null && mPipOrganizer.isInPip()
                 && packageName.equals(SplitScreenUtils.getPackageName(inPipTask.baseIntent));
     }
 
@@ -303,6 +308,14 @@ public abstract class PipTransitionController implements Transitions.TransitionH
 
     /** End the currently-playing PiP animation. */
     public void end() {
+    }
+
+    /**
+     * End the currently-playing PiP animation.
+     *
+     * @param onTransitionEnd callback to run upon finishing the playing transition.
+     */
+    public void end(@Nullable Runnable onTransitionEnd) {
     }
 
     /** Starts the {@link android.window.SystemPerformanceHinter.HighPerfSession}. */

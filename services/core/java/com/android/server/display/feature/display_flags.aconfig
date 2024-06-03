@@ -1,4 +1,5 @@
 package: "com.android.server.display.feature.flags"
+container: "system"
 
 # Important: Flags must be accessed through DisplayManagerFlags.
 
@@ -7,6 +8,14 @@ flag {
     namespace: "display_manager"
     description: "Allows refering to displays by port in display layout"
     bug: "303058435"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "resolution_backup_restore"
+    namespace: "display_manager"
+    description: "Backup/Restore support for High Resolution setting"
+    bug: "321821289"
     is_fixed_read_only: true
 }
 
@@ -117,7 +126,7 @@ flag {
     name: "even_dimmer"
     namespace: "display_manager"
     description: "Feature flag for extending the brightness below traditional range"
-    bug: "179428400"
+    bug: "294760970"
     is_fixed_read_only: true
 }
 
@@ -226,4 +235,67 @@ flag {
     description: "Feature flag for reducing the refresh rate when the screen is idle after a timeout"
     bug: "310026579"
     is_fixed_read_only: true
+}
+
+flag {
+    name: "use_fusion_prox_sensor"
+    namespace: "display_manager"
+    description: "Feature flag to control usage of a Fusion Proximity sensor if configued."
+    bug: "306203895"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "offload_controls_doze_auto_brightness"
+    namespace: "display_manager"
+    description: "Allows the registered DisplayOffloader to control if auto-brightness is used in doze"
+    bug: "327392714"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_peak_refresh_rate_physical_limit"
+    namespace: "display_manager"
+    description: "Flag for adding physical refresh rate limit if smooth display setting is on "
+    bug: "332413475"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "ignore_app_preferred_refresh_rate_request"
+    namespace: "display_manager"
+    description: "Feature flag for DisplayManager to ignore preferred refresh rate app request. It will be handled by SF only."
+    bug: "330810426"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_synthetic_60hz_modes"
+    namespace: "display_manager"
+    description: "Feature flag for DisplayManager to enable synthetic 60Hz modes for vrr displays"
+    bug: "338183249"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "offload_doze_override_holds_wakelock"
+    namespace: "display_manager"
+    description: "DisplayPowerController holds a suspend-blocker while changing the display state on behalf of offload doze override."
+    bug: "338403827"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
 }

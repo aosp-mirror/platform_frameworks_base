@@ -33,6 +33,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.os.Process.SYSTEM_UID;
 import static android.view.MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE;
+import static android.view.WindowInsets.Type.mandatorySystemGestures;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 
@@ -60,11 +61,12 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Insets;
+import android.graphics.Rect;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -72,7 +74,9 @@ import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.view.InsetsState;
 import android.view.MotionEvent;
+import android.view.WindowInsets;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -209,6 +213,7 @@ class RecentTasks {
     private final HashMap<ComponentName, ActivityInfo> mTmpAvailActCache = new HashMap<>();
     private final HashMap<String, ApplicationInfo> mTmpAvailAppCache = new HashMap<>();
     private final SparseBooleanArray mTmpQuietProfileUserIds = new SparseBooleanArray();
+    private final Rect mTmpRect = new Rect();
 
     // TODO(b/127498985): This is currently a rough heuristic for interaction inside an app
     private final PointerEventListener mListener = new PointerEventListener() {
@@ -230,12 +235,27 @@ class RecentTasks {
                     if (win == null) {
                         return;
                     }
+
+                    // Verify the touch is within the mandatory system gesture inset bounds of the
+                    // window, use the raw insets state to ignore window z-order
+                    final InsetsState insetsState = dc.getInsetsStateController()
+                            .getRawInsetsState();
+                    mTmpRect.set(win.getFrame());
+                    mTmpRect.inset(insetsState.calculateInsets(win.getFrame(),
+                            mandatorySystemGestures(), false /* ignoreVisibility */));
+                    if (!mTmpRect.contains(x, y)) {
+                        return;
+                    }
+
                     // Unfreeze the task list once we touch down in a task
                     final boolean isAppWindowTouch = FIRST_APPLICATION_WINDOW <= win.mAttrs.type
                             && win.mAttrs.type <= LAST_APPLICATION_WINDOW;
                     if (isAppWindowTouch) {
                         final Task stack = mService.getTopDisplayFocusedRootTask();
                         final Task topTask = stack != null ? stack.getTopMostTask() : null;
+                        ProtoLog.i(WM_DEBUG_TASKS, "Resetting frozen recents task list"
+                                + " reason=app touch win=%s x=%d y=%d insetFrame=%s", win, x, y,
+                                mTmpRect);
                         resetFreezeTaskListReordering(topTask);
                     }
                 }
@@ -302,6 +322,8 @@ class RecentTasks {
             mFreezeTaskListReordering = true;
         }
 
+        ProtoLog.i(WM_DEBUG_TASKS, "Setting frozen recents task list");
+
         // Always update the reordering time when this is called to ensure that the timeout
         // is reset
         mService.mH.removeCallbacks(mResetFreezeTaskListOnTimeoutRunnable);
@@ -345,6 +367,7 @@ class RecentTasks {
             final Task focusedStack = mService.getTopDisplayFocusedRootTask();
             final Task topTask = focusedStack != null ? focusedStack.getTopMostTask() : null;
             final Task reorderToEndTask = topTask != null && topTask.hasChild() ? topTask : null;
+            ProtoLog.i(WM_DEBUG_TASKS, "Resetting frozen recents task list reason=timeout");
             resetFreezeTaskListReordering(reorderToEndTask);
         }
     }
@@ -706,26 +729,6 @@ class RecentTasks {
                 remove(task);
             }
         }
-    }
-
-    /**
-     * Removes the oldest recent task that is compatible with the given one. This is possible if
-     * the task windowing mode changed after being added to the Recents.
-     */
-    void removeCompatibleRecentTask(Task task) {
-        final int taskIndex = mTasks.indexOf(task);
-        if (taskIndex < 0) {
-            return;
-        }
-
-        final int candidateIndex = findRemoveIndexForTask(task, false /* includingSelf */);
-        if (candidateIndex == -1) {
-            // Nothing to trim
-            return;
-        }
-
-        final Task taskToRemove = taskIndex > candidateIndex ? task : mTasks.get(candidateIndex);
-        remove(taskToRemove);
     }
 
     void removeTasksByPackageName(String packageName, int userId) {
@@ -1615,10 +1618,6 @@ class RecentTasks {
      * list (if any).
      */
     private int findRemoveIndexForAddTask(Task task) {
-        return findRemoveIndexForTask(task, true /* includingSelf */);
-    }
-
-    private int findRemoveIndexForTask(Task task, boolean includingSelf) {
         final int recentsCount = mTasks.size();
         final Intent intent = task.intent;
         final boolean document = intent != null && intent.isDocument();
@@ -1674,8 +1673,6 @@ class RecentTasks {
                     // existing task
                     continue;
                 }
-            } else if (!includingSelf) {
-                continue;
             }
             return i;
         }

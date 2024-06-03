@@ -16,7 +16,7 @@
 
 package com.android.systemui.volume.dagger;
 
-import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.media.AudioManager;
 import android.os.Looper;
@@ -38,11 +38,11 @@ import com.android.systemui.volume.CsdWarningDialog;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.volume.VolumeDialogComponent;
 import com.android.systemui.volume.VolumeDialogImpl;
+import com.android.systemui.volume.VolumePanelDialogReceiver;
 import com.android.systemui.volume.VolumeUI;
 import com.android.systemui.volume.domain.interactor.VolumePanelNavigationInteractor;
 import com.android.systemui.volume.panel.dagger.VolumePanelComponent;
 import com.android.systemui.volume.panel.dagger.factory.VolumePanelComponentFactory;
-import com.android.systemui.volume.panel.ui.activity.VolumePanelActivity;
 import com.android.systemui.volume.ui.navigation.VolumeNavigator;
 
 import dagger.Binds;
@@ -67,6 +67,15 @@ import dagger.multibindings.IntoSet;
         }
 )
 public interface VolumeModule {
+
+    /**
+     * Binds [VolumePanelDialogReceiver]
+     */
+    @Binds
+    @IntoMap
+    @ClassKey(VolumePanelDialogReceiver.class)
+    BroadcastReceiver bindVolumePanelDialogReceiver(VolumePanelDialogReceiver receiver);
+
     /** Starts VolumeUI. */
     @Binds
     @IntoMap
@@ -81,12 +90,6 @@ public interface VolumeModule {
     /**  */
     @Binds
     VolumeComponent provideVolumeComponent(VolumeDialogComponent volumeDialogComponent);
-
-    /** Inject into VolumePanelActivity. */
-    @Binds
-    @IntoMap
-    @ClassKey(VolumePanelActivity.class)
-    Activity bindVolumePanelActivity(VolumePanelActivity activity);
 
     /**  */
     @Binds

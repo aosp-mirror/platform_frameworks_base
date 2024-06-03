@@ -25,6 +25,7 @@ import android.util.Slog;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -160,6 +161,18 @@ public class InputMethodSubtypeArray {
             }
         }
         return instance[index];
+    }
+
+    /**
+     * @return A list of {@link InputMethodInfo} copied from this array.
+     */
+    @NonNull
+    public ArrayList<InputMethodSubtype> toList() {
+        final ArrayList<InputMethodSubtype> list = new ArrayList<>(mCount);
+        for (int i = 0; i < mCount; ++i) {
+            list.add(get(i));
+        }
+        return list;
     }
 
     /**

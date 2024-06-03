@@ -19,11 +19,11 @@ package com.android.systemui.dagger;
 import android.content.BroadcastReceiver;
 
 import com.android.systemui.GuestResetOrExitSessionReceiver;
+import com.android.systemui.accessibility.hearingaid.HearingDevicesDialogReceiver;
 import com.android.systemui.media.dialog.MediaOutputDialogReceiver;
 import com.android.systemui.people.widget.PeopleSpaceWidgetPinnedReceiver;
 import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
 import com.android.systemui.screenshot.SmartActionsReceiver;
-import com.android.systemui.volume.VolumePanelDialogReceiver;
 
 import dagger.Binds;
 import dagger.Module;
@@ -58,15 +58,6 @@ public abstract class DefaultBroadcastReceiverBinder {
      */
     @Binds
     @IntoMap
-    @ClassKey(VolumePanelDialogReceiver.class)
-    public abstract BroadcastReceiver bindVolumePanelDialogReceiver(
-            VolumePanelDialogReceiver broadcastReceiver);
-
-    /**
-     *
-     */
-    @Binds
-    @IntoMap
     @ClassKey(PeopleSpaceWidgetPinnedReceiver.class)
     public abstract BroadcastReceiver bindPeopleSpaceWidgetPinnedReceiver(
             PeopleSpaceWidgetPinnedReceiver broadcastReceiver);
@@ -88,4 +79,13 @@ public abstract class DefaultBroadcastReceiverBinder {
     @ClassKey(GuestResetOrExitSessionReceiver.class)
     public abstract BroadcastReceiver bindGuestResetOrExitSessionReceiver(
             GuestResetOrExitSessionReceiver broadcastReceiver);
+
+    /**
+     *
+     */
+    @Binds
+    @IntoMap
+    @ClassKey(HearingDevicesDialogReceiver.class)
+    public abstract BroadcastReceiver bindHearingDevicesDialogReceiver(
+            HearingDevicesDialogReceiver broadcastReceiver);
 }

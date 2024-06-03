@@ -30,15 +30,20 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
+import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IMagnificationConnection;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import android.window.InputTransferToken;
+
+import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
@@ -53,6 +58,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.io.PrintWriter;
+import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
@@ -67,9 +73,13 @@ import javax.inject.Inject;
 public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     private static final String TAG = "Magnification";
 
+    @VisibleForTesting static final int DELAY_SHOW_MAGNIFICATION_TIMEOUT_MS = 300;
+    private static final int MSG_SHOW_MAGNIFICATION_BUTTON_INTERNAL = 1;
+
     private final ModeSwitchesController mModeSwitchesController;
     private final Context mContext;
     private final Handler mHandler;
+    private final Executor mExecutor;
     private final AccessibilityManager mAccessibilityManager;
     private final CommandQueue mCommandQueue;
     private final OverviewProxyService mOverviewProxyService;
@@ -134,6 +144,39 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     @VisibleForTesting
     DisplayIdIndexSupplier<WindowMagnificationController> mWindowMagnificationControllerSupplier;
 
+    private static class FullscreenMagnificationControllerSupplier extends
+            DisplayIdIndexSupplier<FullscreenMagnificationController> {
+
+        private final Context mContext;
+        private final Executor mExecutor;
+
+        FullscreenMagnificationControllerSupplier(Context context, DisplayManager displayManager,
+                Executor executor) {
+            super(displayManager);
+            mContext = context;
+            mExecutor = executor;
+        }
+
+        @Override
+        protected FullscreenMagnificationController createInstance(Display display) {
+            final Context windowContext = mContext.createWindowContext(display,
+                    TYPE_ACCESSIBILITY_OVERLAY, /* options */ null);
+            Supplier<SurfaceControlViewHost> scvhSupplier = () -> new SurfaceControlViewHost(
+                    mContext, mContext.getDisplay(), new InputTransferToken(), TAG);
+            windowContext.setTheme(com.android.systemui.res.R.style.Theme_SystemUI);
+            return new FullscreenMagnificationController(
+                    windowContext,
+                    mExecutor,
+                    windowContext.getSystemService(AccessibilityManager.class),
+                    windowContext.getSystemService(WindowManager.class),
+                    scvhSupplier);
+        }
+    }
+
+    @VisibleForTesting
+    DisplayIdIndexSupplier<FullscreenMagnificationController>
+            mFullscreenMagnificationControllerSupplier;
+
     private static class SettingsSupplier extends
             DisplayIdIndexSupplier<MagnificationSettingsController> {
 
@@ -168,13 +211,32 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     DisplayIdIndexSupplier<MagnificationSettingsController> mMagnificationSettingsSupplier;
 
     @Inject
-    public Magnification(Context context, @Main Handler mainHandler,
+    public Magnification(Context context, @Main Handler mainHandler, @Main Executor executor,
+            CommandQueue commandQueue, ModeSwitchesController modeSwitchesController,
+            SysUiState sysUiState, OverviewProxyService overviewProxyService,
+            SecureSettings secureSettings, DisplayTracker displayTracker,
+            DisplayManager displayManager, AccessibilityLogger a11yLogger) {
+        this(context, mainHandler.getLooper(), executor, commandQueue,
+                modeSwitchesController, sysUiState, overviewProxyService, secureSettings,
+                displayTracker, displayManager, a11yLogger);
+    }
+
+    @VisibleForTesting
+    public Magnification(Context context, Looper looper, @Main Executor executor,
             CommandQueue commandQueue, ModeSwitchesController modeSwitchesController,
             SysUiState sysUiState, OverviewProxyService overviewProxyService,
             SecureSettings secureSettings, DisplayTracker displayTracker,
             DisplayManager displayManager, AccessibilityLogger a11yLogger) {
         mContext = context;
-        mHandler = mainHandler;
+        mHandler = new Handler(looper) {
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                if (msg.what == MSG_SHOW_MAGNIFICATION_BUTTON_INTERNAL) {
+                    showMagnificationButtonInternal(msg.arg1, msg.arg2);
+                }
+            }
+        };
+        mExecutor = executor;
         mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
         mCommandQueue = commandQueue;
         mModeSwitchesController = modeSwitchesController;
@@ -185,6 +247,8 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
         mWindowMagnificationControllerSupplier = new WindowMagnificationControllerSupplier(context,
                 mHandler, mWindowMagnifierCallback,
                 displayManager, sysUiState, secureSettings);
+        mFullscreenMagnificationControllerSupplier = new FullscreenMagnificationControllerSupplier(
+                context, displayManager, mExecutor);
         mMagnificationSettingsSupplier = new SettingsSupplier(context,
                 mMagnificationSettingsControllerCallback, displayManager, secureSettings);
 
@@ -273,8 +337,13 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
         }
     }
 
+    @MainThread
     void onFullscreenMagnificationActivationChanged(int displayId, boolean activated) {
-        // Do nothing
+        final FullscreenMagnificationController fullscreenMagnificationController =
+                mFullscreenMagnificationControllerSupplier.get(displayId);
+        if (fullscreenMagnificationController != null) {
+            fullscreenMagnificationController.onFullscreenMagnificationActivationChanged(activated);
+        }
     }
 
     @MainThread
@@ -306,6 +375,21 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
 
     @MainThread
     void showMagnificationButton(int displayId, int magnificationMode) {
+        if (Flags.delayShowMagnificationButton()) {
+            if (mHandler.hasMessages(MSG_SHOW_MAGNIFICATION_BUTTON_INTERNAL)) {
+                return;
+            }
+            mHandler.sendMessageDelayed(
+                    mHandler.obtainMessage(
+                            MSG_SHOW_MAGNIFICATION_BUTTON_INTERNAL, displayId, magnificationMode),
+                    DELAY_SHOW_MAGNIFICATION_TIMEOUT_MS);
+        } else {
+            showMagnificationButtonInternal(displayId, magnificationMode);
+        }
+    }
+
+    @MainThread
+    private void showMagnificationButtonInternal(int displayId, int magnificationMode) {
         // not to show mode switch button if settings panel is already showing to
         // prevent settings panel be covered by the button.
         if (isMagnificationSettingsPanelShowing(displayId)) {
@@ -316,6 +400,9 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
 
     @MainThread
     void removeMagnificationButton(int displayId) {
+        if (Flags.delayShowMagnificationButton()) {
+            mHandler.removeMessages(MSG_SHOW_MAGNIFICATION_BUTTON_INTERNAL);
+        }
         mModeSwitchesController.removeButton(displayId);
     }
 

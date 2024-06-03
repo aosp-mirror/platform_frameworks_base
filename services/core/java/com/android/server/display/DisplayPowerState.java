@@ -159,12 +159,13 @@ final class DisplayPowerState {
     /**
      * Sets whether the screen is on, off, or dozing.
      */
-    public void setScreenState(int state) {
+    public void setScreenState(int state, @Display.StateReason int reason) {
         if (mScreenState != state) {
             if (DEBUG) {
-                Slog.w(TAG, "setScreenState: state=" + Display.stateToString(state));
+                Slog.w(TAG,
+                        "setScreenState: state=" + Display.stateToString(state)
+                        + "; reason=" + Display.stateReasonToString(reason));
             }
-
             mScreenState = state;
             mScreenReady = false;
             scheduleScreenUpdate();

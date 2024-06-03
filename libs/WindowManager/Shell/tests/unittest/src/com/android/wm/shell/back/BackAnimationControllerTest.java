@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.back;
 
-import static android.window.BackNavigationInfo.KEY_TRIGGER_BACK;
+import static android.window.BackNavigationInfo.KEY_NAVIGATION_FINISHED;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -69,7 +69,6 @@ import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.sysui.ShellSharedConstants;
 
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -121,6 +120,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
     private TestableContentResolver mContentResolver;
     private TestableLooper mTestableLooper;
 
+    private DefaultCrossActivityBackAnimation mDefaultCrossActivityBackAnimation;
+    private CrossTaskBackAnimation mCrossTaskBackAnimation;
     private ShellBackAnimationRegistry mShellBackAnimationRegistry;
 
     @Before
@@ -134,13 +135,14 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 ANIMATION_ENABLED);
         mTestableLooper = TestableLooper.get(this);
         mShellInit = spy(new ShellInit(mShellExecutor));
+        mDefaultCrossActivityBackAnimation = new DefaultCrossActivityBackAnimation(mContext,
+                mAnimationBackground, mRootTaskDisplayAreaOrganizer);
+        mCrossTaskBackAnimation = new CrossTaskBackAnimation(mContext, mAnimationBackground);
         mShellBackAnimationRegistry =
-                new ShellBackAnimationRegistry(
-                        new CrossActivityBackAnimation(
-                                mContext, mAnimationBackground, mRootTaskDisplayAreaOrganizer),
-                        new CrossTaskBackAnimation(mContext, mAnimationBackground),
-                        /* dialogCloseAnimation= */ null,
-                        new CustomizeActivityAnimation(mContext, mAnimationBackground),
+                new ShellBackAnimationRegistry(mDefaultCrossActivityBackAnimation,
+                        mCrossTaskBackAnimation, /* dialogCloseAnimation= */ null,
+                        new CustomCrossActivityBackAnimation(mContext, mAnimationBackground,
+                                mRootTaskDisplayAreaOrganizer),
                         /* defaultBackToHomeAnimation= */ null);
         mController =
                 new BackAnimationController(
@@ -182,7 +184,9 @@ public class BackAnimationControllerTest extends ShellTestCase {
     }
 
     RemoteAnimationTarget createAnimationTarget() {
-        SurfaceControl topWindowLeash = new SurfaceControl();
+        SurfaceControl topWindowLeash = new SurfaceControl.Builder()
+                .setName("FakeLeash")
+                .build();
         return new RemoteAnimationTarget(-1, RemoteAnimationTarget.MODE_CLOSING, topWindowLeash,
                 false, new Rect(), new Rect(), -1,
                 new Point(0, 0), new Rect(), new Rect(), new WindowConfiguration(),
@@ -351,6 +355,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         // Verify that we prevent any interaction with the animator callback in case a new gesture
         // starts while the current back animation has not ended, instead the gesture is queued
         triggerBackGesture();
+        verify(mAnimatorCallback).setTriggerBack(eq(true));
         verifyNoMoreInteractions(mAnimatorCallback);
 
         // Finish previous back navigation.
@@ -391,6 +396,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         // starts while the current back animation has not ended, instead the gesture is queued
         triggerBackGesture();
         releaseBackGesture();
+        verify(mAnimatorCallback).setTriggerBack(eq(true));
         verifyNoMoreInteractions(mAnimatorCallback);
 
         // Finish previous back navigation.
@@ -404,6 +410,32 @@ public class BackAnimationControllerTest extends ShellTestCase {
         doStartEvents(0, 100);
 
         simulateRemoteAnimationStart();
+        verify(mAnimatorCallback).onBackStarted(any());
+        verify(mBackAnimationRunner).onAnimationStart(anyInt(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void gestureNotQueued_WhenPreviousGestureIsPostCommitCancelling()
+            throws RemoteException {
+        registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
+        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME,
+                /* enableAnimation = */ true,
+                /* isAnimationCallback = */ false);
+
+        doStartEvents(0, 100);
+        simulateRemoteAnimationStart();
+        releaseBackGesture();
+
+        // Check that back cancellation is dispatched.
+        verify(mAnimatorCallback).onBackCancelled();
+        verify(mBackAnimationRunner).onAnimationStart(anyInt(), any(), any(), any(), any());
+
+        reset(mAnimatorCallback);
+        reset(mBackAnimationRunner);
+
+        // Verify that a new start event is dispatched if a new gesture is started during the
+        // post-commit cancel phase
+        triggerBackGesture();
         verify(mAnimatorCallback).onBackStarted(any());
         verify(mBackAnimationRunner).onAnimationStart(anyInt(), any(), any(), any(), any());
     }
@@ -503,7 +535,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
     }
 
     @Test
-    public void callbackShouldDeliverProgress() throws RemoteException {
+    public void appCallback_receivesStartAndInvoke() throws RemoteException {
         registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
 
         final int type = BackNavigationInfo.TYPE_CALLBACK;
@@ -522,8 +554,9 @@ public class BackAnimationControllerTest extends ShellTestCase {
         assertTrue("TriggerBack should have been true", result.mTriggerBack);
 
         verify(mAppCallback, times(1)).onBackStarted(any());
-        verify(mAppCallback, times(1)).onBackProgressed(any());
         verify(mAppCallback, times(1)).onBackInvoked();
+        // Progress events should be generated from the app process.
+        verify(mAppCallback, never()).onBackProgressed(any());
 
         verify(mAnimatorCallback, never()).onBackStarted(any());
         verify(mAnimatorCallback, never()).onBackProgressed(any());
@@ -531,17 +564,32 @@ public class BackAnimationControllerTest extends ShellTestCase {
     }
 
     @Test
+    public void skipsCancelWithoutStart() throws RemoteException {
+        final int type = BackNavigationInfo.TYPE_CALLBACK;
+        final ResultListener result = new ResultListener();
+        createNavigationInfo(new BackNavigationInfo.Builder()
+                .setType(type)
+                .setOnBackInvokedCallback(mAppCallback)
+                .setOnBackNavigationDone(new RemoteCallback(result)));
+        doMotionEvent(MotionEvent.ACTION_CANCEL, 0);
+        mShellExecutor.flushAll();
+
+        verify(mAppCallback, never()).onBackStarted(any());
+        verify(mAppCallback, never()).onBackProgressed(any());
+        verify(mAppCallback, never()).onBackInvoked();
+        verify(mAppCallback, never()).onBackCancelled();
+    }
+
+    @Test
     public void testBackToActivity() throws RemoteException {
-        final CrossActivityBackAnimation animation = new CrossActivityBackAnimation(
-                mContext, mAnimationBackground, mRootTaskDisplayAreaOrganizer);
-        verifySystemBackBehavior(BackNavigationInfo.TYPE_CROSS_ACTIVITY, animation.getRunner());
+        verifySystemBackBehavior(BackNavigationInfo.TYPE_CROSS_ACTIVITY,
+                mDefaultCrossActivityBackAnimation.getRunner());
     }
 
     @Test
     public void testBackToTask() throws RemoteException {
-        final CrossTaskBackAnimation animation = new CrossTaskBackAnimation(mContext,
-                mAnimationBackground);
-        verifySystemBackBehavior(BackNavigationInfo.TYPE_CROSS_TASK, animation.getRunner());
+        verifySystemBackBehavior(BackNavigationInfo.TYPE_CROSS_TASK,
+                mCrossTaskBackAnimation.getRunner());
     }
 
     private void verifySystemBackBehavior(int type, BackAnimationRunner animation)
@@ -552,6 +600,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
 
         // Set up the monitoring objects.
         doNothing().when(runner).onAnimationStart(anyInt(), any(), any(), any(), any());
+        doReturn(false).when(animationRunner).shouldMonitorCUJ(any());
         doReturn(runner).when(animationRunner).getRunner();
         doReturn(callback).when(animationRunner).getCallback();
 
@@ -594,7 +643,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
      */
     private void doStartEvents(int startX, int moveX) {
         doMotionEvent(MotionEvent.ACTION_DOWN, startX);
-        mController.onPilferPointers();
+        mController.onThresholdCrossed();
         doMotionEvent(MotionEvent.ACTION_MOVE, moveX);
     }
 
@@ -633,7 +682,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         @Override
         public void onResult(@Nullable Bundle result) {
             mBackNavigationDone = true;
-            mTriggerBack = result.getBoolean(KEY_TRIGGER_BACK);
+            mTriggerBack = result.getBoolean(KEY_NAVIGATION_FINISHED);
         }
     }
 }

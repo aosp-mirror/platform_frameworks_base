@@ -1,4 +1,5 @@
 package: "android.nfc"
+container: "system"
 
 flag {
     name: "enable_nfc_mainline"
@@ -63,6 +64,7 @@ flag {
 
 flag {
     name: "enable_nfc_charging"
+    is_exported: true
     namespace: "nfc"
     description: "Flag for NFC charging changes"
     bug: "292143899"
@@ -83,3 +85,28 @@ flag {
     description: "Enable NFC vendor command support"
     bug: "289879306"
 }
+
+flag {
+    name: "nfc_oem_extension"
+    is_exported: true
+    namespace: "nfc"
+    description: "Enable NFC OEM extension support"
+    bug: "331206243"
+}
+
+flag {
+    name: "nfc_state_change"
+    is_exported: true
+    namespace: "nfc"
+    description: "Enable nfc state change API"
+    bug: "319934052"
+}
+
+flag {
+    name: "nfc_set_default_disc_tech"
+    is_exported: true
+    namespace: "nfc"
+    description: "Flag for NFC set default disc tech API"
+    bug: "321311407"
+}
+

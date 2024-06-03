@@ -17,13 +17,13 @@
 package com.android.systemui.deviceentry.domain.interactor
 
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
+import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.deviceentry.data.repository.deviceEntryRepository
 import com.android.systemui.flags.fakeSystemPropertiesHelper
 import com.android.systemui.keyguard.domain.interactor.trustInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalCoroutinesApi
@@ -35,11 +35,11 @@ val Kosmos.deviceEntryInteractor by
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
             faceAuthInteractor = deviceEntryFaceAuthInteractor,
-            trustInteractor = trustInteractor,
-            flags = sceneContainerFlags,
-            deviceUnlockedInteractor = deviceUnlockedInteractor,
             fingerprintAuthInteractor = deviceEntryFingerprintAuthInteractor,
             biometricSettingsInteractor = deviceEntryBiometricSettingsInteractor,
+            trustInteractor = trustInteractor,
+            deviceUnlockedInteractor = deviceUnlockedInteractor,
             systemPropertiesHelper = fakeSystemPropertiesHelper,
+            alternateBouncerInteractor = alternateBouncerInteractor,
         )
     }

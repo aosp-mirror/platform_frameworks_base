@@ -26,6 +26,7 @@ import static com.android.server.accessibility.AccessibilityManagerService.MAGNI
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresNoPermission;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -125,6 +126,7 @@ public class MagnificationConnectionManager implements
 
     @ConnectionState
     private int mConnectionState = DISCONNECTED;
+    ConnectionStateChangedCallback mConnectionStateChangedCallback = null;
 
     private static final int WAIT_CONNECTION_TIMEOUT_MILLIS = 100;
 
@@ -263,6 +265,9 @@ public class MagnificationConnectionManager implements
                 }
             }
         }
+        if (mConnectionStateChangedCallback != null) {
+            mConnectionStateChangedCallback.onConnectionStateChanged(connection != null);
+        }
     }
 
     /**
@@ -270,7 +275,7 @@ public class MagnificationConnectionManager implements
      */
     public boolean isConnected() {
         synchronized (mLock) {
-            return mConnectionWrapper != null;
+            return mConnectionWrapper != null && mConnectionState == CONNECTED;
         }
     }
 
@@ -939,11 +944,11 @@ public class MagnificationConnectionManager implements
         disableWindowMagnification(displayId, true);
     }
 
-    @SuppressWarnings("MissingPermissionAnnotation")
     private class ConnectionCallback extends IMagnificationConnectionCallback.Stub implements
             IBinder.DeathRecipient {
         private boolean mExpiredDeathRecipient = false;
 
+        @RequiresNoPermission
         @Override
         public void onWindowMagnifierBoundsChanged(int displayId, Rect bounds) {
             if (mTrace.isA11yTracingEnabledForTypes(
@@ -965,6 +970,7 @@ public class MagnificationConnectionManager implements
             }
         }
 
+        @RequiresNoPermission
         @Override
         public void onChangeMagnificationMode(int displayId, int magnificationMode)
                 throws RemoteException {
@@ -977,6 +983,7 @@ public class MagnificationConnectionManager implements
             mCallback.onChangeMagnificationMode(displayId, magnificationMode);
         }
 
+        @RequiresNoPermission
         @Override
         public void onSourceBoundsChanged(int displayId, Rect sourceBounds) {
             if (mTrace.isA11yTracingEnabledForTypes(
@@ -995,6 +1002,7 @@ public class MagnificationConnectionManager implements
             mCallback.onSourceBoundsChanged(displayId, sourceBounds);
         }
 
+        @RequiresNoPermission
         @Override
         public void onPerformScaleAction(int displayId, float scale, boolean updatePersistence) {
             if (mTrace.isA11yTracingEnabledForTypes(
@@ -1007,6 +1015,7 @@ public class MagnificationConnectionManager implements
             mCallback.onPerformScaleAction(displayId, scale, updatePersistence);
         }
 
+        @RequiresNoPermission
         @Override
         public void onAccessibilityActionPerformed(int displayId) {
             if (mTrace.isA11yTracingEnabledForTypes(
@@ -1018,6 +1027,7 @@ public class MagnificationConnectionManager implements
             mCallback.onAccessibilityActionPerformed(displayId);
         }
 
+        @RequiresNoPermission
         @Override
         public void onMove(int displayId) {
             if (mTrace.isA11yTracingEnabledForTypes(
@@ -1337,5 +1347,9 @@ public class MagnificationConnectionManager implements
                 /* ignore */
             }
         }
+    }
+
+    interface ConnectionStateChangedCallback {
+        void onConnectionStateChanged(boolean connected);
     }
 }

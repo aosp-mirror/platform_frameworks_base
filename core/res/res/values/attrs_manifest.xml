@@ -842,7 +842,8 @@
             that created the task, and therefore there will only be one instance of this activity
             in a task. In contrast to the {@code singleTask} launch mode, this activity can be
             started in multiple instances in different tasks if the
-            {@code FLAG_ACTIVITY_MULTIPLE_TASK} or {@code FLAG_ACTIVITY_NEW_DOCUMENT} is set.-->
+            {@code FLAG_ACTIVITY_MULTIPLE_TASK} or {@code FLAG_ACTIVITY_NEW_DOCUMENT} is set.
+            This enum value is introduced in API level 31. -->
         <enum name="singleInstancePerTask" value="4" />
     </attr>
     <!-- Specify the orientation an activity should be run in.  If not

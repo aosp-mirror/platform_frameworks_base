@@ -975,10 +975,14 @@ RequiresPermission: android.hardware.hdmi.HdmiControlManager#getHdmiCecVersion()
     Method 'getHdmiCecVersion' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.hardware.hdmi.HdmiControlManager#setHdmiCecVersion(int):
     Method 'setHdmiCecVersion' documentation mentions permissions already declared by @RequiresPermission
-RequiresPermission: android.hardware.input.InputManager#addUniqueIdAssociation(String, String):
-    Method 'addUniqueIdAssociation' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.hardware.input.InputManager#removeUniqueIdAssociation(String):
-    Method 'removeUniqueIdAssociation' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.hardware.input.InputManager#addUniqueIdAssociationByDescriptor(String, String):
+    Method 'addUniqueIdAssociationByDescriptor' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.hardware.input.InputManager#addUniqueIdAssociationByPort(String, String):
+    Method 'addUniqueIdAssociationByPort' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.hardware.input.InputManager#removeUniqueIdAssociationByDescriptor(String):
+    Method 'removeUniqueIdAssociationByDescriptor' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.hardware.input.InputManager#removeUniqueIdAssociationByPort(String):
+    Method 'removeUniqueIdAssociationByPort' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.hardware.location.GeofenceHardware#addGeofence(int, int, android.hardware.location.GeofenceHardwareRequest, android.hardware.location.GeofenceHardwareCallback):
     Method 'addGeofence' documentation mentions permissions without declaring @RequiresPermission
 RequiresPermission: android.hardware.location.GeofenceHardware#getMonitoringTypes():
@@ -2031,6 +2035,10 @@ UnflaggedApi: android.content.pm.UserInfo#isPrivateProfile():
     New API must be flagged with @FlaggedApi: method android.content.pm.UserInfo.isPrivateProfile()
 UnflaggedApi: android.credentials.CredentialProviderInfo#isPrimary():
     New API must be flagged with @FlaggedApi: method android.credentials.CredentialProviderInfo.isPrimary()
+UnflaggedApi: android.hardware.input.InputManager#addUniqueIdAssociationByPort(String, String):
+    New API must be flagged with @FlaggedApi: method android.hardware.input.InputManager.addUniqueIdAssociationByPort(String,String)
+UnflaggedApi: android.hardware.input.InputManager#removeUniqueIdAssociationByPort(String):
+    New API must be flagged with @FlaggedApi: method android.hardware.input.InputManager.removeUniqueIdAssociationByPort(String)
 UnflaggedApi: android.media.AudioManager#enterAudioFocusFreezeForTest(java.util.List<java.lang.Integer>):
     New API must be flagged with @FlaggedApi: method android.media.AudioManager.enterAudioFocusFreezeForTest(java.util.List<java.lang.Integer>)
 UnflaggedApi: android.media.AudioManager#exitAudioFocusFreezeForTest():

@@ -142,6 +142,7 @@ public class ApplicationStartInfoTest {
         final String app1PackageName = "com.android.test.stub1";
         final long appStartTimestampIntentStarted = 1000000;
         final long appStartTimestampActivityLaunchFinished = 2000000;
+        final long appStartTimestampFirstFrameDrawn = 2500000;
         final long appStartTimestampReportFullyDrawn = 3000000;
         final long appStartTimestampService = 4000000;
         final long appStartTimestampBroadcast = 5000000;
@@ -272,6 +273,8 @@ public class ApplicationStartInfoTest {
 
         mAppStartInfoTracker.onActivityLaunchFinished(appStartTimestampIntentStarted, COMPONENT,
                 appStartTimestampActivityLaunchFinished, ApplicationStartInfo.LAUNCH_MODE_STANDARD);
+        mAppStartInfoTracker.addTimestampToStart(app1PackageName, app1Uid,
+                appStartTimestampFirstFrameDrawn, ApplicationStartInfo.START_TIMESTAMP_FIRST_FRAME);
         list.clear();
         mAppStartInfoTracker.getStartInfo(app1PackageName, app1Uid, app1Pid1, 0, list);
         verifyInProgressRecordsSize(1);
@@ -321,8 +324,7 @@ public class ApplicationStartInfoTest {
                 app1PackageName);            // packageName
         ServiceRecord service = ServiceRecord.newEmptyInstanceForTest(mAms);
 
-        mAppStartInfoTracker.handleProcessServiceStart(appStartTimestampService, app, service,
-                false);
+        mAppStartInfoTracker.handleProcessServiceStart(appStartTimestampService, app, service);
         list.clear();
         mAppStartInfoTracker.getStartInfo(app1PackageName, app1Uid, 0, 0, list);
         assertEquals(list.size(), 2);
@@ -336,7 +338,7 @@ public class ApplicationStartInfoTest {
                 app1ProcessName,                                      // processName
                 ApplicationStartInfo.START_REASON_SERVICE,            // reason
                 ApplicationStartInfo.STARTUP_STATE_STARTED,           // startup state
-                ApplicationStartInfo.START_TYPE_WARM,                 // state type
+                ApplicationStartInfo.START_TYPE_COLD,                 // state type
                 ApplicationStartInfo.LAUNCH_MODE_STANDARD);           // launch mode
 
         // Case 5: Create an instance of app1 with a different user started for a broadcast
@@ -350,7 +352,7 @@ public class ApplicationStartInfoTest {
                 app1PackageName);                // packageName
 
         mAppStartInfoTracker.handleProcessBroadcastStart(appStartTimestampBroadcast, app,
-                null, true /* isColdStart */);
+                buildIntent(COMPONENT), false /* isAlarm */);
         list.clear();
         mAppStartInfoTracker.getStartInfo(app1PackageName, app1UidUser2, app1PidUser2, 0, list);
         assertEquals(list.size(), 1);
@@ -395,7 +397,7 @@ public class ApplicationStartInfoTest {
                 app2PackageName);                // packageName
 
         mAppStartInfoTracker.handleProcessContentProviderStart(appStartTimestampRContentProvider,
-                app, false);
+                app);
         list.clear();
         mAppStartInfoTracker.getStartInfo(app2PackageName, app2UidUser2, app2PidUser2, 0, list);
         assertEquals(list.size(), 1);
@@ -409,7 +411,7 @@ public class ApplicationStartInfoTest {
                 app2ProcessName,                                      // processName
                 ApplicationStartInfo.START_REASON_CONTENT_PROVIDER,   // reason
                 ApplicationStartInfo.STARTUP_STATE_STARTED,           // startup state
-                ApplicationStartInfo.START_TYPE_WARM,                 // state type
+                ApplicationStartInfo.START_TYPE_COLD,                 // state type
                 ApplicationStartInfo.LAUNCH_MODE_STANDARD);           // launch mode
 
         // Case 8: Save and load again

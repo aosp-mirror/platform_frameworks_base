@@ -31,10 +31,20 @@ public final class StrategySelectionRequest {
     // The display state to which the screen is switching to
     private int mTargetDisplayState;
 
+    // The last brightness that was set by the user and not temporary. Set to
+    // PowerManager.BRIGHTNESS_INVALID_FLOAT when a brightness has yet to be recorded.
+    private float mLastUserSetScreenBrightness;
+
+    // Represents if the user set screen brightness was changed or not.
+    private boolean mUserSetBrightnessChanged;
+
     public StrategySelectionRequest(DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
-            int targetDisplayState) {
+            int targetDisplayState, float lastUserSetScreenBrightness,
+            boolean userSetBrightnessChanged) {
         mDisplayPowerRequest = displayPowerRequest;
         mTargetDisplayState = targetDisplayState;
+        mLastUserSetScreenBrightness = lastUserSetScreenBrightness;
+        mUserSetBrightnessChanged = userSetBrightnessChanged;
     }
 
     public DisplayManagerInternal.DisplayPowerRequest getDisplayPowerRequest() {
@@ -45,18 +55,30 @@ public final class StrategySelectionRequest {
         return mTargetDisplayState;
     }
 
+
+    public float getLastUserSetScreenBrightness() {
+        return mLastUserSetScreenBrightness;
+    }
+
+    public boolean isUserSetBrightnessChanged() {
+        return mUserSetBrightnessChanged;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof StrategySelectionRequest)) {
             return false;
         }
         StrategySelectionRequest other = (StrategySelectionRequest) obj;
-        return Objects.equals(other.getDisplayPowerRequest(), getDisplayPowerRequest())
-                && other.getTargetDisplayState() == getTargetDisplayState();
+        return Objects.equals(mDisplayPowerRequest, other.getDisplayPowerRequest())
+                && mTargetDisplayState == other.getTargetDisplayState()
+                && mLastUserSetScreenBrightness == other.getLastUserSetScreenBrightness()
+                && mUserSetBrightnessChanged == other.isUserSetBrightnessChanged();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mDisplayPowerRequest, mTargetDisplayState);
+        return Objects.hash(mDisplayPowerRequest, mTargetDisplayState,
+                mLastUserSetScreenBrightness, mUserSetBrightnessChanged);
     }
 }

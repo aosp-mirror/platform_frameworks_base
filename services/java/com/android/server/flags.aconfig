@@ -1,4 +1,5 @@
 package: "android.server"
+container: "system"
 
 flag {
      namespace: "system_performance"
@@ -6,4 +7,11 @@ flag {
      description: "Control service portion of telemetry APIs feature."
      is_fixed_read_only: true
      bug: "324153471"
+}
+
+flag {
+     name: "remove_text_service"
+     namespace: "wear_frameworks"
+     description: "Remove TextServiceManagerService on Wear"
+     bug: "323720705"
 }

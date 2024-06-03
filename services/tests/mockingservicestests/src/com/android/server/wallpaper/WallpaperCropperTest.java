@@ -210,12 +210,10 @@ public class WallpaperCropperTest {
                     new Rect(0, 0, bitmapSize.x, bitmapSize.y),
                     new Rect(100, 200, bitmapSize.x - 100, bitmapSize.y))) {
                 for (int mode: ALL_MODES) {
-                    for (boolean rtl: List.of(true, false)) {
-                        for (boolean parallax: List.of(true, false)) {
-                            assertThat(WallpaperCropper.getAdjustedCrop(
-                                    crop, bitmapSize, displaySize, parallax, rtl, mode))
-                                    .isEqualTo(crop);
-                        }
+                    for (boolean parallax: List.of(true, false)) {
+                        assertThat(WallpaperCropper.getAdjustedCrop(
+                                crop, bitmapSize, displaySize, parallax, mode))
+                                .isEqualTo(crop);
                     }
                 }
             }
@@ -236,11 +234,8 @@ public class WallpaperCropperTest {
         Point expectedCropSize = new Point(expectedWidth, 1000);
         for (int mode: ALL_MODES) {
             assertThat(WallpaperCropper.getAdjustedCrop(
-                    crop, bitmapSize, displaySize, true, false, mode))
-                    .isEqualTo(leftOf(crop, expectedCropSize));
-            assertThat(WallpaperCropper.getAdjustedCrop(
-                    crop, bitmapSize, displaySize, true, true, mode))
-                    .isEqualTo(rightOf(crop, expectedCropSize));
+                    crop, bitmapSize, displaySize, true, mode))
+                    .isEqualTo(centerOf(crop, expectedCropSize));
         }
     }
 
@@ -259,11 +254,9 @@ public class WallpaperCropperTest {
             Point bitmapSize = new Point(acceptableWidth, 1000);
             Rect crop = new Rect(0, 0, bitmapSize.x, bitmapSize.y);
             for (int mode : ALL_MODES) {
-                for (boolean rtl : List.of(false, true)) {
-                    assertThat(WallpaperCropper.getAdjustedCrop(
-                            crop, bitmapSize, displaySize, true, rtl, mode))
-                            .isEqualTo(crop);
-                }
+                assertThat(WallpaperCropper.getAdjustedCrop(
+                        crop, bitmapSize, displaySize, true, mode))
+                        .isEqualTo(crop);
             }
         }
     }
@@ -293,11 +286,9 @@ public class WallpaperCropperTest {
         for (int i = 0; i < crops.size(); i++) {
             Rect crop = crops.get(i);
             Rect expectedCrop = expectedAdjustedCrops.get(i);
-            for (boolean rtl: List.of(false, true)) {
-                assertThat(WallpaperCropper.getAdjustedCrop(
-                        crop, bitmapSize, displaySize, false, rtl, WallpaperCropper.ADD))
-                        .isEqualTo(expectedCrop);
-            }
+            assertThat(WallpaperCropper.getAdjustedCrop(
+                    crop, bitmapSize, displaySize, false, WallpaperCropper.ADD))
+                    .isEqualTo(expectedCrop);
         }
     }
 
@@ -318,11 +309,9 @@ public class WallpaperCropperTest {
         Point expectedCropSize = new Point(1000, 1000);
 
         for (Rect crop: crops) {
-            for (boolean rtl : List.of(false, true)) {
-                assertThat(WallpaperCropper.getAdjustedCrop(
-                        crop, bitmapSize, displaySize, false, rtl, WallpaperCropper.REMOVE))
-                        .isEqualTo(centerOf(crop, expectedCropSize));
-            }
+            assertThat(WallpaperCropper.getAdjustedCrop(
+                    crop, bitmapSize, displaySize, false, WallpaperCropper.REMOVE))
+                    .isEqualTo(centerOf(crop, expectedCropSize));
         }
     }
 
@@ -349,24 +338,26 @@ public class WallpaperCropperTest {
             Rect crop = crops.get(i);
             Rect expected = expectedAdjustedCrops.get(i);
             assertThat(WallpaperCropper.getAdjustedCrop(
-                    crop, bitmapSize, displaySize, false, false, WallpaperCropper.BALANCE))
+                    crop, bitmapSize, displaySize, false, WallpaperCropper.BALANCE))
                     .isEqualTo(expected);
 
             Rect transposedCrop = new Rect(crop.top, crop.left, crop.bottom, crop.right);
             Rect expectedTransposed = new Rect(
                     expected.top, expected.left, expected.bottom, expected.right);
             assertThat(WallpaperCropper.getAdjustedCrop(transposedCrop, bitmapSize,
-                    transposedDisplaySize, false, false, WallpaperCropper.BALANCE))
+                    transposedDisplaySize, false, WallpaperCropper.BALANCE))
                     .isEqualTo(expectedTransposed);
         }
     }
 
     /**
-     * Test that {@link WallpaperCropper#getCrop} follows a simple centre-align strategy when
-     * no suggested crops are provided.
+     * Test that {@link WallpaperCropper#getCrop} uses the full image when no crops are provided.
+     * If the image has more width/height ratio than the screen, keep that width for parallax up
+     * to {@link WallpaperCropper#MAX_PARALLAX}. If the crop has less width/height ratio, remove the
+     * surplus height, on both sides to keep the wallpaper centered.
      */
     @Test
-    public void testGetCrop_noSuggestedCrops_centersWallpaper() {
+    public void testGetCrop_noSuggestedCrops() {
         setUpWithDisplays(STANDARD_DISPLAY);
         Point bitmapSize = new Point(800, 1000);
         Rect bitmapRect = new Rect(0, 0, bitmapSize.x, bitmapSize.y);
@@ -374,9 +365,11 @@ public class WallpaperCropperTest {
 
         List<Point> displaySizes = List.of(
                 new Point(500, 1000),
+                new Point(200, 1000),
                 new Point(1000, 500));
         List<Point> expectedCropSizes = List.of(
-                new Point(500, 1000),
+                new Point(Math.min(800, (int) (500 * (1 + WallpaperCropper.MAX_PARALLAX))), 1000),
+                new Point(Math.min(800, (int) (200 * (1 + WallpaperCropper.MAX_PARALLAX))), 1000),
                 new Point(800, 400));
 
         for (int i = 0; i < displaySizes.size(); i++) {
@@ -450,7 +443,8 @@ public class WallpaperCropperTest {
     /**
      * Test that {@link WallpaperCropper#getCrop}, when asked for a folded crop with a suggested
      * crop only for the relative unfolded orientation, creates the folded crop at the center of the
-     * unfolded crop, by removing content on two sides to match the folded screen dimensions.
+     * unfolded crop, by removing content on two sides to match the folded screen dimensions, and
+     * then adds some width for parallax.
      * <p>
      * To simplify, in this test case all crops have the same size as the display (no zoom)
      * and are at the center of the image.
@@ -468,6 +462,7 @@ public class WallpaperCropperTest {
             int unfoldedTwo = getRotatedOrientation(unfoldedOne);
             Rect unfoldedCropOne = centerOf(bitmapRect, mDisplaySizes.get(unfoldedOne));
             Rect unfoldedCropTwo = centerOf(bitmapRect, mDisplaySizes.get(unfoldedTwo));
+            List<Rect> unfoldedCrops = List.of(unfoldedCropOne, unfoldedCropTwo);
             SparseArray<Rect> suggestedCrops = new SparseArray<>();
             suggestedCrops.put(unfoldedOne, unfoldedCropOne);
             suggestedCrops.put(unfoldedTwo, unfoldedCropTwo);
@@ -476,15 +471,28 @@ public class WallpaperCropperTest {
             int foldedTwo = getFoldedOrientation(unfoldedTwo);
             Point foldedDisplayOne = mDisplaySizes.get(foldedOne);
             Point foldedDisplayTwo = mDisplaySizes.get(foldedTwo);
+            List<Point> foldedDisplays = List.of(foldedDisplayOne, foldedDisplayTwo);
 
             for (boolean rtl : List.of(false, true)) {
-                assertThat(mWallpaperCropper.getCrop(
-                        foldedDisplayOne, bitmapSize, suggestedCrops, rtl))
-                        .isEqualTo(centerOf(unfoldedCropOne, foldedDisplayOne));
+                for (int i = 0; i < 2; i++) {
+                    Rect unfoldedCrop = unfoldedCrops.get(i);
+                    Point foldedDisplay = foldedDisplays.get(i);
+                    Rect expectedCrop = centerOf(unfoldedCrop, foldedDisplay);
+                    int maxParallax = (int) (WallpaperCropper.MAX_PARALLAX * unfoldedCrop.width());
 
-                assertThat(mWallpaperCropper.getCrop(
-                        foldedDisplayTwo, bitmapSize, suggestedCrops, rtl))
-                        .isEqualTo(centerOf(unfoldedCropTwo, foldedDisplayTwo));
+                    // the expected behaviour is that we add width for parallax until we reach
+                    // either MAX_PARALLAX or the edge of the crop for the unfolded screen.
+                    if (rtl) {
+                        expectedCrop.left = Math.max(
+                                unfoldedCrop.left, expectedCrop.left - maxParallax);
+                    } else {
+                        expectedCrop.right = Math.min(
+                                unfoldedCrop.right, unfoldedCrop.right + maxParallax);
+                    }
+                    assertThat(mWallpaperCropper.getCrop(
+                            foldedDisplay, bitmapSize, suggestedCrops, rtl))
+                            .isEqualTo(expectedCrop);
+                }
             }
         }
     }

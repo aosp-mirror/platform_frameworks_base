@@ -214,6 +214,8 @@
     <string name="screenshot_saving_title">Saving screenshot\u2026</string>
     <!-- Informs the user that a screenshot is being saved. [CHAR LIMIT=50] -->
     <string name="screenshot_saving_work_profile_title">Saving screenshot to work profile\u2026</string>
+    <!-- Informs the user that a screenshot is being saved to the private profile. [CHAR LIMIT=100] -->
+    <string name="screenshot_saving_private_profile">Saving screenshot to private</string>
     <!-- Notification title displayed when a screenshot is saved to the Gallery. [CHAR LIMIT=50] -->
     <string name="screenshot_saved_title">Screenshot saved</string>
     <!-- Notification title displayed when we fail to take a screenshot. [CHAR LIMIT=50] -->
@@ -257,6 +259,8 @@
     <string name="screenshot_right_boundary_pct">Right boundary <xliff:g id="percent" example="50">%1$d</xliff:g> percent</string>
     <!-- Notification displayed when a screenshot is saved in a work profile. [CHAR LIMIT=NONE] -->
     <string name="screenshot_work_profile_notification">Saved in <xliff:g id="app" example="Files">%1$s</xliff:g> in the work profile</string>
+    <!-- Notification displayed when a screenshot is saved in the private profile. [CHAR LIMIT=NONE] -->
+    <string name="screenshot_private_profile_notification">Saved in <xliff:g id="app" example="Files">%1$s</xliff:g> in the private profile</string>
     <!-- Default name referring to the app on the device that lets the user browse stored files. [CHAR LIMIT=NONE] -->
     <string name="screenshot_default_files_app_name">Files</string>
     <!-- A notice shown to the user to indicate that an app has detected the screenshot that the user has just taken. [CHAR LIMIT=75] -->
@@ -380,6 +384,10 @@
     <!-- Button name for "Cancel". [CHAR LIMIT=NONE] -->
     <string name="cancel">Cancel</string>
 
+    <!-- Content description for the app logo icon on biometric prompt. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_logo">App logo</string>
+    <!-- List of packages for which we want to show overridden logo. For example, an app overrides its launcher logo, if it's in this array, biometric dialog shows the overridden logo; otherwise biometric dialog still shows the default application info icon. [CHAR LIMIT=NONE] -->
+    <string-array name="biometric_dialog_package_names_for_logo_with_overrides" />
     <!-- Message shown when a biometric is authenticated, asking the user to confirm authentication [CHAR LIMIT=30] -->
     <string name="biometric_dialog_confirm">Confirm</string>
     <!-- Button name on BiometricPrompt shown when a biometric is detected but not authenticated. Tapping the button resumes authentication [CHAR LIMIT=30] -->
@@ -408,6 +416,8 @@
     <string name="biometric_dialog_authenticated">Authenticated</string>
     <!-- Talkback string when a canceling authentication [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_cancel_authentication">Cancel Authentication</string>
+    <!-- Content description for the more options button on biometric prompt content view. [CHAR LIMIT=60] -->
+    <string name="biometric_dialog_content_view_more_options_button">More Options</string>
 
     <!-- Button text shown on BiometricPrompt giving the user the option to use an alternate form of authentication (Pin) [CHAR LIMIT=30] -->
     <string name="biometric_dialog_use_pin">Use PIN</string>
@@ -564,7 +574,7 @@
     <!-- Content description for the split notification shade that also includes QS (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_qs_notification_shade">Quick settings and Notification shade.</string>
     <!-- Content description for the lock screen (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_desc_lock_screen">Lock screen.</string>
+    <string name="accessibility_desc_lock_screen">Lock screen</string>
     <!-- Content description for the work profile lock screen. This prevents work profile apps from being used, but personal apps can be used as normal (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_work_lock">Work lock screen</string>
     <!-- Content description for the close button in the zen mode panel introduction message. [CHAR LIMIT=NONE] -->
@@ -674,6 +684,8 @@
     <string name="turn_on_bluetooth">Use Bluetooth</string>
     <!-- QuickSettings: Bluetooth dialog device connected default summary [CHAR LIMIT=NONE]-->
     <string name="quick_settings_bluetooth_device_connected">Connected</string>
+    <!-- QuickSettings: Bluetooth dialog device in audio sharing default summary [CHAR LIMIT=50]-->
+    <string name="quick_settings_bluetooth_device_audio_sharing">Audio Sharing</string>
     <!-- QuickSettings: Bluetooth dialog device saved default summary [CHAR LIMIT=NONE]-->
     <string name="quick_settings_bluetooth_device_saved">Saved</string>
     <!-- QuickSettings: Accessibility label to disconnect a device [CHAR LIMIT=NONE]-->
@@ -683,9 +695,13 @@
     <!-- QuickSettings: Bluetooth auto on tomorrow [CHAR LIMIT=NONE]-->
     <string name="turn_on_bluetooth_auto_tomorrow">Automatically turn on again tomorrow</string>
     <!-- QuickSettings: Bluetooth auto on info text when disabled [CHAR LIMIT=NONE]-->
-    <string name="turn_on_bluetooth_auto_info_disabled">Features like Quick Share, Find My Device, and device location use Bluetooth</string>
+    <string name="turn_on_bluetooth_auto_info_disabled">Features like Quick Share and Find My Device use Bluetooth</string>
     <!-- QuickSettings: Bluetooth auto on info text when enabled [CHAR LIMIT=NONE]-->
-    <string name="turn_on_bluetooth_auto_info_enabled">Bluetooth will turn on tomorrow at 5 AM</string>
+    <string name="turn_on_bluetooth_auto_info_enabled">Bluetooth will turn on tomorrow morning</string>
+    <!-- QuickSettings: Bluetooth dialog audio sharing button text [CHAR LIMIT=50]-->
+    <string name="quick_settings_bluetooth_audio_sharing_button">Audio Sharing</string>
+    <!-- QuickSettings: Bluetooth dialog audio sharing button text when sharing audio [CHAR LIMIT=50]-->
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing">Sharing Audio</string>
 
     <!-- QuickSettings: Bluetooth secondary label for the battery level of a connected device [CHAR LIMIT=20]-->
     <string name="quick_settings_bluetooth_secondary_label_battery_level"><xliff:g id="battery_level_as_percentage">%s</xliff:g> battery</string>
@@ -751,7 +767,7 @@
     <!-- QuickSettings: Wifi secondary label shown when the wifi is being enabled [CHAR LIMIT=NONE] -->
     <string name="quick_settings_wifi_secondary_label_transient">Turning on&#8230;</string>
     <!-- QuickSettings: Cast title [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_cast_title">Screen Cast</string>
+    <string name="quick_settings_cast_title">Cast</string>
     <!-- QuickSettings: Cast detail panel, status text when casting [CHAR LIMIT=NONE] -->
     <string name="quick_settings_casting">Casting</string>
     <!-- QuickSettings: Cast detail panel, default device name [CHAR LIMIT=NONE] -->
@@ -868,6 +884,8 @@
     <string name="qs_record_issue_start">Start</string>
     <!-- QuickSettings: Text to prompt the user to stop an ongoing recording [CHAR LIMIT=20] -->
     <string name="qs_record_issue_stop">Stop</string>
+    <!-- QuickSettings: Should user take a bugreport or only share trace files [CHAR LIMIT=20] -->
+    <string name="qs_record_issue_bug_report">Bug Report</string>
 
     <!-- QuickSettings: Issue Type Drop down options in Record Issue Start Dialog [CHAR LIMIT=50] -->
     <string name="qs_record_issue_dropdown_header">What part of your device experience was affected?</string>
@@ -886,14 +904,21 @@
     <!-- QuickSettings: Label for the toggle that controls whether One-handed mode is enabled. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_onehanded_label">One-handed mode</string>
 
-    <!-- QuickSettings: Contrast tile [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_contrast_label">Contrast</string>
-    <!-- QuickSettings: Contrast tile description: standard [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_contrast_standard">Standard</string>
-    <!-- QuickSettings: Contrast tile description: medium [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_contrast_medium">Medium</string>
-    <!-- QuickSettings: Contrast tile description: high [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_contrast_high">High</string>
+    <!-- Hearing devices -->
+    <!-- QuickSettings: Hearing devices [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_hearing_devices_label">Hearing devices</string>
+    <!-- QuickSettings: Quick Settings Hearing devices dialog title [CHAR LIMIT=30] -->
+    <string name="quick_settings_hearing_devices_dialog_title">Hearing devices</string>
+    <!-- QuickSettings: Hearing devices dialog pair new device [CHAR LIMIT=NONE]-->
+    <string name="quick_settings_pair_hearing_devices">Pair new device</string>
+    <!-- QuickSettings: Content description of the hearing devices dialog pair new device [CHAR LIMIT=NONE] -->
+    <string name="accessibility_hearing_device_pair_new_device">Click to pair new device</string>
+    <!-- QuickSettings: Message when selecting hearing aids presets failed. [CHAR LIMIT=NONE] -->
+    <string name="hearing_devices_presets_error">Couldn\'t update preset</string>
+    <!-- QuickSettings: Title for hearing aids presets. Preset is a set of hearing aid settings. User can apply different settings in different environments (e.g. Outdoor, Restaurant, Home) [CHAR LIMIT=40]-->
+    <string name="hearing_devices_preset_label">Preset</string>
+    <!-- QuickSettings: Tool name for hearing devices dialog related tools [CHAR LIMIT=40]-->
+    <string name="live_caption_title">Live Caption</string>
 
     <!--- Title of dialog triggered if the microphone is disabled but an app tried to access it. [CHAR LIMIT=150] -->
     <string name="sensor_privacy_start_use_mic_dialog_title">Unblock device microphone?</string>
@@ -1112,23 +1137,28 @@
     <!-- Indication on the keyguard that is shown when the device is dock charging. [CHAR LIMIT=80]-->
     <string name="keyguard_indication_charging_time_dock"><xliff:g id="percentage" example="20%">%2$s</xliff:g> • Charging • Full in <xliff:g id="charging_time_left" example="4 hr, 2 min">%1$s</xliff:g></string>
 
+    <!-- Label for accessibility action that shows widgets on lock screen on click. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_open_communal_hub">Widgets on lock screen</string>
+
     <!-- Indicator on keyguard to start the communal tutorial. [CHAR LIMIT=100] -->
     <string name="communal_tutorial_indicator_text">Swipe left to start the communal tutorial</string>
 
-    <!-- Text for CTA button that launches the hub mode widget editor on click. [CHAR LIMIT=50] -->
+    <!-- Text for call-to-action button that launches the hub mode widget editor on click. [CHAR LIMIT=50] -->
     <string name="cta_tile_button_to_open_widget_editor">Customize</string>
-    <!-- Text for CTA button that dismisses the tile on click. [CHAR LIMIT=50] -->
+    <!-- Text for call-to-action button that dismisses the tile on click. [CHAR LIMIT=50] -->
     <string name="cta_tile_button_to_dismiss">Dismiss</string>
-    <!-- Label for CTA tile to edit the glanceable hub [CHAR LIMIT=100] -->
+    <!-- Label for call-to-action tile to edit the glanceable hub [CHAR LIMIT=100] -->
     <string name="cta_label_to_edit_widget">Add, remove, and reorder your widgets in this space</string>
-    <!-- Label for CTA tile that opens widget picker on click in edit mode [CHAR LIMIT=50] -->
+    <!-- Label for call-to-action tile that opens widget picker on click in edit mode [CHAR LIMIT=50] -->
     <string name="cta_label_to_open_widget_picker">Add more widgets</string>
-    <!-- Text for the popup to be displayed after dismissing the CTA tile. [CHAR LIMIT=50] -->
+    <!-- Text for the popup to be displayed after dismissing the call-to-action tile. [CHAR LIMIT=50] -->
     <string name="popup_on_dismiss_cta_tile_text">Long press to customize widgets</string>
     <!-- Text for the button to configure widgets after long press. [CHAR LIMIT=50] -->
     <string name="button_to_configure_widgets_text">Customize widgets</string>
     <!-- Description for the App icon of disabled widget. [CHAR LIMIT=NONE] -->
     <string name="icon_description_for_disabled_widget">App icon for disabled widget</string>
+    <!-- Description for the App icon of a package that is currently being installed. [CHAR LIMIT=NONE] -->
+    <string name="icon_description_for_pending_widget">App icon for a widget being installed</string>
     <!-- Label for the button which configures widgets [CHAR LIMIT=NONE] -->
     <string name="edit_widget">Edit widget</string>
     <!-- Description for the button that removes a widget on click. [CHAR LIMIT=50] -->
@@ -1137,6 +1167,10 @@
     <string name="hub_mode_add_widget_button_text">Add widget</string>
     <!-- Text for the button that exits the hub mode editing mode. [CHAR LIMIT=50] -->
     <string name="hub_mode_editing_exit_button_text">Done</string>
+    <!-- Label for the button in the empty state call-to-action tile that will open the widget picker. [CHAR LIMIT=NONE] -->
+    <string name="label_for_button_in_empty_state_cta">Add widgets</string>
+    <!-- Title for the empty state call-to-action when no widgets are available in the hub. [CHAR LIMIT=NONE] -->
+    <string name="title_for_empty_state_cta">Get quick access to your favorite app widgets without unlocking your tablet.</string>
     <!-- Title for the dialog that redirects users to change allowed widget category in settings. [CHAR LIMIT=NONE] -->
     <string name="dialog_title_to_allow_any_widget">Allow any widget on lock screen?</string>
     <!-- Text for the button in the dialog that opens when tapping on disabled widgets. [CHAR LIMIT=NONE] -->
@@ -1145,6 +1179,18 @@
     <string name="work_mode_off_title">Unpause work apps?</string>
     <!-- Title for button to unpause on work profile. [CHAR LIMIT=NONE] -->
     <string name="work_mode_turn_on">Unpause</string>
+    <!-- Label for accessibility action that navigates to lock screen. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_label_close_communal_hub">Close widgets on lock screen</string>
+    <!-- Label for accessibility action that navigates to edit mode. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_label_edit_widgets">Customize widgets</string>
+    <!-- Accessibility content description for communal hub. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_content_description_for_communal_hub">Widgets on lock screen</string>
+    <!-- Label for accessibility action to select a widget in edit mode. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_label_select_widget">select widget</string>
+    <!-- Label for accessibility action to remove a widget in edit mode. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_label_remove_widget">remove widget</string>
+    <!-- Label for accessibility action to place a widget in edit mode after selecting move widget. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_label_place_widget">place selected widget</string>
 
     <!-- Related to user switcher --><skip/>
 
@@ -1589,15 +1635,24 @@
     <string name="volume_panel_collapsed_sliders">Volume sliders collapsed</string>
 
     <!-- Hint for accessibility. A stream name is a parameter. For example: double tap to mute media [CHAR_LIMIT=NONE] -->
-    <string name="volume_panel_hint_mute">mute %s</string>
+    <string name="volume_panel_hint_mute">Mute %s</string>
     <!-- Hint for accessibility. A stream name is a parameter. For example: double tap to unmute media [CHAR_LIMIT=NONE] -->
-    <string name="volume_panel_hint_unmute">unmute %s</string>
+    <string name="volume_panel_hint_unmute">Unmute %s</string>
 
-    <!-- Title with application label for media output settings. [CHAR LIMIT=20] -->
+    <!-- Hint for accessibility. This is announced when the stream is muted [CHAR_LIMIT=NONE] -->
+    <string name="volume_panel_hint_muted">muted</string>
+
+    <!-- Hint for accessibility. This is announced when ring mode is set to Vibrate. [CHAR_LIMIT=NONE] -->
+    <string name="volume_panel_hint_vibrate">vibrate</string>
+
+    <!-- Title with application label for media output settings when there is media playing. [CHAR LIMIT=20] -->
     <string name="media_output_label_title">Playing <xliff:g id="label" example="Music Player">%s</xliff:g> on</string>
 
     <!-- Title for media output settings without media is playing. [CHAR LIMIT=20] -->
     <string name="media_output_title_without_playing">Audio will play on</string>
+
+    <!-- Title for media output settings when there is an ongoing call in progress. [CHAR LIMIT=20] -->
+    <string name="media_output_title_ongoing_call">Calling on</string>
 
     <!-- Name of special SystemUI debug settings -->
     <string name="system_ui_tuner">System UI Tuner</string>
@@ -1680,6 +1735,9 @@
     <string name="accessibility_status_bar_satellite_good_connection">Satellite, good connection</string>
     <!-- Accessibility label for available satellite connection [CHAR LIMIT=NONE] -->
     <string name="accessibility_status_bar_satellite_available">Satellite, connection available</string>
+
+    <!-- Text displayed indicating that the user is connected to a satellite signal. -->
+    <string name="satellite_connected_carrier_text">Satellite SOS</string>
 
     <!-- Accessibility label for managed profile icon (not shown on screen) [CHAR LIMIT=NONE] -->
     <string name="accessibility_managed_profile">Work profile</string>
@@ -1953,8 +2011,8 @@
     <!-- Content description for the clear search button in shortcut search list. [CHAR LIMIT=NONE] -->
     <string name="keyboard_shortcut_clear_text">Clear search query</string>
     <!-- The title for keyboard shortcut search list [CHAR LIMIT=25] -->
-    <string name="keyboard_shortcut_search_list_title">Shortcuts</string>
-    <!-- The hint for keyboard shortcut search list [CHAR LIMIT=25] -->
+    <string name="keyboard_shortcut_search_list_title">Keyboard Shortcuts</string>
+    <!-- The hint for keyboard shortcut search list [CHAR LIMIT=50] -->
     <string name="keyboard_shortcut_search_list_hint">Search shortcuts</string>
     <!-- The description for no shortcuts results [CHAR LIMIT=25] -->
     <string name="keyboard_shortcut_search_list_no_result">No shortcuts found</string>
@@ -2005,12 +2063,12 @@
     <!-- User visible title for the keyboard shortcut that pulls up Notes app for quick memo. [CHAR LIMIT=70] -->
     <string name="group_system_quick_memo">Take a note</string>
 
-    <!-- User visible title for the system multitasking keyboard shortcuts list. [CHAR LIMIT=70] -->
-    <string name="keyboard_shortcut_group_system_multitasking">System multitasking</string>
-    <!-- User visible title for the keyboard shortcut that enters split screen with current app to RHS [CHAR LIMIT=70] -->
-    <string name="system_multitasking_rhs">Enter split screen with current app to RHS</string>
-    <!-- User visible title for the keyboard shortcut that enters split screen with current app to LHS [CHAR LIMIT=70] -->
-    <string name="system_multitasking_lhs">Enter split screen with current app to LHS</string>
+    <!-- User visible title for the multitasking keyboard shortcuts list. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_system_multitasking">Multitasking</string>
+    <!-- User visible title for the keyboard shortcut that enters split screen with current app on the right [CHAR LIMIT=70] -->
+    <string name="system_multitasking_rhs">Use split screen with current app on the right</string>
+    <!-- User visible title for the keyboard shortcut that enters split screen with current app on the left [CHAR LIMIT=70] -->
+    <string name="system_multitasking_lhs">Use split screen with current app on the left</string>
     <!-- User visible title for the keyboard shortcut that switches from split screen to full screen [CHAR LIMIT=70] -->
     <string name="system_multitasking_full_screen">Switch from split screen to full screen</string>
     <!-- User visible title for the keyboard shortcut that switches to app on right or below while using split screen [CHAR LIMIT=70] -->
@@ -2218,6 +2276,9 @@
 
     <!-- Accessibility description when QS tile is to be added, indicating the destination position [CHAR LIMIT=NONE] -->
     <string name="accessibility_qs_edit_tile_add_to_position">Add to position <xliff:g id="position" example="5">%1$d</xliff:g></string>
+
+    <!-- Accessibility description when QS tile would be added or moved, but the current position is not valid for adding or moving to [CHAR LIMIT=NONE] -->
+    <string name="accessibilit_qs_edit_tile_add_move_invalid_position">Position invalid.</string>
 
     <!-- Accessibility description indicating the currently selected tile's position. Only used for tiles that are currently in use [CHAR LIMIT=NONE] -->
     <string name="accessibility_qs_edit_position">Position <xliff:g id="position" example="5">%1$d</xliff:g></string>
@@ -3427,6 +3488,45 @@
     <string name="privacy_dialog_active_app_usage_2">In use by <xliff:g id="app_name" example="Gmail">%1$s</xliff:g> (<xliff:g id="attribution_label" example="For Wallet">%2$s</xliff:g> \u2022 <xliff:g id="proxy_label" example="Speech services">%3$s</xliff:g>)</string>
     <!-- Label for recent app usage of a phone sensor with sub-attribution and proxy label in the privacy dialog [CHAR LIMIT=NONE] -->
     <string name="privacy_dialog_recent_app_usage_2">Recently used by <xliff:g id="app_name" example="Gmail">%1$s</xliff:g> (<xliff:g id="attribution_label" example="For Wallet">%2$s</xliff:g> \u2022 <xliff:g id="proxy_label" example="Speech services">%3$s</xliff:g>)</string>
+
+    <!-- Title of the keyboard shortcut helper category "System". The helper is a component that
+         shows the user which keyboard shortcuts they can use. The "System" shortcuts are for
+         example "Take a screenshot" or "Go back". [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_category_system">System</string>
+    <!-- Title of the keyboard shortcut helper category "Multitasking". The helper is a component
+         that shows the user which keyboard shortcuts they can use. The "Multitasking" shortcuts are
+         for example "Enter split screen". [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_category_multitasking">Multitasking</string>
+    <!-- Title of the keyboard shortcut helper category "Input". The helper is a component
+         that shows the user which keyboard shortcuts they can use. The "Input" shortcuts are
+         the ones provided by the keyboard. Examples are "Access emoji" or "Switch to next language"
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_category_input">Input</string>
+    <!-- Title of the keyboard shortcut helper category "App shortcuts". The helper is a component
+         that shows the user which keyboard shortcuts they can use. The "App shortcuts" are
+         for example "Open browser" or "Open calculator". [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_category_app_shortcuts">App shortcuts</string>
+    <!-- Title of the keyboard shortcut helper category "Accessibility". The helper is a component
+         that shows the user which keyboard shortcuts they can use. The "Accessibility" shortcuts
+         are for example "Turn on talkback". [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_category_a11y">Accessibility</string>
+    <!-- Title at the top of the keyboard shortcut helper UI. The helper is a component
+         that shows the user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_title">Keyboard shortcuts</string>
+    <!-- Placeholder text shown in the search box of the keyboard shortcut helper, when the user
+         hasn't typed in anything in the search box yet. The helper is a  component that shows the
+         user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_search_placeholder">Search shortcuts</string>
+    <!-- Content description of the icon that allows to collapse a keyboard shortcut helper category
+         panel. The helper is a  component that shows the  user which keyboard shortcuts they can
+         use. The helper shows shortcuts in categories, which can be collapsed or expanded.
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_content_description_collapse_icon">Collapse icon</string>
+    <!-- Content description of the icon that allows to expand a keyboard shortcut helper category
+         panel. The helper is a  component that shows the  user which keyboard shortcuts they can
+         use. The helper shows shortcuts in categories, which can be collapsed or expanded.
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_content_description_expand_icon">Expand icon</string>
 
     <!-- Content description for keyboard backlight brightness dialog [CHAR LIMIT=NONE] -->
     <string name="keyboard_backlight_dialog_title">Keyboard backlight</string>

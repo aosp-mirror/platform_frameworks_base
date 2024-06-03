@@ -21,23 +21,32 @@ import android.app.backup.BackupAgentHelper
 import android.app.backup.BackupManager
 import android.content.Context
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.google.common.util.concurrent.MoreExecutors
 import java.util.concurrent.ConcurrentHashMap
 
 /** Manager of [BackupRestoreStorage]. */
 class BackupRestoreStorageManager private constructor(private val application: Application) {
-    private val storageWrappers = ConcurrentHashMap<String, StorageWrapper>()
+    @VisibleForTesting internal val storageWrappers = ConcurrentHashMap<String, StorageWrapper>()
 
     private val executor = MoreExecutors.directExecutor()
 
     /**
      * Adds all the registered [BackupRestoreStorage] as the helpers of given [BackupAgentHelper].
      *
-     * All [BackupRestoreFileStorage]s will be wrapped as a single [BackupRestoreFileArchiver].
+     * All [BackupRestoreFileStorage]s will be wrapped as a single [BackupRestoreFileArchiver],
+     * specify [fileArchiverName] to avoid key prefix conflict if needed.
      *
+     * @param backupAgentHelper backup agent helper to add helpers
+     * @param fileArchiverName key prefix of the [BackupRestoreFileArchiver], the value must not be
+     *   changed in future
      * @see BackupAgentHelper.addHelper
      */
-    fun addBackupAgentHelpers(backupAgentHelper: BackupAgentHelper) {
+    @JvmOverloads
+    fun addBackupAgentHelpers(
+        backupAgentHelper: BackupAgentHelper,
+        fileArchiverName: String = "file_archiver",
+    ) {
         val fileStorages = mutableListOf<BackupRestoreFileStorage>()
         for ((keyPrefix, storageWrapper) in storageWrappers) {
             val storage = storageWrapper.storage
@@ -48,7 +57,7 @@ class BackupRestoreStorageManager private constructor(private val application: A
             }
         }
         // Always add file archiver even fileStorages is empty to handle forward compatibility
-        val fileArchiver = BackupRestoreFileArchiver(application, fileStorages)
+        val fileArchiver = BackupRestoreFileArchiver(application, fileStorages, fileArchiverName)
         backupAgentHelper.addHelper(fileArchiver.name, fileArchiver)
     }
 
@@ -106,7 +115,8 @@ class BackupRestoreStorageManager private constructor(private val application: A
     /** Returns storage with given name, exception is raised if not found. */
     fun getOrThrow(name: String): BackupRestoreStorage = storageWrappers[name]!!.storage
 
-    private inner class StorageWrapper(val storage: BackupRestoreStorage) :
+    @VisibleForTesting
+    internal inner class StorageWrapper(val storage: BackupRestoreStorage) :
         Observer, KeyedObserver<Any?> {
         init {
             when (storage) {
@@ -128,7 +138,7 @@ class BackupRestoreStorageManager private constructor(private val application: A
         private fun notifyBackupManager(key: Any?, reason: Int) {
             val name = storage.name
             // prefer not triggering backup immediately after restore
-            if (reason == ChangeReason.RESTORE) {
+            if (reason == DataChangeReason.RESTORE) {
                 Log.d(
                     LOG_TAG,
                     "Notify BackupManager dataChanged ignored for restore: storage=$name key=$key"
@@ -139,7 +149,7 @@ class BackupRestoreStorageManager private constructor(private val application: A
                 LOG_TAG,
                 "Notify BackupManager dataChanged: storage=$name key=$key reason=$reason"
             )
-            BackupManager.dataChanged(application.packageName)
+            BackupManager(application).dataChanged()
         }
 
         fun removeObserver() {
@@ -151,8 +161,8 @@ class BackupRestoreStorageManager private constructor(private val application: A
 
         fun notifyRestoreFinished() {
             when (storage) {
-                is KeyedObservable<*> -> storage.notifyChange(ChangeReason.RESTORE)
-                is Observable -> storage.notifyChange(ChangeReason.RESTORE)
+                is KeyedObservable<*> -> storage.notifyChange(DataChangeReason.RESTORE)
+                is Observable -> storage.notifyChange(DataChangeReason.RESTORE)
             }
         }
     }

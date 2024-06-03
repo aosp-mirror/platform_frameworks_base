@@ -18,7 +18,7 @@ package android.app;
 
 
 import static android.location.flags.Flags.FLAG_LOCATION_BYPASS;
-import static android.media.audio.Flags.foregroundAudioControl;
+import static android.media.audio.Flags.roForegroundAudioControl;
 import static android.permission.flags.Flags.FLAG_OP_ENABLE_MOBILE_DATA_BY_USER;
 import static android.view.contentprotection.flags.Flags.FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED;
 import static android.view.contentprotection.flags.Flags.FLAG_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER_APP_OP_ENABLED;
@@ -482,7 +482,8 @@ public class AppOpsManager {
             UID_STATE_FOREGROUND_SERVICE,
             UID_STATE_FOREGROUND,
             UID_STATE_BACKGROUND,
-            UID_STATE_CACHED
+            UID_STATE_CACHED,
+            UID_STATE_NONEXISTENT
     })
     public @interface UidState {}
 
@@ -566,6 +567,12 @@ public class AppOpsManager {
     public static final int MIN_PRIORITY_UID_STATE = UID_STATE_CACHED;
 
     /**
+     * Special uid state: The UID is not running
+     * @hide
+     */
+    public static final int UID_STATE_NONEXISTENT = Integer.MAX_VALUE;
+
+    /**
      * Resolves the first unrestricted state given an app op.
      * @param op The op to resolve.
      * @return The last restricted UID state.
@@ -596,6 +603,7 @@ public class AppOpsManager {
             UID_STATE_FOREGROUND,
             UID_STATE_BACKGROUND,
             UID_STATE_CACHED
+            // UID_STATE_NONEXISTENT isn't a real UID state, so it is excluded
     };
 
     /** @hide */
@@ -615,6 +623,8 @@ public class AppOpsManager {
                 return "bg";
             case UID_STATE_CACHED:
                 return "cch";
+            case UID_STATE_NONEXISTENT:
+                return "gone";
             default:
                 return "unknown";
         }
@@ -1502,12 +1512,10 @@ public class AppOpsManager {
             AppProtoEnums.APP_OP_RECEIVE_SANDBOX_TRIGGER_AUDIO;
 
     /**
-     * Allows the privileged assistant app to receive the training data from the sandboxed hotword
-     * detection service.
+     * This op has been deprecated.
      *
-     * @hide
      */
-    public static final int OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA =
+    private static final int OP_DEPRECATED_3 =
             AppProtoEnums.APP_OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA;
 
     /**
@@ -1556,11 +1564,11 @@ public class AppOpsManager {
             AppProtoEnums.APP_OP_READ_SYSTEM_GRAMMATICAL_GENDER;
 
     /**
-     * Allows an app with a major use case of backing-up or syncing content to run longer jobs.
+     * This app has been removed..
      *
      * @hide
      */
-    public static final int OP_RUN_BACKUP_JOBS = AppProtoEnums.APP_OP_RUN_BACKUP_JOBS;
+    private static final int OP_DEPRECATED_4 = AppProtoEnums.APP_OP_RUN_BACKUP_JOBS;
 
     /**
      * Whether the app has enabled to receive the icon overlay for fetching archived apps.
@@ -1735,13 +1743,11 @@ public class AppOpsManager {
             OPSTR_CAMERA_SANDBOXED,
             OPSTR_RECORD_AUDIO_SANDBOXED,
             OPSTR_RECEIVE_SANDBOX_TRIGGER_AUDIO,
-            OPSTR_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
             OPSTR_CREATE_ACCESSIBILITY_OVERLAY,
             OPSTR_MEDIA_ROUTING_CONTROL,
             OPSTR_ENABLE_MOBILE_DATA_BY_USER,
             OPSTR_RESERVED_FOR_TESTING,
             OPSTR_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER,
-            OPSTR_RUN_BACKUP_JOBS,
             OPSTR_ARCHIVE_ICON_OVERLAY,
             OPSTR_UNARCHIVAL_CONFIRMATION,
             OPSTR_EMERGENCY_LOCATION,
@@ -2395,13 +2401,10 @@ public class AppOpsManager {
             "android:receive_sandbox_trigger_audio";
 
     /**
-     * Allows the privileged assistant app to receive training data from the sandboxed hotword
-     * detection service.
-     *
+     * App op has been deprecated.
      * @hide
      */
-    public static final String OPSTR_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA =
-            "android:RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA";
+    public static final String OPSTR_DEPRECATED_3 = "android:deprecated_3";
 
     /**
      * Creation of an overlay using accessibility services
@@ -2453,11 +2456,11 @@ public class AppOpsManager {
             "android:read_system_grammatical_gender";
 
     /**
-     * Allows an app whose primary use case is to backup or sync content to run longer jobs.
+     * App op has been removed.
      *
      * @hide
      */
-    public static final String OPSTR_RUN_BACKUP_JOBS = "android:run_backup_jobs";
+    public static final String OPSTR_DEPRECATED_4 = "android:deprecated_4";
 
     /**
      * Allows an app to access location without the traditional location permissions and while the
@@ -2582,12 +2585,8 @@ public class AppOpsManager {
             OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
             OP_USE_FULL_SCREEN_INTENT,
             OP_RECEIVE_SANDBOX_TRIGGER_AUDIO,
-            OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
             OP_MEDIA_ROUTING_CONTROL,
             OP_READ_SYSTEM_GRAMMATICAL_GENDER,
-            OP_RUN_BACKUP_JOBS,
-            OP_ARCHIVE_ICON_OVERLAY,
-            OP_UNARCHIVAL_CONFIRMATION,
     };
 
     static final AppOpInfo[] sAppOpInfos = new AppOpInfo[]{
@@ -2685,8 +2684,7 @@ public class AppOpsManager {
             .setDefaultMode(getSystemAlertWindowDefault()).build(),
         new AppOpInfo.Builder(OP_ACCESS_NOTIFICATIONS, OPSTR_ACCESS_NOTIFICATIONS,
                 "ACCESS_NOTIFICATIONS")
-            .setPermission(android.Manifest.permission.ACCESS_NOTIFICATIONS)
-            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+            .setPermission(android.Manifest.permission.ACCESS_NOTIFICATIONS).build(),
         new AppOpInfo.Builder(OP_CAMERA, OPSTR_CAMERA, "CAMERA")
             .setPermission(android.Manifest.permission.CAMERA)
             .setRestriction(UserManager.DISALLOW_CAMERA)
@@ -3022,11 +3020,8 @@ public class AppOpsManager {
                 "RECEIVE_SANDBOX_TRIGGER_AUDIO")
                 .setPermission(Manifest.permission.RECEIVE_SANDBOX_TRIGGER_AUDIO)
                 .setDefaultMode(AppOpsManager.MODE_DEFAULT).build(),
-        new AppOpInfo.Builder(OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
-                OPSTR_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
-                "RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA")
-                .setPermission(Manifest.permission.RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA)
-                .setDefaultMode(AppOpsManager.MODE_DEFAULT).build(),
+        new AppOpInfo.Builder(OP_DEPRECATED_3, OPSTR_DEPRECATED_3, "DEPRECATED_3")
+                .setDefaultMode(AppOpsManager.MODE_IGNORED).build(),
         new AppOpInfo.Builder(OP_CREATE_ACCESSIBILITY_OVERLAY,
                 OPSTR_CREATE_ACCESSIBILITY_OVERLAY,
                 "CREATE_ACCESSIBILITY_OVERLAY")
@@ -3047,8 +3042,8 @@ public class AppOpsManager {
                 // will make it an app-op permission in the future.
                 // .setPermission(Manifest.permission.READ_SYSTEM_GRAMMATICAL_GENDER)
                 .build(),
-        new AppOpInfo.Builder(OP_RUN_BACKUP_JOBS, OPSTR_RUN_BACKUP_JOBS, "RUN_BACKUP_JOBS")
-                .setPermission(Manifest.permission.RUN_BACKUP_JOBS).build(),
+        new AppOpInfo.Builder(OP_DEPRECATED_4, OPSTR_DEPRECATED_4, "DEPRECATED_4")
+                .setDefaultMode(AppOpsManager.MODE_IGNORED).build(),
         new AppOpInfo.Builder(OP_ARCHIVE_ICON_OVERLAY, OPSTR_ARCHIVE_ICON_OVERLAY,
                 "ARCHIVE_ICON_OVERLAY")
                 .setDefaultMode(MODE_ALLOWED).build(),
@@ -3247,7 +3242,7 @@ public class AppOpsManager {
      * @hide
      */
     public static @Mode int opToDefaultMode(int op) {
-        if (op == OP_TAKE_AUDIO_FOCUS && foregroundAudioControl()) {
+        if (op == OP_TAKE_AUDIO_FOCUS && roForegroundAudioControl()) {
             // when removing the flag, change the entry in sAppOpInfos for OP_TAKE_AUDIO_FOCUS
             return AppOpsManager.MODE_FOREGROUND;
         }
@@ -3280,7 +3275,7 @@ public class AppOpsManager {
     }
 
     /**
-     * Retrieve whether the op can be read by apps with manage appops permission.
+     * Retrieve whether the op can be read by apps with privileged appops permission.
      * @hide
      */
     public static boolean opRestrictsRead(int op) {
@@ -3472,6 +3467,8 @@ public class AppOpsManager {
         private @Nullable String mPackageName;
         /** Attribution tag of the proxy that noted the op */
         private @Nullable String mAttributionTag;
+        /** Persistent device Id of the proxy that noted the op */
+        private @Nullable String mDeviceId;
 
         /**
          * Reinit existing object with new state.
@@ -3479,14 +3476,16 @@ public class AppOpsManager {
          * @param uid UID of the proxy app that noted the op
          * @param packageName Package of the proxy that noted the op
          * @param attributionTag attribution tag of the proxy that noted the op
+         * @param deviceId Persistent device Id of the proxy that noted the op
          *
          * @hide
          */
         public void reinit(@IntRange(from = 0) int uid, @Nullable String packageName,
-                @Nullable String attributionTag) {
+                @Nullable String attributionTag, @Nullable String deviceId) {
             mUid = Preconditions.checkArgumentNonnegative(uid);
             mPackageName = packageName;
             mAttributionTag = attributionTag;
+            mDeviceId = deviceId;
         }
 
 
@@ -3520,16 +3519,33 @@ public class AppOpsManager {
                 @IntRange(from = 0) int uid,
                 @Nullable String packageName,
                 @Nullable String attributionTag) {
+            this(uid, packageName, attributionTag,
+                    VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT);
+        }
+
+        /**
+         * Creates a new OpEventProxyInfo.
+         *
+         * @param uid UID of the proxy app that noted the op
+         * @param packageName Package of the proxy that noted the op
+         * @param attributionTag Attribution tag of the proxy that noted the op
+         * @param deviceId Persistent device Id of the proxy that noted the op
+         *
+         * @hide
+         */
+        public OpEventProxyInfo(
+                @IntRange(from = 0) int uid,
+                @Nullable String packageName,
+                @Nullable String attributionTag,
+                @Nullable String deviceId) {
             this.mUid = uid;
             com.android.internal.util.AnnotationValidations.validate(
                     IntRange.class, null, mUid,
                     "from", 0);
             this.mPackageName = packageName;
             this.mAttributionTag = attributionTag;
-
-            // onConstructed(); // You can define this method to get a callback
+            this.mDeviceId = deviceId;
         }
-
         /**
          * Copy constructor
          *
@@ -3540,6 +3556,7 @@ public class AppOpsManager {
             mUid = orig.mUid;
             mPackageName = orig.mPackageName;
             mAttributionTag = orig.mAttributionTag;
+            mDeviceId = orig.mDeviceId;
         }
 
         /**
@@ -3566,6 +3583,12 @@ public class AppOpsManager {
             return mAttributionTag;
         }
 
+        /**
+         * Persistent device Id of the proxy that noted the op
+         */
+        @FlaggedApi(Flags.FLAG_DEVICE_ID_IN_OP_PROXY_INFO_ENABLED)
+        public @Nullable String getDeviceId() { return mDeviceId; }
+
         @Override
         @DataClass.Generated.Member
         public void writeToParcel(@NonNull Parcel dest, int flags) {
@@ -3575,10 +3598,12 @@ public class AppOpsManager {
             byte flg = 0;
             if (mPackageName != null) flg |= 0x2;
             if (mAttributionTag != null) flg |= 0x4;
+            if (mDeviceId != null) flg |= 0x8;
             dest.writeByte(flg);
             dest.writeInt(mUid);
             if (mPackageName != null) dest.writeString(mPackageName);
             if (mAttributionTag != null) dest.writeString(mAttributionTag);
+            if (mDeviceId != null) dest.writeString(mDeviceId);
         }
 
         @Override
@@ -3596,14 +3621,14 @@ public class AppOpsManager {
             int uid = in.readInt();
             String packageName = (flg & 0x2) == 0 ? null : in.readString();
             String attributionTag = (flg & 0x4) == 0 ? null : in.readString();
-
+            String deviceId = (flg & 0x8) == 0 ? null : in.readString();
             this.mUid = uid;
             com.android.internal.util.AnnotationValidations.validate(
                     IntRange.class, null, mUid,
                     "from", 0);
             this.mPackageName = packageName;
             this.mAttributionTag = attributionTag;
-
+            this.mDeviceId = deviceId;
             // onConstructed(); // You can define this method to get a callback
         }
 
@@ -8801,6 +8826,18 @@ public class AppOpsManager {
      * Does not throw a security exception, does not translate {@link #MODE_FOREGROUND}.
      * @hide
      */
+    @TestApi
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    public int unsafeCheckOpRawNoThrow(
+            @NonNull String op, @NonNull AttributionSource attributionSource) {
+        return unsafeCheckOpRawNoThrow(strOpToOp(op), attributionSource);
+    }
+
+    /**
+     * Returns the <em>raw</em> mode associated with the op.
+     * Does not throw a security exception, does not translate {@link #MODE_FOREGROUND}.
+     * @hide
+     */
     public int unsafeCheckOpRawNoThrow(int op, int uid, @NonNull String packageName) {
         return unsafeCheckOpRawNoThrow(op, uid, packageName, Context.DEVICE_ID_DEFAULT);
     }
@@ -8811,8 +8848,8 @@ public class AppOpsManager {
             if (virtualDeviceId == Context.DEVICE_ID_DEFAULT) {
                 return mService.checkOperationRaw(op, uid, packageName, null);
             } else {
-                return mService.checkOperationRawForDevice(op, uid, packageName, null,
-                        Context.DEVICE_ID_DEFAULT);
+                return mService.checkOperationRawForDevice(
+                        op, uid, packageName, null, virtualDeviceId);
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

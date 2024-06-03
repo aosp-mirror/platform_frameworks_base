@@ -46,12 +46,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyBoolean
-import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 private const val ON: Int = 1
 private const val OFF: Int = 0
@@ -90,7 +90,7 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
         secureSettings = FakeSettings()
         systemClock = FakeSystemClock()
         backgroundDelayableExecutor = FakeExecutor(systemClock)
-        whenever(sysuiState.setFlag(anyInt(), anyBoolean())).thenReturn(sysuiState)
+        whenever(sysuiState.setFlag(anyLong(), anyBoolean())).thenReturn(sysuiState)
 
         fontScalingDialogDelegate =
             spy(

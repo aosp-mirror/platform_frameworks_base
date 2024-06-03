@@ -119,6 +119,7 @@ public final class AutomaticZenRule implements Parcelable {
     @IntDef(flag = true, prefix = { "FIELD_" }, value = {
             FIELD_NAME,
             FIELD_INTERRUPTION_FILTER,
+            FIELD_ICON
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ModifiableField {}
@@ -133,6 +134,11 @@ public final class AutomaticZenRule implements Parcelable {
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int FIELD_INTERRUPTION_FILTER = 1 << 1;
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_ICON = 1 << 2;
 
     private boolean enabled;
     private String name;
@@ -579,6 +585,9 @@ public final class AutomaticZenRule implements Parcelable {
         if ((bitmask & FIELD_INTERRUPTION_FILTER) != 0) {
             modified.add("FIELD_INTERRUPTION_FILTER");
         }
+        if ((bitmask & FIELD_ICON) != 0) {
+            modified.add("FIELD_ICON");
+        }
         return "{" + String.join(",", modified) + "}";
     }
 
@@ -671,12 +680,12 @@ public final class AutomaticZenRule implements Parcelable {
         private String mName;
         private ComponentName mOwner;
         private Uri mConditionId;
-        private int mInterruptionFilter;
+        private int mInterruptionFilter = NotificationManager.INTERRUPTION_FILTER_PRIORITY;
         private boolean mEnabled = true;
         private ComponentName mConfigurationActivity = null;
         private ZenPolicy mPolicy = null;
         private ZenDeviceEffects mDeviceEffects = null;
-        private int mType;
+        private int mType = TYPE_UNKNOWN;
         private String mDescription;
         private int mIconResId;
         private boolean mAllowManualInvocation;
@@ -840,6 +849,15 @@ public final class AutomaticZenRule implements Parcelable {
          */
         public @NonNull Builder setCreationTime(long creationTime) {
             mCreationTime = creationTime;
+            return this;
+        }
+
+        /**
+         * Sets the package that owns this rule
+         * @hide
+         */
+        public @NonNull Builder setPackage(@NonNull String pkg) {
+            mPkg = pkg;
             return this;
         }
 

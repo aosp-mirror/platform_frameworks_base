@@ -247,13 +247,13 @@
     <!-- Padding for the bubble popup view contents. -->
     <dimen name="bubble_popup_padding">24dp</dimen>
     <!-- The size of the caption bar inset at the top of bubble bar expanded view. -->
-    <dimen name="bubble_bar_expanded_view_caption_height">32dp</dimen>
+    <dimen name="bubble_bar_expanded_view_caption_height">36dp</dimen>
     <!-- The width of the caption bar at the top of bubble bar expanded view. -->
-    <dimen name="bubble_bar_expanded_view_caption_width">128dp</dimen>
-    <!-- The height of the dots shown for the caption menu in the bubble bar expanded view.. -->
-    <dimen name="bubble_bar_expanded_view_caption_dot_size">4dp</dimen>
-    <!-- The spacing between the dots for the caption menu in the bubble bar expanded view.. -->
-    <dimen name="bubble_bar_expanded_view_caption_dot_spacing">4dp</dimen>
+    <dimen name="bubble_bar_expanded_view_caption_width">80dp</dimen>
+    <!-- The height of the handle shown for the caption menu in the bubble bar expanded view. -->
+    <dimen name="bubble_bar_expanded_view_handle_height">4dp</dimen>
+    <!-- Width of the expanded bubble bar view shown when the bubble is expanded. -->
+    <dimen name="bubble_bar_expanded_view_width">412dp</dimen>
     <!-- Minimum width of the bubble bar manage menu. -->
     <dimen name="bubble_bar_manage_menu_min_width">200dp</dimen>
     <!-- Size of the dismiss icon in the bubble bar manage menu. -->
@@ -272,6 +272,9 @@
     <dimen name="bubble_bar_expanded_view_corner_radius">16dp</dimen>
     <!-- Corner radius for expanded view while it is being dragged -->
     <dimen name="bubble_bar_expanded_view_corner_radius_dragged">28dp</dimen>
+    <!-- Corner radius for expanded view drop target -->
+    <dimen name="bubble_bar_expanded_view_drop_target_corner">28dp</dimen>
+    <dimen name="bubble_bar_expanded_view_drop_target_padding">24dp</dimen>
     <!-- Width of the box around bottom center of the screen where drag only leads to dismiss -->
     <dimen name="bubble_bar_dismiss_zone_width">192dp</dimen>
     <!-- Height of the box around bottom center of the screen where drag only leads to dismiss -->
@@ -418,13 +421,14 @@
     <dimen name="freeform_decor_caption_height">42dp</dimen>
 
     <!-- Height of desktop mode caption for freeform tasks. -->
-    <dimen name="desktop_mode_freeform_decor_caption_height">42dp</dimen>
+    <dimen name="desktop_mode_freeform_decor_caption_height">40dp</dimen>
 
     <!-- Height of desktop mode caption for fullscreen tasks. -->
     <dimen name="desktop_mode_fullscreen_decor_caption_height">36dp</dimen>
 
-    <!-- Width of desktop mode caption for fullscreen tasks. -->
-    <dimen name="desktop_mode_fullscreen_decor_caption_width">128dp</dimen>
+    <!-- Width of desktop mode caption for fullscreen tasks.
+        80 dp for handle + 20 dp for room to grow on the sides when hovered. -->
+    <dimen name="desktop_mode_fullscreen_decor_caption_width">100dp</dimen>
 
     <!-- Required empty space to be visible for partially offscreen tasks. -->
     <dimen name="freeform_required_visible_empty_space_in_header">48dp</dimen>
@@ -456,16 +460,22 @@
     <dimen name="desktop_mode_customizable_caption_margin_end">152dp</dimen>
 
     <!-- The width of the maximize menu in desktop mode. -->
-    <dimen name="desktop_mode_maximize_menu_width">287dp</dimen>
+    <dimen name="desktop_mode_maximize_menu_width">228dp</dimen>
 
     <!-- The height of the maximize menu in desktop mode. -->
-    <dimen name="desktop_mode_maximize_menu_height">112dp</dimen>
+    <dimen name="desktop_mode_maximize_menu_height">114dp</dimen>
 
-    <!-- The larger of the two corner radii of the maximize menu buttons. -->
-    <dimen name="desktop_mode_maximize_menu_buttons_large_corner_radius">4dp</dimen>
+    <!-- The padding of the maximize menu in desktop mode. -->
+    <dimen name="desktop_mode_menu_padding">16dp</dimen>
 
-    <!-- The smaller of the two corner radii of the maximize menu buttons. -->
-    <dimen name="desktop_mode_maximize_menu_buttons_small_corner_radius">2dp</dimen>
+    <!-- The height of the buttons in the maximize menu. -->
+    <dimen name="desktop_mode_maximize_menu_button_height">52dp</dimen>
+
+    <!-- The radius of the maximize menu buttons. -->
+    <dimen name="desktop_mode_maximize_menu_buttons_radius">4dp</dimen>
+
+    <!-- The radius of the layout outline around the maximize menu buttons. -->
+    <dimen name="desktop_mode_maximize_menu_buttons_outline_radius">6dp</dimen>
 
     <!-- The corner radius of the maximize menu. -->
     <dimen name="desktop_mode_maximize_menu_corner_radius">8dp</dimen>
@@ -506,8 +516,23 @@
     <!-- The radius of the caption menu shadow. -->
     <dimen name="desktop_mode_handle_menu_shadow_radius">2dp</dimen>
 
+    <!-- The size of the icon shown in the resize veil. -->
+    <dimen name="desktop_mode_resize_veil_icon_size">96dp</dimen>
+
+    <!-- The with of the border around the app task for edge resizing, when
+         enable_windowing_edge_drag_resize is enabled. -->
+    <dimen name="desktop_mode_edge_handle">12dp</dimen>
+
+    <!-- The original width of the border around the app task for edge resizing, when
+         enable_windowing_edge_drag_resize is disabled. -->
     <dimen name="freeform_resize_handle">15dp</dimen>
 
+    <!-- The size of the corner region for drag resizing with touch, when a larger touch region is
+         appropriate. Applied when enable_windowing_edge_drag_resize is enabled. -->
+    <dimen name="desktop_mode_corner_resize_large">48dp</dimen>
+
+    <!-- The original size of the corner region for darg resizing, when
+         enable_windowing_edge_drag_resize is disabled. -->
     <dimen name="freeform_resize_corner">44dp</dimen>
 
     <!-- The width of the area at the sides of the screen where a freeform task will transition to
@@ -524,6 +549,28 @@
     desktop task snapping to split size. The empty space between this and the top is to allow
     for corner drags without transition. -->
     <dimen name="desktop_mode_split_from_desktop_height">100dp</dimen>
+
+    <!-- The corner radius of a task that was dragged from fullscreen. -->
+    <dimen name="desktop_mode_dragged_task_radius">28dp</dimen>
+
+    <!-- The corner radius of the app chip, maximize and close button's ripple drawable -->
+    <dimen name="desktop_mode_header_buttons_ripple_radius">16dp</dimen>
+    <!-- The vertical inset to apply to the app chip's ripple drawable -->
+    <dimen name="desktop_mode_header_app_chip_ripple_inset_vertical">4dp</dimen>
+
+    <!-- The corner radius of the maximize button's ripple drawable -->
+    <dimen name="desktop_mode_header_maximize_ripple_radius">18dp</dimen>
+    <!-- The vertical inset to apply to the maximize button's ripple drawable -->
+    <dimen name="desktop_mode_header_maximize_ripple_inset_vertical">4dp</dimen>
+    <!-- The horizontal inset to apply to the maximize button's ripple drawable -->
+    <dimen name="desktop_mode_header_maximize_ripple_inset_horizontal">6dp</dimen>
+
+    <!-- The corner radius of the close button's ripple drawable -->
+    <dimen name="desktop_mode_header_close_ripple_radius">18dp</dimen>
+    <!-- The vertical inset to apply to the close button's ripple drawable -->
+    <dimen name="desktop_mode_header_close_ripple_inset_vertical">4dp</dimen>
+    <!-- The horizontal inset to apply to the close button's ripple drawable -->
+    <dimen name="desktop_mode_header_close_ripple_inset_horizontal">6dp</dimen>
 
     <!-- The acceptable area ratio of fg icon area/bg icon area, i.e. (72 x 72) / (108 x 108) -->
     <item type="dimen" format="float" name="splash_icon_enlarge_foreground_threshold">0.44</item>

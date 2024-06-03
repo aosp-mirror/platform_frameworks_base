@@ -16,35 +16,35 @@
 
 package com.android.systemui.keyguard.ui.composable.section
 
+import android.content.Context
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.SceneTransitionLayout
-import com.android.systemui.Flags
+import com.android.compose.modifiers.thenIf
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
-import com.android.systemui.keyguard.ui.composable.blueprint.ClockScenes
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockScenes.largeClockScene
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockScenes.smallClockScene
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockScenes.splitShadeLargeClockScene
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockScenes.splitShadeSmallClockScene
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockTransition
+import com.android.systemui.keyguard.ui.composable.blueprint.WeatherClockScenes
 import com.android.systemui.keyguard.ui.composable.blueprint.rememberBurnIn
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
-import com.android.systemui.res.R
-import com.android.systemui.shade.LargeScreenHeaderHelper
 import javax.inject.Inject
 
 class TopAreaSection
@@ -53,16 +53,17 @@ constructor(
     private val clockViewModel: KeyguardClockViewModel,
     private val smartSpaceSection: SmartSpaceSection,
     private val mediaCarouselSection: MediaCarouselSection,
-    private val notificationSection: NotificationSection,
     private val clockSection: DefaultClockSection,
+    private val weatherClockSection: WeatherClockSection,
     private val clockInteractor: KeyguardClockInteractor,
 ) {
     @Composable
-    fun DefaultClockLayoutWithNotifications(
+    fun DefaultClockLayout(
         modifier: Modifier = Modifier,
     ) {
-        val isLargeClockVisible by clockViewModel.isLargeClockVisible.collectAsState()
-        val currentClockLayout by clockViewModel.currentClockLayout.collectAsState()
+        val currentClockLayout by clockViewModel.currentClockLayout.collectAsStateWithLifecycle()
+        val hasCustomPositionUpdatedAnimation by
+            clockViewModel.hasCustomPositionUpdatedAnimation.collectAsStateWithLifecycle()
         val currentScene =
             when (currentClockLayout) {
                 KeyguardClockViewModel.ClockLayout.SPLIT_SHADE_LARGE_CLOCK ->
@@ -71,15 +72,67 @@ constructor(
                     splitShadeSmallClockScene
                 KeyguardClockViewModel.ClockLayout.LARGE_CLOCK -> largeClockScene
                 KeyguardClockViewModel.ClockLayout.SMALL_CLOCK -> smallClockScene
+                KeyguardClockViewModel.ClockLayout.WEATHER_LARGE_CLOCK ->
+                    WeatherClockScenes.largeClockScene
+                KeyguardClockViewModel.ClockLayout.SPLIT_SHADE_WEATHER_LARGE_CLOCK ->
+                    WeatherClockScenes.splitShadeLargeClockScene
             }
 
-        val splitShadeTopMargin: Dp =
-            if (Flags.centralizedStatusBarHeightFix()) {
-                LargeScreenHeaderHelper.getLargeScreenHeaderHeight(LocalContext.current).dp
-            } else {
-                dimensionResource(id = R.dimen.large_screen_shade_header_height)
+        SceneTransitionLayout(
+            modifier = modifier,
+            currentScene = currentScene,
+            onChangeScene = {},
+            transitions = ClockTransition.defaultClockTransitions,
+            enableInterruptions = false,
+        ) {
+            scene(splitShadeLargeClockScene) {
+                LargeClockWithSmartSpace(
+                    shouldOffSetClockToOneHalf = !hasCustomPositionUpdatedAnimation
+                )
             }
+
+            scene(splitShadeSmallClockScene) {
+                SmallClockWithSmartSpace(modifier = Modifier.fillMaxWidth(0.5f))
+            }
+
+            scene(smallClockScene) { SmallClockWithSmartSpace() }
+
+            scene(largeClockScene) { LargeClockWithSmartSpace() }
+
+            scene(WeatherClockScenes.largeClockScene) { WeatherLargeClockWithSmartSpace() }
+
+            scene(WeatherClockScenes.splitShadeLargeClockScene) {
+                WeatherLargeClockWithSmartSpace(modifier = Modifier.fillMaxWidth(0.5f))
+            }
+        }
+    }
+
+    @Composable
+    private fun SceneScope.SmallClockWithSmartSpace(modifier: Modifier = Modifier) {
         val burnIn = rememberBurnIn(clockInteractor)
+
+        Column(modifier = modifier) {
+            with(clockSection) {
+                SmallClock(
+                    burnInParams = burnIn.parameters,
+                    onTopChanged = burnIn.onSmallClockTopChanged,
+                    modifier = Modifier.wrapContentSize()
+                )
+            }
+            with(smartSpaceSection) {
+                SmartSpace(
+                    burnInParams = burnIn.parameters,
+                    onTopChanged = burnIn.onSmartspaceTopChanged,
+                )
+            }
+            with(mediaCarouselSection) { KeyguardMediaCarousel() }
+        }
+    }
+
+    @Composable
+    private fun SceneScope.LargeClockWithSmartSpace(shouldOffSetClockToOneHalf: Boolean = false) {
+        val burnIn = rememberBurnIn(clockInteractor)
+        val isLargeClockVisible by clockViewModel.isLargeClockVisible.collectAsStateWithLifecycle()
 
         LaunchedEffect(isLargeClockVisible) {
             if (isLargeClockVisible) {
@@ -87,109 +140,85 @@ constructor(
             }
         }
 
-        SceneTransitionLayout(
-            modifier = modifier.fillMaxSize(),
-            currentScene = currentScene,
-            onChangeScene = {},
-            transitions = ClockTransition.defaultClockTransitions,
-        ) {
-            scene(ClockScenes.splitShadeLargeClockScene) {
-                Row(
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxHeight().weight(weight = 1f),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        with(smartSpaceSection) {
-                            SmartSpace(
-                                burnInParams = burnIn.parameters,
-                                onTopChanged = burnIn.onSmartspaceTopChanged,
-                            )
-                        }
-                        with(clockSection) { LargeClock(modifier = Modifier.fillMaxWidth()) }
-                    }
-                    with(notificationSection) {
-                        Notifications(
-                            modifier =
-                                Modifier.fillMaxHeight()
-                                    .weight(weight = 1f)
-                                    .padding(top = splitShadeTopMargin)
-                        )
-                    }
-                }
+        Column {
+            with(smartSpaceSection) {
+                SmartSpace(
+                    burnInParams = burnIn.parameters,
+                    onTopChanged = burnIn.onSmartspaceTopChanged,
+                )
             }
-
-            scene(ClockScenes.splitShadeSmallClockScene) {
-                Row(
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxHeight().weight(weight = 1f),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        with(clockSection) {
-                            SmallClock(
-                                burnInParams = burnIn.parameters,
-                                onTopChanged = burnIn.onSmallClockTopChanged,
-                                modifier = Modifier.fillMaxWidth()
-                            )
+            with(clockSection) {
+                LargeClock(
+                    burnInParams = burnIn.parameters,
+                    modifier =
+                        Modifier.fillMaxSize().thenIf(shouldOffSetClockToOneHalf) {
+                            // If we do not have a custom position animation, we want
+                            // the clock to be on one half of the screen.
+                            Modifier.offset {
+                                IntOffset(
+                                    x = -clockSection.getClockCenteringDistance().toInt(),
+                                    y = 0,
+                                )
+                            }
                         }
-                        with(smartSpaceSection) {
-                            SmartSpace(
-                                burnInParams = burnIn.parameters,
-                                onTopChanged = burnIn.onSmartspaceTopChanged,
-                            )
-                        }
-                        with(mediaCarouselSection) { MediaCarousel() }
-                    }
-                    with(notificationSection) {
-                        Notifications(
-                            modifier =
-                                Modifier.fillMaxHeight()
-                                    .weight(weight = 1f)
-                                    .padding(top = splitShadeTopMargin)
-                        )
-                    }
-                }
-            }
-
-            scene(ClockScenes.smallClockScene) {
-                Column {
-                    with(clockSection) {
-                        SmallClock(
-                            burnInParams = burnIn.parameters,
-                            onTopChanged = burnIn.onSmallClockTopChanged,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                    with(smartSpaceSection) {
-                        SmartSpace(
-                            burnInParams = burnIn.parameters,
-                            onTopChanged = burnIn.onSmartspaceTopChanged,
-                        )
-                    }
-                    with(mediaCarouselSection) { MediaCarousel() }
-                    with(notificationSection) {
-                        Notifications(
-                            modifier =
-                                androidx.compose.ui.Modifier.fillMaxWidth().weight(weight = 1f)
-                        )
-                    }
-                }
-            }
-
-            scene(ClockScenes.largeClockScene) {
-                Column {
-                    with(smartSpaceSection) {
-                        SmartSpace(
-                            burnInParams = burnIn.parameters,
-                            onTopChanged = burnIn.onSmartspaceTopChanged,
-                        )
-                    }
-                    with(clockSection) { LargeClock(modifier = Modifier.fillMaxWidth()) }
-                }
+                )
             }
         }
+    }
+
+    @Composable
+    private fun SceneScope.WeatherLargeClockWithSmartSpace(modifier: Modifier = Modifier) {
+        val burnIn = rememberBurnIn(clockInteractor)
+        val isLargeClockVisible by clockViewModel.isLargeClockVisible.collectAsStateWithLifecycle()
+        val currentClockState = clockViewModel.currentClock.collectAsStateWithLifecycle()
+
+        LaunchedEffect(isLargeClockVisible) {
+            if (isLargeClockVisible) {
+                burnIn.onSmallClockTopChanged(null)
+            }
+        }
+
+        Column(modifier = modifier) {
+            val currentClock = currentClockState.value ?: return@Column
+            with(weatherClockSection) {
+                Time(
+                    clock = currentClock,
+                    burnInParams = burnIn.parameters,
+                )
+            }
+            val density = LocalDensity.current
+            val context = LocalContext.current
+
+            with(smartSpaceSection) {
+                SmartSpace(
+                    burnInParams = burnIn.parameters,
+                    onTopChanged = burnIn.onSmartspaceTopChanged,
+                    modifier =
+                        Modifier.heightIn(
+                            min = getDimen(context, "enhanced_smartspace_height", density)
+                        )
+                )
+            }
+            with(weatherClockSection) {
+                LargeClockSectionBelowSmartspace(
+                    burnInParams = burnIn.parameters,
+                    clock = currentClock,
+                )
+            }
+        }
+    }
+
+    /*
+     * Use this function to access dimen which cannot be access by R.dimen directly
+     * Currently use to access dimen from BcSmartspace
+     * @param name Name of resources
+     * @param density Density required to convert dimen from Int To Dp
+     */
+    private fun getDimen(context: Context, name: String, density: Density): Dp {
+        val res = context.packageManager.getResourcesForApplication(context.packageName)
+        val id = res.getIdentifier(name, "dimen", context.packageName)
+        var dimen: Dp
+        with(density) { dimen = (if (id == 0) 0 else res.getDimensionPixelSize(id)).toDp() }
+        return dimen
     }
 }

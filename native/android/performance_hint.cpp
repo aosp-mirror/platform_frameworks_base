@@ -41,16 +41,15 @@ using namespace aidl::android::os;
 
 using namespace std::chrono_literals;
 
-using HalSessionHint = aidl::android::hardware::power::SessionHint;
-using HalSessionMode = aidl::android::hardware::power::SessionMode;
-using HalWorkDuration = aidl::android::hardware::power::WorkDuration;
+// Namespace for AIDL types coming from the PowerHAL
+namespace hal = aidl::android::hardware::power;
 
 using android::base::StringPrintf;
 
 struct APerformanceHintSession;
 
 constexpr int64_t SEND_HINT_TIMEOUT = std::chrono::nanoseconds(100ms).count();
-struct AWorkDuration : public HalWorkDuration {};
+struct AWorkDuration : public hal::WorkDuration {};
 
 struct APerformanceHintManager {
 public:
@@ -60,7 +59,8 @@ public:
     ~APerformanceHintManager() = default;
 
     APerformanceHintSession* createSession(const int32_t* threadIds, size_t size,
-                                           int64_t initialTargetWorkDurationNanos);
+                                           int64_t initialTargetWorkDurationNanos,
+                                           hal::SessionTag tag = hal::SessionTag::APP);
     int64_t getPreferredRateNanos() const;
 
 private:
@@ -85,7 +85,8 @@ struct APerformanceHintSession {
 public:
     APerformanceHintSession(std::shared_ptr<IHintManager> hintManager,
                             std::shared_ptr<IHintSession> session, int64_t preferredRateNanos,
-                            int64_t targetDurationNanos);
+                            int64_t targetDurationNanos,
+                            std::optional<hal::SessionConfig> sessionConfig);
     APerformanceHintSession() = delete;
     ~APerformanceHintSession();
 
@@ -115,11 +116,12 @@ private:
     // Last hint reported from sendHint indexed by hint value
     std::vector<int64_t> mLastHintSentTimestamp;
     // Cached samples
-    std::vector<HalWorkDuration> mActualWorkDurations;
+    std::vector<hal::WorkDuration> mActualWorkDurations;
     std::string mSessionName;
-    static int32_t sIDCounter;
+    static int64_t sIDCounter;
     // The most recent set of thread IDs
     std::vector<int32_t> mLastThreadIDs;
+    std::optional<hal::SessionConfig> mSessionConfig;
     // Tracing helpers
     void traceThreads(std::vector<int32_t>& tids);
     void tracePowerEfficient(bool powerEfficient);
@@ -130,7 +132,8 @@ private:
 
 static std::shared_ptr<IHintManager>* gIHintManagerForTesting = nullptr;
 static APerformanceHintManager* gHintManagerForTesting = nullptr;
-int32_t APerformanceHintSession::sIDCounter = 0;
+// Start above the int32 range so we don't collide with config sessions
+int64_t APerformanceHintSession::sIDCounter = INT32_MAX;
 
 // ===================================== APerformanceHintManager implementation
 APerformanceHintManager::APerformanceHintManager(std::shared_ptr<IHintManager> manager,
@@ -175,16 +178,20 @@ APerformanceHintManager* APerformanceHintManager::create(std::shared_ptr<IHintMa
 }
 
 APerformanceHintSession* APerformanceHintManager::createSession(
-        const int32_t* threadIds, size_t size, int64_t initialTargetWorkDurationNanos) {
+        const int32_t* threadIds, size_t size, int64_t initialTargetWorkDurationNanos,
+        hal::SessionTag tag) {
     std::vector<int32_t> tids(threadIds, threadIds + size);
     std::shared_ptr<IHintSession> session;
-    ndk::ScopedAStatus ret =
-            mHintManager->createHintSession(mToken, tids, initialTargetWorkDurationNanos, &session);
+    ndk::ScopedAStatus ret;
+    std::optional<hal::SessionConfig> sessionConfig;
+    ret = mHintManager->createHintSessionWithConfig(mToken, tids, initialTargetWorkDurationNanos,
+                                                    tag, &sessionConfig, &session);
+
     if (!ret.isOk() || !session) {
         return nullptr;
     }
     auto out = new APerformanceHintSession(mHintManager, std::move(session), mPreferredRateNanos,
-                                           initialTargetWorkDurationNanos);
+                                           initialTargetWorkDurationNanos, sessionConfig);
     out->traceThreads(tids);
     out->traceTargetDuration(initialTargetWorkDurationNanos);
     out->tracePowerEfficient(false);
@@ -200,18 +207,23 @@ int64_t APerformanceHintManager::getPreferredRateNanos() const {
 APerformanceHintSession::APerformanceHintSession(std::shared_ptr<IHintManager> hintManager,
                                                  std::shared_ptr<IHintSession> session,
                                                  int64_t preferredRateNanos,
-                                                 int64_t targetDurationNanos)
+                                                 int64_t targetDurationNanos,
+                                                 std::optional<hal::SessionConfig> sessionConfig)
       : mHintManager(hintManager),
         mHintSession(std::move(session)),
         mPreferredRateNanos(preferredRateNanos),
         mTargetDurationNanos(targetDurationNanos),
         mFirstTargetMetTimestamp(0),
-        mLastTargetMetTimestamp(0) {
-    const std::vector<HalSessionHint> sessionHintRange{ndk::enum_range<HalSessionHint>().begin(),
-                                                       ndk::enum_range<HalSessionHint>().end()};
-
-    mLastHintSentTimestamp = std::vector<int64_t>(sessionHintRange.size(), 0);
-    mSessionName = android::base::StringPrintf("ADPF Session %" PRId32, ++sIDCounter);
+        mLastTargetMetTimestamp(0),
+        mSessionConfig(sessionConfig) {
+    if (sessionConfig->id > INT32_MAX) {
+        ALOGE("Session ID too large, must fit 32-bit integer");
+    }
+    constexpr int numEnums =
+            ndk::enum_range<hal::SessionHint>().end() - ndk::enum_range<hal::SessionHint>().begin();
+    mLastHintSentTimestamp = std::vector<int64_t>(numEnums, 0);
+    int64_t traceId = sessionConfig.has_value() ? sessionConfig->id : ++sIDCounter;
+    mSessionName = android::base::StringPrintf("ADPF Session %" PRId64, traceId);
 }
 
 APerformanceHintSession::~APerformanceHintSession() {
@@ -246,10 +258,10 @@ int APerformanceHintSession::updateTargetWorkDuration(int64_t targetDurationNano
 }
 
 int APerformanceHintSession::reportActualWorkDuration(int64_t actualDurationNanos) {
-    HalWorkDuration workDuration{.durationNanos = actualDurationNanos,
-                                 .workPeriodStartTimestampNanos = 0,
-                                 .cpuDurationNanos = actualDurationNanos,
-                                 .gpuDurationNanos = 0};
+    hal::WorkDuration workDuration{.durationNanos = actualDurationNanos,
+                                   .workPeriodStartTimestampNanos = 0,
+                                   .cpuDurationNanos = actualDurationNanos,
+                                   .gpuDurationNanos = 0};
 
     return reportActualWorkDurationInternal(static_cast<AWorkDuration*>(&workDuration));
 }
@@ -323,7 +335,8 @@ int APerformanceHintSession::getThreadIds(int32_t* const threadIds, size_t* size
 
 int APerformanceHintSession::setPreferPowerEfficiency(bool enabled) {
     ndk::ScopedAStatus ret =
-            mHintSession->setMode(static_cast<int32_t>(HalSessionMode::POWER_EFFICIENCY), enabled);
+            mHintSession->setMode(static_cast<int32_t>(hal::SessionMode::POWER_EFFICIENCY),
+                                  enabled);
 
     if (!ret.isOk()) {
         ALOGE("%s: HintSession setPreferPowerEfficiency failed: %s", __FUNCTION__,
@@ -450,6 +463,15 @@ APerformanceHintSession* APerformanceHint_createSession(APerformanceHintManager*
     return manager->createSession(threadIds, size, initialTargetWorkDurationNanos);
 }
 
+APerformanceHintSession* APerformanceHint_createSessionInternal(
+        APerformanceHintManager* manager, const int32_t* threadIds, size_t size,
+        int64_t initialTargetWorkDurationNanos, SessionTag tag) {
+    VALIDATE_PTR(manager)
+    VALIDATE_PTR(threadIds)
+    return manager->createSession(threadIds, size, initialTargetWorkDurationNanos,
+                                  static_cast<hal::SessionTag>(tag));
+}
+
 int64_t APerformanceHint_getPreferredUpdateRateNanos(APerformanceHintManager* manager) {
     VALIDATE_PTR(manager)
     return manager->getPreferredRateNanos();
@@ -473,9 +495,9 @@ void APerformanceHint_closeSession(APerformanceHintSession* session) {
     delete session;
 }
 
-int APerformanceHint_sendHint(void* session, SessionHint hint) {
+int APerformanceHint_sendHint(APerformanceHintSession* session, SessionHint hint) {
     VALIDATE_PTR(session)
-    return reinterpret_cast<APerformanceHintSession*>(session)->sendHint(hint);
+    return session->sendHint(hint);
 }
 
 int APerformanceHint_setThreads(APerformanceHintSession* session, const pid_t* threadIds,
@@ -485,11 +507,10 @@ int APerformanceHint_setThreads(APerformanceHintSession* session, const pid_t* t
     return session->setThreads(threadIds, size);
 }
 
-int APerformanceHint_getThreadIds(void* aPerformanceHintSession, int32_t* const threadIds,
+int APerformanceHint_getThreadIds(APerformanceHintSession* session, int32_t* const threadIds,
                                   size_t* const size) {
-    VALIDATE_PTR(aPerformanceHintSession)
-    return static_cast<APerformanceHintSession*>(aPerformanceHintSession)
-            ->getThreadIds(threadIds, size);
+    VALIDATE_PTR(session)
+    return session->getThreadIds(threadIds, size);
 }
 
 int APerformanceHint_setPreferPowerEfficiency(APerformanceHintSession* session, bool enabled) {

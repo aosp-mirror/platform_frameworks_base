@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.os.Process;
-import android.security.KeyStore;
 import android.security.keymaster.KeymasterDefs;
 
 import libcore.util.EmptyArray;
@@ -1008,13 +1007,20 @@ public abstract class KeyProperties {
     public static final int NAMESPACE_LOCKSETTINGS = 103;
 
     /**
+     * The legacy UID that corresponds to {@link #NAMESPACE_APPLICATION}.
+     * In new code, prefer to work with Keystore namespaces directly.
+     * @hide
+     */
+    public static final int UID_SELF = -1;
+
+    /**
      * For legacy support, translate namespaces into known UIDs.
      * @hide
      */
     public static int namespaceToLegacyUid(@Namespace int namespace) {
         switch (namespace) {
             case NAMESPACE_APPLICATION:
-                return KeyStore.UID_SELF;
+                return UID_SELF;
             case NAMESPACE_WIFI:
                 return Process.WIFI_UID;
             default:
@@ -1029,7 +1035,7 @@ public abstract class KeyProperties {
      */
     public static @Namespace int legacyUidToNamespace(int uid) {
         switch (uid) {
-            case KeyStore.UID_SELF:
+            case UID_SELF:
                 return NAMESPACE_APPLICATION;
             case Process.WIFI_UID:
                 return NAMESPACE_WIFI;

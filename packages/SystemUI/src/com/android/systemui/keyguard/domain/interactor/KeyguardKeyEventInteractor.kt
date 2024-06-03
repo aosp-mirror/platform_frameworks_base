@@ -74,6 +74,14 @@ constructor(
      * exit bouncer.
      */
     fun dispatchKeyEventPreIme(event: KeyEvent): Boolean {
+        when (event.action) {
+            KeyEvent.ACTION_DOWN -> {
+                val device = event.getDevice()
+                if (device != null && device.isFullKeyboard() && device.isExternal()) {
+                    powerInteractor.onUserTouch()
+                }
+            }
+        }
         when (event.keyCode) {
             KeyEvent.KEYCODE_BACK ->
                 if (

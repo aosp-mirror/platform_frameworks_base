@@ -21,7 +21,7 @@ import static com.android.systemui.statusbar.phone.SystemUIDialog.DEFAULT_DISMIS
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -92,7 +92,7 @@ public class BroadcastDialogDelegateTest extends SysuiTestCase {
         when(mLocalBluetoothManager.getProfileManager()).thenReturn(mLocalBluetoothProfileManager);
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(null);
 
-        when(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState);
+        when(mSysUiState.setFlag(anyLong(), anyBoolean())).thenReturn(mSysUiState);
         when(mSystemUIDialogFactory.create(any(), any())).thenReturn(mDialog);
 
         mBroadcastDialogDelegate = new BroadcastDialogDelegate(

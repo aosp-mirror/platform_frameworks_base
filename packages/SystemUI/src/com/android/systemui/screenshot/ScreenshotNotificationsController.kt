@@ -105,7 +105,7 @@ internal constructor(
 
     /** Factory for [ScreenshotNotificationsController]. */
     @AssistedFactory
-    interface Factory {
-        fun create(displayId: Int = Display.DEFAULT_DISPLAY): ScreenshotNotificationsController
+    fun interface Factory {
+        fun create(displayId: Int): ScreenshotNotificationsController
     }
 }

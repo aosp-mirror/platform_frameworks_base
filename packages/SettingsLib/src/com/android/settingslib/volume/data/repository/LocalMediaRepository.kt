@@ -17,6 +17,7 @@ package com.android.settingslib.volume.data.repository
 
 import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
+import com.android.settingslib.media.flags.Flags
 import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
 import com.android.settingslib.volume.shared.model.AudioManagerEvent
 import kotlinx.coroutines.CoroutineScope
@@ -69,14 +70,18 @@ class LocalMediaRepositoryImpl(
                         }
                     }
                 localMediaManager.registerCallback(callback)
-                localMediaManager.startScan()
+                if (!Flags.removeUnnecessaryRouteScanning()) {
+                    localMediaManager.startScan()
+                }
 
                 awaitClose {
-                    localMediaManager.stopScan()
+                    if (!Flags.removeUnnecessaryRouteScanning()) {
+                        localMediaManager.stopScan()
+                    }
                     localMediaManager.unregisterCallback(callback)
                 }
             }
-            .shareIn(coroutineScope, SharingStarted.WhileSubscribed(), replay = 0)
+            .shareIn(coroutineScope, SharingStarted.Eagerly, replay = 0)
 
     override val currentConnectedDevice: StateFlow<MediaDevice?> =
         merge(devicesChanges, mediaDevicesUpdates)
@@ -84,8 +89,8 @@ class LocalMediaRepositoryImpl(
             .onStart { emit(localMediaManager.currentConnectedDevice) }
             .stateIn(
                 coroutineScope,
-                SharingStarted.WhileSubscribed(),
-                localMediaManager.currentConnectedDevice
+                SharingStarted.Eagerly,
+                localMediaManager.currentConnectedDevice,
             )
 
     private sealed interface DevicesUpdate {

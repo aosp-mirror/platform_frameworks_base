@@ -20,7 +20,9 @@ import com.android.app.animation.Interpolators.EMPHASIZED
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromDreamingTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.FromDreamingTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
@@ -45,8 +47,7 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = TO_LOCKSCREEN_DURATION,
-            from = KeyguardState.DREAMING,
-            to = KeyguardState.LOCKSCREEN,
+            edge = Edge.create(from = DREAMING, to = LOCKSCREEN),
         )
 
     /** Dream overlay y-translation on exit */

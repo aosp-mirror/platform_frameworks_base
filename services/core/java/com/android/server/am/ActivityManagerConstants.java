@@ -163,7 +163,6 @@ final class ActivityManagerConstants extends ContentObserver {
 
     static final String KEY_USE_TIERED_CACHED_ADJ = "use_tiered_cached_adj";
     static final String KEY_TIERED_CACHED_ADJ_DECAY_TIME = "tiered_cached_adj_decay_time";
-    static final String KEY_USE_MODERN_TRIM = "use_modern_trim";
 
     /**
      * Whether or not to enable the new oom adjuster implementation.
@@ -238,8 +237,6 @@ final class ActivityManagerConstants extends ContentObserver {
 
     private static final boolean DEFAULT_USE_TIERED_CACHED_ADJ = false;
     private static final long DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME = 60 * 1000;
-
-    private static final boolean DEFAULT_USE_MODERN_TRIM = true;
 
     /**
      * The default value to {@link #KEY_ENABLE_NEW_OOMADJ}.
@@ -1118,26 +1115,23 @@ final class ActivityManagerConstants extends ContentObserver {
 
     /**
      * If a service of a timeout-enforced type doesn't finish within this duration after its
-     * timeout, then we'll declare an ANR.
+     * timeout, then we'll crash the app.
      * i.e. if the time limit for a type is 1 hour, and this extra duration is 10 seconds, then
-     * the app will be ANR'ed 1 hour and 10 seconds after it started.
+     * the app will crash 1 hour and 10 seconds after it started.
      */
-    private static final String KEY_FGS_ANR_EXTRA_WAIT_DURATION = "fgs_anr_extra_wait_duration";
+    private static final String KEY_FGS_CRASH_EXTRA_WAIT_DURATION = "fgs_crash_extra_wait_duration";
 
-    /** @see #KEY_FGS_ANR_EXTRA_WAIT_DURATION */
-    static final long DEFAULT_FGS_ANR_EXTRA_WAIT_DURATION = 10_000;
+    /** @see #KEY_FGS_CRASH_EXTRA_WAIT_DURATION */
+    static final long DEFAULT_FGS_CRASH_EXTRA_WAIT_DURATION = 10_000;
 
-    /** @see #KEY_FGS_ANR_EXTRA_WAIT_DURATION */
-    public volatile long mFgsAnrExtraWaitDuration = DEFAULT_FGS_ANR_EXTRA_WAIT_DURATION;
+    /** @see #KEY_FGS_CRASH_EXTRA_WAIT_DURATION */
+    public volatile long mFgsCrashExtraWaitDuration = DEFAULT_FGS_CRASH_EXTRA_WAIT_DURATION;
 
     /** @see #KEY_USE_TIERED_CACHED_ADJ */
     public boolean USE_TIERED_CACHED_ADJ = DEFAULT_USE_TIERED_CACHED_ADJ;
 
     /** @see #KEY_TIERED_CACHED_ADJ_DECAY_TIME */
     public long TIERED_CACHED_ADJ_DECAY_TIME = DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME;
-
-    /** @see #KEY_USE_MODERN_TRIM */
-    public boolean USE_MODERN_TRIM = DEFAULT_USE_MODERN_TRIM;
 
     /** @see #KEY_ENABLE_NEW_OOMADJ */
     public boolean ENABLE_NEW_OOMADJ = DEFAULT_ENABLE_NEW_OOM_ADJ;
@@ -1321,8 +1315,8 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION:
                                 updateShortFgsAnrExtraWaitDuration();
                                 break;
-                            case KEY_FGS_ANR_EXTRA_WAIT_DURATION:
-                                updateFgsAnrExtraWaitDuration();
+                            case KEY_FGS_CRASH_EXTRA_WAIT_DURATION:
+                                updateFgsCrashExtraWaitDuration();
                                 break;
                             case KEY_PROACTIVE_KILLS_ENABLED:
                                 updateProactiveKillsEnabled();
@@ -1342,9 +1336,6 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_USE_TIERED_CACHED_ADJ:
                             case KEY_TIERED_CACHED_ADJ_DECAY_TIME:
                                 updateUseTieredCachedAdj();
-                                break;
-                            case KEY_USE_MODERN_TRIM:
-                                updateUseModernTrim();
                                 break;
                             case KEY_DISABLE_APP_PROFILER_PSS_PROFILING:
                                 updateDisableAppProfilerPssProfiling();
@@ -2208,11 +2199,11 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_DATA_SYNC_FGS_TIMEOUT_DURATION);
     }
 
-    private void updateFgsAnrExtraWaitDuration() {
-        mFgsAnrExtraWaitDuration = DeviceConfig.getLong(
+    private void updateFgsCrashExtraWaitDuration() {
+        mFgsCrashExtraWaitDuration = DeviceConfig.getLong(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                KEY_FGS_ANR_EXTRA_WAIT_DURATION,
-                DEFAULT_FGS_ANR_EXTRA_WAIT_DURATION);
+                KEY_FGS_CRASH_EXTRA_WAIT_DURATION,
+                DEFAULT_FGS_CRASH_EXTRA_WAIT_DURATION);
     }
 
     private void updateEnableWaitForFinishAttachApplication() {
@@ -2231,13 +2222,6 @@ final class ActivityManagerConstants extends ContentObserver {
             DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
             KEY_TIERED_CACHED_ADJ_DECAY_TIME,
             DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME);
-    }
-
-    private void updateUseModernTrim() {
-        USE_MODERN_TRIM = DeviceConfig.getBoolean(
-            DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-            KEY_USE_MODERN_TRIM,
-            DEFAULT_USE_MODERN_TRIM);
     }
 
     private void updateEnableNewOomAdj() {
@@ -2472,8 +2456,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mMediaProcessingFgsTimeoutDuration);
         pw.print("  "); pw.print(KEY_DATA_SYNC_FGS_TIMEOUT_DURATION);
         pw.print("="); pw.println(mDataSyncFgsTimeoutDuration);
-        pw.print("  "); pw.print(KEY_FGS_ANR_EXTRA_WAIT_DURATION);
-        pw.print("="); pw.println(mFgsAnrExtraWaitDuration);
+        pw.print("  "); pw.print(KEY_FGS_CRASH_EXTRA_WAIT_DURATION);
+        pw.print("="); pw.println(mFgsCrashExtraWaitDuration);
 
         pw.print("  "); pw.print(KEY_USE_TIERED_CACHED_ADJ);
         pw.print("="); pw.println(USE_TIERED_CACHED_ADJ);
@@ -2488,6 +2472,9 @@ final class ActivityManagerConstants extends ContentObserver {
 
         pw.print("  "); pw.print(KEY_PSS_TO_RSS_THRESHOLD_MODIFIER);
         pw.print("="); pw.println(PSS_TO_RSS_THRESHOLD_MODIFIER);
+
+        pw.print("  "); pw.print(KEY_MAX_PREVIOUS_TIME);
+        pw.print("="); pw.println(MAX_PREVIOUS_TIME);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {

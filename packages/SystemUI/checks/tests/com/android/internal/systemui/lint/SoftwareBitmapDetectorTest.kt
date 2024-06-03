@@ -21,7 +21,6 @@ import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Issue
 import org.junit.Test
 
-@Suppress("UnstableApiUsage")
 class SoftwareBitmapDetectorTest : SystemUILintDetectorTest() {
 
     override fun getDetector(): Detector = SoftwareBitmapDetector()
@@ -45,7 +44,7 @@ class SoftwareBitmapDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(SoftwareBitmapDetector.ISSUE)
             .run()
@@ -80,7 +79,7 @@ class SoftwareBitmapDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(SoftwareBitmapDetector.ISSUE)
             .run()
@@ -102,12 +101,10 @@ class SoftwareBitmapDetectorTest : SystemUILintDetectorTest() {
                     }
                 """
                 ),
-                *stubs
+                *androidStubs
             )
             .issues(SoftwareBitmapDetector.ISSUE)
             .run()
             .expectClean()
     }
-
-    private val stubs = androidStubs
 }

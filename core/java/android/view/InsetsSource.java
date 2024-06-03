@@ -99,11 +99,17 @@ public class InsetsSource implements Parcelable {
      */
     public static final int FLAG_FORCE_CONSUMING = 1 << 2;
 
+    /**
+     * Controls whether the insets source will play an animation when resizing.
+     */
+    public static final int FLAG_ANIMATE_RESIZING = 1 << 3;
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = "FLAG_", value = {
             FLAG_SUPPRESS_SCRIM,
             FLAG_INSETS_ROUNDED_CORNER,
             FLAG_FORCE_CONSUMING,
+            FLAG_ANIMATE_RESIZING,
     })
     public @interface Flags {}
 
@@ -545,6 +551,9 @@ public class InsetsSource implements Parcelable {
         }
         if ((flags & FLAG_FORCE_CONSUMING) != 0) {
             joiner.add("FORCE_CONSUMING");
+        }
+        if ((flags & FLAG_ANIMATE_RESIZING) != 0) {
+            joiner.add("ANIMATE_RESIZING");
         }
         return joiner.toString();
     }

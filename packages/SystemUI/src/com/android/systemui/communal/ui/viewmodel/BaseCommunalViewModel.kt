@@ -18,9 +18,12 @@ package com.android.systemui.communal.ui.viewmodel
 
 import android.content.ComponentName
 import android.os.UserHandle
+import android.view.View
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.media.controls.ui.view.MediaHost
@@ -31,10 +34,14 @@ import kotlinx.coroutines.flow.flowOf
 
 /** The base view model for the communal hub. */
 abstract class BaseCommunalViewModel(
+    private val communalSceneInteractor: CommunalSceneInteractor,
     private val communalInteractor: CommunalInteractor,
     val mediaHost: MediaHost,
 ) {
-    val currentScene: Flow<SceneKey> = communalInteractor.desiredScene
+    val currentScene: Flow<SceneKey> = communalSceneInteractor.currentScene
+
+    /** Whether communal hub should be focused by accessibility tools. */
+    open val isFocusable: Flow<Boolean> = MutableStateFlow(false)
 
     /** Whether widgets are currently being re-ordered. */
     open val reorderingWidgets: StateFlow<Boolean> = MutableStateFlow(false)
@@ -45,12 +52,15 @@ abstract class BaseCommunalViewModel(
     val selectedKey: StateFlow<String?>
         get() = _selectedKey
 
+    /** Accessibility delegate to be set on CommunalAppWidgetHostView. */
+    open val widgetAccessibilityDelegate: View.AccessibilityDelegate? = null
+
     fun signalUserInteraction() {
         communalInteractor.signalUserInteraction()
     }
 
-    fun onSceneChanged(scene: SceneKey) {
-        communalInteractor.onSceneChanged(scene)
+    fun changeScene(scene: SceneKey, transitionKey: TransitionKey? = null) {
+        communalSceneInteractor.changeScene(scene, transitionKey)
     }
 
     /**
@@ -59,7 +69,7 @@ abstract class BaseCommunalViewModel(
      * Note that you must call is with `null` when the UI is done or risk a memory leak.
      */
     fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
-        communalInteractor.setTransitionState(transitionState)
+        communalSceneInteractor.setTransitionState(transitionState)
     }
 
     /**
@@ -81,14 +91,23 @@ abstract class BaseCommunalViewModel(
     /** A list of all the communal content to be displayed in the communal hub. */
     abstract val communalContent: Flow<List<CommunalContentModel>>
 
+    /**
+     * Whether to freeze the emission of the communalContent flow to prevent recomposition. Defaults
+     * to false, indicating that the flow will emit new update.
+     */
+    open val isCommunalContentFlowFrozen: Flow<Boolean> = flowOf(false)
+
     /** Whether in edit mode for the communal hub. */
     open val isEditMode = false
 
-    /** Whether the popup message triggered by dismissing the CTA tile is showing. */
-    open val isPopupOnDismissCtaShowing: Flow<Boolean> = flowOf(false)
+    /** Whether the type of popup currently showing */
+    open val currentPopup: Flow<PopupType?> = flowOf(null)
 
-    /** Hide the popup message triggered by dismissing the CTA tile. */
-    open fun onHidePopupAfterDismissCta() {}
+    /** Whether the communal hub is empty with no widget available. */
+    open val isEmptyState: Flow<Boolean> = flowOf(false)
+
+    /** Called as the UI request to dismiss the any displaying popup */
+    open fun onHidePopup() {}
 
     /** Called as the UI requests deleting a widget. */
     open fun onDeleteWidget(id: Int) {}
@@ -103,7 +122,10 @@ abstract class BaseCommunalViewModel(
     open fun onReorderWidgets(widgetIdToPriorityMap: Map<Int, Int>) {}
 
     /** Called as the UI requests opening the widget editor with an optional preselected widget. */
-    open fun onOpenWidgetEditor(preselectedKey: String? = null) {}
+    open fun onOpenWidgetEditor(
+        preselectedKey: String? = null,
+        shouldOpenWidgetPickerOnStart: Boolean = false,
+    ) {}
 
     /** Called as the UI requests to dismiss the CTA tile. */
     open fun onDismissCtaTile() {}
@@ -116,6 +138,9 @@ abstract class BaseCommunalViewModel(
 
     /** Called as the user cancels dragging a widget to reorder. */
     open fun onReorderWidgetCancel() {}
+
+    /** Called as the user request to show the customize widget button. */
+    open fun onShowCustomizeWidgetButton() {}
 
     /** Set the key of the currently selected item */
     fun setSelectedKey(key: String?) {

@@ -184,6 +184,7 @@ import android.content.LocusId;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
+import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -266,6 +267,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
+import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.UiThread;
@@ -389,6 +391,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     IntentFirewall mIntentFirewall;
 
     final VisibleActivityProcessTracker mVisibleActivityProcessTracker;
+
+    /** The starting activities which are waiting for their processes to attach. */
+    final ArrayList<ActivityRecord> mStartingProcessActivities = new ArrayList<>();
 
     /* Global service lock used by the package the owns this service. */
     final WindowManagerGlobalLock mGlobalLock = new WindowManagerGlobalLock();
@@ -883,6 +888,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mRecentTasks.onSystemReadyLocked();
             mTaskSupervisor.onSystemReady();
             mActivityClientController.onSystemReady();
+            mAppWarnings.onSystemReady();
             // TODO(b/258792202) Cleanup once ASM is ready to launch
             ActivitySecurityModelFeatureFlags.initialize(mContext.getMainExecutor());
             mGrammaticalManagerInternal = LocalServices.getService(
@@ -945,7 +951,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         configuration.setGrammaticalGender(
-                mGrammaticalManagerInternal.retrieveSystemGrammaticalGender(configuration));
+                mGrammaticalManagerInternal.mergedFinalSystemGrammaticalGender());
 
         synchronized (mGlobalLock) {
             mForceResizableActivities = forceResizable;
@@ -1370,13 +1376,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
             final boolean debug = ((intent.getFlags() & Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0);
 
+            final int userId = UserHandle.getCallingUserId();
             ActivityInfo aInfo = null;
             try {
                 List<ResolveInfo> resolves =
                         AppGlobals.getPackageManager().queryIntentActivities(
                                 intent, r.resolvedType,
                                 PackageManager.MATCH_DEFAULT_ONLY | STOCK_PM_FLAGS,
-                                UserHandle.getCallingUserId()).getList();
+                                userId).getList();
 
                 // Look for the original activity in the list...
                 final int N = resolves != null ? resolves.size() : 0;
@@ -1461,6 +1468,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         .setRealCallingPid(-1)
                         .setRealCallingUid(r.launchedFromUid)
                         .setActivityOptions(options)
+                        .setUserId(userId)
                         .execute();
                 r.finishing = wasFinishing;
                 return res == ActivityManager.START_SUCCESS;
@@ -2158,19 +2166,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             Binder.restoreCallingIdentity(ident);
         }
         return rect;
-    }
-
-    @Override
-    public ActivityManager.TaskDescription getTaskDescription(int id) {
-        synchronized (mGlobalLock) {
-            enforceTaskPermission("getTaskDescription()");
-            final Task tr = mRootWindowContainer.anyTaskForId(id,
-                    MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
-            if (tr != null) {
-                return tr.getTaskDescription();
-            }
-        }
-        return null;
     }
 
     /**
@@ -3072,8 +3067,33 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public Bitmap getTaskDescriptionIcon(String filePath, int userId) {
-        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
-                userId, "getTaskDescriptionIcon");
+        final int callingUid = Binder.getCallingUid();
+        // Verify that the caller can make the request for the given userId
+        userId = handleIncomingUser(Binder.getCallingPid(), callingUid, userId,
+                "getTaskDescriptionIcon");
+        synchronized (mGlobalLock) {
+            // Verify that the caller can make the request for given icon file path
+            final ActivityRecord matchingActivity = mRootWindowContainer.getActivity(
+                    r -> {
+                        if (r.taskDescription == null
+                                || r.taskDescription.getIconFilename() == null) {
+                            return false;
+                        }
+                        return r.taskDescription.getIconFilename().equals(filePath);
+                    });
+            if (matchingActivity == null || (matchingActivity.getUid() != callingUid)) {
+                // Caller UID doesn't match the requested Activity's UID, check if caller is
+                // privileged
+                try {
+                    enforceActivityTaskPermission("getTaskDescriptionIcon");
+                } catch (SecurityException e) {
+                    Slog.w(TAG, "getTaskDescriptionIcon(): request (callingUid=" + callingUid
+                            + ", filePath=" + filePath + ", user=" + userId + ") doesn't match any "
+                            + "activity");
+                    throw e;
+                }
+            }
+        }
 
         final File passedIconFile = new File(filePath);
         final File legitIconFile = new File(TaskPersister.getUserImagesDir(userId),
@@ -3301,6 +3321,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         }
         return false;
+    }
+
+    /**
+     * An instance method that's easier for mocking in tests.
+     */
+    void enforceActivityTaskPermission(String func) {
+        enforceTaskPermission(func);
     }
 
     static void enforceTaskPermission(String func) {
@@ -3713,16 +3740,25 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return false;
         }
 
-        // If PiP2 flag is on and client-request to enter PiP comes in,
-        // we request a direct transition from Shell to TRANSIT_PIP to get the startWct
-        // with the right entry bounds. So PiP activity isn't moved to a pinned task until after
-        // Shell calls back into Core with the entry bounds passed through.
+        // If the app is using auto-enter, and it explicitly requests entering PiP while pausing,
+        // return false immediately since auto-enter should take in place instead.
+        if (fromClient && r.isState(PAUSING) && params.isAutoEnterEnabled()) {
+            Slog.w(TAG, "Skip client enterPictureInPictureMode request while pausing,"
+                    + " auto-enter-pip is enabled");
+            return false;
+        }
+
         if (isPip2ExperimentEnabled()) {
-            final Transition legacyEnterPipTransition = new Transition(TRANSIT_PIP,
+            // If PiP2 flag is on and request to enter PiP comes in,
+            // we request a direct transition TRANSIT_PIP from Shell to get the right entry bounds.
+            // So PiP activity isn't moved to a pinned task until after
+            // Shell calls back into Core with the entry bounds to be applied with startWCT.
+            final Transition enterPipTransition = new Transition(TRANSIT_PIP,
                     0 /* flags */, getTransitionController(), mWindowManager.mSyncEngine);
-            legacyEnterPipTransition.setPipActivity(r);
-            getTransitionController().startCollectOrQueue(legacyEnterPipTransition, (deferred) -> {
-                getTransitionController().requestStartTransition(legacyEnterPipTransition,
+            enterPipTransition.setPipActivity(r);
+            r.mAutoEnteringPip = isAutoEnter;
+            getTransitionController().startCollectOrQueue(enterPipTransition, (deferred) -> {
+                getTransitionController().requestStartTransition(enterPipTransition,
                         r.getTask(), null /* remoteTransition */, null /* displayChange */);
             });
             return true;
@@ -3767,7 +3803,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // Continue the pausing process after entering pip.
                 if (r.isState(PAUSING) && r.mPauseSchedulePendingForPip) {
                     r.getTask().schedulePauseActivity(r, false /* userLeaving */,
-                            false /* pauseImmediately */, true /* autoEnteringPip */, "auto-pip");
+                            false /* pauseImmediately */, true /* autoEnteringPip */,
+                            "auto-pip");
                 }
                 r.mAutoEnteringPip = false;
             }
@@ -4303,6 +4340,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (mDemoteTopAppReasons != 0) {
                 pw.println("  mDemoteTopAppReasons=" + mDemoteTopAppReasons);
             }
+            if (!mStartingProcessActivities.isEmpty()) {
+                pw.println("  mStartingProcessActivities=" + mStartingProcessActivities);
+            }
         }
 
         if (!printedAnything) {
@@ -4343,7 +4383,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      */
     protected boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name, String[] args,
             int opti, boolean dumpAll, boolean dumpVisibleRootTasksOnly,
-            boolean dumpFocusedRootTaskOnly, int displayIdFilter, @UserIdInt int userId) {
+            boolean dumpFocusedRootTaskOnly, int displayIdFilter, @UserIdInt int userId,
+            long timeout) {
         ArrayList<ActivityRecord> activities;
 
         synchronized (mGlobalLock) {
@@ -4388,7 +4429,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     }
                 }
             }
-            dumpActivity("  ", fd, pw, activities.get(i), newArgs, dumpAll);
+            dumpActivity("  ", fd, pw, activities.get(i), newArgs, dumpAll, timeout);
         }
         if (!printedAnything) {
             // Typically happpens when no task matches displayIdFilter
@@ -4402,7 +4443,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * there is a thread associated with the activity.
      */
     private void dumpActivity(String prefix, FileDescriptor fd, PrintWriter pw,
-            ActivityRecord r, String[] args, boolean dumpAll) {
+            ActivityRecord r, String[] args, boolean dumpAll, long timeout) {
         String innerPrefix = prefix + "  ";
         IApplicationThread appThread = null;
         synchronized (mGlobalLock) {
@@ -4433,7 +4474,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             pw.flush();
             try (TransferPipe tp = new TransferPipe()) {
                 appThread.dumpActivity(tp.getWriteFd(), r.token, innerPrefix, args);
-                tp.go(fd);
+                tp.go(fd, timeout);
             } catch (IOException e) {
                 pw.println(innerPrefix + "Failure while dumping the activity: " + e);
             } catch (RemoteException e) {
@@ -5060,6 +5101,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_MANAGER_SLEEP_STATE_CHANGED,
                         FrameworkStatsLog.ACTIVITY_MANAGER_SLEEP_STATE_CHANGED__STATE__AWAKE);
                 startTimeTrackingFocusedActivityLocked();
+                if (mTopApp != null) {
+                    mTopApp.addToPendingTop();
+                }
                 mTopProcessState = ActivityManager.PROCESS_STATE_TOP;
                 Slog.d(TAG, "Top Process State changed to PROCESS_STATE_TOP");
                 mTaskSupervisor.comeOutOfSleepIfNeededLocked();
@@ -5147,6 +5191,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     void startProcessAsync(ActivityRecord activity, boolean knownToBeDead, boolean isTop,
             String hostingType) {
+        if (!mStartingProcessActivities.contains(activity)) {
+            mStartingProcessActivities.add(activity);
+        } else if (mProcessNames.get(
+                activity.processName, activity.info.applicationInfo.uid) != null) {
+            // The process is already starting. Wait for it to attach.
+            return;
+        }
         try {
             if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "dispatchingStartProcess:"
@@ -6143,7 +6194,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void onProcessRemoved(String name, int uid) {
             synchronized (mGlobalLockWithoutBoost) {
-                mProcessNames.remove(name, uid);
+                final WindowProcessController proc = mProcessNames.remove(name, uid);
+                if (proc != null && !mStartingProcessActivities.isEmpty()) {
+                    for (int i = mStartingProcessActivities.size() - 1; i >= 0; i--) {
+                        final ActivityRecord r = mStartingProcessActivities.get(i);
+                        if (uid == r.info.applicationInfo.uid && name.equals(r.processName)) {
+                            Slog.w(TAG, proc + " is removed with pending start " + r);
+                            mStartingProcessActivities.remove(i);
+                            // If visible, finish it to avoid getting stuck on screen.
+                            if (r.isVisibleRequested()) {
+                                r.finishIfPossible("starting-proc-removed", false /* oomAdj */);
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -6303,7 +6367,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void onPackageDataCleared(String name, int userId) {
             synchronized (mGlobalLock) {
                 mCompatModePackages.handlePackageDataClearedLocked(name);
-                mAppWarnings.onPackageDataCleared(name);
+                mAppWarnings.onPackageDataCleared(name, userId);
                 mPackageConfigPersister.onPackageDataCleared(name, userId);
             }
         }
@@ -6311,7 +6375,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void onPackageUninstalled(String name, int userId) {
             synchronized (mGlobalLock) {
-                mAppWarnings.onPackageUninstalled(name);
+                mAppWarnings.onPackageUninstalled(name, userId);
                 mCompatModePackages.handlePackageUninstalledLocked(name);
                 mPackageConfigPersister.onPackageUninstall(name, userId);
             }
@@ -6909,7 +6973,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 boolean dumpFocusedRootTaskOnly, int displayIdFilter,
                 @UserIdInt int userId) {
             return ActivityTaskManagerService.this.dumpActivity(fd, pw, name, args, opti, dumpAll,
-                    dumpVisibleRootTasksOnly, dumpFocusedRootTaskOnly, displayIdFilter, userId);
+                    dumpVisibleRootTasksOnly, dumpFocusedRootTaskOnly, displayIdFilter, userId,
+                    /* timeout= */ 5000);
         }
 
         @Override
@@ -7337,7 +7402,26 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    /** Cache the return value for {@link #isPip2ExperimentEnabled()} */
+    private static Boolean sIsPip2ExperimentEnabled = null;
+
+    /**
+     * @return {@code true} if PiP2 implementation should be used. Besides the trunk stable flag,
+     * system property can be used to override this read only flag during development.
+     * It's currently limited to phone form factor, i.e., not enabled on ARC / TV.
+     */
     static boolean isPip2ExperimentEnabled() {
-        return Flags.enablePip2Implementation();
+        if (sIsPip2ExperimentEnabled == null) {
+            final FeatureInfo arcFeature = SystemConfig.getInstance().getAvailableFeatures().get(
+                    "org.chromium.arc");
+            final FeatureInfo tvFeature = SystemConfig.getInstance().getAvailableFeatures().get(
+                    FEATURE_LEANBACK);
+            final boolean isArc = arcFeature != null && arcFeature.version >= 0;
+            final boolean isTv = tvFeature != null && tvFeature.version >= 0;
+            sIsPip2ExperimentEnabled = SystemProperties.getBoolean(
+                    "persist.wm_shell.pip2", false)
+                    || (Flags.enablePip2Implementation() && !isArc && !isTv);
+        }
+        return sIsPip2ExperimentEnabled;
     }
 }

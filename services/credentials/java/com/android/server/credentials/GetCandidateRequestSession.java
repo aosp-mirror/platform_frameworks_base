@@ -22,9 +22,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.credentials.Constants;
+import android.credentials.CredentialManager;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.GetCandidateCredentialsException;
 import android.credentials.GetCandidateCredentialsResponse;
+import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialRequest;
 import android.credentials.GetCredentialResponse;
 import android.credentials.IGetCandidateCredentialsCallback;
@@ -54,7 +56,7 @@ import java.util.Set;
 public class GetCandidateRequestSession extends RequestSession<GetCredentialRequest,
         IGetCandidateCredentialsCallback, GetCandidateCredentialsResponse>
         implements ProviderSession.ProviderInternalCallback<GetCredentialResponse> {
-    private static final String TAG = "GetCandidateRequestSession";
+    private static final String TAG = CredentialManager.TAG;
 
     private static final String SESSION_ID_KEY = "autofill_session_id";
     private static final String REQUEST_ID_KEY = "autofill_request_id";
@@ -62,6 +64,11 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
     private final IBinder mClientBinder;
     private final int mAutofillSessionId;
     private final int mAutofillRequestId;
+
+    private final ResultReceiver mAutofillCallback;
+
+    @Nullable
+    private ComponentName mPrimaryProviderComponentName = null;
 
     public GetCandidateRequestSession(
             Context context, SessionLifetime sessionCallback,
@@ -76,6 +83,8 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
         mClientBinder = clientBinder;
         mAutofillSessionId = request.getData().getInt(SESSION_ID_KEY, -1);
         mAutofillRequestId = request.getData().getInt(REQUEST_ID_KEY, -1);
+        mAutofillCallback = request.getData().getParcelable(
+                CredentialManager.EXTRA_AUTOFILL_RESULT_RECEIVER, ResultReceiver.class);
         if (mClientBinder != null) {
             setUpClientCallbackListener(mClientBinder);
         }
@@ -98,8 +107,12 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
         if (providerGetCandidateSessions != null) {
             Slog.d(TAG, "In startProviderSession - provider session created and "
                     + "being added for: " + providerInfo.getComponentName());
-            mProviders.put(providerGetCandidateSessions.getComponentName().flattenToString(),
-                    providerGetCandidateSessions);
+            ComponentName componentName = providerGetCandidateSessions
+                    .getComponentName();
+            if (providerInfo.isPrimary()) {
+                mPrimaryProviderComponentName = componentName;
+            }
+            mProviders.put(componentName.flattenToString(), providerGetCandidateSessions);
         }
         return providerGetCandidateSessions;
     }
@@ -132,7 +145,7 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
 
         try {
             invokeClientCallbackSuccess(new GetCandidateCredentialsResponse(
-                    candidateProviderDataList, intent));
+                    candidateProviderDataList, intent, mPrimaryProviderComponentName));
         } catch (RemoteException e) {
             Slog.e(TAG, "Issue while responding to client with error : " + e);
         }
@@ -154,34 +167,34 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
     public void onFinalErrorReceived(ComponentName componentName, String errorType,
             String message) {
         Slog.d(TAG, "onFinalErrorReceived");
-        respondToFinalReceiverWithFailureAndFinish(this.mFinalResponseReceiver, errorType, message);
+        if (GetCredentialException.TYPE_USER_CANCELED.equals(errorType)) {
+            Slog.d(TAG, "User canceled but session is not being terminated");
+            return;
+        }
+        respondToFinalReceiverWithFailureAndFinish(errorType, message);
     }
 
     @Override
-    public void onUiCancellation(boolean isUserCancellation,
-            @Nullable ResultReceiver finalResponseReceiver) {
-        String exception = GetCandidateCredentialsException.TYPE_USER_CANCELED;
-        String message = "User cancelled the selector";
-        if (!isUserCancellation) {
-            exception = GetCandidateCredentialsException.TYPE_INTERRUPTED;
-            message = "The UI was interrupted - please try again.";
-        }
-        mRequestSessionMetric.collectFrameworkException(exception);
-        respondToFinalReceiverWithFailureAndFinish(finalResponseReceiver, exception, message);
+    public void onUiCancellation(boolean isUserCancellation) {
+        Slog.d(TAG, "User canceled but session is not being terminated");
     }
 
     private void respondToFinalReceiverWithFailureAndFinish(
-            ResultReceiver finalResponseReceiver,
             String exception, String message
     ) {
-        if (finalResponseReceiver != null) {
+        if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
+            Slog.w(TAG, "Request has already been completed. This is strange.");
+            return;
+        }
+
+        if (mAutofillCallback != null) {
             Bundle resultData = new Bundle();
             resultData.putStringArray(
                     CredentialProviderService.EXTRA_GET_CREDENTIAL_EXCEPTION,
                     new String[] {exception, message});
-            finalResponseReceiver.send(Constants.FAILURE_CREDMAN_SELECTOR, resultData);
+            mAutofillCallback.send(Constants.FAILURE_CREDMAN_SELECTOR, resultData);
         } else {
-            Slog.w(TAG, "onUiCancellation called but finalResponseReceiver not found");
+            Slog.w(TAG, "onUiCancellation called but mAutofillCallback not found");
         }
         finishSession(/*propagateCancellation=*/false, ApiStatus.FAILURE.getMetricCode());
     }
@@ -218,12 +231,25 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
     public void onFinalResponseReceived(ComponentName componentName,
             GetCredentialResponse response) {
         Slog.d(TAG, "onFinalResponseReceived");
-        if (this.mFinalResponseReceiver != null) {
+        if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
+            Slog.w(TAG, "Request has already been completed. This is strange.");
+            return;
+        }
+        respondToFinalReceiverWithResponseAndFinish(response);
+    }
+
+    private void respondToFinalReceiverWithResponseAndFinish(GetCredentialResponse response) {
+        if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
+            Slog.w(TAG, "Request has already been completed. This is strange.");
+            return;
+        }
+
+        if (this.mAutofillCallback != null) {
             Slog.d(TAG, "onFinalResponseReceived sending through final receiver");
             Bundle resultData = new Bundle();
             resultData.putParcelable(
                     CredentialProviderService.EXTRA_GET_CREDENTIAL_RESPONSE, response);
-            mFinalResponseReceiver.send(Constants.SUCCESS_CREDMAN_SELECTOR, resultData);
+            mAutofillCallback.send(Constants.SUCCESS_CREDMAN_SELECTOR, resultData);
             finishSession(/*propagateCancellation=*/ false, ApiStatus.SUCCESS.getMetricCode());
         } else {
             Slog.w(TAG, "onFinalResponseReceived result receiver not found for pinned entry");

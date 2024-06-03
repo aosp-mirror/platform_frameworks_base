@@ -21,8 +21,7 @@ import android.media.session.MediaController.PlaybackInfo
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.res.R
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaDeviceSessionInteractor
-import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaDeviceSession
-import com.android.systemui.volume.panel.component.volume.domain.interactor.VolumeSliderInteractor
+import com.android.systemui.volume.panel.component.mediaoutput.shared.model.MediaDeviceSession
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -41,7 +40,6 @@ constructor(
     @Assisted private val coroutineScope: CoroutineScope,
     private val context: Context,
     private val mediaDeviceSessionInteractor: MediaDeviceSessionInteractor,
-    private val volumeSliderInteractor: VolumeSliderInteractor,
 ) : SliderViewModel {
 
     override val slider: StateFlow<SliderState> =
@@ -56,6 +54,8 @@ constructor(
         }
     }
 
+    override fun onValueChangeFinished() {}
+
     override fun toggleMuted(state: SliderState) {
         // do nothing because this action isn't supported for Cast sliders.
     }
@@ -66,16 +66,9 @@ constructor(
             value = currentVolume.toFloat(),
             valueRange = volumeRange.first.toFloat()..volumeRange.last.toFloat(),
             icon = Icon.Resource(R.drawable.ic_cast, null),
-            valueText =
-                SliderViewModel.formatValue(
-                    volumeSliderInteractor.processVolumeToValue(
-                        volume = currentVolume,
-                        volumeRange = volumeRange,
-                    )
-                ),
             label = context.getString(R.string.media_device_cast),
             isEnabled = true,
-            a11yStep = 1
+            a11yStep = 1,
         )
     }
 
@@ -83,15 +76,21 @@ constructor(
         override val value: Float,
         override val valueRange: ClosedFloatingPointRange<Float>,
         override val icon: Icon,
-        override val valueText: String,
         override val label: String,
         override val isEnabled: Boolean,
         override val a11yStep: Int,
     ) : SliderState {
         override val disabledMessage: String?
             get() = null
+
         override val isMutable: Boolean
             get() = false
+
+        override val a11yClickDescription: String?
+            get() = null
+
+        override val a11yStateDescription: String?
+            get() = null
     }
 
     @AssistedFactory

@@ -58,7 +58,6 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
@@ -68,6 +67,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
@@ -198,11 +198,22 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     }
 
     @Test
-    public void testIsAvailable_qawFeatureAvailable() {
+    public void testIsAvailable_qawFeatureAvailableWalletUnavailable() {
+        when(mController.isWalletRoleAvailable()).thenReturn(false);
         when(mPackageManager.hasSystemFeature(FEATURE_NFC_HOST_CARD_EMULATION)).thenReturn(true);
         when(mPackageManager.hasSystemFeature("org.chromium.arc")).thenReturn(false);
         when(mSecureSettings.getStringForUser(NFC_PAYMENT_DEFAULT_COMPONENT,
                 UserHandle.USER_CURRENT)).thenReturn("Component");
+
+        assertTrue(mTile.isAvailable());
+    }
+
+    @Test
+    public void testIsAvailable_nfcUnavailableWalletAvailable() {
+        when(mController.isWalletRoleAvailable()).thenReturn(true);
+        when(mHost.getUserId()).thenReturn(PRIMARY_USER_ID);
+        when(mPackageManager.hasSystemFeature(FEATURE_NFC_HOST_CARD_EMULATION)).thenReturn(false);
+        when(mPackageManager.hasSystemFeature("org.chromium.arc")).thenReturn(false);
 
         assertTrue(mTile.isAvailable());
     }

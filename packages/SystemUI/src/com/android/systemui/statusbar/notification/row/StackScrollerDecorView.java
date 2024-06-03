@@ -252,7 +252,7 @@ public abstract class StackScrollerDecorView extends ExpandableView {
             float translationDirection, boolean isHeadsUpAnimation,
             Runnable onStartedRunnable,
             Runnable onFinishedRunnable,
-            AnimatorListenerAdapter animationListener) {
+            AnimatorListenerAdapter animationListener, ClipSide clipSide) {
         // TODO: Use duration
         if (onStartedRunnable != null) {
             onStartedRunnable.run();

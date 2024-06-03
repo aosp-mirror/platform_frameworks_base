@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.graphics.Rect
 import android.transition.Transition
+import android.transition.TransitionListenerAdapter
 import android.transition.TransitionSet
 import android.transition.TransitionValues
 import android.util.Log
@@ -36,6 +37,8 @@ import com.android.systemui.res.R
 import com.android.systemui.shared.R as sharedR
 import com.google.android.material.math.MathUtils
 import kotlin.math.abs
+
+internal fun View.getRect(): Rect = Rect(this.left, this.top, this.right, this.bottom)
 
 internal fun View.setRect(rect: Rect) =
     this.setLeftTopRightBottom(rect.left, rect.top, rect.right, rect.bottom)
@@ -54,9 +57,9 @@ class ClockSizeTransition(
         addTransition(SmartspaceMoveTransition(config, clockViewModel))
     }
 
-    open class VisibilityBoundsTransition() : Transition() {
-        var captureSmartspace: Boolean = false
-
+    abstract class VisibilityBoundsTransition() : Transition() {
+        abstract val captureSmartspace: Boolean
+        protected val TAG = this::class.simpleName!!
         override fun captureEndValues(transition: TransitionValues) = captureValues(transition)
         override fun captureStartValues(transition: TransitionValues) = captureValues(transition)
         override fun getTransitionProperties(): Array<String> = TRANSITION_PROPERTIES
@@ -65,12 +68,18 @@ class ClockSizeTransition(
             val view = transition.view
             transition.values[PROP_VISIBILITY] = view.visibility
             transition.values[PROP_ALPHA] = view.alpha
-            transition.values[PROP_BOUNDS] = Rect(view.left, view.top, view.right, view.bottom)
+            transition.values[PROP_BOUNDS] = view.getRect()
 
             if (!captureSmartspace) return
-            val ss = (view.parent as View).findViewById<View>(sharedR.id.bc_smartspace_view)
-            if (ss == null) return
-            transition.values[SMARTSPACE_BOUNDS] = Rect(ss.left, ss.top, ss.right, ss.bottom)
+            val parent = view.parent as View
+            val targetSSView =
+                parent.findViewById<View>(sharedR.id.bc_smartspace_view)
+                    ?: parent.findViewById<View>(R.id.keyguard_slice_view)
+            if (targetSSView == null) {
+                Log.e(TAG, "Failed to find smartspace equivalent target under $parent")
+                return
+            }
+            transition.values[SMARTSPACE_BOUNDS] = targetSSView.getRect()
         }
 
         open fun mutateBounds(
@@ -88,20 +97,24 @@ class ClockSizeTransition(
             startValues: TransitionValues?,
             endValues: TransitionValues?
         ): Animator? {
-            if (startValues == null || endValues == null) return null
+            if (startValues == null || endValues == null) {
+                Log.w(
+                    TAG,
+                    "Couldn't create animator: startValues=$startValues; endValues=$endValues"
+                )
+                return null
+            }
 
             var fromVis = startValues.values[PROP_VISIBILITY] as Int
             var fromIsVis = fromVis == View.VISIBLE
             var fromAlpha = startValues.values[PROP_ALPHA] as Float
             val fromBounds = startValues.values[PROP_BOUNDS] as Rect
-            val fromSSBounds =
-                if (captureSmartspace) startValues.values[SMARTSPACE_BOUNDS] as Rect else null
+            val fromSSBounds = startValues.values[SMARTSPACE_BOUNDS] as Rect?
 
             val toView = endValues.view
             val toVis = endValues.values[PROP_VISIBILITY] as Int
             val toBounds = endValues.values[PROP_BOUNDS] as Rect
-            val toSSBounds =
-                if (captureSmartspace) endValues.values[SMARTSPACE_BOUNDS] as Rect else null
+            val toSSBounds = endValues.values[SMARTSPACE_BOUNDS] as Rect?
             val toIsVis = toVis == View.VISIBLE
             val toAlpha = if (toIsVis) 1f else 0f
 
@@ -140,11 +153,12 @@ class ClockSizeTransition(
             fun assignAnimValues(src: String, fract: Float, vis: Int? = null) {
                 val bounds = computeBounds(fract)
                 val alpha = MathUtils.lerp(fromAlpha, toAlpha, fract)
-                if (DEBUG)
+                if (DEBUG) {
                     Log.i(
                         TAG,
                         "$src: $toView; fract=$fract; alpha=$alpha; vis=$vis; bounds=$bounds;"
                     )
+                }
                 toView.setVisibility(vis ?: View.VISIBLE)
                 toView.setAlpha(alpha)
                 toView.setRect(bounds)
@@ -169,10 +183,19 @@ class ClockSizeTransition(
                     return@OnPreDrawListener true
                 }
 
-                anim.duration = duration
-                anim.startDelay = startDelay
-                anim.interpolator = interpolator
-                anim.addListener(
+                this@VisibilityBoundsTransition.addListener(
+                    object : TransitionListenerAdapter() {
+                        override fun onTransitionStart(t: Transition) {
+                            toView.viewTreeObserver.addOnPreDrawListener(predrawCallback)
+                        }
+
+                        override fun onTransitionEnd(t: Transition) {
+                            toView.viewTreeObserver.removeOnPreDrawListener(predrawCallback)
+                        }
+                    }
+                )
+
+                val listener =
                     object : AnimatorListenerAdapter() {
                         override fun onAnimationStart(anim: Animator) {
                             assignAnimValues("start", 0f, fromVis)
@@ -181,13 +204,11 @@ class ClockSizeTransition(
                         override fun onAnimationEnd(anim: Animator) {
                             assignAnimValues("end", 1f, toVis)
                             if (sendToBack) toView.translationZ = 0f
-                            toView.viewTreeObserver.removeOnPreDrawListener(predrawCallback)
                         }
                     }
-                )
 
+                anim.addListener(listener)
                 assignAnimValues("init", 0f, fromVis)
-                toView.viewTreeObserver.addOnPreDrawListener(predrawCallback)
             }
         }
 
@@ -198,9 +219,6 @@ class ClockSizeTransition(
             private const val SMARTSPACE_BOUNDS = "ClockSizeTransition:SSBounds"
             private val TRANSITION_PROPERTIES =
                 arrayOf(PROP_VISIBILITY, PROP_ALPHA, PROP_BOUNDS, SMARTSPACE_BOUNDS)
-
-            private val DEBUG = false
-            private val TAG = VisibilityBoundsTransition::class.simpleName!!
         }
     }
 
@@ -209,17 +227,24 @@ class ClockSizeTransition(
         val viewModel: KeyguardClockViewModel,
         val smartspaceViewModel: KeyguardSmartspaceViewModel,
     ) : VisibilityBoundsTransition() {
+        override val captureSmartspace = !viewModel.isLargeClockVisible.value
+
         init {
             duration = CLOCK_IN_MILLIS
             startDelay = CLOCK_IN_START_DELAY_MILLIS
             interpolator = CLOCK_IN_INTERPOLATOR
-            captureSmartspace = !viewModel.useLargeClock && smartspaceViewModel.isSmartspaceEnabled
 
-            if (viewModel.useLargeClock) {
+            if (viewModel.isLargeClockVisible.value) {
                 viewModel.currentClock.value?.let {
+                    if (DEBUG) Log.i(TAG, "Large Clock In: ${it.largeClock.layout.views}")
                     it.largeClock.layout.views.forEach { addTarget(it) }
                 }
+                    ?: run {
+                        Log.e(TAG, "No large clock set, falling back")
+                        addTarget(R.id.lockscreen_clock_view_large)
+                    }
             } else {
+                if (DEBUG) Log.i(TAG, "Small Clock In")
                 addTarget(R.id.lockscreen_clock_view)
             }
         }
@@ -236,12 +261,9 @@ class ClockSizeTransition(
             // Move normally if clock is not changing visibility
             if (fromIsVis == toIsVis) return
 
-            fromBounds.left = toBounds.left
-            fromBounds.right = toBounds.right
-            if (viewModel.useLargeClock) {
-                // Large clock shouldn't move
-                fromBounds.top = toBounds.top
-                fromBounds.bottom = toBounds.bottom
+            fromBounds.set(toBounds)
+            if (viewModel.isLargeClockVisible.value) {
+                // Large clock shouldn't move; fromBounds already set
             } else if (toSSBounds != null && fromSSBounds != null) {
                 // Instead of moving the small clock the full distance, we compute the distance
                 // smartspace will move. We then scale this to match the duration of this animation
@@ -261,7 +283,6 @@ class ClockSizeTransition(
             val CLOCK_IN_INTERPOLATOR = Interpolators.LINEAR_OUT_SLOW_IN
             const val SMALL_CLOCK_IN_MOVE_SCALE =
                 CLOCK_IN_MILLIS / SmartspaceMoveTransition.STATUS_AREA_MOVE_DOWN_MILLIS.toFloat()
-            private val TAG = ClockFaceInTransition::class.simpleName!!
         }
     }
 
@@ -270,17 +291,24 @@ class ClockSizeTransition(
         val viewModel: KeyguardClockViewModel,
         val smartspaceViewModel: KeyguardSmartspaceViewModel,
     ) : VisibilityBoundsTransition() {
+        override val captureSmartspace = viewModel.isLargeClockVisible.value
+
         init {
             duration = CLOCK_OUT_MILLIS
             interpolator = CLOCK_OUT_INTERPOLATOR
-            captureSmartspace = viewModel.useLargeClock && smartspaceViewModel.isSmartspaceEnabled
 
-            if (viewModel.useLargeClock) {
+            if (viewModel.isLargeClockVisible.value) {
+                if (DEBUG) Log.i(TAG, "Small Clock Out")
                 addTarget(R.id.lockscreen_clock_view)
             } else {
                 viewModel.currentClock.value?.let {
+                    if (DEBUG) Log.i(TAG, "Large Clock Out: ${it.largeClock.layout.views}")
                     it.largeClock.layout.views.forEach { addTarget(it) }
                 }
+                    ?: run {
+                        Log.e(TAG, "No large clock set, falling back")
+                        addTarget(R.id.lockscreen_clock_view_large)
+                    }
             }
         }
 
@@ -296,12 +324,9 @@ class ClockSizeTransition(
             // Move normally if clock is not changing visibility
             if (fromIsVis == toIsVis) return
 
-            toBounds.left = fromBounds.left
-            toBounds.right = fromBounds.right
-            if (!viewModel.useLargeClock) {
-                // Large clock shouldn't move
-                toBounds.top = fromBounds.top
-                toBounds.bottom = fromBounds.bottom
+            toBounds.set(fromBounds)
+            if (!viewModel.isLargeClockVisible.value) {
+                // Large clock shouldn't move; toBounds already set
             } else if (toSSBounds != null && fromSSBounds != null) {
                 // Instead of moving the small clock the full distance, we compute the distance
                 // smartspace will move. We then scale this to match the duration of this animation
@@ -311,7 +336,7 @@ class ClockSizeTransition(
                 toBounds.top = fromBounds.top - ssTranslation
                 toBounds.bottom = fromBounds.bottom - ssTranslation
             } else {
-                Log.w(TAG, "mutateBounds: smallClock received no smartspace bounds")
+                Log.e(TAG, "mutateBounds: smallClock received no smartspace bounds")
             }
         }
 
@@ -320,7 +345,6 @@ class ClockSizeTransition(
             val CLOCK_OUT_INTERPOLATOR = Interpolators.LINEAR
             const val SMALL_CLOCK_OUT_MOVE_SCALE =
                 CLOCK_OUT_MILLIS / SmartspaceMoveTransition.STATUS_AREA_MOVE_UP_MILLIS.toFloat()
-            private val TAG = ClockFaceOutTransition::class.simpleName!!
         }
     }
 
@@ -329,9 +353,11 @@ class ClockSizeTransition(
         val config: IntraBlueprintTransition.Config,
         viewModel: KeyguardClockViewModel,
     ) : VisibilityBoundsTransition() {
+        override val captureSmartspace = false
+
         init {
             duration =
-                if (viewModel.useLargeClock) STATUS_AREA_MOVE_UP_MILLIS
+                if (viewModel.isLargeClockVisible.value) STATUS_AREA_MOVE_UP_MILLIS
                 else STATUS_AREA_MOVE_DOWN_MILLIS
             interpolator = Interpolators.EMPHASIZED
             addTarget(sharedR.id.date_smartspace_view)
@@ -343,9 +369,28 @@ class ClockSizeTransition(
             addTarget(R.id.status_view_media_container)
         }
 
+        override fun mutateBounds(
+            view: View,
+            fromIsVis: Boolean,
+            toIsVis: Boolean,
+            fromBounds: Rect,
+            toBounds: Rect,
+            fromSSBounds: Rect?,
+            toSSBounds: Rect?
+        ) {
+            // If view is changing visibility, hold it in place
+            if (fromIsVis == toIsVis) return
+            if (DEBUG) Log.i(TAG, "Holding position of ${view.id}")
+            toBounds.set(fromBounds)
+        }
+
         companion object {
             const val STATUS_AREA_MOVE_UP_MILLIS = 967L
             const val STATUS_AREA_MOVE_DOWN_MILLIS = 467L
         }
+    }
+
+    companion object {
+        val DEBUG = true
     }
 }

@@ -17,10 +17,13 @@
 package com.android.credentialmanager.common.ui
 
 import android.content.Context
+import android.util.Log
+import com.android.credentialmanager.common.Constants
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
+import com.android.credentialmanager.model.get.ActionEntryInfo
 import com.android.credentialmanager.model.get.CredentialEntryInfo
-import com.android.credentialmanager.model.CredentialType
+import com.android.credentialmanager.model.EntryInfo
 import android.graphics.drawable.Icon
 
 class RemoteViewsFactory {
@@ -29,50 +32,55 @@ class RemoteViewsFactory {
         private const val SET_ADJUST_VIEW_BOUNDS_METHOD_NAME = "setAdjustViewBounds"
         private const val SET_MAX_HEIGHT_METHOD_NAME = "setMaxHeight"
         private const val SET_BACKGROUND_RESOURCE_METHOD_NAME = "setBackgroundResource"
-        private const val BULLET_POINT = "\u2022"
+        private const val SEPARATOR = " " + "\u2022" + " "
+
         // TODO(jbabs): RemoteViews#setViewPadding renders this as 8dp on the display. Debug why.
         private const val END_ITEMS_PADDING = 28
 
         fun createDropdownPresentation(
             context: Context,
             icon: Icon,
-            credentialEntryInfo: CredentialEntryInfo,
+            entryInfo: EntryInfo,
             isFirstEntry: Boolean,
             isLastEntry: Boolean,
         ): RemoteViews {
             var layoutId: Int = com.android.credentialmanager.R.layout
                     .credman_dropdown_presentation_layout
             val remoteViews = RemoteViews(context.packageName, layoutId)
-            if (credentialEntryInfo.credentialType == CredentialType.UNKNOWN) {
-                return remoteViews
+            if (entryInfo is CredentialEntryInfo) {
+                val displayName = entryInfo.displayName ?: entryInfo.userName
+                remoteViews.setTextViewText(android.R.id.text1, displayName)
+                val secondaryText = getSecondaryText(entryInfo)
+                if (secondaryText.isNullOrBlank()) {
+                    Log.w(Constants.LOG_TAG, "Secondary text for dropdown credential entry is null")
+                } else {
+                    remoteViews.setTextViewText(android.R.id.text2, secondaryText)
+                }
+                remoteViews.setContentDescription(
+                    android.R.id.icon1, entryInfo
+                        .providerDisplayName
+                )
+            } else if (entryInfo is ActionEntryInfo) {
+                remoteViews.setTextViewText(android.R.id.text1, entryInfo.title)
+                remoteViews.setTextViewText(android.R.id.text2, entryInfo.subTitle)
             }
-            val displayName = credentialEntryInfo.displayName ?: credentialEntryInfo.userName
-            remoteViews.setTextViewText(android.R.id.text1, displayName)
-            val secondaryText =
-                if (credentialEntryInfo.displayName != null
-                    && (credentialEntryInfo.displayName != credentialEntryInfo.userName))
-                    (credentialEntryInfo.userName + " " + BULLET_POINT + " "
-                            + credentialEntryInfo.credentialTypeDisplayName
-                            + " " + BULLET_POINT + " " + credentialEntryInfo.providerDisplayName)
-                else (credentialEntryInfo.credentialTypeDisplayName + " " + BULLET_POINT + " "
-                        + credentialEntryInfo.providerDisplayName)
-            remoteViews.setTextViewText(android.R.id.text2, secondaryText)
-            remoteViews.setImageViewIcon(android.R.id.icon1, icon);
+            remoteViews.setImageViewIcon(android.R.id.icon1, icon)
             remoteViews.setBoolean(
-                android.R.id.icon1, SET_ADJUST_VIEW_BOUNDS_METHOD_NAME, true);
+                android.R.id.icon1, SET_ADJUST_VIEW_BOUNDS_METHOD_NAME, true
+            )
             remoteViews.setInt(
                 android.R.id.icon1,
                 SET_MAX_HEIGHT_METHOD_NAME,
                 context.resources.getDimensionPixelSize(
-                    com.android.credentialmanager.R.dimen.autofill_icon_size));
-            remoteViews.setContentDescription(android.R.id.icon1, credentialEntryInfo
-                    .providerDisplayName);
+                    com.android.credentialmanager.R.dimen.autofill_icon_size
+                )
+            )
             val drawableId =
                 if (isFirstEntry)
                     com.android.credentialmanager.R.drawable.fill_dialog_dynamic_list_item_one else
                     com.android.credentialmanager.R.drawable.fill_dialog_dynamic_list_item_middle
             remoteViews.setInt(
-                android.R.id.content, SET_BACKGROUND_RESOURCE_METHOD_NAME, drawableId);
+                android.R.id.content, SET_BACKGROUND_RESOURCE_METHOD_NAME, drawableId)
             if (isFirstEntry) remoteViews.setViewPadding(
                 com.android.credentialmanager.R.id.credential_card,
                 /* left=*/0,
@@ -88,6 +96,26 @@ class RemoteViewsFactory {
             return remoteViews
         }
 
+        /**
+         * Computes the secondary text for dropdown presentation based on available fields.
+         *
+         * <p> Format for secondary text is [username] . [credentialType] . [providerDisplayName]
+         * If display name and username are the same, we do not display username
+         * If credential type is missing as in the case with SiwG, we just display
+         * providerDisplayName. Both credential type and provider display name should not be empty.
+         */
+        private fun getSecondaryText(credentialEntryInfo: CredentialEntryInfo): String? {
+            return listOf(if (credentialEntryInfo.displayName != null &&
+                (credentialEntryInfo.displayName != credentialEntryInfo.userName))
+                (credentialEntryInfo.userName) else null,
+                credentialEntryInfo.credentialTypeDisplayName,
+                credentialEntryInfo.providerDisplayName).filterNot { it.isNullOrBlank() }
+                    .let { itemsToDisplay ->
+                        if (itemsToDisplay.isEmpty()) null
+                        else itemsToDisplay.joinToString(separator = SEPARATOR)
+                    }
+        }
+
         fun createMoreSignInOptionsPresentation(context: Context): RemoteViews {
             var layoutId: Int = com.android.credentialmanager.R.layout
                     .credman_dropdown_bottom_sheet
@@ -96,16 +124,16 @@ class RemoteViewsFactory {
                 com.android.credentialmanager
                         .R.string.dropdown_presentation_more_sign_in_options_text))
             remoteViews.setBoolean(
-                android.R.id.icon1, SET_ADJUST_VIEW_BOUNDS_METHOD_NAME, true);
+                android.R.id.icon1, SET_ADJUST_VIEW_BOUNDS_METHOD_NAME, true)
             remoteViews.setInt(
                 android.R.id.icon1,
                 SET_MAX_HEIGHT_METHOD_NAME,
                 context.resources.getDimensionPixelSize(
-                    com.android.credentialmanager.R.dimen.autofill_icon_size));
+                    com.android.credentialmanager.R.dimen.autofill_icon_size))
             val drawableId =
                 com.android.credentialmanager.R.drawable.more_options_list_item
             remoteViews.setInt(
-                android.R.id.content, SET_BACKGROUND_RESOURCE_METHOD_NAME, drawableId);
+                android.R.id.content, SET_BACKGROUND_RESOURCE_METHOD_NAME, drawableId)
             return remoteViews
         }
     }

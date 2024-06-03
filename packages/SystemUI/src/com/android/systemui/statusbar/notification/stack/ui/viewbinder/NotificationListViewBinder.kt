@@ -173,7 +173,6 @@ constructor(
                 footerView,
                 footerViewModel,
                 clearAllNotifications = {
-                    metricsLogger.action(MetricsProto.MetricsEvent.ACTION_DISMISS_ALL_NOTES)
                     clearAllNotifications(
                         parentView,
                         // Hide the silent section header (if present) if there will be
@@ -193,13 +192,14 @@ constructor(
                 },
             )
         launch {
-            viewModel.shouldShowFooterView.collect { animatedVisibility ->
+            viewModel.shouldIncludeFooterView.collect { animatedVisibility ->
                 footerView.setVisible(
                     /* visible = */ animatedVisibility.value,
                     /* animate = */ animatedVisibility.isAnimating,
                 )
             }
         }
+        launch { viewModel.shouldHideFooterView.collect { footerView.setShouldBeHidden(it) } }
         disposableHandle.awaitCancellationThenDispose()
     }
 

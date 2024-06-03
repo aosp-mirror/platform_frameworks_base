@@ -18,30 +18,32 @@
 package com.android.systemui.notifications.ui.composable
 
 import android.util.Log
+import androidx.compose.animation.core.Animatable
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -55,33 +57,39 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneScope
-import com.android.compose.modifiers.height
+import com.android.compose.modifiers.thenIf
+import com.android.systemui.common.ui.compose.windowinsets.LocalRawScreenHeight
 import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadius
-import com.android.systemui.notifications.ui.composable.Notifications.Form
-import com.android.systemui.notifications.ui.composable.Notifications.TransitionThresholds.EXPANSION_FOR_MAX_CORNER_RADIUS
-import com.android.systemui.notifications.ui.composable.Notifications.TransitionThresholds.EXPANSION_FOR_MAX_SCRIM_ALPHA
 import com.android.systemui.res.R
+import com.android.systemui.scene.session.ui.composable.SaveableSession
+import com.android.systemui.scene.session.ui.composable.rememberSession
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.composable.ShadeHeader
-import com.android.systemui.statusbar.notification.stack.shared.model.StackRounding
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimRounding
+import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationTransitionThresholds.EXPANSION_FOR_MAX_CORNER_RADIUS
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationTransitionThresholds.EXPANSION_FOR_MAX_SCRIM_ALPHA
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 object Notifications {
     object Elements {
         val NotificationScrim = ElementKey("NotificationScrim")
-        val NotificationPlaceholder = ElementKey("NotificationPlaceholder")
+        val NotificationStackPlaceholder = ElementKey("NotificationStackPlaceholder")
+        val HeadsUpNotificationPlaceholder = ElementKey("HeadsUpNotificationPlaceholder")
         val ShelfSpace = ElementKey("ShelfSpace")
     }
 
@@ -91,12 +99,6 @@ object Notifications {
         const val EXPANSION_FOR_MAX_CORNER_RADIUS = 0.1f
         const val EXPANSION_FOR_MAX_SCRIM_ALPHA = 0.3f
     }
-
-    enum class Form {
-        HunFromTop,
-        Stack,
-        HunFromBottom,
-    }
 }
 
 /**
@@ -105,28 +107,55 @@ object Notifications {
  */
 @Composable
 fun SceneScope.HeadsUpNotificationSpace(
+    stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
     modifier: Modifier = Modifier,
     isPeekFromBottom: Boolean = false,
 ) {
-    NotificationPlaceholder(
-        viewModel = viewModel,
-        form = if (isPeekFromBottom) Form.HunFromBottom else Form.HunFromTop,
-        modifier = modifier,
-    )
+    Element(
+        Notifications.Elements.HeadsUpNotificationPlaceholder,
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .notificationHeadsUpHeight(stackScrollView)
+                .debugBackground(viewModel, DEBUG_HUN_COLOR)
+                .onGloballyPositioned { coordinates: LayoutCoordinates ->
+                    val boundsInWindow = coordinates.boundsInWindow()
+                    debugLog(viewModel) {
+                        "HUNS onGloballyPositioned:" +
+                            " size=${coordinates.size}" +
+                            " bounds=$boundsInWindow"
+                    }
+                    // Note: boundsInWindow doesn't scroll off the screen
+                    stackScrollView.setHeadsUpTop(boundsInWindow.top)
+                }
+    ) {
+        content {}
+    }
 }
 
 /** Adds the space where notification stack should appear in the scene. */
 @Composable
-fun SceneScope.NotificationStack(
+fun SceneScope.ConstrainedNotificationStack(
+    stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
     modifier: Modifier = Modifier,
 ) {
-    NotificationPlaceholder(
-        viewModel = viewModel,
-        form = Form.Stack,
-        modifier = modifier,
-    )
+    Box(
+        modifier =
+            modifier.onSizeChanged { viewModel.onConstrainedAvailableSpaceChanged(it.height) }
+    ) {
+        NotificationPlaceholder(
+            stackScrollView = stackScrollView,
+            viewModel = viewModel,
+            modifier = Modifier.fillMaxSize(),
+        )
+        HeadsUpNotificationSpace(
+            stackScrollView = stackScrollView,
+            viewModel = viewModel,
+            modifier = Modifier.align(Alignment.TopCenter),
+        )
+    }
 }
 
 /**
@@ -135,31 +164,41 @@ fun SceneScope.NotificationStack(
  */
 @Composable
 fun SceneScope.NotificationScrollingStack(
+    shadeSession: SaveableSession,
+    stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
     maxScrimTop: () -> Float,
+    shouldPunchHoleBehindScrim: Boolean,
+    shouldFillMaxSize: Boolean = true,
+    shadeMode: ShadeMode,
     modifier: Modifier = Modifier,
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val density = LocalDensity.current
     val screenCornerRadius = LocalScreenCornerRadius.current
     val scrimCornerRadius = dimensionResource(R.dimen.notification_scrim_corner_radius)
-    val scrollState = rememberScrollState()
-    val syntheticScroll = viewModel.syntheticScroll.collectAsState(0f)
-    val expansionFraction by viewModel.expandFraction.collectAsState(0f)
+    val scrollState =
+        shadeSession.rememberSaveableSession(saver = ScrollState.Saver, key = null) {
+            ScrollState(initial = 0)
+        }
+    val syntheticScroll = viewModel.syntheticScroll.collectAsStateWithLifecycle(0f)
+    val isCurrentGestureOverscroll =
+        viewModel.isCurrentGestureOverscroll.collectAsStateWithLifecycle(false)
+    val expansionFraction by viewModel.expandFraction.collectAsStateWithLifecycle(0f)
 
     val navBarHeight =
         with(density) { WindowInsets.systemBars.asPaddingValues().calculateBottomPadding().toPx() }
-    val statusBarHeight = WindowInsets.systemBars.asPaddingValues().calculateTopPadding()
-    val displayCutoutHeight = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
-    val screenHeight =
-        with(density) {
-            (LocalConfiguration.current.screenHeightDp.dp +
-                    maxOf(statusBarHeight, displayCutoutHeight))
-                .toPx()
-        } + navBarHeight
+    val screenHeight = LocalRawScreenHeight.current
 
-    val contentHeight = viewModel.intrinsicContentHeight.collectAsState()
+    /**
+     * The height in px of the contents of notification stack. Depending on the number of
+     * notifications, this can exceed the space available on screen to show notifications, at which
+     * point the notification stack should become scrollable.
+     */
+    val stackHeight = remember { mutableIntStateOf(0) }
 
-    val stackRounding = viewModel.stackRounding.collectAsState(StackRounding())
+    val scrimRounding =
+        viewModel.shadeScrimRounding.collectAsStateWithLifecycle(ShadeScrimRounding())
 
     // the offset for the notifications scrim. Its upper bound is 0, and its lower bound is
     // calculated in minScrimOffset. The scrim is the same height as the screen minus the
@@ -167,7 +206,10 @@ fun SceneScope.NotificationScrollingStack(
     // When fully expanded (scrimOffset = minScrimOffset), its top bound is at minScrimStartY,
     // which is equal to the height of the Shade Header. Thus, when the scrim is fully expanded, the
     // entire height of the scrim is visible on screen.
-    val scrimOffset = remember { mutableStateOf(0f) }
+    val scrimOffset = shadeSession.rememberSession { Animatable(0f) }
+
+    // set the bounds to null when the scrim disappears
+    DisposableEffect(Unit) { onDispose { viewModel.onScrimBoundsChanged(null) } }
 
     val minScrimTop = with(density) { ShadeHeader.Dimensions.CollapsedHeight.toPx() }
 
@@ -186,9 +228,9 @@ fun SceneScope.NotificationScrollingStack(
 
     // if contentHeight drops below minimum visible scrim height while scrim is
     // expanded, reset scrim offset.
-    LaunchedEffect(contentHeight, scrimOffset) {
-        snapshotFlow { contentHeight.value < minVisibleScrimHeight() && scrimOffset.value < 0f }
-            .collect { shouldCollapse -> if (shouldCollapse) scrimOffset.value = 0f }
+    LaunchedEffect(stackHeight, scrimOffset) {
+        snapshotFlow { stackHeight.intValue < minVisibleScrimHeight() && scrimOffset.value < 0f }
+            .collect { shouldCollapse -> if (shouldCollapse) scrimOffset.snapTo(0f) }
     }
 
     // if we receive scroll delta from NSSL, offset the scrim and placeholder accordingly.
@@ -198,7 +240,7 @@ fun SceneScope.NotificationScrollingStack(
                 val minOffset = minScrimOffset()
                 if (scrimOffset.value > minOffset) {
                     val remainingDelta = (minOffset - (scrimOffset.value - delta)).coerceAtLeast(0f)
-                    scrimOffset.value = (scrimOffset.value - delta).coerceAtLeast(minOffset)
+                    scrimOffset.snapTo((scrimOffset.value - delta).coerceAtLeast(minOffset))
                     if (remainingDelta > 0f) {
                         scrollState.scrollBy(remainingDelta)
                     }
@@ -207,6 +249,27 @@ fun SceneScope.NotificationScrollingStack(
                 }
             }
     }
+
+    val scrimNestedScrollConnection =
+        shadeSession.rememberSession(
+            scrimOffset,
+            maxScrimTop,
+            minScrimTop,
+            isCurrentGestureOverscroll,
+        ) {
+            NotificationScrimNestedScrollConnection(
+                scrimOffset = { scrimOffset.value },
+                snapScrimOffset = { value -> coroutineScope.launch { scrimOffset.snapTo(value) } },
+                animateScrimOffset = { value ->
+                    coroutineScope.launch { scrimOffset.animateTo(value) }
+                },
+                minScrimOffset = minScrimOffset,
+                maxScrimOffset = 0f,
+                contentHeight = { stackHeight.intValue.toFloat() },
+                minVisibleScrimHeight = minVisibleScrimHeight,
+                isCurrentGestureOverscroll = { isCurrentGestureOverscroll.value },
+            )
+        }
 
     Box(
         modifier =
@@ -217,7 +280,8 @@ fun SceneScope.NotificationScrollingStack(
                     // in step with the transition so that it is 0 when it completes.
                     if (
                         scrimOffset.value < 0 &&
-                            layoutState.isTransitioning(from = Scenes.Shade, to = Scenes.Gone)
+                            layoutState.isTransitioning(from = Scenes.Shade, to = Scenes.Gone) ||
+                            layoutState.isTransitioning(from = Scenes.Shade, to = Scenes.Lockscreen)
                     ) {
                         IntOffset(x = 0, y = (scrimOffset.value * expansionFraction).roundToInt())
                     } else {
@@ -230,60 +294,71 @@ fun SceneScope.NotificationScrollingStack(
                                 scrimCornerRadius,
                                 screenCornerRadius,
                                 { expansionFraction },
-                                layoutState.isTransitioningBetween(Scenes.Gone, Scenes.Shade)
+                                shouldPunchHoleBehindScrim,
                             )
-                            .let { stackRounding.value.toRoundedCornerShape(it) }
+                            .let { scrimRounding.value.toRoundedCornerShape(it) }
                     clip = true
+                }
+                .onGloballyPositioned { coordinates ->
+                    val boundsInWindow = coordinates.boundsInWindow()
+                    debugLog(viewModel) {
+                        "SCRIM onGloballyPositioned:" +
+                            " size=${coordinates.size}" +
+                            " bounds=$boundsInWindow"
+                    }
+                    viewModel.onScrimBoundsChanged(
+                        ShadeScrimBounds(
+                            left = boundsInWindow.left,
+                            top = boundsInWindow.top,
+                            right = boundsInWindow.right,
+                            bottom = boundsInWindow.bottom,
+                        )
+                    )
                 }
     ) {
         // Creates a cutout in the background scrim in the shape of the notifications scrim.
         // Only visible when notif scrim alpha < 1, during shade expansion.
-        Spacer(
-            modifier =
-                Modifier.fillMaxSize().drawBehind {
-                    drawRect(Color.Black, blendMode = BlendMode.DstOut)
-                }
-        )
+        if (shouldPunchHoleBehindScrim) {
+            Spacer(
+                modifier =
+                    Modifier.fillMaxSize().drawBehind {
+                        drawRect(Color.Black, blendMode = BlendMode.DstOut)
+                    }
+            )
+        }
         Box(
             modifier =
-                Modifier.fillMaxSize()
-                    .graphicsLayer {
+                Modifier.graphicsLayer {
                         alpha =
-                            if (layoutState.isTransitioningBetween(Scenes.Gone, Scenes.Shade)) {
+                            if (shouldPunchHoleBehindScrim) {
                                 (expansionFraction / EXPANSION_FOR_MAX_SCRIM_ALPHA).coerceAtMost(1f)
                             } else 1f
                     }
                     .background(MaterialTheme.colorScheme.surface)
-                    .debugBackground(viewModel, Color(0.5f, 0.5f, 0f, 0.2f))
+                    .thenIf(shouldFillMaxSize) { Modifier.fillMaxSize() }
+                    .debugBackground(viewModel, DEBUG_BOX_COLOR)
         ) {
             NotificationPlaceholder(
+                stackScrollView = stackScrollView,
                 viewModel = viewModel,
-                form = Form.Stack,
                 modifier =
                     Modifier.verticalNestedScrollToScene(
                             topBehavior = NestedScrollBehavior.EdgeWithPreview,
+                            isExternalOverscrollGesture = { isCurrentGestureOverscroll.value }
                         )
-                        .nestedScroll(
-                            remember(
-                                scrimOffset,
-                                maxScrimTop,
-                                minScrimTop,
-                            ) {
-                                NotificationScrimNestedScrollConnection(
-                                    scrimOffset = { scrimOffset.value },
-                                    onScrimOffsetChanged = { scrimOffset.value = it },
-                                    minScrimOffset = minScrimOffset,
-                                    maxScrimOffset = 0f,
-                                    contentHeight = { contentHeight.value },
-                                    minVisibleScrimHeight = minVisibleScrimHeight,
-                                )
-                            }
-                        )
+                        .thenIf(shadeMode == ShadeMode.Single) {
+                            Modifier.nestedScroll(scrimNestedScrollConnection)
+                        }
                         .verticalScroll(scrollState)
                         .fillMaxWidth()
-                        .height { (contentHeight.value + navBarHeight).roundToInt() },
+                        .notificationStackHeight(
+                            view = stackScrollView,
+                            padding = navBarHeight.toInt()
+                        )
+                        .onSizeChanged { size -> stackHeight.intValue = size.height },
             )
         }
+        HeadsUpNotificationSpace(stackScrollView = stackScrollView, viewModel = viewModel)
     }
 }
 
@@ -304,14 +379,10 @@ fun SceneScope.NotificationShelfSpace(
         modifier
             .element(key = Notifications.Elements.ShelfSpace)
             .fillMaxWidth()
-            .onSizeChanged { size: IntSize ->
-                debugLog(viewModel) { "SHELF onSizeChanged: size=$size" }
-            }
             .onPlaced { coordinates: LayoutCoordinates ->
                 debugLog(viewModel) {
                     ("SHELF onPlaced:" +
                         " size=${coordinates.size}" +
-                        " position=${coordinates.positionInWindow()}" +
                         " bounds=${coordinates.boundsInWindow()}")
                 }
             }
@@ -325,34 +396,27 @@ fun SceneScope.NotificationShelfSpace(
 
 @Composable
 private fun SceneScope.NotificationPlaceholder(
+    stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
-    form: Form,
     modifier: Modifier = Modifier,
 ) {
-    val elementKey = Notifications.Elements.NotificationPlaceholder
     Element(
-        elementKey,
+        Notifications.Elements.NotificationStackPlaceholder,
         modifier =
             modifier
-                .debugBackground(viewModel)
-                .onSizeChanged { size: IntSize ->
-                    debugLog(viewModel) { "STACK onSizeChanged: size=$size" }
-                }
+                .debugBackground(viewModel, DEBUG_STACK_COLOR)
+                .onSizeChanged { size -> debugLog(viewModel) { "STACK onSizeChanged: size=$size" } }
                 .onGloballyPositioned { coordinates: LayoutCoordinates ->
-                    viewModel.onContentTopChanged(coordinates.positionInWindow().y)
+                    val positionInWindow = coordinates.positionInWindow()
                     debugLog(viewModel) {
                         "STACK onGloballyPositioned:" +
                             " size=${coordinates.size}" +
-                            " position=${coordinates.positionInWindow()}" +
+                            " position=$positionInWindow" +
                             " bounds=${coordinates.boundsInWindow()}"
                     }
-                    val boundsInWindow = coordinates.boundsInWindow()
-                    viewModel.onBoundsChanged(
-                        left = boundsInWindow.left,
-                        top = boundsInWindow.top,
-                        right = boundsInWindow.right,
-                        bottom = boundsInWindow.bottom,
-                    )
+                    // NOTE: positionInWindow.y scrolls off screen, but boundsInWindow.top will not
+                    stackScrollView.setStackTop(positionInWindow.y)
+                    stackScrollView.setStackBottom(positionInWindow.y + coordinates.size.height)
                 }
     ) {
         content {}
@@ -388,7 +452,7 @@ private inline fun debugLog(
 
 private fun Modifier.debugBackground(
     viewModel: NotificationsPlaceholderViewModel,
-    color: Color = DEBUG_COLOR,
+    color: Color,
 ): Modifier =
     if (viewModel.isVisualDebuggingEnabled) {
         background(color)
@@ -396,9 +460,9 @@ private fun Modifier.debugBackground(
         this
     }
 
-fun StackRounding.toRoundedCornerShape(radius: Dp): RoundedCornerShape {
-    val topRadius = if (roundTop) radius else 0.dp
-    val bottomRadius = if (roundBottom) radius else 0.dp
+private fun ShadeScrimRounding.toRoundedCornerShape(radius: Dp): RoundedCornerShape {
+    val topRadius = if (isTopRounded) radius else 0.dp
+    val bottomRadius = if (isBottomRounded) radius else 0.dp
     return RoundedCornerShape(
         topStart = topRadius,
         topEnd = topRadius,
@@ -408,4 +472,6 @@ fun StackRounding.toRoundedCornerShape(radius: Dp): RoundedCornerShape {
 }
 
 private const val TAG = "FlexiNotifs"
-private val DEBUG_COLOR = Color(1f, 0f, 0f, 0.2f)
+private val DEBUG_STACK_COLOR = Color(1f, 0f, 0f, 0.2f)
+private val DEBUG_HUN_COLOR = Color(0f, 0f, 1f, 0.2f)
+private val DEBUG_BOX_COLOR = Color(0f, 1f, 0f, 0.2f)

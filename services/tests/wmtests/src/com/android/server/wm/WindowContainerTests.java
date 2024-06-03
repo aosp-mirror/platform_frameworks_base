@@ -565,36 +565,17 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testGetOrientation_childSpecified() {
-        testGetOrientation_childSpecifiedConfig(false, SCREEN_ORIENTATION_LANDSCAPE,
-                SCREEN_ORIENTATION_LANDSCAPE);
-        testGetOrientation_childSpecifiedConfig(false, SCREEN_ORIENTATION_UNSET,
-                SCREEN_ORIENTATION_UNSPECIFIED);
-    }
-
-    private void testGetOrientation_childSpecifiedConfig(boolean childVisible, int childOrientation,
-            int expectedOrientation) {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
-        final TestWindowContainer root = builder.setLayer(0).build();
+        final TestWindowContainer root = builder.build();
         root.setFillsParent(true);
+        assertEquals(SCREEN_ORIENTATION_UNSET, root.getOrientation());
 
-        builder.setIsVisible(childVisible);
+        final TestWindowContainer child = root.addChildWindow();
+        child.setFillsParent(true);
+        assertEquals(SCREEN_ORIENTATION_UNSET, root.getOrientation());
 
-        if (childOrientation != SCREEN_ORIENTATION_UNSET) {
-            builder.setOrientation(childOrientation);
-        }
-
-        final TestWindowContainer child1 = root.addChildWindow(builder);
-        child1.setFillsParent(true);
-
-        assertEquals(expectedOrientation, root.getOrientation());
-    }
-
-    @Test
-    public void testGetOrientation_Unset() {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
-        final TestWindowContainer root = builder.setLayer(0).setIsVisible(true).build();
-        // Unspecified well because we didn't specify anything...
-        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, root.getOrientation());
+        child.setOverrideOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, root.getOrientation());
     }
 
     @Test
@@ -799,6 +780,7 @@ public class WindowContainerTests extends WindowTestsBase {
         verify(child).onConfigurationChanged(any());
     }
 
+    @SuppressWarnings("SelfComparison")
     @Test
     public void testCompareTo() {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);

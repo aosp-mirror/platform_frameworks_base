@@ -37,6 +37,7 @@ import android.provider.Settings;
 import android.service.notification.ZenModeConfig;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
+import android.util.Log;
 
 import androidx.core.graphics.drawable.IconCompat;
 import androidx.slice.Slice;
@@ -48,10 +49,10 @@ import androidx.slice.builders.SliceAction;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.systemui.res.R;
 import com.android.systemui.SystemUIAppComponentFactoryBase;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.StatusBarState;
@@ -212,21 +213,27 @@ public class KeyguardSliceProvider extends SliceProvider implements
     @AnyThread
     @Override
     public Slice onBindSlice(Uri sliceUri) {
-        Trace.beginSection("KeyguardSliceProvider#onBindSlice");
-        Slice slice;
-        synchronized (this) {
-            ListBuilder builder = new ListBuilder(getContext(), mSliceUri, ListBuilder.INFINITY);
-            if (needsMediaLocked()) {
-                addMediaLocked(builder);
-            } else {
-                builder.addRow(new RowBuilder(mDateUri).setTitle(mLastText));
+        Slice slice = null;
+        try {
+            Trace.beginSection("KeyguardSliceProvider#onBindSlice");
+            synchronized (this) {
+                ListBuilder builder = new ListBuilder(getContext(), mSliceUri,
+                        ListBuilder.INFINITY);
+                if (needsMediaLocked()) {
+                    addMediaLocked(builder);
+                } else {
+                    builder.addRow(new RowBuilder(mDateUri).setTitle(mLastText));
+                }
+                addNextAlarmLocked(builder);
+                addZenModeLocked(builder);
+                addPrimaryActionLocked(builder);
+                slice = builder.build();
             }
-            addNextAlarmLocked(builder);
-            addZenModeLocked(builder);
-            addPrimaryActionLocked(builder);
-            slice = builder.build();
+        } catch (IllegalStateException e) {
+            Log.w(TAG, "Could not initialize slice", e);
+        } finally {
+            Trace.endSection();
         }
-        Trace.endSection();
         return slice;
     }
 

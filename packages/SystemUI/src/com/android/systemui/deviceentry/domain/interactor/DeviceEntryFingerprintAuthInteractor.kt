@@ -24,9 +24,11 @@ import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthentication
 import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.FingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.HelpFingerprintAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
@@ -42,8 +44,14 @@ constructor(
     biometricSettingsInteractor: DeviceEntryBiometricSettingsInteractor,
     fingerprintPropertyRepository: FingerprintPropertyRepository,
 ) {
-    /** Whether fingerprint authentication is currently running or not */
+    /**
+     * Whether fingerprint authentication is currently running or not. This does not mean the user
+     * [isEngaged] with the fingerprint.
+     */
     val isRunning: Flow<Boolean> = repository.isRunning
+
+    /** Whether the user is actively engaging with the fingerprint sensor */
+    val isEngaged: StateFlow<Boolean> = repository.isEngaged
 
     /** Provide the current status of fingerprint authentication. */
     val authenticationStatus: Flow<FingerprintAuthenticationStatus> =
@@ -57,6 +65,9 @@ constructor(
         repository.authenticationStatus.filterIsInstance<ErrorFingerprintAuthenticationStatus>()
     val fingerprintHelp: Flow<HelpFingerprintAuthenticationStatus> =
         repository.authenticationStatus.filterIsInstance<HelpFingerprintAuthenticationStatus>()
+
+    val fingerprintSuccess: Flow<SuccessFingerprintAuthenticationStatus> =
+        repository.authenticationStatus.filterIsInstance<SuccessFingerprintAuthenticationStatus>()
 
     /**
      * Whether fingerprint authentication is currently allowed for the user. This is true if the

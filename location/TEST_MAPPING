@@ -2,12 +2,7 @@
   "presubmit": [
     {
       "name": "CtsLocationFineTestCases",
-      "options": [
-          {
-             // TODO: Wait for test to deflake - b/293934372
-             "exclude-filter":"android.location.cts.fine.ScanningSettingsTest"
-          }
-      ]
+      "options": []
     },
     {
       "name": "CtsLocationCoarseTestCases"

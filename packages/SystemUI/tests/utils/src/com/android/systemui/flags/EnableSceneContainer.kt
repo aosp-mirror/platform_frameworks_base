@@ -18,10 +18,12 @@ package com.android.systemui.flags
 
 import android.platform.test.annotations.EnableFlags
 import com.android.systemui.Flags.FLAG_COMPOSE_LOCKSCREEN
+import com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR
 import com.android.systemui.Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR
 import com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR
-import com.android.systemui.Flags.FLAG_MEDIA_IN_SCENE_CONTAINER
 import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
+import com.android.systemui.Flags.FLAG_NOTIFICATIONS_HEADS_UP_REFACTOR
+import com.android.systemui.Flags.FLAG_PREDICTIVE_BACK_SYSUI
 import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 
 /**
@@ -29,12 +31,14 @@ import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
  * that feature. It is also picked up by [SceneContainerRule] to set non-aconfig prerequisites.
  */
 @EnableFlags(
-    FLAG_SCENE_CONTAINER,
-    FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR,
-    FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT,
     FLAG_COMPOSE_LOCKSCREEN,
-    FLAG_MEDIA_IN_SCENE_CONTAINER,
+    FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR,
     FLAG_KEYGUARD_WM_STATE_REFACTOR,
+    FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT,
+    FLAG_NOTIFICATIONS_HEADS_UP_REFACTOR,
+    FLAG_PREDICTIVE_BACK_SYSUI,
+    FLAG_SCENE_CONTAINER,
+    FLAG_DEVICE_ENTRY_UDFPS_REFACTOR,
 )
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)

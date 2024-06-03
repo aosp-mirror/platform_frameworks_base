@@ -17,6 +17,7 @@
 package com.android.systemui.qs;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import static com.android.systemui.Flags.quickSettingsVisualHapticsLongpress;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -32,6 +33,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.haptics.qs.QSLongPressEffect;
 import com.android.systemui.media.controls.ui.view.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
@@ -39,13 +41,16 @@ import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileViewImpl;
-import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.animation.DisappearParameters;
+import com.android.systemui.util.kotlin.JavaAdapterKt;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
+
+import kotlinx.coroutines.flow.StateFlow;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -54,6 +59,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import javax.inject.Provider;
+
 
 /**
  * Controller for QSPanel views.
@@ -88,7 +96,16 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     private SplitShadeStateController mSplitShadeStateController;
 
-    private final VibratorHelper mVibratorHelper;
+    private final Provider<QSLongPressEffect> mLongPressEffectProvider;
+
+    private boolean mDestroyed = false;
+
+    private boolean mMediaVisibleFromInteractor;
+
+    private final Consumer<Boolean> mMediaOrRecommendationVisibleConsumer = mediaVisible -> {
+        mMediaVisibleFromInteractor = mediaVisible;
+        setLayoutForMediaInScene();
+    };
 
     @VisibleForTesting
     protected final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
@@ -112,7 +129,11 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                         /* newScreenLayout= */ mLastScreenLayout,
                         /* containerName= */ mView.getDumpableTag());
 
-                    switchTileLayoutIfNeeded();
+                    if (SceneContainerFlag.isEnabled()) {
+                        setLayoutForMediaInScene();
+                    } else {
+                        switchTileLayoutIfNeeded();
+                    }
                     onConfigurationChanged();
                     if (previousSplitShadeState != mShouldUseSplitNotificationShade) {
                         onSplitShadeChanged(mShouldUseSplitNotificationShade);
@@ -148,7 +169,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             QSLogger qsLogger,
             DumpManager dumpManager,
             SplitShadeStateController splitShadeStateController,
-            VibratorHelper vibratorHelper
+            Provider<QSLongPressEffect> longPressEffectProvider
     ) {
         super(view);
         mHost = host;
@@ -162,7 +183,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mSplitShadeStateController = splitShadeStateController;
         mShouldUseSplitNotificationShade =
                 mSplitShadeStateController.shouldUseSplitNotificationShade(getResources());
-        mVibratorHelper = vibratorHelper;
+        mLongPressEffectProvider = longPressEffectProvider;
     }
 
     @Override
@@ -170,6 +191,9 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mView.initialize(mQSLogger, mUsingMediaPlayer);
         mQSLogger.logAllTilesChangeListening(mView.isListening(), mView.getDumpableTag(), "");
         mHost.addCallback(mQSHostCallback);
+        if (SceneContainerFlag.isEnabled()) {
+            registerForMediaInteractorChanges();
+        }
     }
 
     /**
@@ -189,7 +213,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         // will remove the attach listener. We don't need to do that, because once this object is
         // detached from the graph, it will be gc.
         mHost.removeCallback(mQSHostCallback);
-
+        mDestroyed = true;
         for (TileRecord record : mRecords) {
             record.tile.removeCallback(record.callback);
             mView.removeTile(record);
@@ -204,16 +228,31 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             mQsTileRevealController.setExpansion(mRevealExpansion);
         }
 
-        mMediaHost.addVisibilityChangeListener(mMediaHostVisibilityListener);
+        if (!SceneContainerFlag.isEnabled()) {
+            mMediaHost.addVisibilityChangeListener(mMediaHostVisibilityListener);
+        }
         mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
         setTiles();
         mLastOrientation = getResources().getConfiguration().orientation;
         mLastScreenLayout = getResources().getConfiguration().screenLayout;
         mQSLogger.logOnViewAttached(mLastOrientation, mView.getDumpableTag());
+        if (SceneContainerFlag.isEnabled()) {
+            setLayoutForMediaInScene();
+        }
         switchTileLayout(true);
 
         mDumpManager.registerDumpable(mView.getDumpableTag(), this);
     }
+
+    private void registerForMediaInteractorChanges() {
+        JavaAdapterKt.collectFlow(
+                mView,
+                getMediaVisibleFlow(),
+                mMediaOrRecommendationVisibleConsumer
+        );
+    }
+
+    abstract StateFlow<Boolean> getMediaVisibleFlow();
 
     @Override
     protected void onViewDetached() {
@@ -239,6 +278,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     /** */
     public void setTiles(Collection<QSTile> tiles, boolean collapsedView) {
+        if (mDestroyed) return;
         // TODO(b/168904199): move this logic into QSPanelController.
         if (!collapsedView && mQsTileRevealController != null) {
             mQsTileRevealController.updateRevealedTiles(tiles);
@@ -305,8 +345,14 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     private void addTile(final QSTile tile, boolean collapsedView) {
+        QSLongPressEffect longPressEffect;
+        if (quickSettingsVisualHapticsLongpress()) {
+            longPressEffect = mLongPressEffectProvider.get();
+        } else {
+            longPressEffect = null;
+        }
         final QSTileViewImpl tileView = new QSTileViewImpl(
-                getContext(), collapsedView, mVibratorHelper);
+                getContext(), collapsedView, longPressEffect);
         final TileRecord r = new TileRecord(tile, tileView);
         // TODO(b/250618218): Remove the QSLogger in QSTileViewImpl once we know the root cause of
         // b/250618218.
@@ -424,6 +470,11 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         return false;
     }
 
+    void setLayoutForMediaInScene() {
+        boolean withMedia = shouldUseHorizontalInScene();
+        mView.setColumnRowLayout(withMedia);
+    }
+
     /**
      * Update the way the media disappears based on if we're using the horizontal layout
      */
@@ -459,6 +510,16 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             return false;
         }
         return mUsingMediaPlayer && mMediaHost.getVisible()
+                && mLastOrientation == Configuration.ORIENTATION_LANDSCAPE
+                && (mLastScreenLayout & Configuration.SCREENLAYOUT_LONG_MASK)
+                == Configuration.SCREENLAYOUT_LONG_YES;
+    }
+
+    boolean shouldUseHorizontalInScene() {
+        if (mShouldUseSplitNotificationShade) {
+            return false;
+        }
+        return mMediaVisibleFromInteractor
                 && mLastOrientation == Configuration.ORIENTATION_LANDSCAPE
                 && (mLastScreenLayout & Configuration.SCREENLAYOUT_LONG_MASK)
                 == Configuration.SCREENLAYOUT_LONG_YES;

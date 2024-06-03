@@ -94,18 +94,34 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"연결됨(전화 없음), 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"연결됨(미디어 없음), 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"연결됨(전화 또는 미디어 없음), 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"활성, 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"활성, 왼쪽: 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, 오른쪽: 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"사용 중입니다. 배터리는 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>입니다."</string>
+    <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"사용 중입니다. 배터리는 왼쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, 오른쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>입니다."</string>
+    <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"활성 상태입니다. 왼쪽: 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"활성 상태입니다. 오른쪽: 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"왼쪽: 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, 오른쪽: 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered_left" msgid="2952823007648782646">"왼쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered_right" msgid="6525710737740083276">"오른쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"배터리는 왼쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, 오른쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>입니다."</string>
+    <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"왼쪽 배터리는 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>입니다."</string>
+    <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"오른쪽 배터리는 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>입니다."</string>
+    <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"왼쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_right" msgid="8610019317279155595">"오른쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"활성"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"저장됨"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"활성, 왼쪽만"</string>
-    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"활성, 오른쪽만"</string>
-    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"활성, 왼쪽 및 오른쪽"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"활성(왼쪽만)"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"활성(오른쪽만)"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"활성(왼쪽 및 오른쪽)"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"사용 중입니다(미디어 전용). 배터리는 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>입니다."</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"사용 중입니다(미디어 전용). 배터리는 왼쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, 오른쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>입니다."</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"연결되었습니다(오디오 공유 지원). 배터리는 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>입니다."</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"연결되었습니다(오디오 공유 지원). 배터리는 왼쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, 오른쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>입니다."</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="7707464334346454950">"연결되었습니다(오디오 공유 지원). 왼쪽 배터리는 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>입니다."</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"연결되었습니다(오디오 공유 지원). 오른쪽 배터리는 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>입니다."</string>
+    <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"연결되었습니다(오디오 공유 지원)."</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"사용 중(미디어 전용)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"오디오 공유 지원"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"사용 중(미디어 전용), 왼쪽만"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"사용 중(미디어 전용), 오른쪽만"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"사용 중(미디어 전용), 왼쪽 및 오른쪽"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"미디어 오디오"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"전화 통화"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"파일 전송"</string>
@@ -145,7 +161,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"취소"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"페어링하면 연결 시 연락처 및 통화 기록에 액세스할 수 있습니다."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>와(과) 페어링하지 못했습니다."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN 또는 패스키가 잘못되어 <xliff:g id="DEVICE_NAME">%1$s</xliff:g>와 페어링하지 못했습니다."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN 또는 패스키가 잘못되어 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 기기와 페어링할 수 없습니다."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>와(과) 통신할 수 없습니다."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>에서 페어링을 거부했습니다."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"컴퓨터"</string>
@@ -273,7 +289,7 @@
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"경고: 이 설정을 사용하는 동안에는 이 기기에서 기기 보호 기능이 작동하지 않습니다."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"가상 위치 앱 선택"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"가상 위치 앱이 설정되어 있지 않음"</string>
-    <string name="mock_location_app_set" msgid="4706722469342913843">"모의 위치 앱: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app_set" msgid="4706722469342913843">"가상 위치 앱: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"네트워크"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"무선 디스플레이 인증서"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi-Fi 상세 로깅 사용"</string>
@@ -437,9 +453,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"앱이 최신 형식을 지원하는 것으로 가정"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"트랜스코딩 알림 표시"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"트랜스코딩 캐시 사용 중지"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine 설정"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"L3 대체 강제"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"L3 대체를 강제하려면 선택하세요."</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"실행 중인 서비스"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"현재 실행 중인 서비스 보기 및 제어"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView 구현"</string>
@@ -479,6 +492,10 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g>: <xliff:g id="TIME">%2$s</xliff:g> 후 충전 완료"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - 충전 최적화됨"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> ‑ 충전 중"</string>
+    <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - <xliff:g id="TIME">%3$s</xliff:g>에 완전히 충전됨"</string>
+    <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>에 완전히 충전됨"</string>
+    <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"<xliff:g id="TIME">%1$s</xliff:g>에 완전히 충전됨"</string>
+    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"<xliff:g id="TIME">%1$s</xliff:g>까지 완전히 충전됨"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"알 수 없음"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"충전 중"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"고속 충전 중"</string>
@@ -490,6 +507,8 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"충전됨"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"완전히 충전됨"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"충전 일시중지"</string>
+    <string name="battery_info_status_charging_v2" msgid="6118522107222245505">"충전"</string>
+    <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"급속 충전"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"관리자가 제어"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"제한된 설정으로 제어됨"</string>
     <string name="disabled" msgid="8017887509554714950">"사용 안함"</string>
@@ -619,8 +638,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"새 사용자를 만들지 못함"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"새 게스트 생성 실패"</string>
     <string name="user_nickname" msgid="262624187455825083">"닉네임"</string>
-    <!-- no translation found for edit_user_info_message (6677556031419002895) -->
-    <skip />
+    <string name="edit_user_info_message" msgid="6677556031419002895">"선택한 이름과 사진이 이 기기를 사용하는 모든 사용자에게 표시됩니다."</string>
     <string name="user_add_user" msgid="7876449291500212468">"사용자 추가"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"게스트 추가"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"게스트 삭제"</string>
@@ -647,8 +665,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"종료하면 모든 활동이 삭제됩니다."</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"종료 시 활동을 저장하거나 삭제할 수 있습니다."</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"지금 재설정하여 활동 세션을 삭제하거나 종료 시 활동을 저장 또는 삭제할 수 있습니다."</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"사진 찍기"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"이미지 선택"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"사진 선택"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"잘못된 시도 횟수가 너무 많습니다. 이 기기의 데이터가 삭제됩니다."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"잘못된 시도 횟수가 너무 많습니다. 이 사용자가 삭제됩니다."</string>
@@ -679,6 +695,7 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"휴대전화 신호 막대가 하나입니다."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"휴대전화 신호 막대가 두 개입니다."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"휴대전화 신호 막대가 세 개입니다."</string>
+    <string name="accessibility_phone_four_bars" msgid="4477202400261338403">"전화 막대가 네 개입니다."</string>
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"휴대전화의 신호가 강합니다."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"데이터가 없습니다."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"데이터 신호 막대가 하나입니다."</string>
@@ -688,12 +705,10 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"이더넷에서 연결 해제되었습니다."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"이더넷에 연결되었습니다."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"통화 모드가 없습니다."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"프로필 사진 선택하기"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"기본 사용자 아이콘"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"물리적 키보드"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"키보드 레이아웃 선택"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"기본"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"화면 켜기"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"화면 사용 설정 제어"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"화면 켜기 허용"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"앱에서 화면을 켜도록 허용합니다. 권한이 부여된 경우 앱에서 명시적 인텐트 없이 언제든지 화면을 켤 수 있습니다."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> 방송을 중지하시겠습니까?"</string>
@@ -708,4 +723,5 @@
     <string name="neuter" msgid="2075249330106127310">"중성"</string>
     <string name="feminine" msgid="1529155595310784757">"여성"</string>
     <string name="masculine" msgid="4653978041013996303">"남성"</string>
+    <string name="system_update_settings_list_item_title" msgid="6618098383615432484">"시스템 업데이트"</string>
 </resources>

@@ -53,7 +53,7 @@ public class TestIWindow extends IWindow.Stub {
 
     @Override
     public void insetsControlChanged(InsetsState insetsState,
-            InsetsSourceControl[] activeControls) {
+            InsetsSourceControl.Array activeControls) {
     }
 
     @Override
@@ -95,10 +95,6 @@ public class TestIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void updatePointerIcon(float x, float y) throws RemoteException {
-    }
-
-    @Override
     public void dispatchWindowShown() throws RemoteException {
     }
 
@@ -127,5 +123,10 @@ public class TestIWindow extends IWindow.Stub {
     @Override
     public void hideInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken)
             throws RemoteException {
+    }
+
+    @Override
+    public void dumpWindow(ParcelFileDescriptor pfd) {
+
     }
 }

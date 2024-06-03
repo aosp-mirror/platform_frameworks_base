@@ -23,7 +23,11 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 
-/** Entity for back up and restore. */
+/**
+ * Entity for back up and restore.
+ *
+ * Note that backup/restore callback is invoked on the binder thread.
+ */
 interface BackupRestoreEntity {
     /**
      * Key of the entity.
@@ -45,9 +49,12 @@ interface BackupRestoreEntity {
     /**
      * Backs up the entity.
      *
+     * Back up data in predictable order (e.g. use `TreeMap` instead of `HashMap`), otherwise data
+     * will be backed up needlessly.
+     *
      * @param backupContext context for backup
      * @param outputStream output stream to back up data
-     * @return false if backup file is deleted, otherwise true
+     * @return backup result
      */
     @BinderThread
     @Throws(IOException::class)

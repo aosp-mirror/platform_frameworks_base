@@ -24,12 +24,14 @@ import static android.media.session.MediaController.PlaybackInfo.PLAYBACK_TYPE_L
 import static android.media.session.MediaController.PlaybackInfo.PLAYBACK_TYPE_REMOTE;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ForegroundServiceDelegationOptions;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
@@ -64,7 +66,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -84,11 +85,13 @@ import com.android.server.LocalServices;
 import com.android.server.uri.UriGrantsManagerInternal;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -186,6 +189,9 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
     private final ForegroundServiceDelegationOptions mForegroundServiceDelegationOptions;
 
     private final Object mLock = new Object();
+    // This field is partially guarded by mLock. Writes and non-atomic iterations (for example:
+    // index-based-iterations) must be guarded by mLock. But it is safe to acquire an iterator
+    // without acquiring mLock.
     private final CopyOnWriteArrayList<ISessionControllerCallbackHolder>
             mControllerCallbackHolders = new CopyOnWriteArrayList<>();
 
@@ -222,6 +228,49 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
     private String mMetadataDescription;
 
     private int mPolicies;
+
+    private @UserEngagementState int mUserEngagementState = USER_DISENGAGED;
+
+    @IntDef({USER_PERMANENTLY_ENGAGED, USER_TEMPORARY_ENGAGED, USER_DISENGAGED})
+    @Retention(RetentionPolicy.SOURCE)
+    private @interface UserEngagementState {}
+
+    /**
+     * Indicates that the session is active and in one of the user engaged states.
+     *
+     * @see #updateUserEngagedStateIfNeededLocked(boolean) ()
+     */
+    private static final int USER_PERMANENTLY_ENGAGED = 0;
+
+    /**
+     * Indicates that the session is active and in {@link PlaybackState#STATE_PAUSED} state.
+     *
+     * @see #updateUserEngagedStateIfNeededLocked(boolean) ()
+     */
+    private static final int USER_TEMPORARY_ENGAGED = 1;
+
+    /**
+     * Indicates that the session is either not active or in one of the user disengaged states
+     *
+     * @see #updateUserEngagedStateIfNeededLocked(boolean) ()
+     */
+    private static final int USER_DISENGAGED = 2;
+
+    /**
+     * Indicates the duration of the temporary engaged states.
+     *
+     * <p>Some {@link MediaSession} states like {@link PlaybackState#STATE_PAUSED} are temporarily
+     * engaged, meaning the corresponding session is only considered in an engaged state for the
+     * duration of this timeout, and only if coming from an engaged state.
+     *
+     * <p>For example, if a session is transitioning from a user-engaged state {@link
+     * PlaybackState#STATE_PLAYING} to a temporary user-engaged state {@link
+     * PlaybackState#STATE_PAUSED}, then the session will be considered in a user-engaged state for
+     * the duration of this timeout, starting at the transition instant. However, a temporary
+     * user-engaged state is not considered user-engaged when transitioning from a non-user engaged
+     * state {@link PlaybackState#STATE_STOPPED}.
+     */
+    private static final int TEMP_USER_ENGAGED_TIMEOUT = 600000;
 
     public MediaSessionRecord(
             int ownerPid,
@@ -429,28 +478,9 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             int stream = getVolumeStream(mAudioAttrs);
             final int volumeValue = value;
             mHandler.post(
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                mAudioManager.setStreamVolumeForUid(
-                                        stream,
-                                        volumeValue,
-                                        flags,
-                                        opPackageName,
-                                        uid,
-                                        pid,
-                                        mContext.getApplicationInfo().targetSdkVersion);
-                            } catch (IllegalArgumentException | SecurityException e) {
-                                Slog.e(
-                                        TAG,
-                                        "Cannot set volume: stream=" + stream
-                                                + ", value=" + volumeValue
-                                                + ", flags=" + flags,
-                                        e);
-                            }
-                        }
-                    });
+                    () ->
+                            setStreamVolumeForUid(
+                                    opPackageName, pid, uid, flags, stream, volumeValue));
         } else {
             if (mVolumeControlType != VOLUME_CONTROL_ABSOLUTE) {
                 if (DEBUG) {
@@ -477,6 +507,27 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
             // Always notify, even if the volume hasn't changed.
             mService.notifyRemoteVolumeChanged(flags, this);
+        }
+    }
+
+    private void setStreamVolumeForUid(
+            String opPackageName, int pid, int uid, int flags, int stream, int volumeValue) {
+        try {
+            mAudioManager.setStreamVolumeForUid(
+                    stream,
+                    volumeValue,
+                    flags,
+                    opPackageName,
+                    uid,
+                    pid,
+                    mContext.getApplicationInfo().targetSdkVersion);
+        } catch (IllegalArgumentException | SecurityException e) {
+            Slog.e(
+                    TAG,
+                    "Cannot set volume: stream=" + stream
+                            + ", value=" + volumeValue
+                            + ", flags=" + flags,
+                    e);
         }
     }
 
@@ -544,6 +595,7 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             mSessionCb.mCb.asBinder().unlinkToDeath(this, 0);
             mDestroyed = true;
             mPlaybackState = null;
+            updateUserEngagedStateIfNeededLocked(/* isTimeoutExpired= */ true);
             mHandler.post(MessageHandler.MSG_DESTROYED);
         }
     }
@@ -553,6 +605,12 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
         synchronized (mLock) {
             return mDestroyed;
         }
+    }
+
+    @Override
+    public void expireTempEngaged() {
+        mHandler.removeCallbacks(mHandleTempEngagedSessionTimeout);
+        updateUserEngagedStateIfNeededLocked(/* isTimeoutExpired= */ true);
     }
 
     /**
@@ -636,6 +694,15 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
         }
 
         return foundNonSystemSession && remoteSessionAllowVolumeAdjustment;
+    }
+
+    @Override
+    boolean isLinkedToNotification(Notification notification) {
+        return notification.isMediaNotification()
+                && Objects.equals(
+                        notification.extras.getParcelable(
+                                Notification.EXTRA_MEDIA_SESSION, MediaSession.Token.class),
+                        mSessionToken);
     }
 
     @Override
@@ -738,52 +805,70 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             pid = callingPid;
         }
         mHandler.post(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            if (useSuggested) {
-                                if (AudioSystem.isStreamActive(stream, 0)) {
-                                    mAudioManager.adjustSuggestedStreamVolumeForUid(
-                                            stream,
-                                            direction,
-                                            flags,
-                                            opPackageName,
-                                            uid,
-                                            pid,
-                                            mContext.getApplicationInfo().targetSdkVersion);
-                                } else {
-                                    mAudioManager.adjustSuggestedStreamVolumeForUid(
-                                            AudioManager.USE_DEFAULT_STREAM_TYPE,
-                                            direction,
-                                            flags | previousFlagPlaySound,
-                                            opPackageName,
-                                            uid,
-                                            pid,
-                                            mContext.getApplicationInfo().targetSdkVersion);
-                                }
-                            } else {
-                                mAudioManager.adjustStreamVolumeForUid(
-                                        stream,
-                                        direction,
-                                        flags,
-                                        opPackageName,
-                                        uid,
-                                        pid,
-                                        mContext.getApplicationInfo().targetSdkVersion);
-                            }
-                        } catch (IllegalArgumentException | SecurityException e) {
-                            Slog.e(
-                                    TAG,
-                                    "Cannot adjust volume: direction=" + direction
-                                            + ", stream=" + stream + ", flags=" + flags
-                                            + ", opPackageName=" + opPackageName + ", uid=" + uid
-                                            + ", useSuggested=" + useSuggested
-                                            + ", previousFlagPlaySound=" + previousFlagPlaySound,
-                                    e);
-                        }
-                    }
-                });
+                () ->
+                        adjustSuggestedStreamVolumeForUid(
+                                stream,
+                                direction,
+                                flags,
+                                useSuggested,
+                                previousFlagPlaySound,
+                                opPackageName,
+                                uid,
+                                pid));
+    }
+
+    private void adjustSuggestedStreamVolumeForUid(
+            int stream,
+            int direction,
+            int flags,
+            boolean useSuggested,
+            int previousFlagPlaySound,
+            String opPackageName,
+            int uid,
+            int pid) {
+        try {
+            if (useSuggested) {
+                if (AudioSystem.isStreamActive(stream, 0)) {
+                    mAudioManager.adjustSuggestedStreamVolumeForUid(
+                            stream,
+                            direction,
+                            flags,
+                            opPackageName,
+                            uid,
+                            pid,
+                            mContext.getApplicationInfo().targetSdkVersion);
+                } else {
+                    mAudioManager.adjustSuggestedStreamVolumeForUid(
+                            AudioManager.USE_DEFAULT_STREAM_TYPE,
+                            direction,
+                            flags | previousFlagPlaySound,
+                            opPackageName,
+                            uid,
+                            pid,
+                            mContext.getApplicationInfo().targetSdkVersion);
+                }
+            } else {
+                mAudioManager.adjustStreamVolumeForUid(
+                        stream,
+                        direction,
+                        flags,
+                        opPackageName,
+                        uid,
+                        pid,
+                        mContext.getApplicationInfo().targetSdkVersion);
+            }
+        } catch (IllegalArgumentException | SecurityException e) {
+            Slog.e(
+                    TAG,
+                    "Cannot adjust volume: direction=" + direction
+                            + ", stream=" + stream
+                            + ", flags=" + flags
+                            + ", opPackageName=" + opPackageName
+                            + ", uid=" + uid
+                            + ", useSuggested=" + useSuggested
+                            + ", previousFlagPlaySound=" + previousFlagPlaySound,
+                    e);
+        }
     }
 
     private void logCallbackException(
@@ -802,24 +887,9 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
             playbackState = mPlaybackState;
         }
-        Collection<ISessionControllerCallbackHolder> deadCallbackHolders = null;
-        for (ISessionControllerCallbackHolder holder : mControllerCallbackHolders) {
-            try {
-                holder.mCallback.onPlaybackStateChanged(playbackState);
-            } catch (DeadObjectException e) {
-                if (deadCallbackHolders == null) {
-                    deadCallbackHolders = new ArrayList<>();
-                }
-                deadCallbackHolders.add(holder);
-                logCallbackException("Removing dead callback in pushPlaybackStateUpdate", holder,
-                        e);
-            } catch (RemoteException e) {
-                logCallbackException("unexpected exception in pushPlaybackStateUpdate", holder, e);
-            }
-        }
-        if (deadCallbackHolders != null) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
-        }
+        performOnCallbackHolders(
+                "pushPlaybackStateUpdate",
+                holder -> holder.mCallback.onPlaybackStateChanged(playbackState));
     }
 
     private void pushMetadataUpdate() {
@@ -830,23 +900,8 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
             metadata = mMetadata;
         }
-        Collection<ISessionControllerCallbackHolder> deadCallbackHolders = null;
-        for (ISessionControllerCallbackHolder holder : mControllerCallbackHolders) {
-            try {
-                holder.mCallback.onMetadataChanged(metadata);
-            } catch (DeadObjectException e) {
-                if (deadCallbackHolders == null) {
-                    deadCallbackHolders = new ArrayList<>();
-                }
-                deadCallbackHolders.add(holder);
-                logCallbackException("Removing dead callback in pushMetadataUpdate", holder, e);
-            } catch (RemoteException e) {
-                logCallbackException("unexpected exception in pushMetadataUpdate", holder, e);
-            }
-        }
-        if (deadCallbackHolders != null) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
-        }
+        performOnCallbackHolders(
+                "pushMetadataUpdate", holder -> holder.mCallback.onMetadataChanged(metadata));
     }
 
     private void pushQueueUpdate() {
@@ -857,31 +912,18 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
             toSend = mQueue == null ? null : new ArrayList<>(mQueue);
         }
-        Collection<ISessionControllerCallbackHolder> deadCallbackHolders = null;
-        for (ISessionControllerCallbackHolder holder : mControllerCallbackHolders) {
-            ParceledListSlice<QueueItem> parcelableQueue = null;
-            if (toSend != null) {
-                parcelableQueue = new ParceledListSlice<>(toSend);
-                // Limit the size of initial Parcel to prevent binder buffer overflow
-                // as onQueueChanged is an async binder call.
-                parcelableQueue.setInlineCountLimit(1);
-            }
-
-            try {
-                holder.mCallback.onQueueChanged(parcelableQueue);
-            } catch (DeadObjectException e) {
-                if (deadCallbackHolders == null) {
-                    deadCallbackHolders = new ArrayList<>();
-                }
-                deadCallbackHolders.add(holder);
-                logCallbackException("Removing dead callback in pushQueueUpdate", holder, e);
-            } catch (RemoteException e) {
-                logCallbackException("unexpected exception in pushQueueUpdate", holder, e);
-            }
-        }
-        if (deadCallbackHolders != null) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
-        }
+        performOnCallbackHolders(
+                "pushQueueUpdate",
+                holder -> {
+                    ParceledListSlice<QueueItem> parcelableQueue = null;
+                    if (toSend != null) {
+                        parcelableQueue = new ParceledListSlice<>(toSend);
+                        // Limit the size of initial Parcel to prevent binder buffer overflow
+                        // as onQueueChanged is an async binder call.
+                        parcelableQueue.setInlineCountLimit(1);
+                    }
+                    holder.mCallback.onQueueChanged(parcelableQueue);
+                });
     }
 
     private void pushQueueTitleUpdate() {
@@ -892,23 +934,8 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
             queueTitle = mQueueTitle;
         }
-        Collection<ISessionControllerCallbackHolder> deadCallbackHolders = null;
-        for (ISessionControllerCallbackHolder holder : mControllerCallbackHolders) {
-            try {
-                holder.mCallback.onQueueTitleChanged(queueTitle);
-            } catch (DeadObjectException e) {
-                if (deadCallbackHolders == null) {
-                    deadCallbackHolders = new ArrayList<>();
-                }
-                deadCallbackHolders.add(holder);
-                logCallbackException("Removing dead callback in pushQueueTitleUpdate", holder, e);
-            } catch (RemoteException e) {
-                logCallbackException("unexpected exception in pushQueueTitleUpdate", holder, e);
-            }
-        }
-        if (deadCallbackHolders != null) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
-        }
+        performOnCallbackHolders(
+                "pushQueueTitleUpdate", holder -> holder.mCallback.onQueueTitleChanged(queueTitle));
     }
 
     private void pushExtrasUpdate() {
@@ -919,23 +946,8 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
             extras = mExtras;
         }
-        Collection<ISessionControllerCallbackHolder> deadCallbackHolders = null;
-        for (ISessionControllerCallbackHolder holder : mControllerCallbackHolders) {
-            try {
-                holder.mCallback.onExtrasChanged(extras);
-            } catch (DeadObjectException e) {
-                if (deadCallbackHolders == null) {
-                    deadCallbackHolders = new ArrayList<>();
-                }
-                deadCallbackHolders.add(holder);
-                logCallbackException("Removing dead callback in pushExtrasUpdate", holder, e);
-            } catch (RemoteException e) {
-                logCallbackException("unexpected exception in pushExtrasUpdate", holder, e);
-            }
-        }
-        if (deadCallbackHolders != null) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
-        }
+        performOnCallbackHolders(
+                "pushExtrasUpdate", holder -> holder.mCallback.onExtrasChanged(extras));
     }
 
     private void pushVolumeUpdate() {
@@ -946,23 +958,8 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
             info = getVolumeAttributes();
         }
-        Collection<ISessionControllerCallbackHolder> deadCallbackHolders = null;
-        for (ISessionControllerCallbackHolder holder : mControllerCallbackHolders) {
-            try {
-                holder.mCallback.onVolumeInfoChanged(info);
-            } catch (DeadObjectException e) {
-                if (deadCallbackHolders == null) {
-                    deadCallbackHolders = new ArrayList<>();
-                }
-                deadCallbackHolders.add(holder);
-                logCallbackException("Removing dead callback in pushVolumeUpdate", holder, e);
-            } catch (RemoteException e) {
-                logCallbackException("unexpected exception in pushVolumeUpdate", holder, e);
-            }
-        }
-        if (deadCallbackHolders != null) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
-        }
+        performOnCallbackHolders(
+                "pushVolumeUpdate", holder -> holder.mCallback.onVolumeInfoChanged(info));
     }
 
     private void pushEvent(String event, Bundle data) {
@@ -971,23 +968,7 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
                 return;
             }
         }
-        Collection<ISessionControllerCallbackHolder> deadCallbackHolders = null;
-        for (ISessionControllerCallbackHolder holder : mControllerCallbackHolders) {
-            try {
-                holder.mCallback.onEvent(event, data);
-            } catch (DeadObjectException e) {
-                if (deadCallbackHolders == null) {
-                    deadCallbackHolders = new ArrayList<>();
-                }
-                deadCallbackHolders.add(holder);
-                logCallbackException("Removing dead callback in pushEvent", holder, e);
-            } catch (RemoteException e) {
-                logCallbackException("unexpected exception in pushEvent", holder, e);
-            }
-        }
-        if (deadCallbackHolders != null) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
-        }
+        performOnCallbackHolders("pushEvent", holder -> holder.mCallback.onEvent(event, data));
     }
 
     private void pushSessionDestroyed() {
@@ -998,20 +979,37 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
                 return;
             }
         }
+        performOnCallbackHolders(
+                "pushSessionDestroyed",
+                holder -> {
+                    holder.mCallback.asBinder().unlinkToDeath(holder.mDeathMonitor, 0);
+                    holder.mCallback.onSessionDestroyed();
+                });
+        // After notifying clear all listeners
+        synchronized (mLock) {
+            mControllerCallbackHolders.clear();
+        }
+    }
+
+    private interface ControllerCallbackCall {
+
+        void performOn(ISessionControllerCallbackHolder holder) throws RemoteException;
+    }
+
+    private void performOnCallbackHolders(String operationName, ControllerCallbackCall call) {
+        ArrayList<ISessionControllerCallbackHolder> deadCallbackHolders = new ArrayList<>();
         for (ISessionControllerCallbackHolder holder : mControllerCallbackHolders) {
             try {
-                holder.mCallback.asBinder().unlinkToDeath(holder.mDeathMonitor, 0);
-                holder.mCallback.onSessionDestroyed();
-            } catch (NoSuchElementException e) {
-                logCallbackException("error unlinking to binder death", holder, e);
-            } catch (DeadObjectException e) {
-                logCallbackException("Removing dead callback in pushSessionDestroyed", holder, e);
-            } catch (RemoteException e) {
-                logCallbackException("unexpected exception in pushSessionDestroyed", holder, e);
+                call.performOn(holder);
+            } catch (RemoteException | NoSuchElementException exception) {
+                deadCallbackHolders.add(holder);
+                logCallbackException(
+                        "Exception while executing: " + operationName, holder, exception);
             }
         }
-        // After notifying clear all listeners
-        mControllerCallbackHolders.clear();
+        synchronized (mLock) {
+            mControllerCallbackHolders.removeAll(deadCallbackHolders);
+        }
     }
 
     private PlaybackState getStateWithUpdatedPosition() {
@@ -1059,6 +1057,7 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
         return -1;
     }
 
+    @NonNull
     private PlaybackInfo getVolumeAttributes() {
         int volumeType;
         AudioAttributes attributes;
@@ -1078,16 +1077,19 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
                 volumeType, VOLUME_CONTROL_ABSOLUTE, max, current, attributes, null);
     }
 
-    private final Runnable mClearOptimisticVolumeRunnable = new Runnable() {
-        @Override
-        public void run() {
-            boolean needUpdate = (mOptimisticVolume != mCurrentVolume);
-            mOptimisticVolume = -1;
-            if (needUpdate) {
-                pushVolumeUpdate();
-            }
-        }
-    };
+    private final Runnable mClearOptimisticVolumeRunnable =
+            () -> {
+                boolean needUpdate = (mOptimisticVolume != mCurrentVolume);
+                mOptimisticVolume = -1;
+                if (needUpdate) {
+                    pushVolumeUpdate();
+                }
+            };
+
+    private final Runnable mHandleTempEngagedSessionTimeout =
+            () -> {
+                updateUserEngagedStateIfNeededLocked(/* isTimeoutExpired= */ true);
+            };
 
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
     private static boolean componentNameExists(
@@ -1103,6 +1105,40 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
                 pm.queryBroadcastReceiversAsUser(
                         mediaButtonIntent, PackageManager.ResolveInfoFlags.of(0), userHandle);
         return !resolveInfos.isEmpty();
+    }
+
+    private void updateUserEngagedStateIfNeededLocked(boolean isTimeoutExpired) {
+        int oldUserEngagedState = mUserEngagementState;
+        int newUserEngagedState;
+        if (!isActive() || mPlaybackState == null) {
+            newUserEngagedState = USER_DISENGAGED;
+        } else if (isActive() && mPlaybackState.isActive()) {
+            newUserEngagedState = USER_PERMANENTLY_ENGAGED;
+        } else if (mPlaybackState.getState() == PlaybackState.STATE_PAUSED) {
+            newUserEngagedState =
+                    oldUserEngagedState == USER_PERMANENTLY_ENGAGED || !isTimeoutExpired
+                            ? USER_TEMPORARY_ENGAGED
+                            : USER_DISENGAGED;
+        } else {
+            newUserEngagedState = USER_DISENGAGED;
+        }
+        if (oldUserEngagedState == newUserEngagedState) {
+            return;
+        }
+
+        if (newUserEngagedState == USER_TEMPORARY_ENGAGED) {
+            mHandler.postDelayed(mHandleTempEngagedSessionTimeout, TEMP_USER_ENGAGED_TIMEOUT);
+        } else if (oldUserEngagedState == USER_TEMPORARY_ENGAGED) {
+            mHandler.removeCallbacks(mHandleTempEngagedSessionTimeout);
+        }
+
+        boolean wasUserEngaged = oldUserEngagedState != USER_DISENGAGED;
+        boolean isNowUserEngaged = newUserEngagedState != USER_DISENGAGED;
+        mUserEngagementState = newUserEngagedState;
+        if (wasUserEngaged != isNowUserEngaged) {
+            mService.onSessionUserEngagementStateChange(
+                    /* mediaSessionRecord= */ this, /* isUserEngaged= */ isNowUserEngaged);
+        }
     }
 
     private final class SessionStub extends ISession.Stub {
@@ -1142,8 +1178,10 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
                         .logFgsApiEnd(ActivityManager.FOREGROUND_SERVICE_API_TYPE_MEDIA_PLAYBACK,
                                 callingUid, callingPid);
             }
-
-            mIsActive = active;
+            synchronized (mLock) {
+                mIsActive = active;
+                updateUserEngagedStateIfNeededLocked(/* isTimeoutExpired= */ false);
+            }
             long token = Binder.clearCallingIdentity();
             try {
                 mService.onSessionActiveStateChanged(MediaSessionRecord.this, mPlaybackState);
@@ -1301,6 +1339,7 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
                     && TRANSITION_PRIORITY_STATES.contains(newState));
             synchronized (mLock) {
                 mPlaybackState = state;
+                updateUserEngagedStateIfNeededLocked(/* isTimeoutExpired= */ false);
             }
             final long token = Binder.clearCallingIdentity();
             try {
@@ -1322,12 +1361,14 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
 
         @Override
         public IBinder getBinderForSetQueue() throws RemoteException {
-            return new ParcelableListBinder<QueueItem>((list) -> {
-                synchronized (mLock) {
-                    mQueue = list;
-                }
-                mHandler.post(MessageHandler.MSG_UPDATE_QUEUE);
-            });
+            return new ParcelableListBinder<QueueItem>(
+                    QueueItem.class,
+                    (list) -> {
+                        synchronized (mLock) {
+                            mQueue = list;
+                        }
+                        mHandler.post(MessageHandler.MSG_UPDATE_QUEUE);
+                    });
         }
 
         @Override
@@ -1810,6 +1851,7 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             return mFlags;
         }
 
+        @NonNull
         @Override
         public PlaybackInfo getVolumeAttributes() {
             return MediaSessionRecord.this.getVolumeAttributes();

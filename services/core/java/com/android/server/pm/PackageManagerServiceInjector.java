@@ -86,7 +86,7 @@ public class PackageManagerServiceInjector {
     private final Context mContext;
     private final PackageManagerTracedLock mLock;
     private final Installer mInstaller;
-    private final Object mInstallLock;
+    private final PackageManagerTracedLock mInstallLock;
     private final Handler mBackgroundHandler;
     private final Executor mBackgroundExecutor;
     private final List<ScanPartition> mSystemPartitions;
@@ -144,7 +144,7 @@ public class PackageManagerServiceInjector {
     private final Singleton<PackageMonitorCallbackHelper> mPackageMonitorCallbackHelper;
 
     PackageManagerServiceInjector(Context context, PackageManagerTracedLock lock,
-            Installer installer, Object installLock, PackageAbiHelper abiHelper,
+            Installer installer, PackageManagerTracedLock installLock, PackageAbiHelper abiHelper,
             Handler backgroundHandler,
             List<ScanPartition> systemPartitions,
             Producer<ComponentResolver> componentResolverProducer,
@@ -254,7 +254,7 @@ public class PackageManagerServiceInjector {
         return mAbiHelper;
     }
 
-    public Object getInstallLock() {
+    public PackageManagerTracedLock getInstallLock() {
         return mInstallLock;
     }
 

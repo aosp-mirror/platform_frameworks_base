@@ -24,6 +24,7 @@ import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import javax.inject.Inject
@@ -51,7 +52,7 @@ constructor(
 
     private fun destinationScenes(shadeMode: ShadeMode): Map<UserAction, UserActionResult> {
         return buildMap {
-            if (shadeMode == ShadeMode.Single) {
+            if (shadeMode is ShadeMode.Single) {
                 this[
                     Swipe(
                         pointerCount = 2,
@@ -60,7 +61,21 @@ constructor(
                     )] = UserActionResult(Scenes.QuickSettings)
             }
 
-            this[Swipe(direction = SwipeDirection.Down)] = UserActionResult(Scenes.Shade)
+            // TODO(b/338577208): Remove this once we add Dual Shade invocation zones.
+            if (shadeMode is ShadeMode.Dual) {
+                this[
+                    Swipe(
+                        pointerCount = 2,
+                        fromSource = Edge.Top,
+                        direction = SwipeDirection.Down,
+                    )] = UserActionResult(Scenes.QuickSettingsShade)
+            }
+
+            val downSceneKey =
+                if (shadeMode is ShadeMode.Dual) Scenes.NotificationsShade else Scenes.Shade
+            val downTransitionKey = ToSplitShade.takeIf { shadeMode is ShadeMode.Split }
+            this[Swipe(direction = SwipeDirection.Down)] =
+                UserActionResult(downSceneKey, downTransitionKey)
         }
     }
 }

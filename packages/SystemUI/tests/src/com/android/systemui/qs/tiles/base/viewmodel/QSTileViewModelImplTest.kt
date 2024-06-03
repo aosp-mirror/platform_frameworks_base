@@ -77,7 +77,7 @@ class QSTileViewModelImplTest : SysuiTestCase() {
         underTest =
             QSTileViewModelImpl(
                 QSTileConfigTestBuilder.build {
-                    policy = QSTilePolicy.Restricted("test_restriction")
+                    policy = QSTilePolicy.Restricted(listOf("test_restriction"))
                 },
                 { tileUserActionInteractor },
                 { tileDataInteractor },
@@ -116,6 +116,7 @@ class QSTileViewModelImplTest : SysuiTestCase() {
                     "test_spec:\n" +
                         "    QSTileState(" +
                         "icon=() -> com.android.systemui.common.shared.model.Icon?, " +
+                        "iconRes=null, " +
                         "label=test_data, " +
                         "activationState=INACTIVE, " +
                         "secondaryLabel=null, " +

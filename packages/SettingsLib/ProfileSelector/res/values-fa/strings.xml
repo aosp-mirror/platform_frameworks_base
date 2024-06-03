@@ -19,4 +19,5 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="settingslib_category_personal" msgid="1142302328104700620">"شخصی"</string>
     <string name="settingslib_category_work" msgid="4867750733682444676">"محل کار"</string>
+    <string name="settingslib_category_private" msgid="5039276873477591386">"خصوصی"</string>
 </resources>

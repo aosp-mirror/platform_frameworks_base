@@ -22,15 +22,19 @@ import static com.android.server.power.hint.HintManagerService.CLEAN_UP_UID_DELA
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -38,15 +42,21 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.content.Context;
+import android.hardware.power.ChannelConfig;
+import android.hardware.power.IPower;
+import android.hardware.power.SessionConfig;
+import android.hardware.power.SessionTag;
 import android.hardware.power.WorkDuration;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.IHintSession;
 import android.os.PerformanceHintManager;
 import android.os.Process;
+import android.os.RemoteException;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
@@ -63,6 +73,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -97,6 +109,7 @@ public class HintManagerServiceTest {
 
     private static final long DEFAULT_HINT_PREFERRED_RATE = 16666666L;
     private static final long DEFAULT_TARGET_DURATION = 16666666L;
+    private static final long DOUBLED_TARGET_DURATION = 33333333L;
     private static final long CONCURRENCY_TEST_DURATION_SEC = 10;
     private static final int UID = Process.myUid();
     private static final int TID = Process.myPid();
@@ -106,6 +119,8 @@ public class HintManagerServiceTest {
     private static final int[] SESSION_TIDS_C = new int[] {TID};
     private static final long[] DURATIONS_THREE = new long[] {1L, 100L, 1000L};
     private static final long[] TIMESTAMPS_THREE = new long[] {1L, 2L, 3L};
+    private static final long[] SESSION_PTRS = new long[] {11L, 22L, 33L};
+    private static final long[] SESSION_IDS = new long[] {1L, 11L, 111L};
     private static final long[] DURATIONS_ZERO = new long[] {};
     private static final long[] TIMESTAMPS_ZERO = new long[] {};
     private static final long[] TIMESTAMPS_TWO = new long[] {1L, 2L};
@@ -122,26 +137,74 @@ public class HintManagerServiceTest {
     @Mock
     private HintManagerService.NativeWrapper mNativeWrapperMock;
     @Mock
+    private IPower mIPowerMock;
+    @Mock
     private ActivityManagerInternal mAmInternalMock;
     @Rule
     public final CheckFlagsRule mCheckFlagsRule =
             DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private HintManagerService mService;
+    private ChannelConfig mConfig;
+
+    private static Answer<Long> fakeCreateWithConfig(Long ptr, Long sessionId) {
+        return new Answer<Long>() {
+            public Long answer(InvocationOnMock invocation) {
+                ((SessionConfig) invocation.getArguments()[5]).id = sessionId;
+                return ptr;
+            }
+        };
+    }
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mConfig = new ChannelConfig();
+        mConfig.readFlagBitmask = 1;
+        mConfig.writeFlagBitmask = 2;
         when(mNativeWrapperMock.halGetHintSessionPreferredRate())
                 .thenReturn(DEFAULT_HINT_PREFERRED_RATE);
         when(mNativeWrapperMock.halCreateHintSession(eq(TGID), eq(UID), eq(SESSION_TIDS_A),
-                eq(DEFAULT_TARGET_DURATION))).thenReturn(1L);
+                eq(DEFAULT_TARGET_DURATION))).thenReturn(SESSION_PTRS[0]);
         when(mNativeWrapperMock.halCreateHintSession(eq(TGID), eq(UID), eq(SESSION_TIDS_B),
-                eq(DEFAULT_TARGET_DURATION))).thenReturn(2L);
+                eq(DOUBLED_TARGET_DURATION))).thenReturn(SESSION_PTRS[1]);
         when(mNativeWrapperMock.halCreateHintSession(eq(TGID), eq(UID), eq(SESSION_TIDS_C),
-                eq(0L))).thenReturn(1L);
+                eq(0L))).thenReturn(SESSION_PTRS[2]);
+        when(mNativeWrapperMock.halCreateHintSessionWithConfig(eq(TGID), eq(UID),
+                eq(SESSION_TIDS_A), eq(DEFAULT_TARGET_DURATION), anyInt(),
+                any(SessionConfig.class))).thenAnswer(fakeCreateWithConfig(SESSION_PTRS[0],
+                    SESSION_IDS[0]));
+        when(mNativeWrapperMock.halCreateHintSessionWithConfig(eq(TGID), eq(UID),
+                eq(SESSION_TIDS_B), eq(DOUBLED_TARGET_DURATION), anyInt(),
+                any(SessionConfig.class))).thenAnswer(fakeCreateWithConfig(SESSION_PTRS[1],
+                    SESSION_IDS[1]));
+        when(mNativeWrapperMock.halCreateHintSessionWithConfig(eq(TGID), eq(UID),
+                eq(SESSION_TIDS_C), eq(0L), anyInt(),
+                any(SessionConfig.class))).thenAnswer(fakeCreateWithConfig(SESSION_PTRS[2],
+                    SESSION_IDS[2]));
+
+        when(mIPowerMock.getInterfaceVersion()).thenReturn(5);
+        when(mIPowerMock.getSessionChannel(anyInt(), anyInt())).thenReturn(mConfig);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
         LocalServices.addService(ActivityManagerInternal.class, mAmInternalMock);
+    }
+
+    /**
+     * Mocks the creation calls, but without support for new createHintSessionWithConfig method
+     */
+    public void makeConfigCreationUnsupported() {
+        reset(mNativeWrapperMock);
+        when(mNativeWrapperMock.halGetHintSessionPreferredRate())
+                .thenReturn(DEFAULT_HINT_PREFERRED_RATE);
+        when(mNativeWrapperMock.halCreateHintSession(eq(TGID), eq(UID), eq(SESSION_TIDS_A),
+                eq(DEFAULT_TARGET_DURATION))).thenReturn(SESSION_PTRS[0]);
+        when(mNativeWrapperMock.halCreateHintSession(eq(TGID), eq(UID), eq(SESSION_TIDS_B),
+                eq(DOUBLED_TARGET_DURATION))).thenReturn(SESSION_PTRS[1]);
+        when(mNativeWrapperMock.halCreateHintSession(eq(TGID), eq(UID), eq(SESSION_TIDS_C),
+                eq(0L))).thenReturn(SESSION_PTRS[2]);
+        when(mNativeWrapperMock.halCreateHintSessionWithConfig(anyInt(), anyInt(),
+            any(int[].class), anyLong(), anyInt(),
+            any(SessionConfig.class))).thenThrow(new UnsupportedOperationException());
     }
 
     static class NativeWrapperFake extends NativeWrapper {
@@ -156,6 +219,12 @@ public class HintManagerServiceTest {
 
         @Override
         public long halCreateHintSession(int tgid, int uid, int[] tids, long durationNanos) {
+            return 1;
+        }
+
+        @Override
+        public long halCreateHintSessionWithConfig(int tgid, int uid, int[] tids,
+                long durationNanos, int tag, SessionConfig config) {
             return 1;
         }
 
@@ -198,6 +267,9 @@ public class HintManagerServiceTest {
             NativeWrapper createNativeWrapper() {
                 return mNativeWrapperMock;
             }
+            IPower createIPower() {
+                return mIPowerMock;
+            }
         });
         return mService;
     }
@@ -206,6 +278,9 @@ public class HintManagerServiceTest {
         mService = new HintManagerService(mContext, new Injector() {
             NativeWrapper createNativeWrapper() {
                 return new NativeWrapperFake();
+            }
+            IPower createIPower() {
+                return mIPowerMock;
             }
         });
         return mService;
@@ -224,27 +299,57 @@ public class HintManagerServiceTest {
         IBinder token = new Binder();
         // Make sure we throw exception when adding a TID doesn't belong to the processes
         // In this case, we add `init` PID into the list.
+        SessionConfig config = new SessionConfig();
         assertThrows(SecurityException.class,
-                () -> service.getBinderServiceInstance().createHintSession(token,
-                        new int[]{TID, 1}, DEFAULT_TARGET_DURATION));
+                () -> service.getBinderServiceInstance().createHintSessionWithConfig(token,
+                        new int[]{TID, 1}, DEFAULT_TARGET_DURATION, SessionTag.OTHER, config));
     }
 
     @Test
-    public void testCreateHintSession() throws Exception {
+    public void testCreateHintSessionFallback() throws Exception {
+        HintManagerService service = createService();
+        IBinder token = new Binder();
+        makeConfigCreationUnsupported();
+
+        IHintSession a = service.getBinderServiceInstance().createHintSessionWithConfig(token,
+                SESSION_TIDS_A, DEFAULT_TARGET_DURATION, SessionTag.OTHER, new SessionConfig());
+        assertNotNull(a);
+
+        IHintSession b = service.getBinderServiceInstance().createHintSessionWithConfig(token,
+                SESSION_TIDS_B, DOUBLED_TARGET_DURATION, SessionTag.OTHER, new SessionConfig());
+        assertNotEquals(a, b);
+
+        IHintSession c = service.getBinderServiceInstance().createHintSessionWithConfig(token,
+                SESSION_TIDS_C, 0L, SessionTag.OTHER, new SessionConfig());
+        assertNotNull(c);
+        verify(mNativeWrapperMock, times(3)).halCreateHintSession(anyInt(), anyInt(),
+                                                                  any(int[].class), anyLong());
+    }
+
+    @Test
+    public void testCreateHintSessionWithConfig() throws Exception {
         HintManagerService service = createService();
         IBinder token = new Binder();
 
-        IHintSession a = service.getBinderServiceInstance().createHintSession(token,
-                SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
+        SessionConfig config = new SessionConfig();
+        IHintSession a = service.getBinderServiceInstance().createHintSessionWithConfig(token,
+                SESSION_TIDS_A, DEFAULT_TARGET_DURATION, SessionTag.OTHER, config);
         assertNotNull(a);
+        assertEquals(SESSION_IDS[0], config.id);
 
-        IHintSession b = service.getBinderServiceInstance().createHintSession(token,
-                SESSION_TIDS_B, DEFAULT_TARGET_DURATION);
+        SessionConfig config2 = new SessionConfig();
+        IHintSession b = service.getBinderServiceInstance().createHintSessionWithConfig(token,
+                SESSION_TIDS_B, DOUBLED_TARGET_DURATION, SessionTag.APP, config2);
         assertNotEquals(a, b);
+        assertEquals(SESSION_IDS[1], config2.id);
 
-        IHintSession c = service.getBinderServiceInstance().createHintSession(token,
-                SESSION_TIDS_C, 0L);
+        SessionConfig config3 = new SessionConfig();
+        IHintSession c = service.getBinderServiceInstance().createHintSessionWithConfig(token,
+                SESSION_TIDS_C, 0L, SessionTag.GAME, config3);
         assertNotNull(c);
+        assertEquals(SESSION_IDS[2], config3.id);
+        verify(mNativeWrapperMock, times(3)).halCreateHintSessionWithConfig(anyInt(), anyInt(),
+                any(int[].class), anyLong(), anyInt(), any(SessionConfig.class));
     }
 
     @Test
@@ -253,9 +358,11 @@ public class HintManagerServiceTest {
         IBinder token = new Binder();
 
         AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSession(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
+                .createHintSessionWithConfig(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION,
+                        SessionTag.OTHER, new SessionConfig());
 
-        // Set session to background and calling updateHintAllowed() would invoke pause();
+        // Set session to background and calling updateHintAllowedByProcState() would invoke
+        // pause();
         service.mUidObserver.onUidStateChanged(
                 a.mUid, ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0, 0);
 
@@ -268,7 +375,8 @@ public class HintManagerServiceTest {
         assertFalse(service.mUidObserver.isUidForeground(a.mUid));
         verify(mNativeWrapperMock, times(1)).halPauseHintSession(anyLong());
 
-        // Set session to foreground and calling updateHintAllowed() would invoke resume();
+        // Set session to foreground and calling updateHintAllowedByProcState() would invoke
+        // resume();
         service.mUidObserver.onUidStateChanged(
                 a.mUid, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0, 0);
 
@@ -288,8 +396,8 @@ public class HintManagerServiceTest {
         HintManagerService service = createService();
         IBinder token = new Binder();
 
-        IHintSession a = service.getBinderServiceInstance().createHintSession(token,
-                SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
+        IHintSession a = service.getBinderServiceInstance().createHintSessionWithConfig(token,
+                SESSION_TIDS_A, DEFAULT_TARGET_DURATION, SessionTag.OTHER, new SessionConfig());
 
         a.close();
         verify(mNativeWrapperMock, times(1)).halCloseHintSession(anyLong());
@@ -300,8 +408,8 @@ public class HintManagerServiceTest {
         HintManagerService service = createService();
         IBinder token = new Binder();
 
-        IHintSession a = service.getBinderServiceInstance().createHintSession(token,
-                SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
+        IHintSession a = service.getBinderServiceInstance().createHintSessionWithConfig(token,
+                SESSION_TIDS_A, DEFAULT_TARGET_DURATION, SessionTag.OTHER, new SessionConfig());
 
         assertThrows(IllegalArgumentException.class, () -> {
             a.updateTargetWorkDuration(-1L);
@@ -321,7 +429,8 @@ public class HintManagerServiceTest {
         IBinder token = new Binder();
 
         AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSession(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
+                .createHintSessionWithConfig(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION,
+                        SessionTag.OTHER, new SessionConfig());
 
         a.updateTargetWorkDuration(100L);
         a.reportActualWorkDuration(DURATIONS_THREE, TIMESTAMPS_THREE);
@@ -363,7 +472,8 @@ public class HintManagerServiceTest {
         IBinder token = new Binder();
 
         AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSession(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
+                .createHintSessionWithConfig(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION,
+                    SessionTag.OTHER, new SessionConfig());
 
         a.sendHint(PerformanceHintManager.Session.CPU_LOAD_RESET);
         verify(mNativeWrapperMock, times(1)).halSendHint(anyLong(),
@@ -389,7 +499,8 @@ public class HintManagerServiceTest {
         IBinder token = new Binder();
 
         AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSession(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
+                .createHintSessionWithConfig(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION,
+                    SessionTag.OTHER, new SessionConfig());
 
         service.mUidObserver.onUidStateChanged(
                 a.mUid, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND, 0, 0);
@@ -410,7 +521,8 @@ public class HintManagerServiceTest {
         IBinder token = new Binder();
 
         AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSession(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
+                .createHintSessionWithConfig(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION,
+                        SessionTag.OTHER, new SessionConfig());
 
         service.mUidObserver.onUidStateChanged(
                 a.mUid, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0, 0);
@@ -423,7 +535,8 @@ public class HintManagerServiceTest {
         IBinder token = new Binder();
 
         AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSession(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
+                .createHintSessionWithConfig(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION,
+                        SessionTag.OTHER, new SessionConfig());
 
         a.updateTargetWorkDuration(100L);
 
@@ -450,36 +563,45 @@ public class HintManagerServiceTest {
     public void testCleanupDeadThreads() throws Exception {
         HintManagerService service = createService();
         IBinder token = new Binder();
-        CountDownLatch stopLatch1 = new CountDownLatch(1);
-        int threadCount = 3;
-        int[] tids1 = createThreads(threadCount, stopLatch1);
+        int threadCount = 2;
+
+        // session 1 has 2 non-isolated tids
         long sessionPtr1 = 111;
-        when(mNativeWrapperMock.halCreateHintSession(eq(TGID), eq(UID), eq(tids1),
-                eq(DEFAULT_TARGET_DURATION))).thenReturn(sessionPtr1);
+        CountDownLatch stopLatch1 = new CountDownLatch(1);
+        int[] tids1 = createThreads(threadCount, stopLatch1);
+        when(mNativeWrapperMock.halCreateHintSessionWithConfig(eq(TGID), eq(UID), eq(tids1),
+                eq(DEFAULT_TARGET_DURATION), anyInt(), any(SessionConfig.class)))
+                .thenReturn(sessionPtr1);
         AppHintSession session1 = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSession(token, tids1, DEFAULT_TARGET_DURATION);
+                .createHintSessionWithConfig(token, tids1, DEFAULT_TARGET_DURATION,
+                        SessionTag.OTHER, new SessionConfig());
         assertNotNull(session1);
 
-        // for test only to avoid conflicting with any real thread that exists on device
+        // session 2 has 2 non-isolated tids and 2 isolated tids
+        long sessionPtr2 = 222;
+        CountDownLatch stopLatch2 = new CountDownLatch(1);
+        // negative value used for test only to avoid conflicting with any real thread that exists
         int isoProc1 = -100;
         int isoProc2 = 9999;
         when(mAmInternalMock.getIsolatedProcesses(eq(UID))).thenReturn(List.of(0));
-
-        CountDownLatch stopLatch2 = new CountDownLatch(1);
         int[] tids2 = createThreads(threadCount, stopLatch2);
         int[] tids2WithIsolated = Arrays.copyOf(tids2, tids2.length + 2);
-        int[] expectedTids2 = Arrays.copyOf(tids2, tids2.length + 1);
-        expectedTids2[tids2.length] = isoProc1;
         tids2WithIsolated[threadCount] = isoProc1;
         tids2WithIsolated[threadCount + 1] = isoProc2;
-        long sessionPtr2 = 222;
-        when(mNativeWrapperMock.halCreateHintSession(eq(TGID), eq(UID), eq(tids2WithIsolated),
-                eq(DEFAULT_TARGET_DURATION))).thenReturn(sessionPtr2);
+        int[] expectedTids2 = Arrays.copyOf(tids2, tids2.length + 1);
+        expectedTids2[tids2.length] = isoProc1;
+        when(mNativeWrapperMock.halCreateHintSessionWithConfig(eq(TGID), eq(UID),
+                eq(tids2WithIsolated), eq(DEFAULT_TARGET_DURATION), anyInt(),
+                any(SessionConfig.class))).thenReturn(sessionPtr2);
         AppHintSession session2 = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSession(token, tids2WithIsolated, DEFAULT_TARGET_DURATION);
+                .createHintSessionWithConfig(token, tids2WithIsolated,
+                        DEFAULT_TARGET_DURATION, SessionTag.OTHER, new SessionConfig());
         assertNotNull(session2);
 
-        // trigger clean up through UID state change by making the process background
+        // trigger clean up through UID state change by making the process foreground->background
+        // this will remove the one unexpected isolated tid from session 2
+        service.mUidObserver.onUidStateChanged(UID,
+                ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0, 0);
         service.mUidObserver.onUidStateChanged(UID,
                 ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND, 0, 0);
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500) + TimeUnit.MILLISECONDS.toNanos(
@@ -499,17 +621,21 @@ public class HintManagerServiceTest {
         verify(mNativeWrapperMock, times(1)).halSetThreads(eq(sessionPtr2), eq(expectedTids2));
         reset(mNativeWrapperMock);
 
-        // let all session 1 threads to exit and the cleanup should force pause the session
+        // let all session 1 threads to exit and the cleanup should force pause the session 1
         stopLatch1.countDown();
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(100));
         service.mUidObserver.onUidStateChanged(UID,
-                ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0, 0);
+                ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND, 0, 0);
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500) + TimeUnit.MILLISECONDS.toNanos(
                 CLEAN_UP_UID_DELAY_MILLIS));
         verify(mNativeWrapperMock, times(1)).halPauseHintSession(eq(sessionPtr1));
         verify(mNativeWrapperMock, never()).halSetThreads(eq(sessionPtr1), any());
         verify(mNativeWrapperMock, never()).halSetThreads(eq(sessionPtr2), any());
-        // all hints will have no effect as the session is force paused while proc in foreground
+        verifyAllHintsEnabled(session1, false);
+        verifyAllHintsEnabled(session2, false);
+        service.mUidObserver.onUidStateChanged(UID,
+                ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0, 0);
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500));
         verifyAllHintsEnabled(session1, false);
         verifyAllHintsEnabled(session2, true);
         reset(mNativeWrapperMock);
@@ -608,7 +734,8 @@ public class HintManagerServiceTest {
         IBinder token = new Binder();
 
         AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSession(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
+                .createHintSessionWithConfig(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION,
+                        SessionTag.OTHER, new SessionConfig());
 
         a.setMode(0, true);
         verify(mNativeWrapperMock, times(1)).halSetMode(anyLong(),
@@ -631,6 +758,102 @@ public class HintManagerServiceTest {
         assertFalse(service.mUidObserver.isUidForeground(a.mUid));
         a.setMode(0, true);
         verify(mNativeWrapperMock, never()).halSetMode(anyLong(), anyInt(), anyBoolean());
+    }
+
+    @Test
+    public void testGetChannel() throws Exception {
+        HintManagerService service = createService();
+        Binder token = new Binder();
+
+        // Should only call once, after caching the first call
+        ChannelConfig config = service.getBinderServiceInstance().getSessionChannel(token);
+        ChannelConfig config2 = service.getBinderServiceInstance().getSessionChannel(token);
+        verify(mIPowerMock, times(1)).getSessionChannel(eq(TGID), eq(UID));
+        assertEquals(config.readFlagBitmask, mConfig.readFlagBitmask);
+        assertEquals(config.writeFlagBitmask, mConfig.writeFlagBitmask);
+        assertEquals(config2.readFlagBitmask, mConfig.readFlagBitmask);
+        assertEquals(config2.writeFlagBitmask, mConfig.writeFlagBitmask);
+    }
+
+    @Test
+    public void testGetChannelTwice() throws Exception {
+        HintManagerService service = createService();
+        Binder token = new Binder();
+
+        service.getBinderServiceInstance().getSessionChannel(token);
+        verify(mIPowerMock, times(1)).getSessionChannel(eq(TGID), eq(UID));
+        service.getBinderServiceInstance().closeSessionChannel();
+        verify(mIPowerMock, times(1)).closeSessionChannel(eq(TGID), eq(UID));
+
+        clearInvocations(mIPowerMock);
+
+        service.getBinderServiceInstance().getSessionChannel(token);
+        verify(mIPowerMock, times(1)).getSessionChannel(eq(TGID), eq(UID));
+        service.getBinderServiceInstance().closeSessionChannel();
+        verify(mIPowerMock, times(1)).closeSessionChannel(eq(TGID), eq(UID));
+    }
+
+    @Test
+    public void testGetChannelFails() throws Exception {
+        HintManagerService service = createService();
+        Binder token = new Binder();
+
+        when(mIPowerMock.getSessionChannel(anyInt(), anyInt())).thenThrow(RemoteException.class);
+
+        assertThrows(IllegalStateException.class, () -> {
+            service.getBinderServiceInstance().getSessionChannel(token);
+        });
+    }
+
+
+    @Test
+    public void testGetChannelBadVersion() throws Exception {
+        when(mIPowerMock.getInterfaceVersion()).thenReturn(3);
+        HintManagerService service = createService();
+        Binder token = new Binder();
+
+        reset(mIPowerMock);
+        when(mIPowerMock.getInterfaceVersion()).thenReturn(3);
+        when(mIPowerMock.getSessionChannel(anyInt(), anyInt())).thenReturn(mConfig);
+
+        ChannelConfig channel = service.getBinderServiceInstance().getSessionChannel(token);
+        verify(mIPowerMock, times(0)).getSessionChannel(eq(TGID), eq(UID));
+        assertNull(channel);
+    }
+
+    @Test
+    public void testCloseChannel() throws Exception {
+        HintManagerService service = createService();
+        Binder token = new Binder();
+
+        service.getBinderServiceInstance().getSessionChannel(token);
+        service.getBinderServiceInstance().closeSessionChannel();
+        verify(mIPowerMock, times(1)).closeSessionChannel(eq(TGID), eq(UID));
+    }
+
+    @Test
+    public void testCloseChannelFails() throws Exception {
+        HintManagerService service = createService();
+        Binder token = new Binder();
+
+        service.getBinderServiceInstance().getSessionChannel(token);
+
+        doThrow(RemoteException.class).when(mIPowerMock).closeSessionChannel(anyInt(), anyInt());
+
+        assertThrows(IllegalStateException.class, () -> {
+            service.getBinderServiceInstance().closeSessionChannel();
+        });
+    }
+
+    @Test
+    public void testDoubleClose() throws Exception {
+        HintManagerService service = createService();
+        Binder token = new Binder();
+
+        service.getBinderServiceInstance().getSessionChannel(token);
+        service.getBinderServiceInstance().closeSessionChannel();
+        service.getBinderServiceInstance().closeSessionChannel();
+        verify(mIPowerMock, times(1)).closeSessionChannel(eq(TGID), eq(UID));
     }
 
     // This test checks that concurrent operations from different threads on IHintService,
@@ -726,7 +949,8 @@ public class HintManagerServiceTest {
             AtomicReference<Boolean> shouldRun) throws Exception {
         IBinder token = new Binder();
         AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSession(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
+                .createHintSessionWithConfig(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION,
+                        SessionTag.OTHER, new SessionConfig());
         // we will start some threads and get their valid TIDs to update
         int threadCount = 3;
         // the list of TIDs
@@ -793,7 +1017,8 @@ public class HintManagerServiceTest {
         IBinder token = new Binder();
 
         AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSession(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
+                .createHintSessionWithConfig(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION,
+                        SessionTag.OTHER, new SessionConfig());
 
         a.updateTargetWorkDuration(100L);
         a.reportActualWorkDuration2(WORK_DURATIONS_FIVE);
@@ -837,5 +1062,41 @@ public class HintManagerServiceTest {
         assertFalse(service.mUidObserver.isUidForeground(a.mUid));
         a.reportActualWorkDuration2(WORK_DURATIONS_FIVE);
         verify(mNativeWrapperMock, never()).halReportActualWorkDuration(anyLong(), any(), any());
+    }
+
+    @Test
+    public void testChannelDiesWhenTokenDies() throws Exception {
+        HintManagerService service = createService();
+
+        class DyingToken extends Binder {
+            DeathRecipient mToNotify;
+            @Override
+            public void linkToDeath(@NonNull DeathRecipient recipient, int flags) {
+                mToNotify = recipient;
+                super.linkToDeath(recipient, flags);
+            }
+
+            public void fakeDeath() {
+                mToNotify.binderDied();
+            }
+        }
+
+        DyingToken token = new DyingToken();
+
+        service.getBinderServiceInstance().getSessionChannel(token);
+        verify(mIPowerMock, times(1)).getSessionChannel(eq(TGID), eq(UID));
+        assertTrue(service.hasChannel(TGID, UID));
+
+        token.fakeDeath();
+
+        assertFalse(service.hasChannel(TGID, UID));
+        verify(mIPowerMock, times(1)).closeSessionChannel(eq(TGID), eq(UID));
+
+        clearInvocations(mIPowerMock);
+
+        token = new DyingToken();
+        service.getBinderServiceInstance().getSessionChannel(token);
+        verify(mIPowerMock, times(1)).getSessionChannel(eq(TGID), eq(UID));
+        assertTrue(service.hasChannel(TGID, UID));
     }
 }

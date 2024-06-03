@@ -1,4 +1,5 @@
 package: "android.view.flags"
+container: "system"
 
 flag {
     name: "enable_surface_native_alloc_registration_ro"
@@ -28,6 +29,7 @@ flag {
 
 flag {
   name: "sensitive_content_app_protection_api"
+  is_exported: true
   namespace: "permissions"
   description: "This flag controls the new sensitive content protection API,"
     " The API will be used by other ui toolkits (i.e. compose, webview, custom virtual views)."
@@ -44,8 +46,39 @@ flag {
 }
 
 flag {
+  name: "sensitive_content_premature_protection_removed_fix"
+  namespace: "permissions"
+  description: "Bug fix where sensitive content protection is prematurely removed."
+  bug: "336626172"
+  # Referenced in WM where WM starts before DeviceConfig
+  is_fixed_read_only: true
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "enable_arrow_icon_on_hover_when_clickable"
     namespace: "toolkit"
     description: "Enable default arrow icon when hovering on buttons or clickable widgets."
     bug: "299269803"
+}
+
+flag {
+    name: "enable_invalidate_check_thread"
+    namespace: "toolkit"
+    description: "Enable checkThread call in ViewRootImpl#onDescendentInvalidated"
+    bug: "333752000"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "add_schandle_to_vri_surface"
+    namespace: "window_surfaces"
+    description: "Add surface control handle to VRI Surface"
+    bug: "320706287"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

@@ -20,7 +20,7 @@
     <string name="app_name" msgid="4539824758261855508">"Gestionnaire d\'identifiants"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Annuler"</string>
     <string name="string_continue" msgid="1346732695941131882">"Continuer"</string>
-    <string name="string_more_options" msgid="2763852250269945472">"Sauver autrement"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"Autre option"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"En savoir plus"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"Afficher le mot de passe"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"Masquer le mot de passe"</string>
@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Nous nous dirigeons vers un futur sans mots de passe, mais ceux-ci resteront disponibles en plus des clés d\'accès."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Choisissez où enregistrer vos <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Sélectionnez un gestionnaire de mots de passe pour enregistrer vos informations et vous connecter plus rapidement la prochaine fois"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Créer une clé d\'accès pour se connecter à <xliff:g id="APPNAME">%1$s</xliff:g> ?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Enregistrer un mot de passe pour se connecter à <xliff:g id="APPNAME">%1$s</xliff:g> ?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Enregistrer les informations de connexion pour <xliff:g id="APPNAME">%1$s</xliff:g> ?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Créer une clé d\'accès pour se connecter à <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"Enregistrer le mot de passe pour se connecter à <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Enregistrer les informations de connexion pour <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
     <string name="passkey" msgid="632353688396759522">"clé d\'accès"</string>
     <string name="password" msgid="6738570945182936667">"mot de passe"</string>
     <string name="passkeys" msgid="5733880786866559847">"clés d\'accès"</string>
@@ -68,14 +68,15 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Revenir à la page précédente"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Fermer"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Fermer"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Utiliser votre clé d\'accès enregistrée pour <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Utiliser votre mot de passe enregistré pour <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Utiliser vos infos de connexion pour <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Déverrouiller les options de connexion pour <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Utiliser votre clé d\'accès enregistrée pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Utiliser votre mot de passe enregistré pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Utiliser votre compte pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Utiliser le verrouillage de l\'écran pour se connecter à <xliff:g id="APP_NAME">%1$s</xliff:g> avec <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Déverrouiller les options de connexion pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Choisir une clé d\'accès enregistrée pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Choisir un mot de passe enregistré pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Choisir des informations de connexion enregistrées pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Choisir des infos de connexion pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Choisissez les identifiants à utiliser pour la connexion à <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"Sélectionnez un compte pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Choisir une option pour <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Utiliser ces informations dans <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Se connecter d\'une autre manière"</string>

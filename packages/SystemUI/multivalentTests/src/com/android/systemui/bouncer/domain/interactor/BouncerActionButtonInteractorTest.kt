@@ -29,10 +29,10 @@ import com.android.systemui.authentication.data.repository.fakeAuthenticationRep
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags.REFACTOR_GETCURRENTUSER
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.telephony.data.repository.fakeTelephonyRepository
@@ -56,6 +56,7 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableSceneContainer
 class BouncerActionButtonInteractorTest : SysuiTestCase() {
 
     @Mock private lateinit var selectedUserInteractor: SelectedUserInteractor
@@ -75,7 +76,6 @@ class BouncerActionButtonInteractorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        kosmos.fakeSceneContainerFlags.enabled = true
 
         mobileConnectionsRepository = kosmos.fakeMobileConnectionsRepository
 

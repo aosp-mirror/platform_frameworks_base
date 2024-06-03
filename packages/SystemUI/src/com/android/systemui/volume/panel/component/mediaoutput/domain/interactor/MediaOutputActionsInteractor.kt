@@ -21,7 +21,7 @@ import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.media.dialog.MediaOutputDialogManager
-import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaDeviceSession
+import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaOutputComponentModel
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import javax.inject.Inject
 
@@ -29,19 +29,17 @@ import javax.inject.Inject
 @VolumePanelScope
 class MediaOutputActionsInteractor
 @Inject
-constructor(
-    private val mediaOutputDialogManager: MediaOutputDialogManager,
-) {
+constructor(private val mediaOutputDialogManager: MediaOutputDialogManager) {
 
-    fun onBarClick(session: MediaDeviceSession, isPlaybackActive: Boolean, expandable: Expandable) {
-        if (isPlaybackActive) {
+    fun onBarClick(model: MediaOutputComponentModel?, expandable: Expandable?) {
+        if (model is MediaOutputComponentModel.MediaSession) {
             mediaOutputDialogManager.createAndShowWithController(
-                session.packageName,
+                model.session.packageName,
                 false,
-                expandable.dialogController()
+                expandable?.dialogController()
             )
         } else {
-            mediaOutputDialogManager.createAndShowForSystemRouting(expandable.dialogController())
+            mediaOutputDialogManager.createAndShowForSystemRouting(expandable?.dialogController())
         }
     }
 

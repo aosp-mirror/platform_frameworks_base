@@ -269,7 +269,7 @@ class MediaDataProcessor(
         }
 
     override fun start() {
-        if (!mediaFlags.isMediaControlsRefactorEnabled()) {
+        if (!mediaFlags.isSceneContainerEnabled()) {
             return
         }
 
@@ -498,8 +498,8 @@ class MediaDataProcessor(
      * External listeners registered with [MediaCarouselInteractor.addListener] will be notified
      * after the event propagates through the internal listener pipeline.
      */
-    private fun notifyMediaDataRemoved(key: String) {
-        internalListeners.forEach { it.onMediaDataRemoved(key) }
+    private fun notifyMediaDataRemoved(key: String, userInitiated: Boolean = false) {
+        internalListeners.forEach { it.onMediaDataRemoved(key, userInitiated) }
     }
 
     /**
@@ -531,7 +531,7 @@ class MediaDataProcessor(
             if (it.active == !timedOut && !forceUpdate) {
                 if (it.resumption) {
                     if (DEBUG) Log.d(TAG, "timing out resume player $key")
-                    dismissMediaData(key, 0L /* delay */)
+                    dismissMediaData(key, delayMs = 0L, userInitiated = false)
                 }
                 return
             }
@@ -580,17 +580,17 @@ class MediaDataProcessor(
         }
     }
 
-    private fun removeEntry(key: String, logEvent: Boolean = true) {
+    private fun removeEntry(key: String, logEvent: Boolean = true, userInitiated: Boolean = false) {
         mediaDataRepository.removeMediaEntry(key)?.let {
             if (logEvent) {
                 logger.logMediaRemoved(it.appUid, it.packageName, it.instanceId)
             }
         }
-        notifyMediaDataRemoved(key)
+        notifyMediaDataRemoved(key, userInitiated)
     }
 
     /** Dismiss a media entry. Returns false if the key was not found. */
-    fun dismissMediaData(key: String, delay: Long): Boolean {
+    fun dismissMediaData(key: String, delayMs: Long, userInitiated: Boolean): Boolean {
         val existed = mediaDataRepository.mediaEntries.value[key] != null
         backgroundExecutor.execute {
             mediaDataRepository.mediaEntries.value[key]?.let { mediaData ->
@@ -602,8 +602,22 @@ class MediaDataProcessor(
                 }
             }
         }
-        foregroundExecutor.executeDelayed({ removeEntry(key) }, delay)
+        foregroundExecutor.executeDelayed(
+            { removeEntry(key, userInitiated = userInitiated) },
+            delayMs
+        )
         return existed
+    }
+
+    /** Dismiss a media entry. Returns false if the corresponding key was not found. */
+    fun dismissMediaData(instanceId: InstanceId, delayMs: Long, userInitiated: Boolean): Boolean {
+        val mediaEntries = mediaDataRepository.mediaEntries.value
+        val filteredEntries = mediaEntries.filter { (_, data) -> data.instanceId == instanceId }
+        return if (filteredEntries.isNotEmpty()) {
+            dismissMediaData(filteredEntries.keys.first(), delayMs, userInitiated)
+        } else {
+            false
+        }
     }
 
     /**
@@ -732,8 +746,7 @@ class MediaDataProcessor(
             notif.extras.getParcelable(
                 Notification.EXTRA_BUILDER_APPLICATION_INFO,
                 ApplicationInfo::class.java
-            )
-                ?: getAppInfoFromPackage(sbn.packageName)
+            ) ?: getAppInfoFromPackage(sbn.packageName)
 
         // App name
         val appName = getAppName(sbn, appInfo)
@@ -1568,7 +1581,7 @@ class MediaDataProcessor(
         ) {}
 
         /** Called whenever a previously existing Media notification was removed. */
-        fun onMediaDataRemoved(key: String) {}
+        fun onMediaDataRemoved(key: String, userInitiated: Boolean) {}
 
         /**
          * Called whenever a previously existing Smartspace media data was removed.

@@ -90,13 +90,6 @@ public class ActivityTaskManager {
     public static final int RESIZE_MODE_USER = RESIZE_MODE_PRESERVE_WINDOW;
 
     /**
-     * Input parameter to {@link IActivityTaskManager#resizeTask} used by window
-     * manager during a screen rotation.
-     * @hide
-     */
-    public static final int RESIZE_MODE_SYSTEM_SCREEN_ROTATION = RESIZE_MODE_PRESERVE_WINDOW;
-
-    /**
      * Input parameter to {@link IActivityTaskManager#resizeTask} which indicates
      * that the resize should be performed even if the bounds appears unchanged.
      * @hide

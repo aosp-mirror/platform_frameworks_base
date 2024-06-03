@@ -39,10 +39,10 @@ import static java.util.Objects.requireNonNull;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.annotation.NonNull;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.IStatusBarService;
@@ -64,6 +64,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.collection.render.NotifViewBarn;
@@ -87,7 +88,7 @@ import java.util.List;
 import java.util.Map;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class PreparationCoordinatorTest extends SysuiTestCase {
     private NotifCollectionListener mCollectionListener;
@@ -112,7 +113,9 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Mock private Handler mHandler;
     @Mock private SecureSettings mSecureSettings;
     @Spy private FakeNotifInflater mNotifInflater = new FakeNotifInflater();
-    private final SectionStyleProvider mSectionStyleProvider = new SectionStyleProvider();
+    @Mock
+    HighPriorityProvider mHighPriorityProvider;
+    private SectionStyleProvider mSectionStyleProvider;
     @Mock private UserTracker mUserTracker;
     @Mock private GroupMembershipManager mGroupMembershipManager;
 
@@ -126,6 +129,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mSectionStyleProvider = new SectionStyleProvider(mHighPriorityProvider);
         mAdjustmentProvider = new NotifUiAdjustmentProvider(
                 mHandler,
                 mSecureSettings,

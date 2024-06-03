@@ -22,9 +22,10 @@ import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
-import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion.isWakeAndUnlock
+import com.android.systemui.keyguard.shared.model.BiometricUnlockMode.Companion.isWakeAndUnlock
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample
@@ -35,7 +36,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -47,10 +47,11 @@ constructor(
     @Background private val scope: CoroutineScope,
     @Background bgDispatcher: CoroutineDispatcher,
     @Main mainDispatcher: CoroutineDispatcher,
-    private val keyguardInteractor: KeyguardInteractor,
+    keyguardInteractor: KeyguardInteractor,
     powerInteractor: PowerInteractor,
     private val communalInteractor: CommunalInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
+    val deviceEntryRepository: DeviceEntryRepository,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.DOZING,
@@ -59,6 +60,7 @@ constructor(
         bgDispatcher = bgDispatcher,
         powerInteractor = powerInteractor,
         keyguardOcclusionInteractor = keyguardOcclusionInteractor,
+        keyguardInteractor = keyguardInteractor,
     ) {
 
     override fun start() {
@@ -67,7 +69,7 @@ constructor(
         listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
-    private val canDismissLockScreen: Flow<Boolean> =
+    private val canTransitionToGoneOnWake: Flow<Boolean> =
         combine(
             keyguardInteractor.isKeyguardShowing,
             keyguardInteractor.isKeyguardDismissible,
@@ -83,30 +85,28 @@ constructor(
         scope.launch {
             powerInteractor.isAwake
                 .debounce(50L)
+                .filterRelevantKeyguardStateAnd { isAwake -> isAwake }
                 .sample(
                     keyguardInteractor.biometricUnlockState,
-                    startedKeyguardTransitionStep,
                     keyguardInteractor.isKeyguardOccluded,
                     communalInteractor.isIdleOnCommunal,
-                    canDismissLockScreen,
+                    canTransitionToGoneOnWake,
                     keyguardInteractor.primaryBouncerShowing,
                 )
                 .collect {
                     (
-                        isAwake,
+                        _,
                         biometricUnlockState,
-                        lastStartedTransition,
                         occluded,
                         isIdleOnCommunal,
-                        canDismissLockScreen,
+                        canTransitionToGoneOnWake,
                         primaryBouncerShowing) ->
-                    if (!(isAwake && lastStartedTransition.to == KeyguardState.DOZING)) {
-                        return@collect
-                    }
                     startTransitionTo(
-                        if (isWakeAndUnlock(biometricUnlockState)) {
+                        if (!deviceEntryRepository.isLockscreenEnabled()) {
                             KeyguardState.GONE
-                        } else if (canDismissLockScreen) {
+                        } else if (isWakeAndUnlock(biometricUnlockState.mode)) {
+                            KeyguardState.GONE
+                        } else if (canTransitionToGoneOnWake) {
                             KeyguardState.GONE
                         } else if (primaryBouncerShowing) {
                             KeyguardState.PRIMARY_BOUNCER
@@ -130,19 +130,15 @@ constructor(
 
         scope.launch {
             powerInteractor.detailedWakefulness
-                .filter { it.isAwake() }
+                .filterRelevantKeyguardStateAnd { it.isAwake() }
                 .sample(
-                    startedKeyguardTransitionStep,
                     communalInteractor.isIdleOnCommunal,
                     keyguardInteractor.biometricUnlockState,
-                    canDismissLockScreen,
+                    canTransitionToGoneOnWake,
                     keyguardInteractor.primaryBouncerShowing,
                 )
-                // If we haven't at least STARTED a transition to DOZING, ignore.
-                .filter { (_, startedStep, _, _) -> startedStep.to == KeyguardState.DOZING }
                 .collect {
                     (
-                        _,
                         _,
                         isIdleOnCommunal,
                         biometricUnlockState,
@@ -151,10 +147,15 @@ constructor(
                     if (
                         !maybeStartTransitionToOccludedOrInsecureCamera() &&
                             // Handled by dismissFromDozing().
-                            !isWakeAndUnlock(biometricUnlockState)
+                            !isWakeAndUnlock(biometricUnlockState.mode)
                     ) {
                         startTransitionTo(
-                            if (canDismissLockscreen) {
+                            if (!KeyguardWmStateRefactor.isEnabled && canDismissLockscreen) {
+                                KeyguardState.GONE
+                            } else if (
+                                KeyguardWmStateRefactor.isEnabled &&
+                                    !deviceEntryRepository.isLockscreenEnabled()
+                            ) {
                                 KeyguardState.GONE
                             } else if (primaryBouncerShowing) {
                                 KeyguardState.PRIMARY_BOUNCER
@@ -162,7 +163,8 @@ constructor(
                                 KeyguardState.GLANCEABLE_HUB
                             } else {
                                 KeyguardState.LOCKSCREEN
-                            }
+                            },
+                            ownerReason = "waking from dozing"
                         )
                     }
                 }

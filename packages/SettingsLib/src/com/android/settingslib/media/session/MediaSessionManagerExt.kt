@@ -45,14 +45,13 @@ val MediaSessionManager.activeMediaChanges: Flow<List<MediaController>?>
             .buffer(capacity = Channel.CONFLATED)
 
 /** [Flow] for [MediaSessionManager.RemoteSessionCallback]. */
-val MediaSessionManager.remoteSessionChanges: Flow<MediaSession.Token?>
+val MediaSessionManager.defaultRemoteSessionChanged: Flow<MediaSession.Token?>
     get() =
         callbackFlow {
                 val callback =
                     object : MediaSessionManager.RemoteSessionCallback {
-                        override fun onVolumeChanged(sessionToken: MediaSession.Token, flags: Int) {
-                            launch { send(sessionToken) }
-                        }
+                        override fun onVolumeChanged(sessionToken: MediaSession.Token, flags: Int) =
+                            Unit
 
                         override fun onDefaultRemoteSessionChanged(
                             sessionToken: MediaSession.Token?

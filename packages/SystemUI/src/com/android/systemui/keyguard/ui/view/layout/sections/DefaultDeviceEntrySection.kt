@@ -21,6 +21,7 @@ import android.content.Context
 import android.graphics.Point
 import android.graphics.Rect
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import androidx.annotation.VisibleForTesting
@@ -34,6 +35,7 @@ import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.DeviceEntryIconViewBinder
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
@@ -72,7 +74,7 @@ constructor(
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (
             !KeyguardBottomAreaRefactor.isEnabled &&
-                !DeviceEntryUdfpsRefactor.isEnabled &&
+                !MigrateClocksToBlueprint.isEnabled &&
                 !DeviceEntryUdfpsRefactor.isEnabled
         ) {
             return
@@ -115,6 +117,10 @@ constructor(
     override fun applyConstraints(constraintSet: ConstraintSet) {
         val isUdfpsSupported =
             if (DeviceEntryUdfpsRefactor.isEnabled) {
+                Log.d(
+                    "DefaultDeviceEntrySection",
+                    "isUdfpsSupported=${deviceEntryIconViewModel.get().isUdfpsSupported.value}"
+                )
                 deviceEntryIconViewModel.get().isUdfpsSupported.value
             } else {
                 authController.isUdfpsSupported
@@ -137,8 +143,25 @@ constructor(
         val iconRadiusPx = (defaultDensity * 36).toInt()
 
         if (isUdfpsSupported) {
-            authController.udfpsLocation?.let { udfpsLocation ->
-                centerIcon(udfpsLocation, authController.udfpsRadius, constraintSet)
+            if (DeviceEntryUdfpsRefactor.isEnabled) {
+                deviceEntryIconViewModel.get().udfpsLocation.value?.let { udfpsLocation ->
+                    Log.d(
+                        "DeviceEntrySection",
+                        "udfpsLocation=$udfpsLocation, " +
+                            "scaledLocation=(${udfpsLocation.centerX},${udfpsLocation.centerY}), " +
+                            "unusedAuthController=${authController.udfpsLocation}"
+                    )
+                    centerIcon(
+                        Point(udfpsLocation.centerX.toInt(), udfpsLocation.centerY.toInt()),
+                        udfpsLocation.radius,
+                        constraintSet
+                    )
+                }
+            } else {
+                authController.udfpsLocation?.let { udfpsLocation ->
+                    Log.d("DeviceEntrySection", "udfpsLocation=$udfpsLocation")
+                    centerIcon(udfpsLocation, authController.udfpsRadius, constraintSet)
+                }
             }
         } else {
             centerIcon(
@@ -196,6 +219,38 @@ constructor(
                 ConstraintSet.START,
                 sensorRect.left
             )
+        }
+
+        // This is only intended to be here until the KeyguardBottomAreaRefactor flag is enabled
+        // Without this logic, the lock icon location changes but the KeyguardBottomAreaView is not
+        // updated and visible ui layout jank occurs. This is due to AmbientIndicationContainer
+        // being in NPVC and laying out prior to the KeyguardRootView.
+        // Remove when both DeviceEntryUdfpsRefactor and KeyguardBottomAreaRefactor are enabled.
+        if (DeviceEntryUdfpsRefactor.isEnabled && !KeyguardBottomAreaRefactor.isEnabled) {
+            with(notificationPanelView) {
+                val isUdfpsSupported = deviceEntryIconViewModel.get().isUdfpsSupported.value
+                val bottomAreaViewRight = findViewById<View>(R.id.keyguard_bottom_area)?.right ?: 0
+                findViewById<View>(R.id.ambient_indication_container)?.let {
+                    val (ambientLeft, ambientTop) = it.locationOnScreen
+                    if (isUdfpsSupported) {
+                        // make top of ambient indication view the bottom of the lock icon
+                        it.layout(
+                            ambientLeft,
+                            sensorRect.bottom,
+                            bottomAreaViewRight - ambientLeft,
+                            ambientTop + it.measuredHeight
+                        )
+                    } else {
+                        // make bottom of ambient indication view the top of the lock icon
+                        it.layout(
+                            ambientLeft,
+                            sensorRect.top - it.measuredHeight,
+                            bottomAreaViewRight - ambientLeft,
+                            sensorRect.top
+                        )
+                    }
+                }
+            }
         }
     }
 }

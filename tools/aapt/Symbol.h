@@ -40,7 +40,7 @@ struct Symbol {
 };
 
 /**
- * A specific defintion of a symbol, defined with a configuration and a definition site.
+ * A specific definition of a symbol, defined with a configuration and a definition site.
  */
 struct SymbolDefinition {
     inline SymbolDefinition();
@@ -92,4 +92,3 @@ bool SymbolDefinition::operator<(const SymbolDefinition& rhs) const {
 }
 
 #endif // AAPT_SYMBOL_H
-

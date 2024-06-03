@@ -347,6 +347,7 @@
     <uses-permission android:name="android.permission.REQUEST_COMPANION_SELF_MANAGED" />
     <uses-permission android:name="android.permission.USE_COMPANION_TRANSPORTS" />
     <uses-permission android:name="android.permission.REQUEST_OBSERVE_DEVICE_UUID_PRESENCE" />
+    <uses-permission android:name="android.permission.DELIVER_COMPANION_MESSAGES" />
 
     <uses-permission android:name="android.permission.MANAGE_APPOPS" />
     <uses-permission android:name="android.permission.WATCH_APPOPS" />
@@ -609,6 +610,8 @@
 
     <!-- Permission required for CTS test - CtsThreadNetworkTestCases -->
     <uses-permission android:name="android.permission.THREAD_NETWORK_PRIVILEGED"/>
+    <!-- Permission required to access Thread network shell commands for testing -->
+    <uses-permission android:name="android.permission.THREAD_NETWORK_TESTING"/>
 
     <!-- Permission required for CTS tests to enable/disable rate limiting toasts. -->
     <uses-permission android:name="android.permission.MANAGE_TOAST_RATE_LIMITING" />
@@ -896,7 +899,6 @@
 
     <!-- Permissions required for CTS test - CtsVoiceInteractionTestCases -->
     <uses-permission android:name="android.permission.RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT" />
-    <uses-permission android:name="android.permission.RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA" />
     <uses-permission android:name="android.permission.RECEIVE_SANDBOX_TRIGGER_AUDIO" />
 
     <uses-permission android:name="android.permission.GET_BINDING_UID_IMPORTANCE" />
@@ -934,6 +936,9 @@
 
     <!-- Permission required for Cts test - CtsSettingsTestCases -->
     <uses-permission android:name="android.permission.PREPARE_FACTORY_RESET" />
+
+    <!-- Permission required for CTS test - FileIntegrityManagerTest -->
+    <uses-permission android:name="android.permission.SETUP_FSVERITY" />
 
     <application
         android:label="@string/app_label"

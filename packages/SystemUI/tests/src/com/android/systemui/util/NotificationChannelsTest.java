@@ -22,9 +22,9 @@ import static org.mockito.Mockito.verify;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;

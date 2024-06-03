@@ -584,8 +584,8 @@ public class ComputerEngine implements Computer {
                     list = new ArrayList<>(1);
                     list.add(ri);
                     PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                            mInjector.getCompatibility(), mComponentResolver,
-                            list, false, intent, resolvedType, filterCallingUid);
+                            mInjector.getCompatibility(), this, list, false, intent,
+                            resolvedType, filterCallingUid);
                 }
             }
         } else {
@@ -609,13 +609,15 @@ public class ComputerEngine implements Computer {
                 }
                 list = lockedResult.result;
             }
+            PackageManagerServiceUtils.applyNullActionBlocking(
+                    mInjector.getCompatibility(), this, list, false, intent, filterCallingUid);
         }
 
         if (originalIntent != null) {
             // We also have to ensure all components match the original intent
             PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                    mInjector.getCompatibility(), mComponentResolver,
-                    list, false, originalIntent, resolvedType, filterCallingUid);
+                    mInjector.getCompatibility(), this, list, false, originalIntent,
+                    resolvedType, filterCallingUid);
         }
 
         return skipPostResolution ? list : applyPostResolutionFilter(
@@ -698,20 +700,22 @@ public class ComputerEngine implements Computer {
                     list = new ArrayList<>(1);
                     list.add(ri);
                     PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                            mInjector.getCompatibility(), mComponentResolver,
-                            list, false, intent, resolvedType, callingUid);
+                            mInjector.getCompatibility(), this, list, false, intent,
+                            resolvedType, callingUid);
                 }
             }
         } else {
             list = queryIntentServicesInternalBody(intent, resolvedType, flags,
                     userId, callingUid, instantAppPkgName);
+            PackageManagerServiceUtils.applyNullActionBlocking(
+                    mInjector.getCompatibility(), this, list, false, intent, callingUid);
         }
 
         if (originalIntent != null) {
             // We also have to ensure all components match the original intent
             PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                    mInjector.getCompatibility(), mComponentResolver,
-                    list, false, originalIntent, resolvedType, callingUid);
+                    mInjector.getCompatibility(), this, list, false, originalIntent,
+                    resolvedType, callingUid);
         }
 
         return list;

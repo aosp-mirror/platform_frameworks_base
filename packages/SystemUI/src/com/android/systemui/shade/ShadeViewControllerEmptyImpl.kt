@@ -20,14 +20,16 @@ import android.view.MotionEvent
 import android.view.ViewGroup
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractor
+import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController
 import java.util.function.Consumer
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 
 /** Empty implementation of ShadeViewController for variants with no shade. */
-class ShadeViewControllerEmptyImpl @Inject constructor() :
+open class ShadeViewControllerEmptyImpl @Inject constructor() :
     ShadeViewController,
     ShadeBackActionInteractor,
     ShadeLockscreenInteractor,
@@ -44,7 +46,6 @@ class ShadeViewControllerEmptyImpl @Inject constructor() :
     override val isViewEnabled: Boolean = false
     override fun shouldHideStatusBarIconsWhenExpanded() = false
     @Deprecated("Not supported by scenes") override fun blockExpansionForCurrentTouch() {}
-    override fun disableHeader(state1: Int, state2: Int, animated: Boolean) {}
     override fun startExpandLatencyTracking() {}
     override fun startBouncerPreHideAnimation() {}
     override fun dozeTimeTick() {}
@@ -81,6 +82,10 @@ class ShadeViewControllerEmptyImpl @Inject constructor() :
     override fun handleExternalTouch(event: MotionEvent): Boolean {
         return false
     }
+    override fun handleExternalInterceptTouch(event: MotionEvent): Boolean {
+        return false
+    }
+
     override fun startInputFocusTransfer() {}
     override fun cancelInputFocusTransfer() {}
     override fun finishInputFocusTransfer(velocity: Float) {}
@@ -88,6 +93,7 @@ class ShadeViewControllerEmptyImpl @Inject constructor() :
     override val shadeFoldAnimator = ShadeFoldAnimatorEmptyImpl()
     @Deprecated("Use SceneInteractor.currentScene instead.")
     override val legacyPanelExpansion = flowOf(0f)
+    override val udfpsTransitionToFullShadeProgress = MutableStateFlow(0f)
 }
 
 class ShadeHeadsUpTrackerEmptyImpl : ShadeHeadsUpTracker {

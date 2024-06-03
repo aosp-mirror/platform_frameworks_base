@@ -30,11 +30,15 @@ import com.android.compose.nestedscroll.PriorityNestedScrollConnection
  */
 fun NotificationScrimNestedScrollConnection(
     scrimOffset: () -> Float,
-    onScrimOffsetChanged: (Float) -> Unit,
+    snapScrimOffset: (Float) -> Unit,
+    animateScrimOffset: (Float) -> Unit,
     minScrimOffset: () -> Float,
     maxScrimOffset: Float,
     contentHeight: () -> Float,
     minVisibleScrimHeight: () -> Float,
+    isCurrentGestureOverscroll: () -> Boolean,
+    onStart: (Float) -> Unit = {},
+    onStop: (Float) -> Unit = {},
 ): PriorityNestedScrollConnection {
     return PriorityNestedScrollConnection(
         orientation = Orientation.Vertical,
@@ -49,7 +53,7 @@ fun NotificationScrimNestedScrollConnection(
         // scrolling down and content is done scrolling to top. After that, the scrim
         // needs to collapse; collapse the scrim until it is at the maxScrimOffset.
         canStartPostScroll = { offsetAvailable, _ ->
-            offsetAvailable > 0 && scrimOffset() < maxScrimOffset
+            offsetAvailable > 0 && (scrimOffset() < maxScrimOffset || isCurrentGestureOverscroll())
         },
         canStartPostFling = { false },
         canContinueScroll = {
@@ -57,7 +61,7 @@ fun NotificationScrimNestedScrollConnection(
             minScrimOffset() < currentHeight && currentHeight < maxScrimOffset
         },
         canScrollOnFling = true,
-        onStart = { /* do nothing */},
+        onStart = { offsetAvailable -> onStart(offsetAvailable) },
         onScroll = { offsetAvailable ->
             val currentHeight = scrimOffset()
             val amountConsumed =
@@ -68,10 +72,16 @@ fun NotificationScrimNestedScrollConnection(
                     val amountLeft = minScrimOffset() - currentHeight
                     offsetAvailable.coerceAtLeast(amountLeft)
                 }
-            onScrimOffsetChanged(currentHeight + amountConsumed)
+            snapScrimOffset(currentHeight + amountConsumed)
             amountConsumed
         },
         // Don't consume the velocity on pre/post fling
-        onStop = { 0f },
+        onStop = { velocityAvailable ->
+            onStop(velocityAvailable)
+            if (scrimOffset() < minScrimOffset()) {
+                animateScrimOffset(minScrimOffset())
+            }
+            0f
+        },
     )
 }

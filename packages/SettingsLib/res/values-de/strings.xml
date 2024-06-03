@@ -66,7 +66,7 @@
     <string name="connected_via_app" msgid="3532267661404276584">"Verbunden über <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Zum Anmelden tippen"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"Kein Internet"</string>
-    <string name="private_dns_broken" msgid="1984159464346556931">"Auf den privaten DNS-Server kann nicht zugegriffen werden"</string>
+    <string name="private_dns_broken" msgid="1984159464346556931">"Auf den Server des privaten DNS kann nicht zugegriffen werden"</string>
     <string name="wifi_limited_connection" msgid="1184778285475204682">"Eingeschränkte Verbindung"</string>
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"Kein Internet"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"Anmeldung erforderlich"</string>
@@ -94,24 +94,40 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Mit <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> verbunden (kein Telefon-Audio), Akkustand bei <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Mit <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> verbunden (kein Medien-Audio), Akkustand bei <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Mit <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> verbunden (weder Telefon- noch Medien-Audio), Akkustand bei <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Aktiv, Akkustand: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Aktiv, Akkustand L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>; R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"Aktiv. Akku: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"Aktiv. Akku links: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Akku rechts: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
+    <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"Aktiv. L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> Akku."</string>
+    <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"Aktiv. R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> Akku."</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Akkustand: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"Akku – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Akkustand L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>; R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered_left" msgid="2952823007648782646">"Links – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered_right" msgid="6525710737740083276">"Rechts – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"Akku links: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Akku rechts: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
+    <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"Akku links: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"Akku rechts: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"Links – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_right" msgid="8610019317279155595">"Rechts – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktiv"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Gespeichert"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktiv, nur links"</string>
-    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktiv, nur rechts"</string>
-    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktiv, links und rechts"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktiv (nur links)"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Aktiv (nur rechts)"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Aktiv (links und rechts)"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Aktiv (nur Medien). Akku: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Aktiv (nur Medien). Akku links: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Akku rechts: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Verbunden (unterstützt Audiofreigabe). Akku: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"Verbunden (unterstützt Audiofreigabe). Akku links: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Akku rechts: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="7707464334346454950">"Verbunden (unterstützt Audiofreigabe). Akku links: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"Verbunden (unterstützt Audiofreigabe). Akku rechts: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"Verbunden (unterstützt Audiofreigabe)"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Aktiv (nur Medien)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Unterstützt Audiofreigabe"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Aktiv (nur Medien), nur links"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Aktiv (nur Medien), nur rechts"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Aktiv (nur Medien), links und rechts"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Medien-Audio"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonanrufe"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Dateiübertragung"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Eingabegerät"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Internetzugriff"</string>
-    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Zugriff auf Kontakte und Anrufliste geben"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Zugriff auf Kontakte und Anrufliste gewähren"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Die Daten werden z. B. für Anrufbenachrichtigungen verwendet"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Freigabe der Internetverbindung"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"SMS"</string>
@@ -221,7 +237,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Profil auswählen"</string>
     <string name="category_personal" msgid="6236798763159385225">"Privat"</string>
     <string name="category_work" msgid="4014193632325996115">"Geschäftlich"</string>
-    <string name="category_private" msgid="4244892185452788977">"Privat"</string>
+    <string name="category_private" msgid="4244892185452788977">"Vertraulich"</string>
     <string name="category_clone" msgid="1554511758987195974">"Klonen"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Entwickleroptionen"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Entwickleroptionen aktivieren"</string>
@@ -301,10 +317,10 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Bluetooth-Audio-LDAC-Codec auslösen\nAuswahl: Wiedergabequalität"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Privates DNS"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Privaten DNS-Modus auswählen"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Modus des privaten DNS auswählen"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Aus"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automatisch"</string>
-    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Hostname des privaten DNS-Anbieters"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Hostname des Anbieters des privaten DNS"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Hostname des DNS-Anbieters eingeben"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Verbindung nicht möglich"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Optionen zur Zertifizierung für kabellose Übertragung anzeigen"</string>
@@ -437,9 +453,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Voraussetzen, dass Apps moderne Formate unterstützen"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Benachrichtigungen zur Transcodierung anzeigen"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Cache für Transcodierung deaktivieren"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine-Einstellungen"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"L3-Fallback erzwingen"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Auswählen, um L3-Fallback zu erzwingen"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Aktive Dienste"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Momentan ausgeführte Dienste anzeigen und steuern"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView-Implementierung"</string>
@@ -453,7 +466,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalie (Rot-Grün-Sehschwäche)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalie (Blau-Gelb-Sehschwäche)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Farbkorrektur"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Die Farbkorrektur kann nützlich sein, wenn du:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Farben noch genauer sehen möchtest&lt;/li&gt; &lt;li&gt;&amp;nbsp;bestimmte Farben entfernen möchtest, um dich besser zu konzentrieren&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Die Farbkorrektur kann nützlich sein, wenn du:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Farben noch genauer sehen möchtest&lt;/li&gt; &lt;li&gt;&amp;nbsp;Bestimmte Farben entfernen möchtest, um dich besser zu konzentrieren&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Außer Kraft gesetzt von \"<xliff:g id="TITLE">%1$s</xliff:g>\""</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> – Ladevorgang zum Schutz des Akkus angehalten"</string>
@@ -479,6 +492,10 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – voll in <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – Laden wird optimiert"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – Wird geladen"</string>
+    <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATUS">%2$s</xliff:g> – Vollständig geladen in <xliff:g id="TIME">%3$s</xliff:g>"</string>
+    <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> – Vollständig geladen in <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"Vollständig geladen in <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"Vollständig geladen bis <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Unbekannt"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Wird aufgeladen"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Schnelles Aufladen"</string>
@@ -490,6 +507,8 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"Aufgeladen"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Vollständig geladen"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Ladevorgang angehalten"</string>
+    <string name="battery_info_status_charging_v2" msgid="6118522107222245505">"Wird geladen"</string>
+    <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"Schnelles Laden"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Durch den Administrator verwaltet"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Gesteuert durch eingeschränkte Einstellung"</string>
     <string name="disabled" msgid="8017887509554714950">"Deaktiviert"</string>
@@ -574,7 +593,7 @@
     <string name="tv_media_transfer_default" msgid="5403053145185843843">"Standardeinstellung: Fernseher"</string>
     <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI-Ausgang"</string>
     <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Interne Lautsprecher"</string>
-    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Verbindung kann nicht hergestellt werden. Schalte das Gerät aus &amp; und wieder ein."</string>
+    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Verbindung kann nicht hergestellt werden. Schalte das Gerät aus und wieder ein."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Netzbetriebenes Audiogerät"</string>
     <string name="help_label" msgid="3528360748637781274">"Hilfe und Feedback"</string>
     <string name="storage_category" msgid="2287342585424631813">"Speicher"</string>
@@ -619,8 +638,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Nutzer konnte nicht erstellt werden"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Fehler beim Erstellen eines neuen Gasts"</string>
     <string name="user_nickname" msgid="262624187455825083">"Alias"</string>
-    <!-- no translation found for edit_user_info_message (6677556031419002895) -->
-    <skip />
+    <string name="edit_user_info_message" msgid="6677556031419002895">"Der gewählte Name und das gewählte Bild sind für jeden Nutzer dieses Geräts sichtbar."</string>
     <string name="user_add_user" msgid="7876449291500212468">"Nutzer hinzufügen"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Gast hinzufügen"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Gast entfernen"</string>
@@ -647,8 +665,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Beim Beenden werden alle Aktivitäten gelöscht"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Speichere oder lösche deine Aktivitäten beim Beenden"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Zurücksetzen, um jetzt die Sitzungsaktivitäten zu löschen, oder Aktivitäten beim Beenden speichern oder löschen"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Foto machen"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"Bild auswählen"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Foto auswählen"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Zu viele Fehlversuche. Die Daten auf diesem Gerät werden gelöscht."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Zu viele Fehlversuche. Dieser Nutzer wird gelöscht."</string>
@@ -679,6 +695,7 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"Telefonsignal - ein Balken"</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"Telefonsignal - zwei Balken"</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"Telefonsignal - drei Balken"</string>
+    <string name="accessibility_phone_four_bars" msgid="4477202400261338403">"Smartphone – vier Balken."</string>
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"Volle Telefonsignalstärke"</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"Keine Daten"</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Datensignal - ein Balken"</string>
@@ -688,12 +705,10 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet nicht verbunden"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Keine Anrufe."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Profilbild auswählen"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"Standardmäßiges Nutzersymbol"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Physische Tastatur"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Tastaturlayout wählen"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Standard"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Display aktivieren"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"Steuerelement zum Aktivieren des Displays"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Aktivieren des Displays erlauben"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Einer App erlauben, das Display zu aktivieren. Wenn du diese Erlaubnis erteilst, kann die App jederzeit das Display aktivieren – auch ohne deine explizite Absicht."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> nicht mehr streamen?"</string>
@@ -708,4 +723,5 @@
     <string name="neuter" msgid="2075249330106127310">"Neutrum"</string>
     <string name="feminine" msgid="1529155595310784757">"Feminin"</string>
     <string name="masculine" msgid="4653978041013996303">"Maskulin"</string>
+    <string name="system_update_settings_list_item_title" msgid="6618098383615432484">"Systemupdates"</string>
 </resources>

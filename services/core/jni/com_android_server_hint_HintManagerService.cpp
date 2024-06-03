@@ -34,12 +34,9 @@
 
 #include "jni.h"
 
-using aidl::android::hardware::power::SessionHint;
-using aidl::android::hardware::power::SessionMode;
-using aidl::android::hardware::power::WorkDuration;
-using android::power::PowerHintSessionWrapper;
+namespace hal = aidl::android::hardware::power;
 
-using android::base::StringPrintf;
+using android::power::PowerHintSessionWrapper;
 
 namespace android {
 
@@ -66,6 +63,15 @@ static int64_t getHintSessionPreferredRate() {
     return rate;
 }
 
+void throwUnsupported(JNIEnv* env, const char* msg) {
+    env->ThrowNew(env->FindClass("java/lang/UnsupportedOperationException"), msg);
+}
+
+void throwFailed(JNIEnv* env, const char* msg) {
+    // We throw IllegalStateException for all errors other than the "unsupported" ones
+    env->ThrowNew(env->FindClass("java/lang/IllegalStateException"), msg);
+}
+
 static jlong createHintSession(JNIEnv* env, int32_t tgid, int32_t uid,
                                std::vector<int32_t>& threadIds, int64_t durationNanos) {
     auto result = gPowerHalController.createHintSession(tgid, uid, threadIds, durationNanos);
@@ -76,7 +82,36 @@ static jlong createHintSession(JNIEnv* env, int32_t tgid, int32_t uid,
         return res.second ? session_ptr : 0;
     } else if (result.isFailed()) {
         ALOGW("createHintSession failed with message: %s", result.errorMessage());
+        throwFailed(env, result.errorMessage());
+    } else if (result.isUnsupported()) {
+        throwUnsupported(env, result.errorMessage());
+        return -1;
     }
+    return 0;
+}
+
+static jlong createHintSessionWithConfig(JNIEnv* env, int32_t tgid, int32_t uid,
+                                         std::vector<int32_t> threadIds, int64_t durationNanos,
+                                         int32_t sessionTag, hal::SessionConfig& config) {
+    auto result =
+            gPowerHalController.createHintSessionWithConfig(tgid, uid, threadIds, durationNanos,
+                                                            static_cast<hal::SessionTag>(
+                                                                    sessionTag),
+                                                            &config);
+    if (result.isOk()) {
+        jlong session_ptr = reinterpret_cast<jlong>(result.value().get());
+        std::scoped_lock sessionLock(gSessionMapLock);
+        auto res = gSessionMap.insert({session_ptr, result.value()});
+        if (!res.second) {
+            throwFailed(env, "PowerHAL provided an invalid session");
+            return 0;
+        }
+        return session_ptr;
+    } else if (result.isUnsupported()) {
+        throwUnsupported(env, result.errorMessage());
+        return -1;
+    }
+    throwFailed(env, result.errorMessage());
     return 0;
 }
 
@@ -103,12 +138,12 @@ static void updateTargetWorkDuration(int64_t session_ptr, int64_t targetDuration
 }
 
 static void reportActualWorkDuration(int64_t session_ptr,
-                                     const std::vector<WorkDuration>& actualDurations) {
+                                     const std::vector<hal::WorkDuration>& actualDurations) {
     auto appSession = reinterpret_cast<PowerHintSessionWrapper*>(session_ptr);
     appSession->reportActualWorkDuration(actualDurations);
 }
 
-static void sendHint(int64_t session_ptr, SessionHint hint) {
+static void sendHint(int64_t session_ptr, hal::SessionHint hint) {
     auto appSession = reinterpret_cast<PowerHintSessionWrapper*>(session_ptr);
     appSession->sendHint(hint);
 }
@@ -118,7 +153,7 @@ static void setThreads(int64_t session_ptr, const std::vector<int32_t>& threadId
     appSession->setThreads(threadIds);
 }
 
-static void setMode(int64_t session_ptr, SessionMode mode, bool enabled) {
+static void setMode(int64_t session_ptr, hal::SessionMode mode, bool enabled) {
     auto appSession = reinterpret_cast<PowerHintSessionWrapper*>(session_ptr);
     appSession->setMode(mode, enabled);
 }
@@ -136,11 +171,32 @@ static jlong nativeCreateHintSession(JNIEnv* env, jclass /* clazz */, jint tgid,
                                      jintArray tids, jlong durationNanos) {
     ScopedIntArrayRO tidArray(env, tids);
     if (nullptr == tidArray.get() || tidArray.size() == 0) {
-        ALOGW("GetIntArrayElements returns nullptr.");
+        ALOGW("nativeCreateHintSession: GetIntArrayElements returns nullptr.");
         return 0;
     }
     std::vector<int32_t> threadIds(tidArray.get(), tidArray.get() + tidArray.size());
     return createHintSession(env, tgid, uid, threadIds, durationNanos);
+}
+
+static jlong nativeCreateHintSessionWithConfig(JNIEnv* env, jclass /* clazz */, jint tgid, jint uid,
+                                               jintArray tids, jlong durationNanos, jint sessionTag,
+                                               jobject sessionConfig) {
+    ScopedIntArrayRO tidArray(env, tids);
+    if (nullptr == tidArray.get() || tidArray.size() == 0) {
+        ALOGW("nativeCreateHintSessionWithConfig: GetIntArrayElements returns nullptr.");
+        return 0;
+    }
+    std::vector<int32_t> threadIds(tidArray.get(), tidArray.get() + tidArray.size());
+    hal::SessionConfig config;
+    jlong out = createHintSessionWithConfig(env, tgid, uid, std::move(threadIds), durationNanos,
+                                            sessionTag, config);
+    if (out <= 0) {
+        return out;
+    }
+    static jclass configClass = env->FindClass("android/hardware/power/SessionConfig");
+    static jfieldID fid = env->GetFieldID(configClass, "id", "J");
+    env->SetLongField(sessionConfig, fid, config.id);
+    return out;
 }
 
 static void nativePauseHintSession(JNIEnv* env, jclass /* clazz */, jlong session_ptr) {
@@ -165,7 +221,7 @@ static void nativeReportActualWorkDuration(JNIEnv* env, jclass /* clazz */, jlon
     ScopedLongArrayRO arrayActualDurations(env, actualDurations);
     ScopedLongArrayRO arrayTimeStamps(env, timeStamps);
 
-    std::vector<WorkDuration> actualList(arrayActualDurations.size());
+    std::vector<hal::WorkDuration> actualList(arrayActualDurations.size());
     for (size_t i = 0; i < arrayActualDurations.size(); i++) {
         actualList[i].timeStampNanos = arrayTimeStamps[i];
         actualList[i].durationNanos = arrayActualDurations[i];
@@ -174,7 +230,7 @@ static void nativeReportActualWorkDuration(JNIEnv* env, jclass /* clazz */, jlon
 }
 
 static void nativeSendHint(JNIEnv* env, jclass /* clazz */, jlong session_ptr, jint hint) {
-    sendHint(session_ptr, static_cast<SessionHint>(hint));
+    sendHint(session_ptr, static_cast<hal::SessionHint>(hint));
 }
 
 static void nativeSetThreads(JNIEnv* env, jclass /* clazz */, jlong session_ptr, jintArray tids) {
@@ -186,13 +242,13 @@ static void nativeSetThreads(JNIEnv* env, jclass /* clazz */, jlong session_ptr,
 
 static void nativeSetMode(JNIEnv* env, jclass /* clazz */, jlong session_ptr, jint mode,
                           jboolean enabled) {
-    setMode(session_ptr, static_cast<SessionMode>(mode), enabled);
+    setMode(session_ptr, static_cast<hal::SessionMode>(mode), enabled);
 }
 
 static void nativeReportActualWorkDuration2(JNIEnv* env, jclass /* clazz */, jlong session_ptr,
                                             jobjectArray jWorkDurations) {
     int size = env->GetArrayLength(jWorkDurations);
-    std::vector<WorkDuration> workDurations(size);
+    std::vector<hal::WorkDuration> workDurations(size);
     for (int i = 0; i < size; i++) {
         jobject workDuration = env->GetObjectArrayElement(jWorkDurations, i);
         workDurations[i].workPeriodStartTimestampNanos =
@@ -215,6 +271,8 @@ static const JNINativeMethod sHintManagerServiceMethods[] = {
         {"nativeInit", "()V", (void*)nativeInit},
         {"nativeGetHintSessionPreferredRate", "()J", (void*)nativeGetHintSessionPreferredRate},
         {"nativeCreateHintSession", "(II[IJ)J", (void*)nativeCreateHintSession},
+        {"nativeCreateHintSessionWithConfig", "(II[IJILandroid/hardware/power/SessionConfig;)J",
+         (void*)nativeCreateHintSessionWithConfig},
         {"nativePauseHintSession", "(J)V", (void*)nativePauseHintSession},
         {"nativeResumeHintSession", "(J)V", (void*)nativeResumeHintSession},
         {"nativeCloseHintSession", "(J)V", (void*)nativeCloseHintSession},

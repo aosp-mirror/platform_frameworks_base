@@ -1,13 +1,7 @@
 {
-  "presubmit": [
-    { "name": "tiny-framework-dump-test" },
-    { "name": "hoststubgentest" },
-    { "name": "hoststubgen-invoke-test" }
-  ],
-  "ravenwood-presubmit": [
+  "imports": [
     {
-      "name": "CtsUtilTestCasesRavenwood",
-      "host": true
+      "path": "frameworks/base/ravenwood"
     }
   ]
 }

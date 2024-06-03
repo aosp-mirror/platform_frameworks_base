@@ -42,7 +42,6 @@ import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
@@ -56,8 +55,10 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.RestrictedLockUtilsInternal;
+import com.android.settingslib.graph.SignalDrawable;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityTransitionAnimator;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile;
@@ -137,9 +138,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      *
      * Calls to the controller should be made here to set the new state of the device.
      *
-     * @param view The view that was clicked.
+     * @param expandable {@link Expandable} that was clicked.
      */
-    protected abstract void handleClick(@Nullable View view);
+    protected abstract void handleClick(@Nullable Expandable expandable);
 
     /**
      * Update state of the tile based on device state
@@ -282,7 +283,8 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mHandler.sendEmptyMessage(H.REMOVE_CALLBACKS);
     }
 
-    public void click(@Nullable View view) {
+    @Override
+    public void click(@Nullable Expandable expandable) {
         mMetricsLogger.write(populate(new LogMaker(ACTION_QS_CLICK).setType(TYPE_ACTION)
                 .addTaggedData(FIELD_STATUS_BAR_STATE,
                         mStatusBarStateController.getState())));
@@ -292,11 +294,12 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mQSLogger.logTileClick(mTileSpec, mStatusBarStateController.getState(), mState.state,
                 eventId);
         if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-            mHandler.obtainMessage(H.CLICK, eventId, 0, view).sendToTarget();
+            mHandler.obtainMessage(H.CLICK, eventId, 0, expandable).sendToTarget();
         }
     }
 
-    public void secondaryClick(@Nullable View view) {
+    @Override
+    public void secondaryClick(@Nullable Expandable expandable) {
         mMetricsLogger.write(populate(new LogMaker(ACTION_QS_SECONDARY_CLICK).setType(TYPE_ACTION)
                 .addTaggedData(FIELD_STATUS_BAR_STATE,
                         mStatusBarStateController.getState())));
@@ -305,11 +308,11 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         final int eventId = mClickEventId++;
         mQSLogger.logTileSecondaryClick(mTileSpec, mStatusBarStateController.getState(),
                 mState.state, eventId);
-        mHandler.obtainMessage(H.SECONDARY_CLICK, eventId, 0, view).sendToTarget();
+        mHandler.obtainMessage(H.SECONDARY_CLICK, eventId, 0, expandable).sendToTarget();
     }
 
     @Override
-    public void longClick(@Nullable View view) {
+    public void longClick(@Nullable Expandable expandable) {
         mMetricsLogger.write(populate(new LogMaker(ACTION_QS_LONG_PRESS).setType(TYPE_ACTION)
                 .addTaggedData(FIELD_STATUS_BAR_STATE,
                         mStatusBarStateController.getState())));
@@ -319,7 +322,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mQSLogger.logTileLongClick(mTileSpec, mStatusBarStateController.getState(), mState.state,
                 eventId);
         if (!mFalsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)) {
-            mHandler.obtainMessage(H.LONG_CLICK, eventId, 0, view).sendToTarget();
+            mHandler.obtainMessage(H.LONG_CLICK, eventId, 0, expandable).sendToTarget();
         }
     }
 
@@ -397,22 +400,22 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      *
      * Defaults to {@link QSTileImpl#handleClick}
      *
-     * @param view The view that was clicked.
+     * @param expandable {@link Expandable} that was clicked.
      */
-    protected void handleSecondaryClick(@Nullable View view) {
+    protected void handleSecondaryClick(@Nullable Expandable expandable) {
         // Default to normal click.
-        handleClick(view);
+        handleClick(expandable);
     }
 
     /**
      * Handles long click on the tile by launching the {@link Intent} defined in
      * {@link QSTileImpl#getLongClickIntent}.
      *
-     * @param view The view from which the opening window will be animated.
+     * @param expandable {@link Expandable} from which the opening window will be animated.
      */
-    protected void handleLongClick(@Nullable View view) {
+    protected void handleLongClick(@Nullable Expandable expandable) {
         ActivityTransitionAnimator.Controller animationController =
-                view != null ? ActivityTransitionAnimator.Controller.fromView(view,
+                expandable != null ? expandable.activityTransitionController(
                         InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE) : null;
         mActivityStarter.postStartActivityDismissingKeyguard(getLongClickIntent(), 0,
                 animationController);
@@ -591,16 +594,16 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                         mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
                     } else {
                         mQSLogger.logHandleClick(mTileSpec, msg.arg1);
-                        handleClick((View) msg.obj);
+                        handleClick((Expandable) msg.obj);
                     }
                 } else if (msg.what == SECONDARY_CLICK) {
                     name = "handleSecondaryClick";
                     mQSLogger.logHandleSecondaryClick(mTileSpec, msg.arg1);
-                    handleSecondaryClick((View) msg.obj);
+                    handleSecondaryClick((Expandable) msg.obj);
                 } else if (msg.what == LONG_CLICK) {
                     name = "handleLongClick";
                     mQSLogger.logHandleLongClick(mTileSpec, msg.arg1);
-                    handleLongClick((View) msg.obj);
+                    handleLongClick((Expandable) msg.obj);
                 } else if (msg.what == REFRESH_STATE) {
                     name = "handleRefreshState";
                     handleRefreshState(msg.obj);
@@ -630,12 +633,23 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     }
 
     public static class DrawableIcon extends Icon {
+
         protected final Drawable mDrawable;
         protected final Drawable mInvisibleDrawable;
+        private static final String TAG = "QSTileImpl";
 
         public DrawableIcon(Drawable drawable) {
             mDrawable = drawable;
-            mInvisibleDrawable = drawable.getConstantState().newDrawable();
+            Drawable.ConstantState nullableConstantState = drawable.getConstantState();
+            if (nullableConstantState == null) {
+                if (!(drawable instanceof SignalDrawable)) {
+                    Log.w(TAG, "DrawableIcon: drawable has null ConstantState"
+                            + " and is not a SignalDrawable");
+                }
+                mInvisibleDrawable = drawable;
+            } else {
+                mInvisibleDrawable = nullableConstantState.newDrawable();
+            }
         }
 
         @Override
@@ -661,6 +675,10 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         public DrawableIconWithRes(Drawable drawable, int id) {
             super(drawable);
             mId = id;
+        }
+
+        public int getResourceId() {
+            return mId;
         }
 
         @Override

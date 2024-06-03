@@ -24,9 +24,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
+import android.content.pm.PackageManagerInternal;
 import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
 import android.os.Binder;
@@ -72,6 +73,7 @@ public class SensitiveContentProtectionManagerServiceContentTest {
 
     @Mock private WindowManagerInternal mWindowManager;
     @Mock private MediaProjectionManager mProjectionManager;
+    @Mock private PackageManagerInternal mPackageManagerInternal;
     private MediaProjectionInfo mMediaProjectionInfo;
 
     @Captor
@@ -91,7 +93,7 @@ public class SensitiveContentProtectionManagerServiceContentTest {
         mSensitiveContentProtectionManagerService =
                 new SensitiveContentProtectionManagerService(mContext);
         mSensitiveContentProtectionManagerService.init(mProjectionManager, mWindowManager,
-                new ArraySet<>(Set.of(mExemptedScreenRecorderPackage)));
+                mPackageManagerInternal, new ArraySet<>(Set.of(mExemptedScreenRecorderPackage)));
         verify(mProjectionManager).addCallback(mMediaProjectionCallbackCaptor.capture(), any());
         mMediaPorjectionCallback = mMediaProjectionCallbackCaptor.getValue();
         mMediaProjectionInfo =
@@ -105,7 +107,7 @@ public class SensitiveContentProtectionManagerServiceContentTest {
         mMediaPorjectionCallback.onStart(exemptedRecorderPackage);
         mSensitiveContentProtectionManagerService.setSensitiveContentProtection(
                 mPackageInfo.getWindowToken(), mPackageInfo.getPkg(), mPackageInfo.getUid(), true);
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -132,7 +134,7 @@ public class SensitiveContentProtectionManagerServiceContentTest {
         // when screen sharing is not active, no app window should be blocked.
         mSensitiveContentProtectionManagerService.setSensitiveContentProtection(
                 mPackageInfo.getWindowToken(), mPackageInfo.getPkg(), mPackageInfo.getUid(), true);
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -146,12 +148,25 @@ public class SensitiveContentProtectionManagerServiceContentTest {
     }
 
     @Test
+    public void testAutofillServicePackageExemption() {
+        String testAutofillService = mScreenRecorderPackage + "/com.example.SampleAutofillService";
+        int userId = Process.myUserHandle().getIdentifier();
+        Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                Settings.Secure.AUTOFILL_SERVICE, testAutofillService , userId);
+
+        mMediaPorjectionCallback.onStart(mMediaProjectionInfo);
+        mSensitiveContentProtectionManagerService.setSensitiveContentProtection(
+                mPackageInfo.getWindowToken(), mPackageInfo.getPkg(), mPackageInfo.getUid(), true);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
+    }
+
+    @Test
     public void testDeveloperOptionDisableFeature() {
         mockDisabledViaDeveloperOption();
         mMediaProjectionCallbackCaptor.getValue().onStart(mMediaProjectionInfo);
         mSensitiveContentProtectionManagerService.setSensitiveContentProtection(
                 mPackageInfo.getWindowToken(), mPackageInfo.getPkg(), mPackageInfo.getUid(), true);
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     private void mockDisabledViaDeveloperOption() {

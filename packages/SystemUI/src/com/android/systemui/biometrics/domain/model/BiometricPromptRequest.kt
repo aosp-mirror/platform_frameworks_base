@@ -1,5 +1,6 @@
 package com.android.systemui.biometrics.domain.model
 
+import android.content.ComponentName
 import android.graphics.Bitmap
 import android.hardware.biometrics.PromptContentView
 import android.hardware.biometrics.PromptInfo
@@ -43,6 +44,9 @@ sealed class BiometricPromptRequest(
         val logoBitmap: Bitmap? = info.logoBitmap
         val logoDescription: String? = info.logoDescription
         val negativeButtonText: String = info.negativeButtonText?.toString() ?: ""
+        val componentNameForConfirmDeviceCredentialActivity: ComponentName? =
+            info.componentNameForConfirmDeviceCredentialActivity
+        val allowBackgroundAuthentication = info.isAllowBackgroundAuthentication
     }
 
     /** Prompt using a credential (pin, pattern, password). */

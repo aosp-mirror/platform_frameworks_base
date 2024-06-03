@@ -467,13 +467,6 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         onRequestedOverrideConfigurationChanged(mRequestsTmpConfig);
     }
 
-    /** Sets the windowing mode for the configuration container. */
-    void setDisplayWindowingMode(int windowingMode) {
-        mRequestsTmpConfig.setTo(getRequestedOverrideConfiguration());
-        mRequestsTmpConfig.windowConfiguration.setDisplayWindowingMode(windowingMode);
-        onRequestedOverrideConfigurationChanged(mRequestsTmpConfig);
-    }
-
     /**
      * Returns true if this container is currently in multi-window mode. I.e. sharing the screen
      * with another activity.
@@ -541,8 +534,8 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
                 nightMode);
         boolean newLocalesSet = (locales != null) && setOverrideLocales(mRequestsTmpConfig,
                 locales);
-        boolean newGenderSet = (gender != null) && setOverrideGender(mRequestsTmpConfig,
-                gender);
+        boolean newGenderSet = setOverrideGender(mRequestsTmpConfig,
+                gender == null ? Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED : gender);
         if (newNightModeSet || newLocalesSet || newGenderSet) {
             onRequestedOverrideConfigurationChanged(mRequestsTmpConfig);
         }
@@ -584,14 +577,11 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      *
      * @return true if the grammatical gender has been changed.
      */
-    private boolean setOverrideGender(Configuration requestsTmpConfig,
+    protected boolean setOverrideGender(Configuration requestsTmpConfig,
             @Configuration.GrammaticalGender int gender) {
-        if (mRequestedOverrideConfiguration.getGrammaticalGender() == gender) {
-            return false;
-        } else {
-            requestsTmpConfig.setGrammaticalGender(gender);
-            return true;
-        }
+        // Noop, only ActivityRecord and WindowProcessController have enough knowledge about the
+        // app to apply gender correctly.
+        return false;
     }
 
     public boolean isActivityTypeDream() {

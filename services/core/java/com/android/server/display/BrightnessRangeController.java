@@ -19,7 +19,6 @@ package com.android.server.display;
 import android.hardware.display.BrightnessInfo;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.PowerManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.brightness.clamper.HdrClamper;
@@ -117,6 +116,7 @@ class BrightnessRangeController {
                 () -> mNormalBrightnessModeController.setAutoBrightnessState(state),
                 () ->  mHbmController.setAutoBrightnessEnabled(state)
         );
+        mHdrClamper.setAutoBrightnessState(state);
     }
 
     void onBrightnessChanged(float brightness, float unthrottledBrightness,
@@ -147,9 +147,7 @@ class BrightnessRangeController {
 
     float getHdrBrightnessValue() {
         float hdrBrightness = mHbmController.getHdrBrightnessValue();
-        float brightnessMax = mUseHdrClamper ? mHdrClamper.getMaxBrightness()
-                : PowerManager.BRIGHTNESS_MAX;
-        return Math.min(hdrBrightness, brightnessMax);
+        return mUseHdrClamper ? mHdrClamper.clamp(hdrBrightness) : hdrBrightness;
     }
 
     float getTransitionPoint() {

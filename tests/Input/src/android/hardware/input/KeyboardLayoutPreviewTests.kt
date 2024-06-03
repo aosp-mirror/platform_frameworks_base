@@ -16,6 +16,8 @@
 
 package android.hardware.input
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.content.ContextWrapper
 import android.graphics.drawable.Drawable
 import android.platform.test.annotations.Presubmit
@@ -54,16 +56,16 @@ class KeyboardLayoutPreviewTests {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_KEYBOARD_LAYOUT_PREVIEW_FLAG)
     fun testKeyboardLayoutDrawable_hasCorrectDimensions() {
-        setFlagsRule.enableFlags(Flags.FLAG_KEYBOARD_LAYOUT_PREVIEW_FLAG)
         val drawable = createDrawable()!!
         assertEquals(WIDTH, drawable.intrinsicWidth)
         assertEquals(HEIGHT, drawable.intrinsicHeight)
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_KEYBOARD_LAYOUT_PREVIEW_FLAG)
     fun testKeyboardLayoutDrawable_isNull_ifFlagOff() {
-        setFlagsRule.disableFlags(Flags.FLAG_KEYBOARD_LAYOUT_PREVIEW_FLAG)
         assertNull(createDrawable())
     }
 }

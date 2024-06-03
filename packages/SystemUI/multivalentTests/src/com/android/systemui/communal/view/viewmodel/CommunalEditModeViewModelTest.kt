@@ -39,6 +39,7 @@ import com.android.systemui.communal.data.repository.fakeCommunalMediaRepository
 import com.android.systemui.communal.data.repository.fakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.log.CommunalUiEvent
@@ -106,6 +107,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
 
         underTest =
             CommunalEditModeViewModel(
+                kosmos.communalSceneInteractor,
                 kosmos.communalInteractor,
                 kosmos.communalSettingsInteractor,
                 mediaHost,
@@ -123,12 +125,12 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             // Widgets available.
             val widgets =
                 listOf(
-                    CommunalWidgetContentModel(
+                    CommunalWidgetContentModel.Available(
                         appWidgetId = 0,
                         priority = 30,
                         providerInfo = providerInfo,
                     ),
-                    CommunalWidgetContentModel(
+                    CommunalWidgetContentModel.Available(
                         appWidgetId = 1,
                         priority = 20,
                         providerInfo = providerInfo,
@@ -149,13 +151,11 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             val communalContent by collectLastValue(underTest.communalContent)
 
             // Only Widgets and CTA tile are shown.
-            assertThat(communalContent?.size).isEqualTo(3)
+            assertThat(communalContent?.size).isEqualTo(2)
             assertThat(communalContent?.get(0))
                 .isInstanceOf(CommunalContentModel.WidgetContent::class.java)
             assertThat(communalContent?.get(1))
                 .isInstanceOf(CommunalContentModel.WidgetContent::class.java)
-            assertThat(communalContent?.get(2))
-                .isInstanceOf(CommunalContentModel.CtaTileInEditMode::class.java)
         }
 
     @Test
@@ -179,12 +179,12 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             // Widgets available.
             val widgets =
                 listOf(
-                    CommunalWidgetContentModel(
+                    CommunalWidgetContentModel.Available(
                         appWidgetId = 0,
                         priority = 30,
                         providerInfo = providerInfo,
                     ),
-                    CommunalWidgetContentModel(
+                    CommunalWidgetContentModel.Available(
                         appWidgetId = 1,
                         priority = 20,
                         providerInfo = providerInfo,
@@ -195,24 +195,20 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             val communalContent by collectLastValue(underTest.communalContent)
 
             // Widgets and CTA tile are shown.
-            assertThat(communalContent?.size).isEqualTo(3)
+            assertThat(communalContent?.size).isEqualTo(2)
             assertThat(communalContent?.get(0))
                 .isInstanceOf(CommunalContentModel.WidgetContent::class.java)
             assertThat(communalContent?.get(1))
                 .isInstanceOf(CommunalContentModel.WidgetContent::class.java)
-            assertThat(communalContent?.get(2))
-                .isInstanceOf(CommunalContentModel.CtaTileInEditMode::class.java)
 
             underTest.onDeleteWidget(widgets.get(0).appWidgetId)
 
             // Only one widget and CTA tile remain.
-            assertThat(communalContent?.size).isEqualTo(2)
+            assertThat(communalContent?.size).isEqualTo(1)
             val item = communalContent?.get(0)
             val appWidgetId =
                 if (item is CommunalContentModel.WidgetContent) item.appWidgetId else null
             assertThat(appWidgetId).isEqualTo(widgets.get(1).appWidgetId)
-            assertThat(communalContent?.get(1))
-                .isInstanceOf(CommunalContentModel.CtaTileInEditMode::class.java)
         }
 
     @Test

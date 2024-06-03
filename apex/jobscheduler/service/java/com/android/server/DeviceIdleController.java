@@ -109,6 +109,7 @@ import com.android.modules.expresslog.Counter;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.deviceidle.ConstraintController;
 import com.android.server.deviceidle.DeviceIdleConstraintTracker;
+import com.android.server.deviceidle.Flags;
 import com.android.server.deviceidle.IDeviceIdleConstraint;
 import com.android.server.deviceidle.TvConstraintController;
 import com.android.server.net.NetworkPolicyManagerInternal;
@@ -618,6 +619,7 @@ public class DeviceIdleController extends SystemService
      * List of end times for app-IDs that are temporarily marked as being allowed to access
      * the network and acquire wakelocks. Times are in milliseconds.
      */
+    @GuardedBy("this")
     private final SparseArray<Pair<MutableLong, String>> mTempWhitelistAppIdEndTimes
             = new SparseArray<>();
 
@@ -2558,7 +2560,7 @@ public class DeviceIdleController extends SystemService
         }
 
         boolean isLocationPrefetchEnabled() {
-            return mContext.getResources().getBoolean(
+            return !Flags.removeIdleLocation() && mContext.getResources().getBoolean(
                    com.android.internal.R.bool.config_autoPowerModePrefetchLocation);
         }
 
@@ -5009,7 +5011,9 @@ public class DeviceIdleController extends SystemService
                 if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) {
                     return -1;
                 }
-                dumpTempWhitelistSchedule(pw, false);
+                synchronized (this) {
+                    dumpTempWhitelistScheduleLocked(pw, false);
+                }
             }
         } else if ("except-idle-whitelist".equals(cmd)) {
             getContext().enforceCallingOrSelfPermission(
@@ -5293,7 +5297,7 @@ public class DeviceIdleController extends SystemService
                     pw.println();
                 }
             }
-            dumpTempWhitelistSchedule(pw, true);
+            dumpTempWhitelistScheduleLocked(pw, true);
 
             size = mTempWhitelistAppIdArray != null ? mTempWhitelistAppIdArray.length : 0;
             if (size > 0) {
@@ -5421,7 +5425,8 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    void dumpTempWhitelistSchedule(PrintWriter pw, boolean printTitle) {
+    @GuardedBy("this")
+    void dumpTempWhitelistScheduleLocked(PrintWriter pw, boolean printTitle) {
         final int size = mTempWhitelistAppIdEndTimes.size();
         if (size > 0) {
             String prefix = "";

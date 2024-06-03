@@ -99,15 +99,15 @@ class MediaUiEventLogger @Inject constructor(private val logger: UiEventLogger) 
         logger.log(MediaUiEvent.DISMISS_SWIPE)
     }
 
-    fun logLongPressOpen(uid: Int, packageName: String, instanceId: InstanceId) {
+    fun logLongPressOpen(uid: Int, packageName: String, instanceId: InstanceId?) {
         logger.logWithInstanceId(MediaUiEvent.OPEN_LONG_PRESS, uid, packageName, instanceId)
     }
 
-    fun logLongPressDismiss(uid: Int, packageName: String, instanceId: InstanceId) {
+    fun logLongPressDismiss(uid: Int, packageName: String, instanceId: InstanceId?) {
         logger.logWithInstanceId(MediaUiEvent.DISMISS_LONG_PRESS, uid, packageName, instanceId)
     }
 
-    fun logLongPressSettings(uid: Int, packageName: String, instanceId: InstanceId) {
+    fun logLongPressSettings(uid: Int, packageName: String, instanceId: InstanceId?) {
         logger.logWithInstanceId(
             MediaUiEvent.OPEN_SETTINGS_LONG_PRESS,
             uid,
@@ -188,7 +188,7 @@ class MediaUiEventLogger @Inject constructor(private val logger: UiEventLogger) 
         )
     }
 
-    fun logRecommendationItemTap(packageName: String, instanceId: InstanceId, position: Int) {
+    fun logRecommendationItemTap(packageName: String, instanceId: InstanceId?, position: Int) {
         logger.logWithInstanceIdAndPosition(
             MediaUiEvent.MEDIA_RECOMMENDATION_ITEM_TAP,
             0,
@@ -198,7 +198,7 @@ class MediaUiEventLogger @Inject constructor(private val logger: UiEventLogger) 
         )
     }
 
-    fun logRecommendationCardTap(packageName: String, instanceId: InstanceId) {
+    fun logRecommendationCardTap(packageName: String, instanceId: InstanceId?) {
         logger.logWithInstanceId(
             MediaUiEvent.MEDIA_RECOMMENDATION_CARD_TAP,
             0,

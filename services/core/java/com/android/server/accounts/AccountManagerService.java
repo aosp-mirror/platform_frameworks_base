@@ -880,6 +880,14 @@ public class AccountManagerService
                     packagesToVisibility = Collections.emptyMap();
                     accountRemovedReceivers = Collections.emptyList();
                 }
+                if (notify) {
+                    Integer oldVisibility =
+                            accounts.accountsDb.findAccountVisibility(account, packageName);
+                    if (oldVisibility != null && oldVisibility == newVisibility) {
+                        // Database will not be updated - skip LOGIN_ACCOUNTS_CHANGED broadcast.
+                        notify = false;
+                    }
+                }
 
                 if (!updateAccountVisibilityLocked(account, packageName, newVisibility, accounts)) {
                     return false;
@@ -897,6 +905,11 @@ public class AccountManagerService
                         }
                     }
                     for (String packageNameToNotify : accountRemovedReceivers) {
+                        int currentVisibility =
+                                resolveAccountVisibility(account, packageNameToNotify, accounts);
+                        if (isVisible(currentVisibility)) {
+                            continue;
+                        }
                         sendAccountRemovedBroadcast(
                                 account,
                                 packageNameToNotify,
@@ -3666,6 +3679,11 @@ public class AccountManagerService
 
             // Strip auth token from result.
             result.remove(AccountManager.KEY_AUTHTOKEN);
+            if (!checkKeyIntent(Binder.getCallingUid(), result)) {
+                onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                        "invalid intent in bundle returned");
+                return;
+            }
 
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG,
@@ -4514,8 +4532,13 @@ public class AccountManagerService
     public Account[] getAccountsAsUser(String type, int userId, String opPackageName) {
         int callingUid = Binder.getCallingUid();
         mAppOpsManager.checkPackage(callingUid, opPackageName);
-        return getAccountsAsUserForPackage(type, userId, opPackageName /* callingPackage */, -1,
-                opPackageName, false /* includeUserManagedNotVisible */);
+        try {
+            return getAccountsAsUserForPackage(type, userId, opPackageName /* callingPackage */, -1,
+                    opPackageName, false /* includeUserManagedNotVisible */);
+        } catch (SQLiteCantOpenDatabaseException e) {
+            Log.e(TAG, "Could not get accounts for user " + userId, e);
+            return new Account[]{};
+        }
     }
 
     @NonNull
@@ -5276,6 +5299,11 @@ public class AccountManagerService
                     } else {
                         if (mStripAuthTokenFromResult) {
                             result.remove(AccountManager.KEY_AUTHTOKEN);
+                            if (!checkKeyIntent(Binder.getCallingUid(), result)) {
+                                onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                                        "invalid intent in bundle returned");
+                                return;
+                            }
                         }
                         if (Log.isLoggable(TAG, Log.VERBOSE)) {
                             Log.v(TAG, getClass().getSimpleName()

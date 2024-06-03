@@ -40,6 +40,7 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">center</item>
+        <item name="android:textDirection">locale</item>
         <item name="android:layout_marginLeft">14dp</item>
         <item name="android:layout_marginRight">14dp</item>
         <item name="android:textSize">20sp</item>
@@ -53,6 +54,7 @@
         <item name="android:layout_marginTop">18dp</item>
         <item name="android:layout_marginLeft">18dp</item>
         <item name="android:layout_marginRight">18dp</item>
+        <item name="android:textDirection">locale</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>

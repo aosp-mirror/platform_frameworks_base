@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"We zijn op weg naar een wachtwoordloze toekomst, maar naast toegangssleutels kun je nog steeds gebruikmaken van wachtwoorden."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Kiezen waar je je <xliff:g id="CREATETYPES">%1$s</xliff:g> wilt opslaan"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecteer een wachtwoordmanager om je informatie op te slaan en de volgende keer sneller in te loggen"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Toegangssleutel maken om in te loggen bij <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Wachtwoord opslaan om in te loggen bij <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Inloggegevens opslaan voor <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Toegangssleutel maken om in te loggen bij <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"Wachtwoord opslaan om in te loggen bij <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Inloggegevens opslaan voor <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"Toegangssleutel"</string>
     <string name="password" msgid="6738570945182936667">"wachtwoord"</string>
     <string name="passkeys" msgid="5733880786866559847">"toegangssleutels"</string>
@@ -68,20 +68,21 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Ga terug naar de vorige pagina"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Sluiten"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Sluiten"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Je opgeslagen toegangssleutel gebruiken voor <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Je opgeslagen wachtwoord voor <xliff:g id="APP_NAME">%1$s</xliff:g> gebruiken?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Je login voor <xliff:g id="APP_NAME">%1$s</xliff:g> gebruiken?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Inlogopties voor <xliff:g id="APP_NAME">%1$s</xliff:g> ontgrendelen?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Gebruik je opgeslagen toegangssleutel voor <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Gebruik je opgeslagen wachtwoord voor <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Gebruik je account voor <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Gebruik je schermvergrendeling om in te loggen bij <xliff:g id="APP_NAME">%1$s</xliff:g> met <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Ontgrendel inlogopties voor <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Opgeslagen toegangssleutel kiezen voor <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Opgeslagen wachtwoord kiezen voor <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Opgeslagen login kiezen voor <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Kies een login voor <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"Kies een account voor <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Een optie kiezen voor <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Deze informatie gebruiken in <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Op een andere manier inloggen"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Opties bekijken"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Doorgaan"</string>
-    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Opties voor inloggen"</string>
+    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Inlogopties"</string>
     <string name="button_label_view_more" msgid="3429098227286495651">"Meer bekijken"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Voor <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Vergrendelde wachtwoordmanagers"</string>
@@ -92,6 +93,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Via een ander apparaat"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Een ander apparaat gebruiken"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"Verzoek geannuleerd door <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Opties voor inloggen"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Inlogopties"</string>
     <string name="more_options_content_description" msgid="1323427365788198808">"Meer"</string>
 </resources>

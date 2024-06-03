@@ -20,9 +20,10 @@ package com.android.systemui.statusbar.notification.stack.domain.interactor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
-import com.android.systemui.statusbar.notification.stack.data.repository.NotificationStackAppearanceRepository
-import com.android.systemui.statusbar.notification.stack.shared.model.StackBounds
-import com.android.systemui.statusbar.notification.stack.shared.model.StackRounding
+import com.android.systemui.statusbar.notification.stack.data.repository.NotificationPlaceholderRepository
+import com.android.systemui.statusbar.notification.stack.data.repository.NotificationViewHeightRepository
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimRounding
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,11 +37,13 @@ import kotlinx.coroutines.flow.flowOf
 class NotificationStackAppearanceInteractor
 @Inject
 constructor(
-    private val repository: NotificationStackAppearanceRepository,
+    private val viewHeightRepository: NotificationViewHeightRepository,
+    private val placeholderRepository: NotificationPlaceholderRepository,
     shadeInteractor: ShadeInteractor,
 ) {
     /** The bounds of the notification stack in the current scene. */
-    val stackBounds: StateFlow<StackBounds> = repository.stackBounds.asStateFlow()
+    val shadeScrimBounds: StateFlow<ShadeScrimBounds?> =
+        placeholderRepository.shadeScrimBounds.asStateFlow()
 
     /**
      * Whether the stack is expanding from GONE-with-HUN to SHADE
@@ -50,64 +53,73 @@ constructor(
     private val isExpandingFromHeadsUp: Flow<Boolean> = flowOf(false)
 
     /** The rounding of the notification stack. */
-    val stackRounding: Flow<StackRounding> =
+    val shadeScrimRounding: Flow<ShadeScrimRounding> =
         combine(
                 shadeInteractor.shadeMode,
                 isExpandingFromHeadsUp,
             ) { shadeMode, isExpandingFromHeadsUp ->
-                StackRounding(
-                    roundTop = !(shadeMode == ShadeMode.Split && isExpandingFromHeadsUp),
-                    roundBottom = shadeMode != ShadeMode.Single,
+                ShadeScrimRounding(
+                    isTopRounded = !(shadeMode == ShadeMode.Split && isExpandingFromHeadsUp),
+                    isBottomRounded = shadeMode != ShadeMode.Single,
                 )
             }
             .distinctUntilChanged()
 
-    /**
-     * The height in px of the contents of notification stack. Depending on the number of
-     * notifications, this can exceed the space available on screen to show notifications, at which
-     * point the notification stack should become scrollable.
-     */
-    val intrinsicContentHeight: StateFlow<Float> = repository.intrinsicContentHeight.asStateFlow()
+    /** The alpha of the Notification Stack for the brightness mirror */
+    val alphaForBrightnessMirror: StateFlow<Float> =
+        placeholderRepository.alphaForBrightnessMirror.asStateFlow()
 
-    /** The y-coordinate in px of top of the contents of the notification stack. */
-    val contentTop: StateFlow<Float> = repository.contentTop.asStateFlow()
+    /** The height of the keyguard's available space bounds */
+    val constrainedAvailableSpace: StateFlow<Int> =
+        placeholderRepository.constrainedAvailableSpace.asStateFlow()
 
     /**
      * Whether the notification stack is scrolled to the top; i.e., it cannot be scrolled down any
      * further.
      */
-    val scrolledToTop: StateFlow<Boolean> = repository.scrolledToTop.asStateFlow()
+    val scrolledToTop: StateFlow<Boolean> = placeholderRepository.scrolledToTop.asStateFlow()
 
     /**
      * The amount in px that the notification stack should scroll due to internal expansion. This
      * should only happen when a notification expansion hits the bottom of the screen, so it is
      * necessary to scroll up to keep expanding the notification.
      */
-    val syntheticScroll: Flow<Float> = repository.syntheticScroll.asStateFlow()
+    val syntheticScroll: Flow<Float> = viewHeightRepository.syntheticScroll.asStateFlow()
+
+    /**
+     * Whether the current touch gesture is overscroll. If true, it means the NSSL has already
+     * consumed part of the gesture.
+     */
+    val isCurrentGestureOverscroll: Flow<Boolean> =
+        viewHeightRepository.isCurrentGestureOverscroll.asStateFlow()
+
+    /** Sets the alpha to apply to the NSSL for the brightness mirror */
+    fun setAlphaForBrightnessMirror(alpha: Float) {
+        placeholderRepository.alphaForBrightnessMirror.value = alpha
+    }
 
     /** Sets the position of the notification stack in the current scene. */
-    fun setStackBounds(bounds: StackBounds) {
-        check(bounds.top <= bounds.bottom) { "Invalid bounds: $bounds" }
-        repository.stackBounds.value = bounds
-    }
-
-    /** Sets the height of the contents of the notification stack. */
-    fun setIntrinsicContentHeight(height: Float) {
-        repository.intrinsicContentHeight.value = height
-    }
-
-    /** Sets the y-coord in px of the top of the contents of the notification stack. */
-    fun setContentTop(startY: Float) {
-        repository.contentTop.value = startY
+    fun setShadeScrimBounds(bounds: ShadeScrimBounds?) {
+        check(bounds == null || bounds.top <= bounds.bottom) { "Invalid bounds: $bounds" }
+        placeholderRepository.shadeScrimBounds.value = bounds
     }
 
     /** Sets whether the notification stack is scrolled to the top. */
     fun setScrolledToTop(scrolledToTop: Boolean) {
-        repository.scrolledToTop.value = scrolledToTop
+        placeholderRepository.scrolledToTop.value = scrolledToTop
     }
 
     /** Sets the amount (px) that the notification stack should scroll due to internal expansion. */
     fun setSyntheticScroll(delta: Float) {
-        repository.syntheticScroll.value = delta
+        viewHeightRepository.syntheticScroll.value = delta
+    }
+
+    /** Sets whether the current touch gesture is overscroll. */
+    fun setCurrentGestureOverscroll(isOverscroll: Boolean) {
+        viewHeightRepository.isCurrentGestureOverscroll.value = isOverscroll
+    }
+
+    fun setConstrainedAvailableSpace(height: Int) {
+        placeholderRepository.constrainedAvailableSpace.value = height
     }
 }

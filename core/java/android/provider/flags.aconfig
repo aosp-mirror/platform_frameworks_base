@@ -1,7 +1,16 @@
 package: "android.provider"
+container: "system"
+
+flag {
+    name: "a11y_standalone_gesture_enabled"
+    namespace: "accessibility"
+    description: "Separating a11y software shortcut and gesture shortcut"
+    bug: "297544054"
+}
 
 flag {
     name: "system_settings_default"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Enable Settings.System.resetToDefault APIs."
     bug: "279083734"
@@ -9,6 +18,7 @@ flag {
 
 flag {
     name: "user_keys"
+    is_exported: true
     namespace: "privacy_infra_policy"
     description: "This flag controls new E2EE contact keys API"
     bug: "290696572"
@@ -16,6 +26,7 @@ flag {
 
 flag {
     name: "backup_tasks_settings_screen"
+    is_exported: true
     namespace: "backstage_power"
     description: "Add a new settings page for the RUN_BACKUP_JOBS permission."
     bug: "320563660"

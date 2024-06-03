@@ -1,5 +1,6 @@
 package: "android.os"
 container: "system"
+container: "system"
 
 flag {
     name: "android_os_build_vanilla_ice_cream"
@@ -26,6 +27,7 @@ flag {
 
 flag {
     name: "remove_app_profiler_pss_collection"
+    is_exported: true
     namespace: "backstage_power"
     description: "Replaces background PSS collection in AppProfiler with RSS"
     bug: "297542292"
@@ -33,6 +35,7 @@ flag {
 
 flag {
     name: "allow_thermal_headroom_thresholds"
+    is_exported: true
     namespace: "game"
     description: "Enable thermal headroom thresholds API"
     bug: "288119641"
@@ -41,6 +44,7 @@ flag {
 # This flag guards the private space feature, its APIs, and some of the feature implementations. The flag android.multiuser.Flags.enable_private_space_features exclusively guards all the implementations.
 flag {
     name: "allow_private_profile"
+    is_exported: true
     namespace: "profile_experiences"
     description: "Guards a new Private Profile type in UserManager - everything from its setup to config to deletion."
     bug: "299069460"
@@ -49,6 +53,7 @@ flag {
 
 flag {
     name: "bugreport_mode_max_value"
+    is_exported: true
     namespace: "telephony"
     description: "Introduce a constant as maximum value of bugreport mode."
     bug: "305067125"
@@ -56,6 +61,7 @@ flag {
 
 flag {
     name: "adpf_prefer_power_efficiency"
+    is_exported: true
     namespace: "game"
     description: "Guards the ADPF power efficiency API"
     bug: "288117936"
@@ -63,6 +69,7 @@ flag {
 
 flag {
     name: "security_state_service"
+    is_exported: true
     namespace: "dynamic_spl"
     description: "Guards the Security State API."
     bug: "302189431"
@@ -70,6 +77,7 @@ flag {
 
 flag {
     name: "battery_saver_supported_check_api"
+    is_exported: true
     namespace: "backstage_power"
     description: "Guards a new API in PowerManager to check if battery saver is supported or not."
     bug: "305067031"
@@ -77,6 +85,7 @@ flag {
 
 flag {
     name: "adpf_gpu_report_actual_work_duration"
+    is_exported: true
     namespace: "game"
     description: "Guards the ADPF GPU APIs."
     bug: "284324521"
@@ -87,6 +96,53 @@ flag {
     namespace: "game"
     description: "Guards use of the FMQ channel for ADPF"
     bug: "315894228"
+}
+
+flag {
+    name: "adpf_use_fmq_channel_fixed"
+    namespace: "game"
+    description: "Guards use of the FMQ channel for ADPF with a readonly flag"
+    is_fixed_read_only: true
+    bug: "315894228"
+}
+
+flag {
+    name: "adpf_fmq_eager_send"
+    namespace: "game"
+    description: "Guards the use of an eager-sending optimization in FMQ for low-latency messages"
+    is_fixed_read_only: true
+    bug: "315894228"
+}
+
+flag {
+    name: "adpf_hwui_gpu"
+    namespace: "game"
+    description: "Guards use of the FMQ channel for ADPF"
+    is_fixed_read_only: true
+    bug: "330922490"
+}
+
+flag {
+    name: "adpf_obtainview_boost"
+    namespace: "game"
+    description: "Guards use of a boost in response to HWUI obtainView"
+    is_fixed_read_only: true
+    bug: "328238660"
+}
+
+flag {
+    name: "adpf_platform_power_efficiency"
+    namespace: "game"
+    description: "Guards use of the ADPF power efficiency API within the platform"
+    is_fixed_read_only: true
+    bug: "277285195"
+}
+
+flag {
+    name: "adpf_measure_during_input_event_boost"
+    namespace: "game"
+    description: "Guards use of a boost when view measures during input events"
+    bug: "256549451"
 }
 
 flag {
@@ -114,6 +170,7 @@ flag {
 
 flag {
     name: "battery_part_status_api"
+    is_exported: true
     namespace: "phoenix"
     description: "Feature flag for adding Health HAL v3 APIs."
     is_fixed_read_only: true
@@ -122,6 +179,7 @@ flag {
 
 flag {
     name: "storage_lifetime_api"
+    is_exported: true
     namespace: "phoenix"
     description: "Feature flag for adding storage component health APIs."
     is_fixed_read_only: true
@@ -131,6 +189,7 @@ flag {
 flag {
      namespace: "system_performance"
      name: "telemetry_apis_framework_initialization"
+     is_exported: true
      description: "Control framework initialization APIs of telemetry APIs feature."
      is_fixed_read_only: true
      bug: "324241334"

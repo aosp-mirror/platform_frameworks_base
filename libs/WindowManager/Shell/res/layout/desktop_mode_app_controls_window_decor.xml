@@ -19,6 +19,7 @@
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/desktop_mode_caption"
+    android:background="@drawable/desktop_mode_header_background"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_horizontal"
@@ -27,13 +28,11 @@
     <LinearLayout
         android:id="@+id/open_menu_button"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:tint="?androidprv:attr/materialColorOnSurface"
-        android:background="?android:selectableItemBackground"
+        android:layout_height="40dp"
         android:orientation="horizontal"
         android:clickable="true"
         android:focusable="true"
-        android:paddingStart="12dp">
+        android:layout_marginStart="12dp">
         <ImageView
             android:id="@+id/application_icon"
             android:layout_width="@dimen/desktop_mode_caption_icon_radius"
@@ -84,8 +83,6 @@
         android:layout_height="40dp"
         android:layout_gravity="end"
         android:layout_marginHorizontal="8dp"
-        android:paddingHorizontal="5dp"
-        android:paddingVertical="3dp"
         android:clickable="true"
         android:focusable="true"/>
 
@@ -96,8 +93,6 @@
         android:paddingHorizontal="10dp"
         android:paddingVertical="8dp"
         android:layout_marginEnd="8dp"
-        android:tint="?androidprv:attr/materialColorOnSurface"
-        android:background="?android:selectableItemBackgroundBorderless"
         android:contentDescription="@string/close_button_text"
         android:src="@drawable/desktop_mode_header_ic_close"
         android:scaleType="centerCrop"

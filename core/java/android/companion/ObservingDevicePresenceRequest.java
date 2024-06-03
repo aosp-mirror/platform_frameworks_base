@@ -183,7 +183,11 @@ public final class ObservingDevicePresenceRequest implements Parcelable {
          * @param uuid The ParcelUuid for observing device presence.
          */
         @NonNull
-        @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_DEVICE_UUID_PRESENCE)
+        @RequiresPermission(allOf = {
+                android.Manifest.permission.REQUEST_OBSERVE_DEVICE_UUID_PRESENCE,
+                android.Manifest.permission.BLUETOOTH_CONNECT,
+                android.Manifest.permission.BLUETOOTH_SCAN
+        })
         public Builder setUuid(@NonNull ParcelUuid uuid) {
             checkNotUsed();
             this.mUuid = uuid;

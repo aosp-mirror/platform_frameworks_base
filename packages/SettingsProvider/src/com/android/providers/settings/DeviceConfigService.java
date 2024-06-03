@@ -531,13 +531,22 @@ public final class DeviceConfigService extends Binder {
             pw.println("  put NAMESPACE KEY VALUE [default]");
             pw.println("      Change the contents of KEY to VALUE for the given NAMESPACE.");
             pw.println("      {default} to set as the default value.");
+            pw.println("  override NAMESPACE KEY VALUE");
+            pw.println("      Set flag NAMESPACE/KEY to the given VALUE, and ignores "
+                    + "server-updates for");
+            pw.println("      this flag. This can still be called even if there is no underlying "
+                    + "value set.");
             pw.println("  delete NAMESPACE KEY");
             pw.println("      Delete the entry for KEY for the given NAMESPACE.");
+            pw.println("  clear_override NAMESPACE KEY");
+            pw.println("      Clear local sticky flag override for KEY in the given NAMESPACE.");
             pw.println("  list_namespaces [--public]");
             pw.println("      Prints the name of all (or just the public) namespaces.");
             pw.println("  list [NAMESPACE]");
             pw.println("      Print all keys and values defined, optionally for the given "
                     + "NAMESPACE.");
+            pw.println("  list_local_overrides");
+            pw.println("      Print all flags that have been overridden.");
             pw.println("  reset RESET_MODE [NAMESPACE]");
             pw.println("      Reset all flag values, optionally for a NAMESPACE, according to "
                     + "RESET_MODE.");
@@ -547,8 +556,9 @@ public final class DeviceConfigService extends Binder {
                     + "flags are reset");
             pw.println("  set_sync_disabled_for_tests SYNC_DISABLED_MODE");
             pw.println("      Modifies bulk property setting behavior for tests. When in one of the"
-                    + " disabled modes this ensures that config isn't overwritten.");
-            pw.println("      SYNC_DISABLED_MODE is one of:");
+                    + " disabled modes");
+            pw.println("      this ensures that config isn't overwritten. SYNC_DISABLED_MODE is "
+                    + "one of:");
             pw.println("        none: Sync is not disabled. A reboot may be required to restart"
                     + " syncing.");
             pw.println("        persistent: Sync is disabled, this state will survive a reboot.");

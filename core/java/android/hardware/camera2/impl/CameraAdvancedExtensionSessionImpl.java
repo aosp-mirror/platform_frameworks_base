@@ -200,6 +200,8 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                 supportedCaptureSizes.put(format, supportedSizes);
             }
         }
+
+        int captureFormat = ImageFormat.UNKNOWN;
         Surface burstCaptureSurface = CameraExtensionUtils.getBurstCaptureSurface(
                 config.getOutputConfigurations(), supportedCaptureSizes);
         OutputConfiguration burstCaptureOutputConfig = null;
@@ -210,6 +212,12 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                 }
             }
             suitableSurfaceCount++;
+
+            if (Flags.analytics24q3()) {
+                CameraExtensionUtils.SurfaceInfo burstCaptureSurfaceInfo =
+                        CameraExtensionUtils.querySurface(burstCaptureSurface);
+                captureFormat = burstCaptureSurfaceInfo.mFormat;
+            }
         }
 
         if (suitableSurfaceCount != config.getOutputConfigurations().size()) {
@@ -249,6 +257,9 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                 burstCaptureOutputConfig, postviewOutputConfig, config.getStateCallback(),
                 config.getExecutor(), sessionId, token, config.getExtension());
 
+        if (Flags.analytics24q3()) {
+            ret.mStatsAggregator.setCaptureFormat(captureFormat);
+        }
         ret.mStatsAggregator.setClientName(ctx.getOpPackageName());
         ret.mStatsAggregator.setExtensionType(config.getExtension());
 

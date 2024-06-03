@@ -20,7 +20,6 @@ import static android.app.ActivityManager.isStartResultSuccessful;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.INVALID_WINDOWING_MODE;
 import static android.app.ActivityTaskManager.RESIZE_MODE_FORCED;
-import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
@@ -43,12 +42,10 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE_DEPRECATED;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.InsetsSource.FLAG_INSETS_ROUNDED_CORNER;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
@@ -137,6 +134,7 @@ import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppCompatTaskInfo;
 import android.app.AppGlobals;
+import android.app.CameraCompatTaskInfo;
 import android.app.IActivityController;
 import android.app.PictureInPictureParams;
 import android.app.TaskInfo;
@@ -170,12 +168,9 @@ import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
-import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.RemoteAnimationAdapter;
-import android.view.Surface;
 import android.view.SurfaceControl;
-import android.view.TaskTransitionSpec;
 import android.view.WindowManager;
 import android.view.WindowManager.TransitionOldType;
 import android.window.ITaskOrganizer;
@@ -198,6 +193,7 @@ import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.uri.NeededUriGrants;
+import com.android.window.flags.Flags;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -301,6 +297,10 @@ class Task extends TaskFragment {
     ActivityRecord mTranslucentActivityWaiting = null;
     ArrayList<ActivityRecord> mUndrawnActivitiesBelowTopTranslucent = new ArrayList<>();
 
+    // The topmost Activity that was converted to translucent for scene transition, which should
+    // be converted from translucent once the transition is completed, or the app died.
+    private ActivityRecord mPendingConvertFromTranslucentActivity = null;
+
     /**
      * Set when we know we are going to be calling updateConfiguration()
      * soon, so want to skip intermediate config checks.
@@ -363,6 +363,10 @@ class Task extends TaskFragment {
      * Used to know that we should try harder to keep this process around, in case the
      * user wants to return to it. */
     private WindowProcessController mRootProcess;
+
+    /** The TF host info are set once the task has ever added an organized task fragment. */
+    int mTaskFragmentHostUid;
+    String mTaskFragmentHostProcessName;
 
     /** Takes on same value as first root activity */
     boolean isPersistable = false;
@@ -440,16 +444,6 @@ class Task extends TaskFragment {
     // Id of the previous display the root task was on.
     int mPrevDisplayId = INVALID_DISPLAY;
 
-    /** ID of the display which rotation {@link #mRotation} has. */
-    private int mLastRotationDisplayId = INVALID_DISPLAY;
-
-    /**
-     * Display rotation as of the last time {@link #setBounds(Rect)} was called or this task was
-     * moved to a new display.
-     */
-    @Surface.Rotation
-    private int mRotation;
-
     int mMultiWindowRestoreWindowingMode = INVALID_WINDOWING_MODE;
 
     /**
@@ -460,10 +454,7 @@ class Task extends TaskFragment {
      */
     int mLastReportedRequestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
-    // For comparison with DisplayContent bounds.
-    private Rect mTmpRect = new Rect();
-    // For handling display rotations.
-    private Rect mTmpRect2 = new Rect();
+    private final Rect mTmpRect = new Rect();
 
     // Resize mode of the task. See {@link ActivityInfo#resizeMode}
     // Based on the {@link ActivityInfo#resizeMode} of the root activity.
@@ -639,8 +630,6 @@ class Task extends TaskFragment {
         mLastTaskSnapshotData = _lastSnapshotData != null
                 ? _lastSnapshotData
                 : new PersistedTaskSnapshotData();
-        // Tasks have no set orientation value (including SCREEN_ORIENTATION_UNSPECIFIED).
-        setOrientation(SCREEN_ORIENTATION_UNSET);
         affinityIntent = _affinityIntent;
         affinity = _affinity;
         rootAffinity = _rootAffinity;
@@ -1074,9 +1063,11 @@ class Task extends TaskFragment {
         // as the one in the task because either one of them could be the alias activity.
         if (Objects.equals(realActivity, r.mActivityComponent) && this.intent != null) {
             intent.setComponent(this.intent.getComponent());
-            // Make sure the package name the same to prevent one of the intent is set while the
-            // other one is not.
-            intent.setPackage(this.intent.getPackage());
+            if (intent.getSelector() == null) {
+                // Make sure the package name the same to prevent one of the intent is set while the
+                // other one is not.
+                intent.setPackage(this.intent.getPackage());
+            }
         }
         return intent.filterEquals(this.intent);
     }
@@ -1196,9 +1187,6 @@ class Task extends TaskFragment {
             updateOverrideConfigurationFromLaunchBounds();
         }
 
-        // Update task bounds if needed.
-        adjustBoundsForDisplayChangeIfNeeded(getDisplayContent());
-
         mRootWindowContainer.updateUIDsPresentOnDisplay();
 
         // Ensure all animations are finished at same time in split-screen mode.
@@ -1275,8 +1263,9 @@ class Task extends TaskFragment {
             final ActivityRecord top = topRunningActivity();
             final ActivityRecord resumedActivity = getResumedActivity();
             if (resumedActivity != null
-                    && (top.getTaskFragment() != this || !canBeResumed(resuming))) {
-                // Pausing the resumed activity because it is occluded by other task fragment.
+                    && (top == null || top.getTaskFragment() != this || !canBeResumed(resuming))) {
+                // Pausing the resumed activity because it is occluded by other task fragment, or
+                // should not be remained in resumed state.
                 if (startPausing(false /* uiSleeping*/, resuming, reason)) {
                     someActivityPaused[0]++;
                 }
@@ -1469,6 +1458,11 @@ class Task extends TaskFragment {
         // passed from Task constructor.
         final TaskFragment childTaskFrag = child.asTaskFragment();
         if (childTaskFrag != null && childTaskFrag.asTask() == null) {
+            if (childTaskFrag.mTaskFragmentOrganizerProcessName != null
+                    && mTaskFragmentHostProcessName == null) {
+                mTaskFragmentHostUid = childTaskFrag.mTaskFragmentOrganizerUid;
+                mTaskFragmentHostProcessName = childTaskFrag.mTaskFragmentOrganizerProcessName;
+            }
             childTaskFrag.setMinDimensions(mMinWidth, mMinHeight);
 
             // The starting window should keep covering its task when a pure TaskFragment is added
@@ -1936,6 +1930,9 @@ class Task extends TaskFragment {
             }
             if (td.getSystemBarsAppearance() == 0) {
                 td.setSystemBarsAppearance(atd.getSystemBarsAppearance());
+            }
+            if (td.getTopOpaqueSystemBarsAppearance() == 0 && r.fillsParent()) {
+                td.setTopOpaqueSystemBarsAppearance(atd.getSystemBarsAppearance());
             }
             if (td.getNavigationBarColor() == 0) {
                 td.setNavigationBarColor(atd.getNavigationBarColor());
@@ -2732,15 +2729,7 @@ class Task extends TaskFragment {
             return setBounds(getRequestedOverrideBounds(), bounds);
         }
 
-        int rotation = Surface.ROTATION_0;
-        final DisplayContent displayContent = getRootTask() != null
-                ? getRootTask().getDisplayContent() : null;
-        if (displayContent != null) {
-            rotation = displayContent.getDisplayInfo().rotation;
-        }
-
         final int boundsChange = super.setBounds(bounds);
-        mRotation = rotation;
         updateSurfacePositionNonOrganized();
         return boundsChange;
     }
@@ -2800,10 +2789,6 @@ class Task extends TaskFragment {
 
     @Override
     void onDisplayChanged(DisplayContent dc) {
-        final boolean isRootTask = isRootTask();
-        if (!isRootTask && !mCreatedByOrganizer) {
-            adjustBoundsForDisplayChangeIfNeeded(dc);
-        }
         super.onDisplayChanged(dc);
         if (isLeafTask()) {
             final int displayId = (dc != null) ? dc.getDisplayId() : INVALID_DISPLAY;
@@ -2937,33 +2922,6 @@ class Task extends TaskFragment {
         return;
     }
 
-    /**
-     * Account for specified insets to crop the animation bounds by to avoid the animation
-     * occurring over "out of bounds" regions
-     *
-     * For example this is used to make sure the tasks are cropped to be fully above the expanded
-     * taskbar when animating.
-     *
-     * TEMPORARY FIELD (b/202383002)
-     * TODO: Remove once we use surfaceflinger rounded corners on tasks rather than taskbar overlays
-     *       or when shell transitions are fully enabled
-     *
-     * @param animationBounds The animation bounds to adjust to account for the custom spec insets.
-     */
-    void adjustAnimationBoundsForTransition(Rect animationBounds) {
-        TaskTransitionSpec spec = mWmService.mTaskTransitionSpec;
-        if (spec != null) {
-            final InsetsState state =
-                    getDisplayContent().getInsetsStateController().getRawInsetsState();
-            for (int i = state.sourceSize() - 1; i >= 0; i--) {
-                final InsetsSource source = state.sourceAt(i);
-                if (source.hasFlags(FLAG_INSETS_ROUNDED_CORNER)) {
-                    animationBounds.inset(source.calculateVisibleInsets(animationBounds));
-                }
-            }
-        }
-    }
-
     void setDragResizing(boolean dragResizing) {
         if (mDragResizing != dragResizing) {
             // No need to check if allowed if it's leaving dragResize
@@ -2979,48 +2937,6 @@ class Task extends TaskFragment {
 
     boolean isDragResizing() {
         return mDragResizing;
-    }
-
-    void adjustBoundsForDisplayChangeIfNeeded(final DisplayContent displayContent) {
-        if (displayContent == null) {
-            return;
-        }
-        if (getRequestedOverrideBounds().isEmpty()) {
-            return;
-        }
-        final int displayId = displayContent.getDisplayId();
-        final int newRotation = displayContent.getDisplayInfo().rotation;
-        if (displayId != mLastRotationDisplayId) {
-            // This task is on a display that it wasn't on. There is no point to keep the relative
-            // position if display rotations for old and new displays are different. Just keep these
-            // values.
-            mLastRotationDisplayId = displayId;
-            mRotation = newRotation;
-            return;
-        }
-
-        if (mRotation == newRotation) {
-            // Rotation didn't change. We don't need to adjust the bounds to keep the relative
-            // position.
-            return;
-        }
-
-        // Device rotation changed.
-        // - We don't want the task to move around on the screen when this happens, so update the
-        //   task bounds so it stays in the same place.
-        // - Rotate the bounds and notify activity manager if the task can be resized independently
-        //   from its root task. The root task will take care of task rotation for the other case.
-        mTmpRect2.set(getBounds());
-
-        if (!getWindowConfiguration().canResizeTask()) {
-            setBounds(mTmpRect2);
-            return;
-        }
-
-        displayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
-        if (setBounds(mTmpRect2) != BOUNDS_CHANGE_NONE) {
-            mAtmService.resizeTask(mTaskId, getBounds(), RESIZE_MODE_SYSTEM_SCREEN_ROTATION);
-        }
     }
 
     /** Cancels any running app transitions associated with the task. */
@@ -3204,6 +3120,11 @@ class Task extends TaskFragment {
                 mTaskId, snapshot);
     }
 
+    void onSnapshotInvalidated() {
+        mAtmService.getTaskChangeNotificationController().notifyTaskSnapshotInvalidated(mTaskId);
+    }
+
+
     TaskDescription getTaskDescription() {
         return mTaskDescription;
     }
@@ -3359,7 +3280,8 @@ class Task extends TaskFragment {
         // If true, we want to get the Dimmer from the level above since we don't want to animate
         // the dim with the Task.
         if (!isRootTask() || (Dimmer.DIMMER_REFACTOR && isTranslucentAndVisible())
-                || isTranslucent(null)) {
+                || (Flags.getDimmerOnClosing() ? isTranslucentForTransition()
+                                                : isTranslucent(null))) {
             return super.getDimmer();
         }
 
@@ -3533,10 +3455,12 @@ class Task extends TaskFragment {
         // Whether the direct top activity is eligible for letterbox education.
         appCompatTaskInfo.topActivityEligibleForLetterboxEducation = isTopActivityResumed
                 && top.isEligibleForLetterboxEducation();
+        appCompatTaskInfo.isLetterboxEducationEnabled = top != null
+                && top.mLetterboxUiController.isLetterboxEducationEnabled();
         // Whether the direct top activity requested showing camera compat control.
-        appCompatTaskInfo.cameraCompatControlState = isTopActivityResumed
+        appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState = isTopActivityResumed
                 ? top.getCameraCompatControlState()
-                : AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
+                : CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
 
         final Task parentTask = getParent() != null ? getParent().asTask() : null;
         info.parentTaskId = parentTask != null && parentTask.mCreatedByOrganizer
@@ -3547,8 +3471,6 @@ class Task extends TaskFragment {
         info.isVisibleRequested = isVisibleRequested();
         info.isSleeping = shouldSleepActivities();
         info.isTopActivityTransparent = top != null && !top.fillsParent();
-        appCompatTaskInfo.isLetterboxDoubleTapEnabled = top != null
-                && top.mLetterboxUiController.isLetterboxDoubleTapEducationEnabled();
         appCompatTaskInfo.topActivityLetterboxVerticalPosition = TaskInfo.PROPERTY_VALUE_UNSET;
         appCompatTaskInfo.topActivityLetterboxHorizontalPosition = TaskInfo.PROPERTY_VALUE_UNSET;
         appCompatTaskInfo.topActivityLetterboxWidth = TaskInfo.PROPERTY_VALUE_UNSET;
@@ -3563,15 +3485,29 @@ class Task extends TaskFragment {
             appCompatTaskInfo.topActivityLetterboxWidth = top.getBounds().width();
             appCompatTaskInfo.topActivityLetterboxHeight = top.getBounds().height();
         }
+        // We need to consider if letterboxed or pillarboxed
+        // TODO(b/336807329) Encapsulate reachability logic
+        appCompatTaskInfo.isLetterboxDoubleTapEnabled = top != null
+                && top.mLetterboxUiController.isLetterboxDoubleTapEducationEnabled();
         if (appCompatTaskInfo.isLetterboxDoubleTapEnabled) {
             if (appCompatTaskInfo.isTopActivityPillarboxed()) {
-                // Pillarboxed
-                appCompatTaskInfo.topActivityLetterboxHorizontalPosition =
-                        top.mLetterboxUiController.getLetterboxPositionForHorizontalReachability();
+                if (top.mLetterboxUiController.allowHorizontalReachabilityForThinLetterbox()) {
+                    // Pillarboxed
+                    appCompatTaskInfo.topActivityLetterboxHorizontalPosition =
+                            top.mLetterboxUiController
+                                    .getLetterboxPositionForHorizontalReachability();
+                } else {
+                    appCompatTaskInfo.isLetterboxDoubleTapEnabled = false;
+                }
             } else {
-                // Letterboxed
-                appCompatTaskInfo.topActivityLetterboxVerticalPosition =
-                        top.mLetterboxUiController.getLetterboxPositionForVerticalReachability();
+                if (top.mLetterboxUiController.allowVerticalReachabilityForThinLetterbox()) {
+                    // Letterboxed
+                    appCompatTaskInfo.topActivityLetterboxVerticalPosition =
+                            top.mLetterboxUiController
+                                    .getLetterboxPositionForVerticalReachability();
+                } else {
+                    appCompatTaskInfo.isLetterboxDoubleTapEnabled = false;
+                }
             }
         }
         appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton = top != null
@@ -3685,17 +3621,21 @@ class Task extends TaskFragment {
                 info.requestedVisibleTypes = topMainWin.getRequestedVisibleTypes();
             }
         }
+        final Rect rotatedBounds = activity.getFixedRotationTransformDisplayBounds();
+        info.taskBounds.set(rotatedBounds != null ? rotatedBounds
+                : info.taskInfo.configuration.windowConfiguration.getBounds());
         // If the developer has persist a different configuration, we need to override it to the
         // starting window because persisted configuration does not effect to Task.
         info.taskInfo.configuration.setTo(activity.getConfiguration());
-        final ActivityRecord topFullscreenActivity = getTopFullscreenActivity();
-        if (topFullscreenActivity != null) {
-            final WindowState topFullscreenOpaqueWindow =
-                    topFullscreenActivity.getTopFullscreenOpaqueWindow();
-            if (topFullscreenOpaqueWindow != null) {
-                info.topOpaqueWindowInsetsState =
-                        topFullscreenOpaqueWindow.getInsetsStateWithVisibilityOverride();
-                info.topOpaqueWindowLayoutParams = topFullscreenOpaqueWindow.getAttrs();
+        if (!Flags.drawSnapshotAspectRatioMatch()) {
+            final ActivityRecord topFullscreenActivity = getTopFullscreenActivity();
+            if (topFullscreenActivity != null) {
+                final WindowState mainWindow = topFullscreenActivity.findMainWindow(false);
+                if (mainWindow != null) {
+                    info.topOpaqueWindowInsetsState =
+                            mainWindow.getInsetsStateWithVisibilityOverride();
+                    info.topOpaqueWindowLayoutParams = mainWindow.getAttrs();
+                }
             }
         }
         return info;
@@ -4679,9 +4619,10 @@ class Task extends TaskFragment {
 
     @Override
     public void setWindowingMode(int windowingMode) {
-        // Calling Task#setWindowingMode() for leaf task since this is the a specialization of
+        // Calling Task#setWindowingMode() for leaf task since this is a specialization of
         // {@link #setWindowingMode(int)} for root task.
         if (!isRootTask()) {
+            mMultiWindowRestoreWindowingMode = INVALID_WINDOWING_MODE;
             super.setWindowingMode(windowingMode);
             return;
         }
@@ -4725,6 +4666,9 @@ class Task extends TaskFragment {
             return;
         }
 
+        // Reset multi-window restore windowing mode.
+        mMultiWindowRestoreWindowingMode = INVALID_WINDOWING_MODE;
+
         final ActivityRecord topActivity = getTopNonFinishingActivity();
 
         // For now, assume that the root task's windowing mode is what will actually be used
@@ -4741,14 +4685,6 @@ class Task extends TaskFragment {
             // transferring the transform on the leash to the task, reset this state once we're
             // moving out of pip
             setCanAffectSystemUiFlags(true);
-            // Turn on userLeaveHint so other app can enter PiP mode.
-            mTaskSupervisor.mUserLeaving = true;
-            // Allow entering PiP from current top most activity when we are leaving PiP.
-            final Task topFocused = mRootWindowContainer.getTopDisplayFocusedRootTask();
-            if (topFocused != null) {
-                final ActivityRecord ar = topFocused.getTopResumedActivity();
-                enableEnterPipOnTaskSwitch(ar, null /* toFrontTask */, ar, null /* opts */);
-            }
             mRootWindowContainer.notifyActivityPipModeChanged(this, null);
         }
         if (likelyResolvedMode == WINDOWING_MODE_PINNED) {
@@ -4806,6 +4742,14 @@ class Task extends TaskFragment {
                                 topActivity.getSyncTransaction());
                     }
                     lastParentBeforePip.moveToFront("movePinnedActivityToOriginalTask");
+                    // If the reparent is not included in transition, make sure the visibility of
+                    // task is still updated by core. Otherwise if the task is collected (e.g.
+                    // rotation change) after leaving this scope, the visibility operation will be
+                    // put in sync transaction, then it is not synced with reparent.
+                    if (com.android.window.flags.Flags.removePrepareSurfaceInPlacement()
+                            && lastParentBeforePip.mSyncState == SYNC_STATE_NONE) {
+                        lastParentBeforePip.prepareSurfaces();
+                    }
                 }
                 if (isPip2ExperimentEnabled) {
                     super.setWindowingMode(windowingMode);
@@ -4844,11 +4788,13 @@ class Task extends TaskFragment {
     /**
      * Abort an incomplete pip-entry. If left in this state, it will cover everything but remain
      * paused. If this is needed, there is a bug -- this should only be used for recovery.
+     *
+     * @return true if there is an inconsistency in the task and activity state.
      */
-    void abortPipEnter(ActivityRecord top) {
+    boolean abortPipEnter(ActivityRecord top) {
         // an incomplete state has the task PINNED but the activity not.
         if (!inPinnedWindowingMode() || top.inPinnedWindowingMode() || !canMoveTaskToBack(this)) {
-            return;
+            return false;
         }
         final Transition transition = new Transition(TRANSIT_TO_BACK, 0 /* flags */,
                 mTransitionController, mWmService.mSyncEngine);
@@ -4870,6 +4816,7 @@ class Task extends TaskFragment {
             top.setWindowingMode(WINDOWING_MODE_UNDEFINED);
             top.mWaitForEnteringPinnedMode = false;
         }
+        return true;
     }
 
     void resumeNextFocusAfterReparent() {
@@ -5049,6 +4996,27 @@ class Task extends TaskFragment {
         }
     }
 
+    void abortTranslucentActivityWaiting(@NonNull ActivityRecord r) {
+        if (r != mTranslucentActivityWaiting && r != mPendingConvertFromTranslucentActivity) {
+            return;
+        }
+
+        if (mTranslucentActivityWaiting != null) {
+            if (!mTranslucentActivityWaiting.finishing) {
+                mTranslucentActivityWaiting.setOccludesParent(true);
+            }
+            mTranslucentActivityWaiting = null;
+        }
+        if (mPendingConvertFromTranslucentActivity != null) {
+            if (!mPendingConvertFromTranslucentActivity.finishing) {
+                mPendingConvertFromTranslucentActivity.setOccludesParent(true);
+            }
+            mPendingConvertFromTranslucentActivity = null;
+        }
+        mUndrawnActivitiesBelowTopTranslucent.clear();
+        mHandler.removeMessages(TRANSLUCENT_TIMEOUT_MSG);
+    }
+
     void checkTranslucentActivityWaiting(ActivityRecord top) {
         if (mTranslucentActivityWaiting != top) {
             mUndrawnActivitiesBelowTopTranslucent.clear();
@@ -5063,8 +5031,17 @@ class Task extends TaskFragment {
 
     void convertActivityToTranslucent(ActivityRecord r) {
         mTranslucentActivityWaiting = r;
+        mPendingConvertFromTranslucentActivity = r;
         mUndrawnActivitiesBelowTopTranslucent.clear();
         mHandler.sendEmptyMessageDelayed(TRANSLUCENT_TIMEOUT_MSG, TRANSLUCENT_CONVERSION_TIMEOUT);
+    }
+
+    void convertActivityFromTranslucent(ActivityRecord r) {
+        if (r != mPendingConvertFromTranslucentActivity) {
+            Slog.e(TAG, "convertFromTranslucent expects " + mPendingConvertFromTranslucentActivity
+                    + " but is " + r);
+        }
+        mPendingConvertFromTranslucentActivity = null;
     }
 
     /**
@@ -5786,7 +5763,7 @@ class Task extends TaskFragment {
         // If we have a watcher, preflight the move before committing to it.  First check
         // for *other* available tasks, but if none are available, then try again allowing the
         // current task to be selected.
-        if (isTopRootTaskInDisplayArea() && mAtmService.mController != null) {
+        if (mAtmService.mController != null && isTopRootTaskInDisplayArea()) {
             ActivityRecord next = topRunningActivity(null, task.mTaskId);
             if (next == null) {
                 next = topRunningActivity(null, INVALID_TASK_ID);
@@ -5830,6 +5807,15 @@ class Task extends TaskFragment {
                 + tr.mTaskId);
 
         if (mTransitionController.isShellTransitionsEnabled()) {
+            // TODO(b/277838915): Consider to make it concurrent to eliminate the special case.
+            final Transition collecting = mTransitionController.getCollectingTransition();
+            if (collecting != null && collecting.mType == TRANSIT_OPEN) {
+                // It can be a CLOSING participate of an OPEN transition. This avoids the deferred
+                // transition from moving task to back after the task was moved to front.
+                collecting.collect(tr);
+                moveTaskToBackInner(tr, collecting);
+                return true;
+            }
             final Transition transition = new Transition(TRANSIT_TO_BACK, 0 /* flags */,
                     mTransitionController, mWmService.mSyncEngine);
             // Guarantee that this gets its own transition by queueing on SyncEngine
@@ -5858,7 +5844,7 @@ class Task extends TaskFragment {
         return true;
     }
 
-    private boolean moveTaskToBackInner(@NonNull Task task, @Nullable Transition transition) {
+    private void moveTaskToBackInner(@NonNull Task task, @Nullable Transition transition) {
         final Transition.ReadyCondition movedToBack =
                 new Transition.ReadyCondition("moved-to-back", task);
         if (transition != null) {
@@ -5873,7 +5859,7 @@ class Task extends TaskFragment {
 
             if (inPinnedWindowingMode()) {
                 mTaskSupervisor.removeRootTask(this);
-                return true;
+                return;
             }
 
             mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
@@ -5896,7 +5882,6 @@ class Task extends TaskFragment {
         } else {
             mRootWindowContainer.resumeFocusedTasksTopActivities();
         }
-        return true;
     }
 
     boolean willActivityBeVisible(IBinder token) {
@@ -6789,6 +6774,15 @@ class Task extends TaskFragment {
         }
     }
 
+    @Nullable
+    ActivityRecord getBottomMostActivityInSamePackage() {
+        if (realActivity == null) {
+            return null;
+        }
+        return getActivity(ar -> ar.packageName.equals(
+                realActivity.getPackageName()), false /* traverseTopToBottom */);
+    }
+
     /**
      * Associates the decor surface with the given TF, or create one if there
      * isn't one in the Task yet. The surface will be removed with the TF,
@@ -6883,13 +6877,13 @@ class Task extends TaskFragment {
             mIsBoosted = isBoosted;
             // The client transaction will be applied together with the next assignLayer.
             if (clientTransaction != null) {
-                mDecorSurfaceContainer.mPendingClientTransactions.add(clientTransaction);
+                mPendingClientTransactions.add(clientTransaction);
             }
         }
 
         private void assignLayer(@NonNull SurfaceControl.Transaction t, int layer) {
             t.setLayer(mContainerSurface, layer);
-            t.setVisibility(mContainerSurface, mOwnerTaskFragment.isVisible());
+            t.setVisibility(mContainerSurface, mOwnerTaskFragment.isVisible() || mIsBoosted);
             for (int i = 0; i < mPendingClientTransactions.size(); i++) {
                 t.merge(mPendingClientTransactions.get(i));
             }

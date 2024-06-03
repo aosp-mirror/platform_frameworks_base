@@ -200,10 +200,18 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 supportedCaptureSizes.put(format, supportedSizes);
             }
         }
+
+        int captureFormat = ImageFormat.UNKNOWN;
         Surface burstCaptureSurface = CameraExtensionUtils.getBurstCaptureSurface(
                 config.getOutputConfigurations(), supportedCaptureSizes);
         if (burstCaptureSurface != null) {
             suitableSurfaceCount++;
+
+            if (Flags.analytics24q3()) {
+                CameraExtensionUtils.SurfaceInfo burstCaptureSurfaceInfo =
+                        CameraExtensionUtils.querySurface(burstCaptureSurface);
+                captureFormat = burstCaptureSurfaceInfo.mFormat;
+            }
         }
 
         if (suitableSurfaceCount != config.getOutputConfigurations().size()) {
@@ -258,6 +266,9 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 extensionChars.getAvailableCaptureResultKeys(config.getExtension()),
                 config.getExtension());
 
+        if (Flags.analytics24q3()) {
+            session.mStatsAggregator.setCaptureFormat(captureFormat);
+        }
         session.mStatsAggregator.setClientName(ctx.getOpPackageName());
         session.mStatsAggregator.setExtensionType(config.getExtension());
 
@@ -390,7 +401,16 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 if (surfaceInfo.mFormat == ImageFormat.JPEG) {
                     mImageJpegProcessor = new CameraExtensionJpegProcessor(mImageProcessor);
                     mImageProcessor = mImageJpegProcessor;
+                } else if (Flags.extension10Bit() && mClientPostviewSurface != null) {
+                    // Handles case when postview is JPEG and capture is YUV
+                    CameraExtensionUtils.SurfaceInfo postviewSurfaceInfo =
+                            CameraExtensionUtils.querySurface(mClientPostviewSurface);
+                    if (postviewSurfaceInfo.mFormat == ImageFormat.JPEG) {
+                        mImageJpegProcessor = new CameraExtensionJpegProcessor(mImageProcessor);
+                        mImageProcessor = mImageJpegProcessor;
+                    }
                 }
+
                 mBurstCaptureImageReader = ImageReader.newInstance(surfaceInfo.mWidth,
                         surfaceInfo.mHeight, CameraExtensionCharacteristics.PROCESSING_INPUT_FORMAT,
                         mImageExtender.getMaxCaptureStage());

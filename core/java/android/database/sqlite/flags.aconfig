@@ -1,7 +1,9 @@
 package: "android.database.sqlite"
+container: "system"
 
 flag {
      name: "sqlite_apis_35"
+     is_exported: true
      namespace: "system_performance"
      is_fixed_read_only: true
      description: "SQLite APIs held back for Android 15"
@@ -14,4 +16,12 @@ flag {
      is_fixed_read_only: true
      description: "Permit updates to TEMP tables in read-only transactions"
      bug: "317993835"
+}
+
+flag {
+     name: "simple_sql_comment_scanner"
+     namespace: "system_performance"
+     is_fixed_read_only: true
+     description: "Scan SQL comments by hand instead of with a regex"
+     bug: "329118560"
 }

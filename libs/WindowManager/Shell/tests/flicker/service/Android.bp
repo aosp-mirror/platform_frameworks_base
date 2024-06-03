@@ -65,6 +65,10 @@ android_test {
     package_name: "com.android.wm.shell.flicker.service",
     instrumentation_target_package: "com.android.wm.shell.flicker.service",
     test_config_template: "AndroidTestTemplate.xml",
+    test_suites: [
+        "device-tests",
+        "device-platinum-tests",
+    ],
     srcs: [":WMShellFlickerServicePlatinumTests-src"],
     static_libs: ["WMShellFlickerTestsBase"],
     data: ["trace_config/*"],

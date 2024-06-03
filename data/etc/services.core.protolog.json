@@ -79,20 +79,8 @@
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
-    "1789854065584848502": {
-      "message": "startingData was nulled out before handling mAddStartingWindow: %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STARTING_WINDOW",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
     "5659016061937922595": {
       "message": "Add starting %s: startingData=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STARTING_WINDOW",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "-9066702108316454290": {
-      "message": "Aborted starting %s: startingData=%s",
       "level": "VERBOSE",
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
@@ -583,6 +571,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "7211222997110112110": {
+      "message": "Refreshing activity for freeform camera compatibility treatment, activityRecord=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/ActivityRefresher.java"
+    },
     "1665699123574159131": {
       "message": "Starting activity when config will change = %b",
       "level": "VERBOSE",
@@ -706,18 +700,6 @@
     "-6404059840638143757": {
       "message": "Update process config of %s to new config %s",
       "level": "VERBOSE",
-      "group": "WM_DEBUG_CONFIGURATION",
-      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
-    },
-    "2959074735946674755": {
-      "message": "Trying to update display configuration for system\/invalid process.",
-      "level": "WARN",
-      "group": "WM_DEBUG_CONFIGURATION",
-      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
-    },
-    "5668810920995272206": {
-      "message": "Trying to update display configuration for invalid process, pid=%d",
-      "level": "WARN",
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
@@ -1057,12 +1039,6 @@
       "group": "WM_DEBUG_BACK_PREVIEW",
       "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
-    "-1459414342866553129": {
-      "message": "Current focused window being animated by recents. Overriding back callback to recents controller callback.",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/BackNavigationController.java"
-    },
     "2881085074175114605": {
       "message": "Focused window didn't have a valid surface drawn.",
       "level": "DEBUG",
@@ -1134,6 +1110,18 @@
       "level": "INFO",
       "group": "WM_SHOW_SURFACE_ALLOC",
       "at": "com\/android\/server\/wm\/BlackFrame.java"
+    },
+    "8116030277393789125": {
+      "message": "Display id=%d is notified that Camera %s is open for package %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/CameraStateMonitor.java"
+    },
+    "-3774458166471278611": {
+      "message": "Display id=%d is notified that Camera %s is closed.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/CameraStateMonitor.java"
     },
     "-74949168947384056": {
       "message": "Sending to proc %s new compat %s",
@@ -1771,12 +1759,6 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
     },
-    "-7756685416834187936": {
-      "message": "Refreshing activity for camera compatibility treatment, activityRecord=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STATES",
-      "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
-    },
     "-5176775281239247368": {
       "message": "Reverting orientation after camera compat force rotation",
       "level": "VERBOSE",
@@ -1789,32 +1771,20 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
     },
-    "-8302211458579221117": {
-      "message": "Display id=%d is notified that Camera %s is open for package %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
-    },
     "-1534784331886673955": {
       "message": "DisplayRotationCompatPolicy: Multi-window toast not shown as package '%s' cannot be found.",
       "level": "ERROR",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
     },
-    "1797195804376906831": {
-      "message": "Display id=%d is notified that Camera %s is closed, scheduling rotation update.",
+    "-5121743609317543819": {
+      "message": "Display id=%d is notified that camera is closed but activity is still refreshing. Rescheduling an update.",
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
     },
-    "-8746776274432739264": {
-      "message": "Display id=%d is notified that Camera %s is closed but activity is still refreshing. Rescheduling an update.",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
-    },
-    "3622181214422515679": {
-      "message": "Display id=%d is notified that Camera %s is closed, updating rotation.",
+    "1769752961776628557": {
+      "message": "Display id=%d is notified that Camera is closed, updating rotation.",
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
@@ -2064,6 +2034,24 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/PhysicalDisplaySwitchTransitionLauncher.java"
+    },
+    "-1640401313436844534": {
+      "message": "Resetting frozen recents task list reason=app touch win=%s x=%d y=%d insetFrame=%s",
+      "level": "INFO",
+      "group": "WM_DEBUG_TASKS",
+      "at": "com\/android\/server\/wm\/RecentTasks.java"
+    },
+    "-8803811426486764449": {
+      "message": "Setting frozen recents task list",
+      "level": "INFO",
+      "group": "WM_DEBUG_TASKS",
+      "at": "com\/android\/server\/wm\/RecentTasks.java"
+    },
+    "4040735335719974079": {
+      "message": "Resetting frozen recents task list reason=timeout",
+      "level": "INFO",
+      "group": "WM_DEBUG_TASKS",
+      "at": "com\/android\/server\/wm\/RecentTasks.java"
     },
     "3308140128142966415": {
       "message": "remove RecentTask %s when finishing user %d",
@@ -3253,6 +3241,36 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/TransitionController.java"
     },
+    "-4546322749928357965": {
+      "message": "Registering transition player %s over %d other players",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
+    "-4250307779892136611": {
+      "message": "Registering transition player %s ",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
+    "3242771541905259983": {
+      "message": "Attempt to unregister transition player %s but it isn't registered",
+      "level": "WARN",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
+    "3691912781236221027": {
+      "message": "Unregistering active transition player %s at index=%d leaving %d in stack",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
+    "-2879980134100946679": {
+      "message": "Unregistering transition player %s at index=%d leaving %d in stack",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
     "-4235778637051052061": {
       "message": "Disabling player for transition #%d because display isn't enabled yet",
       "level": "VERBOSE",
@@ -3465,6 +3483,12 @@
     },
     "-4345077332231178044": {
       "message": "Old wallpaper still the target.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WALLPAPER",
+      "at": "com\/android\/server\/wm\/WallpaperController.java"
+    },
+    "257349083882992098": {
+      "message": "updateWallpaperTokens requestedVisibility=%b on keyguardLocked=%b",
       "level": "VERBOSE",
       "group": "WM_DEBUG_WALLPAPER",
       "at": "com\/android\/server\/wm\/WallpaperController.java"
@@ -4191,18 +4215,6 @@
     },
     "1278715281433572858": {
       "message": "Bad requesting window %s",
-      "level": "WARN",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "-707915937966769475": {
-      "message": "unable to update pointer icon",
-      "level": "WARN",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "-8663841671650918687": {
-      "message": "unable to restore pointer icon",
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"

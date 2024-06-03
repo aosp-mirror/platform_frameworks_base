@@ -27,6 +27,8 @@ import static android.os.VibrationEffect.Composition.PRIMITIVE_TICK;
 import static android.os.VibrationEffect.EFFECT_CLICK;
 import static android.os.VibrationEffect.EFFECT_TEXTURE_TICK;
 import static android.os.VibrationEffect.EFFECT_TICK;
+import static android.view.HapticFeedbackConstants.BIOMETRIC_CONFIRM;
+import static android.view.HapticFeedbackConstants.BIOMETRIC_REJECT;
 import static android.view.HapticFeedbackConstants.CLOCK_TICK;
 import static android.view.HapticFeedbackConstants.CONTEXT_CLICK;
 import static android.view.HapticFeedbackConstants.KEYBOARD_RELEASE;
@@ -80,6 +82,8 @@ public class HapticFeedbackVibrationProviderTest {
             new int[] {SCROLL_ITEM_FOCUS, SCROLL_LIMIT, SCROLL_TICK};
     private static final int[] KEYBOARD_FEEDBACK_CONSTANTS =
             new int[] {KEYBOARD_TAP, KEYBOARD_RELEASE};
+    private static final int[] BIOMETRIC_FEEDBACK_CONSTANTS =
+            new int[] {BIOMETRIC_CONFIRM, BIOMETRIC_REJECT};
 
     private static final float KEYBOARD_VIBRATION_FIXED_AMPLITUDE = 0.62f;
 
@@ -283,6 +287,17 @@ public class HapticFeedbackVibrationProviderTest {
     }
 
     @Test
+    public void testVibrationAttribute_biometricConstants_returnsCommunicationRequestUsage() {
+        HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
+
+        for (int effectId : BIOMETRIC_FEEDBACK_CONSTANTS) {
+            VibrationAttributes attrs = hapticProvider.getVibrationAttributesForHapticFeedback(
+                    effectId, /* bypassVibrationIntensitySetting= */ false, /* fromIme= */ false);
+            assertThat(attrs.getUsage()).isEqualTo(VibrationAttributes.USAGE_COMMUNICATION_REQUEST);
+        }
+    }
+
+    @Test
     public void testVibrationAttribute_forNotBypassingIntensitySettings() {
         HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
 
@@ -419,6 +434,15 @@ public class HapticFeedbackVibrationProviderTest {
             assertWithMessage("Expected FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE for effect "
                     + effectId)
                     .that(attrs.isFlagSet(FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE)).isTrue();
+        }
+    }
+
+    @Test
+    public void testIsRestricted_biometricConstants_returnsTrue() {
+        HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
+
+        for (int effectId : BIOMETRIC_FEEDBACK_CONSTANTS) {
+            assertThat(hapticProvider.isRestrictedHapticFeedback(effectId)).isTrue();
         }
     }
 

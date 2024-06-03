@@ -19,13 +19,17 @@ package com.android.systemui.keyguard.domain.interactor
 import android.app.ActivityManager.RunningTaskInfo
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.keyguard.data.repository.KeyguardOcclusionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.sample
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -45,11 +49,12 @@ import kotlinx.coroutines.flow.stateIn
 class KeyguardOcclusionInteractor
 @Inject
 constructor(
-    @Application scope: CoroutineScope,
-    val repository: KeyguardOcclusionRepository,
-    val powerInteractor: PowerInteractor,
-    val transitionInteractor: KeyguardTransitionInteractor,
-    val keyguardInteractor: KeyguardInteractor,
+    @Application applicationScope: CoroutineScope,
+    private val repository: KeyguardOcclusionRepository,
+    private val powerInteractor: PowerInteractor,
+    private val transitionInteractor: KeyguardTransitionInteractor,
+    keyguardInteractor: KeyguardInteractor,
+    deviceUnlockedInteractor: Lazy<DeviceUnlockedInteractor>,
 ) {
     val showWhenLockedActivityInfo = repository.showWhenLockedActivityInfo.asStateFlow()
 
@@ -72,7 +77,9 @@ constructor(
         // transition, to ensure we don't transition while moving between, for example,
         // *_BOUNCER -> LOCKSCREEN.
         return powerInteractor.detailedWakefulness.value.powerButtonLaunchGestureTriggered &&
-            KeyguardState.deviceIsAsleepInState(transitionInteractor.getStartedState())
+            KeyguardState.deviceIsAsleepInState(
+                transitionInteractor.currentTransitionInfoInternal.value.to
+            )
     }
 
     /**
@@ -94,14 +101,19 @@ constructor(
                 // Emit false once that activity goes away.
                 isShowWhenLockedActivityOnTop.filter { !it }.map { false }
             )
-            .stateIn(scope, SharingStarted.Eagerly, false)
+            .stateIn(applicationScope, SharingStarted.Eagerly, false)
 
     /**
      * Whether launching an occluding activity will automatically dismiss keyguard. This happens if
      * the keyguard is dismissable.
      */
-    val occludingActivityWillDismissKeyguard =
-        keyguardInteractor.isKeyguardDismissible.stateIn(scope, SharingStarted.Eagerly, false)
+    val occludingActivityWillDismissKeyguard: StateFlow<Boolean> =
+        if (SceneContainerFlag.isEnabled) {
+                deviceUnlockedInteractor.get().deviceUnlockStatus.map { it.isUnlocked }
+            } else {
+                keyguardInteractor.isKeyguardDismissible
+            }
+            .stateIn(scope = applicationScope, SharingStarted.Eagerly, false)
 
     /**
      * Called to let System UI know that WM says a SHOW_WHEN_LOCKED activity is on top (or no longer

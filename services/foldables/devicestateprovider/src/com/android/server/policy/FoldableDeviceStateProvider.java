@@ -95,6 +95,7 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
 
     private final Sensor mHingeAngleSensor;
     private final DisplayManager mDisplayManager;
+    @Nullable
     private final Sensor mHallSensor;
     private static final Predicate<FoldableDeviceStateProvider> ALLOWED = p -> true;
 
@@ -122,7 +123,7 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
             @NonNull Context context,
             @NonNull SensorManager sensorManager,
             @NonNull Sensor hingeAngleSensor,
-            @NonNull Sensor hallSensor,
+            @Nullable Sensor hallSensor,
             @NonNull DisplayManager displayManager,
             @NonNull DeviceStatePredicateWrapper[] deviceStatePredicateWrappers) {
         this(new FeatureFlagsImpl(), context, sensorManager, hingeAngleSensor, hallSensor,
@@ -135,7 +136,7 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
             @NonNull Context context,
             @NonNull SensorManager sensorManager,
             @NonNull Sensor hingeAngleSensor,
-            @NonNull Sensor hallSensor,
+            @Nullable Sensor hallSensor,
             @NonNull DisplayManager displayManager,
             @NonNull DeviceStatePredicateWrapper[] deviceStatePredicateWrappers) {
 
@@ -149,7 +150,9 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
         mIsDualDisplayBlockingEnabled = featureFlags.enableDualDisplayBlocking();
 
         sensorManager.registerListener(this, mHingeAngleSensor, SENSOR_DELAY_FASTEST);
-        sensorManager.registerListener(this, mHallSensor, SENSOR_DELAY_FASTEST);
+        if (hallSensor != null) {
+            sensorManager.registerListener(this, mHallSensor, SENSOR_DELAY_FASTEST);
+        }
 
         mOrderedStates = new DeviceState[deviceStatePredicateWrappers.length];
         for (int i = 0; i < deviceStatePredicateWrappers.length; i++) {
@@ -324,7 +327,7 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
     @Override
     public void onSensorChanged(SensorEvent event) {
         synchronized (mLock) {
-            if (event.sensor == mHallSensor) {
+            if (mHallSensor != null && event.sensor == mHallSensor) {
                 mLastHallSensorEvent = event;
             } else if (event.sensor == mHingeAngleSensor) {
                 mLastHingeAngleSensorEvent = event;
@@ -359,11 +362,11 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
     }
 
     @GuardedBy("mLock")
-    private void dumpSensorValues(Sensor sensor, @Nullable SensorEvent event) {
+    private void dumpSensorValues(@Nullable Sensor sensor, @Nullable SensorEvent event) {
         Slog.i(TAG, toSensorValueString(sensor, event));
     }
 
-    private String toSensorValueString(Sensor sensor, @Nullable SensorEvent event) {
+    private String toSensorValueString(@Nullable Sensor sensor, @Nullable SensorEvent event) {
         String sensorString = sensor == null ? "null" : sensor.getName();
         String eventValues = event == null ? "null" : Arrays.toString(event.values);
         return sensorString + " : " + eventValues;

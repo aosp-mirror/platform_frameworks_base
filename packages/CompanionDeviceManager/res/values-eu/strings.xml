@@ -26,14 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"gailua"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"Baimen hauek erabili ahalko ditu <xliff:g id="DEVICE_NAME">%1$s</xliff:g>n aplikazioak:"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Eman informazioa telefonotik hartzeko baimena &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; aplikazioari"</string>
-    <!-- no translation found for title_app_streaming_with_mirroring (3364582597581570658) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (295548145144086753) -->
-    <skip />
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; gailuari zure telefonoko aplikazioak zuzenean igortzeko baimena eman nahi diozu?"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s gailuak telefonoan ikusgai dagoen edo erreproduzitzen den eduki guztia atzitu ahal izango du, audioa, argazkiak, pasahitzak eta mezuak barne.&lt;br/&gt;&lt;br/&gt;%1$s aplikazioak zuzenean igortzeko gai izango da, baimen hori kentzen diozun arte."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Gailuarteko zerbitzuak"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"Gailu batetik bestera aplikazioak igortzeko baimena eskatzen ari da <xliff:g id="APP_NAME">%1$s</xliff:g>, <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> gailuaren izenean"</string>
-    <!-- no translation found for helper_summary_app_streaming_with_mirroring (6138581029144467467) -->
-    <skip />
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"Aplikazioak gailuen artean bistaratzeko eta zuzenean igortzeko baimena eskatzen ari da <xliff:g id="APP_NAME">%1$s</xliff:g>, <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> gailuaren izenean"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"Eman telefonoko informazio hau erabiltzeko baimena &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; aplikazioari"</string>
@@ -41,10 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play Services"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"Telefonoko argazkiak, multimedia-edukia eta jakinarazpenak erabiltzeko baimena eskatzen ari da <xliff:g id="APP_NAME">%1$s</xliff:g>, <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> gailuaren izenean"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Ekintza hau gauzatzeko baimena eman nahi diozu &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; aplikazioari?"</string>
-    <!-- no translation found for title_nearby_device_streaming_with_mirroring (242855799919611657) -->
-    <skip />
-    <!-- no translation found for summary_nearby_device_streaming (4039565463149145573) -->
-    <skip />
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; gailuari zure telefonoko aplikazioak eta sistemaren eginbideak zuzenean igortzeko baimena eman nahi diozu?"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s gailuak telefonoan ikusgai dagoen edo erreproduzitzen den eduki guztia atzitu ahal izango du, audioa, argazkiak, ordainketa-informazioa, pasahitzak eta mezuak barne.&lt;br/&gt;&lt;br/&gt;%1$s aplikazioak eta sistemaren eginbideak zuzenean igortzeko gai izango da, baimen hori kentzen diozun arte."</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"Aplikazioak eta sistemaren beste eginbide batzuk inguruko gailuetara igortzeko baimena eskatzen ari da <xliff:g id="APP_NAME">%1$s</xliff:g>, <xliff:g id="DEVICE_NAME">%2$s</xliff:g> gailuaren izenean"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"gailua"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Telefonoaren eta hautatutako gailuaren artean informazioa sinkronizatzeko gai izango da aplikazioa (esate baterako, deitzaileen izenak)"</string>

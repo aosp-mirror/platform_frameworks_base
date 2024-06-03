@@ -29,7 +29,6 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 
 import androidx.annotation.Nullable;
@@ -41,6 +40,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogTransitionAnimator;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
@@ -63,6 +63,7 @@ import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.DialogKt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -160,12 +161,12 @@ public class CastTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected void handleLongClick(@Nullable View view) {
-        handleClick(view);
+    protected void handleLongClick(@Nullable Expandable expandable) {
+        handleClick(expandable);
     }
 
     @Override
-    protected void handleClick(@Nullable View view) {
+    protected void handleClick(@Nullable Expandable expandable) {
         if (getState().state == Tile.STATE_UNAVAILABLE) {
             return;
         }
@@ -173,7 +174,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
         List<CastDevice> activeDevices = getActiveDevices();
         if (willPopDialog()) {
             if (!mKeyguard.isShowing()) {
-                showDialog(view);
+                showDialog(expandable);
             } else {
                 mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
                     // Dismissing the keyguard will collapse the shade, so we don't animate from the
@@ -215,7 +216,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
         }
     }
 
-    private void showDialog(@Nullable View view) {
+    private void showDialog(@Nullable Expandable expandable) {
         mUiHandler.post(() -> {
             final DialogHolder holder = new DialogHolder();
             final Dialog dialog = MediaRouteDialogPresenter.createDialog(
@@ -240,13 +241,21 @@ public class CastTile extends QSTileImpl<BooleanState> {
             SystemUIDialog.setDialogSize(dialog);
 
             mUiHandler.post(() -> {
-                if (view != null) {
-                    mDialogTransitionAnimator.showFromView(dialog, view,
-                            new DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                                    INTERACTION_JANK_TAG));
-                } else {
-                    dialog.show();
+                if (expandable != null) {
+                    DialogTransitionAnimator.Controller controller =
+                            expandable.dialogTransitionController(
+                                    new DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                                            INTERACTION_JANK_TAG));
+                    if (controller != null) {
+                        mDialogTransitionAnimator.show(dialog, controller);
+                        return;
+                    }
                 }
+                if (dialog.getWindow() != null) {
+                    DialogKt.registerAnimationOnBackInvoked(dialog,
+                            dialog.getWindow().getDecorView());
+                }
+                dialog.show();
             });
         });
     }
@@ -272,7 +281,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
                 state.secondaryLabel = getDeviceName(device);
                 state.stateDescription = state.stateDescription + ","
                         + mContext.getString(
-                                R.string.accessibility_cast_name, state.label);
+                        R.string.accessibility_cast_name, state.label);
                 connecting = false;
                 break;
             } else if (device.state == CastDevice.STATE_CONNECTING) {
@@ -342,14 +351,14 @@ public class CastTile extends QSTileImpl<BooleanState> {
     };
 
     private final SignalCallback mSignalCallback = new SignalCallback() {
-                @Override
-                public void setWifiIndicators(@NonNull WifiIndicators indicators) {
-                    // statusIcon.visible has the connected status information
-                    boolean enabledAndConnected = indicators.enabled
-                            && (indicators.qsIcon != null && indicators.qsIcon.visible);
-                    setCastTransportAllowed(enabledAndConnected);
-                }
-            };
+        @Override
+        public void setWifiIndicators(@NonNull WifiIndicators indicators) {
+            // statusIcon.visible has the connected status information
+            boolean enabledAndConnected = indicators.enabled
+                    && (indicators.qsIcon != null && indicators.qsIcon.visible);
+            setCastTransportAllowed(enabledAndConnected);
+        }
+    };
 
     private final HotspotController.Callback mHotspotCallback =
             new HotspotController.Callback() {

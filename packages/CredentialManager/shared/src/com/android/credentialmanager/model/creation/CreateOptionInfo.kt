@@ -19,6 +19,7 @@ package com.android.credentialmanager.model.creation
 import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.drawable.Drawable
+import com.android.credentialmanager.model.BiometricRequestInfo
 import com.android.credentialmanager.model.EntryInfo
 import java.time.Instant
 
@@ -36,6 +37,7 @@ class CreateOptionInfo(
     val lastUsedTime: Instant,
     val footerDescription: String?,
     val allowAutoSelect: Boolean,
+    val biometricRequest: BiometricRequestInfo? = null,
 ) : EntryInfo(
     providerId,
     entryKey,

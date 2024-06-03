@@ -110,6 +110,9 @@ import dagger.Lazy;
 
 import kotlin.Unit;
 
+import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -117,9 +120,6 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-
-import kotlinx.coroutines.CoroutineScope;
-import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 /**
  * Shows and hides the under-display fingerprint sensor (UDFPS) overlay, handles UDFPS touch events,
@@ -400,14 +400,22 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         if (!mOverlayParams.equals(overlayParams)) {
             mOverlayParams = overlayParams;
 
-            final boolean wasShowingAlternateBouncer = mAlternateBouncerInteractor.isVisibleState();
-
-            // When the bounds change it's always necessary to re-create the overlay's window with
-            // new LayoutParams. If the overlay needs to be shown, this will re-create and show the
-            // overlay with the updated LayoutParams. Otherwise, the overlay will remain hidden.
-            redrawOverlay();
-            if (wasShowingAlternateBouncer) {
-                mKeyguardViewManager.showBouncer(true);
+            if (DeviceEntryUdfpsRefactor.isEnabled()) {
+                if (mOverlay != null && mOverlay.getRequestReason() == REASON_AUTH_KEYGUARD) {
+                    mOverlay.updateOverlayParams(mOverlayParams);
+                } else {
+                    redrawOverlay();
+                }
+            } else {
+                final boolean wasShowingAlternateBouncer =
+                        mAlternateBouncerInteractor.isVisibleState();
+                // When the bounds change it's always to re-create the overlay's window with new
+                // LayoutParams. If the overlay needs to be shown, this will re-create and show the
+                // overlay with the updated LayoutParams. Otherwise, the overlay will remain hidden.
+                redrawOverlay();
+                if (wasShowingAlternateBouncer) {
+                    mKeyguardViewManager.showBouncer(true);
+                }
             }
         }
     }
@@ -850,7 +858,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
 
         mOverlay = null;
         mOrientationListener.disable();
-
     }
 
     private void unconfigureDisplay(View view) {
@@ -859,7 +866,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         }
         if (DeviceEntryUdfpsRefactor.isEnabled()) {
             if (mUdfpsDisplayMode != null) {
-                mUdfpsDisplayMode.disable(null); // beverlt
+                mUdfpsDisplayMode.disable(null);
             }
         } else {
             if (view != null) {

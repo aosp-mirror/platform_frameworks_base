@@ -24,23 +24,24 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
-import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.function.Consumer;
 
 /**
  * Scheduler for Shell initiated PiP transitions and animations.
@@ -52,19 +53,9 @@ public class PipScheduler {
     private final Context mContext;
     private final PipBoundsState mPipBoundsState;
     private final ShellExecutor mMainExecutor;
+    private final PipTransitionState mPipTransitionState;
     private PipSchedulerReceiver mSchedulerReceiver;
     private PipTransitionController mPipTransitionController;
-
-    // pinned PiP task's WC token
-    @Nullable
-    private WindowContainerToken mPipTaskToken;
-
-    // pinned PiP task's leash
-    @Nullable
-    private SurfaceControl mPinnedTaskLeash;
-
-    // true if Launcher has started swipe PiP to home animation
-    private boolean mInSwipePipToHomeTransition;
 
     /**
      * Temporary PiP CUJ codes to schedule PiP related transitions directly from Shell.
@@ -101,11 +92,14 @@ public class PipScheduler {
         }
     }
 
-    public PipScheduler(Context context, PipBoundsState pipBoundsState,
-            ShellExecutor mainExecutor) {
+    public PipScheduler(Context context,
+            PipBoundsState pipBoundsState,
+            ShellExecutor mainExecutor,
+            PipTransitionState pipTransitionState) {
         mContext = context;
         mPipBoundsState = pipBoundsState;
         mMainExecutor = mainExecutor;
+        mPipTransitionState = pipTransitionState;
 
         if (PipUtils.isPip2ExperimentEnabled()) {
             // temporary broadcast receiver to initiate exit PiP via expand
@@ -115,29 +109,25 @@ public class PipScheduler {
         }
     }
 
+    ShellExecutor getMainExecutor() {
+        return mMainExecutor;
+    }
+
     void setPipTransitionController(PipTransitionController pipTransitionController) {
         mPipTransitionController = pipTransitionController;
     }
 
-    void setPinnedTaskLeash(SurfaceControl pinnedTaskLeash) {
-        mPinnedTaskLeash = pinnedTaskLeash;
-    }
-
-    void setPipTaskToken(@Nullable WindowContainerToken pipTaskToken) {
-        mPipTaskToken = pipTaskToken;
-    }
-
     @Nullable
     private WindowContainerTransaction getExitPipViaExpandTransaction() {
-        if (mPipTaskToken == null) {
+        if (mPipTransitionState.mPipTaskToken == null) {
             return null;
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
         // final expanded bounds to be inherited from the parent
-        wct.setBounds(mPipTaskToken, null);
+        wct.setBounds(mPipTransitionState.mPipTaskToken, null);
         // if we are hitting a multi-activity case
         // windowing mode change will reparent to original host task
-        wct.setWindowingMode(mPipTaskToken, WINDOWING_MODE_UNDEFINED);
+        wct.setWindowingMode(mPipTransitionState.mPipTaskToken, WINDOWING_MODE_UNDEFINED);
         return wct;
     }
 
@@ -162,25 +152,47 @@ public class PipScheduler {
     /**
      * Animates resizing of the pinned stack given the duration.
      */
-    public void scheduleAnimateResizePip(Rect toBounds, Consumer<Rect> onFinishResizeCallback) {
-        if (mPipTaskToken == null) {
+    public void scheduleAnimateResizePip(Rect toBounds) {
+        if (mPipTransitionState.mPipTaskToken == null || !mPipTransitionState.isInPip()) {
             return;
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        wct.setBounds(mPipTaskToken, toBounds);
-        mPipTransitionController.startResizeTransition(wct, onFinishResizeCallback);
+        wct.setBounds(mPipTransitionState.mPipTaskToken, toBounds);
+        mPipTransitionController.startResizeTransition(wct);
     }
 
-    void setInSwipePipToHomeTransition(boolean inSwipePipToHome) {
-        mInSwipePipToHomeTransition = inSwipePipToHome;
+    /**
+     * Directly perform a scaled matrix transformation on the leash. This will not perform any
+     * {@link WindowContainerTransaction}.
+     */
+    public void scheduleUserResizePip(Rect toBounds) {
+        scheduleUserResizePip(toBounds, 0f /* degrees */);
     }
 
-    boolean isInSwipePipToHomeTransition() {
-        return mInSwipePipToHomeTransition;
-    }
+    /**
+     * Directly perform a scaled matrix transformation on the leash. This will not perform any
+     * {@link WindowContainerTransaction}.
+     *
+     * @param degrees the angle to rotate the bounds to.
+     */
+    public void scheduleUserResizePip(Rect toBounds, float degrees) {
+        if (toBounds.isEmpty()) {
+            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Attempted to user resize PIP to empty bounds, aborting.", TAG);
+            return;
+        }
+        SurfaceControl leash = mPipTransitionState.mPinnedTaskLeash;
+        final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
 
-    void onExitPip() {
-        mPipTaskToken = null;
-        mPinnedTaskLeash = null;
+        Matrix transformTensor = new Matrix();
+        final float[] mMatrixTmp = new float[9];
+        final float scale = (float) toBounds.width() / mPipBoundsState.getBounds().width();
+
+        transformTensor.setScale(scale, scale);
+        transformTensor.postTranslate(toBounds.left, toBounds.top);
+        transformTensor.postRotate(degrees, toBounds.centerX(), toBounds.centerY());
+
+        tx.setMatrix(leash, transformTensor, mMatrixTmp);
+        tx.apply();
     }
 }

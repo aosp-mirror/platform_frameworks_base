@@ -233,6 +233,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      */
     private ArrayList<Task> mTransientHideTasks;
 
+    @VisibleForTesting
+    ArrayList<Runnable> mTransactionCompletedListeners = null;
+
+    private ArrayList<Runnable> mTransitionEndedListeners = null;
+
     /** Custom activity-level animation options and callbacks. */
     private TransitionInfo.AnimationOptions mOverrideOptions;
     private IRemoteCallback mClientAnimationStartCallback = null;
@@ -1426,20 +1431,17 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 }
             }
             if (mTransientLaunches != null) {
-                InsetsControlTarget prevImeTarget = dc.getImeTarget(
-                        DisplayContent.IME_TARGET_CONTROL);
-                InsetsControlTarget newImeTarget = null;
                 TaskDisplayArea transientTDA = null;
-                // Transient-launch activities cannot be IME target (WindowState#canBeImeTarget),
-                // so re-compute in case the IME target is changed after transition.
                 for (int t = 0; t < mTransientLaunches.size(); ++t) {
                     if (mTransientLaunches.keyAt(t).getDisplayContent() == dc) {
-                        newImeTarget = dc.computeImeTarget(true /* updateImeTarget */);
+                        if (hasVisibleTransientLaunch) {
+                            updateImeForVisibleTransientLaunch(dc);
+                        }
                         transientTDA = mTransientLaunches.keyAt(i).getTaskDisplayArea();
                         break;
                     }
                 }
-                if (mRecentsDisplayId != INVALID_DISPLAY && prevImeTarget == newImeTarget) {
+                if (!hasVisibleTransientLaunch && mRecentsDisplayId == dc.mDisplayId) {
                     // Restore IME icon only when moving the original app task to front from
                     // recents, in case IME icon may missing if the moving task has already been
                     // the current focused task.
@@ -1473,6 +1475,18 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mController.mSnapshotController.onTransitionFinish(mType, mTargets);
         // Resume snapshot persist thread after snapshot controller analysis this transition.
         mController.updateAnimatingState();
+
+        invokeTransitionEndedListeners();
+    }
+
+    private void invokeTransitionEndedListeners() {
+        if (mTransitionEndedListeners == null) {
+            return;
+        }
+        for (int i = 0; i < mTransitionEndedListeners.size(); i++) {
+            mTransitionEndedListeners.get(i).run();
+        }
+        mTransitionEndedListeners = null;
     }
 
     private void commitConfigAtEndActivities() {
@@ -1537,6 +1551,35 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return null;
     }
 
+    /**
+     * Transient-launch activities cannot be IME target (see {@link WindowState#canBeImeTarget}),
+     * so re-compute in case the IME target is changed after transition.
+     */
+    private void updateImeForVisibleTransientLaunch(@NonNull DisplayContent dc) {
+        final WindowState imeTarget = dc.computeImeTarget(true /* updateImeTarget */);
+        final WindowState imeWindow = dc.mInputMethodWindow;
+        if (imeWindow == null || imeTarget == null
+                || !mController.hasCollectingRotationChange(dc, dc.getRotation())) {
+            return;
+        }
+        // Drop the insets leash if it is still controlled by previous (invisible) app. This avoids
+        // showing IME with old rotation on an app with new rotation if IME parent is updated
+        // but insets leash hasn't been refreshed, i.e. DisplayContent#updateImeParent is called
+        // but InsetsStateController#notifyControlTargetChanged still waits for IME to redraw.
+        final InsetsSourceProvider sourceProvider = imeWindow.getControllableInsetProvider();
+        if (sourceProvider == null || sourceProvider.mControl == null
+                || !sourceProvider.isClientVisible()
+                || imeTarget == sourceProvider.getControlTarget()) {
+            return;
+        }
+        final SurfaceControl imeInsetsLeash = sourceProvider.mControl.getLeash();
+        final InsetsControlTarget controlTarget = sourceProvider.getControlTarget();
+        if (imeInsetsLeash != null && controlTarget != null && controlTarget.getWindow() != null
+                && !controlTarget.getWindow().mToken.isVisible()) {
+            dc.getSyncTransaction().reparent(imeInsetsLeash, null);
+        }
+    }
+
     void abort() {
         // This calls back into itself via controller.abort, so just early return here.
         if (mState == STATE_ABORT) return;
@@ -1555,6 +1598,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // Syncengine abort will call through to onTransactionReady()
         mSyncEngine.abort(mSyncId);
         mController.dispatchLegacyAppTransitionCancelled();
+        invokeTransitionEndedListeners();
     }
 
     /** Immediately moves this to playing even if it isn't started yet. */
@@ -1619,14 +1663,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
 
         if (mController.useFullReadyTracking()) {
-            if (mReadyTracker.mMet.isEmpty()) {
-                Slog.e(TAG, "#" + mSyncId + ": No conditions provided");
-            } else {
-                for (int i = 0; i < mReadyTracker.mConditions.size(); ++i) {
-                    Slog.e(TAG, "#" + mSyncId + ": unmet condition at ready: "
-                            + mReadyTracker.mConditions.get(i));
-                }
-            }
             for (int i = 0; i < mReadyTracker.mMet.size(); ++i) {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "#%d: Met condition: %s",
                         mSyncId, mReadyTracker.mMet.get(i));
@@ -1639,6 +1675,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // needs to be updated for STATE_ABORT.
         commitVisibleActivities(transaction);
         commitVisibleWallpapers();
+
+        if (mTransactionCompletedListeners != null) {
+            for (int i = 0; i < mTransactionCompletedListeners.size(); i++) {
+                final Runnable listener = mTransactionCompletedListeners.get(i);
+                transaction.addTransactionCompletedListener(Runnable::run,
+                        (stats) -> listener.run());
+            }
+        }
 
         // Fall-back to the default display if there isn't one participating.
         final DisplayContent primaryDisplay = !mTargetDisplays.isEmpty() ? mTargetDisplays.get(0)
@@ -1814,7 +1858,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 final AccessibilityController accessibilityController =
                         dc.mWmService.mAccessibilityController;
                 if (accessibilityController.hasCallbacks()) {
-                    accessibilityController.onWMTransition(dc.getDisplayId(), mType);
+                    accessibilityController.onWMTransition(dc.getDisplayId(), mType, mFlags);
                 }
             }
         } else {
@@ -1859,6 +1903,31 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 asyncRotationController.onTransactionCommitTimeout(mCleanupTransaction);
             }
         }
+    }
+
+    /**
+     * Adds a listener that will be executed after the start transaction of this transition
+     * is presented on the screen, the listener will be executed on a binder thread
+     */
+    void addTransactionCompletedListener(Runnable listener) {
+        if (mTransactionCompletedListeners == null) {
+            mTransactionCompletedListeners = new ArrayList<>();
+        }
+        mTransactionCompletedListeners.add(listener);
+    }
+
+    /**
+     * Adds a listener that will be executed after the transition is finished or aborted.
+     */
+    void addTransitionEndedListener(Runnable listener) {
+        if (mState != STATE_COLLECTING && mState != STATE_STARTED) {
+            throw new IllegalStateException(
+                    "Can't register listeners if the transition isn't collecting. state=" + mState);
+        }
+        if (mTransitionEndedListeners == null) {
+            mTransitionEndedListeners = new ArrayList<>();
+        }
+        mTransitionEndedListeners.add(listener);
     }
 
     /**
@@ -2599,7 +2668,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 }
             }
             final SurfaceControl rootLeash = leashReference.makeAnimationLeash().setName(
-                    "Transition Root: " + leashReference.getName()).build();
+                    "Transition Root: " + leashReference.getName())
+                    .setCallsite("Transition.calculateTransitionRoots").build();
             rootLeash.setUnreleasedWarningCallSite("Transition.calculateTransitionRoots");
             // Update layers to start transaction because we prevent assignment during collect, so
             // the layer of transition root can be correct.
@@ -3231,9 +3301,15 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     // Whether this is in a Task with embedded activity.
                     flags |= FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
                 }
-                if (parentTask.forAllActivities(ActivityRecord::hasStartingWindow)) {
-                    // The starting window should cover all windows inside the leaf Task.
-                    flags |= FLAG_IS_BEHIND_STARTING_WINDOW;
+                final ActivityRecord starting = parentTask.topActivityContainsStartingWindow();
+                if (starting != null) {
+                    if (starting == record || (starting.mStartingData != null
+                            && starting.mStartingData.mAssociatedTask != null)) {
+                        flags |= FLAG_IS_BEHIND_STARTING_WINDOW;
+                    } else if (record != null && parentTask.mChildren.indexOf(record)
+                            < parentTask.mChildren.indexOf(starting)) {
+                        flags |= FLAG_IS_BEHIND_STARTING_WINDOW;
+                    }
                 }
                 if (isWindowFillingTask(wc, parentTask)) {
                     // Whether the container fills its parent Task bounds.
@@ -3304,6 +3380,18 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         --mReadyTrackerOld.mDeferReadyDepth;
         // Apply ready in case it is waiting for the previous defer call.
         applyReady();
+    }
+
+    @Override
+    public void onReadyTimeout() {
+        if (!mController.useFullReadyTracking()) {
+            Slog.e(TAG, "#" + mSyncId + " readiness timeout, used=" + mReadyTrackerOld.mUsed
+                    + " deferReadyDepth=" + mReadyTrackerOld.mDeferReadyDepth
+                    + " group=" + mReadyTrackerOld.mReadyGroups);
+            return;
+        }
+        Slog.e(TAG, "#" + mSyncId + " met conditions: " + mReadyTracker.mMet);
+        Slog.e(TAG, "#" + mSyncId + " unmet conditions: " + mReadyTracker.mConditions);
     }
 
     /**
@@ -3699,7 +3787,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (changeInfo.mRotation != wc.mDisplayContent.getRotation()) {
                 // This isn't cheap, so only do it for rotation change.
                 changeInfo.mSnapshotLuma = TransitionAnimation.getBorderLuma(
-                        buffer, screenshotBuffer.getColorSpace());
+                        buffer, screenshotBuffer.getColorSpace(), wc.mSurfaceControl);
             }
             SurfaceControl.Transaction t = wc.mWmService.mTransactionFactory.get();
             TransitionAnimation.configureScreenshotLayer(t, snapshotSurface, screenshotBuffer);

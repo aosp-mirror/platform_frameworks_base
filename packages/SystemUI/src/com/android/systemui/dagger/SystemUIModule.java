@@ -18,6 +18,7 @@ package com.android.systemui.dagger;
 
 import android.app.INotificationManager;
 import android.app.Service;
+import android.app.backup.BackupManager;
 import android.content.Context;
 import android.service.dreams.IDreamManager;
 
@@ -29,9 +30,11 @@ import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.CameraProtectionModule;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.SystemUISecondaryUserService;
 import com.android.systemui.accessibility.AccessibilityModule;
 import com.android.systemui.accessibility.data.repository.AccessibilityRepositoryModule;
+import com.android.systemui.ambient.dagger.AmbientModule;
 import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
 import com.android.systemui.authentication.AuthenticationModule;
@@ -43,12 +46,14 @@ import com.android.systemui.biometrics.domain.BiometricsDomainLayerModule;
 import com.android.systemui.bouncer.data.repository.BouncerRepositoryModule;
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractorModule;
 import com.android.systemui.bouncer.ui.BouncerViewModule;
+import com.android.systemui.brightness.dagger.ScreenBrightnessModule;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.clipboardoverlay.dagger.ClipboardOverlayModule;
 import com.android.systemui.common.data.CommonDataLayerModule;
 import com.android.systemui.communal.dagger.CommunalModule;
 import com.android.systemui.complication.dagger.ComplicationComponent;
 import com.android.systemui.controls.dagger.ControlsModule;
+import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.SystemUser;
 import com.android.systemui.dagger.qualifiers.UiBackground;
@@ -64,12 +69,12 @@ import com.android.systemui.flags.FlagsModule;
 import com.android.systemui.inputmethod.InputMethodModule;
 import com.android.systemui.keyboard.KeyboardModule;
 import com.android.systemui.keyevent.data.repository.KeyEventRepositoryModule;
-import com.android.systemui.keyguard.ui.view.layout.blueprints.KeyguardBlueprintModule;
-import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSectionsModule;
+import com.android.systemui.keyguard.ui.composable.LockscreenContent;
 import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.log.dagger.MonitorLog;
 import com.android.systemui.log.table.TableLogBuffer;
-import com.android.systemui.mediaprojection.appselector.MediaProjectionModule;
+import com.android.systemui.mediaprojection.MediaProjectionModule;
+import com.android.systemui.mediaprojection.appselector.MediaProjectionActivitiesModule;
 import com.android.systemui.mediaprojection.taskswitcher.MediaProjectionTaskSwitcherModule;
 import com.android.systemui.model.SceneContainerPlugin;
 import com.android.systemui.model.SysUiState;
@@ -89,6 +94,7 @@ import com.android.systemui.qs.footer.dagger.FooterActionsModule;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recordissue.RecordIssueModule;
 import com.android.systemui.retail.dagger.RetailModeModule;
+import com.android.systemui.scene.shared.model.SceneContainerConfig;
 import com.android.systemui.scene.shared.model.SceneDataSource;
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator;
 import com.android.systemui.scene.ui.view.WindowRootViewComponent;
@@ -101,6 +107,7 @@ import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolatorImpl;
 import com.android.systemui.shared.condition.Monitor;
 import com.android.systemui.smartspace.dagger.SmartspaceModule;
+import com.android.systemui.startable.Dependencies;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -158,9 +165,14 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
+import dagger.multibindings.Multibinds;
+
+import kotlinx.coroutines.CoroutineScope;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 import javax.inject.Named;
@@ -178,6 +190,7 @@ import javax.inject.Named;
 @Module(includes = {
         AccessibilityModule.class,
         AccessibilityRepositoryModule.class,
+        AmbientModule.class,
         AppOpsModule.class,
         AssistModule.class,
         AuthenticationModule.class,
@@ -207,10 +220,9 @@ import javax.inject.Named;
         InputMethodModule.class,
         KeyEventRepositoryModule.class,
         KeyboardModule.class,
-        KeyguardBlueprintModule.class,
-        KeyguardSectionsModule.class,
         LetterboxModule.class,
         LogModule.class,
+        MediaProjectionActivitiesModule.class,
         MediaProjectionModule.class,
         MediaProjectionTaskSwitcherModule.class,
         MotionToolModule.class,
@@ -225,6 +237,7 @@ import javax.inject.Named;
         RecordIssueModule.class,
         ReferenceModule.class,
         RetailModeModule.class,
+        ScreenBrightnessModule.class,
         ScreenshotModule.class,
         SensorModule.class,
         SecurityRepositoryModule.class,
@@ -261,6 +274,10 @@ import javax.inject.Named;
             WindowRootViewComponent.class,
         })
 public abstract class SystemUIModule {
+
+    @Multibinds
+    @Dependencies
+    abstract Map<Class<?>, Set<Class<? extends CoreStartable>>> startableDependencyMap();
 
     @Binds
     abstract BootCompleteCache bindBootCompleteCache(BootCompleteCacheImpl bootCompleteCache);
@@ -301,6 +318,13 @@ public abstract class SystemUIModule {
         return new Monitor(executor, Collections.singleton(systemProcessCondition), logBuffer);
     }
 
+    /** Provides the package name for SystemUI. */
+    @SysUISingleton
+    @Provides
+    static BackupManager provideBackupManager(@Application Context context) {
+        return new BackupManager(context);
+    }
+
     @BindsOptionalOf
     abstract CommandQueue optionalCommandQueue();
 
@@ -338,6 +362,9 @@ public abstract class SystemUIModule {
 
     @BindsOptionalOf
     abstract FingerprintReEnrollNotification optionalFingerprintReEnrollNotification();
+
+    @BindsOptionalOf
+    abstract LockscreenContent optionalLockscreenContent();
 
     @SysUISingleton
     @Binds
@@ -401,6 +428,13 @@ public abstract class SystemUIModule {
     @IntoMap
     @ClassKey(SystemUISecondaryUserService.class)
     abstract Service bindsSystemUISecondaryUserService(SystemUISecondaryUserService service);
+
+    @Provides
+    @SysUISingleton
+    static SceneDataSourceDelegator providesSceneDataSourceDelegator(
+            @Application CoroutineScope applicationScope, SceneContainerConfig config) {
+        return new SceneDataSourceDelegator(applicationScope, config);
+    }
 
     @Binds
     abstract SceneDataSource bindSceneDataSource(SceneDataSourceDelegator delegator);

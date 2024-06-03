@@ -18,6 +18,7 @@ package com.android.systemui.volume.panel.component.captioning.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.uiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
@@ -45,7 +46,12 @@ class CaptioningViewModelTest : SysuiTestCase() {
     fun setup() {
         underTest =
             with(kosmos) {
-                CaptioningViewModel(context, captioningInteractor, testScope.backgroundScope)
+                CaptioningViewModel(
+                    context,
+                    captioningInteractor,
+                    testScope.backgroundScope,
+                    uiEventLogger,
+                )
             }
     }
 
@@ -58,7 +64,7 @@ class CaptioningViewModelTest : SysuiTestCase() {
                 val buttonViewModel by collectLastValue(underTest.buttonViewModel)
                 runCurrent()
 
-                assertThat(buttonViewModel!!.isChecked).isFalse()
+                assertThat(buttonViewModel!!.isActive).isFalse()
             }
         }
     }
@@ -72,7 +78,7 @@ class CaptioningViewModelTest : SysuiTestCase() {
                 val buttonViewModel by collectLastValue(underTest.buttonViewModel)
                 runCurrent()
 
-                assertThat(buttonViewModel!!.isChecked).isTrue()
+                assertThat(buttonViewModel!!.isActive).isTrue()
             }
         }
     }

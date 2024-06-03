@@ -66,9 +66,5 @@ private fun SceneScope.LockscreenScene(
         key = QuickSettings.SharedValues.TilesSquishiness,
     )
 
-    lockscreenContent
-        .get()
-        .Content(
-            modifier = modifier.fillMaxSize(),
-        )
+    with(lockscreenContent.get()) { Content(modifier = modifier.fillMaxSize()) }
 }

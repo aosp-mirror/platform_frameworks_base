@@ -42,7 +42,11 @@ namespace renderthread {
 RenderProxy::RenderProxy(bool translucent, RenderNode* rootRenderNode,
                          IContextFactory* contextFactory)
         : mRenderThread(RenderThread::getInstance()), mContext(nullptr) {
+#ifdef __ANDROID__
     pid_t uiThreadId = pthread_gettid_np(pthread_self());
+#else
+    pid_t uiThreadId = 0;
+#endif
     pid_t renderThreadId = getRenderThreadTid();
     mContext = mRenderThread.queue().runSync([=, this]() -> CanvasContext* {
         CanvasContext* context = CanvasContext::create(mRenderThread, translucent, rootRenderNode,
@@ -90,6 +94,7 @@ void RenderProxy::setName(const char* name) {
 }
 
 void RenderProxy::setHardwareBuffer(AHardwareBuffer* buffer) {
+#ifdef __ANDROID__
     if (buffer) {
         AHardwareBuffer_acquire(buffer);
     }
@@ -99,6 +104,7 @@ void RenderProxy::setHardwareBuffer(AHardwareBuffer* buffer) {
             AHardwareBuffer_release(hardwareBuffer);
         }
     });
+#endif
 }
 
 void RenderProxy::setSurface(ANativeWindow* window, bool enableTimeout) {
@@ -216,7 +222,9 @@ void RenderProxy::cancelLayerUpdate(DeferredLayerUpdater* layer) {
 }
 
 void RenderProxy::detachSurfaceTexture(DeferredLayerUpdater* layer) {
+#ifdef __ANDROID__
     return mRenderThread.queue().runSync([&]() { layer->detachSurfaceTexture(); });
+#endif
 }
 
 void RenderProxy::destroyHardwareResources() {
@@ -324,11 +332,13 @@ void RenderProxy::dumpGraphicsMemory(int fd, bool includeProfileData, bool reset
             }
         });
     }
+#ifdef __ANDROID__
     if (!Properties::isolatedProcess) {
         std::string grallocInfo;
         GraphicBufferAllocator::getInstance().dump(grallocInfo);
         dprintf(fd, "%s\n", grallocInfo.c_str());
     }
+#endif
 }
 
 void RenderProxy::getMemoryUsage(size_t* cpuUsage, size_t* gpuUsage) {
@@ -352,7 +362,11 @@ void RenderProxy::rotateProcessStatsBuffer() {
 }
 
 int RenderProxy::getRenderThreadTid() {
+#ifdef __ANDROID__
     return mRenderThread.getTid();
+#else
+    return 0;
+#endif
 }
 
 void RenderProxy::addRenderNode(RenderNode* node, bool placeFront) {
@@ -461,7 +475,7 @@ void RenderProxy::prepareToDraw(Bitmap& bitmap) {
 int RenderProxy::copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap) {
     ATRACE_NAME("HardwareBitmap readback");
     RenderThread& thread = RenderThread::getInstance();
-    if (gettid() == thread.getTid()) {
+    if (RenderThread::isCurrent()) {
         // TODO: fix everything that hits this. We should never be triggering a readback ourselves.
         return (int)thread.readback().copyHWBitmapInto(hwBitmap, bitmap);
     } else {
@@ -472,7 +486,7 @@ int RenderProxy::copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap) {
 
 int RenderProxy::copyImageInto(const sk_sp<SkImage>& image, SkBitmap* bitmap) {
     RenderThread& thread = RenderThread::getInstance();
-    if (gettid() == thread.getTid()) {
+    if (RenderThread::isCurrent()) {
         // TODO: fix everything that hits this. We should never be triggering a readback ourselves.
         return (int)thread.readback().copyImageInto(image, bitmap);
     } else {

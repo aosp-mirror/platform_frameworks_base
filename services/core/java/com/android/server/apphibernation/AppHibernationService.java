@@ -461,6 +461,9 @@ public final class AppHibernationService extends SystemService {
                     packageName, PACKAGE_MATCH_FLAGS, userId);
             StorageStats stats = mStorageStatsManager.queryStatsForPackage(
                     info.storageUuid, packageName, new UserHandle(userId));
+            if (android.app.Flags.appRestrictionsApi()) {
+                noteHibernationChange(packageName, info.uid, true);
+            }
             mIActivityManager.forceStopPackage(packageName, userId);
             mIPackageManager.deleteApplicationCacheFilesAsUser(packageName, userId,
                     null /* observer */);
@@ -490,6 +493,11 @@ public final class AppHibernationService extends SystemService {
         // Deliver LOCKED_BOOT_COMPLETE AND BOOT_COMPLETE broadcast so app can re-register
         // their alarms/jobs/etc.
         try {
+            if (android.app.Flags.appRestrictionsApi()) {
+                ApplicationInfo info = mIPackageManager.getApplicationInfo(
+                        packageName, PACKAGE_MATCH_FLAGS, userId);
+                noteHibernationChange(packageName, info.uid, false);
+            }
             Intent lockedBcIntent = new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED)
                     .setPackage(packageName);
             final String[] requiredPermissions = {Manifest.permission.RECEIVE_BOOT_COMPLETED};
@@ -553,6 +561,23 @@ public final class AppHibernationService extends SystemService {
             state.savedByte = savedBytes;
         }
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+    }
+
+    /** Inform ActivityManager that the app being stopped or unstopped due to hibernation */
+    private void noteHibernationChange(String packageName, int uid, boolean hibernated) {
+        try {
+            if (hibernated) {
+                // TODO: Switch to an ActivityManagerInternal API
+                mIActivityManager.noteAppRestrictionEnabled(
+                        packageName, uid, ActivityManager.RESTRICTION_LEVEL_FORCE_STOPPED,
+                        true, ActivityManager.RESTRICTION_REASON_DORMANT, null,
+                        ActivityManager.RESTRICTION_SOURCE_SYSTEM,
+                        /* TODO: fetch actual timeout - 90 days */ 90 * 24 * 60 * 60_000L);
+            }
+            // No need to log the unhibernate case as an unstop is logged already in ActivityMS
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Couldn't set restriction state change");
+        }
     }
 
     /**

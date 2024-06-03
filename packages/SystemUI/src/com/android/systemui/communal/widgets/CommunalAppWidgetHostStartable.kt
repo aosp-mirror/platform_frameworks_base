@@ -23,7 +23,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.util.kotlin.BooleanFlowOperators.or
+import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -39,6 +39,7 @@ class CommunalAppWidgetHostStartable
 @Inject
 constructor(
     private val appWidgetHost: CommunalAppWidgetHost,
+    private val communalWidgetHost: CommunalWidgetHost,
     private val communalInteractor: CommunalInteractor,
     private val userTracker: UserTracker,
     @Background private val bgScope: CoroutineScope,
@@ -46,7 +47,7 @@ constructor(
 ) : CoreStartable {
 
     override fun start() {
-        or(communalInteractor.isCommunalAvailable, communalInteractor.editModeOpen)
+        anyOf(communalInteractor.isCommunalAvailable, communalInteractor.editModeOpen)
             // Only trigger updates on state changes, ignoring the initial false value.
             .pairwise(false)
             .filter { (previous, new) -> previous != new }
@@ -70,9 +71,11 @@ constructor(
         // Always ensure this is called on the main/ui thread.
         withContext(uiDispatcher) {
             if (active) {
+                communalWidgetHost.startObservingHost()
                 appWidgetHost.startListening()
             } else {
                 appWidgetHost.stopListening()
+                communalWidgetHost.stopObservingHost()
             }
         }
 
@@ -83,7 +86,15 @@ constructor(
     private fun validateWidgetsAndDeleteOrphaned(widgets: List<CommunalWidgetContentModel>) {
         val currentUserIds = userTracker.userProfiles.map { it.id }.toSet()
         widgets
-            .filter { widget -> !currentUserIds.contains(widget.providerInfo.profile?.identifier) }
+            .filter { widget ->
+                val uid =
+                    when (widget) {
+                        is CommunalWidgetContentModel.Available ->
+                            widget.providerInfo.profile?.identifier
+                        is CommunalWidgetContentModel.Pending -> widget.user.identifier
+                    }
+                !currentUserIds.contains(uid)
+            }
             .onEach { widget -> communalInteractor.deleteWidget(id = widget.appWidgetId) }
     }
 }

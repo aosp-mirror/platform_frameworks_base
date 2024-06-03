@@ -87,6 +87,14 @@ public final class SatelliteManager {
     private static final ConcurrentHashMap<SatelliteCapabilitiesCallback,
             ISatelliteCapabilitiesCallback>
             sSatelliteCapabilitiesCallbackMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<SatelliteSupportedStateCallback,
+            ISatelliteSupportedStateCallback> sSatelliteSupportedStateCallbackMap =
+            new ConcurrentHashMap<>();
+
+    private static final ConcurrentHashMap<SatelliteCommunicationAllowedStateCallback,
+            ISatelliteCommunicationAllowedStateCallback>
+            sSatelliteCommunicationAllowedStateCallbackMap =
+            new ConcurrentHashMap<>();
 
     private final int mSubId;
 
@@ -951,6 +959,16 @@ public final class SatelliteManager {
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_MODEM_STATE_CONNECTED = 7;
     /**
+     * The satellite modem is being powered on.
+     * @hide
+     */
+    public static final int SATELLITE_MODEM_STATE_ENABLING_SATELLITE = 8;
+    /**
+     * The satellite modem is being powered off.
+     * @hide
+     */
+    public static final int SATELLITE_MODEM_STATE_DISABLING_SATELLITE = 9;
+    /**
      * Satellite modem state is unknown. This generic modem state should be used only when the
      * modem state cannot be mapped to other specific modem states.
      */
@@ -967,6 +985,8 @@ public final class SatelliteManager {
             SATELLITE_MODEM_STATE_UNAVAILABLE,
             SATELLITE_MODEM_STATE_NOT_CONNECTED,
             SATELLITE_MODEM_STATE_CONNECTED,
+            SATELLITE_MODEM_STATE_ENABLING_SATELLITE,
+            SATELLITE_MODEM_STATE_DISABLING_SATELLITE,
             SATELLITE_MODEM_STATE_UNKNOWN
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -989,12 +1009,33 @@ public final class SatelliteManager {
      */
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int DATAGRAM_TYPE_LOCATION_SHARING = 2;
+    /**
+     * This type of datagram is used to keep the device in satellite connected state or check if
+     * there is any incoming message.
+     * @hide
+     */
+    public static final int DATAGRAM_TYPE_KEEP_ALIVE = 3;
+    /**
+     * Datagram type indicating that the datagram to be sent or received is of type SOS message and
+     * is the last message to emergency service provider indicating still needs help.
+     * @hide
+     */
+    public static final int DATAGRAM_TYPE_LAST_SOS_MESSAGE_STILL_NEED_HELP = 4;
+    /**
+     * Datagram type indicating that the datagram to be sent or received is of type SOS message and
+     * is the last message to emergency service provider indicating no more help is needed.
+     * @hide
+     */
+    public static final int DATAGRAM_TYPE_LAST_SOS_MESSAGE_NO_HELP_NEEDED = 5;
 
     /** @hide */
     @IntDef(prefix = "DATAGRAM_TYPE_", value = {
             DATAGRAM_TYPE_UNKNOWN,
             DATAGRAM_TYPE_SOS_MESSAGE,
-            DATAGRAM_TYPE_LOCATION_SHARING
+            DATAGRAM_TYPE_LOCATION_SHARING,
+            DATAGRAM_TYPE_KEEP_ALIVE,
+            DATAGRAM_TYPE_LAST_SOS_MESSAGE_STILL_NEED_HELP,
+            DATAGRAM_TYPE_LAST_SOS_MESSAGE_NO_HELP_NEEDED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DatagramType {}
@@ -1074,8 +1115,13 @@ public final class SatelliteManager {
                             }
 
                             @Override
-                            public void onSendDatagramStateChanged(int state, int sendPendingCount,
-                                    int errorCode) {
+                            public void onSendDatagramStateChanged(int datagramType, int state,
+                                    int sendPendingCount, int errorCode) {
+                                executor.execute(() -> Binder.withCleanCallingIdentity(
+                                        () -> callback.onSendDatagramStateChanged(datagramType,
+                                                state, sendPendingCount, errorCode)));
+
+                                // For backward compatibility
                                 executor.execute(() -> Binder.withCleanCallingIdentity(
                                         () -> callback.onSendDatagramStateChanged(
                                                 state, sendPendingCount, errorCode)));
@@ -2284,7 +2330,171 @@ public final class SatelliteManager {
         return new ArrayList<>();
     }
 
-    @Nullable private static ITelephony getITelephony() {
+    /**
+     * Registers for the satellite supported state changed.
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback to handle the satellite supoprted state changed event.
+     *
+     * @return The {@link SatelliteResult} result of the operation.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @SatelliteResult public int registerForSupportedStateChanged(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull SatelliteSupportedStateCallback callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ISatelliteSupportedStateCallback internalCallback =
+                        new ISatelliteSupportedStateCallback.Stub() {
+                            @Override
+                            public void onSatelliteSupportedStateChanged(boolean supported) {
+                                executor.execute(() -> Binder.withCleanCallingIdentity(
+                                        () -> callback.onSatelliteSupportedStateChanged(
+                                                supported)));
+                            }
+                        };
+                sSatelliteSupportedStateCallbackMap.put(callback, internalCallback);
+                return telephony.registerForSatelliteSupportedStateChanged(
+                        mSubId, internalCallback);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("registerForSupportedStateChanged() RemoteException: " + ex);
+            ex.rethrowAsRuntimeException();
+        }
+        return SATELLITE_RESULT_REQUEST_FAILED;
+    }
+
+    /**
+     * Unregisters for the satellite supported state changed.
+     * If callback was not registered before, the request will be ignored.
+     *
+     * @param callback The callback that was passed to
+     * {@link #registerForSupportedStateChanged(Executor, SatelliteSupportedStateCallback)}
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public void unregisterForSupportedStateChanged(
+            @NonNull SatelliteSupportedStateCallback callback) {
+        Objects.requireNonNull(callback);
+        ISatelliteSupportedStateCallback internalCallback =
+                sSatelliteSupportedStateCallbackMap.remove(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                if (internalCallback != null) {
+                    telephony.unregisterForSatelliteSupportedStateChanged(mSubId, internalCallback);
+                } else {
+                    loge("unregisterForSupportedStateChanged: No internal callback.");
+                }
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("unregisterForSupportedStateChanged() RemoteException: " + ex);
+            ex.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Registers for the satellite communication allowed state changed.
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback to handle satellite communication allowed state changed event.
+     * @return The {@link SatelliteResult} result of the operation.
+     * @throws SecurityException     if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @SatelliteResult
+    public int registerForCommunicationAllowedStateChanged(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull SatelliteCommunicationAllowedStateCallback callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ISatelliteCommunicationAllowedStateCallback internalCallback =
+                        new ISatelliteCommunicationAllowedStateCallback.Stub() {
+                            @Override
+                            public void onSatelliteCommunicationAllowedStateChanged(
+                                    boolean isAllowed) {
+                                executor.execute(() -> Binder.withCleanCallingIdentity(
+                                        () -> callback.onSatelliteCommunicationAllowedStateChanged(
+                                                isAllowed)));
+                            }
+                        };
+                sSatelliteCommunicationAllowedStateCallbackMap.put(callback, internalCallback);
+                return telephony.registerForCommunicationAllowedStateChanged(
+                        mSubId, internalCallback);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("registerForCommunicationAllowedStateChanged() RemoteException: " + ex);
+            ex.rethrowAsRuntimeException();
+        }
+        return SATELLITE_RESULT_REQUEST_FAILED;
+    }
+
+    /**
+     * Unregisters for the satellite communication allowed state changed.
+     * If callback was not registered before, the request will be ignored.
+     *
+     * @param callback The callback that was passed to
+     *                 {@link #registerForCommunicationAllowedStateChanged(Executor,
+     *                 SatelliteCommunicationAllowedStateCallback)}
+     * @throws SecurityException     if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public void unregisterForCommunicationAllowedStateChanged(
+            @NonNull SatelliteCommunicationAllowedStateCallback callback) {
+        Objects.requireNonNull(callback);
+        ISatelliteCommunicationAllowedStateCallback internalCallback =
+                sSatelliteCommunicationAllowedStateCallbackMap.remove(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                if (internalCallback != null) {
+                    telephony.unregisterForCommunicationAllowedStateChanged(mSubId,
+                            internalCallback);
+                } else {
+                    loge("unregisterForCommunicationAllowedStateChanged: No internal callback.");
+                }
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("unregisterForCommunicationAllowedStateChanged() RemoteException: " + ex);
+            ex.rethrowAsRuntimeException();
+        }
+    }
+
+    @Nullable
+    private static ITelephony getITelephony() {
         ITelephony binder = ITelephony.Stub.asInterface(TelephonyFrameworkInitializer
                 .getTelephonyServiceManager()
                 .getTelephonyServiceRegisterer()

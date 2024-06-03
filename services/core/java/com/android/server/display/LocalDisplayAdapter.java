@@ -53,6 +53,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
+import com.android.server.display.color.ColorDisplayService;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.mode.DisplayModeDirector;
 import com.android.server.display.notifications.DisplayNotificationManager;
@@ -81,11 +82,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
     private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.boot.emulator.circular";
     // Min and max strengths for even dimmer feature.
     private static final float EVEN_DIMMER_MIN_STRENGTH = 0.0f;
-    private static final float EVEN_DIMMER_MAX_STRENGTH = 70.0f; // not too dim yet.
+    private static final float EVEN_DIMMER_MAX_STRENGTH = 90.0f;
     private static final float BRIGHTNESS_MIN = 0.0f;
-    // The brightness at which we start using color matrices rather than backlight,
-    // to dim the display
-    private static final float BACKLIGHT_COLOR_TRANSITION_POINT = 0.1f;
 
     private final LongSparseArray<LocalDisplayDevice> mDevices = new LongSparseArray<>();
 
@@ -100,6 +98,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
     private Context mOverlayContext;
 
     private int mEvenDimmerStrength = -1;
+    private ColorDisplayService.ColorDisplayServiceInternal mCdsi;
 
     // Called with SyncRoot lock held.
     LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot, Context context,
@@ -169,6 +168,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             }
             SurfaceControl.DesiredDisplayModeSpecs modeSpecs =
                     mSurfaceControlProxy.getDesiredDisplayModeSpecs(displayToken);
+            if (modeSpecs == null) {
+                // If mode specs is null, it most probably means that display got
+                // unplugged very rapidly.
+                Slog.w(TAG, "Desired display mode specs from SurfaceFlinger are null");
+                return;
+            }
             LocalDisplayDevice device = mDevices.get(physicalDisplayId);
             if (device == null) {
                 // Display was added.
@@ -938,7 +943,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             final float nits = backlightToNits(backlight);
                             final float sdrNits = backlightToNits(sdrBacklight);
 
-                            if (getFeatureFlags().isEvenDimmerEnabled()) {
+                            if (getFeatureFlags().isEvenDimmerEnabled()
+                                    && mDisplayDeviceConfig != null
+                                    && mDisplayDeviceConfig.isEvenDimmerAvailable()) {
                                 applyColorMatrixBasedDimming(brightnessState);
                             }
 
@@ -991,18 +998,27 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
                     private void applyColorMatrixBasedDimming(float brightnessState) {
                         int strength = (int) (MathUtils.constrainedMap(
-                                EVEN_DIMMER_MAX_STRENGTH, EVEN_DIMMER_MIN_STRENGTH, // to this range
-                                BRIGHTNESS_MIN, BACKLIGHT_COLOR_TRANSITION_POINT, // from this range
-                                brightnessState) + 0.5); // map this (+ rounded up)
+                                // to this range:
+                                EVEN_DIMMER_MAX_STRENGTH, EVEN_DIMMER_MIN_STRENGTH,
+                                // from this range:
+                                BRIGHTNESS_MIN, mDisplayDeviceConfig.getEvenDimmerTransitionPoint(),
+                                // map this (+ rounded up):
+                                brightnessState) + 0.5);
 
                         if (mEvenDimmerStrength < 0 // uninitialised
                                 || MathUtils.abs(mEvenDimmerStrength - strength) > 1
                                 || strength <= 1) {
                             mEvenDimmerStrength = strength;
                         }
+                        boolean enabled = mEvenDimmerStrength > 0.0f;
 
-                        // TODO: use `enabled` and `mRbcStrength` to set color matrices here
-                        // TODO: boolean enabled = mEvenDimmerStrength > 0.0f;
+                        if (mCdsi == null) {
+                            mCdsi = LocalServices.getService(
+                                    ColorDisplayService.ColorDisplayServiceInternal.class);
+                        }
+                        if (mCdsi != null) {
+                            mCdsi.applyEvenDimmerColorChanges(enabled, strength);
+                        }
                     }
                 };
             }
@@ -1103,7 +1119,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         new SurfaceControl.DesiredDisplayModeSpecs(baseSfModeId,
                                 mDisplayModeSpecs.allowGroupSwitching,
                                 mDisplayModeSpecs.primary,
-                                mDisplayModeSpecs.appRequest)));
+                                mDisplayModeSpecs.appRequest,
+                                mDisplayModeSpecs.mIdleScreenRefreshRateConfig)));
             }
         }
 

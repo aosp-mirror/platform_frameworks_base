@@ -16,97 +16,95 @@
 
 package com.android.systemui.biometrics.ui.viewmodel
 
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysUITestComponent
-import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.TestMocksModule
-import com.android.systemui.biometrics.domain.BiometricsDomainLayerModule
-import com.android.systemui.collectLastValue
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FakeFeatureFlagsClassicModule
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.BrokenWithSceneContainer
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.flags.parameterizeSceneContainerFlag
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
-import com.android.systemui.runCurrent
-import com.android.systemui.runTest
-import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
-import com.android.systemui.user.domain.UserDomainLayerModule
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.statusbar.phone.systemUIDialogManager
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import dagger.BindsInstance
-import dagger.Component
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
-class DefaultUdfpsTouchOverlayViewModelTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class DefaultUdfpsTouchOverlayViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
+
+    private val kosmos =
+        testKosmos().apply {
+            fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, true) }
+        }
+    private val testScope = kosmos.testScope
+
     @Captor
     private lateinit var sysuiDialogListenerCaptor: ArgumentCaptor<SystemUIDialogManager.Listener>
-    private var systemUIDialogManager: SystemUIDialogManager = mock()
+    private var systemUIDialogManager = kosmos.systemUIDialogManager
+    private val keyguardRepository = kosmos.fakeKeyguardRepository
+
+    private val shadeTestUtil by lazy { kosmos.shadeTestUtil }
+
+    private lateinit var underTest: DefaultUdfpsTouchOverlayViewModel
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return parameterizeSceneContainerFlag()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        underTest =
+            DefaultUdfpsTouchOverlayViewModel(
+                kosmos.shadeInteractor,
+                systemUIDialogManager,
+            )
     }
 
-    @SysUISingleton
-    @Component(
-        modules =
-            [
-                SysUITestModule::class,
-                UserDomainLayerModule::class,
-                BiometricsDomainLayerModule::class,
-            ]
-    )
-    interface TestComponent : SysUITestComponent<DefaultUdfpsTouchOverlayViewModel> {
-        val keyguardRepository: FakeKeyguardRepository
-        val shadeRepository: FakeShadeRepository
-        @Component.Factory
-        interface Factory {
-            fun create(
-                @BindsInstance test: SysuiTestCase,
-                featureFlags: FakeFeatureFlagsClassicModule,
-                mocks: TestMocksModule,
-            ): TestComponent
-        }
-    }
-
-    private fun TestComponent.shadeExpanded(expanded: Boolean) {
+    private fun shadeExpanded(expanded: Boolean) {
         if (expanded) {
-            shadeRepository.setLegacyShadeExpansion(1f)
-            shadeRepository.setLegacyShadeTracking(false)
-            shadeRepository.setLegacyExpandedOrAwaitingInputTransfer(true)
+            shadeTestUtil.setShadeExpansion(1f)
+            shadeTestUtil.setTracking(false)
+            shadeTestUtil.setLegacyExpandedOrAwaitingInputTransfer(true)
         } else {
             keyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            shadeRepository.setLegacyShadeExpansion(0f)
-            shadeRepository.setLegacyShadeTracking(false)
-            shadeRepository.setLegacyExpandedOrAwaitingInputTransfer(false)
+            shadeTestUtil.setShadeExpansion(0f)
+            shadeTestUtil.setTracking(false)
+            shadeTestUtil.setLegacyExpandedOrAwaitingInputTransfer(false)
         }
     }
 
-    private val testComponent: TestComponent =
-        DaggerDefaultUdfpsTouchOverlayViewModelTest_TestComponent.factory()
-            .create(
-                test = this,
-                featureFlags =
-                    FakeFeatureFlagsClassicModule { set(Flags.FULL_SCREEN_USER_SWITCHER, true) },
-                mocks = TestMocksModule(systemUIDialogManager = systemUIDialogManager),
-            )
-
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun shadeNotExpanded_noDialogShowing_shouldHandleTouchesTrue() =
-        testComponent.runTest {
+        testScope.runTest {
             val shouldHandleTouches by collectLastValue(underTest.shouldHandleTouches)
             runCurrent()
 
@@ -120,7 +118,7 @@ class DefaultUdfpsTouchOverlayViewModelTest : SysuiTestCase() {
 
     @Test
     fun shadeNotExpanded_dialogShowing_shouldHandleTouchesFalse() =
-        testComponent.runTest {
+        testScope.runTest {
             val shouldHandleTouches by collectLastValue(underTest.shouldHandleTouches)
             runCurrent()
 
@@ -134,7 +132,7 @@ class DefaultUdfpsTouchOverlayViewModelTest : SysuiTestCase() {
 
     @Test
     fun shadeExpanded_noDialogShowing_shouldHandleTouchesFalse() =
-        testComponent.runTest {
+        testScope.runTest {
             val shouldHandleTouches by collectLastValue(underTest.shouldHandleTouches)
             runCurrent()
 

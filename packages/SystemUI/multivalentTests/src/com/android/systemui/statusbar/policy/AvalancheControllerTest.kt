@@ -22,6 +22,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
@@ -29,7 +30,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManagerTestUtil.createFullSc
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.settings.FakeGlobalSettings
 import com.android.systemui.util.time.FakeSystemClock
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -47,11 +48,13 @@ import org.mockito.junit.MockitoRule
 @EnableFlags(NotificationThrottleHun.FLAG_NAME)
 class AvalancheControllerTest : SysuiTestCase() {
 
-    private val mAvalancheController = AvalancheController()
-
     // For creating mocks
     @get:Rule var rule: MockitoRule = MockitoJUnit.rule()
     @Mock private val runnableMock: Runnable? = null
+
+    // For creating AvalancheController
+    @Mock private lateinit var dumpManager: DumpManager
+    private lateinit var mAvalancheController: AvalancheController
 
     // For creating TestableHeadsUpManager
     @Mock private val mAccessibilityMgr: AccessibilityManagerWrapper? = null
@@ -73,7 +76,10 @@ class AvalancheControllerTest : SysuiTestCase() {
             )
             .then { i: InvocationOnMock -> i.getArgument(0) }
 
-        // Initialize TestableHeadsUpManager here instead of at declaration, when mocks will be null
+        // Initialize AvalancheController and TestableHeadsUpManager during setUp instead of
+        // declaration, where mocks are null
+        mAvalancheController = AvalancheController(dumpManager, mUiEventLoggerFake)
+
         testableHeadsUpManager =
             TestableHeadsUpManager(
                 mContext,
@@ -126,7 +132,7 @@ class AvalancheControllerTest : SysuiTestCase() {
         mAvalancheController.update(headsUpEntry, runnableMock!!, "testLabel")
 
         // Entry is showing now
-        Truth.assertThat(mAvalancheController.headsUpEntryShowing).isEqualTo(headsUpEntry)
+        assertThat(mAvalancheController.headsUpEntryShowing).isEqualTo(headsUpEntry)
     }
 
     @Test
@@ -141,14 +147,14 @@ class AvalancheControllerTest : SysuiTestCase() {
 
         // Entry has one Runnable
         val runnableList: List<Runnable?>? = mAvalancheController.nextMap[headsUpEntry]
-        Truth.assertThat(runnableList).isNotNull()
-        Truth.assertThat(runnableList!!.size).isEqualTo(1)
+        assertThat(runnableList).isNotNull()
+        assertThat(runnableList!!.size).isEqualTo(1)
 
         // Update
         mAvalancheController.update(headsUpEntry, runnableMock, "testLabel")
 
         // Entry has two Runnables
-        Truth.assertThat(runnableList.size).isEqualTo(2)
+        assertThat(runnableList.size).isEqualTo(2)
     }
 
     @Test
@@ -166,7 +172,7 @@ class AvalancheControllerTest : SysuiTestCase() {
         mAvalancheController.update(headsUpEntry, runnableMock!!, "testLabel")
 
         // Entry is next
-        Truth.assertThat(mAvalancheController.nextMap.containsKey(headsUpEntry)).isTrue()
+        assertThat(mAvalancheController.nextMap.containsKey(headsUpEntry)).isTrue()
     }
 
     @Test
@@ -179,7 +185,7 @@ class AvalancheControllerTest : SysuiTestCase() {
         mAvalancheController.delete(headsUpEntry, runnableMock, "testLabel")
 
         // Entry was removed from next
-        Truth.assertThat(mAvalancheController.nextMap.containsKey(headsUpEntry)).isFalse()
+        assertThat(mAvalancheController.nextMap.containsKey(headsUpEntry)).isFalse()
 
         // Runnable was not run
         Mockito.verify(runnableMock, Mockito.times(0)).run()
@@ -195,7 +201,7 @@ class AvalancheControllerTest : SysuiTestCase() {
         mAvalancheController.delete(headsUpEntry, runnableMock!!, "testLabel")
 
         // Entry was removed from dropSet
-        Truth.assertThat(mAvalancheController.debugDropSet.contains(headsUpEntry)).isFalse()
+        assertThat(mAvalancheController.debugDropSet.contains(headsUpEntry)).isFalse()
     }
 
     @Test
@@ -238,7 +244,74 @@ class AvalancheControllerTest : SysuiTestCase() {
         mAvalancheController.delete(showingEntry, runnableMock, "testLabel")
 
         // Next entry is shown
-        Truth.assertThat(mAvalancheController.headsUpEntryShowing).isEqualTo(nextEntry)
+        assertThat(mAvalancheController.headsUpEntryShowing).isEqualTo(nextEntry)
+    }
+
+
+    @Test
+    fun testDelete_deleteSecondToLastEntry_showingEntryKeyBecomesPreviousHunKey() {
+        mAvalancheController.previousHunKey = ""
+
+        // Entry is showing
+        val firstEntry = createHeadsUpEntry(id = 0)
+        mAvalancheController.headsUpEntryShowing = firstEntry
+
+        // There's another entry waiting to show next
+        val secondEntry = createHeadsUpEntry(id = 1)
+        mAvalancheController.addToNext(secondEntry, runnableMock!!)
+
+        // Delete
+        mAvalancheController.delete(firstEntry, runnableMock, "testLabel")
+
+        // Next entry is shown
+        assertThat(mAvalancheController.previousHunKey).isEqualTo(firstEntry.mEntry!!.key)
+    }
+
+    @Test
+    fun testDelete_deleteLastEntry_previousHunKeyCleared() {
+        mAvalancheController.previousHunKey = "key"
+
+        // Nothing waiting to show
+        mAvalancheController.clearNext()
+
+        // One entry is showing
+        val showingEntry = createHeadsUpEntry(id = 0)
+        mAvalancheController.headsUpEntryShowing = showingEntry
+
+        // Delete
+        mAvalancheController.delete(showingEntry, runnableMock!!, "testLabel")
+
+        // Next entry is shown
+        assertThat(mAvalancheController.previousHunKey).isEqualTo("");
+    }
+
+    @Test
+    fun testGetDurationMs_untrackedEntryEmptyAvalanche_useAutoDismissTime() {
+        val givenEntry = createHeadsUpEntry(id = 0)
+
+        // Nothing is showing
+        mAvalancheController.headsUpEntryShowing = null
+
+        // Nothing is next
+        mAvalancheController.clearNext()
+
+        val durationMs = mAvalancheController.getDurationMs(givenEntry, autoDismissMs = 5000)
+        assertThat(durationMs).isEqualTo(5000)
+    }
+
+    @Test
+    fun testGetDurationMs_untrackedEntryNonEmptyAvalanche_useAutoDismissTime() {
+        val givenEntry = createHeadsUpEntry(id = 0)
+
+        // Given entry not tracked
+        mAvalancheController.headsUpEntryShowing = createHeadsUpEntry(id = 1)
+
+        mAvalancheController.clearNext()
+        val nextEntry = createHeadsUpEntry(id = 2)
+        mAvalancheController.addToNext(nextEntry, runnableMock!!)
+
+        val durationMs = mAvalancheController.getDurationMs(givenEntry, autoDismissMs = 5000)
+        assertThat(durationMs).isEqualTo(5000)
     }
 
     @Test
@@ -251,11 +324,11 @@ class AvalancheControllerTest : SysuiTestCase() {
         mAvalancheController.clearNext()
 
         val durationMs = mAvalancheController.getDurationMs(showingEntry, autoDismissMs = 5000)
-        Truth.assertThat(durationMs).isEqualTo(5000)
+        assertThat(durationMs).isEqualTo(5000)
     }
 
     @Test
-    fun testGetDurationMs_nextEntryLowerPriority_500() {
+    fun testGetDurationMs_nextEntryLowerPriority_5000() {
         // Entry is showing
         val showingEntry = createFsiHeadsUpEntry(id = 1)
         mAvalancheController.headsUpEntryShowing = showingEntry
@@ -265,10 +338,10 @@ class AvalancheControllerTest : SysuiTestCase() {
         mAvalancheController.addToNext(nextEntry, runnableMock!!)
 
         // Next entry has lower priority
-        Truth.assertThat(nextEntry.compareNonTimeFields(showingEntry)).isEqualTo(1)
+        assertThat(nextEntry.compareNonTimeFields(showingEntry)).isEqualTo(1)
 
         val durationMs = mAvalancheController.getDurationMs(showingEntry, autoDismissMs = 5000)
-        Truth.assertThat(durationMs).isEqualTo(5000)
+        assertThat(durationMs).isEqualTo(5000)
     }
 
     @Test
@@ -282,10 +355,10 @@ class AvalancheControllerTest : SysuiTestCase() {
         mAvalancheController.addToNext(nextEntry, runnableMock!!)
 
         // Same priority
-        Truth.assertThat(nextEntry.compareNonTimeFields(showingEntry)).isEqualTo(0)
+        assertThat(nextEntry.compareNonTimeFields(showingEntry)).isEqualTo(0)
 
         val durationMs = mAvalancheController.getDurationMs(showingEntry, autoDismissMs = 5000)
-        Truth.assertThat(durationMs).isEqualTo(1000)
+        assertThat(durationMs).isEqualTo(1000)
     }
 
     @Test
@@ -299,9 +372,9 @@ class AvalancheControllerTest : SysuiTestCase() {
         mAvalancheController.addToNext(nextEntry, runnableMock!!)
 
         // Next entry has higher priority
-        Truth.assertThat(nextEntry.compareNonTimeFields(showingEntry)).isEqualTo(-1)
+        assertThat(nextEntry.compareNonTimeFields(showingEntry)).isEqualTo(-1)
 
         val durationMs = mAvalancheController.getDurationMs(showingEntry, autoDismissMs = 5000)
-        Truth.assertThat(durationMs).isEqualTo(500)
+        assertThat(durationMs).isEqualTo(500)
     }
 }

@@ -29,7 +29,6 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TabletopModeController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
-import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.pip.PhonePipKeepClearAlgorithm;
 import com.android.wm.shell.common.pip.PipAppOpsListener;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
@@ -56,10 +55,12 @@ import com.android.wm.shell.pip.phone.PhonePipMenuController;
 import com.android.wm.shell.pip.phone.PipController;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.HomeTransitionObserver;
 import com.android.wm.shell.transition.Transitions;
 
 import dagger.Module;
@@ -192,11 +193,12 @@ public abstract class Pip1Module {
             PipBoundsState pipBoundsState, PipDisplayLayoutState pipDisplayLayoutState,
             PipTransitionState pipTransitionState, PhonePipMenuController pipMenuController,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
+            HomeTransitionObserver homeTransitionObserver,
             Optional<SplitScreenController> splitScreenOptional) {
         return new PipTransition(context, shellInit, shellTaskOrganizer, transitions,
                 pipBoundsState, pipDisplayLayoutState, pipTransitionState, pipMenuController,
                 pipBoundsAlgorithm, pipAnimationController, pipSurfaceTransactionHelper,
-                splitScreenOptional);
+                homeTransitionObserver, splitScreenOptional);
     }
 
     @WMSingleton

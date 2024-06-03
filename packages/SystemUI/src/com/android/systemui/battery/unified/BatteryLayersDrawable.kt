@@ -56,9 +56,6 @@ import kotlin.math.roundToInt
  *          - The internal space is divided into 12x10 and 6x6 rectangles
  *          - The attribution is aligned left
  *          - The percent text is scaled based on the number of characters (1,2, or 3) in the string
- *
- * When [BatteryDrawableState.showErrorState] is true, we will only show either the percent text OR
- * the battery fill, in order to maximize contrast when using the error colors.
  */
 @Suppress("RtlHardcoded")
 class BatteryLayersDrawable(
@@ -91,7 +88,7 @@ class BatteryLayersDrawable(
     var colors: BatteryColors = BatteryColors.LightThemeColors
         set(value) {
             field = value
-            updateColors(batteryState.showErrorState, value)
+            updateColorProfile(batteryState.hasForegroundContent(), batteryState.color, value)
         }
 
     init {
@@ -101,51 +98,64 @@ class BatteryLayersDrawable(
     }
 
     private fun handleUpdateState(old: BatteryDrawableState, new: BatteryDrawableState) {
-        if (new.showErrorState != old.showErrorState) {
-            updateColors(new.showErrorState, colors)
-        }
-
         if (new.level != old.level) {
             fill.batteryLevel = new.level
             textOnly.batteryLevel = new.level
             spaceSharingText.batteryLevel = new.level
         }
 
+        val shouldUpdateColors =
+            new.color != old.color ||
+                new.attribution != attribution.drawable ||
+                new.hasForegroundContent() != old.hasForegroundContent()
+
         if (new.attribution != null && new.attribution != attribution.drawable) {
             attribution.drawable = new.attribution
-            updateColors(new.showErrorState, colors)
         }
 
         if (new.hasForegroundContent() != old.hasForegroundContent()) {
-            setFillColor(new.hasForegroundContent(), new.showErrorState, colors)
+            setFillInsets(new.hasForegroundContent())
+        }
+
+        // Finally, update colors last if any of the above conditions were met, so that everything
+        // is properly tinted
+        if (shouldUpdateColors) {
+            updateColorProfile(new.hasForegroundContent(), new.color, colors)
         }
     }
 
-    /** In error states, we don't draw fill unless there is no foreground content (e.g., percent) */
-    private fun updateColors(showErrorState: Boolean, colorInfo: BatteryColors) {
-        frameBg.setTint(if (showErrorState) colorInfo.errorBackground else colorInfo.bg)
-        frame.setTint(colorInfo.fg)
-        attribution.setTint(if (showErrorState) colorInfo.errorForeground else colorInfo.fg)
-        textOnly.setTint(if (showErrorState) colorInfo.errorForeground else colorInfo.fg)
-        spaceSharingText.setTint(if (showErrorState) colorInfo.errorForeground else colorInfo.fg)
-        setFillColor(batteryState.hasForegroundContent(), showErrorState, colorInfo)
-    }
-
-    /**
-     * If there is a foreground layer, then we draw the fill with the low opacity
-     * [BatteryColors.fill] color. Otherwise, if there is no other foreground layer, we will use
-     * either the error or fillOnly colors for more contrast
-     */
-    private fun setFillColor(
+    private fun updateColorProfile(
         hasFg: Boolean,
-        error: Boolean,
+        color: ColorProfile,
         colorInfo: BatteryColors,
     ) {
-        if (hasFg) {
-            fill.fillColor = colorInfo.fill
-        } else {
-            fill.fillColor = if (error) colorInfo.errorForeground else colorInfo.fillOnly
+        frame.setTint(colorInfo.fg)
+        frameBg.setTint(colorInfo.bg)
+        textOnly.setTint(colorInfo.fg)
+        spaceSharingText.setTint(colorInfo.fg)
+        attribution.setTint(colorInfo.fg)
+
+        when (color) {
+            ColorProfile.None -> {
+                fill.fillColor = if (hasFg) colorInfo.fill else colorInfo.fillOnly
+            }
+            ColorProfile.Active -> {
+                fill.fillColor = colorInfo.activeFill
+            }
+            ColorProfile.Warning -> {
+                fill.fillColor = colorInfo.warnFill
+            }
+            ColorProfile.Error -> {
+                fill.fillColor = colorInfo.errorFill
+            }
         }
+    }
+
+    private fun setFillInsets(
+        hasFg: Boolean,
+    ) {
+        // Extra padding around the fill if there is nothing in the foreground
+        fill.fillInsetAmount = if (hasFg) 0f else 1.5f
     }
 
     override fun onBoundsChange(bounds: Rect) {
@@ -200,10 +210,9 @@ class BatteryLayersDrawable(
         // 2. Then the frame itself
         frame.draw(canvas)
 
-        // 3. Fill it the appropriate amount if non-error state or error + no attribute
-        if (!batteryState.showErrorState || !batteryState.hasForegroundContent()) {
-            fill.draw(canvas)
-        }
+        // 3. Fill it the appropriate amount
+        fill.draw(canvas)
+
         // 4. Decide what goes inside
         if (batteryState.showPercent && batteryState.attribution != null) {
             // 4a. percent & attribution. Implies space-sharing
@@ -309,6 +318,7 @@ class BatteryLayersDrawable(
          *
          * See [BatteryDrawableState] for how to set the properties of the resulting class
          */
+        @Suppress("UseCompatLoadingForDrawables")
         fun newBatteryDrawable(
             context: Context,
             initialState: BatteryDrawableState = BatteryDrawableState.DefaultInitialState,

@@ -186,7 +186,7 @@ public final class ServiceBindingOomAdjPolicyTest {
         doReturn(true).when(mAms.mOomAdjuster.mCachedAppOptimizer).useFreezer();
         doNothing().when(mAms.mOomAdjuster.mCachedAppOptimizer).freezeAppAsyncAtEarliestLSP(
                 any());
-        doReturn(false).when(mAms.mAppProfiler).updateLowMemStateLSP(anyInt(), anyInt(),
+        doNothing().when(mAms.mAppProfiler).updateLowMemStateLSP(anyInt(), anyInt(),
                 anyInt(), anyLong());
 
         mCurrentCallingUid = TEST_APP1_UID;

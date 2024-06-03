@@ -136,6 +136,13 @@ final class ConnectionRecord implements OomAdjusterModernImpl.Connection{
                 false, oomAdjReason, UNKNOWN_ADJ, false, false);
     }
 
+    @Override
+    public boolean canAffectCapabilities() {
+        return hasFlag(Context.BIND_INCLUDE_CAPABILITIES
+                | Context.BIND_BYPASS_USER_NETWORK_RESTRICTIONS);
+    }
+
+
     public long getFlags() {
         return flags;
     }

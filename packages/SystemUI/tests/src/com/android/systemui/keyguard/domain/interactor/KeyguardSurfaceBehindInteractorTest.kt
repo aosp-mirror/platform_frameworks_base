@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -226,5 +227,74 @@ class KeyguardSurfaceBehindInteractorTest : SysuiTestCase() {
                 // We should be at alpha = 0f during the animation.
                 { it == KeyguardSurfaceBehindModel(alpha = 0f) },
             )
+        }
+
+    @Test
+    fun notificationLaunchFromLockscreen_isAnimatingSurfaceTrue() =
+        testScope.runTest {
+            val isAnimatingSurface by collectLastValue(underTest.isAnimatingSurface)
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                    transitionState = TransitionState.STARTED,
+                )
+            )
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                    transitionState = TransitionState.FINISHED,
+                )
+            )
+            kosmos.notificationLaunchAnimationInteractor.setIsLaunchAnimationRunning(true)
+            runCurrent()
+            assertThat(isAnimatingSurface).isTrue()
+        }
+
+    @Test
+    fun notificationLaunchFromGone_isAnimatingSurfaceFalse() =
+        testScope.runTest {
+            val isAnimatingSurface by collectLastValue(underTest.isAnimatingSurface)
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    transitionState = TransitionState.STARTED,
+                )
+            )
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    transitionState = TransitionState.FINISHED,
+                )
+            )
+            kosmos.notificationLaunchAnimationInteractor.setIsLaunchAnimationRunning(true)
+            runCurrent()
+            assertThat(isAnimatingSurface).isFalse()
+        }
+
+    @Test
+    fun notificationLaunchFalse_isAnimatingSurfaceFalse() =
+        testScope.runTest {
+            val isAnimatingSurface by collectLastValue(underTest.isAnimatingSurface)
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.LOCKSCREEN,
+                    transitionState = TransitionState.STARTED,
+                )
+            )
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.LOCKSCREEN,
+                    transitionState = TransitionState.FINISHED,
+                )
+            )
+            kosmos.notificationLaunchAnimationInteractor.setIsLaunchAnimationRunning(false)
+            runCurrent()
+            assertThat(isAnimatingSurface).isFalse()
         }
 }

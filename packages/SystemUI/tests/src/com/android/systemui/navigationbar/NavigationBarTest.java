@@ -38,7 +38,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -111,6 +111,7 @@ import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.DeviceConfigProxyFake;
@@ -275,8 +276,8 @@ public class NavigationBarTest extends SysuiTestCase {
                     mKeyguardStateController, mock(NavigationModeController.class),
                     mEdgeBackGestureHandlerFactory, mock(IWindowManager.class),
                     mock(UserTracker.class), mock(DisplayTracker.class),
-                    mNotificationShadeWindowController, mock(DumpManager.class),
-                    mock(CommandQueue.class), mSynchronousExecutor));
+                    mNotificationShadeWindowController, mock(ConfigurationController.class),
+                    mock(DumpManager.class), mock(CommandQueue.class), mSynchronousExecutor));
             mNavigationBar = createNavBar(mContext);
             mExternalDisplayNavigationBar = createNavBar(mSysuiTestableContextExternal);
         });
@@ -299,7 +300,7 @@ public class NavigationBarTest extends SysuiTestCase {
         doNothing().when(mWindowManager).addView(any(), any());
         doNothing().when(mWindowManager).removeViewImmediate(any());
         mMockSysUiState = mock(SysUiState.class);
-        when(mMockSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mMockSysUiState);
+        when(mMockSysUiState.setFlag(anyLong(), anyBoolean())).thenReturn(mMockSysUiState);
 
         mContext.addMockSystemService(WindowManager.class, mWindowManager);
         mSysuiTestableContextExternal.addMockSystemService(WindowManager.class, mWindowManager);

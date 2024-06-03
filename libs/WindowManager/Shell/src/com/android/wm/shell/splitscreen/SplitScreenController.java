@@ -90,7 +90,6 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
-import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.common.split.SplitScreenConstants.PersistentSnapPosition;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.common.split.SplitScreenUtils;
@@ -99,6 +98,7 @@ import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentTasksController;
+import com.android.wm.shell.shared.annotations.ExternalThread;
 import com.android.wm.shell.splitscreen.SplitScreen.StageType;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellCommandHandler;
@@ -138,6 +138,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     public static final int EXIT_REASON_RECREATE_SPLIT = 10;
     public static final int EXIT_REASON_FULLSCREEN_SHORTCUT = 11;
     public static final int EXIT_REASON_DESKTOP_MODE = 12;
+    public static final int EXIT_REASON_FULLSCREEN_REQUEST = 13;
     @IntDef(value = {
             EXIT_REASON_UNKNOWN,
             EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW,
@@ -151,7 +152,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             EXIT_REASON_CHILD_TASK_ENTER_PIP,
             EXIT_REASON_RECREATE_SPLIT,
             EXIT_REASON_FULLSCREEN_SHORTCUT,
-            EXIT_REASON_DESKTOP_MODE
+            EXIT_REASON_DESKTOP_MODE,
+            EXIT_REASON_FULLSCREEN_REQUEST
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface ExitReason{}
@@ -502,6 +504,15 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     public int getActivateSplitPosition(TaskInfo taskInfo) {
         return mStageCoordinator.getActivateSplitPosition(taskInfo);
+    }
+
+    /** Start two tasks in parallel as a splitscreen pair. */
+    public void startTasks(int taskId1, @Nullable Bundle options1, int taskId2,
+            @Nullable Bundle options2, @SplitPosition int splitPosition,
+            @PersistentSnapPosition int snapPosition,
+            @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
+        mStageCoordinator.startTasks(taskId1, options1, taskId2, options2, splitPosition,
+                snapPosition, remoteTransition, instanceId);
     }
 
     /**
@@ -1054,6 +1065,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 return "RECREATE_SPLIT";
             case EXIT_REASON_DESKTOP_MODE:
                 return "DESKTOP_MODE";
+            case EXIT_REASON_FULLSCREEN_REQUEST:
+                return "FULLSCREEN_REQUEST";
             default:
                 return "unknown reason, reason int = " + exitReason;
         }
@@ -1116,6 +1129,15 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         };
 
         @Override
+        public void startTasks(int taskId1, @Nullable Bundle options1, int taskId2,
+                @Nullable Bundle options2, int splitPosition, int snapPosition,
+                @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
+            mMainExecutor.execute(() -> SplitScreenController.this.startTasks(
+                    taskId1, options1, taskId2, options2, splitPosition, snapPosition,
+                    remoteTransition, instanceId));
+        }
+
+        @Override
         public void registerSplitScreenListener(SplitScreenListener listener, Executor executor) {
             if (mExecutors.containsKey(listener)) return;
 
@@ -1141,6 +1163,12 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     SplitScreenController.this.unregisterSplitScreenListener(mListener);
                 }
             });
+        }
+
+        @Override
+        public void registerSplitAnimationListener(@NonNull SplitInvocationListener listener,
+                @NonNull Executor executor) {
+            mStageCoordinator.registerSplitAnimationListener(listener, executor);
         }
 
         @Override

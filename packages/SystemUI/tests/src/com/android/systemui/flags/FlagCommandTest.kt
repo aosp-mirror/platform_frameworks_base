@@ -16,7 +16,7 @@
 
 package com.android.systemui.flags
 
-import android.test.suitebuilder.annotation.SmallTest
+import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
 import java.io.PrintWriter

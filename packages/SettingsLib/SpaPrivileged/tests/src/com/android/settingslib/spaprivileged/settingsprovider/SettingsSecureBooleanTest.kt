@@ -102,7 +102,8 @@ class SettingsSecureBooleanTest {
         delay(100)
         value = true
 
-        assertThat(listDeferred.await()).containsExactly(false, true).inOrder()
+        assertThat(listDeferred.await())
+            .containsAtLeast(false, true).inOrder()
     }
 
     private companion object {

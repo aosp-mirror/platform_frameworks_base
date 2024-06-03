@@ -240,6 +240,56 @@ public class ApplicationsStateTest {
     }
 
     @Test
+    public void testDownloadAndLauncherNotInQuietAcceptsCorrectApps() {
+        mEntry.isHomeApp = false;
+        mEntry.hasLauncherEntry = false;
+
+        // should include updated system apps
+        when(mEntry.info.isInstantApp()).thenReturn(false);
+        mEntry.info.flags = ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
+        assertThat(ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER_NOT_QUIET.filterApp(mEntry))
+                .isTrue();
+
+        // should not include system apps other than the home app
+        mEntry.info.flags = ApplicationInfo.FLAG_SYSTEM;
+        mEntry.isHomeApp = false;
+        mEntry.hasLauncherEntry = false;
+        assertThat(ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER_NOT_QUIET.filterApp(mEntry))
+                .isFalse();
+
+        // should include the home app
+        mEntry.isHomeApp = true;
+        assertThat(ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER_NOT_QUIET.filterApp(mEntry))
+                .isTrue();
+
+        // should include any System app with a launcher entry
+        mEntry.isHomeApp = false;
+        mEntry.hasLauncherEntry = true;
+        assertThat(ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER_NOT_QUIET.filterApp(mEntry))
+                .isTrue();
+
+        // should not include updated system apps when in quiet mode
+        when(mEntry.info.isInstantApp()).thenReturn(false);
+        mEntry.info.flags = ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
+        mEntry.hideInQuietMode = true;
+        assertThat(ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER_NOT_QUIET.filterApp(mEntry))
+                .isFalse();
+
+        // should not include the home app when in quiet mode
+        mEntry.isHomeApp = true;
+        mEntry.hideInQuietMode = true;
+        assertThat(ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER_NOT_QUIET.filterApp(mEntry))
+                .isFalse();
+
+        // should not include any System app with a launcher entry when in quiet mode
+        mEntry.isHomeApp = false;
+        mEntry.hasLauncherEntry = true;
+        mEntry.hideInQuietMode = true;
+        assertThat(ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER_NOT_QUIET.filterApp(mEntry))
+                .isFalse();
+    }
+
+    @Test
     public void testOtherAppsRejectsLegacyGame() {
         mEntry.info.flags = ApplicationInfo.FLAG_IS_GAME;
 
@@ -264,6 +314,16 @@ public class ApplicationsStateTest {
         assertThat(ApplicationsState.FILTER_ALL_ENABLED.filterApp(mEntry)).isTrue();
         when(mEntry.info.isInstantApp()).thenReturn(true);
         assertThat(ApplicationsState.FILTER_ALL_ENABLED.filterApp(mEntry)).isFalse();
+    }
+
+    @Test
+    public void testEnabledFilterNotQuietRejectsInstantApp() {
+        mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SUPPORT_AUTOLOCK_FOR_PRIVATE_SPACE,
+                android.multiuser.Flags.FLAG_HANDLE_INTERLEAVED_SETTINGS_FOR_PRIVATE_SPACE);
+        mEntry.info.enabled = true;
+        assertThat(ApplicationsState.FILTER_ENABLED_NOT_QUIET.filterApp(mEntry)).isTrue();
+        when(mEntry.info.isInstantApp()).thenReturn(true);
+        assertThat(ApplicationsState.FILTER_ENABLED_NOT_QUIET.filterApp(mEntry)).isFalse();
     }
 
     @Test

@@ -23,6 +23,15 @@
         <option name="force-root" value="true" />
     </target_preparer>
 
+    <target_preparer class="com.android.tradefed.targetprep.DeviceSetup">
+        <option name="screen-always-on" value="on" />
+    </target_preparer>
+
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <option name="run-command" value="input keyevent KEYCODE_WAKEUP" />
+        <option name="run-command" value="wm dismiss-keyguard" />
+    </target_preparer>
+
     <option name="test-suite-tag" value="apct" />
     <option name="test-suite-tag" value="framework-base-presubmit" />
     <option name="test-tag" value="SystemUITests" />

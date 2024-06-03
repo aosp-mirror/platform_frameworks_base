@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import android.annotation.NonNull;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.media.MediaMetadata;
@@ -92,6 +93,8 @@ public class MediaShellCommand extends ShellCommand {
                 runMonitor();
             } else if (cmd.equals("volume")) {
                 runVolume();
+            } else if (cmd.equals("expire-temp-engaged-sessions")) {
+                expireTempEngagedSessions();
             } else {
                 showError("Error: unknown command '" + cmd + "'");
                 return -1;
@@ -245,7 +248,7 @@ public class MediaShellCommand extends ShellCommand {
         }
 
         @Override
-        public void onAudioInfoChanged(MediaController.PlaybackInfo info) {
+        public void onAudioInfoChanged(@NonNull MediaController.PlaybackInfo info) {
             mWriter.println("onAudioInfoChanged " + info);
         }
     }
@@ -366,5 +369,9 @@ public class MediaShellCommand extends ShellCommand {
     // "volume" command for stream volume control
     private void runVolume() throws Exception {
         VolumeCtrl.run(this);
+    }
+
+    private void expireTempEngagedSessions() throws Exception {
+        mSessionService.expireTempEngagedSessions();
     }
 }

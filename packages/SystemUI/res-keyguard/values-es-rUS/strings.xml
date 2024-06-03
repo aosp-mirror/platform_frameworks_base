@@ -83,7 +83,7 @@
     <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Demasiados intentos con PIN incorrecto"</string>
     <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Demasiados intentos con patrón incorrecto"</string>
     <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Demasiados intentos con contraseña incorrecta"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Vuelve a intentarlo en # segundo.}many{Vuelve a intentarlo en # segundos.}other{Vuelve a intentarlo en # segundos.}}"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Vuelve a intentarlo en # segundo}many{Vuelve a intentarlo en # segundos}other{Vuelve a intentarlo en # segundos}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Ingresa el PIN de la tarjeta SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Ingresa el PIN de la tarjeta SIM de \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Inhabilita la tarjeta eSIM para usar el dispositivo sin servicio móvil."</string>
@@ -111,12 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Para seguridad adicional, usa un patrón"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Para seguridad adicional, usa un PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Para seguridad adicional, usa una contraseña"</string>
-    <!-- no translation found for kg_prompt_added_security_pin (5487992065995475528) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_pattern (1017068086102168544) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_password (6053156069765029006) -->
-    <skip />
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Se requiere el PIN por razones de seguridad"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Se requiere el patrón por razones de seguridad"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Se requiere la contraseña por razones de seguridad"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Dispositivo bloqueado por el administrador"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"El dispositivo se bloqueó de forma manual"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"No se reconoció"</string>

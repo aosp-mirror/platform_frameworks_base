@@ -102,6 +102,8 @@ message SecureSettingsProto {
         optional SettingProto qs_targets = 54 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_pinch_to_zoom_anywhere_enabled = 55 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_single_finger_panning_enabled = 56 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto accessibility_gesture_targets = 57 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto display_daltonizer_saturation_level = 58 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     }
     optional Accessibility accessibility = 2;
@@ -247,6 +249,11 @@ message SecureSettingsProto {
         optional SettingProto location_time_zone_detection_enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional DateTime date_time = 90;
+
+    message Display {
+        optional SettingProto screen_resolution_mode = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Display display = 100;
 
     message Doze {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
@@ -724,7 +731,9 @@ message SecureSettingsProto {
     }
     optional Zen zen = 71;
 
+    optional SettingProto charge_optimization_mode = 101 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 100;
+    // Next tag = 102;
 }

@@ -9,12 +9,10 @@ import android.provider.AlarmClock
 import android.service.quicksettings.Tile
 import android.text.TextUtils
 import android.text.format.DateFormat
-import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.res.R
-import com.android.systemui.animation.ActivityTransitionAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
@@ -25,12 +23,15 @@ import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.NextAlarmController
 import java.util.Locale
 import javax.inject.Inject
 
-class AlarmTile @Inject constructor(
+class AlarmTile
+@Inject
+constructor(
     host: QSHost,
     uiEventLogger: QsEventLogger,
     @Background backgroundLooper: Looper,
@@ -56,8 +57,7 @@ class AlarmTile @Inject constructor(
 
     private var lastAlarmInfo: AlarmManager.AlarmClockInfo? = null
     private val icon = ResourceIcon.get(R.drawable.ic_alarm)
-    @VisibleForTesting
-    internal val defaultIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
+    @VisibleForTesting internal val defaultIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
     private val callback = NextAlarmController.NextAlarmChangeCallback { nextAlarm ->
         lastAlarmInfo = nextAlarm
         refreshState()
@@ -73,11 +73,11 @@ class AlarmTile @Inject constructor(
         }
     }
 
-    override fun handleClick(view: View?) {
-        val animationController = view?.let {
-            ActivityTransitionAnimator.Controller.fromView(
-                    it, InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE)
-        }
+    override fun handleClick(expandable: Expandable?) {
+        val animationController =
+            expandable?.activityTransitionController(
+                InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE
+            )
         val pendingIntent = lastAlarmInfo?.showIntent
         if (pendingIntent != null) {
             mActivityStarter.postStartActivityDismissingKeyguard(pendingIntent, animationController)

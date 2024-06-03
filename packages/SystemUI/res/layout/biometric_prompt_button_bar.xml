@@ -17,16 +17,18 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:theme="@style/Theme.SystemUI.Dialog"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!-- Negative Button, reserved for app -->
     <Button
         android:id="@+id/button_negative"
-        style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+        style="@style/AuthCredentialNegativeButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginLeft="24dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginBottom="8dp"
         android:ellipsize="end"
         android:maxLines="2"
         android:visibility="invisible"
@@ -36,11 +38,12 @@
     <!-- Cancel Button, replaces negative button when biometric is accepted -->
     <Button
         android:id="@+id/button_cancel"
-        style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+        style="@style/AuthCredentialNegativeButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginLeft="24dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginBottom="8dp"
         android:text="@string/cancel"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -49,11 +52,12 @@
     <!-- "Use Credential" Button, replaces if device credential is allowed -->
     <Button
         android:id="@+id/button_use_credential"
-        style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+        style="@style/AuthCredentialNegativeButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginLeft="24dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginBottom="8dp"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -61,11 +65,12 @@
     <!-- Positive Button -->
     <Button
         android:id="@+id/button_confirm"
-        style="@*android:style/Widget.DeviceDefault.Button.Colored"
+        style="@style/Widget.Dialog.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginRight="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="8dp"
         android:ellipsize="end"
         android:maxLines="2"
         android:text="@string/biometric_dialog_confirm"
@@ -76,11 +81,12 @@
     <!-- Try Again Button -->
     <Button
         android:id="@+id/button_try_again"
-        style="@*android:style/Widget.DeviceDefault.Button.Colored"
+        style="@style/Widget.Dialog.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginRight="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="8dp"
         android:ellipsize="end"
         android:maxLines="2"
         android:text="@string/biometric_dialog_try_again"

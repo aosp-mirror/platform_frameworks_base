@@ -18,6 +18,7 @@
 package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.content.res.Resources
+import android.view.WindowInsets
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
@@ -25,15 +26,19 @@ import androidx.constraintlayout.widget.ConstraintSet.LEFT
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.RIGHT
 import androidx.constraintlayout.widget.ConstraintSet.VISIBILITY_MODE_IGNORE
+import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
+import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
+import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombinedViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.statusbar.VibratorHelper
+import dagger.Lazy
 import javax.inject.Inject
 
 class DefaultShortcutsSection
@@ -46,11 +51,29 @@ constructor(
     private val falsingManager: FalsingManager,
     private val indicationController: KeyguardIndicationController,
     private val vibratorHelper: VibratorHelper,
+    private val keyguardBlueprintInteractor: Lazy<KeyguardBlueprintInteractor>,
 ) : BaseShortcutSection() {
+
+    // Amount to increase the bottom margin by to avoid colliding with inset
+    private var safeInsetBottom = 0
+
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (KeyguardBottomAreaRefactor.isEnabled) {
             addLeftShortcut(constraintLayout)
             addRightShortcut(constraintLayout)
+
+            constraintLayout
+                .requireViewById<LaunchableImageView>(R.id.start_button)
+                .setOnApplyWindowInsetsListener { _, windowInsets ->
+                    val tempSafeInset = windowInsets?.displayCutout?.safeInsetBottom ?: 0
+                    if (safeInsetBottom != tempSafeInset) {
+                        safeInsetBottom = tempSafeInset
+                        keyguardBlueprintInteractor
+                            .get()
+                            .refreshBlueprint(IntraBlueprintTransition.Type.DefaultTransition)
+                    }
+                    WindowInsets.CONSUMED
+                }
         }
     }
 
@@ -91,12 +114,24 @@ constructor(
             constrainWidth(R.id.start_button, width)
             constrainHeight(R.id.start_button, height)
             connect(R.id.start_button, LEFT, PARENT_ID, LEFT, horizontalOffsetMargin)
-            connect(R.id.start_button, BOTTOM, PARENT_ID, BOTTOM, verticalOffsetMargin)
+            connect(
+                R.id.start_button,
+                BOTTOM,
+                PARENT_ID,
+                BOTTOM,
+                verticalOffsetMargin + safeInsetBottom
+            )
 
             constrainWidth(R.id.end_button, width)
             constrainHeight(R.id.end_button, height)
             connect(R.id.end_button, RIGHT, PARENT_ID, RIGHT, horizontalOffsetMargin)
-            connect(R.id.end_button, BOTTOM, PARENT_ID, BOTTOM, verticalOffsetMargin)
+            connect(
+                R.id.end_button,
+                BOTTOM,
+                PARENT_ID,
+                BOTTOM,
+                verticalOffsetMargin + safeInsetBottom
+            )
 
             // The constraint set visibility for start and end button are default visible, set to
             // ignore so the view's own initial visibility (invisible) is used

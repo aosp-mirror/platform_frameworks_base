@@ -20,8 +20,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.testKosmos
-import com.android.systemui.volume.panel.mockVolumePanelUiComponent
 import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
+import com.android.systemui.volume.panel.shared.model.mockVolumePanelUiComponent
 import com.android.systemui.volume.panel.ui.layout.ComponentsLayoutManager
 import com.android.systemui.volume.panel.ui.layout.DefaultComponentsLayoutManager
 import com.google.common.truth.Truth
@@ -51,7 +51,7 @@ class DefaultComponentsLayoutManagerTest : SysuiTestCase() {
         val component5 = ComponentState(COMPONENT_5, kosmos.mockVolumePanelUiComponent, false)
         val layout =
             underTest.layout(
-                VolumePanelState(0, false, false),
+                VolumePanelState(orientation = 0, isLargeScreen = false),
                 setOf(
                     bottomBarComponentState,
                     component1,
@@ -79,7 +79,7 @@ class DefaultComponentsLayoutManagerTest : SysuiTestCase() {
         val component1State = ComponentState(COMPONENT_1, kosmos.mockVolumePanelUiComponent, false)
         val component2State = ComponentState(COMPONENT_2, kosmos.mockVolumePanelUiComponent, false)
         underTest.layout(
-            VolumePanelState(0, false, false),
+            VolumePanelState(orientation = 0, isLargeScreen = false),
             setOf(
                 component1State,
                 component2State,

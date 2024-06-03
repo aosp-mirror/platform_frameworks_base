@@ -30,8 +30,8 @@ import com.android.internal.R;
 class UnsupportedDisplaySizeDialog extends AppWarnings.BaseDialog {
 
     UnsupportedDisplaySizeDialog(final AppWarnings manager, Context context,
-            ApplicationInfo appInfo) {
-        super(manager, appInfo.packageName);
+            ApplicationInfo appInfo, int userId) {
+        super(manager, context, appInfo.packageName, userId);
 
         final PackageManager pm = context.getPackageManager();
         final CharSequence label = appInfo.loadSafeLabel(pm,
@@ -59,6 +59,6 @@ class UnsupportedDisplaySizeDialog extends AppWarnings.BaseDialog {
         final CheckBox alwaysShow = mDialog.findViewById(R.id.ask_checkbox);
         alwaysShow.setChecked(true);
         alwaysShow.setOnCheckedChangeListener((buttonView, isChecked) -> manager.setPackageFlag(
-                mPackageName, AppWarnings.FLAG_HIDE_DISPLAY_SIZE, !isChecked));
+                mUserId, mPackageName, AppWarnings.FLAG_HIDE_DISPLAY_SIZE, !isChecked));
     }
 }

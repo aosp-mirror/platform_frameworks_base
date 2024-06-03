@@ -154,8 +154,24 @@ will be unregistered. There is no explicit command for unregistering a device.
 
 #### `delay`
 
-Add a delay between the processing of commands. The delay will be timed from when the last delay
-ended, rather than from the current time, to allow for more precise timings to be produced.
+Add a delay between the processing of commands.
+
+The delay will be timed relative to the time base, a reference time which is set when the device is
+registered or by the `updateTimeBase` command. Take the following set of example commands:
+
+1. `register` device
+2. `delay` 500ms
+3. `inject` some events
+4. `delay` 10ms
+5. `inject` more events
+
+If the `register` command is executed at time _X_, the injection at step 3 will be scheduled for
+time _X_+500ms. Since scheduling isn't precise, they might actually be injected a few milliseconds
+later, but regardless of that the injection at step 5 will always be scheduled for _X_+510ms. This
+prevents scheduling delays from building up over time and slowing down the playback of recordings.
+However, it does mean that when you expect to wait for an indeterminate period of time, you should
+send `updateTimeBase` afterwards to prevent following events being scheduled in the past — see that
+command's section for an example.
 
 | Field         | Type          | Description                |
 |:-------------:|:-------------:|:-------------------------- |
@@ -172,6 +188,45 @@ Example:
   "duration": 10
 }
 ```
+
+#### `updateTimeBase`
+
+Update the time base from which the following events are scheduled to the current time. When
+controlling `uinput` over standard input, you should send this command if you want following events
+to be scheduled relative to now, rather than the last injection. See the following example set of
+commands and the times they will be scheduled to run at:
+
+1. `register` (say this occurs at time _X_)
+2. `delay` 500ms
+3. `inject`: scheduled for _X_+500ms
+4. `delay` 10ms
+5. `inject`: scheduled for _X_+510ms
+6. (wait a few seconds)
+7. `updateTimeBase` (say this occurs at time _Y_)
+8. `delay` 10ms
+9. `inject`: scheduled for _Y_+10ms
+
+Without the `updateTimeBase` command, the final injection would be scheduled for _X_+520ms, which
+would be in the past.
+
+This is useful if you are issuing commands in multiple stages with long or unknown delays in between
+them. For example, say you have a test that does the following:
+
+1. `register` a device
+2. `inject` a few events that should launch an app
+3. Wait for the app to launch (an indeterminate amount of time, possibly seconds)
+4. 1000 `inject` commands separated by `delay` commands of 10ms
+
+Without `updateTimeBase`, the `inject` commands of step 4 will be scheduled to start immediately
+after the events from step 2. That time is probably in the past, so many of the 1000 injections will
+be sent immediately. This will likely fill the kernel's event buffers, causing events to be dropped.
+Sending `updateTimeBase` before the `inject` commands in step 4 will schedule them relative to the
+current time, meaning that they will be all injected with the intended 10ms delays between them.
+
+| Field         | Type          | Description                     |
+|:-------------:|:-------------:|:------------------------------- |
+| `id`          | integer       | Device ID                       |
+| `command`     | string        | Must be set to "updateTimeBase" |
 
 #### `inject`
 

@@ -17,13 +17,12 @@ package com.android.systemui.unfold
 
 import android.os.VibrationAttributes
 import android.os.VibrationEffect
-import android.os.Vibrator
+import android.os.vibrator
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.unfold.util.TestFoldProvider
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.mock
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,19 +34,39 @@ import org.mockito.Mockito.verify
 @SmallTest
 class UnfoldHapticsPlayerTest : SysuiTestCase() {
 
-    private val progressProvider = TestUnfoldTransitionProvider()
-    private val vibrator: Vibrator = mock()
-    private val testFoldProvider = TestFoldProvider()
+    private val kosmos = testKosmos()
+
+    private val progressProvider = kosmos.fakeUnfoldTransitionProgressProvider
+    private val vibrator = kosmos.vibrator
+    private val transitionConfig = kosmos.unfoldTransitionConfig
+    private val testFoldProvider = kosmos.foldProvider
 
     private lateinit var player: UnfoldHapticsPlayer
 
     @Before
     fun before() {
-        player = UnfoldHapticsPlayer(progressProvider, testFoldProvider, Runnable::run, vibrator)
+        transitionConfig.isHapticsEnabled = true
+        player = UnfoldHapticsPlayer(progressProvider, testFoldProvider, transitionConfig,
+            Runnable::run, vibrator)
     }
 
     @Test
     fun testUnfoldingTransitionFinishingEarly_playsHaptics() {
+        testFoldProvider.onFoldUpdate(isFolded = true)
+        testFoldProvider.onFoldUpdate(isFolded = false)
+        progressProvider.onTransitionStarted()
+        progressProvider.onTransitionProgress(0.5f)
+        progressProvider.onTransitionFinishing()
+
+        verify(vibrator).vibrate(any<VibrationEffect>(), any<VibrationAttributes>())
+    }
+
+    @Test
+    fun testHapticsDisabled_unfoldingTransitionFinishing_doesNotPlayHaptics() {
+        transitionConfig.isHapticsEnabled = false
+        player = UnfoldHapticsPlayer(progressProvider, testFoldProvider, transitionConfig,
+                Runnable::run, vibrator)
+
         testFoldProvider.onFoldUpdate(isFolded = true)
         testFoldProvider.onFoldUpdate(isFolded = false)
         progressProvider.onTransitionStarted()

@@ -42,6 +42,7 @@ per-file BackgroundStartPrivileges.java = file:/BAL_OWNERS
 # ActivityThread
 per-file ActivityThread.java = file:/services/core/java/com/android/server/am/OWNERS
 per-file ActivityThread.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file ActivityThread.java = file:RESOURCES_OWNERS
 
 # Alarm
 per-file *Alarm* = file:/apex/jobscheduler/OWNERS
@@ -58,6 +59,9 @@ per-file ReceiverInfo* = file:/BROADCASTS_OWNERS
 
 # ComponentCaller
 per-file ComponentCaller.java = file:COMPONENT_CALLER_OWNERS
+
+# DreamManager
+per-file DreamManager.java = file:/DREAM_MANAGER_OWNERS
 
 # GrammaticalInflectionManager
 per-file *GrammaticalInflection* = file:/services/core/java/com/android/server/grammaticalinflection/OWNERS

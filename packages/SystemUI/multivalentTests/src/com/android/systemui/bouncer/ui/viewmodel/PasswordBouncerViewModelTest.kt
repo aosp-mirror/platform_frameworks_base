@@ -27,7 +27,6 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
-import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.inputmethod.data.model.InputMethodModel
 import com.android.systemui.inputmethod.data.repository.fakeInputMethodRepository
 import com.android.systemui.inputmethod.domain.interactor.inputMethodInteractor
@@ -153,7 +152,6 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password
             )
-            kosmos.fakeDeviceEntryRepository.setUnlocked(false)
             switchToScene(Scenes.Bouncer)
 
             // No input entered.
@@ -329,7 +327,6 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
         kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
             AuthenticationMethodModel.Password
         )
-        kosmos.fakeDeviceEntryRepository.setUnlocked(false)
         switchToScene(Scenes.Bouncer)
     }
 

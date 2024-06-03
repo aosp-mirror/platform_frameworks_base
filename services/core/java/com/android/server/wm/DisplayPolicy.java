@@ -41,7 +41,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACK
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_CONSUME_IME_INSETS;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IMMERSIVE_CONFIRMATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
@@ -146,6 +145,7 @@ import com.android.server.policy.WindowManagerPolicy.ScreenOnListener;
 import com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wallpaper.WallpaperManagerInternal;
+import com.android.wm.shell.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -779,6 +779,11 @@ public class DisplayPolicy {
         return mLidState;
     }
 
+    private void onDisplaySwitchFinished() {
+        mDisplayContent.mWallpaperController.onDisplaySwitchFinished();
+        mDisplayContent.mDisplayUpdater.onDisplaySwitching(false);
+    }
+
     public void setAwake(boolean awake) {
         synchronized (mLock) {
             if (awake == mAwake) {
@@ -797,7 +802,7 @@ public class DisplayPolicy {
             mService.mAtmService.mKeyguardController.updateDeferTransitionForAod(
                     mAwake /* waiting */);
             if (!awake) {
-                mDisplayContent.mWallpaperController.onDisplaySwitchFinished();
+                onDisplaySwitchFinished();
             }
         }
     }
@@ -866,7 +871,7 @@ public class DisplayPolicy {
 
     /** It is called after {@link #finishScreenTurningOn}. This runs on PowerManager's thread. */
     public void screenTurnedOn() {
-        mDisplayContent.mWallpaperController.onDisplaySwitchFinished();
+        onDisplaySwitchFinished();
     }
 
     public void screenTurnedOff() {
@@ -980,19 +985,6 @@ public class DisplayPolicy {
                                 + win.mActivityRecord.getName() + " that isn't translucent trying"
                                 + " to fit insets. fitInsetsTypes=" + WindowInsets.Type.toString(
                                         attrs.getFitInsetsTypes()));
-                    }
-                    if ((attrs.privateFlags & PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED) != 0
-                            && attrs.layoutInDisplayCutoutMode
-                                    != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
-                        // A non-translucent main window of the app enforced to go edge-to-edge
-                        // isn't allowed to fit display cutout, or it will cause software bezels.
-                        throw new IllegalArgumentException("Illegal attributes: Main window of "
-                                + win.mActivityRecord.getName() + " that isn't translucent and"
-                                + " targets SDK level " + win.mActivityRecord.mTargetSdk
-                                + " (>= 35) trying to specify layoutInDisplayCutoutMode as '"
-                                + WindowManager.LayoutParams.layoutInDisplayCutoutModeToString(
-                                        attrs.layoutInDisplayCutoutMode)
-                                + "' instead of 'always'");
                     }
                 }
                 break;
@@ -1814,7 +1806,8 @@ public class DisplayPolicy {
         updateConfigurationAndScreenSizeDependentBehaviors();
 
         final boolean shouldAttach =
-                res.getBoolean(R.bool.config_attachNavBarToAppDuringTransition);
+                res.getBoolean(R.bool.config_attachNavBarToAppDuringTransition)
+                        && !Flags.enableTinyTaskbar();
         if (mShouldAttachNavBarToAppDuringTransition != shouldAttach) {
             mShouldAttachNavBarToAppDuringTransition = shouldAttach;
         }
@@ -1930,9 +1923,14 @@ public class DisplayPolicy {
             final Rect mConfigInsets = new Rect();
 
             /**
-             * Legacy value of mConfigInsets for app compatibility purpose.
+             * Override value of mConfigInsets for app compatibility purpose.
              */
-            final Rect mLegacyConfigInsets = new Rect();
+            final Rect mOverrideConfigInsets = new Rect();
+
+            /**
+             * Override value of mNonDecorInsets for app compatibility purpose.
+             */
+            final Rect mOverrideNonDecorInsets = new Rect();
 
             /** The display frame available after excluding {@link #mNonDecorInsets}. */
             final Rect mNonDecorFrame = new Rect();
@@ -1945,9 +1943,14 @@ public class DisplayPolicy {
             final Rect mConfigFrame = new Rect();
 
             /**
-             * Legacy value of mConfigFrame for app compatibility purpose.
+             * Override value of mConfigFrame for app compatibility purpose.
              */
-            final Rect mLegacyConfigFrame = new Rect();
+            final Rect mOverrideConfigFrame = new Rect();
+
+            /**
+             * Override value of mNonDecorFrame for app compatibility purpose.
+             */
+            final Rect mOverrideNonDecorFrame = new Rect();
 
             private boolean mNeedUpdate = true;
 
@@ -1963,22 +1966,31 @@ public class DisplayPolicy {
                         ? decor
                         : insetsState.calculateInsets(displayFrame, dc.mWmService.mConfigTypes,
                                 true /* ignoreVisibility */);
-                final Insets legacyConfigInsets = dc.mWmService.mConfigTypes
-                        == dc.mWmService.mLegacyConfigTypes
+                final Insets overrideConfigInsets = dc.mWmService.mConfigTypes
+                        == dc.mWmService.mOverrideConfigTypes
                         ? configInsets
                         : insetsState.calculateInsets(displayFrame,
-                                dc.mWmService.mLegacyConfigTypes, true /* ignoreVisibility */);
+                                dc.mWmService.mOverrideConfigTypes, true /* ignoreVisibility */);
+                final Insets overrideDecorInsets = dc.mWmService.mDecorTypes
+                        == dc.mWmService.mOverrideDecorTypes
+                        ? decor
+                        : insetsState.calculateInsets(displayFrame,
+                                dc.mWmService.mOverrideDecorTypes, true /* ignoreVisibility */);
                 mNonDecorInsets.set(decor.left, decor.top, decor.right, decor.bottom);
                 mConfigInsets.set(configInsets.left, configInsets.top, configInsets.right,
                         configInsets.bottom);
-                mLegacyConfigInsets.set(legacyConfigInsets.left, legacyConfigInsets.top,
-                        legacyConfigInsets.right, legacyConfigInsets.bottom);
+                mOverrideConfigInsets.set(overrideConfigInsets.left, overrideConfigInsets.top,
+                        overrideConfigInsets.right, overrideConfigInsets.bottom);
+                mOverrideNonDecorInsets.set(overrideDecorInsets.left, overrideDecorInsets.top,
+                        overrideDecorInsets.right, overrideDecorInsets.bottom);
                 mNonDecorFrame.set(displayFrame);
                 mNonDecorFrame.inset(mNonDecorInsets);
                 mConfigFrame.set(displayFrame);
                 mConfigFrame.inset(mConfigInsets);
-                mLegacyConfigFrame.set(displayFrame);
-                mLegacyConfigFrame.inset(mLegacyConfigInsets);
+                mOverrideConfigFrame.set(displayFrame);
+                mOverrideConfigFrame.inset(mOverrideConfigInsets);
+                mOverrideNonDecorFrame.set(displayFrame);
+                mOverrideNonDecorFrame.inset(mOverrideNonDecorInsets);
                 mNeedUpdate = false;
                 return insetsState;
             }
@@ -1986,10 +1998,12 @@ public class DisplayPolicy {
             void set(Info other) {
                 mNonDecorInsets.set(other.mNonDecorInsets);
                 mConfigInsets.set(other.mConfigInsets);
-                mLegacyConfigInsets.set(other.mLegacyConfigInsets);
+                mOverrideConfigInsets.set(other.mOverrideConfigInsets);
+                mOverrideNonDecorInsets.set(other.mOverrideNonDecorInsets);
                 mNonDecorFrame.set(other.mNonDecorFrame);
                 mConfigFrame.set(other.mConfigFrame);
-                mLegacyConfigFrame.set(other.mLegacyConfigFrame);
+                mOverrideConfigFrame.set(other.mOverrideConfigFrame);
+                mOverrideNonDecorFrame.set(other.mOverrideNonDecorFrame);
                 mNeedUpdate = false;
             }
 
@@ -2102,7 +2116,7 @@ public class DisplayPolicy {
         final InsetsState newInsetsState = newInfo.update(mDisplayContent, rotation, dw, dh);
         final DecorInsets.Info currentInfo = getDecorInsetsInfo(rotation, dw, dh);
         if (newInfo.mConfigFrame.equals(currentInfo.mConfigFrame)
-                && newInfo.mLegacyConfigFrame.equals(currentInfo.mLegacyConfigFrame)) {
+                && newInfo.mOverrideConfigFrame.equals(currentInfo.mOverrideConfigFrame)) {
             // Even if the config frame is not changed in current rotation, it may change the
             // insets in other rotations if the frame of insets source is changed.
             final InsetsState currentInsetsState = mDisplayContent.mDisplayFrames.mInsetsState;
@@ -2185,6 +2199,11 @@ public class DisplayPolicy {
         }
         mCachedDecorInsets.mPreserveId =
                 mDisplayContent.mTransitionController.getCollectingTransitionId();
+    }
+
+    /** If this is called, expect that there will be an onDisplayChanged about unique id. */
+    public void onDisplaySwitchStart() {
+        mDisplayContent.mDisplayUpdater.onDisplaySwitching(true);
     }
 
     @NavigationBarPosition

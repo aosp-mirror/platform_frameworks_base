@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
-import android.hardware.biometrics.BiometricSourceType
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.biometrics.AuthController
@@ -31,6 +30,7 @@ import com.android.systemui.doze.DozeMachine
 import com.android.systemui.doze.DozeTransitionCallback
 import com.android.systemui.doze.DozeTransitionListener
 import com.android.systemui.dreams.DreamOverlayCallbackController
+import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.DismissAction
@@ -109,6 +109,19 @@ interface KeyguardRepository {
     )
     val isKeyguardGoingAway: Flow<Boolean>
 
+    /**
+     * Whether the keyguard is enabled, per [KeyguardService]. If the keyguard is not enabled, the
+     * lockscreen cannot be shown and the device will go from AOD/DOZING directly to GONE.
+     *
+     * Keyguard can be disabled by selecting Security: "None" in settings, or by apps that hold
+     * permission to do so (such as Phone).
+     *
+     * If the keyguard is disabled while we're locked, we will transition to GONE unless we're in
+     * lockdown mode. If the keyguard is re-enabled, we'll transition back to LOCKSCREEN if we were
+     * locked when it was disabled.
+     */
+    val isKeyguardEnabled: StateFlow<Boolean>
+
     /** Is the always-on display available to be used? */
     val isAodAvailable: StateFlow<Boolean>
 
@@ -169,19 +182,19 @@ interface KeyguardRepository {
     /** Observable for the [StatusBarState] */
     val statusBarState: StateFlow<StatusBarState>
 
-    /** Observable for biometric unlock modes */
+    /** Observable for biometric unlock state which includes the mode and unlock source */
     val biometricUnlockState: Flow<BiometricUnlockModel>
 
-    fun setBiometricUnlockState(value: BiometricUnlockModel)
+    fun setBiometricUnlockState(
+        unlockMode: BiometricUnlockMode,
+        unlockSource: BiometricUnlockSource?,
+    )
 
     /** Approximate location on the screen of the fingerprint sensor. */
     val fingerprintSensorLocation: Flow<Point?>
 
     /** Approximate location on the screen of the face unlock sensor/front facing camera. */
     val faceSensorLocation: Flow<Point?>
-
-    /** Source of the most recent biometric unlock, such as fingerprint or face. */
-    val biometricUnlockSource: Flow<BiometricUnlockSource?>
 
     /** Whether quick settings or quick-quick settings is visible. */
     val isQuickSettingsVisible: Flow<Boolean>
@@ -206,7 +219,11 @@ interface KeyguardRepository {
     )
     val keyguardDoneAnimationsFinished: Flow<Unit>
 
-    /** Receive whether clock should be centered on lockscreen. */
+    /**
+     * Receive whether clock should be centered on lockscreen.
+     *
+     * @deprecated When scene container flag is on use clockShouldBeCentered from domain level.
+     */
     val clockShouldBeCentered: Flow<Boolean>
 
     /**
@@ -265,6 +282,9 @@ interface KeyguardRepository {
             "'keyguardDoneAnimationsFinished' is when the GONE transition is finished."
     )
     fun keyguardDoneAnimationsFinished()
+
+    /** Sets whether the keyguard is enabled (see [isKeyguardEnabled]). */
+    fun setKeyguardEnabled(enabled: Boolean)
 }
 
 /** Encapsulates application state for the keyguard. */
@@ -435,6 +455,9 @@ constructor(
         awaitClose { keyguardStateController.removeCallback(callback) }
     }
 
+    private val _isKeyguardEnabled = MutableStateFlow(true)
+    override val isKeyguardEnabled: StateFlow<Boolean> = _isKeyguardEnabled.asStateFlow()
+
     private val _isDozing = MutableStateFlow(statusBarStateController.isDozing)
     override val isDozing: StateFlow<Boolean> = _isDozing.asStateFlow()
 
@@ -593,11 +616,15 @@ constructor(
                 statusBarStateIntToObject(statusBarStateController.state)
             )
 
-    private val _biometricUnlockState = MutableStateFlow(BiometricUnlockModel.NONE)
+    private val _biometricUnlockState: MutableStateFlow<BiometricUnlockModel> =
+        MutableStateFlow(BiometricUnlockModel(BiometricUnlockMode.NONE, null))
     override val biometricUnlockState = _biometricUnlockState.asStateFlow()
 
-    override fun setBiometricUnlockState(value: BiometricUnlockModel) {
-        _biometricUnlockState.value = value
+    override fun setBiometricUnlockState(
+        unlockMode: BiometricUnlockMode,
+        unlockSource: BiometricUnlockSource?,
+    ) {
+        _biometricUnlockState.value = BiometricUnlockModel(unlockMode, unlockSource)
     }
 
     override val fingerprintSensorLocation: Flow<Point?> = conflatedCallbackFlow {
@@ -623,27 +650,6 @@ constructor(
     }
 
     override val faceSensorLocation: Flow<Point?> = facePropertyRepository.sensorLocation
-
-    override val biometricUnlockSource: Flow<BiometricUnlockSource?> = conflatedCallbackFlow {
-        val callback =
-            object : KeyguardUpdateMonitorCallback() {
-                override fun onBiometricAuthenticated(
-                    userId: Int,
-                    biometricSourceType: BiometricSourceType?,
-                    isStrongBiometric: Boolean
-                ) {
-                    trySendWithFailureLogging(
-                        BiometricUnlockSource.fromBiometricSourceType(biometricSourceType),
-                        TAG,
-                        "onBiometricAuthenticated"
-                    )
-                }
-            }
-
-        keyguardUpdateMonitor.registerCallback(callback)
-        trySendWithFailureLogging(null, TAG, "initial value")
-        awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
-    }
 
     private val _isQuickSettingsVisible = MutableStateFlow(false)
     override val isQuickSettingsVisible: Flow<Boolean> = _isQuickSettingsVisible.asStateFlow()
@@ -675,6 +681,10 @@ constructor(
 
     override fun setClockShouldBeCentered(shouldBeCentered: Boolean) {
         _clockShouldBeCentered.value = shouldBeCentered
+    }
+
+    override fun setKeyguardEnabled(enabled: Boolean) {
+        _isKeyguardEnabled.value = enabled
     }
 
     private fun statusBarStateIntToObject(value: Int): StatusBarState {

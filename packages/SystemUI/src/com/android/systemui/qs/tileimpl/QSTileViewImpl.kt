@@ -19,12 +19,14 @@ package com.android.systemui.qs.tileimpl
 import android.animation.ArgbEvaluator
 import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.content.res.Resources.ID_NULL
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
@@ -36,6 +38,7 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityEvent
@@ -46,11 +49,13 @@ import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.TextView
 import androidx.annotation.VisibleForTesting
+import androidx.core.graphics.drawable.updateBounds
 import com.android.app.tracing.traceSection
 import com.android.settingslib.Utils
 import com.android.systemui.Flags
 import com.android.systemui.Flags.quickSettingsVisualHapticsLongpress
 import com.android.systemui.FontSizeUtils
+import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.LaunchableView
 import com.android.systemui.animation.LaunchableViewDelegate
 import com.android.systemui.haptics.qs.QSLongPressEffect
@@ -62,15 +67,14 @@ import com.android.systemui.plugins.qs.QSTileView
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSIconViewImpl.QS_ANIM_LENGTH
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.VibratorHelper
-import com.android.systemui.util.children
+import kotlinx.coroutines.DisposableHandle
 import java.util.Objects
 
 private const val TAG = "QSTileViewImpl"
 open class QSTileViewImpl @JvmOverloads constructor(
     context: Context,
     private val collapsed: Boolean = false,
-    private val vibratorHelper: VibratorHelper? = null,
+    private val longPressEffect: QSLongPressEffect? = null,
 ) : QSTileView(context), HeightOverrideable, LaunchableView {
 
     companion object {
@@ -83,6 +87,10 @@ open class QSTileViewImpl @JvmOverloads constructor(
         const val UNAVAILABLE_ALPHA = 0.3f
         @VisibleForTesting
         internal const val TILE_STATE_RES_PREFIX = "tile_states_"
+        @VisibleForTesting
+        internal const val LONG_PRESS_EFFECT_WIDTH_SCALE = 1.1f
+        @VisibleForTesting
+        internal const val LONG_PRESS_EFFECT_HEIGHT_SCALE = 1.2f
     }
 
     private val icon: QSIconViewImpl = QSIconViewImpl(context)
@@ -142,7 +150,8 @@ open class QSTileViewImpl @JvmOverloads constructor(
      */
     protected var showRippleEffect = true
 
-    private lateinit var qsTileBackground: LayerDrawable
+    private lateinit var qsTileBackground: RippleDrawable
+    private lateinit var qsTileFocusBackground: Drawable
     private lateinit var backgroundDrawable: LayerDrawable
     private lateinit var backgroundBaseDrawable: Drawable
     private lateinit var backgroundOverlayDrawable: Drawable
@@ -180,12 +189,17 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private val locInScreen = IntArray(2)
 
     /** Visuo-haptic long-press effects */
-    private var longPressEffect: QSLongPressEffect? = null
+    var haveLongPressPropertiesBeenReset = true
+        private set
+    private var paddingForLaunch = Rect()
     private var initialLongPressProperties: QSLongPressProperties? = null
     private var finalLongPressProperties: QSLongPressProperties? = null
     private val colorEvaluator = ArgbEvaluator.getInstance()
-    val hasLongPressEffect: Boolean
-        get() = longPressEffect != null
+    val isLongPressEffectInitialized: Boolean
+        get() = longPressEffect?.hasInitialized == true
+    private var longPressEffectHandle: DisposableHandle? = null
+    val isLongPressEffectBound: Boolean
+        get() = longPressEffectHandle != null
 
     init {
         val typedValue = TypedValue()
@@ -302,10 +316,11 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
     private fun createTileBackground(): Drawable {
         qsTileBackground = if (Flags.qsTileFocusState()) {
-            mContext.getDrawable(R.drawable.qs_tile_background_flagged) as LayerDrawable
+            mContext.getDrawable(R.drawable.qs_tile_background_flagged) as RippleDrawable
         } else {
             mContext.getDrawable(R.drawable.qs_tile_background) as RippleDrawable
         }
+        qsTileFocusBackground = mContext.getDrawable(R.drawable.qs_tile_focused_background)!!
         backgroundDrawable =
             qsTileBackground.findDrawableByLayerId(R.id.background) as LayerDrawable
         backgroundBaseDrawable =
@@ -319,9 +334,42 @@ open class QSTileViewImpl @JvmOverloads constructor(
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         super.onLayout(changed, l, t, r, b)
         updateHeight()
+        maybeUpdateLongPressEffectDimensions()
     }
 
+    private fun maybeUpdateLongPressEffectDimensions() {
+        if (!isLongClickable || longPressEffect == null) return
+
+        val actualHeight = if (heightOverride != HeightOverrideable.NO_OVERRIDE) {
+            heightOverride
+        } else {
+            measuredHeight
+        }
+        initialLongPressProperties?.height = actualHeight.toFloat()
+        initialLongPressProperties?.width = measuredWidth.toFloat()
+        finalLongPressProperties?.height = LONG_PRESS_EFFECT_HEIGHT_SCALE * actualHeight
+        finalLongPressProperties?.width = LONG_PRESS_EFFECT_WIDTH_SCALE * measuredWidth
+    }
+
+    override fun onFocusChanged(gainFocus: Boolean, direction: Int, previouslyFocusedRect: Rect?) {
+        super.onFocusChanged(gainFocus, direction, previouslyFocusedRect)
+        if (Flags.qsTileFocusState()) {
+            if (gainFocus) {
+                qsTileFocusBackground.setBounds(0, 0, width, height)
+                overlay.add(qsTileFocusBackground)
+            } else {
+                overlay.clear()
+            }
+        }
+    }
     private fun updateHeight() {
+        // TODO(b/332900989): Find a more robust way of resetting the tile if not reset by the
+        //  launch animation.
+        if (!haveLongPressPropertiesBeenReset && longPressEffect != null) {
+            // The launch animation of a long-press effect did not reset the long-press effect so
+            // we must do it here
+            resetLongPressEffectProperties()
+        }
         val actualHeight = if (heightOverride != HeightOverrideable.NO_OVERRIDE) {
             heightOverride
         } else {
@@ -348,15 +396,23 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     override fun init(tile: QSTile) {
-        init(
-                { v: View? -> tile.click(this) },
-                { view: View? ->
-                    tile.longClick(this)
-                    true
-                }
-        )
+        val expandable = Expandable.fromView(this)
         if (quickSettingsVisualHapticsLongpress()) {
-            isHapticFeedbackEnabled = false // Haptics will be handled by the [QSLongPressEffect]
+            isHapticFeedbackEnabled = false
+            longPressEffect?.qsTile = tile
+            longPressEffect?.expandable = expandable
+            init(
+                { _: View? -> longPressEffect?.onTileClick() },
+                null, // Haptics and long-clicks will be handled by the [QSLongPressEffect]
+            )
+        } else {
+            init(
+                { _: View? -> tile.click(expandable) },
+                { _: View? ->
+                    tile.longClick(expandable)
+                    true
+                },
+            )
         }
     }
 
@@ -494,6 +550,20 @@ open class QSTileViewImpl @JvmOverloads constructor(
         return sb.toString()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        // let the View run the onTouch logic for click and long-click detection
+        val result = super.onTouchEvent(event)
+        if (longPressEffect != null) {
+            when (event?.actionMasked) {
+                MotionEvent.ACTION_DOWN -> longPressEffect.handleActionDown()
+                MotionEvent.ACTION_UP -> longPressEffect.handleActionUp()
+                MotionEvent.ACTION_CANCEL -> longPressEffect.handleActionCancel()
+            }
+        }
+        return result
+    }
+
     // HANDLE STATE CHANGES RELATED METHODS
 
     protected open fun handleStateChanged(state: QSTile.State) {
@@ -611,22 +681,27 @@ open class QSTileViewImpl @JvmOverloads constructor(
         lastIconTint = icon.getColor(state)
 
         // Long-press effects
-        if (quickSettingsVisualHapticsLongpress()){
-            if (state.handlesLongClick && maybeCreateAndInitializeLongPressEffect()) {
-                // set the valid long-press effect as the touch listener
-                showRippleEffect = false
-                setOnTouchListener(longPressEffect)
-                QSLongPressEffectViewBinder.bind(this, longPressEffect)
-            } else {
-                // Long-press effects might have been enabled before but the new state does not
-                // handle a long-press. In this case, we go back to the behaviour of a regular tile
-                // and clean-up the resources
-                showRippleEffect = isClickable
-                setOnTouchListener(null)
-                longPressEffect = null
-                initialLongPressProperties = null
-                finalLongPressProperties = null
+        if (state.handlesLongClick &&
+            longPressEffect?.initializeEffect(longPressEffectDuration) == true) {
+            // bind the long-press effect and set it as the touch listener
+            if (!isLongPressEffectBound) {
+                longPressEffectHandle =
+                    QSLongPressEffectViewBinder.bind(
+                        this,
+                        longPressEffect,
+                        state.spec,
+                    )
             }
+            showRippleEffect = false
+            initializeLongPressProperties(measuredHeight, measuredWidth)
+        } else {
+            // Long-press effects might have been enabled before but the new state does not
+            // handle a long-press. In this case, we go back to the behaviour of a regular tile
+            // and clean-up the resources
+            unbindLongPressEffect()
+            showRippleEffect = isClickable
+            initialLongPressProperties = null
+            finalLongPressProperties = null
         }
     }
 
@@ -748,10 +823,66 @@ open class QSTileViewImpl @JvmOverloads constructor(
         }
     }
 
-    override fun onActivityLaunchAnimationEnd() = resetLongPressEffectProperties()
+    override fun onActivityLaunchAnimationEnd() {
+        if (longPressEffect != null && !haveLongPressPropertiesBeenReset) {
+            resetLongPressEffectProperties()
+        }
+    }
+
+    fun prepareForLaunch() {
+        val startingHeight = initialLongPressProperties?.height?.toInt() ?: 0
+        val startingWidth = initialLongPressProperties?.width?.toInt() ?: 0
+        val deltaH = finalLongPressProperties?.height?.minus(startingHeight)?.toInt() ?: 0
+        val deltaW = finalLongPressProperties?.width?.minus(startingWidth)?.toInt() ?: 0
+        paddingForLaunch.left = -deltaW / 2
+        paddingForLaunch.top = -deltaH / 2
+        paddingForLaunch.right = deltaW / 2
+        paddingForLaunch.bottom = deltaH / 2
+    }
+
+    override fun getPaddingForLaunchAnimation(): Rect = paddingForLaunch
 
     fun updateLongPressEffectProperties(effectProgress: Float) {
         if (!isLongClickable || longPressEffect == null) return
+
+        if (haveLongPressPropertiesBeenReset) haveLongPressPropertiesBeenReset = false
+
+        // Dimensions change
+        val newHeight =
+            interpolateFloat(
+                effectProgress,
+                initialLongPressProperties?.height ?: 0f,
+                finalLongPressProperties?.height ?: 0f,
+            ).toInt()
+        val newWidth =
+            interpolateFloat(
+                effectProgress,
+                initialLongPressProperties?.width ?: 0f,
+                finalLongPressProperties?.width ?: 0f,
+            ).toInt()
+
+        val startingHeight = initialLongPressProperties?.height?.toInt() ?: 0
+        val startingWidth = initialLongPressProperties?.width?.toInt() ?: 0
+        val deltaH = (newHeight - startingHeight) / 2
+        val deltaW = (newWidth - startingWidth) / 2
+
+        background.updateBounds(
+            left = -deltaW,
+            top = -deltaH,
+            right = newWidth - deltaW,
+            bottom = newHeight - deltaH,
+        )
+
+        // Radius change
+        val newRadius =
+            interpolateFloat(
+                effectProgress,
+                initialLongPressProperties?.cornerRadius ?: 0f,
+                finalLongPressProperties?.cornerRadius ?: 0f,
+            )
+        changeCornerRadius(newRadius)
+
+        // Color change
         setAllColors(
             colorEvaluator.evaluate(
                 effectProgress,
@@ -787,44 +918,23 @@ open class QSTileViewImpl @JvmOverloads constructor(
                 finalLongPressProperties?.iconColor ?: 0,
             ) as Int,
         )
+    }
 
-        val newScaleX =
-            interpolateFloat(
-                effectProgress,
-                initialLongPressProperties?.xScale ?: 1f,
-                finalLongPressProperties?.xScale ?: 1f,
-            )
-        val newScaleY =
-            interpolateFloat(
-                effectProgress,
-                initialLongPressProperties?.xScale ?: 1f,
-                finalLongPressProperties?.xScale ?: 1f,
-            )
-        val newRadius =
-            interpolateFloat(
-                effectProgress,
-                initialLongPressProperties?.cornerRadius ?: 0f,
-                finalLongPressProperties?.cornerRadius ?: 0f,
-            )
-        scaleX = newScaleX
-        scaleY = newScaleY
-        for (child in children) {
-            child.scaleX = 1f / newScaleX
-            child.scaleY = 1f / newScaleY
-        }
-        changeCornerRadius(newRadius)
+    private fun unbindLongPressEffect() {
+        longPressEffectHandle?.dispose()
+        longPressEffectHandle = null
     }
 
     private fun interpolateFloat(fraction: Float, start: Float, end: Float): Float =
         start + fraction * (end - start)
 
-    private fun resetLongPressEffectProperties() {
-        scaleY = 1f
-        scaleX = 1f
-        for (child in children) {
-            child.scaleY = 1f
-            child.scaleX = 1f
-        }
+    fun resetLongPressEffectProperties() {
+        background.updateBounds(
+            left = 0,
+            top = 0,
+            right = initialLongPressProperties?.width?.toInt() ?: measuredWidth,
+            bottom = initialLongPressProperties?.height?.toInt() ?: measuredHeight,
+        )
         changeCornerRadius(resources.getDimensionPixelSize(R.dimen.qs_corner_radius).toFloat())
         setAllColors(
             getBackgroundColorForState(lastState, lastDisabledByPolicy),
@@ -834,34 +944,15 @@ open class QSTileViewImpl @JvmOverloads constructor(
             getOverlayColorForState(lastState),
         )
         icon.setTint(icon.mIcon as ImageView, lastIconTint)
+        haveLongPressPropertiesBeenReset = true
     }
 
-    private fun maybeCreateAndInitializeLongPressEffect(): Boolean {
-        // Don't setup the effect if the long-press duration is invalid
-        val effectDuration = longPressEffectDuration
-        if (effectDuration <= 0) {
-            longPressEffect = null
-            return false
-        }
-
-        initializeLongPressProperties()
-        if (longPressEffect == null) {
-            longPressEffect =
-                QSLongPressEffect(
-                    vibratorHelper,
-                    effectDuration,
-                )
-        } else {
-            longPressEffect?.resetWithDuration(effectDuration)
-        }
-        return true
-    }
-
-    private fun initializeLongPressProperties() {
+    @VisibleForTesting
+    fun initializeLongPressProperties(startingHeight: Int, startingWidth: Int) {
         initialLongPressProperties =
             QSLongPressProperties(
-                /* xScale= */1f,
-                /* yScale= */1f,
+                height = startingHeight.toFloat(),
+                width = startingWidth.toFloat(),
                 resources.getDimensionPixelSize(R.dimen.qs_corner_radius).toFloat(),
                 getBackgroundColorForState(lastState),
                 getLabelColorForState(lastState),
@@ -873,8 +964,8 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
         finalLongPressProperties =
             QSLongPressProperties(
-                /* xScale= */1.1f,
-                /* yScale= */1.2f,
+                height = LONG_PRESS_EFFECT_HEIGHT_SCALE * startingHeight,
+                width = LONG_PRESS_EFFECT_WIDTH_SCALE * startingWidth,
                 resources.getDimensionPixelSize(R.dimen.qs_corner_radius).toFloat() - 20,
                 getBackgroundColorForState(Tile.STATE_ACTIVE),
                 getLabelColorForState(Tile.STATE_ACTIVE),

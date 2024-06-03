@@ -39,7 +39,6 @@ import com.android.systemui.res.R
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
-import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -50,6 +49,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.eq
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
@@ -59,7 +59,6 @@ import org.mockito.MockitoAnnotations
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
 
-    //@Mock private lateinit var dialogFactory: SystemUIDialog.Factory
     @Mock private lateinit var starter: ActivityStarter
     @Mock private lateinit var controller: RecordingController
     @Mock private lateinit var userContextProvider: UserContextProvider
@@ -76,13 +75,13 @@ class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
         whenever(flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)).thenReturn(true)
 
         val systemUIDialogFactory =
-                SystemUIDialog.Factory(
-                        context,
-                        Dependency.get(SystemUIDialogManager::class.java),
-                        Dependency.get(SysUiState::class.java),
-                        Dependency.get(BroadcastDispatcher::class.java),
-                        Dependency.get(DialogTransitionAnimator::class.java),
-                )
+            SystemUIDialog.Factory(
+                context,
+                Dependency.get(SystemUIDialogManager::class.java),
+                Dependency.get(SysUiState::class.java),
+                Dependency.get(BroadcastDispatcher::class.java),
+                Dependency.get(DialogTransitionAnimator::class.java),
+            )
 
         val delegate =
             ScreenRecordPermissionDialogDelegate(
@@ -94,6 +93,7 @@ class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
                 onStartRecordingClicked,
                 mediaProjectionMetricsLogger,
                 systemUIDialogFactory,
+                context,
             )
         dialog = delegate.createDialog()
     }
@@ -187,6 +187,17 @@ class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
         dismissDialog()
 
         verify(mediaProjectionMetricsLogger).notifyProjectionRequestCancelled(TEST_HOST_UID)
+    }
+
+    @Test
+    fun showDialog_singleAppSelected_clickOnStart_projectionRequestCancelledIsNotLoggedOnce() {
+        showDialog()
+        onSpinnerItemSelected(SINGLE_APP)
+
+        clickOnStart()
+
+        verify(mediaProjectionMetricsLogger, never())
+            .notifyProjectionRequestCancelled(TEST_HOST_UID)
     }
 
     private fun showDialog() {

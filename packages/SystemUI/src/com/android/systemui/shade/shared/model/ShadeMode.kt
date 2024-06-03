@@ -38,4 +38,8 @@ sealed interface ShadeMode {
      * a space on a small screen or folded device.
      */
     data object Dual : ShadeMode
+
+    companion object {
+        @JvmStatic fun dual(): Dual = Dual
+    }
 }

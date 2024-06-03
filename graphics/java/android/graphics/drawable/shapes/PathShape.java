@@ -93,7 +93,7 @@ public class PathShape extends Shape {
             && Float.compare(pathShape.mStdHeight, mStdHeight) == 0
             && Float.compare(pathShape.mScaleX, mScaleX) == 0
             && Float.compare(pathShape.mScaleY, mScaleY) == 0
-            // Path does not have equals implementation but incase it gains one, use it here
+            // Path does not have equals implementation but in case it gains one, use it here
             && Objects.equals(mPath, pathShape.mPath);
     }
 

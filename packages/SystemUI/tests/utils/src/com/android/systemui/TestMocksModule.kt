@@ -24,10 +24,12 @@ import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.statusbar.IStatusBarService
+import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardViewController
 import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.biometrics.AuthController
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.demomode.DemoModeController
@@ -85,6 +87,7 @@ data class TestMocksModule(
     @get:Provides val activityStarter: ActivityStarter = mock(),
     @get:Provides val activityManagerWrapper: ActivityManagerWrapper = mock(),
     @get:Provides val ambientState: AmbientState = mock(),
+    @get:Provides val authController: AuthController = mock(),
     @get:Provides val bubbles: Optional<Bubbles> = Optional.of(mock()),
     @get:Provides val darkIconDispatcher: DarkIconDispatcher = mock(),
     @get:Provides val demoModeController: DemoModeController = mock(),
@@ -150,6 +153,7 @@ data class TestMocksModule(
     @get:Provides val displayMetrics: DisplayMetrics = mock(),
     @get:Provides val metricsLogger: MetricsLogger = mock(),
     @get:Provides val userManager: UserManager = mock(),
+    @get:Provides val lockPatternUtils: LockPatternUtils = mock(),
 
     // system server mocks
     @get:Provides val mockStatusBarService: IStatusBarService = mock(),

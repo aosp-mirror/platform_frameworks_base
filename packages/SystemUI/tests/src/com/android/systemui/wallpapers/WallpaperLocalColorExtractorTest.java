@@ -16,9 +16,12 @@
 
 package com.android.systemui.wallpapers;
 
+import static com.android.window.flags.Flags.FLAG_OFFLOAD_COLOR_EXTRACTION;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
@@ -32,6 +35,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -55,8 +59,8 @@ import java.util.concurrent.Executor;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class WallpaperLocalColorExtractorTest extends SysuiTestCase {
-    private static final int LOW_BMP_WIDTH = 128;
-    private static final int LOW_BMP_HEIGHT = 128;
+    private static final int LOW_BMP_WIDTH = 112;
+    private static final int LOW_BMP_HEIGHT = 112;
     private static final int HIGH_BMP_WIDTH = 3000;
     private static final int HIGH_BMP_HEIGHT = 4000;
     private static final int VERY_LOW_BMP_WIDTH = 1;
@@ -77,6 +81,7 @@ public class WallpaperLocalColorExtractorTest extends SysuiTestCase {
     private Executor mBackgroundExecutor;
 
     private int mColorsProcessed;
+    private int mLocalColorsProcessed;
     private int mMiniBitmapUpdatedCount;
     private int mActivatedCount;
     private int mDeactivatedCount;
@@ -93,6 +98,7 @@ public class WallpaperLocalColorExtractorTest extends SysuiTestCase {
 
     private void resetCounters() {
         mColorsProcessed = 0;
+        mLocalColorsProcessed = 0;
         mMiniBitmapUpdatedCount = 0;
         mActivatedCount = 0;
         mDeactivatedCount = 0;
@@ -112,10 +118,14 @@ public class WallpaperLocalColorExtractorTest extends SysuiTestCase {
                 new Object(),
                 new WallpaperLocalColorExtractor.WallpaperLocalColorExtractorCallback() {
                     @Override
+                    public void onColorsProcessed() {
+                        mColorsProcessed++;
+                    }
+                    @Override
                     public void onColorsProcessed(List<RectF> regions,
                             List<WallpaperColors> colors) {
                         assertThat(regions.size()).isEqualTo(colors.size());
-                        mColorsProcessed += regions.size();
+                        mLocalColorsProcessed += regions.size();
                     }
 
                     @Override
@@ -148,8 +158,10 @@ public class WallpaperLocalColorExtractorTest extends SysuiTestCase {
                 .when(spyColorExtractor)
                 .createMiniBitmap(any(Bitmap.class), anyInt(), anyInt());
 
-        doReturn(new WallpaperColors(Color.valueOf(0), Color.valueOf(0), Color.valueOf(0)))
-                .when(spyColorExtractor).getLocalWallpaperColors(any(Rect.class));
+        WallpaperColors colors = new WallpaperColors(
+                Color.valueOf(0), Color.valueOf(0), Color.valueOf(0));
+        doReturn(colors).when(spyColorExtractor).getLocalWallpaperColors(any(Rect.class));
+        doReturn(colors).when(spyColorExtractor).getWallpaperColors(any(Bitmap.class), anyFloat());
 
         return spyColorExtractor;
     }
@@ -177,7 +189,7 @@ public class WallpaperLocalColorExtractorTest extends SysuiTestCase {
 
     /**
      * Test that for bitmaps of random dimensions, the mini bitmap is always created
-     * with either a width <= SMALL_SIDE or a height <= SMALL_SIDE
+     * with an area <= MINI_BITMAP_MAX_AREA
      */
     @Test
     public void testMiniBitmapCreation() {
@@ -191,14 +203,14 @@ public class WallpaperLocalColorExtractorTest extends SysuiTestCase {
             spyColorExtractor.onBitmapChanged(bitmap);
 
             assertThat(mMiniBitmapUpdatedCount).isEqualTo(1);
-            assertThat(Math.min(mMiniBitmapWidth, mMiniBitmapHeight))
-                    .isAtMost(WallpaperLocalColorExtractor.SMALL_SIDE);
+            assertThat(mMiniBitmapWidth * mMiniBitmapHeight)
+                    .isAtMost(WallpaperLocalColorExtractor.MINI_BITMAP_MAX_AREA);
         }
     }
 
     /**
-     * Test that for bitmaps with both width and height <= SMALL_SIDE,
-     * the mini bitmap is always created with both width and height <= SMALL_SIDE
+     * Test that for bitmaps with both width and height <= LOW_BMP_WIDTH,
+     * the mini bitmap is always created with an area <= MINI_BITMAP_MAX_AREA
      */
     @Test
     public void testSmallMiniBitmapCreation() {
@@ -212,8 +224,8 @@ public class WallpaperLocalColorExtractorTest extends SysuiTestCase {
             spyColorExtractor.onBitmapChanged(bitmap);
 
             assertThat(mMiniBitmapUpdatedCount).isEqualTo(1);
-            assertThat(Math.max(mMiniBitmapWidth, mMiniBitmapHeight))
-                    .isAtMost(WallpaperLocalColorExtractor.SMALL_SIDE);
+            assertThat(mMiniBitmapWidth * mMiniBitmapHeight)
+                    .isAtMost(WallpaperLocalColorExtractor.MINI_BITMAP_MAX_AREA);
         }
     }
 
@@ -244,7 +256,7 @@ public class WallpaperLocalColorExtractorTest extends SysuiTestCase {
 
             assertThat(mActivatedCount).isEqualTo(1);
             assertThat(mMiniBitmapUpdatedCount).isEqualTo(1);
-            assertThat(mColorsProcessed).isEqualTo(regions.size());
+            assertThat(mLocalColorsProcessed).isEqualTo(regions.size());
 
             spyColorExtractor.removeLocalColorAreas(regions);
             assertThat(mDeactivatedCount).isEqualTo(1);
@@ -329,10 +341,67 @@ public class WallpaperLocalColorExtractorTest extends SysuiTestCase {
                 spyColorExtractor.onBitmapChanged(newBitmap);
                 assertThat(mMiniBitmapUpdatedCount).isEqualTo(1);
             }
-            assertThat(mColorsProcessed).isEqualTo(regions.size());
+            assertThat(mLocalColorsProcessed).isEqualTo(regions.size());
         }
         spyColorExtractor.removeLocalColorAreas(regions);
         assertThat(mDeactivatedCount).isEqualTo(1);
+    }
+
+    /**
+     * Test that after the bitmap changes, the colors are computed only if asked via onComputeColors
+     */
+    @Test
+    @EnableFlags(FLAG_OFFLOAD_COLOR_EXTRACTION)
+    public void testRecomputeColors() {
+        resetCounters();
+        Bitmap bitmap = getMockBitmap(HIGH_BMP_WIDTH, HIGH_BMP_HEIGHT);
+        WallpaperLocalColorExtractor spyColorExtractor = getSpyWallpaperLocalColorExtractor();
+        spyColorExtractor.onBitmapChanged(bitmap);
+        assertThat(mColorsProcessed).isEqualTo(0);
+        spyColorExtractor.onComputeColors();
+        assertThat(mColorsProcessed).isEqualTo(1);
+    }
+
+    /**
+     * Test that after onComputeColors is called, the colors are computed once the bitmap is loaded
+     */
+    @Test
+    @EnableFlags(FLAG_OFFLOAD_COLOR_EXTRACTION)
+    public void testRecomputeColorsBeforeBitmapLoaded() {
+        resetCounters();
+        Bitmap bitmap = getMockBitmap(HIGH_BMP_WIDTH, HIGH_BMP_HEIGHT);
+        WallpaperLocalColorExtractor spyColorExtractor = getSpyWallpaperLocalColorExtractor();
+        spyColorExtractor.onComputeColors();
+        spyColorExtractor.onBitmapChanged(bitmap);
+        assertThat(mColorsProcessed).isEqualTo(1);
+    }
+
+    /**
+     * Test that after the dim changes, the colors are computed if the bitmap is already loaded
+     */
+    @Test
+    @EnableFlags(FLAG_OFFLOAD_COLOR_EXTRACTION)
+    public void testRecomputeColorsOnDimChanged() {
+        resetCounters();
+        Bitmap bitmap = getMockBitmap(HIGH_BMP_WIDTH, HIGH_BMP_HEIGHT);
+        WallpaperLocalColorExtractor spyColorExtractor = getSpyWallpaperLocalColorExtractor();
+        spyColorExtractor.onBitmapChanged(bitmap);
+        spyColorExtractor.onDimAmountChanged(0.5f);
+        assertThat(mColorsProcessed).isEqualTo(1);
+    }
+
+    /**
+     * Test that after the dim changes, the colors will be recomputed once the bitmap is loaded
+     */
+    @Test
+    @EnableFlags(FLAG_OFFLOAD_COLOR_EXTRACTION)
+    public void testRecomputeColorsOnDimChangedBeforeBitmapLoaded() {
+        resetCounters();
+        Bitmap bitmap = getMockBitmap(HIGH_BMP_WIDTH, HIGH_BMP_HEIGHT);
+        WallpaperLocalColorExtractor spyColorExtractor = getSpyWallpaperLocalColorExtractor();
+        spyColorExtractor.onDimAmountChanged(0.3f);
+        spyColorExtractor.onBitmapChanged(bitmap);
+        assertThat(mColorsProcessed).isEqualTo(1);
     }
 
     @Test
@@ -346,6 +415,6 @@ public class WallpaperLocalColorExtractorTest extends SysuiTestCase {
         assertThat(mMiniBitmapUpdatedCount).isEqualTo(1);
         spyColorExtractor.cleanUp();
         spyColorExtractor.addLocalColorsAreas(listOfRandomAreas(MIN_AREAS, MAX_AREAS));
-        assertThat(mColorsProcessed).isEqualTo(0);
+        assertThat(mLocalColorsProcessed).isEqualTo(0);
     }
 }

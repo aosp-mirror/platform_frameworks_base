@@ -22,12 +22,10 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.base.viewmodel.QSTileViewModelFactory
-import com.android.systemui.qs.tiles.impl.custom.di.CustomTileComponent
-import com.android.systemui.qs.tiles.impl.custom.di.QSTileConfigModule
-import com.android.systemui.qs.tiles.impl.custom.domain.entity.CustomTileDataModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfigProvider
 import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileViewModelAdapter
+import com.android.systemui.qs.tiles.viewmodel.StubQSTileViewModel
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -40,8 +38,7 @@ constructor(
     private val adapterFactory: QSTileViewModelAdapter.Factory,
     private val tileMap:
         Map<String, @JvmSuppressWildcards Provider<@JvmSuppressWildcards QSTileViewModel>>,
-    private val customTileComponentBuilder: CustomTileComponent.Builder,
-    private val customTileViewModelFactory: QSTileViewModelFactory.Component<CustomTileDataModel>,
+    private val customTileViewModelFactory: QSTileViewModelFactory.Component,
 ) : QSFactory {
 
     init {
@@ -57,7 +54,9 @@ constructor(
         val viewModel: QSTileViewModel =
             when (val spec = TileSpec.create(tileSpec)) {
                 is TileSpec.CustomTileSpec -> createCustomTileViewModel(spec)
-                is TileSpec.PlatformTileSpec -> tileMap[tileSpec]?.get()
+                // when using the stub, we default to old tile rather than adding the stub
+                is TileSpec.PlatformTileSpec ->
+                    tileMap[tileSpec]?.get()?.takeIf { it !is StubQSTileViewModel }
                 is TileSpec.Invalid -> null
             }
                 ?: return null
@@ -65,7 +64,5 @@ constructor(
     }
 
     private fun createCustomTileViewModel(spec: TileSpec.CustomTileSpec): QSTileViewModel =
-        customTileViewModelFactory.create(spec) { config ->
-            customTileComponentBuilder.qsTileConfigModule(QSTileConfigModule(config)).build()
-        }
+        customTileViewModelFactory.create(spec)
 }

@@ -16,15 +16,22 @@
 
 package com.android.server.power.hint;
 
+import static android.os.Flags.adpfUseFmqChannel;
+
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.power.hint.Flags.powerhintThreadCleanup;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.StatsManager;
 import android.app.UidObserver;
 import android.content.Context;
+import android.hardware.power.ChannelConfig;
+import android.hardware.power.IPower;
+import android.hardware.power.SessionConfig;
+import android.hardware.power.SessionTag;
 import android.hardware.power.WorkDuration;
 import android.os.Binder;
 import android.os.Handler;
@@ -36,6 +43,7 @@ import android.os.Message;
 import android.os.PerformanceHintManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -66,7 +74,9 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /** An hint service implementation that runs in System Server process. */
 public final class HintManagerService extends SystemService {
@@ -87,8 +97,20 @@ public final class HintManagerService extends SystemService {
     @GuardedBy("mLock")
     private final ArrayMap<Integer, ArrayMap<IBinder, ArraySet<AppHintSession>>> mActiveSessions;
 
-    /** Lock to protect HAL handles and listen list. */
+    // Multi-level map storing all the channel binder token death listeners.
+    // First level is keyed by the UID of the client process owning the channel.
+    // Second level is the tgid of the process, which will often just be size one.
+    // Each channel is unique per (tgid, uid) pair, so this map associates each pair with an
+    // object that listens for the death notification of the binder token that was provided by
+    // that client when it created the channel, so we can detect when the client process dies.
+    @GuardedBy("mChannelMapLock")
+    private ArrayMap<Integer, TreeMap<Integer, ChannelItem>> mChannelMap;
+
+    /** Lock to protect mActiveSessions and the UidObserver. */
     private final Object mLock = new Object();
+
+    /** Lock to protect mChannelMap. */
+    private final Object mChannelMapLock = new Object();
 
     @GuardedBy("mNonIsolatedTidsLock")
     private final Map<Integer, Set<Long>> mNonIsolatedTids;
@@ -103,6 +125,11 @@ public final class HintManagerService extends SystemService {
     private final ActivityManagerInternal mAmInternal;
 
     private final Context mContext;
+
+    private AtomicBoolean mConfigCreationSupport = new AtomicBoolean(true);
+
+    private final IPower mPowerHal;
+    private int mPowerHalVersion;
 
     private static final String PROPERTY_SF_ENABLE_CPU_HINT = "debug.sf.enable_adpf_cpu_hint";
     private static final String PROPERTY_HWUI_ENABLE_HINT_MANAGER = "debug.hwui.use_hint_manager";
@@ -125,12 +152,22 @@ public final class HintManagerService extends SystemService {
             mNonIsolatedTids = null;
         }
         mActiveSessions = new ArrayMap<>();
+        mChannelMap = new ArrayMap<>();
         mNativeWrapper = injector.createNativeWrapper();
         mNativeWrapper.halInit();
         mHintSessionPreferredRate = mNativeWrapper.halGetHintSessionPreferredRate();
         mUidObserver = new MyUidObserver();
         mAmInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityManagerInternal.class));
+        mPowerHal = injector.createIPower();
+        mPowerHalVersion = 0;
+        if (mPowerHal != null) {
+            try {
+                mPowerHalVersion = mPowerHal.getInterfaceVersion();
+            } catch (RemoteException e) {
+                throw new IllegalStateException("Could not contact PowerHAL!", e);
+            }
+        }
     }
 
     private ServiceThread createCleanUpThread() {
@@ -144,6 +181,10 @@ public final class HintManagerService extends SystemService {
     static class Injector {
         NativeWrapper createNativeWrapper() {
             return new NativeWrapper();
+        }
+        IPower createIPower() {
+            return IPower.Stub.asInterface(
+                ServiceManager.waitForDeclaredService(IPower.DESCRIPTOR + "/default"));
         }
     }
 
@@ -217,6 +258,9 @@ public final class HintManagerService extends SystemService {
         private static native long nativeCreateHintSession(int tgid, int uid, int[] tids,
                 long durationNanos);
 
+        private static native long nativeCreateHintSessionWithConfig(int tgid, int uid, int[] tids,
+                long durationNanos, int tag, SessionConfig config);
+
         private static native void nativePauseHintSession(long halPtr);
 
         private static native void nativeResumeHintSession(long halPtr);
@@ -251,6 +295,12 @@ public final class HintManagerService extends SystemService {
         /** Wrapper for HintManager.nativeCreateHintSession */
         public long halCreateHintSession(int tgid, int uid, int[] tids, long durationNanos) {
             return nativeCreateHintSession(tgid, uid, tids, durationNanos);
+        }
+
+        /** Wrapper for HintManager.nativeCreateHintSessionWithConfig */
+        public long halCreateHintSessionWithConfig(
+                int tgid, int uid, int[] tids, long durationNanos, int tag, SessionConfig config) {
+            return nativeCreateHintSessionWithConfig(tgid, uid, tids, durationNanos, tag, config);
         }
 
         /** Wrapper for HintManager.nativePauseHintSession */
@@ -303,11 +353,10 @@ public final class HintManagerService extends SystemService {
 
     @VisibleForTesting
     final class MyUidObserver extends UidObserver {
-        private final Object mCacheLock = new Object();
-        @GuardedBy("mCacheLock")
+        @GuardedBy("mLock")
         private final SparseIntArray mProcStatesCache = new SparseIntArray();
         public boolean isUidForeground(int uid) {
-            synchronized (mCacheLock) {
+            synchronized (mLock) {
                 return mProcStatesCache.get(uid, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND)
                         <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
             }
@@ -316,20 +365,29 @@ public final class HintManagerService extends SystemService {
         @Override
         public void onUidGone(int uid, boolean disabled) {
             FgThread.getHandler().post(() -> {
-                synchronized (mCacheLock) {
-                    mProcStatesCache.delete(uid);
-                }
                 synchronized (mLock) {
+                    mProcStatesCache.delete(uid);
                     ArrayMap<IBinder, ArraySet<AppHintSession>> tokenMap = mActiveSessions.get(uid);
                     if (tokenMap == null) {
                         return;
                     }
+                    Slog.d(TAG, "Uid gone for " + uid);
                     for (int i = tokenMap.size() - 1; i >= 0; i--) {
                         // Will remove the session from tokenMap
                         ArraySet<AppHintSession> sessionSet = tokenMap.valueAt(i);
                         for (int j = sessionSet.size() - 1; j >= 0; j--) {
                             sessionSet.valueAt(j).close();
                         }
+                    }
+                }
+                synchronized (mChannelMapLock) {
+                    // Clean up the uid's session channels
+                    final TreeMap<Integer, ChannelItem> uidMap = mChannelMap.get(uid);
+                    if (uidMap != null) {
+                        for (Map.Entry<Integer, ChannelItem> entry : uidMap.entrySet()) {
+                            entry.getValue().closeChannel();
+                        }
+                        mChannelMap.remove(uid);
                     }
                 }
             });
@@ -342,35 +400,144 @@ public final class HintManagerService extends SystemService {
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             FgThread.getHandler().post(() -> {
-                synchronized (mCacheLock) {
-                    if (powerhintThreadCleanup()) {
-                        final boolean before = isUidForeground(uid);
-                        mProcStatesCache.put(uid, procState);
-                        final boolean after = isUidForeground(uid);
-                        if (before != after) {
-                            final Message msg = mCleanUpHandler.obtainMessage(EVENT_CLEAN_UP_UID,
-                                    uid);
-                            mCleanUpHandler.sendMessageDelayed(msg, CLEAN_UP_UID_DELAY_MILLIS);
-                        }
-                    } else {
-                        mProcStatesCache.put(uid, procState);
-                    }
-                }
-                boolean shouldAllowUpdate = isUidForeground(uid);
                 synchronized (mLock) {
+                    boolean shouldCleanup = false;
+                    if (powerhintThreadCleanup()) {
+                        int prevProcState = mProcStatesCache.get(uid, Integer.MAX_VALUE);
+                        shouldCleanup =
+                                prevProcState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
+                                        && procState
+                                        > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+                    }
+
+                    mProcStatesCache.put(uid, procState);
                     ArrayMap<IBinder, ArraySet<AppHintSession>> tokenMap = mActiveSessions.get(uid);
                     if (tokenMap == null) {
                         return;
                     }
+                    if (shouldCleanup && powerhintThreadCleanup()) {
+                        final Message msg = mCleanUpHandler.obtainMessage(EVENT_CLEAN_UP_UID,
+                                uid);
+                        mCleanUpHandler.sendMessageDelayed(msg, CLEAN_UP_UID_DELAY_MILLIS);
+                        Slog.d(TAG, "Sent cleanup message for uid " + uid);
+                    }
+                    boolean shouldAllowUpdate = isUidForeground(uid);
                     for (int i = tokenMap.size() - 1; i >= 0; i--) {
                         final ArraySet<AppHintSession> sessionSet = tokenMap.valueAt(i);
                         for (int j = sessionSet.size() - 1; j >= 0; j--) {
-                            sessionSet.valueAt(j).onProcStateChanged(shouldAllowUpdate);
+                            sessionSet.valueAt(j).updateHintAllowedByProcState(shouldAllowUpdate);
                         }
                     }
                 }
             });
         }
+    }
+
+    /**
+     * Creates a channel item in the channel map if one does not exist, then returns
+     * the entry in the channel map.
+     */
+    public ChannelItem getOrCreateMappedChannelItem(int tgid, int uid, IBinder token) {
+        synchronized (mChannelMapLock) {
+            if (!mChannelMap.containsKey(uid)) {
+                mChannelMap.put(uid, new TreeMap<Integer, ChannelItem>());
+            }
+            TreeMap<Integer, ChannelItem> map = mChannelMap.get(uid);
+            if (!map.containsKey(tgid)) {
+                ChannelItem item = new ChannelItem(tgid, uid, token);
+                item.openChannel();
+                map.put(tgid, item);
+            }
+            return map.get(tgid);
+        }
+    }
+
+    /**
+     * This removes an entry in the binder token callback map when a channel is closed,
+     * and unregisters its callbacks.
+     */
+    public void removeChannelItem(Integer tgid, Integer uid) {
+        synchronized (mChannelMapLock) {
+            TreeMap<Integer, ChannelItem> map = mChannelMap.get(uid);
+            if (map != null) {
+                ChannelItem item = map.get(tgid);
+                if (item != null) {
+                    item.closeChannel();
+                    map.remove(tgid);
+                }
+                if (map.isEmpty()) {
+                    mChannelMap.remove(uid);
+                }
+            }
+        }
+    }
+
+    /**
+     * Manages the lifecycle of a single channel. This includes caching the channel descriptor,
+     * receiving binder token death notifications, and handling cleanup on uid termination. There
+     * can only be one ChannelItem per (tgid, uid) pair in mChannelMap, and channel creation happens
+     * when a ChannelItem enters the map, while destruction happens when it leaves the map.
+     */
+    private class ChannelItem implements IBinder.DeathRecipient {
+        @Override
+        public void binderDied() {
+            removeChannelItem(mTgid, mUid);
+        }
+
+        ChannelItem(int tgid, int uid, IBinder token) {
+            this.mTgid = tgid;
+            this.mUid = uid;
+            this.mToken = token;
+            this.mLinked = false;
+            this.mConfig = null;
+        }
+
+        public void closeChannel() {
+            if (mLinked) {
+                mToken.unlinkToDeath(this, 0);
+                mLinked = false;
+            }
+            if (mConfig != null) {
+                try  {
+                    mPowerHal.closeSessionChannel(mTgid, mUid);
+                } catch (RemoteException e) {
+                    throw new IllegalStateException("Failed to close session channel!", e);
+                }
+                mConfig = null;
+            }
+        }
+
+        public void openChannel() {
+            if (!mLinked) {
+                try {
+                    mToken.linkToDeath(this, 0);
+                } catch (RemoteException e) {
+                    throw new IllegalStateException("Client already dead", e);
+                }
+                mLinked = true;
+            }
+            if (mConfig == null) {
+                try {
+                    // This method uses PowerHAL directly through the SDK,
+                    // to avoid needing to pass the ChannelConfig through JNI.
+                    mConfig = mPowerHal.getSessionChannel(mTgid, mUid);
+                } catch (RemoteException e) {
+                    removeChannelItem(mTgid, mUid);
+                    throw new IllegalStateException("Failed to create session channel!", e);
+                }
+            }
+        }
+
+        ChannelConfig getConfig() {
+            return mConfig;
+        }
+
+        // To avoid accidental double-linking / unlinking
+        boolean mLinked;
+        final int mTgid;
+        final int mUid;
+        final IBinder mToken;
+        ChannelConfig mConfig;
     }
 
     final class CleanUpHandler extends Handler {
@@ -390,8 +557,10 @@ public final class HintManagerService extends SystemService {
                     removeEqualMessages(msg.what, msg.obj);
                     final Message newMsg = obtainMessage(msg.what, msg.obj);
                     sendMessageDelayed(newMsg, CLEAN_UP_UID_DELAY_MILLIS);
+                    Slog.d(TAG, "Duplicate messages for " + msg.obj);
                     return;
                 }
+                Slog.d(TAG, "Starts cleaning for " + msg.obj);
                 final int uid = (int) msg.obj;
                 boolean isForeground = mUidObserver.isUidForeground(uid);
                 // store all sessions in a list and release the global lock
@@ -456,7 +625,10 @@ public final class HintManagerService extends SystemService {
                         totalDurationNs / durationNsList.length);
                 int th90DurationUs = (int) TimeUnit.NANOSECONDS.toMicros(
                         durationNsList[(int) (durationNsList.length * 0.9)]);
-                Slog.d(TAG,
+                FrameworkStatsLog.write(FrameworkStatsLog.ADPF_HINT_SESSION_TID_CLEANUP, uid,
+                        totalDurationUs, maxDurationUs, totalTidCnt, totalInvalidTidCnt,
+                        maxInvalidTidCnt, sessionCnt, isForeground);
+                Slog.w(TAG,
                         "Invalid tid found for UID" + uid + " in " + totalDurationUs + "us:\n\t"
                                 + "count("
                                 + " session: " + sessionCnt
@@ -478,7 +650,7 @@ public final class HintManagerService extends SystemService {
         // kill(tid, 0) to only check if it exists. The result will be cached in checkedTids
         // map with tid as the key and checked status as value.
         public int cleanUpSession(AppHintSession session, SparseIntArray checkedTids, int[] total) {
-            if (session.isClosed()) {
+            if (session.isClosed() || session.isForcePaused()) {
                 return 0;
             }
             final int pid = session.mPid;
@@ -540,7 +712,7 @@ public final class HintManagerService extends SystemService {
                     final int[] filteredTids = filtered.toArray();
                     if (filteredTids.length == 0) {
                         session.mShouldForcePause = true;
-                        if (session.mUpdateAllowed) {
+                        if (session.mUpdateAllowedByProcState) {
                             session.pause();
                         }
                     } else {
@@ -555,6 +727,18 @@ public final class HintManagerService extends SystemService {
     @VisibleForTesting
     IHintManager.Stub getBinderServiceInstance() {
         return mService;
+    }
+
+    @VisibleForTesting
+    Boolean hasChannel(int tgid, int uid) {
+        synchronized (mChannelMapLock) {
+            TreeMap<Integer, ChannelItem> uidMap = mChannelMap.get(uid);
+            if (uidMap != null) {
+                ChannelItem item = uidMap.get(tgid);
+                return item != null;
+            }
+            return false;
+        }
     }
 
     // returns the first invalid tid or null if not found
@@ -609,8 +793,12 @@ public final class HintManagerService extends SystemService {
     @VisibleForTesting
     final class BinderService extends IHintManager.Stub {
         @Override
-        public IHintSession createHintSession(IBinder token, int[] tids, long durationNanos) {
-            if (!isHalSupported()) return null;
+        public IHintSession createHintSessionWithConfig(@NonNull IBinder token,
+                @NonNull int[] tids, long durationNanos, @SessionTag int tag,
+                @Nullable SessionConfig config) {
+            if (!isHalSupported()) {
+                throw new UnsupportedOperationException("PowerHAL is not supported!");
+            }
 
             java.util.Objects.requireNonNull(token);
             java.util.Objects.requireNonNull(tids);
@@ -631,8 +819,35 @@ public final class HintManagerService extends SystemService {
                     throw new SecurityException(errMsg);
                 }
 
-                long halSessionPtr = mNativeWrapper.halCreateHintSession(callingTgid, callingUid,
-                        tids, durationNanos);
+                Long halSessionPtr = null;
+                if (mConfigCreationSupport.get()) {
+                    try {
+                        halSessionPtr = mNativeWrapper.halCreateHintSessionWithConfig(
+                                callingTgid, callingUid, tids, durationNanos, tag, config);
+                    } catch (UnsupportedOperationException e) {
+                        mConfigCreationSupport.set(false);
+                    } catch (IllegalStateException e) {
+                        Slog.e("createHintSessionWithConfig failed: ", e.getMessage());
+                        throw new IllegalStateException(
+                            "createHintSessionWithConfig failed: " + e.getMessage());
+                    }
+                }
+
+                if (halSessionPtr == null) {
+                    try {
+                        halSessionPtr = mNativeWrapper.halCreateHintSession(callingTgid,
+                                callingUid, tids, durationNanos);
+                    } catch (UnsupportedOperationException e) {
+                        Slog.w("createHintSession unsupported: ", e.getMessage());
+                        throw new UnsupportedOperationException(
+                            "createHintSession unsupported: " + e.getMessage());
+                    } catch (IllegalStateException e) {
+                        Slog.e("createHintSession failed: ", e.getMessage());
+                        throw new IllegalStateException(
+                            "createHintSession failed: " + e.getMessage());
+                    }
+                }
+
                 if (powerhintThreadCleanup()) {
                     synchronized (mNonIsolatedTidsLock) {
                         for (int i = nonIsolated.size() - 1; i >= 0; i--) {
@@ -641,14 +856,11 @@ public final class HintManagerService extends SystemService {
                         }
                     }
                 }
-                if (halSessionPtr == 0) {
-                    return null;
-                }
 
-                AppHintSession hs = new AppHintSession(callingUid, callingTgid, tids, token,
-                        halSessionPtr, durationNanos);
                 logPerformanceHintSessionAtom(callingUid, halSessionPtr, durationNanos, tids);
                 synchronized (mLock) {
+                    AppHintSession hs = new AppHintSession(callingUid, callingTgid, tids, token,
+                            halSessionPtr, durationNanos);
                     ArrayMap<IBinder, ArraySet<AppHintSession>> tokenMap =
                             mActiveSessions.get(callingUid);
                     if (tokenMap == null) {
@@ -667,6 +879,28 @@ public final class HintManagerService extends SystemService {
                 Binder.restoreCallingIdentity(identity);
             }
         }
+
+        @Override
+        public ChannelConfig getSessionChannel(IBinder token) {
+            if (mPowerHalVersion < 5 || !adpfUseFmqChannel()) {
+                return null;
+            }
+            java.util.Objects.requireNonNull(token);
+            final int callingTgid = Process.getThreadGroupLeader(Binder.getCallingPid());
+            final int callingUid = Binder.getCallingUid();
+            ChannelItem item = getOrCreateMappedChannelItem(callingTgid, callingUid, token);
+            return item.getConfig();
+        };
+
+        @Override
+        public void closeSessionChannel() {
+            if (mPowerHalVersion < 5 || !adpfUseFmqChannel()) {
+                return;
+            }
+            final int callingTgid = Process.getThreadGroupLeader(Binder.getCallingPid());
+            final int callingUid = Binder.getCallingUid();
+            removeChannelItem(callingTgid, callingUid);
+        };
 
         @Override
         public long getHintSessionPreferredRate() {
@@ -724,7 +958,7 @@ public final class HintManagerService extends SystemService {
         protected final IBinder mToken;
         protected long mHalSessionPtr;
         protected long mTargetDurationNanos;
-        protected boolean mUpdateAllowed;
+        protected boolean mUpdateAllowedByProcState;
         protected int[] mNewThreadIds;
         protected boolean mPowerEfficient;
         protected boolean mShouldForcePause;
@@ -742,11 +976,11 @@ public final class HintManagerService extends SystemService {
             mThreadIds = threadIds;
             mHalSessionPtr = halSessionPtr;
             mTargetDurationNanos = durationNanos;
-            mUpdateAllowed = true;
+            mUpdateAllowedByProcState = true;
             mPowerEfficient = false;
             mShouldForcePause = false;
             final boolean allowed = mUidObserver.isUidForeground(mUid);
-            updateHintAllowed(allowed);
+            updateHintAllowedByProcState(allowed);
             try {
                 token.linkToDeath(this, 0);
             } catch (RemoteException e) {
@@ -756,19 +990,23 @@ public final class HintManagerService extends SystemService {
         }
 
         @VisibleForTesting
-        boolean updateHintAllowed(boolean allowed) {
+        boolean updateHintAllowedByProcState(boolean allowed) {
             synchronized (this) {
-                if (allowed && !mUpdateAllowed && !mShouldForcePause) resume();
-                if (!allowed && mUpdateAllowed) pause();
-                mUpdateAllowed = allowed;
-                return mUpdateAllowed;
+                if (allowed && !mUpdateAllowedByProcState && !mShouldForcePause) resume();
+                if (!allowed && mUpdateAllowedByProcState) pause();
+                mUpdateAllowedByProcState = allowed;
+                return mUpdateAllowedByProcState;
             }
+        }
+
+        boolean isHintAllowed() {
+            return mHalSessionPtr != 0 && mUpdateAllowedByProcState && !mShouldForcePause;
         }
 
         @Override
         public void updateTargetWorkDuration(long targetDurationNanos) {
             synchronized (this) {
-                if (mHalSessionPtr == 0 || !mUpdateAllowed || mShouldForcePause) {
+                if (!isHintAllowed()) {
                     return;
                 }
                 Preconditions.checkArgument(targetDurationNanos > 0, "Expected"
@@ -781,7 +1019,7 @@ public final class HintManagerService extends SystemService {
         @Override
         public void reportActualWorkDuration(long[] actualDurationNanos, long[] timeStampNanos) {
             synchronized (this) {
-                if (mHalSessionPtr == 0 || !mUpdateAllowed || mShouldForcePause) {
+                if (!isHintAllowed()) {
                     return;
                 }
                 Preconditions.checkArgument(actualDurationNanos.length != 0, "the count"
@@ -846,7 +1084,7 @@ public final class HintManagerService extends SystemService {
         @Override
         public void sendHint(@PerformanceHintManager.Session.Hint int hint) {
             synchronized (this) {
-                if (mHalSessionPtr == 0 || !mUpdateAllowed || mShouldForcePause) {
+                if (!isHintAllowed()) {
                     return;
                 }
                 Preconditions.checkArgument(hint >= 0, "the hint ID value should be"
@@ -868,7 +1106,7 @@ public final class HintManagerService extends SystemService {
                 if (mHalSessionPtr == 0) {
                     return;
                 }
-                if (!mUpdateAllowed) {
+                if (!mUpdateAllowedByProcState) {
                     Slogf.v(TAG, "update hint not allowed, storing tids.");
                     mNewThreadIds = tids;
                     mShouldForcePause = false;
@@ -933,10 +1171,15 @@ public final class HintManagerService extends SystemService {
             }
         }
 
+        boolean isForcePaused() {
+            synchronized (this) {
+                return mShouldForcePause;
+            }
+        }
         @Override
         public void setMode(int mode, boolean enabled) {
             synchronized (this) {
-                if (mHalSessionPtr == 0 || !mUpdateAllowed || mShouldForcePause) {
+                if (!isHintAllowed()) {
                     return;
                 }
                 Preconditions.checkArgument(mode >= 0, "the mode Id value should be"
@@ -951,7 +1194,7 @@ public final class HintManagerService extends SystemService {
         @Override
         public void reportActualWorkDuration2(WorkDuration[] workDurations) {
             synchronized (this) {
-                if (mHalSessionPtr == 0 || !mUpdateAllowed || mShouldForcePause) {
+                if (!isHintAllowed()) {
                     return;
                 }
                 Preconditions.checkArgument(workDurations.length != 0, "the count"
@@ -1014,10 +1257,6 @@ public final class HintManagerService extends SystemService {
             }
         }
 
-        private void onProcStateChanged(boolean updateAllowed) {
-            updateHintAllowed(updateAllowed);
-        }
-
         private void pause() {
             synchronized (this) {
                 if (mHalSessionPtr == 0) return;
@@ -1043,7 +1282,7 @@ public final class HintManagerService extends SystemService {
                 pw.println(prefix + "SessionUID: " + mUid);
                 pw.println(prefix + "SessionTIDs: " + Arrays.toString(mThreadIds));
                 pw.println(prefix + "SessionTargetDurationNanos: " + mTargetDurationNanos);
-                pw.println(prefix + "SessionAllowed: " + mUpdateAllowed);
+                pw.println(prefix + "SessionAllowedByProcState: " + mUpdateAllowedByProcState);
                 pw.println(prefix + "SessionForcePaused: " + mShouldForcePause);
                 pw.println(prefix + "PowerEfficient: " + (mPowerEfficient ? "true" : "false"));
             }

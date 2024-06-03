@@ -26,8 +26,12 @@ import android.content.Context
 import android.graphics.Rect
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
+import android.hardware.input.InputManager
 import android.os.Handler
 import android.platform.test.annotations.EnableFlags
+import android.platform.test.annotations.RequiresFlagsEnabled
+import android.platform.test.flag.junit.CheckFlagsRule
+import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
@@ -39,8 +43,10 @@ import android.view.InputChannel
 import android.view.InputMonitor
 import android.view.InsetsSource
 import android.view.InsetsState
+import android.view.KeyEvent
 import android.view.SurfaceControl
 import android.view.SurfaceView
+import android.view.View
 import android.view.WindowInsets.Type.navigationBars
 import android.view.WindowInsets.Type.statusBars
 import androidx.test.filters.SmallTest
@@ -48,6 +54,7 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.window.flags.Flags
+import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
@@ -57,8 +64,9 @@ import com.android.wm.shell.common.DisplayInsetsController
 import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
-import com.android.wm.shell.desktopmode.DesktopModeStatus
 import com.android.wm.shell.desktopmode.DesktopTasksController
+import com.android.wm.shell.freeform.FreeformTaskTransitionStarter
+import com.android.wm.shell.shared.DesktopModeStatus
 import com.android.wm.shell.sysui.KeyguardChangeListener
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
@@ -67,6 +75,7 @@ import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel.DesktopModeOnInsetsChangedListener
 import java.util.Optional
 import java.util.function.Supplier
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -96,6 +105,10 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @JvmField
     @Rule
     val setFlagsRule = SetFlagsRule()
+
+    @JvmField
+    @Rule
+    val mCheckFlagsRule: CheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
 
     @Mock private lateinit var mockDesktopModeWindowDecorFactory:
             DesktopModeWindowDecoration.Factory
@@ -272,6 +285,41 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     }
 
     @Test
+    fun testBackEventHasRightDisplayId() {
+        val secondaryDisplay = createVirtualDisplay() ?: return
+        val secondaryDisplayId = secondaryDisplay.display.displayId
+        val task = createTask(
+            displayId = secondaryDisplayId,
+            windowingMode = WINDOWING_MODE_FREEFORM
+        )
+        val windowDecor = setUpMockDecorationForTask(task)
+
+        onTaskOpening(task)
+        val onClickListenerCaptor = argumentCaptor<View.OnClickListener>()
+        verify(windowDecor).setCaptionListeners(
+            onClickListenerCaptor.capture(), any(), any(), any())
+
+        val onClickListener = onClickListenerCaptor.firstValue
+        val view = mock(View::class.java)
+        whenever(view.id).thenReturn(R.id.back_button)
+
+        val inputManager = mock(InputManager::class.java)
+        mContext.addMockSystemService(InputManager::class.java, inputManager)
+
+        val freeformTaskTransitionStarter = mock(FreeformTaskTransitionStarter::class.java)
+        desktopModeWindowDecorViewModel
+                .setFreeformTaskTransitionStarter(freeformTaskTransitionStarter)
+
+        onClickListener.onClick(view)
+
+        val eventCaptor = argumentCaptor<KeyEvent>()
+        verify(inputManager, times(2)).injectInputEvent(eventCaptor.capture(), anyInt())
+
+        assertEquals(secondaryDisplayId, eventCaptor.firstValue.displayId)
+        assertEquals(secondaryDisplayId, eventCaptor.secondValue.displayId)
+    }
+
+    @Test
     fun testCaptionIsNotCreatedWhenKeyguardIsVisible() {
         val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true)
         val keyguardListenerCaptor = argumentCaptor<KeyguardChangeListener>()
@@ -306,6 +354,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_IMMERSIVE_HANDLE_HIDING)
     fun testRelayoutRunsWhenStatusBarsInsetsSourceVisibilityChanges() {
         val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM, focused = true)
         val decoration = setUpMockDecorationForTask(task)
@@ -326,6 +375,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_IMMERSIVE_HANDLE_HIDING)
     fun testRelayoutDoesNotRunWhenNonStatusBarsInsetsSourceVisibilityChanges() {
         val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM, focused = true)
         val decoration = setUpMockDecorationForTask(task)
@@ -346,6 +396,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_IMMERSIVE_HANDLE_HIDING)
     fun testRelayoutDoesNotRunWhenNonStatusBarsInsetSourceVisibilityDoesNotChange() {
         val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM, focused = true)
         val decoration = setUpMockDecorationForTask(task)

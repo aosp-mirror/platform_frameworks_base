@@ -66,6 +66,8 @@ import android.companion.ICompanionDeviceManager;
 import android.companion.virtual.IVirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceManager;
 import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.ClipboardManager;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
@@ -196,6 +198,7 @@ import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.StatsFrameworkInitializer;
 import android.os.SystemConfigManager;
+import android.os.SystemProperties;
 import android.os.SystemUpdateManager;
 import android.os.SystemVibrator;
 import android.os.SystemVibratorManager;
@@ -284,6 +287,28 @@ public final class SystemServiceRegistry {
 
     /** @hide */
     public static boolean sEnableServiceNotFoundWtf = false;
+
+    /**
+     * Starting with {@link VANILLA_ICE_CREAM}, Telephony feature flags
+     * (e.g. {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}) are being checked before
+     * returning managers that depend on them. If the feature is missing,
+     * {@link Context#getSystemService} will return null.
+     *
+     * This change is specific to VcnManager.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    static final long ENABLE_CHECKING_TELEPHONY_FEATURES_FOR_VCN = 330902016;
+
+    /**
+     * The corresponding vendor API for Android V
+     *
+     * <p>Starting with Android V, the vendor API format has switched to YYYYMM.
+     *
+     * @see <a href="https://preview.source.android.com/docs/core/architecture/api-flags">Vendor API
+     *     level</a>
+     */
+    private static final int VENDOR_API_FOR_ANDROID_V = 202404;
 
     // Service registry information.
     // This information is never changed once static initialization has completed.
@@ -450,8 +475,10 @@ public final class SystemServiceRegistry {
                 new CachedServiceFetcher<VcnManager>() {
             @Override
             public VcnManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                if (!ctx.getPackageManager().hasSystemFeature(
-                        PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)) {
+                final String telephonyFeatureToCheck = getVcnFeatureDependency();
+
+                if (telephonyFeatureToCheck != null
+                    && !ctx.getPackageManager().hasSystemFeature(telephonyFeatureToCheck)) {
                     return null;
                 }
 
@@ -1748,6 +1775,30 @@ public final class SystemServiceRegistry {
         return manager.hasSystemFeature(featureName);
     }
 
+    // Suppressing AndroidFrameworkCompatChange because we're querying vendor
+    // partition SDK level, not application's target SDK version (which BTW we
+    // also check through Compatibility framework a few lines below).
+    @SuppressWarnings("AndroidFrameworkCompatChange")
+    @Nullable
+    private static String getVcnFeatureDependency() {
+        // Check SDK version of the client app. Apps targeting pre-V SDK might
+        // have not checked for existence of these features.
+        if (!Compatibility.isChangeEnabled(ENABLE_CHECKING_TELEPHONY_FEATURES_FOR_VCN)) {
+            return null;
+        }
+
+        // Check SDK version of the vendor partition. Pre-V devices might have
+        // incorrectly under-declared telephony features.
+        final int vendorApiLevel = SystemProperties.getInt(
+                "ro.vendor.api_level", Build.VERSION.DEVICE_INITIAL_SDK_INT);
+        if (vendorApiLevel < VENDOR_API_FOR_ANDROID_V) {
+            return PackageManager.FEATURE_TELEPHONY;
+        } else {
+            return PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION;
+        }
+
+    }
+
     /**
      * Gets a system service from a given context.
      * @hide
@@ -1779,6 +1830,11 @@ public final class SystemServiceRegistry {
                 case Context.SEARCH_SERVICE:
                     // Wear device does not support SEARCH_SERVICE so we do not print WTF here
                     if (hasSystemFeatureOpportunistic(ctx, PackageManager.FEATURE_WATCH)) {
+                        return null;
+                    }
+                    break;
+                case Context.APPWIDGET_SERVICE:
+                    if (!hasSystemFeatureOpportunistic(ctx, PackageManager.FEATURE_APP_WIDGETS)) {
                         return null;
                     }
                     break;

@@ -17,8 +17,10 @@
 package com.android.server.os;
 
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
+import static android.app.admin.flags.Flags.onboardingConsentlessBugreports;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.AppOpsManager;
@@ -30,6 +32,7 @@ import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.BugreportManager.BugreportCallback;
 import android.os.BugreportParams;
+import android.os.Build;
 import android.os.Environment;
 import android.os.IDumpstate;
 import android.os.IDumpstateListener;
@@ -45,6 +48,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.LocalLog;
+import android.util.MutableBoolean;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.Xml;
@@ -67,11 +71,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Implementation of the service that provides a privileged API to capture and consume bugreports.
@@ -95,6 +102,9 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     private static final String BUGREPORT_SERVICE = "bugreportd";
     private static final long DEFAULT_BUGREPORT_SERVICE_TIMEOUT_MILLIS = 30 * 1000;
 
+    private static final long DEFAULT_BUGREPORT_CONSENTLESS_GRACE_PERIOD_MILLIS =
+            TimeUnit.MINUTES.toMillis(2);
+
     private final Object mLock = new Object();
     private final Injector mInjector;
     private final Context mContext;
@@ -102,6 +112,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     private final TelephonyManager mTelephonyManager;
     private final ArraySet<String> mBugreportAllowlistedPackages;
     private final BugreportFileManager mBugreportFileManager;
+    private static final FeatureFlags sFeatureFlags = new FeatureFlagsImpl();
 
 
     @GuardedBy("mLock")
@@ -127,6 +138,10 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         @GuardedBy("mLock")
         private ArrayMap<Pair<Integer, String>, ArraySet<String>> mBugreportFiles =
                 new ArrayMap<>();
+
+        // Map of <CallerPackage, Pair<TimestampOfLastConsent, skipConsentForFullReport>>
+        @GuardedBy("mLock")
+        private Map<String, Pair<Long, Boolean>> mConsentGranted = new HashMap<>();
 
         @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
         @GuardedBy("mLock")
@@ -184,6 +199,16 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
                         throwInvalidBugreportFileForCallerException(
                                 bugreportFile, callingInfo.second);
                     }
+
+                    boolean keepBugreportOnRetrieval = false;
+                    if (onboardingBugreportV2Enabled()) {
+                        keepBugreportOnRetrieval = mBugreportFilesToPersist.contains(
+                                bugreportFile);
+                    }
+
+                    if (!keepBugreportOnRetrieval) {
+                        bugreportFilesForUid.remove(bugreportFile);
+                    }
                 } else {
                     ArraySet<String> bugreportFilesForCaller = mBugreportFiles.get(callingInfo);
                     if (bugreportFilesForCaller != null
@@ -221,6 +246,64 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
                     }
                     writeBugreportDataLocked();
                 }
+            }
+        }
+
+        /**
+         * Logs an entry with a timestamp of a consent being granted by the user to the calling
+         * {@code packageName}.
+         */
+        void logConsentGrantedForCaller(
+                String packageName, boolean consentGranted, boolean isDeferredReport) {
+            if (!onboardingConsentlessBugreports() || !Build.IS_DEBUGGABLE) {
+                return;
+            }
+            synchronized (mLock) {
+                // Adds an entry with the timestamp of the consent being granted by the user, and
+                // whether the consent can be skipped for a full bugreport, because a single
+                // consent can be used for multiple deferred reports but only one full report.
+                if (consentGranted) {
+                    mConsentGranted.put(packageName, new Pair<>(
+                            System.currentTimeMillis(),
+                            isDeferredReport));
+                } else if (!isDeferredReport) {
+                    if (!mConsentGranted.containsKey(packageName)) {
+                        Slog.e(TAG, "Previous consent from package: " + packageName + " should"
+                                + "have been logged.");
+                        return;
+                    }
+                    mConsentGranted.put(packageName, new Pair<>(
+                            mConsentGranted.get(packageName).first,
+                            /* second = */ false
+                    ));
+                }
+            }
+        }
+
+        /**
+         * Returns {@code true} if user consent be skippeb because a previous consens has been
+         * granted to the caller within the allowed time period.
+         */
+        boolean canSkipConsentScreen(String packageName, boolean isFullReport) {
+            if (!onboardingConsentlessBugreports() || !Build.IS_DEBUGGABLE) {
+                return false;
+            }
+            synchronized (mLock) {
+                if (!mConsentGranted.containsKey(packageName)) {
+                    return false;
+                }
+                long currentTime = System.currentTimeMillis();
+                long consentGrantedTime = mConsentGranted.get(packageName).first;
+                if (consentGrantedTime + DEFAULT_BUGREPORT_CONSENTLESS_GRACE_PERIOD_MILLIS
+                        < currentTime) {
+                    mConsentGranted.remove(packageName);
+                    return false;
+                }
+                boolean skipConsentForFullReport = mConsentGranted.get(packageName).second;
+                if (isFullReport && !skipConsentForFullReport) {
+                    return false;
+                }
+                return true;
             }
         }
 
@@ -325,14 +408,22 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     }
 
     static class Injector {
+        class RoleManagerWrapper {
+            List<String> getRoleHolders(@NonNull String roleName) {
+                return mContext.getSystemService(RoleManager.class).getRoleHolders(roleName);
+            }
+        }
+
         Context mContext;
         ArraySet<String> mAllowlistedPackages;
         AtomicFile mMappingFile;
+        RoleManagerWrapper mRoleManagerWrapper;
 
         Injector(Context context, ArraySet<String> allowlistedPackages, AtomicFile mappingFile) {
             mContext = context;
             mAllowlistedPackages = allowlistedPackages;
             mMappingFile = mappingFile;
+            mRoleManagerWrapper = new RoleManagerWrapper();
         }
 
         Context getContext() {
@@ -357,6 +448,10 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
 
         void setSystemProperty(String key, String value) {
             SystemProperties.set(key, value);
+        }
+
+        RoleManagerWrapper getRoleManagerWrapper() {
+            return mRoleManagerWrapper;
         }
     }
 
@@ -392,7 +487,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     public void startBugreport(int callingUidUnused, String callingPackage,
             FileDescriptor bugreportFd, FileDescriptor screenshotFd,
             int bugreportMode, int bugreportFlags, IDumpstateListener listener,
-            boolean isScreenshotRequested) {
+            boolean isScreenshotRequested, boolean skipUserConsentUnused) {
         Objects.requireNonNull(callingPackage);
         Objects.requireNonNull(bugreportFd);
         Objects.requireNonNull(listener);
@@ -405,9 +500,51 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         ensureUserCanTakeBugReport(bugreportMode);
 
         Slogf.i(TAG, "Starting bugreport for %s / %d", callingPackage, callingUid);
-        synchronized (mLock) {
-            startBugreportLocked(callingUid, callingPackage, bugreportFd, screenshotFd,
-                    bugreportMode, bugreportFlags, listener, isScreenshotRequested);
+        final MutableBoolean handoffLock = new MutableBoolean(false);
+        if (sFeatureFlags.asyncStartBugreport()) {
+            synchronized (handoffLock) {
+                new Thread(()-> {
+                    try {
+                        synchronized (mLock) {
+                            synchronized (handoffLock) {
+                                handoffLock.value = true;
+                                handoffLock.notifyAll();
+                            }
+                            startBugreportLocked(
+                                    callingUid,
+                                    callingPackage,
+                                    bugreportFd,
+                                    screenshotFd,
+                                    bugreportMode,
+                                    bugreportFlags,
+                                    listener,
+                                    isScreenshotRequested);
+                        }
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Cannot start a new bugreport due to an unknown error", e);
+                        reportError(listener, IDumpstateListener.BUGREPORT_ERROR_RUNTIME_ERROR);
+                    }
+                }, "BugreportManagerServiceThread").start();
+                try {
+                    while (!handoffLock.value) { // handle the rare case of a spurious wakeup
+                        handoffLock.wait(DEFAULT_BUGREPORT_SERVICE_TIMEOUT_MILLIS);
+                    }
+                } catch (InterruptedException e) {
+                    Slog.e(TAG, "Unexpectedly interrupted waiting for startBugreportLocked", e);
+                }
+            }
+        } else {
+            synchronized (mLock) {
+                startBugreportLocked(
+                        callingUid,
+                        callingPackage,
+                        bugreportFd,
+                        screenshotFd,
+                        bugreportMode,
+                        bugreportFlags,
+                        listener,
+                        isScreenshotRequested);
+            }
         }
     }
 
@@ -441,7 +578,8 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     @RequiresPermission(value = Manifest.permission.DUMP, conditional = true)
     public void retrieveBugreport(int callingUidUnused, String callingPackage, int userId,
             FileDescriptor bugreportFd, String bugreportFile,
-            boolean keepBugreportOnRetrievalUnused, IDumpstateListener listener) {
+            boolean keepBugreportOnRetrievalUnused, boolean skipUserConsentUnused,
+            IDumpstateListener listener) {
         int callingUid = Binder.getCallingUid();
         enforcePermission(callingPackage, callingUid, false);
 
@@ -472,9 +610,13 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
                 return;
             }
 
+            boolean skipUserConsent = mBugreportFileManager.canSkipConsentScreen(
+                    callingPackage, /* isFullReport = */ false);
+
             // Wrap the listener so we can intercept binder events directly.
             DumpstateListener myListener = new DumpstateListener(listener, ds,
-                    new Pair<>(callingUid, callingPackage), /* reportFinishedFile= */ true);
+                    new Pair<>(callingUid, callingPackage), /* reportFinishedFile= */ true,
+                    !skipUserConsent, /* isDeferredReport = */ true);
 
             boolean keepBugreportOnRetrieval = false;
             if (onboardingBugreportV2Enabled()) {
@@ -485,7 +627,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             setCurrentDumpstateListenerLocked(myListener);
             try {
                 ds.retrieveBugreport(callingUid, callingPackage, userId, bugreportFd,
-                        bugreportFile, keepBugreportOnRetrieval, myListener);
+                        bugreportFile, keepBugreportOnRetrieval, skipUserConsent, myListener);
             } catch (RemoteException e) {
                 Slog.e(TAG, "RemoteException in retrieveBugreport", e);
             }
@@ -536,7 +678,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         if (!allowlisted) {
             final long token = Binder.clearCallingIdentity();
             try {
-                allowlisted = mContext.getSystemService(RoleManager.class).getRoleHolders(
+                allowlisted = mInjector.getRoleManagerWrapper().getRoleHolders(
                         ROLE_SYSTEM_AUTOMOTIVE_PROJECTION).contains(callingPackage);
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -686,7 +828,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             }
         }
 
-        boolean reportFinishedFile =
+        boolean isDeferredConsentReport =
                 (bugreportFlags & BugreportParams.BUGREPORT_FLAG_DEFER_CONSENT) != 0;
 
         boolean keepBugreportOnRetrieval =
@@ -698,14 +840,17 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             reportError(listener, IDumpstateListener.BUGREPORT_ERROR_RUNTIME_ERROR);
             return;
         }
-
+        boolean skipUserConsent = mBugreportFileManager.canSkipConsentScreen(
+                callingPackage, !isDeferredConsentReport);
         DumpstateListener myListener = new DumpstateListener(listener, ds,
-                new Pair<>(callingUid, callingPackage), reportFinishedFile,
-                keepBugreportOnRetrieval);
+                new Pair<>(callingUid, callingPackage),
+                /* reportFinishedFile = */ isDeferredConsentReport, keepBugreportOnRetrieval,
+                !isDeferredConsentReport && !skipUserConsent,
+                isDeferredConsentReport);
         setCurrentDumpstateListenerLocked(myListener);
         try {
             ds.startBugreport(callingUid, callingPackage, bugreportFd, screenshotFd, bugreportMode,
-                    bugreportFlags, myListener, isScreenshotRequested);
+                    bugreportFlags, myListener, isScreenshotRequested, skipUserConsent);
         } catch (RemoteException e) {
             // dumpstate service is already started now. We need to kill it to manage the
             // lifecycle correctly. If we don't subsequent callers will get
@@ -862,14 +1007,21 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         private boolean mDone;
         private boolean mKeepBugreportOnRetrieval;
 
+        private boolean mConsentGranted;
+
+        private boolean mIsDeferredReport;
+
         DumpstateListener(IDumpstateListener listener, IDumpstate ds,
-                Pair<Integer, String> caller, boolean reportFinishedFile) {
-            this(listener, ds, caller, reportFinishedFile, /* keepBugreportOnRetrieval= */ false);
+                Pair<Integer, String> caller, boolean reportFinishedFile,
+                boolean consentGranted, boolean isDeferredReport) {
+            this(listener, ds, caller, reportFinishedFile, /* keepBugreportOnRetrieval= */ false,
+                    consentGranted, isDeferredReport);
         }
 
         DumpstateListener(IDumpstateListener listener, IDumpstate ds,
                 Pair<Integer, String> caller, boolean reportFinishedFile,
-                boolean keepBugreportOnRetrieval) {
+                boolean keepBugreportOnRetrieval, boolean consentGranted,
+                boolean isDeferredReport) {
             if (DEBUG) {
                 Slogf.d(TAG, "Starting DumpstateListener(id=%d) for caller %s", mId, caller);
             }
@@ -878,6 +1030,8 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             mCaller = caller;
             mReportFinishedFile = reportFinishedFile;
             mKeepBugreportOnRetrieval = keepBugreportOnRetrieval;
+            mConsentGranted = consentGranted;
+            mIsDeferredReport = isDeferredReport;
             try {
                 mDs.asBinder().linkToDeath(this, 0);
             } catch (RemoteException e) {
@@ -917,6 +1071,8 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             } else if (DEBUG) {
                 Slog.d(TAG, "Not reporting finished file");
             }
+            mBugreportFileManager.logConsentGrantedForCaller(
+                    mCaller.second, mConsentGranted, mIsDeferredReport);
             mListener.onFinished(bugreportFile);
         }
 

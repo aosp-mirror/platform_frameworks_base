@@ -55,7 +55,7 @@ constructor(
             when (state) {
                 is ObservableTransitionState.Idle ->
                     flowOf(
-                        if (state.scene != Scenes.Gone) {
+                        if (state.currentScene != Scenes.Gone) {
                             // When resting on a non-Gone scene, the panel is fully expanded.
                             1f
                         } else {
@@ -69,27 +69,21 @@ constructor(
                         state.fromScene == Scenes.Gone ->
                             if (state.toScene.isExpandable()) {
                                 // Moving from Gone to a scene that can animate-expand has a
-                                // panel
-                                // expansion
-                                // that tracks with the transition.
+                                // panel expansion that tracks with the transition.
                                 state.progress
                             } else {
                                 // Moving from Gone to a scene that doesn't animate-expand
-                                // immediately makes
-                                // the panel fully expanded.
+                                // immediately makes the panel fully expanded.
                                 flowOf(1f)
                             }
                         state.toScene == Scenes.Gone ->
                             if (state.fromScene.isExpandable()) {
                                 // Moving to Gone from a scene that can animate-expand has a
-                                // panel
-                                // expansion
-                                // that tracks with the transition.
+                                // panel expansion that tracks with the transition.
                                 state.progress.map { 1 - it }
                             } else {
                                 // Moving to Gone from a scene that doesn't animate-expand
-                                // immediately makes
-                                // the panel fully collapsed.
+                                // immediately makes the panel fully collapsed.
                                 flowOf(0f)
                             }
                         else -> flowOf(1f)
@@ -125,6 +119,15 @@ constructor(
     @Deprecated("Use SceneInteractor or ShadeInteractor instead")
     override val barState
         get() = statusBarStateController.state
+
+    @Deprecated("No longer supported. Do not add new calls to this.")
+    override fun shouldHideStatusBarIconsWhenExpanded(): Boolean {
+        if (shadeAnimationInteractor.isLaunchingActivity.value) {
+            return false
+        }
+        // TODO(b/325936094) if a HUN is showing, return false
+        return sceneInteractor.currentScene.value == Scenes.Lockscreen
+    }
 
     private fun SceneKey.isExpandable(): Boolean {
         return this == Scenes.Shade || this == Scenes.QuickSettings

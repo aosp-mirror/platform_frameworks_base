@@ -29,11 +29,17 @@ interface ShadeInteractor : BaseShadeInteractor {
     /** Emits true if the shade is currently allowed and false otherwise. */
     val isShadeEnabled: StateFlow<Boolean>
 
+    /** Emits true if QS is currently allowed and false otherwise. */
+    val isQsEnabled: StateFlow<Boolean>
+
     /** Whether either the shade or QS is fully expanded. */
     val isAnyFullyExpanded: StateFlow<Boolean>
 
     /** Whether the Shade is fully expanded. */
     val isShadeFullyExpanded: Flow<Boolean>
+
+    /** Whether the Shade is fully collapsed. */
+    val isShadeFullyCollapsed: Flow<Boolean>
 
     /**
      * Whether the user is expanding or collapsing either the shade or quick settings with user
@@ -66,7 +72,7 @@ interface BaseShadeInteractor {
     val isAnyExpanded: StateFlow<Boolean>
 
     /** The amount [0-1] that the shade has been opened. */
-    val shadeExpansion: Flow<Float>
+    val shadeExpansion: StateFlow<Float>
 
     /**
      * The amount [0-1] QS has been opened. Normal shade with notifications (QQS) visible will

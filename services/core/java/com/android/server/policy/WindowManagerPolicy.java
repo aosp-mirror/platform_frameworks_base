@@ -251,12 +251,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          */
         public int getCameraLensCoverState();
 
-        /**
-         * Switch the keyboard layout for the given device.
-         * Direction should be +1 or -1 to go to the next or previous keyboard layout.
-         */
-        public void switchKeyboardLayout(int deviceId, int direction);
-
         public void shutdown(boolean confirm);
         public void reboot(boolean confirm);
         public void rebootSafeMode(boolean confirm);
@@ -894,6 +888,9 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     public interface ScreenOffListener {
         void onScreenOff();
     }
+
+    /** Called when the physical display starts to switch, e.g. fold/unfold. */
+    void onDisplaySwitchStart(int displayId);
 
     /**
      * Return whether the default display is on and not blocked by a black surface.

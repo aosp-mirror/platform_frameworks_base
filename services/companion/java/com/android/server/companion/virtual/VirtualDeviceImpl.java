@@ -28,9 +28,8 @@ import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CAMERA;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CLIPBOARD;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
 import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS;
-import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
-import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.companion.virtualdevice.flags.Flags.virtualCameraServiceDiscovery;
+import static android.companion.virtualdevice.flags.Flags.intentInterceptionActionMatchingFix;
 
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
@@ -272,7 +271,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 params,
                 DisplayManagerGlobal.getInstance(),
                 isVirtualCameraEnabled()
-                        ? new VirtualCameraController(params.getDevicePolicy(POLICY_TYPE_CAMERA))
+                        ? new VirtualCameraController(
+                                params.getDevicePolicy(POLICY_TYPE_CAMERA), deviceId)
                         : null);
     }
 
@@ -1067,6 +1067,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @Override
     public boolean hasCustomAudioInputSupport() throws RemoteException {
+        return hasCustomAudioInputSupportInternal();
+    }
+
+    private boolean hasCustomAudioInputSupportInternal() {
         if (!Flags.vdmPublicApis()) {
             return false;
         }
@@ -1078,8 +1082,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             return false;
         }
 
-        if (getDevicePolicy(POLICY_TYPE_AUDIO) == VirtualDeviceParams.DEVICE_POLICY_DEFAULT) {
-            return false;
+        if (getDevicePolicy(POLICY_TYPE_AUDIO) == VirtualDeviceParams.DEVICE_POLICY_CUSTOM) {
+            return true;
         }
         final long token = Binder.clearCallingIdentity();
         try {
@@ -1107,10 +1111,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mParams.dump(fout, indent + indent);
         fout.println(indent + "mVirtualDisplayIds: ");
         synchronized (mVirtualDeviceLock) {
-            fout.println("    mDevicePolicies: " + mDevicePolicies);
             for (int i = 0; i < mVirtualDisplays.size(); i++) {
                 fout.println(indent + "  " + mVirtualDisplays.keyAt(i));
             }
+            fout.println("    mDevicePolicies: " + mDevicePolicies);
             fout.println(indent + "mDefaultShowPointerIcon: " + mDefaultShowPointerIcon);
         }
         mInputController.dump(fout);
@@ -1118,6 +1122,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         if (mVirtualCameraController != null) {
             mVirtualCameraController.dump(fout, indent);
         }
+        fout.println(
+                indent + "hasCustomAudioInputSupport: " + hasCustomAudioInputSupportInternal());
     }
 
     // For display mirroring, we want to dispatch all key events to the source (default) display,
@@ -1149,8 +1155,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 Flags.vdmCustomHome() ? mParams.getHomeComponent() : null;
 
         final GenericWindowPolicyController gwpc = new GenericWindowPolicyController(
-                FLAG_SECURE,
-                SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+                WindowManager.LayoutParams.FLAG_SECURE,
+                WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
                 mAttributionSource,
                 getAllowedUserHandles(),
                 activityLaunchAllowedByDefault,
@@ -1264,7 +1270,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         // if the secure window is shown on a non-secure virtual display.
         DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
         Display display = displayManager.getDisplay(displayId);
-        if ((display.getFlags() & FLAG_SECURE) == 0) {
+        if ((display.getFlags() & Display.FLAG_SECURE) == 0) {
             showToastWhereUidIsRunning(uid, com.android.internal.R.string.vdm_secure_window,
                     Toast.LENGTH_LONG, mContext.getMainLooper());
 
@@ -1473,7 +1479,13 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         synchronized (mVirtualDeviceLock) {
             boolean hasInterceptedIntent = false;
             for (Map.Entry<IBinder, IntentFilter> interceptor : mIntentInterceptors.entrySet()) {
-                if (interceptor.getValue().match(
+                IntentFilter intentFilter = interceptor.getValue();
+                // Explicitly match the actions because the intent filter will match any intent
+                // without an explicit action. If the intent has no action, then require that there
+                // are no actions specified in the filter either.
+                boolean explicitActionMatch = !intentInterceptionActionMatchingFix()
+                        || intent.getAction() != null || intentFilter.countActions() == 0;
+                if (explicitActionMatch && intentFilter.match(
                         intent.getAction(), intent.getType(), intent.getScheme(), intent.getData(),
                         intent.getCategories(), TAG) >= 0) {
                     try {

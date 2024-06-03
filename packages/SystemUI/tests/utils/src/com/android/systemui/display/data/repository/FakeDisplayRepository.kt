@@ -23,6 +23,8 @@ import dagger.Module
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.mockito.Mockito.`when` as whenever
 
 /** Creates a mock display. */
@@ -69,12 +71,20 @@ class FakeDisplayRepository @Inject constructor() : DisplayRepository {
     override val pendingDisplay: Flow<DisplayRepository.PendingDisplay?>
         get() = pendingDisplayFlow
 
+    val _defaultDisplayOff: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    override val defaultDisplayOff: Flow<Boolean>
+        get() = _defaultDisplayOff.asStateFlow()
+
     override val displayAdditionEvent: Flow<Display?>
         get() = displayAdditionEventFlow
 
     private val _displayChangeEvent = MutableSharedFlow<Int>(replay = 1)
     override val displayChangeEvent: Flow<Int> = _displayChangeEvent
     suspend fun emitDisplayChangeEvent(displayId: Int) = _displayChangeEvent.emit(displayId)
+
+    fun setDefaultDisplayOff(defaultDisplayOff: Boolean) {
+        _defaultDisplayOff.value = defaultDisplayOff
+    }
 }
 
 @Module

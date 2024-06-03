@@ -108,15 +108,12 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Cần vẽ hình mở khoá sau khi khởi động lại thiết bị"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"Cần nhập mã PIN sau khi khởi động lại thiết bị"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Cần nhập mật khẩu sau khi khởi động lại thiết bị"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Để tăng cường bảo mật, hãy sử dụng hình mở khoá"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Để tăng cường bảo mật, hãy dùng hình mở khoá"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Để tăng cường bảo mật, hãy sử dụng mã PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Để tăng cường bảo mật, hãy sử dụng mật khẩu"</string>
-    <!-- no translation found for kg_prompt_added_security_pin (5487992065995475528) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_pattern (1017068086102168544) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_password (6053156069765029006) -->
-    <skip />
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Yêu cầu mã PIN để tăng cường bảo mật"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Yêu cầu hình mở khoá để tăng cường bảo mật"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Yêu cầu mật khẩu để tăng cường bảo mật"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Thiết bị đã bị quản trị viên khóa"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Thiết bị đã bị khóa theo cách thủ công"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Không nhận dạng được"</string>

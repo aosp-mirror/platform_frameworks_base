@@ -1,4 +1,5 @@
 package: "com.android.systemui.accessibility.accessibilitymenu"
+container: "system"
 
 # NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
 
@@ -7,4 +8,14 @@ flag {
     namespace: "accessibility"
     description: "Hides the AccessibilityMenuService UI before taking action instead of after."
     bug: "292020123"
+}
+
+flag {
+    name: "a11y_menu_snackbar_live_region"
+    namespace: "accessibility"
+    description: "configures live region on snackbar so its contents are announced when it appears."
+    bug: "338351484"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

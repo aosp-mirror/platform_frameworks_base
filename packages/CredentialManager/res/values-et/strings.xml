@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Liikudes paroolivaba tuleviku poole, jäävad paroolid pääsuvõtmete kõrval siiski kättesaadavaks."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Valige, kuhu soovite oma <xliff:g id="CREATETYPES">%1$s</xliff:g> salvestada"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Valige paroolihaldur, et salvestada oma teave ja järgmisel korral kiiremini sisse logida"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Kas luua rakendusse <xliff:g id="APPNAME">%1$s</xliff:g> sisselogimiseks pääsuvõti?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Kas salvestada rakendusse <xliff:g id="APPNAME">%1$s</xliff:g> sisselogimiseks parool?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Kas salvestada rakenduse <xliff:g id="APPNAME">%1$s</xliff:g> jaoks sisselogimisandmed?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Kas luua rakendusse <xliff:g id="APP_NAME">%1$s</xliff:g> sisselogimiseks pääsuvõti?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"Kas salvestada parool rakendusse <xliff:g id="APP_NAME">%1$s</xliff:g> sisselogimiseks?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Kas salvestada rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> jaoks sisselogimisteave?"</string>
     <string name="passkey" msgid="632353688396759522">"pääsuvõti"</string>
     <string name="password" msgid="6738570945182936667">"parool"</string>
     <string name="passkeys" msgid="5733880786866559847">"pääsuvõtmed"</string>
@@ -68,14 +68,15 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Minge tagasi eelmisele lehele"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Sule"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Loobu"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Kas kasutada rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> jaoks salvestatud pääsuvõtit?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Kas kasutada rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> puhul salvestatud parooli?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Kas soovite rakendusse <xliff:g id="APP_NAME">%1$s</xliff:g> sisselogimiseks kasutada oma mandaati?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Kas avada rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> jaoks sisselogimisvalikud?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Kasutage rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> jaoks salvestatud pääsuvõtit"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Kasutage rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> jaoks salvestatud parooli"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Kasutage rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> jaoks kontot"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Kasutage rakendusse <xliff:g id="APP_NAME">%1$s</xliff:g> kasutajanimega <xliff:g id="USERNAME">%2$s</xliff:g> sisselogimiseks ekraanilukku"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Avage rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> jaoks sisselogimisviisid"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Valige rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> jaoks salvestatud pääsuvõti"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Valige rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> jaoks salvestatud parool"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Valige rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> jaoks salvestatud sisselogimisandmed"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Valige rakendusse <xliff:g id="APP_NAME">%1$s</xliff:g> sisselogimiseks mandaat"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"Valige rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> jaoks konto"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Kas teha valik rakendusele <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Kas soovite kasutada seda teavet rakenduses <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Logige sisse muul viisil"</string>

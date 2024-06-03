@@ -74,10 +74,7 @@ import java.util.List;
         }
         final PackageManagerInternal packageManagerInternal =
                 LocalServices.getService(PackageManagerInternal.class);
-        final int actualUid =
-                packageManagerInternal.getPackageUid(
-                        packageName, 0 /* flags */, UserHandle.getUserId(uid));
-        if (!UserHandle.isSameApp(uid, actualUid)) {
+        if (!packageManagerInternal.isSameApp(packageName, uid, UserHandle.getUserId(uid))) {
             String[] uidPackages = context.getPackageManager().getPackagesForUid(uid);
             throw new IllegalArgumentException(
                     "packageName does not belong to the calling uid; "

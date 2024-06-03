@@ -217,7 +217,7 @@ public class HidlToAidlSensorAdapterTest {
                 mContext, mHidlToAidlSensorAdapter.getLazySession(), null /* token */,
                 1 /* requestId */, null /* listener */, USER_ID, HAT, TAG, mBiometricUtils,
                 SENSOR_ID, mLogger, mBiometricContext,
-                mHidlToAidlSensorAdapter.getSensorProperties(), null, null,
+                mHidlToAidlSensorAdapter.getSensorProperties(), null,
                 mAuthenticationStateListeners, 5 /* maxTemplatesPerUser */, ENROLL_ENROLL,
                 (new FingerprintEnrollOptions.Builder()).build()));
         mLooper.dispatchAll();

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="accessibility_menu_service_name" msgid="730136711554740131">"Menu Acessibilidade"</string>
+    <string name="accessibility_menu_service_name" msgid="730136711554740131">"menu Acessibilidade"</string>
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"O menu Acessibilidade disponibiliza um menu grande no ecrã para controlar o dispositivo. Pode bloquear o dispositivo, controlar o volume e o brilho, fazer capturas de ecrã e muito mais."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Assistente"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"Assistente"</string>
@@ -21,7 +21,7 @@
     <string name="previous_button_content_description" msgid="840869171117765966">"Ir para o ecrã anterior"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"Ir para o ecrã seguinte"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"O menu Acessibilidade disponibiliza um menu grande no ecrã para controlar o dispositivo. Pode bloquear o dispositivo, controlar o volume e o brilho, fazer capturas de ecrã e muito mais."</string>
-    <string name="accessibility_menu_summary" msgid="340071398148208130">"Controle o dispositivo através do menu grande"</string>
+    <string name="accessibility_menu_summary" msgid="340071398148208130">"Controlar dispositivo através do menu grande"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Definições do menu Acessibilidade"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Botões grandes"</string>
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Aumentar o tamanho dos botões do menu Acessibilidade"</string>

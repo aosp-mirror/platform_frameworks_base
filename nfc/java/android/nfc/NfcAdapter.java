@@ -340,7 +340,8 @@ public final class NfcAdapter {
     public static final int FLAG_READER_NFC_BARCODE = 0x10;
 
     /** @hide */
-    @IntDef(flag = true, prefix = {"FLAG_READER_"}, value = {
+    @IntDef(flag = true, value = {
+        FLAG_SET_DEFAULT_TECH,
         FLAG_READER_KEEP,
         FLAG_READER_DISABLE,
         FLAG_READER_NFC_A,
@@ -438,7 +439,8 @@ public final class NfcAdapter {
     public static final int FLAG_USE_ALL_TECH = 0xff;
 
     /** @hide */
-    @IntDef(flag = true, prefix = {"FLAG_LISTEN_"}, value = {
+    @IntDef(flag = true, value = {
+        FLAG_SET_DEFAULT_TECH,
         FLAG_LISTEN_KEEP,
         FLAG_LISTEN_DISABLE,
         FLAG_LISTEN_NFC_PASSIVE_A,
@@ -447,6 +449,18 @@ public final class NfcAdapter {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ListenTechnology {}
+
+    /**
+     * Flag used in {@link #setDiscoveryTechnology(Activity, int, int)}.
+     * <p>
+     * Setting this flag changes the default listen or poll tech.
+     * Only available to privileged apps.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_SET_DEFAULT_DISC_TECH)
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public static final int FLAG_SET_DEFAULT_TECH = 0x40000000;
 
     /**
      * @hide
@@ -581,6 +595,7 @@ public final class NfcAdapter {
     final Context mContext;
     final HashMap<NfcUnlockHandler, INfcUnlockHandler> mNfcUnlockHandlers;
     final Object mLock;
+    final NfcOemExtension mNfcOemExtension;
 
     ITagRemovedCallback mTagRemovedListener; // protected by mLock
 
@@ -891,6 +906,7 @@ public final class NfcAdapter {
         mControllerAlwaysOnListener = new NfcControllerAlwaysOnListener(getService());
         mNfcWlcStateListener = new NfcWlcStateListener(getService());
         mNfcVendorNciCallbackListener = new NfcVendorNciCallbackListener(getService());
+        mNfcOemExtension = new NfcOemExtension(mContext, this);
     }
 
     /**
@@ -1104,6 +1120,9 @@ public final class NfcAdapter {
      * {@link #ACTION_ADAPTER_STATE_CHANGED} broadcasts to find out when the
      * operation is complete.
      *
+     * <p>This API is only allowed to be called by system apps
+     * or apps which are Device Owner or Profile Owner.
+     *
      * <p>If this returns true, then either NFC is already on, or
      * a {@link #ACTION_ADAPTER_STATE_CHANGED} broadcast will be sent
      * to indicate a state transition. If this returns false, then
@@ -1111,13 +1130,12 @@ public final class NfcAdapter {
      * NFC on (for example we are in airplane mode and NFC is not
      * toggleable in airplane mode on this platform).
      *
-     * @hide
      */
-    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_STATE_CHANGE)
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     public boolean enable() {
         try {
-            return sService.enable();
+            return sService.enable(mContext.getPackageName());
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             // Try one more time
@@ -1126,7 +1144,7 @@ public final class NfcAdapter {
                 return false;
             }
             try {
-                return sService.enable();
+                return sService.enable(mContext.getPackageName());
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to recover NFC Service.");
             }
@@ -1144,19 +1162,21 @@ public final class NfcAdapter {
      * {@link #ACTION_ADAPTER_STATE_CHANGED} broadcasts to find out when the
      * operation is complete.
      *
+     * <p>This API is only allowed to be called by system apps
+     * or apps which are Device Owner or Profile Owner.
+     *
      * <p>If this returns true, then either NFC is already off, or
      * a {@link #ACTION_ADAPTER_STATE_CHANGED} broadcast will be sent
      * to indicate a state transition. If this returns false, then
      * there is some problem that prevents an attempt to turn
      * NFC off.
      *
-     * @hide
      */
-    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_STATE_CHANGE)
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     public boolean disable() {
         try {
-            return sService.disable(true);
+            return sService.disable(true, mContext.getPackageName());
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             // Try one more time
@@ -1165,7 +1185,7 @@ public final class NfcAdapter {
                 return false;
             }
             try {
-                return sService.disable(true);
+                return sService.disable(true, mContext.getPackageName());
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to recover NFC Service.");
             }
@@ -1181,7 +1201,7 @@ public final class NfcAdapter {
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     public boolean disable(boolean persist) {
         try {
-            return sService.disable(persist);
+            return sService.disable(persist, mContext.getPackageName());
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             // Try one more time
@@ -1190,7 +1210,7 @@ public final class NfcAdapter {
                 return false;
             }
             try {
-                return sService.disable(persist);
+                return sService.disable(persist, mContext.getPackageName());
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to recover NFC Service.");
             }
@@ -1248,7 +1268,11 @@ public final class NfcAdapter {
     /**
      * Controls whether the NFC adapter will allow transactions to proceed or be in observe mode
      * and simply observe and notify the APDU service of polling loop frames. See
-     * {@link #isObserveModeSupported()} for a description of observe mode.
+     * {@link #isObserveModeSupported()} for a description of observe mode. Only the package of the
+     * currently preferred service (the service set as preferred by the current foreground
+     * application via {@link CardEmulation#setPreferredService(Activity, ComponentName)} or the
+     * current Default Wallet Role Holder {@link android.app.role.RoleManager#ROLE_WALLET}),
+     * otherwise a call to this method will fail and return false.
      *
      * @param enabled false disables observe mode to allow the transaction to proceed while true
      *                enables observe mode and does not allow transactions to proceed.
@@ -1258,8 +1282,12 @@ public final class NfcAdapter {
 
     @FlaggedApi(Flags.FLAG_NFC_OBSERVE_MODE)
     public boolean setObserveModeEnabled(boolean enabled) {
+        if (mContext == null) {
+            throw new UnsupportedOperationException("You need a context on NfcAdapter to use the "
+                    + " observe mode APIs");
+        }
         try {
-            return sService.setObserveMode(enabled);
+            return sService.setObserveMode(enabled, mContext.getPackageName());
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             return false;
@@ -1860,24 +1888,13 @@ public final class NfcAdapter {
     public void setDiscoveryTechnology(@NonNull Activity activity,
             @PollTechnology int pollTechnology, @ListenTechnology int listenTechnology) {
 
-        // A special treatment of the _KEEP flags
-        if ((listenTechnology & FLAG_LISTEN_KEEP) != 0) {
-            listenTechnology = -1;
-        }
-        if ((pollTechnology & FLAG_READER_KEEP) != 0) {
-            pollTechnology = -1;
-        }
-
         if (listenTechnology == FLAG_LISTEN_DISABLE) {
             synchronized (sLock) {
                 if (!sHasNfcFeature) {
                     throw new UnsupportedOperationException();
                 }
             }
-            mNfcActivityManager.enableReaderMode(activity, null, pollTechnology, null);
-            return;
-        }
-        if (pollTechnology == FLAG_READER_DISABLE) {
+        } else if (pollTechnology == FLAG_READER_DISABLE) {
             synchronized (sLock) {
                 if (!sHasCeFeature) {
                     throw new UnsupportedOperationException();
@@ -1890,7 +1907,25 @@ public final class NfcAdapter {
                 }
             }
         }
-        mNfcActivityManager.setDiscoveryTech(activity, pollTechnology, listenTechnology);
+    /*
+     * Privileged FLAG to set technology mask for all data processed by NFC controller
+     * Note: Use with caution! The app is responsible for ensuring that the discovery
+     * technology mask is returned to default.
+     * Note: FLAG_USE_ALL_TECH used with _KEEP flags will reset the technolody to android default
+     */
+        if (Flags.nfcSetDefaultDiscTech()
+                && ((pollTechnology & FLAG_SET_DEFAULT_TECH) == FLAG_SET_DEFAULT_TECH
+                || (listenTechnology & FLAG_SET_DEFAULT_TECH) == FLAG_SET_DEFAULT_TECH)) {
+            Binder token = new Binder();
+            try {
+                NfcAdapter.sService.updateDiscoveryTechnology(token,
+                        pollTechnology, listenTechnology);
+            } catch (RemoteException e) {
+                attemptDeadServiceRecovery(e);
+            }
+        } else {
+            mNfcActivityManager.setDiscoveryTech(activity, pollTechnology, listenTechnology);
+        }
     }
 
     /**
@@ -2801,12 +2836,11 @@ public final class NfcAdapter {
     @TestApi
     @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
     public void notifyPollingLoop(@NonNull PollingFrame pollingFrame) {
-        Bundle frame = pollingFrame.toBundle();
         try {
             if (sService == null) {
                 attemptDeadServiceRecovery(null);
             }
-            sService.notifyPollingLoop(frame);
+            sService.notifyPollingLoop(pollingFrame);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             // Try one more time
@@ -2815,7 +2849,7 @@ public final class NfcAdapter {
                 return;
             }
             try {
-                sService.notifyPollingLoop(frame);
+                sService.notifyPollingLoop(pollingFrame);
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to recover NFC Service.");
             }
@@ -3162,5 +3196,20 @@ public final class NfcAdapter {
         @FlaggedApi(Flags.FLAG_NFC_VENDOR_CMD)
         void onVendorNciNotification(
                 @IntRange(from = 9, to = 15) int gid, int oid, @NonNull byte[] payload);
+    }
+
+    /**
+     * Returns an instance of {@link NfcOemExtension} associated with {@link NfcAdapter} instance.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @NonNull public NfcOemExtension getNfcOemExtension() {
+        synchronized (sLock) {
+            if (!sHasNfcFeature) {
+                throw new UnsupportedOperationException();
+            }
+        }
+        return mNfcOemExtension;
     }
 }

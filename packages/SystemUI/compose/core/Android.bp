@@ -32,12 +32,14 @@ android_library {
 
     static_libs: [
         "PlatformAnimationLib",
+        "PlatformMotionTestingComposeValues",
 
         "androidx.compose.runtime_runtime",
         "androidx.compose.material3_material3",
         "androidx.compose.material3_material3-window-size-class",
         "androidx.savedstate_savedstate",
         "androidx.window_window",
+        "//frameworks/libs/systemui:tracinglib-platform",
     ],
 
     kotlincflags: ["-Xjvm-default=all"],

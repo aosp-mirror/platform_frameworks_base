@@ -55,6 +55,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
@@ -88,13 +89,14 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
     private lateinit var dialog: SystemUIDialog
     private lateinit var factory: SystemUIDialog.Factory
     private lateinit var latch: CountDownLatch
+    private var issueRecordingState = IssueRecordingState()
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
         whenever(dprLazy.get()).thenReturn(devicePolicyResolver)
-        whenever(sysuiState.setFlag(anyInt(), anyBoolean())).thenReturn(sysuiState)
-        whenever(screenCaptureDisabledDialogDelegate.createDialog())
+        whenever(sysuiState.setFlag(anyLong(), anyBoolean())).thenReturn(sysuiState)
+        whenever(screenCaptureDisabledDialogDelegate.createSysUIDialog())
             .thenReturn(screenCaptureDisabledDialog)
         whenever(
                 userFileManager.getSharedPreferences(
@@ -128,6 +130,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
                     mediaProjectionMetricsLogger,
                     userFileManager,
                     screenCaptureDisabledDialogDelegate,
+                    issueRecordingState,
                 ) {
                     latch.countDown()
                 }

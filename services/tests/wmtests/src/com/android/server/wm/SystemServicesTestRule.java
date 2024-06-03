@@ -56,6 +56,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.DisplayManagerGlobal;
@@ -68,6 +69,7 @@ import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.StrictMode;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.util.Log;
 import android.view.DisplayInfo;
@@ -85,6 +87,7 @@ import com.android.server.am.ActivityManagerService;
 import com.android.server.display.DisplayControl;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.firewall.IntentFirewall;
+import com.android.server.grammaticalinflection.GrammaticalInflectionManagerInternal;
 import com.android.server.input.InputManagerService;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
@@ -194,10 +197,12 @@ public class SystemServicesTestRule implements TestRule {
         mMockitoSession = mockitoSession()
                 .mockStatic(LocalServices.class, spyStubOnly)
                 .mockStatic(DeviceConfig.class, spyStubOnly)
+                .mockStatic(UserManager.class, spyStubOnly)
                 .mockStatic(SurfaceControl.class, mockStubOnly)
                 .mockStatic(DisplayControl.class, mockStubOnly)
                 .mockStatic(LockGuard.class, mockStubOnly)
                 .mockStatic(Watchdog.class, mockStubOnly)
+                .spyStatic(DesktopModeLaunchParamsModifier.class)
                 .strictness(Strictness.LENIENT)
                 .startMocking();
 
@@ -205,6 +210,11 @@ public class SystemServicesTestRule implements TestRule {
         setUpLocalServices();
         setUpActivityTaskManagerService();
         setUpWindowManagerService();
+
+        // We never load the system settings in the tests, thus need to setup the grammatical
+        // gender configuration explicitly.
+        mAtmService.getGlobalConfiguration().setGrammaticalGender(
+                Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED);
     }
 
     private void setUpSystemCore() {
@@ -334,6 +344,18 @@ public class SystemServicesTestRule implements TestRule {
         };
         when(umi.isUserVisible(anyInt())).thenAnswer(isUserVisibleAnswer);
         when(umi.isUserVisible(anyInt(), anyInt())).thenAnswer(isUserVisibleAnswer);
+
+        final var gimi = mock(
+                GrammaticalInflectionManagerInternal.class, withSettings().stubOnly());
+        doReturn(Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED).when(
+                gimi).getGrammaticalGenderFromDeveloperSettings();
+        doReturn(Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED).when(
+                gimi).getSystemGrammaticalGender(anyInt());
+        doReturn(Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED).when(
+                gimi).mergedFinalSystemGrammaticalGender();
+        doReturn(false).when(gimi).canGetSystemGrammaticalGender(anyInt());
+        doReturn(gimi).when(
+                () -> LocalServices.getService(GrammaticalInflectionManagerInternal.class));
     }
 
     private void setUpActivityTaskManagerService() {
@@ -423,6 +445,9 @@ public class SystemServicesTestRule implements TestRule {
                 if (dc.mDisplayRotationCompatPolicy != null) {
                     dc.mDisplayRotationCompatPolicy.dispose();
                 }
+                if (dc.mCameraStateMonitor != null) {
+                    dc.mCameraStateMonitor.dispose();
+                }
             }
         }
 
@@ -469,6 +494,7 @@ public class SystemServicesTestRule implements TestRule {
         LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
         LocalServices.removeServiceForTest(UserManagerInternal.class);
         LocalServices.removeServiceForTest(ImeTargetVisibilityPolicy.class);
+        LocalServices.removeServiceForTest(GrammaticalInflectionManagerInternal.class);
     }
 
     Description getDescription() {

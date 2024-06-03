@@ -168,6 +168,13 @@ public class InteractionJankMonitor {
     @Deprecated public static final int CUJ_LAUNCHER_LAUNCH_APP_PAIR_FROM_WORKSPACE = Cuj.CUJ_LAUNCHER_LAUNCH_APP_PAIR_FROM_WORKSPACE;
     @Deprecated public static final int CUJ_LAUNCHER_LAUNCH_APP_PAIR_FROM_TASKBAR = Cuj.CUJ_LAUNCHER_LAUNCH_APP_PAIR_FROM_TASKBAR;
     @Deprecated public static final int CUJ_LAUNCHER_SAVE_APP_PAIR = Cuj.CUJ_LAUNCHER_SAVE_APP_PAIR;
+    @Deprecated public static final int CUJ_LAUNCHER_ALL_APPS_SEARCH_BACK = Cuj.CUJ_LAUNCHER_ALL_APPS_SEARCH_BACK;
+    @Deprecated public static final int CUJ_LAUNCHER_TASKBAR_ALL_APPS_CLOSE_BACK = Cuj.CUJ_LAUNCHER_TASKBAR_ALL_APPS_CLOSE_BACK;
+    @Deprecated public static final int CUJ_LAUNCHER_TASKBAR_ALL_APPS_SEARCH_BACK = Cuj.CUJ_LAUNCHER_TASKBAR_ALL_APPS_SEARCH_BACK;
+    @Deprecated public static final int CUJ_LAUNCHER_WIDGET_PICKER_CLOSE_BACK = Cuj.CUJ_LAUNCHER_WIDGET_PICKER_CLOSE_BACK;
+    @Deprecated public static final int CUJ_LAUNCHER_WIDGET_PICKER_SEARCH_BACK = Cuj.CUJ_LAUNCHER_WIDGET_PICKER_SEARCH_BACK;
+    @Deprecated public static final int CUJ_LAUNCHER_WIDGET_BOTTOM_SHEET_CLOSE_BACK = Cuj.CUJ_LAUNCHER_WIDGET_BOTTOM_SHEET_CLOSE_BACK;
+    @Deprecated public static final int CUJ_LAUNCHER_WIDGET_EDU_SHEET_CLOSE_BACK = Cuj.CUJ_LAUNCHER_WIDGET_EDU_SHEET_CLOSE_BACK;
 
     private static class InstanceHolder {
         public static final InteractionJankMonitor INSTANCE =

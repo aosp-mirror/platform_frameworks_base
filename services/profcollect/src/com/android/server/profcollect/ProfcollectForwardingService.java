@@ -63,6 +63,9 @@ public final class ProfcollectForwardingService extends SystemService {
             "com.android.server.profcollect.UPLOAD_PROFILES";
     private static final long BG_PROCESS_INTERVAL = TimeUnit.HOURS.toMillis(4); // every 4 hours.
 
+    private int mUsageSetting;
+    private boolean mUploadEnabled;
+
     private IProfCollectd mIProfcollect;
     private static ProfcollectForwardingService sSelfService;
     private final Handler mHandler = new ProfcollectdHandler(IoThread.getHandler().getLooper());
@@ -78,7 +81,7 @@ public final class ProfcollectForwardingService extends SystemService {
         public void onReceive(Context context, Intent intent) {
             if (INTENT_UPLOAD_PROFILES.equals(intent.getAction())) {
                 Log.d(LOG_TAG, "Received broadcast to pack and upload reports");
-                packAndUploadReport();
+                createAndUploadReport(sSelfService);
             }
         }
     };
@@ -90,6 +93,17 @@ public final class ProfcollectForwardingService extends SystemService {
             throw new AssertionError("only one service instance allowed");
         }
         sSelfService = this;
+
+        // Get "Usage & diagnostics" checkbox status. 1 is for enabled, 0 is for disabled.
+        try {
+            mUsageSetting = Settings.Global.getInt(context.getContentResolver(), "multi_cb");
+        } catch (SettingNotFoundException e) {
+            Log.e(LOG_TAG, "Usage setting not found: " + e.getMessage());
+            mUsageSetting = -1;
+        }
+
+        mUploadEnabled =
+            context.getResources().getBoolean(R.bool.config_profcollectReportUploaderEnabled);
 
         final IntentFilter filter = new IntentFilter();
         filter.addAction(INTENT_UPLOAD_PROFILES);
@@ -221,7 +235,6 @@ public final class ProfcollectForwardingService extends SystemService {
          */
         public static void schedule(Context context) {
             JobScheduler js = context.getSystemService(JobScheduler.class);
-
             js.schedule(new JobInfo.Builder(JOB_IDLE_PROCESS, JOB_SERVICE_NAME)
                     .setRequiresDeviceIdle(true)
                     .setRequiresCharging(true)
@@ -235,19 +248,8 @@ public final class ProfcollectForwardingService extends SystemService {
             if (DEBUG) {
                 Log.d(LOG_TAG, "Starting background process job");
             }
-
-            BackgroundThread.get().getThreadHandler().post(
-                    () -> {
-                        try {
-                            if (sSelfService.mIProfcollect == null) {
-                                return;
-                            }
-                            sSelfService.mIProfcollect.process();
-                        } catch (RemoteException e) {
-                            Log.e(LOG_TAG, "Failed to process profiles in background: "
-                                    + e.getMessage());
-                        }
-                    });
+            createAndUploadReport(sSelfService);
+            jobFinished(params, false);
             return true;
         }
 
@@ -356,7 +358,7 @@ public final class ProfcollectForwardingService extends SystemService {
                 }
 
                 if (status == UpdateEngine.UpdateStatusConstants.UPDATED_NEED_REBOOT) {
-                    packAndUploadReport();
+                    createAndUploadReport(sSelfService);
                 }
             }
 
@@ -367,41 +369,27 @@ public final class ProfcollectForwardingService extends SystemService {
         });
     }
 
-    private void packAndUploadReport() {
-        if (mIProfcollect == null) {
-            return;
-        }
-
-        Context context = getContext();
+    private static void createAndUploadReport(ProfcollectForwardingService pfs) {
         BackgroundThread.get().getThreadHandler().post(() -> {
+            String reportName;
             try {
-                int usageSetting = -1;
-                try {
-                    // Get "Usage & diagnostics" checkbox status. 1 is for enabled, 0 is for
-                    // disabled.
-                    usageSetting = Settings.Global.getInt(context.getContentResolver(), "multi_cb");
-                } catch (SettingNotFoundException e) {
-                    Log.i(LOG_TAG, "Usage setting not found: " + e.getMessage());
-                }
-
-                // Prepare profile report
-                String reportName = mIProfcollect.report(usageSetting) + ".zip";
-
-                if (!context.getResources().getBoolean(
-                        R.bool.config_profcollectReportUploaderEnabled)) {
-                    Log.i(LOG_TAG, "Upload is not enabled.");
-                    return;
-                }
-
-                // Upload the report
-                Intent intent = new Intent()
-                        .setPackage("com.android.shell")
-                        .setAction("com.android.shell.action.PROFCOLLECT_UPLOAD")
-                        .putExtra("filename", reportName);
-                context.sendBroadcast(intent);
+                reportName = pfs.mIProfcollect.report(pfs.mUsageSetting) + ".zip";
             } catch (RemoteException e) {
-                Log.e(LOG_TAG, "Failed to upload report: " + e.getMessage());
+                Log.e(LOG_TAG, "Failed to create report: " + e.getMessage());
+                return;
             }
+            if (!pfs.mUploadEnabled) {
+                Log.i(LOG_TAG, "Upload is not enabled.");
+                return;
+            }
+            Intent intent = new Intent()
+                    .setPackage("com.android.shell")
+                    .setAction("com.android.shell.action.PROFCOLLECT_UPLOAD")
+                    .putExtra("filename", reportName);
+            pfs.getContext().sendBroadcast(intent);
         });
+        if (DEBUG) {
+            Log.d(LOG_TAG, "Sent report for upload.");
+        }
     }
 }

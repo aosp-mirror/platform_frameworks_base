@@ -21,6 +21,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
@@ -34,7 +35,7 @@ import com.android.packageinstaller.v2.ui.InstallActionListener;
  */
 public class ExternalSourcesBlockedFragment extends DialogFragment {
 
-    private final String TAG = ExternalSourcesBlockedFragment.class.getSimpleName();
+    private static final String LOG_TAG = ExternalSourcesBlockedFragment.class.getSimpleName();
     @NonNull
     private final InstallUserActionRequired mDialogData;
     @NonNull
@@ -55,6 +56,7 @@ public class ExternalSourcesBlockedFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        Log.i(LOG_TAG, "Creating " + LOG_TAG + "\n" + mDialogData);
         mDialog = new AlertDialog.Builder(requireContext())
             .setTitle(mDialogData.getAppLabel())
             .setIcon(mDialogData.getAppIcon())

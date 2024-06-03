@@ -1,7 +1,9 @@
 package: "android.companion"
+container: "system"
 
 flag {
     name: "new_association_builder"
+    is_exported: true
     namespace: "companion"
     description: "Controls if the new Builder is exposed to test apis."
     bug: "296251481"
@@ -16,6 +18,7 @@ flag {
 
 flag {
     name: "association_tag"
+    is_exported: true
     namespace: "companion"
     description: "Enable Association tag APIs "
     bug: "289241123"
@@ -23,6 +26,7 @@ flag {
 
 flag {
     name: "device_presence"
+    is_exported: true
     namespace: "companion"
     description: "Enable device presence APIs"
     bug: "283000075"
@@ -30,7 +34,16 @@ flag {
 
 flag {
     name: "perm_sync_user_consent"
+    is_exported: true
     namespace: "companion"
     description: "Expose perm sync user consent API"
     bug: "309528663"
+}
+
+flag {
+    name: "ongoing_perm_sync"
+    is_exported: true
+    namespace: "companion"
+    description: "Enable ongoing perm sync"
+    bug: "338469649"
 }

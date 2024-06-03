@@ -19,7 +19,10 @@ package com.android.systemui.communal
 import android.annotation.SuppressLint
 import android.app.DreamManager
 import com.android.systemui.CoreStartable
+import com.android.systemui.Flags.glanceableHubAllowKeyguardWhenDreaming
 import com.android.systemui.Flags.communalHub
+import com.android.systemui.Flags.restartDreamOnUnocclude
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -27,10 +30,12 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample
-import javax.inject.Inject
+import com.android.systemui.util.kotlin.sample
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import javax.inject.Inject
 
 /**
  * A [CoreStartable] responsible for automatically starting the dream when the communal hub is
@@ -43,6 +48,7 @@ constructor(
     private val powerInteractor: PowerInteractor,
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    private val communalInteractor: CommunalInteractor,
     private val dreamManager: DreamManager,
     @Background private val bgScope: CoroutineScope,
 ) : CoreStartable {
@@ -50,6 +56,19 @@ constructor(
     override fun start() {
         if (!communalHub()) {
             return
+        }
+
+        // Return to dream from occluded when not already dreaming.
+        if (restartDreamOnUnocclude()) {
+            keyguardTransitionInteractor.startedKeyguardTransitionStep
+                .sample(keyguardInteractor.isDreaming, ::Pair)
+                .filter {
+                    it.first.from == KeyguardState.OCCLUDED &&
+                        it.first.to == KeyguardState.DREAMING &&
+                        !it.second
+                }
+                .onEach { dreamManager.startDream() }
+                .launchIn(bgScope)
         }
 
         // Restart the dream underneath the hub in order to support the ability to swipe
@@ -60,6 +79,7 @@ constructor(
                 if (
                     finishedState == KeyguardState.GLANCEABLE_HUB &&
                         !dreaming &&
+                        !glanceableHubAllowKeyguardWhenDreaming() &&
                         dreamManager.canStartDreaming(isAwake)
                 ) {
                     dreamManager.startDream()

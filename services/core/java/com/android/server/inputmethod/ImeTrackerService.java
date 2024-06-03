@@ -133,6 +133,13 @@ public final class ImeTrackerService extends IImeTracker.Stub {
         }
     }
 
+    @Override
+    public void onDispatched(@NonNull ImeTracker.Token statsToken) {
+        synchronized (mLock) {
+            mHistory.setFinished(statsToken, ImeTracker.STATUS_SUCCESS, ImeTracker.PHASE_NOT_SET);
+        }
+    }
+
     /**
      * Updates the IME request tracking token with new information available in IMMS.
      *
@@ -162,6 +169,15 @@ public final class ImeTrackerService extends IImeTracker.Stub {
         super.hasPendingImeVisibilityRequests_enforcePermission();
         synchronized (mLock) {
             return !mHistory.mLiveEntries.isEmpty();
+        }
+    }
+
+    @EnforcePermission(Manifest.permission.TEST_INPUT_METHOD)
+    @Override
+    public void finishTrackingPendingImeVisibilityRequests() {
+        super.finishTrackingPendingImeVisibilityRequests_enforcePermission();
+        synchronized (mLock) {
+            mHistory.mLiveEntries.clear();
         }
     }
 

@@ -21,7 +21,7 @@ import android.content.Context
 import android.content.IntentFilter
 import android.os.Handler
 import android.os.UserHandle
-import android.test.suitebuilder.annotation.SmallTest
+import androidx.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import com.android.systemui.SysuiTestCase

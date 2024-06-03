@@ -31,15 +31,14 @@ import android.os.Handler
 import android.os.Parcel
 import android.service.quicksettings.IQSTileService
 import android.service.quicksettings.Tile
-import android.test.suitebuilder.annotation.SmallTest
+import androidx.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.IWindowManager
-import android.view.View
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityTransitionAnimator
-import com.android.systemui.animation.view.LaunchableFrameLayout
+import com.android.systemui.animation.Expandable
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.qs.QSTile
@@ -339,7 +338,7 @@ class CustomTileTest : SysuiTestCase() {
             tile.qsTile.activityLaunchForClick = pi
         }
 
-        tile.handleClick(mock(View::class.java))
+        tile.handleClick(mock(Expandable::class.java))
         testableLooper.processAllMessages()
 
         verify(activityStarter, never())
@@ -366,7 +365,7 @@ class CustomTileTest : SysuiTestCase() {
         val tile = CustomTile.create(customTileFactory, TILE_SPEC, mContext)
         tile.qsTile.activityLaunchForClick = pi
 
-        tile.handleClick(mock(LaunchableFrameLayout::class.java))
+        tile.handleClick(mock(Expandable::class.java))
 
         testableLooper.processAllMessages()
 

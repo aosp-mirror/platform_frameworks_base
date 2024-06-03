@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume.panel.dagger
 
+import com.android.systemui.volume.dagger.UiEventLoggerStartableModule
 import com.android.systemui.volume.panel.component.anc.AncModule
 import com.android.systemui.volume.panel.component.bottombar.BottomBarModule
 import com.android.systemui.volume.panel.component.captioning.CaptioningModule
@@ -25,6 +26,7 @@ import com.android.systemui.volume.panel.component.volume.VolumeSlidersModule
 import com.android.systemui.volume.panel.dagger.factory.VolumePanelComponentFactory
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import com.android.systemui.volume.panel.domain.DomainModule
+import com.android.systemui.volume.panel.domain.VolumePanelStartable
 import com.android.systemui.volume.panel.domain.interactor.ComponentsInteractor
 import com.android.systemui.volume.panel.ui.UiModule
 import com.android.systemui.volume.panel.ui.composable.ComponentsFactory
@@ -43,10 +45,10 @@ import kotlinx.coroutines.CoroutineScope
     modules =
         [
             // Volume Panel infra modules
-            CoroutineModule::class,
             DefaultMultibindsModule::class,
             DomainModule::class,
             UiModule::class,
+            UiEventLoggerStartableModule::class,
             // Components modules
             BottomBarModule::class,
             AncModule::class,
@@ -58,6 +60,12 @@ import kotlinx.coroutines.CoroutineScope
 )
 interface VolumePanelComponent {
 
+    /**
+     * Provides a coroutine scope to use inside [VolumePanelScope].
+     * [com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel] manages the lifecycle
+     * of this scope. It's cancelled when the View Model is destroyed. This helps to free occupied
+     * resources when volume panel is not shown.
+     */
     fun coroutineScope(): CoroutineScope
 
     fun componentsInteractor(): ComponentsInteractor
@@ -66,9 +74,14 @@ interface VolumePanelComponent {
 
     fun componentsLayoutManager(): ComponentsLayoutManager
 
+    fun volumePanelStartables(): Set<VolumePanelStartable>
+
     @Subcomponent.Factory
     interface Factory : VolumePanelComponentFactory {
 
-        override fun create(@BindsInstance viewModel: VolumePanelViewModel): VolumePanelComponent
+        override fun create(
+            @BindsInstance viewModel: VolumePanelViewModel,
+            @BindsInstance scope: CoroutineScope,
+        ): VolumePanelComponent
     }
 }

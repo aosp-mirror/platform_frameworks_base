@@ -16,14 +16,15 @@
 
 #include "WebViewFunctorManager.h"
 
+#include <log/log.h>
 #include <private/hwui/WebViewFunctor.h>
+#include <utils/Trace.h>
+
+#include <atomic>
+
 #include "Properties.h"
 #include "renderthread/CanvasContext.h"
 #include "renderthread/RenderThread.h"
-
-#include <log/log.h>
-#include <utils/Trace.h>
-#include <atomic>
 
 namespace android::uirenderer {
 
@@ -86,7 +87,7 @@ void WebViewFunctor_release(int functor) {
     WebViewFunctorManager::instance().releaseFunctor(functor);
 }
 
-void WebViewFunctor_reportRenderingThreads(int functor, const int32_t* thread_ids, size_t size) {
+void WebViewFunctor_reportRenderingThreads(int functor, const pid_t* thread_ids, size_t size) {
     WebViewFunctorManager::instance().reportRenderingThreads(functor, thread_ids, size);
 }
 
@@ -264,8 +265,8 @@ void WebViewFunctor::reparentSurfaceControl(ASurfaceControl* parent) {
     funcs.transactionDeleteFunc(transaction);
 }
 
-void WebViewFunctor::reportRenderingThreads(const int32_t* thread_ids, size_t size) {
-    // TODO(b/329219352): Pass the threads to HWUI and update the ADPF session.
+void WebViewFunctor::reportRenderingThreads(const pid_t* thread_ids, size_t size) {
+    mRenderingThreads = std::vector<pid_t>(thread_ids, thread_ids + size);
 }
 
 WebViewFunctorManager& WebViewFunctorManager::instance() {
@@ -354,7 +355,7 @@ void WebViewFunctorManager::destroyFunctor(int functor) {
     }
 }
 
-void WebViewFunctorManager::reportRenderingThreads(int functor, const int32_t* thread_ids,
+void WebViewFunctorManager::reportRenderingThreads(int functor, const pid_t* thread_ids,
                                                    size_t size) {
     std::lock_guard _lock{mLock};
     for (auto& iter : mFunctors) {
@@ -363,6 +364,21 @@ void WebViewFunctorManager::reportRenderingThreads(int functor, const int32_t* t
             break;
         }
     }
+}
+
+std::vector<pid_t> WebViewFunctorManager::getRenderingThreadsForActiveFunctors() {
+    std::vector<pid_t> renderingThreads;
+    std::lock_guard _lock{mLock};
+    for (const auto& iter : mActiveFunctors) {
+        const auto& functorThreads = iter->getRenderingThreads();
+        for (const auto& tid : functorThreads) {
+            if (std::find(renderingThreads.begin(), renderingThreads.end(), tid) ==
+                renderingThreads.end()) {
+                renderingThreads.push_back(tid);
+            }
+        }
+    }
+    return renderingThreads;
 }
 
 sp<WebViewFunctor::Handle> WebViewFunctorManager::handleFor(int functor) {

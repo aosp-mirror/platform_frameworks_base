@@ -205,8 +205,6 @@ public class MockingOomAdjusterTests {
                 new ProcessStatsService(sService, new File(sContext.getFilesDir(), "procstats")));
         setFieldValue(ActivityManagerService.class, sService, "mBackupTargets",
                 mock(SparseArray.class));
-        setFieldValue(ActivityManagerService.class, sService, "mOomAdjProfiler",
-                mock(OomAdjProfiler.class));
         setFieldValue(ActivityManagerService.class, sService, "mUserController",
                 mock(UserController.class));
         setFieldValue(ActivityManagerService.class, sService, "mAppProfiler", profiler);
@@ -247,9 +245,11 @@ public class MockingOomAdjusterTests {
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
     }
 
+    @SuppressWarnings("GuardedBy")
     @After
     public void tearDown() {
         sService.mOomAdjuster.resetInternal();
+        sService.mOomAdjuster.mActiveUids.clear();
     }
 
     private static <T> void setFieldValue(Class clazz, Object obj, String fieldName, T val) {
@@ -479,15 +479,7 @@ public class MockingOomAdjusterTests {
         sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(app);
 
-        final int expectedAdj;
-        if (sService.mConstants.ENABLE_NEW_OOMADJ) {
-            // A cached empty process can be at best a level higher than the min cached adj.
-            expectedAdj = sFirstCachedAdj;
-        } else {
-            // This is wrong but legacy behavior is going to be removed and not worth fixing.
-            expectedAdj = CACHED_APP_MIN_ADJ;
-        }
-
+        final int expectedAdj = sFirstCachedAdj;
         assertProcStates(app, PROCESS_STATE_CACHED_EMPTY, expectedAdj,
                 SCHED_GROUP_BACKGROUND);
     }
@@ -964,6 +956,7 @@ public class MockingOomAdjusterTests {
         ConnectionRecord cr = s.getConnections().get(binder).get(0);
         setFieldValue(ConnectionRecord.class, cr, "activity",
                 mock(ActivityServiceConnectionsHolder.class));
+        doReturn(client).when(sService).getTopApp();
         doReturn(true).when(cr.activity).isActivityVisible();
         sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(client, app);
@@ -2826,6 +2819,69 @@ public class MockingOomAdjusterTests {
                 SCHED_GROUP_DEFAULT);
     }
 
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testSetUidTempAllowlistState() {
+        final ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+        final ProcessRecord app2 = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+        setProcessesToLru(app, app2);
+
+        // App1 binds to app2 and gets temp allowlisted.
+        bindService(app2, app, null, null, 0, mock(IBinder.class));
+        sService.mOomAdjuster.setUidTempAllowlistStateLSP(MOCKAPP_UID, true);
+
+        assertEquals(true, app.getUidRecord().isSetAllowListed());
+        assertEquals(true, app.mOptRecord.shouldNotFreeze());
+        assertEquals(true, app2.mOptRecord.shouldNotFreeze());
+
+        sService.mOomAdjuster.setUidTempAllowlistStateLSP(MOCKAPP_UID, false);
+        assertEquals(false, app.getUidRecord().isSetAllowListed());
+        assertEquals(false, app.mOptRecord.shouldNotFreeze());
+        assertEquals(false, app2.mOptRecord.shouldNotFreeze());
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testSetUidTempAllowlistState_multipleAllowlistClients() {
+        final ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+        final ProcessRecord app2 = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+        final ProcessRecord app3 = spy(makeDefaultProcessRecord(MOCKAPP3_PID, MOCKAPP3_UID,
+                MOCKAPP3_PROCESSNAME, MOCKAPP3_PACKAGENAME, false));
+        setProcessesToLru(app, app2, app3);
+
+        // App1 and app2 both bind to app3 and get temp allowlisted.
+        bindService(app3, app, null, null, 0, mock(IBinder.class));
+        bindService(app3, app2, null, null, 0, mock(IBinder.class));
+        sService.mOomAdjuster.setUidTempAllowlistStateLSP(MOCKAPP_UID, true);
+        sService.mOomAdjuster.setUidTempAllowlistStateLSP(MOCKAPP2_UID, true);
+
+        assertEquals(true, app.getUidRecord().isSetAllowListed());
+        assertEquals(true, app2.getUidRecord().isSetAllowListed());
+        assertEquals(true, app.mOptRecord.shouldNotFreeze());
+        assertEquals(true, app2.mOptRecord.shouldNotFreeze());
+        assertEquals(true, app3.mOptRecord.shouldNotFreeze());
+
+        // Remove app1 from allowlist.
+        sService.mOomAdjuster.setUidTempAllowlistStateLSP(MOCKAPP_UID, false);
+        assertEquals(false, app.getUidRecord().isSetAllowListed());
+        assertEquals(true, app2.getUidRecord().isSetAllowListed());
+        assertEquals(false, app.mOptRecord.shouldNotFreeze());
+        assertEquals(true, app2.mOptRecord.shouldNotFreeze());
+        assertEquals(true, app3.mOptRecord.shouldNotFreeze());
+
+        // Now remove app2 from allowlist.
+        sService.mOomAdjuster.setUidTempAllowlistStateLSP(MOCKAPP2_UID, false);
+        assertEquals(false, app.getUidRecord().isSetAllowListed());
+        assertEquals(false, app2.getUidRecord().isSetAllowListed());
+        assertEquals(false, app.mOptRecord.shouldNotFreeze());
+        assertEquals(false, app2.mOptRecord.shouldNotFreeze());
+        assertEquals(false, app3.mOptRecord.shouldNotFreeze());
+    }
+
     private ProcessRecord makeDefaultProcessRecord(int pid, int uid, String processName,
             String packageName, boolean hasShownUi) {
         return new ProcessRecordBuilder(pid, uid, processName, packageName).setHasShownUi(
@@ -3067,6 +3123,14 @@ public class MockingOomAdjusterTests {
                 receivers.addCurReceiver(mock(BroadcastRecord.class));
             }
             providers.setLastProviderTime(mLastProviderTime);
+
+            UidRecord uidRec = sService.mOomAdjuster.mActiveUids.get(mUid);
+            if (uidRec == null) {
+                uidRec = new UidRecord(mUid, sService);
+                sService.mOomAdjuster.mActiveUids.put(mUid, uidRec);
+            }
+            uidRec.addProcess(app);
+            app.setUidRecord(uidRec);
             return app;
         }
     }

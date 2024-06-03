@@ -16,17 +16,23 @@
 
 package com.android.wm.shell.windowdecor;
 
+import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getFineResizeCornerSize;
+import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLargeResizeCornerSize;
+import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeEdgeHandleSize;
+
 import android.annotation.NonNull;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration;
 import android.app.WindowConfiguration.WindowingMode;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.VectorDrawable;
 import android.os.Handler;
+import android.util.Size;
 import android.view.Choreographer;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -68,9 +74,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             Handler handler,
             Choreographer choreographer,
             SyncTransactionQueue syncQueue) {
-        super(context, displayController, taskOrganizer, taskInfo, taskSurface,
-                taskInfo.getConfiguration());
-
+        super(context, displayController, taskOrganizer, taskInfo, taskSurface);
         mHandler = handler;
         mChoreographer = choreographer;
         mSyncQueue = syncQueue;
@@ -90,12 +94,14 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     @Override
     @NonNull
     Rect calculateValidDragArea() {
+        final Context displayContext = mDisplayController.getDisplayContext(mTaskInfo.displayId);
+        if (displayContext == null) return new Rect();
         final int leftButtonsWidth = loadDimensionPixelSize(mContext.getResources(),
                 R.dimen.caption_left_buttons_width);
 
         // On a smaller screen, don't require as much empty space on screen, as offscreen
         // drags will be restricted too much.
-        final int requiredEmptySpaceId = mDisplayController.getDisplayContext(mTaskInfo.displayId)
+        final int requiredEmptySpaceId = displayContext
                 .getResources().getConfiguration().smallestScreenWidthDp >= 600
                 ? R.dimen.freeform_required_visible_empty_space_in_header :
                 R.dimen.small_screen_required_visible_empty_space_in_header;
@@ -192,7 +198,6 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         mRelayoutParams.mShadowRadiusId = shadowRadiusID;
         mRelayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
         mRelayoutParams.mSetTaskPositionAndCrop = setTaskCropAndPosition;
-        mRelayoutParams.mAllowCaptionInputFallthrough = false;
 
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
@@ -220,7 +225,6 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
                     mHandler,
                     mChoreographer,
                     mDisplay.getDisplayId(),
-                    0 /* taskCornerRadius */,
                     mDecorationContainerSurface,
                     mDragPositioningCallback,
                     mSurfaceControlBuilderSupplier,
@@ -232,12 +236,10 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
                 .getScaledTouchSlop();
         mDragDetector.setTouchSlop(touchSlop);
 
-        final int resize_handle = mResult.mRootView.getResources()
-                .getDimensionPixelSize(R.dimen.freeform_resize_handle);
-        final int resize_corner = mResult.mRootView.getResources()
-                .getDimensionPixelSize(R.dimen.freeform_resize_corner);
-        mDragResizeListener.setGeometry(
-                mResult.mWidth, mResult.mHeight, resize_handle, resize_corner, touchSlop);
+        final Resources res = mResult.mRootView.getResources();
+        mDragResizeListener.setGeometry(new DragResizeWindowGeometry(0 /* taskCornerRadius */,
+                new Size(mResult.mWidth, mResult.mHeight), getResizeEdgeHandleSize(res),
+                getFineResizeCornerSize(res), getLargeResizeCornerSize(res)), touchSlop);
     }
 
     /**

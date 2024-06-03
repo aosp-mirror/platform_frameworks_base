@@ -24,7 +24,7 @@ import com.android.systemui.flags.RefactorFlagUtils
 @Suppress("NOTHING_TO_INLINE")
 object NotificationViewFlipperPausing {
     /** The aconfig flag name */
-    const val FLAG_NAME = Flags.FLAG_NOTIFICATION_VIEW_FLIPPER_PAUSING
+    const val FLAG_NAME = Flags.FLAG_NOTIFICATION_VIEW_FLIPPER_PAUSING_V2
 
     /** A token used for dependency declaration */
     val token: FlagToken
@@ -33,7 +33,7 @@ object NotificationViewFlipperPausing {
     /** Is the refactor enabled */
     @JvmStatic
     inline val isEnabled
-        get() = Flags.notificationViewFlipperPausing()
+        get() = Flags.notificationViewFlipperPausingV2()
 
     /**
      * Called to ensure code is only run when the flag is enabled. This protects users from the

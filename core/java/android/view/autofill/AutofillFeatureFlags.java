@@ -255,6 +255,17 @@ public class AutofillFeatureFlags {
     public static final String DEVICE_CONFIG_IGNORE_RELAYOUT_WHEN_AUTH_PENDING =
             "ignore_relayout_auth_pending";
 
+    /**
+     * Bugfix flag, Autofill should only fill in value from current session.
+     *
+     * See frameworks/base/services/autofill/bugfixes.aconfig#fill_fields_from_current_session_only
+     * for more information
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_FILL_FIELDS_FROM_CURRENT_SESSION_ONLY =
+            "fill_fields_from_current_session_only";
+
     // END AUTOFILL FOR ALL APPS FLAGS //
 
 
@@ -521,7 +532,7 @@ public class AutofillFeatureFlags {
         return DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_AUTOFILL,
                 DEVICE_CONFIG_IGNORE_VIEW_STATE_RESET_TO_EMPTY,
-                false);
+                true);
     }
 
     /** @hide */
@@ -529,6 +540,14 @@ public class AutofillFeatureFlags {
         return DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_AUTOFILL,
                 DEVICE_CONFIG_IGNORE_RELAYOUT_WHEN_AUTH_PENDING,
+                false);
+    }
+
+    /** @hide **/
+    public static boolean shouldFillFieldsFromCurrentSessionOnly() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_FILL_FIELDS_FROM_CURRENT_SESSION_ONLY,
                 false);
     }
 

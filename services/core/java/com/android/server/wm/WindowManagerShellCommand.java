@@ -848,7 +848,12 @@ public class WindowManagerShellCommand extends ShellCommand {
             return -1;
         }
         synchronized (mInternal.mGlobalLock) {
-            mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(multiplier);
+            try {
+                mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(multiplier);
+            } catch (IllegalArgumentException  e) {
+                getErrPrintWriter().println("Error: invalid multiplier value " + e);
+                return -1;
+            }
         }
         return 0;
     }
@@ -867,7 +872,12 @@ public class WindowManagerShellCommand extends ShellCommand {
             return -1;
         }
         synchronized (mInternal.mGlobalLock) {
-            mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(multiplier);
+            try {
+                mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(multiplier);
+            } catch (IllegalArgumentException  e) {
+                getErrPrintWriter().println("Error: invalid multiplier value " + e);
+                return -1;
+            }
         }
         return 0;
     }
@@ -1539,9 +1549,9 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("        both it and R.dimen.config_fixedOrientationLetterboxAspectRatio will");
         pw.println("        be ignored and framework implementation will determine aspect ratio.");
         pw.println("      --cornerRadius radius");
-        pw.println("        Corners radius for activities in the letterbox mode. If radius < 0,");
-        pw.println("        both it and R.integer.config_letterboxActivityCornersRadius will be");
-        pw.println("        ignored and corners of the activity won't be rounded.");
+        pw.println("        Corners radius (in pixels) for activities in the letterbox mode.");
+        pw.println("        If radius < 0, both R.integer.config_letterboxActivityCornersRadius");
+        pw.println("        and it will be ignored and corners of the activity won't be rounded.");
         pw.println("      --backgroundType [reset|solid_color|app_color_background");
         pw.println("          |app_color_background_floating|wallpaper]");
         pw.println("        Type of background used in the letterbox mode.");

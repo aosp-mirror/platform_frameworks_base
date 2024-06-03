@@ -25,6 +25,7 @@ import com.android.settingslib.volume.shared.model.RingerMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 /** Provides audio stream state and an ability to change it */
@@ -46,11 +47,36 @@ class AudioVolumeInteractor(
     val ringerMode: StateFlow<RingerMode>
         get() = audioRepository.ringerMode
 
-    suspend fun setVolume(audioStream: AudioStream, volume: Int) =
-        audioRepository.setVolume(audioStream, volume)
+    suspend fun setVolume(audioStream: AudioStream, volume: Int) {
+        val streamModel = getAudioStream(audioStream).first()
+        val oldVolume = streamModel.volume
+        if (volume != oldVolume) {
+            audioRepository.setVolume(audioStream, volume)
+            when {
+                volume == streamModel.minVolume -> setMuted(audioStream, true)
+                oldVolume == streamModel.minVolume && volume > streamModel.minVolume ->
+                    setMuted(audioStream, false)
+            }
+        }
+    }
 
-    suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean) =
-        audioRepository.setMuted(audioStream, isMuted)
+    suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean) {
+        if (audioStream.value == AudioManager.STREAM_RING) {
+            val mode =
+                if (isMuted) AudioManager.RINGER_MODE_VIBRATE else AudioManager.RINGER_MODE_NORMAL
+            audioRepository.setRingerMode(audioStream, RingerMode(mode))
+        }
+        val mutedChanged = audioRepository.setMuted(audioStream, isMuted)
+        if (mutedChanged && !isMuted) {
+            with(getAudioStream(audioStream).first()) {
+                if (volume == minVolume) {
+                    // Slightly increase volume when user un-mutes the stream that is lowered
+                    // down to its minimum
+                    setVolume(audioStream, volume + 1)
+                }
+            }
+        }
+    }
 
     /** Checks if the volume can be changed via the UI. */
     fun canChangeVolume(audioStream: AudioStream): Flow<Boolean> {
@@ -65,10 +91,6 @@ class AudioVolumeInteractor(
             notificationsSoundPolicyInteractor.isZenMuted(audioStream).map { !it }
         }
     }
-
-    fun isMutable(audioStream: AudioStream): Boolean =
-        // Alarm stream doesn't support muting
-        audioStream.value != AudioManager.STREAM_ALARM
 
     private suspend fun processVolume(
         audioStreamModel: AudioStreamModel,

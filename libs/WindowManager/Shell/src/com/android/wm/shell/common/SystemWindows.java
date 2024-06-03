@@ -353,7 +353,7 @@ public class SystemWindows {
 
         @Override
         public void insetsControlChanged(InsetsState insetsState,
-                InsetsSourceControl[] activeControls) {}
+                InsetsSourceControl.Array activeControls) {}
 
         @Override
         public void showInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken) {}
@@ -389,9 +389,6 @@ public class SystemWindows {
         public void dispatchDragEvent(DragEvent event) {}
 
         @Override
-        public void updatePointerIcon(float x, float y) {}
-
-        @Override
         public void dispatchWindowShown() {}
 
         @Override
@@ -408,6 +405,11 @@ public class SystemWindows {
             } catch (RemoteException ex) {
                 // ignore
             }
+        }
+
+        @Override
+        public void dumpWindow(ParcelFileDescriptor pfd) {
+
         }
     }
 }

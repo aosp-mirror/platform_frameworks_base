@@ -18,8 +18,8 @@ package com.android.systemui.media.controls.domain.pipeline
 
 import android.app.smartspace.SmartspaceAction
 import android.os.Bundle
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.systemui.SysuiTestCase
@@ -33,9 +33,6 @@ import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.Executor
@@ -50,6 +47,9 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.whenever
 
 private const val KEY = "TEST_KEY"
 private const val KEY_ALT = "TEST_KEY_2"
@@ -64,7 +64,7 @@ private const val SMARTSPACE_PACKAGE = "SMARTSPACE_PKG"
 private val SMARTSPACE_INSTANCE_ID = InstanceId.fakeInstanceId(456)!!
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class LegacyMediaDataFilterImplTest : SysuiTestCase() {
 
@@ -172,20 +172,20 @@ class LegacyMediaDataFilterImplTest : SysuiTestCase() {
     fun testOnRemovedForCurrent_callsListener() {
         // GIVEN a media was removed for main user
         mediaDataFilter.onMediaDataLoaded(KEY, null, dataMain)
-        mediaDataFilter.onMediaDataRemoved(KEY)
+        mediaDataFilter.onMediaDataRemoved(KEY, false)
 
         // THEN we should tell the listener
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
     }
 
     @Test
     fun testOnRemovedForGuest_doesNotCallListener() {
         // GIVEN a media was removed for guest user
         mediaDataFilter.onMediaDataLoaded(KEY, null, dataGuest)
-        mediaDataFilter.onMediaDataRemoved(KEY)
+        mediaDataFilter.onMediaDataRemoved(KEY, false)
 
         // THEN we should NOT tell the listener
-        verify(listener, never()).onMediaDataRemoved(eq(KEY))
+        verify(listener, never()).onMediaDataRemoved(eq(KEY), anyBoolean())
     }
 
     @Test
@@ -197,7 +197,7 @@ class LegacyMediaDataFilterImplTest : SysuiTestCase() {
         setUser(USER_GUEST)
 
         // THEN we should remove the main user's media
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
     }
 
     @Test
@@ -230,7 +230,7 @@ class LegacyMediaDataFilterImplTest : SysuiTestCase() {
         setPrivateProfileUnavailable()
 
         // THEN we should add the private profile media
-        verify(listener).onMediaDataRemoved(eq(KEY_ALT))
+        verify(listener).onMediaDataRemoved(eq(KEY_ALT), eq(false))
     }
 
     @Test
@@ -360,7 +360,7 @@ class LegacyMediaDataFilterImplTest : SysuiTestCase() {
     @Test
     fun testOnNotificationRemoved_doesntHaveMedia() {
         mediaDataFilter.onMediaDataLoaded(KEY, oldKey = null, data = dataMain)
-        mediaDataFilter.onMediaDataRemoved(KEY)
+        mediaDataFilter.onMediaDataRemoved(KEY, false)
         assertThat(mediaDataFilter.hasAnyMediaOrRecommendation()).isFalse()
         assertThat(mediaDataFilter.hasAnyMedia()).isFalse()
     }

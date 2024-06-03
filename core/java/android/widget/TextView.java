@@ -27,6 +27,7 @@ import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_C
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY;
 import static android.view.inputmethod.CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
+import static android.view.inputmethod.EditorInfo.STYLUS_HANDWRITING_ENABLED_ANDROIDX_EXTRAS_KEY;
 
 import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
 import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
@@ -10062,9 +10063,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 outAttrs.initialCapsMode = ic.getCursorCapsMode(getInputType());
                 outAttrs.setInitialSurroundingText(mText);
                 outAttrs.contentMimeTypes = getReceiveContentMimeTypes();
-                if (android.view.inputmethod.Flags.editorinfoHandwritingEnabled()
-                        && isAutoHandwritingEnabled()) {
-                    outAttrs.setStylusHandwritingEnabled(true);
+                if (android.view.inputmethod.Flags.editorinfoHandwritingEnabled()) {
+                    boolean handwritingEnabled = isAutoHandwritingEnabled();
+                    outAttrs.setStylusHandwritingEnabled(handwritingEnabled);
+                    // AndroidX Core library 1.13.0 introduced
+                    // EditorInfoCompat#setStylusHandwritingEnabled and
+                    // EditorInfoCompat#isStylusHandwritingEnabled which used a boolean value in the
+                    // EditorInfo extras bundle. These methods do not set or check the Android V
+                    // property since the Android V SDK was not yet available. In order for
+                    // EditorInfoCompat#isStylusHandwritingEnabled to return the correct value for
+                    // EditorInfo created by Android V TextView, the extras bundle value is also set
+                    // here.
+                    if (outAttrs.extras == null) {
+                        outAttrs.extras = new Bundle();
+                    }
+                    outAttrs.extras.putBoolean(
+                            STYLUS_HANDWRITING_ENABLED_ANDROIDX_EXTRAS_KEY, handwritingEnabled);
                 }
                 ArrayList<Class<? extends HandwritingGesture>> gestures = new ArrayList<>();
                 gestures.add(SelectGesture.class);
@@ -11254,8 +11268,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 width = des;
             } else {
                 if (mUseBoundsForWidth) {
-                    width = Math.max(boring.width,
-                            (int) Math.ceil(boring.getDrawingBoundingBox().width()));
+                    RectF bbox = boring.getDrawingBoundingBox();
+                    float rightMax = Math.max(bbox.right, boring.width);
+                    float leftMin = Math.min(bbox.left, 0);
+                    width = Math.max(boring.width, (int) Math.ceil(rightMax - leftMin));
                 } else {
                     width = boring.width;
                 }

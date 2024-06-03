@@ -111,6 +111,11 @@ class BackupRestoreProcessor {
         Slog.i(TAG, "applyRestoredPayload() userId=[" + userId + "], payload size=["
                 + payload.length + "].");
 
+        if (payload.length == 0) {
+            Slog.i(TAG, "CDM backup payload was empty.");
+            return;
+        }
+
         ByteBuffer buffer = ByteBuffer.wrap(payload);
 
         // Make sure that payload version matches current version to ensure proper deserialization
@@ -120,15 +125,26 @@ class BackupRestoreProcessor {
             return;
         }
 
-        // Read the bytes containing backed-up associations
-        byte[] associationsPayload = new byte[buffer.getInt()];
-        buffer.get(associationsPayload);
+        // Pre-load the bytes into memory before processing them to ensure payload mal-formatting
+        // error is caught early on.
+        final byte[] associationsPayload;
+        final byte[] requestsPayload;
+        try {
+            // Read the bytes containing backed-up associations
+            associationsPayload = new byte[buffer.getInt()];
+            buffer.get(associationsPayload);
+
+            // Read the bytes containing backed-up system data transfer requests user consent
+            requestsPayload = new byte[buffer.getInt()];
+            buffer.get(requestsPayload);
+        } catch (Exception bufferException) {
+            Slog.e(TAG, "CDM backup payload was mal-formatted.", bufferException);
+            return;
+        }
+
         final Associations restoredAssociations = readAssociationsFromPayload(
                 associationsPayload, userId);
 
-        // Read the bytes containing backed-up system data transfer requests user consent
-        byte[] requestsPayload = new byte[buffer.getInt()];
-        buffer.get(requestsPayload);
         List<SystemDataTransferRequest> restoredRequestsForUser =
                 mSystemDataTransferRequestStore.readRequestsFromPayload(requestsPayload, userId);
 
@@ -159,7 +175,7 @@ class BackupRestoreProcessor {
 
             // Create a new association reassigned to this user and a valid association ID
             final String packageName = restored.getPackageName();
-            final int newId = mAssociationStore.getNextId(userId);
+            final int newId = mAssociationStore.getNextId();
             AssociationInfo newAssociation = new AssociationInfo.Builder(newId, userId, packageName,
                     restored).build();
 

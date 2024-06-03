@@ -29,36 +29,46 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 interface IAppOpsController {
-    val mode: Flow<Int>
+    val modeFlow: Flow<Int>
     val isAllowed: Flow<Boolean>
-        get() = mode.map { it == MODE_ALLOWED }
+        get() = modeFlow.map { it == MODE_ALLOWED }
 
     fun setAllowed(allowed: Boolean)
 
     @Mode fun getMode(): Int
 }
 
+data class AppOps(
+    val op: Int,
+    val modeForNotAllowed: Int = MODE_ERRORED,
+
+    /**
+     * Use AppOpsManager#setUidMode() instead of AppOpsManager#setMode() when set allowed.
+     *
+     * Security or privacy related app-ops should be set with setUidMode() instead of setMode().
+     */
+    val setModeByUid: Boolean = false,
+)
+
 class AppOpsController(
     context: Context,
     private val app: ApplicationInfo,
-    private val op: Int,
-    private val modeForNotAllowed: Int = MODE_ERRORED,
-    private val setModeByUid: Boolean = false,
+    private val appOps: AppOps,
 ) : IAppOpsController {
     private val appOpsManager = context.appOpsManager
     private val packageManager = context.packageManager
-    override val mode = appOpsManager.opModeFlow(op, app)
+    override val modeFlow = appOpsManager.opModeFlow(appOps.op, app)
 
     override fun setAllowed(allowed: Boolean) {
-        val mode = if (allowed) MODE_ALLOWED else modeForNotAllowed
+        val mode = if (allowed) MODE_ALLOWED else appOps.modeForNotAllowed
 
-        if (setModeByUid) {
-            appOpsManager.setUidMode(op, app.uid, mode)
+        if (appOps.setModeByUid) {
+            appOpsManager.setUidMode(appOps.op, app.uid, mode)
         } else {
-            appOpsManager.setMode(op, app.uid, app.packageName, mode)
+            appOpsManager.setMode(appOps.op, app.uid, app.packageName, mode)
         }
 
-        val permission = AppOpsManager.opToPermission(op)
+        val permission = AppOpsManager.opToPermission(appOps.op)
         if (permission != null) {
             packageManager.updatePermissionFlags(permission, app.packageName,
                     PackageManager.FLAG_PERMISSION_USER_SET,
@@ -67,5 +77,6 @@ class AppOpsController(
         }
     }
 
-    @Mode override fun getMode(): Int = appOpsManager.getOpMode(op, app)
+    @Mode
+    override fun getMode(): Int = appOpsManager.getOpMode(appOps.op, app)
 }

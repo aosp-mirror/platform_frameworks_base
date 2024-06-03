@@ -1,22 +1,26 @@
 package: "android.permission.flags"
+container: "system"
 
 flag {
-  name: "device_aware_permission_apis_enabled"
-  is_fixed_read_only: true
-  namespace: "permissions"
-  description: "enable device aware permission APIs"
-  bug: "274852670"
+    name: "device_aware_permission_apis_enabled"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "enable device aware permission APIs"
+    bug: "274852670"
 }
 
 flag {
-  name: "voice_activation_permission_apis"
-  namespace: "permissions"
-  description: "enable voice activation permission APIs"
-  bug: "287264308"
+    name: "voice_activation_permission_apis"
+    is_exported: true
+    namespace: "permissions"
+    description: "enable voice activation permission APIs"
+    bug: "287264308"
 }
 
 flag {
     name: "system_server_role_controller_enabled"
+    is_exported: true
     is_fixed_read_only: true
     namespace: "permissions"
     description: "enable role controller in system server"
@@ -24,28 +28,24 @@ flag {
 }
 
 flag {
-  name: "set_next_attribution_source"
-  namespace: "permissions"
-  description: "enable AttributionSource.setNextAttributionSource"
-  bug: "304478648"
+    name: "set_next_attribution_source"
+    is_exported: true
+    namespace: "permissions"
+    description: "enable AttributionSource.setNextAttributionSource"
+    bug: "304478648"
 }
 
 flag {
     name: "should_register_attribution_source"
+    is_exported: true
     namespace: "permissions"
     description: "enable the shouldRegisterAttributionSource API"
     bug: "305057691"
 }
 
 flag {
-  name: "attribution_source_constructor"
-  namespace: "permissions"
-  description: "enable AttributionSource(int, int, String, String, IBinder, String[], AttributionSource)"
-  bug: "304478648"
-}
-
-flag {
     name: "enhanced_confirmation_mode_apis_enabled"
+    is_exported: true
     is_fixed_read_only: true
     namespace: "permissions"
     description: "enable enhanced confirmation mode apis"
@@ -53,21 +53,24 @@ flag {
 }
 
 flag {
-  name: "op_enable_mobile_data_by_user"
-  namespace: "permissions"
-  description: "enables logging of the OP_ENABLE_MOBILE_DATA_BY_USER"
-  bug: "222650148"
+    name: "op_enable_mobile_data_by_user"
+    is_exported: true
+    namespace: "permissions"
+    description: "enables logging of the OP_ENABLE_MOBILE_DATA_BY_USER"
+    bug: "222650148"
 }
 
 flag {
-  name: "factory_reset_prep_permission_apis"
-  namespace: "wallet_integration"
-  description: "enable Permission PREPARE_FACTORY_RESET."
-  bug: "302016478"
+    name: "factory_reset_prep_permission_apis"
+    is_exported: true
+    namespace: "wallet_integration"
+    description: "enable Permission PREPARE_FACTORY_RESET."
+    bug: "302016478"
 }
 
 flag {
     name: "retail_demo_role_enabled"
+    is_exported: true
     namespace: "permissions"
     description: "default retail demo role holder"
     bug: "274132354"
@@ -82,30 +85,68 @@ flag {
 
 flag {
     name: "wallet_role_enabled"
+    is_exported: true
     namespace: "wallet_integration"
     description: "This flag is used to enabled the Wallet Role for all users on the device"
     bug: "283989236"
 }
 
 flag {
-  name: "signature_permission_allowlist_enabled"
-  is_fixed_read_only: true
-  namespace: "permissions"
-  description: "Enable signature permission allowlist"
-  bug: "308573169"
+    name: "signature_permission_allowlist_enabled"
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Enable signature permission allowlist"
+    bug: "308573169"
 }
 
 flag {
-  name: "sensitive_notification_app_protection"
-  namespace: "permissions"
-  description: "This flag controls the sensitive notification app protections while screen sharing"
-  bug: "312784351"
-  # Referenced in WM where WM starts before DeviceConfig
-  is_fixed_read_only: true
+    name: "sensitive_notification_app_protection"
+    is_exported: true
+    # Referenced in WM where WM starts before DeviceConfig
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "This flag controls the sensitive notification app protections while screen sharing"
+    bug: "312784351"
+}
+
+flag {
+    name: "sensitive_content_improvements"
+    # Referenced in WM where WM starts before DeviceConfig
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Improvements to sensitive content/notification features, such as the Toast UX."
+    bug: "301960090"
+
+}
+
+flag {
+    name: "sensitive_content_metrics_bugfix"
+    # Referenced in WM where WM starts before DeviceConfig
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Enables metrics bugfixes for sensitive content/notification features"
+    bug: "312784351"
+
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "sensitive_content_recents_screenshot_bugfix"
+    # Referenced in WM where WM starts before DeviceConfig
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Enables recents screenshot bugfixes for sensitive content/notification features"
+    bug: "312784351"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
     name: "device_aware_permissions_enabled"
+    is_exported: true
     is_fixed_read_only: true
     namespace: "permissions"
     description: "When the flag is off no permissions can be device aware"
@@ -114,6 +155,7 @@ flag {
 
 flag {
      name: "get_emergency_role_holder_api_enabled"
+     is_exported: true
      is_fixed_read_only: true
      namespace: "permissions"
      description: "Enables the getEmergencyRoleHolder API."
@@ -128,6 +170,16 @@ flag {
 }
 
 flag {
+    name: "finish_running_ops_for_killed_packages"
+    namespace: "permissions"
+    description: "Finish all appops for a dead app process"
+    bug: "234630570"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "runtime_permission_appops_mapping_enabled"
     is_fixed_read_only: true
     namespace: "permissions"
@@ -135,3 +187,18 @@ flag {
     bug: "266164193"
 }
 
+flag {
+    name: "device_id_in_op_proxy_info_enabled"
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Enable getDeviceId API in OpEventProxyInfo"
+    bug: "337340961"
+ }
+
+flag {
+    name: "device_aware_app_op_new_schema_enabled"
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Persist device attributed AppOp accesses on the disk"
+    bug: "308201969"
+}

@@ -392,9 +392,9 @@ final class WifiDisplayAdapter extends DisplayAdapter {
 
         float refreshRate = 60.0f; // TODO: get this for real
 
-        String name = display.getFriendlyDisplayName();
-        String address = display.getDeviceAddress();
-        IBinder displayToken = DisplayControl.createDisplay(name, secure);
+        final String name = display.getFriendlyDisplayName();
+        final String address = display.getDeviceAddress();
+        IBinder displayToken = DisplayControl.createVirtualDisplay(name, secure);
         mDisplayDevice = new WifiDisplayDevice(displayToken, name, width, height,
                 refreshRate, deviceFlags, address, surface);
         sendDisplayDeviceEventLocked(mDisplayDevice, DISPLAY_DEVICE_EVENT_ADDED);
@@ -631,7 +631,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
                 mSurface.release();
                 mSurface = null;
             }
-            DisplayControl.destroyDisplay(getDisplayTokenLocked());
+            DisplayControl.destroyVirtualDisplay(getDisplayTokenLocked());
         }
 
         public void setNameLocked(String name) {

@@ -1,4 +1,5 @@
 package: "com.android.internal.compat.flags"
+container: "system"
 
 flag {
     name: "skip_old_and_disabled_compat_logging"

@@ -104,6 +104,7 @@ import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -161,9 +162,8 @@ import java.util.zip.ZipOutputStream;
 public class LauncherAppsService extends SystemService {
     private static final String WM_TRACE_DIR = "/data/misc/wmtrace/";
     private static final String VC_FILE_SUFFIX = ".vc";
-    // TODO(b/310027945): Update the intent name.
     private static final String PS_SETTINGS_INTENT =
-            "com.android.settings.action.PRIVATE_SPACE_SETUP_FLOW";
+            "com.android.settings.action.OPEN_PRIVATE_SPACE_SETTINGS";
 
     private static final Set<PosixFilePermission> WM_TRACE_FILE_PERMISSIONS = Set.of(
             PosixFilePermission.OWNER_WRITE,
@@ -215,7 +215,9 @@ public class LauncherAppsService extends SystemService {
     static class LauncherAppsImpl extends ILauncherApps.Stub {
         private static final boolean DEBUG = false;
         private static final String TAG = "LauncherAppsService";
-
+        private static final String NAMESPACE_MULTIUSER = "multiuser";
+        private static final String FLAG_NON_SYSTEM_ACCESS_TO_HIDDEN_PROFILES =
+                "allow_3p_launchers_access_via_launcher_apps_apis";
         private final Context mContext;
         private final UserManager mUm;
         private final RoleManager mRoleManager;
@@ -563,6 +565,10 @@ public class LauncherAppsService extends SystemService {
                     return true;
                 }
 
+                if (isAccessToHiddenProfilesForNonSystemAppsForbidden()) {
+                    return false;
+                }
+
                 if (!mRoleManager
                         .getRoleHoldersAsUser(
                                 RoleManager.ROLE_HOME, UserHandle.getUserHandleForUid(callingUid))
@@ -570,7 +576,6 @@ public class LauncherAppsService extends SystemService {
                     return false;
                 }
 
-                // TODO(b/321988638): add option to disable with a flag
                 return mContext.checkPermission(
                                 android.Manifest.permission.ACCESS_HIDDEN_PROFILES,
                                 callingPid,
@@ -579,6 +584,13 @@ public class LauncherAppsService extends SystemService {
             } finally {
                 injectRestoreCallingIdentity(ident);
             }
+        }
+
+        private boolean isAccessToHiddenProfilesForNonSystemAppsForbidden() {
+            return !DeviceConfig.getBoolean(
+                    NAMESPACE_MULTIUSER,
+                    FLAG_NON_SYSTEM_ACCESS_TO_HIDDEN_PROFILES,
+                    /* defaultValue= */ true);
         }
 
         private boolean areHiddenApisChecksEnabled() {
@@ -1227,6 +1239,8 @@ public class LauncherAppsService extends SystemService {
                 @NonNull final ShortcutQueryWrapper query, @NonNull final UserHandle targetUser) {
             ensureShortcutPermission(callingPackage);
             if (!canAccessProfile(targetUser.getIdentifier(), "Cannot get shortcuts")) {
+                Log.e(TAG, "return empty shortcuts because callingPackage " + callingPackage
+                        + " cannot access user " + targetUser.getIdentifier());
                 return new ParceledListSlice<>(Collections.EMPTY_LIST);
             }
 
@@ -1788,15 +1802,26 @@ public class LauncherAppsService extends SystemService {
                 Slog.e(TAG, "Caller cannot access hidden profiles");
                 return null;
             }
+            final int callingUser = getCallingUserId();
+            final int callingUid = getCallingUid();
             final long identity = Binder.clearCallingIdentity();
             try {
                 Intent psSettingsIntent = new Intent(PS_SETTINGS_INTENT);
                 psSettingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                final PendingIntent pi = PendingIntent.getActivity(mContext,
+                List<ResolveInfo> ri = mPackageManagerInternal.queryIntentActivities(
+                        psSettingsIntent,
+                        psSettingsIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                        PackageManager.MATCH_SYSTEM_ONLY, callingUid, callingUser);
+                if (ri.isEmpty()) {
+                    return null;
+                }
+                final PendingIntent pi = PendingIntent.getActivityAsUser(mContext,
                         /* requestCode */ 0,
                         psSettingsIntent,
-                        PendingIntent.FLAG_IMMUTABLE | FLAG_UPDATE_CURRENT);
+                        PendingIntent.FLAG_IMMUTABLE | FLAG_UPDATE_CURRENT,
+                        null,
+                        UserHandle.of(callingUser));
                 return pi == null ? null : pi.getIntentSender();
             } finally {
                 Binder.restoreCallingIdentity(identity);

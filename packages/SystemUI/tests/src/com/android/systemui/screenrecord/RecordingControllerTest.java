@@ -17,9 +17,12 @@
 package com.android.systemui.screenrecord;
 
 import static android.os.Process.myUid;
+
 import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -128,7 +131,7 @@ public class RecordingControllerTest extends SysuiTestCase {
         );
 
         mFeatureFlags = new FakeFeatureFlags();
-        when(mScreenCaptureDisabledDialogDelegate.createDialog())
+        when(mScreenCaptureDisabledDialogDelegate.createSysUIDialog())
                 .thenReturn(mScreenCaptureDisabledDialog);
         when(mScreenRecordDialogFactory.create(any(), any()))
                 .thenReturn(mScreenRecordDialogDelegate);

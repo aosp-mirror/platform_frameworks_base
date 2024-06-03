@@ -796,7 +796,7 @@ public class Activity extends ContextThemeWrapper
     private static final String SAVED_DIALOGS_TAG = "android:savedDialogs";
     private static final String SAVED_DIALOG_KEY_PREFIX = "android:dialog_";
     private static final String SAVED_DIALOG_ARGS_KEY_PREFIX = "android:dialog_args_";
-    private static final String HAS_CURENT_PERMISSIONS_REQUEST_KEY =
+    private static final String HAS_CURRENT_PERMISSIONS_REQUEST_KEY =
             "android:hasCurrentPermissionsRequest";
 
     private static final String REQUEST_PERMISSIONS_WHO_PREFIX = "@android:requestPermissions:";
@@ -1183,6 +1183,7 @@ public class Activity extends ContextThemeWrapper
      * @see #setIntent(Intent, ComponentCaller)
      */
     @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    @SuppressLint("OnNameExpected")
     public @Nullable ComponentCaller getCaller() {
         return mCaller;
     }
@@ -1203,6 +1204,7 @@ public class Activity extends ContextThemeWrapper
      * @see #getCaller
      */
     @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    @SuppressLint("OnNameExpected")
     public void setIntent(@Nullable Intent newIntent, @Nullable ComponentCaller newCaller) {
         internalSetIntent(newIntent, newCaller);
     }
@@ -5796,6 +5798,8 @@ public class Activity extends ContextThemeWrapper
      * @see #onRequestPermissionsResult
      */
     @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    @SuppressLint("OnNameExpected")
+    // Suppress lint as this is an overload of the original API.
     public boolean shouldShowRequestPermissionRationale(@NonNull String permission, int deviceId) {
         final PackageManager packageManager = getDeviceId() == deviceId ? getPackageManager()
                 : createDeviceContext(deviceId).getPackageManager();
@@ -7159,6 +7163,7 @@ public class Activity extends ContextThemeWrapper
      * @see ComponentCaller
      */
     @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    @SuppressLint("OnNameExpected")
     public @NonNull ComponentCaller getInitialCaller() {
         return mInitialCaller;
     }
@@ -7186,10 +7191,11 @@ public class Activity extends ContextThemeWrapper
      * @see #getCaller
      */
     @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    @SuppressLint("OnNameExpected")
     public @NonNull ComponentCaller getCurrentCaller() {
         if (mCurrentCaller == null) {
             throw new IllegalStateException("The caller is null because #getCurrentCaller should be"
-                    + " called within #onNewIntent method");
+                    + " called within #onNewIntent or #onActivityResult methods");
         }
         return mCurrentCaller;
     }
@@ -9318,14 +9324,14 @@ public class Activity extends ContextThemeWrapper
 
     private void storeHasCurrentPermissionRequest(Bundle bundle) {
         if (bundle != null && mHasCurrentPermissionsRequest) {
-            bundle.putBoolean(HAS_CURENT_PERMISSIONS_REQUEST_KEY, true);
+            bundle.putBoolean(HAS_CURRENT_PERMISSIONS_REQUEST_KEY, true);
         }
     }
 
     private void restoreHasCurrentPermissionRequest(Bundle bundle) {
         if (bundle != null) {
             mHasCurrentPermissionsRequest = bundle.getBoolean(
-                    HAS_CURENT_PERMISSIONS_REQUEST_KEY, false);
+                    HAS_CURRENT_PERMISSIONS_REQUEST_KEY, false);
         }
     }
 
@@ -9632,6 +9638,7 @@ public class Activity extends ContextThemeWrapper
      *                            the default behaviour
      */
     @FlaggedApi(android.security.Flags.FLAG_ASM_RESTRICTIONS_ENABLED)
+    @SuppressLint("OnNameExpected")
     public void setAllowCrossUidActivitySwitchFromBelow(boolean allowed) {
         ActivityClient.getInstance().setAllowCrossUidActivitySwitchFromBelow(mToken, allowed);
     }

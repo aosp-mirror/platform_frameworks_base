@@ -18,15 +18,17 @@ package com.android.compose.animation.scene.modifiers
 
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.intermediateLayout
+import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.unit.Constraints
 import com.android.compose.animation.scene.SceneTransitionLayoutState
 
 @OptIn(ExperimentalComposeUiApi::class)
 internal fun Modifier.noResizeDuringTransitions(layoutState: SceneTransitionLayoutState): Modifier {
-    return intermediateLayout { measurable, constraints ->
+    return approachLayout(isMeasurementApproachInProgress = { layoutState.isTransitioning() }) {
+        measurable,
+        constraints ->
         if (layoutState.currentTransition == null) {
-            return@intermediateLayout measurable.measure(constraints).run {
+            return@approachLayout measurable.measure(constraints).run {
                 layout(width, height) { place(0, 0) }
             }
         }

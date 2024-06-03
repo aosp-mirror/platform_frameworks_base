@@ -24,6 +24,8 @@ import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.MagnificationConfig;
 import android.annotation.NonNull;
+import android.annotation.PermissionManuallyEnforced;
+import android.annotation.RequiresNoPermission;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -64,7 +66,6 @@ import java.util.Set;
  *
  * TODO(241429275): Initialize this when a proxy is registered.
  */
-@SuppressWarnings("MissingPermissionAnnotation")
 public class ProxyAccessibilityServiceConnection extends AccessibilityServiceConnection {
     private static final String LOG_TAG = "ProxyAccessibilityServiceConnection";
 
@@ -125,6 +126,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
      *
      * @param infos the list of enabled and installed services.
      */
+    @RequiresNoPermission
     @Override
     public void setInstalledAndEnabledServices(@NonNull List<AccessibilityServiceInfo> infos) {
         final long identity = Binder.clearCallingIdentity();
@@ -215,6 +217,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
         }
     }
 
+    @RequiresNoPermission
     @Override
     @NonNull
     public List<AccessibilityServiceInfo> getInstalledAndEnabledServices() {
@@ -224,6 +227,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
         }
     }
 
+    @RequiresNoPermission
     @Override
     public AccessibilityWindowInfo.WindowListSparseArray getWindows() {
         final AccessibilityWindowInfo.WindowListSparseArray allWindows = super.getWindows();
@@ -235,6 +239,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
         return displayWindows;
     }
 
+    @RequiresNoPermission
     @Override
     public void setFocusAppearance(int strokeWidth, int color) {
         synchronized (mLock) {
@@ -272,6 +277,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
         return mFocusColor;
     }
 
+    @RequiresNoPermission
     @Override
     int resolveAccessibilityWindowIdForFindFocusLocked(int windowId, int focusType) {
         if (windowId == AccessibilityWindowInfo.ANY_WINDOW_ID) {
@@ -314,12 +320,14 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need fingerprint hardware */
+    @RequiresNoPermission
     @Override
     public boolean isCapturingFingerprintGestures() throws UnsupportedOperationException {
         throw new UnsupportedOperationException("isCapturingFingerprintGestures is not supported");
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need fingerprint hardware */
+    @RequiresNoPermission
     @Override
     public void onFingerprintGestureDetectionActiveChanged(boolean active)
             throws UnsupportedOperationException {
@@ -328,12 +336,14 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need fingerprint hardware */
+    @RequiresNoPermission
     @Override
     public void onFingerprintGesture(int gesture) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("onFingerprintGesture is not supported");
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need fingerprint hardware */
+    @RequiresNoPermission
     @Override
     public boolean isFingerprintGestureDetectionAvailable() throws UnsupportedOperationException {
         throw new UnsupportedOperationException("isFingerprintGestureDetectionAvailable is not"
@@ -341,6 +351,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /** @throws UnsupportedOperationException since a proxy is not a Service */
+    @RequiresNoPermission
     @Override
     public void onServiceConnected(ComponentName name, IBinder service)
             throws UnsupportedOperationException {
@@ -349,6 +360,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /** @throws UnsupportedOperationException since a proxy is not a Service */
+    @RequiresNoPermission
     @Override
     public void onServiceDisconnected(ComponentName name)
             throws UnsupportedOperationException {
@@ -357,6 +369,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
 
     /** @throws UnsupportedOperationException since a proxy should use
      * setInstalledAndEnabledServices*/
+    @RequiresNoPermission
     @Override
     public void setServiceInfo(AccessibilityServiceInfo info)
             throws UnsupportedOperationException  {
@@ -365,6 +378,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /** @throws UnsupportedOperationException since a proxy should use A11yManager#unregister */
+    @RequiresNoPermission
     @Override
     public void disableSelf() throws UnsupportedOperationException {
         // A proxy uses A11yManager#unregister to turn itself off.
@@ -372,12 +386,14 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /** @throws UnsupportedOperationException since a proxy does not have global system access */
+    @RequiresNoPermission
     @Override
     public boolean performGlobalAction(int action) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("performGlobalAction is not supported");
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need key events */
+    @RequiresNoPermission
     @Override
     public void setOnKeyEventResult(boolean handled, int sequence)
             throws UnsupportedOperationException {
@@ -385,6 +401,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /** @throws UnsupportedOperationException since a proxy does not have global system access */
+    @RequiresNoPermission
     @Override
     public @NonNull List<AccessibilityNodeInfo.AccessibilityAction> getSystemActions()
             throws UnsupportedOperationException {
@@ -393,6 +410,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
 
     /** @throws UnsupportedOperationException since a proxy does not need magnification */
     @Nullable
+    @RequiresNoPermission
     @Override
     public MagnificationConfig getMagnificationConfig(int displayId)
             throws UnsupportedOperationException {
@@ -400,30 +418,35 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need magnification */
+    @RequiresNoPermission
     @Override
     public float getMagnificationScale(int displayId) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("getMagnificationScale is not supported");
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need magnification */
+    @RequiresNoPermission
     @Override
     public float getMagnificationCenterX(int displayId) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("getMagnificationCenterX is not supported");
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need magnification */
+    @RequiresNoPermission
     @Override
     public float getMagnificationCenterY(int displayId) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("getMagnificationCenterY is not supported");
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need magnification */
+    @RequiresNoPermission
     @Override
     public Region getMagnificationRegion(int displayId) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("getMagnificationRegion is not supported");
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need magnification */
+    @RequiresNoPermission
     @Override
     public Region getCurrentMagnificationRegion(int displayId)
             throws UnsupportedOperationException {
@@ -431,6 +454,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need magnification */
+    @RequiresNoPermission
     @Override
     public boolean resetMagnification(int displayId, boolean animate)
             throws UnsupportedOperationException {
@@ -438,6 +462,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need magnification */
+    @RequiresNoPermission
     @Override
     public boolean resetCurrentMagnification(int displayId, boolean animate)
             throws UnsupportedOperationException {
@@ -445,6 +470,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need magnification */
+    @RequiresNoPermission
     @Override
     public boolean setMagnificationConfig(int displayId,
             @androidx.annotation.NonNull MagnificationConfig config, boolean animate)
@@ -453,6 +479,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need magnification */
+    @RequiresNoPermission
     @Override
     public void setMagnificationCallbackEnabled(int displayId, boolean enabled)
             throws UnsupportedOperationException {
@@ -460,24 +487,36 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need magnification */
+    @RequiresNoPermission
+    @Override
+    public boolean isMagnificationSystemUIConnected() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("isMagnificationSystemUIConnected is not"
+                + " supported");
+    }
+
+    /** @throws UnsupportedOperationException since a proxy does not need magnification */
+    @RequiresNoPermission
     @Override
     public boolean isMagnificationCallbackEnabled(int displayId) {
         throw new UnsupportedOperationException("isMagnificationCallbackEnabled is not supported");
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need IME access*/
+    @RequiresNoPermission
     @Override
     public boolean setSoftKeyboardShowMode(int showMode) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("setSoftKeyboardShowMode is not supported");
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need IME access */
+    @RequiresNoPermission
     @Override
     public int getSoftKeyboardShowMode() throws UnsupportedOperationException {
         throw new UnsupportedOperationException("getSoftKeyboardShowMode is not supported");
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need IME access */
+    @RequiresNoPermission
     @Override
     public void setSoftKeyboardCallbackEnabled(boolean enabled)
             throws UnsupportedOperationException {
@@ -485,12 +524,14 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need IME access */
+    @RequiresNoPermission
     @Override
     public boolean switchToInputMethod(String imeId) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("switchToInputMethod is not supported");
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need IME access */
+    @RequiresNoPermission
     @Override
     public int setInputMethodEnabled(String imeId, boolean enabled)
             throws UnsupportedOperationException {
@@ -498,12 +539,14 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need access to the shortcut */
+    @RequiresNoPermission
     @Override
     public boolean isAccessibilityButtonAvailable() throws UnsupportedOperationException {
         throw new UnsupportedOperationException("isAccessibilityButtonAvailable is not supported");
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need gestures/input access */
+    @RequiresNoPermission
     @Override
     public void sendGesture(int sequence, ParceledListSlice gestureSteps)
             throws UnsupportedOperationException {
@@ -511,6 +554,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need gestures/input access */
+    @RequiresNoPermission
     @Override
     public void dispatchGesture(int sequence, ParceledListSlice gestureSteps, int displayId)
             throws UnsupportedOperationException {
@@ -518,6 +562,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need access to screenshots */
+    @RequiresNoPermission
     @Override
     public void takeScreenshot(int displayId, RemoteCallback callback)
             throws UnsupportedOperationException {
@@ -525,6 +570,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need gestures/input access */
+    @RequiresNoPermission
     @Override
     public void setGestureDetectionPassthroughRegion(int displayId, Region region)
             throws UnsupportedOperationException {
@@ -533,6 +579,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need gestures/input access */
+    @RequiresNoPermission
     @Override
     public void setTouchExplorationPassthroughRegion(int displayId, Region region)
             throws UnsupportedOperationException {
@@ -541,6 +588,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need gestures/input access */
+    @RequiresNoPermission
     @Override
     public void setServiceDetectsGesturesEnabled(int displayId, boolean mode)
             throws UnsupportedOperationException {
@@ -549,36 +597,42 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need touch input access */
+    @RequiresNoPermission
     @Override
     public void requestTouchExploration(int displayId) throws UnsupportedOperationException  {
         throw new UnsupportedOperationException("requestTouchExploration is not supported");
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need touch input access */
+    @RequiresNoPermission
     @Override
     public void requestDragging(int displayId, int pointerId) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("requestDragging is not supported");
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need touch input access */
+    @RequiresNoPermission
     @Override
     public void requestDelegating(int displayId) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("requestDelegating is not supported");
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need touch input access */
+    @RequiresNoPermission
     @Override
     public void onDoubleTap(int displayId) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("onDoubleTap is not supported");
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need touch input access */
+    @RequiresNoPermission
     @Override
     public void onDoubleTapAndHold(int displayId) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("onDoubleTapAndHold is not supported");
     }
 
     /** @throws UnsupportedOperationException since a proxy does not need touch input access */
+    @RequiresNoPermission
     @Override
     public void setAnimationScale(float scale) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("setAnimationScale is not supported");
@@ -615,6 +669,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
         return updated;
     }
 
+    @PermissionManuallyEnforced
     @Override
     public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;

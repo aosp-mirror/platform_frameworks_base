@@ -84,7 +84,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Kan nie selnetwerk bereik nie"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Probeer die voorkeurnetwerk verander. Tik om te verander."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Noodoproepe is onbeskikbaar"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Kan nie noodoproepe oor Wi-Fi maak nie"</string>
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Noodoproepe vereis ’n selnetwerk."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Opletberigte"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Oproepaanstuur"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Noodterugbel-modus"</string>
@@ -137,7 +137,7 @@
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="8383917598312067365">"Wi-Fi-oproepe | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="6865214948822061486">"<xliff:g id="SPN">%s</xliff:g>-VoWifi"</string>
     <string name="wfcSpnFormat_wifi_calling" msgid="6178935388378661755">"Wi-Fi-oproepe"</string>
-    <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi-oproepe"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
     <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Wi-fi-oproep"</string>
@@ -153,16 +153,19 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> na <xliff:g id="TIME_DELAY">{2}</xliff:g> sekondes"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nie aangestuur nie"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nie aangestuur nie"</string>
-    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Selnetwerksekuriteit"</string>
-    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Gaan instellings na"</string>
-    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Toegang gekry tot toestelidentifiseerder"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"’n Netwerk op die <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g>-verbinding het jou toestel se unieke identifiseerder (IMSI) <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> keer in die tydperk tussen <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> en <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> aangeteken."</string>
-    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Geënkripteerde verbinding aan <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
-    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Jy is nou gekoppel aan ’n veiliger selnetwerk."</string>
-    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Nie-geënkripteerde verbinding aan <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Jy is gekoppel aan \'n nie-geënkripteerde selnetwerk. Jou oproepe, boodskappe en data is kwesbaar vir onderskepping."</string>
-    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Selsekuriteitinstellings"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"Selnetwerksekuriteit"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Enkripsie, kennisgewings vir ongeënkripteerde netwerke"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"Toegang is tot toestel-ID verkry"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"’n Nabygeleë netwerk het om <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> jou toestel se unieke ID (IMSI of IMEI) aangeteken terwyl jou <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>-SIM gebruik is"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"’n Nabygeleë netwerk het om <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> jou toestel se unieke ID (IMSI of IMEI) aangeteken terwyl jou <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>-SIM gebruik is.\n\nDit beteken dat jou ligging, aktiwiteit of identiteit aangeteken is. Dit is ’n algemene praktyk, maar kan ’n kwessie wees vir mense wat bekommerd is oor privaatheid."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Verbind aan geënkripteerde netwerk <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>-SIM-verbinding is nou meer beveilig"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"Verbind aan ongeënkripteerde netwerk"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Oproepe, boodskappe en data is tans meer kwesbaar terwyl jy jou <xliff:g id="NETWORK_NAME">%1$s</xliff:g>-SIM gebruik."</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"Oproepe, boodskappe en data is tans meer kwesbaar terwyl jy jou <xliff:g id="NETWORK_NAME">%1$s</xliff:g>-SIM gebruik.\n\nJy sal nog ’n kennisgewing kry wanneer jou verbinding weer geënkripteer is."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"Instellings vir selnetwerksekuriteit"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Meer inligting"</string>
+    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"Het dit"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Kenmerkkode klaar."</string>
     <string name="fcError" msgid="5325116502080221346">"Verbindingsprobleem of ongeldige kenmerk-kode."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -198,6 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Jou werkprofiel is nie meer op hierdie toestel beskikbaar nie"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Te veel wagwoordpogings"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administrateur het toestel vir persoonlike gebruik afgestaan"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Privaat ruimte is verwyder"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Jou organisasie laat nie privaat ruimtes op hierdie bestuurde toestel toe nie."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Toestel word bestuur"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Jou organisasie bestuur hierdie toestel en kan netwerkverkeer monitor. Tik vir besonderhede."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Programme kan toegang tot jou ligging kry"</string>
@@ -259,7 +264,7 @@
     <string name="global_action_emergency" msgid="1387617624177105088">"Noodgeval"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Foutverslag"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Beëindig sessie"</string>
-    <string name="global_action_screenshot" msgid="2610053466156478564">"Skermkiekie"</string>
+    <string name="global_action_screenshot" msgid="2610053466156478564">"Skermskoot"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"Foutverslag"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Dit sal inligting oor die huidige toestand van jou toestel insamel om as \'n e-posboodskap te stuur. Dit sal \'n tydjie neem vandat die foutverslag begin is totdat dit reg is om gestuur te word; wees asseblief geduldig."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Interaktiewe verslag"</string>
@@ -280,6 +285,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Stembystand"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"Snelsluit"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"Antwoord"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Nuwe kennisgewing"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Fisieke sleutelbord"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Sekuriteit"</string>
@@ -356,8 +362,9 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Neem skermkiekie"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Kan \'n skermkiekie neem."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"Voorskou, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
+    <string name="dream_accessibility_action_click" msgid="7392398629967797805">"maak toe"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"deaktiveer of verander statusbalk"</string>
-    <string name="permdesc_statusBar" msgid="5809162768651019642">"Laat die program toe om die statusbalk te deaktiveer en stelselikone by te voeg of te verwyder."</string>
+    <string name="permdesc_statusBar" msgid="5809162768651019642">"Laat die app toe om die statusbalk te deaktiveer en stelselikone by te voeg of te verwyder."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"wees die statusbalk"</string>
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Laat die program toe om die statusbalk te wees."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"vou statusbalk in of uit"</string>
@@ -662,7 +669,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Vingerafdruk word nie herken nie"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Vingerafdruk word nie herken nie"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Kan nie gesig herken nie. Gebruik eerder vingerafdruk."</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5590293588784953188">"Gesig nie herken nie. Gebruik eerder vingerafdruk."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Vingerafdruk is gestaaf"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Gesig is gestaaf"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Gesig is gestaaf; druk asseblief bevestig"</string>
@@ -828,7 +835,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Stel wagwoordreëls"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Beheer die lengte en die karakters wat in skermslotwagwoorde en -PIN\'e toegelaat word."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitor pogings om skerm te ontsluit"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Monitor die aantal keer wat \'n verkeerde wagwoorde ingevoer is wanneer die skerm ontsluit word. Sluit die tablet of vee al die data uit as die wagwoord te veel keer verkeerd ingevoer word."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Monitor die aantal keer wat \'n verkeerde wagwoord ingevoer word wanneer die skerm ontsluit word. Sluit die tablet of vee al die data uit as die wagwoord te veel keer verkeerd ingevoer word."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Monitor die aantal verkeerde wagwoorde wat ingetik word wanneer die skerm ontsluit word, en sluit jou Android TV-toestel of vee al jou Android TV-toestel se data uit as te veel verkeerde wagwoorde ingetik word."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Monitor die aantal verkeerde wagwoorde wat ingevoer word wanneer die skerm ontsluit word, en sluit die inligtingvermaakstelsel of vee al die inligtingvermaakstelsel se data uit as te veel verkeerde wagwoorde ingevoer word."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Monitor die aantal keer wat \'n verkeerde wagwoorde ingevoer is wanneer die skerm ontsluit word. Sluit die foon of vee al die data uit as die wagwoord te veel keer verkeerd ingevoer word."</string>
@@ -841,7 +848,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"Om die skerm te sluit"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Beheer hoe en wanneer die skerm sluit."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Om alle data uit te vee"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Vee die tablet se data uit sonder waarskuwing, deur \'n fabrieksterugstelling uit te voer."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Vee die tablet se data uit sonder waarskuwing, deur \'n fabriekterugstelling uit te voer."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Vee jou Android TV-toestel se data sonder waarskuwing uit deur \'n fabrieksterugstelling uit te voer."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Vee die inligtingvermaakstelsel se data sonder waarskuwing uit deur \'n fabriekterugstelling te doen."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Vee die foon se data uit sonder waarskuwing, deur \'n fabrieksterugstelling uit te voer."</string>
@@ -1183,6 +1190,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Vee uit"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Invoermetode"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Teksaksies"</string>
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"Handskrif word nie in hierdie veld gesteun nie"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Handskrif word nie in wagwoordvelde gesteun nie"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Terug"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Wissel invoermetode"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Bergingspasie word min"</string>
@@ -1339,7 +1348,7 @@
     <string name="network_switch_metered_toast" msgid="501662047275723743">"Het oorgeskakel van <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="2255670471736226365">"mobiele data"</item>
-    <item msgid="5520925862115353992">"Wi-Fi"</item>
+    <item msgid="5520925862115353992">"Wi-fi"</item>
     <item msgid="1055487873974272842">"Bluetooth"</item>
     <item msgid="1616528372438698248">"Ethernet"</item>
     <item msgid="9177085807664964627">"VPN"</item>
@@ -1424,7 +1433,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Tik om taal en uitleg te kies"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Wys bo-oor ander programme"</string>
+    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Wys bo-oor ander apps"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> word bo-oor ander programme gewys"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> wys bo-oor ander programme"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"As jy nie wil hê dat <xliff:g id="NAME">%s</xliff:g> hierdie kenmerk gebruik nie, tik om instellings oop te maak en skakel dit af."</string>
@@ -1894,13 +1903,13 @@
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Vra PIN voordat jy ontspeld"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Vra ontsluitpatroon voordat jy ontspeld"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Vra wagwoord voordat jy ontspeld"</string>
-    <string name="package_installed_device_owner" msgid="7035926868974878525">"Geïnstalleer deur jou administrateur"</string>
+    <string name="package_installed_device_owner" msgid="8684974629306529138">"Deur jou admin geïnstalleer.\nGaan na instellings om toegestaande toestemmings te sien"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Opgedateer deur jou administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Uitgevee deur jou administrateur"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Batterybespaarder skakel Donkertema aan en beperk of skakel agtergrondaktiwiteit, sommige visuele effekte, sekere kenmerke en sommige netwerkverbindings af"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Batterybespaarder skakel Donkertema aan en beperk of skakel agtergrondaktiwiteit, sommige visuele effekte, sekere kenmerke en sommige netwerkverbindings af"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Databespaarder verhoed sommige programme om data in die agtergrond te stuur of te aanvaar om datagebruik te help verminder. \'n Program wat jy tans gebruik kan by data ingaan, maar sal dit dalk minder gereeld doen. Dit kan byvoorbeeld beteken dat prente nie wys voordat jy op hulle tik nie."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Databespaarder verhoed sommige apps om data in die agtergrond te stuur of te aanvaar om datagebruik te help verminder. \'n App wat jy tans gebruik kan by data ingaan, maar sal dit dalk minder gereeld doen. Dit kan byvoorbeeld beteken dat prente nie wys voordat jy op hulle tik nie."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Skakel Databespaarder aan?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Skakel aan"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Een minuut lank (tot {formattedTime})}other{# minute lank (tot {formattedTime})}}"</string>
@@ -1927,6 +1936,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Bestuur deur <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Aan"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Af"</string>
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>-<xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Enige kalender"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> demp sekere klanke"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Daar is \'n interne probleem met jou toestel en dit sal dalk onstabiel wees totdat jy \'n fabriekterugstelling doen."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Daar is \'n interne probleem met jou toestel. Kontak jou vervaardiger vir besonderhede."</string>
@@ -1965,7 +1977,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Ongekategoriseer"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Jy stel die belangrikheid van hierdie kennisgewings."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Dit is belangrik as gevolg van die mense wat betrokke is."</string>
-    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Gepasmaakte programkennisgewing"</string>
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Gepasmaakte appkennisgewing"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Laat <xliff:g id="APP">%1$s</xliff:g> toe om \'n nuwe gebruiker met <xliff:g id="ACCOUNT">%2$s</xliff:g> te skep (\'n gebruiker met hierdie rekening bestaan reeds)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Laat <xliff:g id="APP">%1$s</xliff:g> toe om \'n nuwe gebruiker met <xliff:g id="ACCOUNT">%2$s</xliff:g> te skep?"</string>
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"Voeg gebruiker onder toesig by"</string>
@@ -2026,7 +2038,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"Speld <xliff:g id="LABEL">%1$s</xliff:g> vas"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Ontspeld"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"Ontspeld <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="app_info" msgid="6113278084877079851">"Programinligting"</string>
+    <string name="app_info" msgid="6113278084877079851">"Appinligting"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Begin tans demonstrasie …"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Stel toestel tans terug …"</string>
@@ -2135,6 +2147,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Roetinemodus-inligtingkennisgewing"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Batterybespaarder is aangeskakel"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Verminder tans batterygebruik om batterylewe te verleng"</string>
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"Batterybespaarder is aan"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"Batterybespaarder is aangeskakel om batterylewe te verleng"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Batterybespaarder"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Batterybespaarder is afgeskakel"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Foon se battery het genoeg krag. Kenmerke is nie meer beperk nie."</string>
@@ -2171,7 +2185,7 @@
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Kitsinstellings"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Kragdialoog"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Sluitskerm"</string>
-    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Skermkiekie"</string>
+    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Skermskoot"</string>
     <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"Kopstuk haak"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Toeganklikheidkortpad op skerm"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Toeganklikheidkortpadkieser op skerm"</string>
@@ -2182,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"D-paneel links"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"D-paneel regs"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"D-paneel middel"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> se onderskrifbalk."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> is in die BEPERK-groep geplaas"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"het \'n prent gestuur"</string>
@@ -2209,6 +2222,8 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Skakel oor na werkapp?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"Jou organisasie laat jou net toe om oproepe van werkapps af te maak"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"Jou organisasie laat jou net toe om boodskappe van werkapps af te stuur"</string>
+    <string name="miniresolver_private_space_phone_information" msgid="4469511223312488570">"Jy kan foonoproepe net van jou persoonlike Foon-app af maak. Oproepe wat met persoonlike Foon gemaak word, sal by jou persoonlike oproepgeskiedenis gevoeg word."</string>
+    <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"Jy kan SMS-boodskappe net van jou persoonlike Boodskappe-app af stuur."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Gebruik persoonlike blaaier"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Gebruik werkblaaier"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"Bel"</string>
@@ -2388,10 +2403,25 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Werk 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Toets"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Gemeenskaplik"</string>
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"Werkprofiel"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Privaat ruimte"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Kloon"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Gemeenskaplik"</string>
+    <string name="redacted_notification_message" msgid="1520587845842228816">"Sensitiewe kennisgewinginhoud is versteek"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Appinhoud is weens sekuriteit van skermdeling verberg"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Outomaties aan satelliet gekoppel"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Jy kan boodskappe stuur en ontvang sonder ’n selfoon- of wi-fi-netwerk"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Maak Boodskappe oop"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Hoe dit werk"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Hangend …"</string>
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Stel Vingerafdrukslot weer op"</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> het nie goed gewerk nie en is uitgevee"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> en <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> het nie goed gewerk nie en is uitgevee"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> het nie goed gewerk nie en is uitgevee. Stel dit weer op om jou foon met vingerafdruk te ontsluit."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> en <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> het nie goed gewerk nie en is uitgevee. Stel dit weer op om jou foon met jou vingerafdruk te ontsluit."</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"Stel Gesigslot weer op"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Jou gesigmodel het nie goed gewerk nie en is uitgevee. Stel dit weer op om jou foon met gesig te ontsluit."</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Stel op"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Nie nou nie"</string>
 </resources>

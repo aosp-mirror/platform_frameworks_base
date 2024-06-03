@@ -39,6 +39,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyguard.shared.model.DevicePosture
 import com.android.systemui.res.R
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -68,6 +69,8 @@ interface FacePropertyRepository {
 
     /** The info of current available camera. */
     val cameraInfo: StateFlow<CameraInfo?>
+
+    val supportedPostures: List<DevicePosture>
 }
 
 /** Describes a biometric sensor */
@@ -187,6 +190,15 @@ constructor(
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = if (cameraInfoList.isNotEmpty()) cameraInfoList[0] else null
             )
+
+    private val supportedPosture =
+        applicationContext.resources.getInteger(R.integer.config_face_auth_supported_posture)
+    override val supportedPostures: List<DevicePosture> =
+        if (supportedPosture == 0) {
+            DevicePosture.entries
+        } else {
+            listOf(DevicePosture.toPosture(supportedPosture))
+        }
 
     private val defaultSensorLocation: StateFlow<Point?> =
         cameraInfo

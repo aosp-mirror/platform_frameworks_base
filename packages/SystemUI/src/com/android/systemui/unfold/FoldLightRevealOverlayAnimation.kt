@@ -20,11 +20,10 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.annotation.BinderThread
-import android.content.Context
-import android.os.Handler
 import android.os.SystemProperties
 import android.util.Log
 import android.view.animation.DecelerateInterpolator
+import com.android.app.tracing.TraceUtils.traceAsync
 import com.android.internal.foldables.FoldLockSettingAvailabilityProvider
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.display.data.repository.DeviceStateRepository
@@ -36,12 +35,13 @@ import com.android.systemui.unfold.FullscreenLightRevealAnimationController.Comp
 import com.android.systemui.unfold.FullscreenLightRevealAnimationController.Companion.isVerticalRotation
 import com.android.systemui.unfold.dagger.UnfoldBg
 import com.android.systemui.util.animation.data.repository.AnimationStatusRepository
+import com.android.systemui.util.kotlin.race
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -59,13 +59,13 @@ import kotlinx.coroutines.withTimeout
 class FoldLightRevealOverlayAnimation
 @Inject
 constructor(
-    private val context: Context,
-    @UnfoldBg private val bgHandler: Handler,
+    @UnfoldBg private val bgDispatcher: CoroutineDispatcher,
     private val deviceStateRepository: DeviceStateRepository,
     private val powerInteractor: PowerInteractor,
     @Background private val applicationScope: CoroutineScope,
     private val animationStatusRepository: AnimationStatusRepository,
-    private val controllerFactory: FullscreenLightRevealAnimationController.Factory
+    private val controllerFactory: FullscreenLightRevealAnimationController.Factory,
+    private val foldLockSettingAvailabilityProvider: FoldLockSettingAvailabilityProvider
 ) : FullscreenLightRevealAnimation {
 
     private val revealProgressValueAnimator: ValueAnimator =
@@ -79,7 +79,7 @@ constructor(
     override fun init() {
         // This method will be called only on devices where this animation is enabled,
         // so normally this thread won't be created
-        if (!FoldLockSettingAvailabilityProvider(context.resources).isFoldLockBehaviorAvailable) {
+        if (!foldLockSettingAvailabilityProvider.isFoldLockBehaviorAvailable) {
             return
         }
 
@@ -91,7 +91,6 @@ constructor(
             )
         controller.init()
 
-        val bgDispatcher = bgHandler.asCoroutineDispatcher("@UnfoldBg Handler")
         applicationScope.launch(bgDispatcher) {
             powerInteractor.screenPowerState.collect {
                 if (it == ScreenPowerState.SCREEN_ON) {
@@ -109,14 +108,21 @@ constructor(
                             if (!areAnimationEnabled.first() || !isFolded) {
                                 return@flow
                             }
-                            withTimeout(WAIT_FOR_ANIMATION_TIMEOUT_MS) {
-                                readyCallback = CompletableDeferred()
-                                val onReady = readyCallback?.await()
-                                readyCallback = null
-                                controller.addOverlay(ALPHA_OPAQUE, onReady)
-                                waitForScreenTurnedOn()
-                            }
-                            playFoldLightRevealOverlayAnimation()
+                            race(
+                                {
+                                    traceAsync(TAG, "prepareAndPlayFoldAnimation()") {
+                                        withTimeout(WAIT_FOR_ANIMATION_TIMEOUT_MS) {
+                                            readyCallback = CompletableDeferred()
+                                            val onReady = readyCallback?.await()
+                                            readyCallback = null
+                                            controller.addOverlay(ALPHA_OPAQUE, onReady)
+                                            waitForScreenTurnedOn()
+                                        }
+                                        playFoldLightRevealOverlayAnimation()
+                                    }
+                                },
+                                { waitForGoToSleep() }
+                            )
                         }
                         .catchTimeoutAndLog()
                         .onCompletion {
@@ -135,9 +141,13 @@ constructor(
         readyCallback?.complete(onOverlayReady) ?: onOverlayReady.run()
     }
 
-    private suspend fun waitForScreenTurnedOn() {
-        powerInteractor.screenPowerState.filter { it == ScreenPowerState.SCREEN_ON }.first()
-    }
+    private suspend fun waitForScreenTurnedOn() =
+        traceAsync(TAG, "waitForScreenTurnedOn()") {
+            powerInteractor.screenPowerState.filter { it == ScreenPowerState.SCREEN_ON }.first()
+        }
+
+    private suspend fun waitForGoToSleep() =
+        traceAsync(TAG, "waitForGoToSleep()") { powerInteractor.isAsleep.filter { it }.first() }
 
     private suspend fun playFoldLightRevealOverlayAnimation() {
         revealProgressValueAnimator.duration = ANIMATION_DURATION

@@ -119,6 +119,7 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
     fun faceAuthIsRequestedWhenLockscreenBecomesVisibleFromOffState() =
         testScope.runTest {
             underTest.start()
+            runCurrent()
 
             powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_LID)
             faceWakeUpTriggersConfig.setTriggerFaceAuthOnWakeUpFrom(
@@ -160,6 +161,7 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
     fun faceAuthIsRequestedWhenLockscreenBecomesVisibleFromAodState() =
         testScope.runTest {
             underTest.start()
+            runCurrent()
 
             powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_LID)
             faceWakeUpTriggersConfig.setTriggerFaceAuthOnWakeUpFrom(
@@ -207,6 +209,7 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
     fun faceAuthIsRequestedWhenLockscreenBecomesVisibleFromDozingState() =
         testScope.runTest {
             underTest.start()
+            runCurrent()
 
             powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_LID)
             faceWakeUpTriggersConfig.setTriggerFaceAuthOnWakeUpFrom(
@@ -535,13 +538,14 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
     @Test
     fun lockedOut_providesSameValueFromRepository() =
         testScope.runTest {
-            assertThat(underTest.lockedOut).isSameInstanceAs(faceAuthRepository.isLockedOut)
+            assertThat(underTest.isLockedOut).isSameInstanceAs(faceAuthRepository.isLockedOut)
         }
 
     @Test
     fun authenticated_providesSameValueFromRepository() =
         testScope.runTest {
-            assertThat(underTest.authenticated).isSameInstanceAs(faceAuthRepository.isAuthenticated)
+            assertThat(underTest.isAuthenticated)
+                .isSameInstanceAs(faceAuthRepository.isAuthenticated)
         }
 
     companion object {

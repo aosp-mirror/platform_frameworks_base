@@ -177,6 +177,7 @@ public class Watchdog implements Dumpable {
             "android.hardware.biometrics.fingerprint.IFingerprint/",
             "android.hardware.bluetooth.IBluetoothHci/",
             "android.hardware.camera.provider.ICameraProvider/",
+            "android.hardware.drm.IDrmFactory/",
             "android.hardware.gnss.IGnss/",
             "android.hardware.graphics.allocator.IAllocator/",
             "android.hardware.graphics.composer3.IComposer/",

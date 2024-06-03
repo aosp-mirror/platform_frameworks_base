@@ -18,7 +18,7 @@ package com.android.systemui.mediaprojection.taskswitcher.ui
 
 import android.app.Notification
 import android.app.NotificationManager
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.testScope
@@ -40,9 +40,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class TaskSwitcherNotificationCoordinatorTest : SysuiTestCase() {
 
@@ -66,6 +67,10 @@ class TaskSwitcherNotificationCoordinatorTest : SysuiTestCase() {
                 fakeBroadcastDispatcher,
             )
         coordinator.start()
+        // When the coordinator starts up, the view model will immediately emit a NotShowing event
+        // and hide the notification. That's fine, but we should reset the notification manager so
+        // that the initial emission isn't part of the tests.
+        reset(notificationManager)
     }
 
     @Test
@@ -82,8 +87,13 @@ class TaskSwitcherNotificationCoordinatorTest : SysuiTestCase() {
     @Test
     fun hideNotification() {
         testScope.runTest {
+            // First, show a notification
+            switchTask()
+
+            // WHEN the projection is stopped
             fakeMediaProjectionManager.dispatchOnStop()
 
+            // THEN the notification is hidden
             verify(notificationManager).cancel(any(), any())
         }
     }
@@ -91,13 +101,15 @@ class TaskSwitcherNotificationCoordinatorTest : SysuiTestCase() {
     @Test
     fun notificationIdIsConsistent() {
         testScope.runTest {
-            fakeMediaProjectionManager.dispatchOnStop()
-            val idCancel = argumentCaptor<Int>()
-            verify(notificationManager).cancel(any(), idCancel.capture())
-
+            // First, show a notification
             switchTask()
             val idNotify = argumentCaptor<Int>()
             verify(notificationManager).notify(any(), idNotify.capture(), any())
+
+            // Then, hide the notification
+            fakeMediaProjectionManager.dispatchOnStop()
+            val idCancel = argumentCaptor<Int>()
+            verify(notificationManager).cancel(any(), idCancel.capture())
 
             assertEquals(idCancel.value, idNotify.value)
         }

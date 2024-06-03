@@ -17,7 +17,10 @@
 package com.android.systemui.keyguard.data.repository
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testDispatcher
 
 var Kosmos.keyguardTransitionRepository: KeyguardTransitionRepository by
     Kosmos.Fixture { fakeKeyguardTransitionRepository }
 var Kosmos.fakeKeyguardTransitionRepository by Kosmos.Fixture { FakeKeyguardTransitionRepository() }
+var Kosmos.realKeyguardTransitionRepository: KeyguardTransitionRepository by
+    Kosmos.Fixture { KeyguardTransitionRepositoryImpl(testDispatcher) }

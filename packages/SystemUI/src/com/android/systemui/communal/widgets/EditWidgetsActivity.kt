@@ -31,12 +31,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
-import com.android.app.tracing.coroutines.launch
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.communal.ui.compose.CommunalHub
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.util.WidgetPickerIntentUtils.getWidgetExtraFromIntent
@@ -44,6 +44,7 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
 import javax.inject.Inject
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /** An Activity for editing the widgets that appear in hub mode. */
@@ -60,11 +61,16 @@ constructor(
         private const val TAG = "EditWidgetsActivity"
         private const val EXTRA_IS_PENDING_WIDGET_DRAG = "is_pending_widget_drag"
         const val EXTRA_PRESELECTED_KEY = "preselected_key"
+        const val EXTRA_OPEN_WIDGET_PICKER_ON_START = "open_widget_picker_on_start"
     }
 
     private val logger = Logger(logBuffer, "EditWidgetsActivity")
 
     private val widgetConfigurator by lazy { widgetConfiguratorFactory.create(this) }
+
+    private var shouldOpenWidgetPickerOnStart = false
+
+    private var lockOnDestroy = false
 
     private val addWidgetActivityLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(StartActivityForResult()) { result ->
@@ -112,6 +118,9 @@ constructor(
         window.setDecorFitsSystemWindows(false)
 
         val preselectedKey = intent.getStringExtra(EXTRA_PRESELECTED_KEY)
+        shouldOpenWidgetPickerOnStart =
+            intent.getBooleanExtra(EXTRA_OPEN_WIDGET_PICKER_ON_START, false)
+
         communalViewModel.setSelectedKey(preselectedKey)
 
         setContent {
@@ -143,12 +152,18 @@ constructor(
     }
 
     private fun onEditDone() {
-        try {
-            communalViewModel.onSceneChanged(CommunalScenes.Communal)
-            checkNotNull(windowManagerService).lockNow(/* options */ null)
+        lifecycleScope.launch {
+            communalViewModel.changeScene(
+                CommunalScenes.Communal,
+                CommunalTransitionKeys.SimpleFade
+            )
+
+            // Wait for the current scene to be idle on communal.
+            communalViewModel.isIdleOnCommunal.first { it }
+            // Then finish the activity (this helps to avoid a flash of lockscreen when locking
+            // in onDestroy()).
+            lockOnDestroy = true
             finish()
-        } catch (e: RemoteException) {
-            Log.e(TAG, "Couldn't lock the device as WindowManager is dead.")
         }
     }
 
@@ -161,6 +176,11 @@ constructor(
 
     override fun onStart() {
         super.onStart()
+
+        if (shouldOpenWidgetPickerOnStart) {
+            onOpenWidgetPicker()
+            shouldOpenWidgetPickerOnStart = false
+        }
 
         logger.i("Starting the communal widget editor activity")
         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_EDIT_MODE_SHOWN)
@@ -176,5 +196,15 @@ constructor(
     override fun onDestroy() {
         super.onDestroy()
         communalViewModel.setEditModeOpen(false)
+
+        if (lockOnDestroy) lockNow()
+    }
+
+    private fun lockNow() {
+        try {
+            checkNotNull(windowManagerService).lockNow(/* options */ null)
+        } catch (e: RemoteException) {
+            Log.e(TAG, "Couldn't lock the device as WindowManager is dead.")
+        }
     }
 }

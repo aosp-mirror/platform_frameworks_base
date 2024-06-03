@@ -11,6 +11,7 @@ package {
 aconfig_declarations {
     name: "framework_graphics_flags",
     package: "com.android.graphics.flags",
+    container: "system",
     srcs: ["android/framework_graphics.aconfig"],
 }
 

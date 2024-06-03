@@ -23,6 +23,10 @@ import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
+import static kotlinx.coroutines.flow.SharedFlowKt.MutableSharedFlow;
+import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
@@ -37,9 +41,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
-import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
-
+import android.animation.Animator;
 import android.annotation.IdRes;
 import android.content.ContentResolver;
 import android.content.res.Configuration;
@@ -73,7 +75,7 @@ import com.android.keyguard.KeyguardSliceViewController;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardStatusViewController;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.LockIconViewController;
+import com.android.keyguard.LegacyLockIconViewController;
 import com.android.keyguard.dagger.KeyguardQsUserSwitchComponent;
 import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
@@ -136,7 +138,6 @@ import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorLega
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl;
 import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl;
-import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -155,6 +156,7 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinatorLogger;
 import com.android.systemui.statusbar.notification.data.repository.NotificationsKeyguardViewStateRepository;
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
+import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor;
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
@@ -162,6 +164,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator;
+import com.android.systemui.statusbar.notification.stack.data.repository.FakeHeadsUpNotificationRepository;
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
@@ -201,19 +204,23 @@ import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import dagger.Lazy;
 
+import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.channels.BufferOverflow;
+import kotlinx.coroutines.test.TestScope;
+
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.mockito.stubbing.Answer;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-
-import kotlinx.coroutines.CoroutineDispatcher;
-import kotlinx.coroutines.test.TestScope;
 
 public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
 
@@ -279,7 +286,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected AmbientState mAmbientState;
     @Mock protected UserManager mUserManager;
     @Mock protected UiEventLogger mUiEventLogger;
-    @Mock protected LockIconViewController mLockIconViewController;
+    @Mock protected LegacyLockIconViewController mLockIconViewController;
     @Mock protected KeyguardViewConfigurator mKeyguardViewConfigurator;
     @Mock protected KeyguardRootView mKeyguardRootView;
     @Mock protected View mKeyguardRootViewChild;
@@ -307,7 +314,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected NotificationListContainer mNotificationListContainer;
     @Mock protected NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     @Mock protected UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
-    @Mock protected ShadeTransitionController mShadeTransitionController;
     @Mock protected QS mQs;
     @Mock protected QSFragmentLegacy mQSFragment;
     @Mock protected ViewGroup mQsHeader;
@@ -347,7 +353,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock private KeyguardClockPositionAlgorithm mKeyguardClockPositionAlgorithm;
     @Mock private NaturalScrollingSettingObserver mNaturalScrollingSettingObserver;
     @Mock private LargeScreenHeaderHelper mLargeScreenHeaderHelper;
-
     protected final int mMaxUdfpsBurnInOffsetY = 5;
     protected FakeFeatureFlagsClassic mFeatureFlags = new FakeFeatureFlagsClassic();
     protected KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
@@ -360,6 +365,13 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     protected TestScope mTestScope = mKosmos.getTestScope();
     protected ShadeInteractor mShadeInteractor;
     protected PowerInteractor mPowerInteractor;
+    protected FakeHeadsUpNotificationRepository mFakeHeadsUpNotificationRepository =
+            new FakeHeadsUpNotificationRepository();
+    protected NotificationsKeyguardViewStateRepository mNotificationsKeyguardViewStateRepository =
+            new NotificationsKeyguardViewStateRepository();
+    protected NotificationsKeyguardInteractor mNotificationsKeyguardInteractor =
+            new NotificationsKeyguardInteractor(mNotificationsKeyguardViewStateRepository);
+    protected HeadsUpNotificationInteractor mHeadsUpNotificationInteractor;
     protected NotificationPanelViewController.TouchHandler mTouchHandler;
     protected ConfigurationController mConfigurationController;
     protected SysuiStatusBarStateController mStatusBarStateController;
@@ -383,10 +395,11 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
 
     protected FragmentHostManager.FragmentListener mFragmentListener;
 
+    @Rule(order = 200)
+    public MockitoRule mMockitoRule = MockitoJUnit.rule();
+
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
-        mFeatureFlags.set(Flags.TRACKPAD_GESTURE_FEATURES, false);
         mFeatureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false);
         mFeatureFlags.set(Flags.QS_USER_DETAIL_SHORTCUT, false);
 
@@ -400,7 +413,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         mFakeKeyguardRepository = keyguardInteractorDeps.getRepository();
         mKeyguardBottomAreaInteractor = new KeyguardBottomAreaInteractor(mFakeKeyguardRepository);
         mFakeKeyguardClockRepository = new FakeKeyguardClockRepository();
-        mKeyguardClockInteractor = new KeyguardClockInteractor(mFakeKeyguardClockRepository);
+        mKeyguardClockInteractor = mKosmos.getKeyguardClockInteractor();
         mKeyguardInteractor = keyguardInteractorDeps.getKeyguardInteractor();
         mShadeRepository = new FakeShadeRepository();
         mShadeAnimationInteractor = new ShadeAnimationInteractorLegacyImpl(
@@ -408,6 +421,11 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         mPowerInteractor = keyguardInteractorDeps.getPowerInteractor();
         when(mKeyguardTransitionInteractor.isInTransitionToStateWhere(any())).thenReturn(
                 MutableStateFlow(false));
+        when(mKeyguardTransitionInteractor.isInTransition(any(), any()))
+                .thenReturn(emptyFlow());
+        when(mKeyguardTransitionInteractor.getCurrentKeyguardState()).thenReturn(
+                MutableSharedFlow(0, 0, BufferOverflow.SUSPEND));
+        when(mDeviceEntryFaceAuthInteractor.isBypassEnabled()).thenReturn(MutableStateFlow(false));
         DeviceEntryUdfpsInteractor deviceEntryUdfpsInteractor =
                 mock(DeviceEntryUdfpsInteractor.class);
         when(deviceEntryUdfpsInteractor.isUdfpsSupported()).thenReturn(MutableStateFlow(false));
@@ -439,11 +457,13 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         SystemClock systemClock = new FakeSystemClock();
         mStatusBarStateController = new StatusBarStateControllerImpl(
                 mUiEventLogger,
-                mKosmos.getInteractionJankMonitor(),
+                () -> mKosmos.getInteractionJankMonitor(),
                 mJavaAdapter,
+                () -> mKeyguardTransitionInteractor,
                 () -> mShadeInteractor,
                 () -> mKosmos.getDeviceUnlockedInteractor(),
-                () -> mKosmos.getSceneInteractor());
+                () -> mKosmos.getSceneInteractor(),
+                () -> mKosmos.getKeyguardClockInteractor());
 
         KeyguardStatusView keyguardStatusView = new KeyguardStatusView(mContext);
         keyguardStatusView.setId(R.id.keyguard_status_view);
@@ -540,7 +560,9 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         }).when(mView).setOnTouchListener(any(NotificationPanelViewController.TouchHandler.class));
 
         // Dreaming->Lockscreen
-        when(mKeyguardTransitionInteractor.getDreamingToLockscreenTransition())
+        when(mKeyguardTransitionInteractor.transition(any()))
+                .thenReturn(emptyFlow());
+        when(mKeyguardTransitionInteractor.transition(any(), any()))
                 .thenReturn(emptyFlow());
         when(mDreamingToLockscreenTransitionViewModel.getLockscreenAlpha())
                 .thenReturn(emptyFlow());
@@ -548,46 +570,28 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 .thenReturn(emptyFlow());
 
         // Occluded->Lockscreen
-        when(mKeyguardTransitionInteractor.getOccludedToLockscreenTransition())
-                .thenReturn(emptyFlow());
         when(mOccludedToLockscreenTransitionViewModel.getLockscreenAlpha())
                 .thenReturn(emptyFlow());
         when(mOccludedToLockscreenTransitionViewModel.getLockscreenTranslationY())
                 .thenReturn(emptyFlow());
 
         // Lockscreen->Dreaming
-        when(mKeyguardTransitionInteractor.getLockscreenToDreamingTransition())
-                .thenReturn(emptyFlow());
         when(mLockscreenToDreamingTransitionViewModel.getLockscreenAlpha())
                 .thenReturn(emptyFlow());
         when(mLockscreenToDreamingTransitionViewModel.lockscreenTranslationY(anyInt()))
                 .thenReturn(emptyFlow());
 
         // Gone->Dreaming
-        when(mKeyguardTransitionInteractor.getGoneToDreamingTransition())
-                .thenReturn(emptyFlow());
         when(mGoneToDreamingTransitionViewModel.getLockscreenAlpha())
                 .thenReturn(emptyFlow());
         when(mGoneToDreamingTransitionViewModel.lockscreenTranslationY(anyInt()))
                 .thenReturn(emptyFlow());
 
         // Gone->Dreaming lockscreen hosted
-        when(mKeyguardTransitionInteractor.getGoneToDreamingLockscreenHostedTransition())
-                .thenReturn(emptyFlow());
         when(mGoneToDreamingLockscreenHostedTransitionViewModel.getLockscreenAlpha())
                 .thenReturn(emptyFlow());
 
-        // Dreaming lockscreen hosted->Lockscreen
-        when(mKeyguardTransitionInteractor.getDreamingLockscreenHostedToLockscreenTransition())
-                .thenReturn(emptyFlow());
-
-        // Lockscreen->Dreaming lockscreen hosted
-        when(mKeyguardTransitionInteractor.getLockscreenToDreamingLockscreenHostedTransition())
-                .thenReturn(emptyFlow());
-
         // Lockscreen->Occluded
-        when(mKeyguardTransitionInteractor.getLockscreenToOccludedTransition())
-                .thenReturn(emptyFlow());
         when(mLockscreenToOccludedTransitionViewModel.getLockscreenAlpha())
                 .thenReturn(emptyFlow());
         when(mLockscreenToOccludedTransitionViewModel.getLockscreenTranslationY())
@@ -605,20 +609,24 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 new NotificationsKeyguardInteractor(notifsKeyguardViewStateRepository);
         NotificationWakeUpCoordinator coordinator =
                 new NotificationWakeUpCoordinator(
+                        mKosmos.getTestScope().getBackgroundScope(),
                         mDumpManager,
                         mock(HeadsUpManager.class),
                         new StatusBarStateControllerImpl(
                                 new UiEventLoggerFake(),
-                                mKosmos.getInteractionJankMonitor(),
+                                () -> mKosmos.getInteractionJankMonitor(),
                                 mJavaAdapter,
+                                () -> mKeyguardTransitionInteractor,
                                 () -> mShadeInteractor,
                                 () -> mKosmos.getDeviceUnlockedInteractor(),
-                                () -> mKosmos.getSceneInteractor()),
+                                () -> mKosmos.getSceneInteractor(),
+                                () -> mKosmos.getKeyguardClockInteractor()),
                         mKeyguardBypassController,
                         mDozeParameters,
                         mScreenOffAnimationController,
                         new NotificationWakeUpCoordinatorLogger(logcatLogBuffer()),
-                        notifsKeyguardInteractor);
+                        notifsKeyguardInteractor,
+                        mKosmos.getCommunalInteractor());
         mConfigurationController = new ConfigurationControllerImpl(mContext);
         PulseExpansionHandler expansionHandler = new PulseExpansionHandler(
                 mContext,
@@ -662,12 +670,17 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         when(mView.getParent()).thenReturn(mViewParent);
         when(mQs.getHeader()).thenReturn(mQsHeader);
         when(mDownMotionEvent.getAction()).thenReturn(MotionEvent.ACTION_DOWN);
-        when(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState);
+        when(mSysUiState.setFlag(anyLong(), anyBoolean())).thenReturn(mSysUiState);
 
         mMainHandler = new Handler(Looper.getMainLooper());
 
         when(mView.requireViewById(R.id.keyguard_long_press))
                 .thenReturn(mock(LongPressHandlingView.class));
+
+        mHeadsUpNotificationInteractor =
+                new HeadsUpNotificationInteractor(mFakeHeadsUpNotificationRepository,
+                        mDeviceEntryFaceAuthInteractor, mKeyguardTransitionInteractor,
+                        mNotificationsKeyguardInteractor, mShadeInteractor);
 
         mNotificationPanelViewController = new NotificationPanelViewController(
                 mView,
@@ -724,7 +737,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mNotificationListContainer,
                 mNotificationStackSizeCalculator,
                 mUnlockedScreenOffAnimationController,
-                mShadeTransitionController,
                 systemClock,
                 mKeyguardBottomAreaViewModel,
                 mKeyguardBottomAreaInteractor,
@@ -745,6 +757,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mActivityStarter,
                 mSharedNotificationContainerInteractor,
                 mActiveNotificationsInteractor,
+                mHeadsUpNotificationInteractor,
                 mShadeAnimationInteractor,
                 mKeyguardViewConfigurator,
                 mDeviceEntryFaceAuthInteractor,
@@ -766,6 +779,9 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                     @Override
                     public void onOpenStarted() {}
                 });
+        // Create a set to which the class will add all animators used, so that we can
+        // verify that they are all stopped.
+        mNotificationPanelViewController.mTestSetOfAnimatorsUsed = new HashSet<>();
         ArgumentCaptor<View.OnAttachStateChangeListener> onAttachStateChangeListenerArgumentCaptor =
                 ArgumentCaptor.forClass(View.OnAttachStateChangeListener.class);
         verify(mView, atLeast(1)).addOnAttachStateChangeListener(
@@ -791,10 +807,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mNotificationPanelViewControllerLazy,
                 mView,
                 mQsFrameTranslateController,
-                mShadeTransitionController,
                 expansionHandler,
                 mNotificationRemoteInputManager,
-                mShadeExpansionStateManager,
                 mStatusBarKeyguardViewManager,
                 mLightBarController,
                 mNotificationStackScrollLayoutController,
@@ -804,7 +818,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mStatusBarTouchableRegionManager,
                 mKeyguardStateController,
                 mKeyguardBypassController,
-                mUpdateMonitor,
                 mScrimController,
                 mMediaDataManager,
                 mMediaHierarchyManager,
@@ -814,7 +827,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mAccessibilityManager,
                 mLockscreenGestureLogger,
                 mMetricsLogger,
-                mKosmos.getInteractionJankMonitor(),
+                () -> mKosmos.getInteractionJankMonitor(),
                 mShadeLog,
                 mDumpManager,
                 mDeviceEntryFaceAuthInteractor,
@@ -824,18 +837,26 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mJavaAdapter,
                 mCastController,
                 new ResourcesSplitShadeStateController(),
+                () -> mKosmos.getCommunalTransitionViewModel(),
                 () -> mLargeScreenHeaderHelper
         );
     }
 
     @After
     public void tearDown() {
+        List<Animator> leakedAnimators = null;
         if (mNotificationPanelViewController != null) {
             mNotificationPanelViewController.mBottomAreaShadeAlphaAnimator.cancel();
             mNotificationPanelViewController.cancelHeightAnimator();
+            leakedAnimators = mNotificationPanelViewController.mTestSetOfAnimatorsUsed.stream()
+                    .filter(Animator::isRunning).toList();
+            mNotificationPanelViewController.mTestSetOfAnimatorsUsed.forEach(Animator::cancel);
         }
         if (mMainHandler != null) {
             mMainHandler.removeCallbacksAndMessages(null);
+        }
+        if (leakedAnimators != null) {
+            assertThat(leakedAnimators).isEmpty();
         }
     }
 
@@ -901,8 +922,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         mConfigurationController.onConfigurationChanged(configuration);
     }
 
-    protected void onTouchEvent(MotionEvent ev) {
-        mTouchHandler.onTouch(mView, ev);
+    protected boolean onTouchEvent(MotionEvent ev) {
+        return mTouchHandler.onTouch(mView, ev);
     }
 
     protected void setDozing(boolean dozing, boolean dozingAlwaysOn) {

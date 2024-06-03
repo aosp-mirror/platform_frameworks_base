@@ -25,7 +25,6 @@ import android.os.Parcelable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -77,9 +76,11 @@ public final class DeviceStateInfo implements Parcelable {
      * NOTE: Unlike {@link #DeviceStateInfo(DeviceStateInfo)}, this constructor does not copy the
      * supplied parameters.
      */
-    public DeviceStateInfo(@NonNull List<DeviceState> supportedStates, DeviceState baseState,
+    // Using the specific types to avoid virtual method calls in binder transactions
+    @SuppressWarnings("NonApiType")
+    public DeviceStateInfo(@NonNull ArrayList<DeviceState> supportedStates, DeviceState baseState,
             DeviceState state) {
-        this.supportedStates = new ArrayList<>(supportedStates);
+        this.supportedStates = supportedStates;
         this.baseState = baseState;
         this.currentState = state;
     }
@@ -89,13 +90,13 @@ public final class DeviceStateInfo implements Parcelable {
      * the fields of the returned instance.
      */
     public DeviceStateInfo(@NonNull DeviceStateInfo info) {
-        this(List.copyOf(info.supportedStates), info.baseState, info.currentState);
+        this(new ArrayList<>(info.supportedStates), info.baseState, info.currentState);
     }
 
     @Override
     public boolean equals(@Nullable Object other) {
         if (this == other) return true;
-        if (other == null || getClass() != other.getClass()) return false;
+        if (other == null || (getClass() != other.getClass())) return false;
         DeviceStateInfo that = (DeviceStateInfo) other;
         return baseState.equals(that.baseState)
                 &&  currentState.equals(that.currentState)

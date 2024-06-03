@@ -17,6 +17,7 @@
 #include "renderthread/RenderThread.h"
 
 #include "Readback.h"
+#include "renderstate/RenderState.h"
 #include "renderthread/VulkanManager.h"
 
 namespace android {
@@ -66,6 +67,7 @@ RenderThread::RenderThread()
 RenderThread::~RenderThread() {}
 
 void RenderThread::initThreadLocals() {
+    mRenderState = new RenderState(*this);
     mCacheManager = new CacheManager(*this);
 }
 

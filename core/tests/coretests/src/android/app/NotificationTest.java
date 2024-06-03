@@ -84,8 +84,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.SystemProperties;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -126,13 +126,11 @@ public class NotificationTest {
 
     @Rule
     public TestRule compatChangeRule = new PlatformCompatChangeRule();
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Before
     public void setUp() {
         mContext = InstrumentationRegistry.getContext();
-        // TODO(b/169435530): remove this flag set once resolved.
-        SystemProperties.set("persist.sysui.notification.builder_extras_override",
-                Boolean.toString(false));
     }
 
     @Test
@@ -1701,10 +1699,6 @@ public class NotificationTest {
     // Ensures that extras in a Notification Builder can be updated.
     @Test
     public void testExtras_cachedExtrasOverwrittenByUserProvided() {
-        // Sets the flag to new state.
-        // TODO(b/169435530): remove this set value once resolved.
-        SystemProperties.set("persist.sysui.notification.builder_extras_override",
-                Boolean.toString(true));
         Bundle extras = new Bundle();
         extras.putCharSequence(EXTRA_TITLE, "test title");
         extras.putCharSequence(EXTRA_SUMMARY_TEXT, "summary text");
@@ -1730,10 +1724,6 @@ public class NotificationTest {
     // Ensures that extras in a Notification Builder can be updated by an extender.
     @Test
     public void testExtras_cachedExtrasOverwrittenByExtender() {
-        // Sets the flag to new state.
-        // TODO(b/169435530): remove this set value once resolved.
-        SystemProperties.set("persist.sysui.notification.builder_extras_override",
-                Boolean.toString(true));
         Notification.CarExtender extender = new Notification.CarExtender().setColor(1234);
 
         Notification notification = new Notification.Builder(mContext, "test id")
@@ -1745,58 +1735,6 @@ public class NotificationTest {
 
         Notification.CarExtender recoveredExtender = new Notification.CarExtender(notification);
         assertThat(recoveredExtender.getColor()).isEqualTo(5678);
-    }
-
-    // Validates pre-flag flip behavior, that extras in a Notification Builder cannot be updated.
-    // TODO(b/169435530): remove this test once resolved.
-    @Test
-    public void testExtras_cachedExtrasOverwrittenByUserProvidedOld() {
-        // Sets the flag to old state.
-        SystemProperties.set("persist.sysui.notification.builder_extras_override",
-                Boolean.toString(false));
-
-        Bundle extras = new Bundle();
-        extras.putCharSequence(EXTRA_TITLE, "test title");
-        extras.putCharSequence(EXTRA_SUMMARY_TEXT, "summary text");
-
-        Notification.Builder builder = new Notification.Builder(mContext, "test id")
-                .addExtras(extras);
-
-        Notification notification = builder.build();
-        assertThat(notification.extras.getCharSequence(EXTRA_TITLE).toString()).isEqualTo(
-                "test title");
-        assertThat(notification.extras.getCharSequence(EXTRA_SUMMARY_TEXT).toString()).isEqualTo(
-                "summary text");
-
-        extras.putCharSequence(EXTRA_TITLE, "new title");
-        builder.addExtras(extras);
-        notification = builder.build();
-        assertThat(notification.extras.getCharSequence(EXTRA_TITLE).toString()).isEqualTo(
-                "test title");
-        assertThat(notification.extras.getCharSequence(EXTRA_SUMMARY_TEXT).toString()).isEqualTo(
-                "summary text");
-    }
-
-    // Validates pre-flag flip behavior, that extras in a Notification Builder cannot be updated
-    // by an extender.
-    // TODO(b/169435530): remove this test once resolved.
-    @Test
-    public void testExtras_cachedExtrasOverwrittenByExtenderOld() {
-        // Sets the flag to old state.
-        SystemProperties.set("persist.sysui.notification.builder_extras_override",
-                Boolean.toString(false));
-
-        Notification.CarExtender extender = new Notification.CarExtender().setColor(1234);
-
-        Notification notification = new Notification.Builder(mContext, "test id")
-                .extend(extender).build();
-
-        extender.setColor(5678);
-
-        Notification.Builder.recoverBuilder(mContext, notification).extend(extender).build();
-
-        Notification.CarExtender recoveredExtender = new Notification.CarExtender(notification);
-        assertThat(recoveredExtender.getColor()).isEqualTo(1234);
     }
 
     @Test
@@ -1833,6 +1771,36 @@ public class NotificationTest {
         Bitmap resultBitmap = result.getBackground();
         assertNotNull(resultBitmap);
         Assert.assertEquals(bitmap, resultBitmap);
+    }
+
+    @Test
+    public void testGetWhen_zero() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setWhen(0)
+                .build();
+
+        mSetFlagsRule.disableFlags(Flags.FLAG_SORT_SECTION_BY_TIME);
+
+        assertThat(n.getWhen()).isEqualTo(0);
+
+        mSetFlagsRule.enableFlags(Flags.FLAG_SORT_SECTION_BY_TIME);
+
+        assertThat(n.getWhen()).isEqualTo(n.creationTime);
+    }
+
+    @Test
+    public void testGetWhen_devProvidedNonZero() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setWhen(9)
+                .build();
+
+        mSetFlagsRule.disableFlags(Flags.FLAG_SORT_SECTION_BY_TIME);
+
+        assertThat(n.getWhen()).isEqualTo(9);
+
+        mSetFlagsRule.enableFlags(Flags.FLAG_SORT_SECTION_BY_TIME);
+
+        assertThat(n.getWhen()).isEqualTo(9);
     }
 
     private void assertValid(Notification.Colors c) {

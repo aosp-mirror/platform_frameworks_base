@@ -26,14 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"دستگاه"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"این برنامه مجاز می‌شود به این اجازه‌ها در <xliff:g id="DEVICE_NAME">%1$s</xliff:g> شما دسترسی پیدا کند"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"‏اجازه دادن به &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; برای دسترسی به اطلاعات تلفن"</string>
-    <!-- no translation found for title_app_streaming_with_mirroring (3364582597581570658) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (295548145144086753) -->
-    <skip />
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"‏به &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; اجازه می‌دهید برنامه‌های تلفنتان را جاری‌سازی کند؟"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"‏‫%1$s به هرچیزی که در تلفن نمایان است یا پخش می‌شود، ازجمله صداها، عکس‌ها، گذرواژه‌ها، و پیام‌ها دسترسی خواهد داشت.&lt;br/&gt;&lt;br/&gt;تا زمانی که دسترسی به این اجازه را حذف نکنید، %1$s می‌تواند برنامه‌ها را جاری‌سازی کند."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"سرویس‌های بین‌دستگاهی"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> ازطرف <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> اجازه می‌خواهد برنامه‌ها را بین دستگاه‌های شما جاری‌سازی کند"</string>
-    <!-- no translation found for helper_summary_app_streaming_with_mirroring (6138581029144467467) -->
-    <skip />
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g> ازطرف <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> برای نمایش و جاری‌سازی برنامه‌ها بین دستگاه‌های شما اجازه می‌خواهد"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"‏به &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; اجازه دسترسی به این اطلاعات در دستگاهتان داده شود"</string>
@@ -41,10 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"‏خدمات Google Play"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> ازطرف <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> اجازه می‌خواهد به عکس‌ها، رسانه‌ها، و اعلان‌های تلفن شما دسترسی پیدا کند"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"‏به &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; اجازه داده شود این اقدام را انجام دهد؟"</string>
-    <!-- no translation found for title_nearby_device_streaming_with_mirroring (242855799919611657) -->
-    <skip />
-    <!-- no translation found for summary_nearby_device_streaming (4039565463149145573) -->
-    <skip />
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"‏به &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; اجازه می‌دهید برنامه‌های تلفنتان و ویژگی‌های سیستم را جاری‌سازی کند؟"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"‏‫%1$s به هرچیزی که در تلفن نمایان است یا پخش می‌شود، ازجمله صداها، عکس‌ها، اطلاعات پرداخت، گذرواژه‌ها، و پیام‌ها دسترسی خواهد داشت.&lt;br/&gt;&lt;br/&gt;تا زمانی که دسترسی به این اجازه را حذف نکنید، %1$s می‌تواند برنامه‌ها و ویژگی‌های سیستم را جاری‌سازی کند."</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> ازطرف <xliff:g id="DEVICE_NAME">%2$s</xliff:g> اجازه می‌خواهد تا برنامه‌ها و دیگر ویژگی‌های سیستم را در دستگاه‌های اطراف جاری‌سازی کند."</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"دستگاه"</string>
     <string name="summary_generic" msgid="1761976003668044801">"این برنامه مجاز می‌شود اطلاعتی مثل نام شخصی را که تماس می‌گیرد بین تلفن شما و دستگاه انتخاب‌شده همگام‌سازی کند"</string>

@@ -78,7 +78,7 @@
     <string name="uninstalling" msgid="8709566347688966845">"ଅନ୍‌ଇନଷ୍ଟଲ୍‌ କରାଯାଉଛି…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ଅନଇନଷ୍ଟଲ୍‍ କରାଯାଉଛି…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"ଅନଇନଷ୍ଟଲ୍‌ ହୋଇଗଲା।"</string>
-    <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>କୁ ଅନଇନଷ୍ଟଲ୍‌ କରାଗଲା"</string>
+    <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>କୁ ଅନଇନଷ୍ଟଲ କରାଯାଇଛି"</string>
     <string name="uninstall_done_clone_app" msgid="5578308154544195413">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ର କ୍ଲୋନକୁ ଡିଲିଟ କରାଯାଇଛି"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"ଅନଇନଷ୍ଟଲ୍‌ କରିହେଲା ନାହିଁ।"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ଅନଇନଷ୍ଟଲ୍‍ କରିବା ସଫଳ ହେଲାନାହିଁ।"</string>

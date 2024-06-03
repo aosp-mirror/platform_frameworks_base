@@ -4,7 +4,7 @@ By default, Android APIs aren’t opted-in to Ravenwood, and they default to thr
 
 To opt-in to supporting an API under Ravenwood, you can use the inline annotations documented below to customize your API behavior when running under Ravenwood.  Because these annotations are inline in the relevant platform source code, they serve as valuable reminders to future API maintainers of Ravenwood support expectations.
 
-> **Note:** Active development of Ravenwood has been paused as of March 2024. Currently supported APIs will continue working, but the addition of new APIs is not currently being supported. There is an allowlist that restricts where Ravenwood-specific annotations can be used, and that allowlist is not being expanded while development is paused.
+> **Note:** to ensure that API teams are well-supported during early Ravenwood onboarding, the Ravenwood team is manually maintaining an allow-list of classes that are able to use Ravenwood annotations.  Please reach out to ravenwood@ so we can offer design advice and allow-list your APIs.
 
 These Ravenwood-specific annotations have no bearing on the status of an API being public, `@SystemApi`, `@TestApi`, `@hide`, etc.  Ravenwood annotations are an orthogonal concept that are only consumed by the internal `hoststubgen` tool during a post-processing step that generates the Ravenwood runtime environment.  Teams that own APIs can continue to refactor opted-in `@hide` implementation details, as long as the test-visible behavior continues passing.
 

@@ -99,6 +99,10 @@ import com.android.systemui.util.time.SystemClockImpl;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.systemui.wmshell.BubblesTestActivity;
 
+import kotlin.coroutines.CoroutineContext;
+
+import kotlinx.coroutines.test.TestScope;
+
 import org.mockito.ArgumentCaptor;
 
 import java.util.Objects;
@@ -106,9 +110,6 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
-
-import kotlin.coroutines.CoroutineContext;
-import kotlinx.coroutines.test.TestScope;
 
 /**
  * A helper class to create {@link ExpandableNotificationRow} (for both individual and group
@@ -191,7 +192,7 @@ public class NotificationTestHelper {
                 mBgCoroutineContext,
                 mMainCoroutineContext);
 
-        NotificationContentInflater contentBinder = new NotificationContentInflater(
+        NotificationRowContentBinder contentBinder = new NotificationContentInflater(
                 mock(NotifRemoteViewCache.class),
                 mock(NotificationRemoteInputManager.class),
                 mock(ConversationNotificationProcessor.class),
@@ -199,7 +200,8 @@ public class NotificationTestHelper {
                 mock(Executor.class),
                 new MockSmartReplyInflater(),
                 mock(NotifLayoutInflaterFactory.Provider.class),
-                mock(NotificationContentInflaterLogger.class));
+                mock(HeadsUpStyleProvider.class),
+                mock(NotificationRowContentBinderLogger.class));
         contentBinder.setInflateSynchronously(true);
         mBindStage = new RowContentBindStage(contentBinder,
                 mock(NotifInflationErrorManager.class),
@@ -615,10 +617,8 @@ public class NotificationTestHelper {
 
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
-        if (com.android.systemui.Flags.notificationRowUserContext()) {
-            inflater.setFactory2(new RowInflaterTask.RowAsyncLayoutInflater(entry, mSystemClock,
-                    mRowInflaterTaskLogger));
-        }
+        inflater.setFactory2(new RowInflaterTask.RowAsyncLayoutInflater(entry, mSystemClock,
+                mRowInflaterTaskLogger));
         mRow = (ExpandableNotificationRow) inflater.inflate(
                 R.layout.status_bar_notification_row,
                 null /* root */,

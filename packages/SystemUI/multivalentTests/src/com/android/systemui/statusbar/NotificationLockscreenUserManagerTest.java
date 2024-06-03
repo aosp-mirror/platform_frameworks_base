@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import static android.app.Flags.FLAG_KEYGUARD_PRIVATE_NOTIFICATIONS;
 import static android.app.Notification.VISIBILITY_PRIVATE;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.VISIBILITY_NO_OVERRIDE;
@@ -24,7 +25,6 @@ import static android.app.StatusBarManager.EXTRA_KM_PRIVATE_NOTIFS_ALLOWED;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS;
-import static android.app.Flags.FLAG_KEYGUARD_PRIVATE_NOTIFICATIONS;
 import static android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES;
 import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
 import static android.os.UserHandle.USER_ALL;
@@ -73,7 +73,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlagsClassic;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.log.LogWtfHandlerRule;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
@@ -163,6 +162,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     private NotificationEntry mCurrentUserNotif;
     private NotificationEntry mSecondaryUserNotif;
     private NotificationEntry mWorkProfileNotif;
+    private NotificationEntry mSensitiveContentNotif;
     private final FakeFeatureFlagsClassic mFakeFeatureFlags = new FakeFeatureFlagsClassic();
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeExecutor mBackgroundExecutor = new FakeExecutor(mFakeSystemClock);
@@ -224,6 +224,14 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                 .build();
         mWorkProfileNotif.setRanking(new RankingBuilder(mWorkProfileNotif.getRanking())
                 .setChannel(channel)
+                .setVisibilityOverride(VISIBILITY_NO_OVERRIDE).build());
+        mSensitiveContentNotif = new NotificationEntryBuilder()
+                .setNotification(notifWithPrivateVisibility)
+                .setUser(new UserHandle(mCurrentUser.id))
+                .build();
+        mSensitiveContentNotif.setRanking(new RankingBuilder(mCurrentUserNotif.getRanking())
+                .setChannel(channel)
+                .setSensitiveContent(true)
                 .setVisibilityOverride(VISIBILITY_NO_OVERRIDE).build());
         when(mNotifCollection.getEntry(mWorkProfileNotif.getKey())).thenReturn(mWorkProfileNotif);
 
@@ -457,6 +465,17 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         // THEN the secondary profile notification still needs to be redacted because the current
         // user's setting takes precedence
         assertTrue(mLockscreenUserManager.needsRedaction(mSecondaryUserNotif));
+    }
+
+    @Test
+    public void testHasSensitiveContent_redacted() {
+        // Allow private notifications for this user
+        mSettings.putIntForUser(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0,
+                mCurrentUser.id);
+        changeSetting(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
+
+        // Sensitive Content notifications are always redacted
+        assertTrue(mLockscreenUserManager.needsRedaction(mSensitiveContentNotif));
     }
 
     @Test

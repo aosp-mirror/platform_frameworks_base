@@ -25,8 +25,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.PendingDisplay
-import com.android.systemui.display.ui.view.MirroringConfirmationDialog
-import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.display.ui.view.MirroringConfirmationDialogDelegate
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
@@ -54,7 +53,7 @@ constructor(
     private val connectedDisplayInteractor: ConnectedDisplayInteractor,
     @Application private val scope: CoroutineScope,
     @Background private val bgDispatcher: CoroutineDispatcher,
-    private val configurationController: ConfigurationController,
+    private val bottomSheetFactory: MirroringConfirmationDialogDelegate.Factory,
 ) : CoreStartable {
 
     private var dialog: Dialog? = null
@@ -91,8 +90,8 @@ constructor(
     private fun showDialog(pendingDisplay: PendingDisplay, concurrentDisplaysInProgess: Boolean) {
         hideDialog()
         dialog =
-            MirroringConfirmationDialog(
-                    context,
+            bottomSheetFactory
+                .createDialog(
                     onStartMirroringClickListener = {
                         scope.launch(bgDispatcher) { pendingDisplay.enable() }
                         hideDialog()
@@ -102,7 +101,6 @@ constructor(
                         hideDialog()
                     },
                     navbarBottomInsetsProvider = { Utils.getNavbarInsets(context).bottom },
-                    configurationController,
                     showConcurrentDisplayInfo = concurrentDisplaysInProgess
                 )
                 .apply { show() }

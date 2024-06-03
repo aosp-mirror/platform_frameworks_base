@@ -458,7 +458,7 @@ final class ResolveIntentHelper {
                     list = new ArrayList<>(1);
                     list.add(ri);
                     PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                            mPlatformCompat, componentResolver, list, true, intent,
+                            mPlatformCompat, computer, list, true, intent,
                             resolvedType, filterCallingUid);
                 }
             }
@@ -479,12 +479,14 @@ final class ResolveIntentHelper {
                     list = result;
                 }
             }
+            PackageManagerServiceUtils.applyNullActionBlocking(
+                    mPlatformCompat, computer, list, true, intent, filterCallingUid);
         }
 
         if (originalIntent != null) {
             // We also have to ensure all components match the original intent
             PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                    mPlatformCompat, componentResolver,
+                    mPlatformCompat, computer,
                     list, true, originalIntent, resolvedType, filterCallingUid);
         }
 

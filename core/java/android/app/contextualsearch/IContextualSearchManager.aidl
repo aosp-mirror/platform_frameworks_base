@@ -1,6 +1,5 @@
 package android.app.contextualsearch;
 
-
 import android.app.contextualsearch.IContextualSearchCallback;
 /**
  * @hide

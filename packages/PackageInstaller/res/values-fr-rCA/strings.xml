@@ -72,13 +72,13 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Garder <xliff:g id="SIZE">%1$s</xliff:g> de données d\'application."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Voulez-vous supprimer cette application?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Voulez-vous désinstaller cette application? Le clone de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> sera aussi supprimé."</string>
-    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Voulez-vous désinstaller cette application de votre Espace privé?"</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Voulez-vous désinstaller cette appli de votre espace privé?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Désinstallations en cours…"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Désinstallations échouées"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Désinstallation en cours…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"Désinstallation de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> en cours…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Désinstallation terminée."</string>
-    <string name="uninstall_done_app" msgid="4588850984473605768">"L\'application <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> a bien été désinstallée"</string>
+    <string name="uninstall_done_app" msgid="4588850984473605768">"L\'appli <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> a bien été désinstallée"</string>
     <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Le clone de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> a été supprimé"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Échec de la désinstallation."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"La désinstallation de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> n\'a pas réussi."</string>

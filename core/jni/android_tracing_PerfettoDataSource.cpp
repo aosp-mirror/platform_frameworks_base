@@ -45,12 +45,6 @@ static struct {
 static struct {
     jclass clazz;
     jmethodID init;
-    jmethodID getAndClearAllPendingTracePackets;
-} gTracingContextClassInfo;
-
-static struct {
-    jclass clazz;
-    jmethodID init;
 } gCreateTlsStateArgsClassInfo;
 
 static struct {
@@ -68,32 +62,10 @@ struct IncrementalState {
     jobject jobj;
 };
 
-static void traceAllPendingPackets(JNIEnv* env, jobject jCtx, PerfettoDsTracerIterator* ctx) {
-    jobjectArray packets =
-            (jobjectArray)env
-                    ->CallObjectMethod(jCtx,
-                                       gTracingContextClassInfo.getAndClearAllPendingTracePackets);
-    if (env->ExceptionOccurred()) {
-        env->ExceptionDescribe();
-        env->ExceptionClear();
-
-        LOG_ALWAYS_FATAL("Failed to call java context finalize method");
-    }
-
-    int packets_count = env->GetArrayLength(packets);
-    for (int i = 0; i < packets_count; i++) {
-        jbyteArray packet_proto_buffer = (jbyteArray)env->GetObjectArrayElement(packets, i);
-
-        jbyte* raw_proto_buffer = env->GetByteArrayElements(packet_proto_buffer, 0);
-        int buffer_size = env->GetArrayLength(packet_proto_buffer);
-
-        struct PerfettoDsRootTracePacket trace_packet;
-        PerfettoDsTracerPacketBegin(ctx, &trace_packet);
-        PerfettoPbMsgAppendBytes(&trace_packet.msg.msg, (const uint8_t*)raw_proto_buffer,
-                                 buffer_size);
-        PerfettoDsTracerPacketEnd(ctx, &trace_packet);
-    }
-}
+// In a single thread there can be only one trace point active across all data source, so we can use
+// a single global thread_local variable to keep track of the active tracer iterator.
+thread_local static bool gInIteration;
+thread_local static struct PerfettoDsTracerIterator gIterator;
 
 PerfettoDataSource::PerfettoDataSource(JNIEnv* env, jobject javaDataSource,
                                        std::string dataSourceName)
@@ -121,87 +93,124 @@ jobject PerfettoDataSource::newInstance(JNIEnv* env, void* ds_config, size_t ds_
     return instance;
 }
 
-jobject PerfettoDataSource::createTlsStateGlobalRef(JNIEnv* env, PerfettoDsInstanceIndex inst_id) {
-    ScopedLocalRef<jobject> args(env,
-                                 env->NewObject(gCreateTlsStateArgsClassInfo.clazz,
-                                                gCreateTlsStateArgsClassInfo.init, mJavaDataSource,
-                                                inst_id));
-
-    ScopedLocalRef<jobject> tslState(env,
-                                     env->CallObjectMethod(mJavaDataSource,
-                                                           gPerfettoDataSourceClassInfo
-                                                                   .createTlsState,
-                                                           args.get()));
-
-    if (env->ExceptionCheck()) {
-        LOGE_EX(env);
-        env->ExceptionClear();
-        LOG_ALWAYS_FATAL("Failed to create new Java Perfetto incremental state");
+bool PerfettoDataSource::TraceIterateBegin() {
+    if (gInIteration) {
+        return false;
     }
 
-    return env->NewGlobalRef(tslState.get());
-}
+    gIterator = PerfettoDsTraceIterateBegin(&dataSource);
 
-jobject PerfettoDataSource::createIncrementalStateGlobalRef(JNIEnv* env,
-                                                            PerfettoDsInstanceIndex inst_id) {
-    ScopedLocalRef<jobject> args(env,
-                                 env->NewObject(gCreateIncrementalStateArgsClassInfo.clazz,
-                                                gCreateIncrementalStateArgsClassInfo.init,
-                                                mJavaDataSource, inst_id));
-
-    ScopedLocalRef<jobject> incrementalState(env,
-                                             env->CallObjectMethod(mJavaDataSource,
-                                                                   gPerfettoDataSourceClassInfo
-                                                                           .createIncrementalState,
-                                                                   args.get()));
-
-    if (env->ExceptionCheck()) {
-        LOGE_EX(env);
-        env->ExceptionClear();
-        LOG_ALWAYS_FATAL("Failed to create Java Perfetto incremental state");
+    if (gIterator.impl.tracer == nullptr) {
+        return false;
     }
 
-    return env->NewGlobalRef(incrementalState.get());
+    gInIteration = true;
+    return true;
 }
 
-void PerfettoDataSource::trace(JNIEnv* env, jobject traceFunction) {
-    PERFETTO_DS_TRACE(dataSource, ctx) {
-        ALOG(LOG_DEBUG, LOG_TAG, "\tin native trace callback function %p", this);
-        TlsState* tls_state =
-                reinterpret_cast<TlsState*>(PerfettoDsGetCustomTls(&dataSource, &ctx));
-        IncrementalState* incr_state = reinterpret_cast<IncrementalState*>(
-                PerfettoDsGetIncrementalState(&dataSource, &ctx));
+bool PerfettoDataSource::TraceIterateNext() {
+    if (!gInIteration) {
+        LOG_ALWAYS_FATAL("Tried calling TraceIterateNext outside of a tracer iteration.");
+        return false;
+    }
 
-        ALOG(LOG_DEBUG, LOG_TAG, "\t tls_state = %p", tls_state);
-        ALOG(LOG_DEBUG, LOG_TAG, "\t incr_state = %p", incr_state);
+    PerfettoDsTraceIterateNext(&dataSource, &gIterator);
 
-        ALOG(LOG_DEBUG, LOG_TAG, "\t tls_state->jobj = %p", tls_state->jobj);
-        ALOG(LOG_DEBUG, LOG_TAG, "\t incr_state->jobj = %p", incr_state->jobj);
+    if (gIterator.impl.tracer == nullptr) {
+        // Reached end of iterator. No more datasource instances.
+        gInIteration = false;
+        return false;
+    }
 
-        ScopedLocalRef<jobject> jCtx(env,
-                                     env->NewObject(gTracingContextClassInfo.clazz,
-                                                    gTracingContextClassInfo.init, &ctx,
-                                                    tls_state->jobj, incr_state->jobj));
+    return true;
+}
 
-        ALOG(LOG_DEBUG, LOG_TAG, "\t jCtx = %p", jCtx.get());
+void PerfettoDataSource::TraceIterateBreak() {
+    if (!gInIteration) {
+        return;
+    }
 
-        jclass objclass = env->GetObjectClass(traceFunction);
-        jmethodID method =
-                env->GetMethodID(objclass, "trace", "(Landroid/tracing/perfetto/TracingContext;)V");
-        if (method == 0) {
-            LOG_ALWAYS_FATAL("Failed to get method id");
-        }
+    PerfettoDsTraceIterateBreak(&dataSource, &gIterator);
+    gInIteration = false;
+}
 
-        env->ExceptionClear();
+PerfettoDsInstanceIndex PerfettoDataSource::GetInstanceIndex() {
+    if (!gInIteration) {
+        LOG_ALWAYS_FATAL("Tried calling GetInstanceIndex outside of a tracer iteration.");
+        return -1;
+    }
 
-        env->CallVoidMethod(traceFunction, method, jCtx.get());
-        if (env->ExceptionOccurred()) {
-            env->ExceptionDescribe();
-            env->ExceptionClear();
-            LOG_ALWAYS_FATAL("Failed to call java trace method");
-        }
+    return gIterator.impl.inst_id;
+}
 
-        traceAllPendingPackets(env, jCtx.get(), &ctx);
+jobject PerfettoDataSource::GetCustomTls() {
+    if (!gInIteration) {
+        LOG_ALWAYS_FATAL("Tried getting CustomTls outside of a tracer iteration.");
+        return nullptr;
+    }
+
+    TlsState* tls_state =
+            reinterpret_cast<TlsState*>(PerfettoDsGetCustomTls(&dataSource, &gIterator));
+
+    return tls_state->jobj;
+}
+
+void PerfettoDataSource::SetCustomTls(jobject tlsState) {
+    if (!gInIteration) {
+        LOG_ALWAYS_FATAL("Tried getting CustomTls outside of a tracer iteration.");
+        return;
+    }
+
+    TlsState* tls_state =
+            reinterpret_cast<TlsState*>(PerfettoDsGetCustomTls(&dataSource, &gIterator));
+
+    tls_state->jobj = tlsState;
+}
+
+jobject PerfettoDataSource::GetIncrementalState() {
+    if (!gInIteration) {
+        LOG_ALWAYS_FATAL("Tried getting IncrementalState outside of a tracer iteration.");
+        return nullptr;
+    }
+
+    IncrementalState* incr_state = reinterpret_cast<IncrementalState*>(
+            PerfettoDsGetIncrementalState(&dataSource, &gIterator));
+
+    return incr_state->jobj;
+}
+
+void PerfettoDataSource::SetIncrementalState(jobject incrementalState) {
+    if (!gInIteration) {
+        LOG_ALWAYS_FATAL("Tried getting IncrementalState outside of a tracer iteration.");
+        return;
+    }
+
+    IncrementalState* incr_state = reinterpret_cast<IncrementalState*>(
+            PerfettoDsGetIncrementalState(&dataSource, &gIterator));
+
+    incr_state->jobj = incrementalState;
+}
+
+void PerfettoDataSource::WritePackets(JNIEnv* env, jobjectArray packets) {
+    if (!gInIteration) {
+        LOG_ALWAYS_FATAL("Tried writing packets outside of a tracer iteration.");
+        return;
+    }
+
+    int packets_count = env->GetArrayLength(packets);
+    for (int i = 0; i < packets_count; i++) {
+        jbyteArray packet_proto_buffer = (jbyteArray)env->GetObjectArrayElement(packets, i);
+
+        jbyte* raw_proto_buffer = env->GetByteArrayElements(packet_proto_buffer, nullptr);
+        int buffer_size = env->GetArrayLength(packet_proto_buffer);
+
+        struct PerfettoDsRootTracePacket trace_packet;
+        PerfettoDsTracerPacketBegin(&gIterator, &trace_packet);
+        PerfettoPbMsgAppendBytes(&trace_packet.msg.msg, (const uint8_t*)raw_proto_buffer,
+                                 buffer_size);
+        PerfettoDsTracerPacketEnd(&gIterator, &trace_packet);
+
+        env->ReleaseByteArrayElements(packet_proto_buffer, raw_proto_buffer, 0 /* default mode */);
     }
 }
 
@@ -213,14 +222,12 @@ void PerfettoDataSource::flushAll() {
 
 PerfettoDataSource::~PerfettoDataSource() {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    env->DeleteWeakGlobalRef(mJavaDataSource);
+    env->DeleteGlobalRef(mJavaDataSource);
 }
 
 jlong nativeCreate(JNIEnv* env, jclass clazz, jobject javaDataSource, jstring name) {
     const char* nativeString = env->GetStringUTFChars(name, 0);
-    ALOG(LOG_DEBUG, LOG_TAG, "nativeCreate(%p, %s)", javaDataSource, nativeString);
     PerfettoDataSource* dataSource = new PerfettoDataSource(env, javaDataSource, nativeString);
-    ALOG(LOG_DEBUG, LOG_TAG, "\tdatasource* = %p", dataSource);
     env->ReleaseStringUTFChars(name, nativeString);
 
     dataSource->incStrong((void*)nativeCreate);
@@ -229,42 +236,32 @@ jlong nativeCreate(JNIEnv* env, jclass clazz, jobject javaDataSource, jstring na
 }
 
 void nativeDestroy(void* ptr) {
-    ALOG(LOG_DEBUG, LOG_TAG, "nativeCreate(%p)", ptr);
     PerfettoDataSource* dataSource = reinterpret_cast<PerfettoDataSource*>(ptr);
     dataSource->decStrong((void*)nativeCreate);
 }
 
 static jlong nativeGetFinalizer(JNIEnv* /* env */, jclass /* clazz */) {
-    ALOG(LOG_DEBUG, LOG_TAG, "nativeGetFinalizer()");
     return static_cast<jlong>(reinterpret_cast<uintptr_t>(&nativeDestroy));
 }
 
-void nativeTrace(JNIEnv* env, jclass clazz, jlong dataSourcePtr, jobject traceFunctionInterface) {
-    ALOG(LOG_DEBUG, LOG_TAG, "nativeTrace(%p)", (void*)dataSourcePtr);
-    sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
-
-    datasource->trace(env, traceFunctionInterface);
-}
-
-void nativeFlush(JNIEnv* env, jclass clazz, jobject jCtx, jlong ctxPtr) {
-    ALOG(LOG_DEBUG, LOG_TAG, "nativeFlush(%p, %p)", jCtx, (void*)ctxPtr);
-    auto* ctx = reinterpret_cast<struct PerfettoDsTracerIterator*>(ctxPtr);
-    traceAllPendingPackets(env, jCtx, ctx);
-    PerfettoDsTracerFlush(ctx, nullptr, nullptr);
+void nativeWritePackets(JNIEnv* env, jclass clazz, jlong ds_ptr, jobjectArray packets) {
+    ALOG(LOG_DEBUG, LOG_TAG, "nativeWritePackets(%p)", (void*)ds_ptr);
+    sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(ds_ptr);
+    datasource->WritePackets(env, packets);
 }
 
 void nativeFlushAll(JNIEnv* env, jclass clazz, jlong ptr) {
-    ALOG(LOG_DEBUG, LOG_TAG, "nativeFlushAll(%p)", (void*)ptr);
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(ptr);
     datasource->flushAll();
 }
 
 void nativeRegisterDataSource(JNIEnv* env, jclass clazz, jlong datasource_ptr,
-                              int buffer_exhausted_policy) {
-    ALOG(LOG_DEBUG, LOG_TAG, "nativeRegisterDataSource(%p)", (void*)datasource_ptr);
+                              jint buffer_exhausted_policy, jboolean will_notify_on_stop,
+                              jboolean no_flush) {
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(datasource_ptr);
 
     struct PerfettoDsParams params = PerfettoDsParamsDefault();
+    params.will_notify_on_stop = will_notify_on_stop;
     params.buffer_exhausted_policy = (PerfettoDsBufferExhaustedPolicy)buffer_exhausted_policy;
 
     params.user_arg = reinterpret_cast<void*>(datasource.get());
@@ -283,25 +280,13 @@ void nativeRegisterDataSource(JNIEnv* env, jclass clazz, jlong datasource_ptr,
 
         auto* datasource_instance =
                 new PerfettoDataSourceInstance(env, java_data_source_instance.get(), inst_id);
-
-        ALOG(LOG_DEBUG, LOG_TAG, "on_setup_cb ds=%p, ds_instance=%p", datasource,
-             datasource_instance);
-
         return static_cast<void*>(datasource_instance);
     };
 
     params.on_create_tls_cb = [](struct PerfettoDsImpl* ds_impl, PerfettoDsInstanceIndex inst_id,
                                  struct PerfettoDsTracerImpl* tracer, void* user_arg) -> void* {
-        JNIEnv* env = GetOrAttachJNIEnvironment(gVm, JNI_VERSION_1_6);
-
-        auto* datasource = reinterpret_cast<PerfettoDataSource*>(user_arg);
-
-        jobject java_tls_state = datasource->createTlsStateGlobalRef(env, inst_id);
-
-        auto* tls_state = new TlsState(java_tls_state);
-
-        ALOG(LOG_DEBUG, LOG_TAG, "on_create_tls_cb ds=%p, tsl_state=%p", datasource, tls_state);
-
+        // Populated later and only if required by the java side
+        auto* tls_state = new TlsState(NULL);
         return static_cast<void*>(tls_state);
     };
 
@@ -310,23 +295,16 @@ void nativeRegisterDataSource(JNIEnv* env, jclass clazz, jlong datasource_ptr,
 
         TlsState* tls_state = reinterpret_cast<TlsState*>(ptr);
 
-        ALOG(LOG_DEBUG, LOG_TAG, "on_delete_tls_cb %p", tls_state);
-
-        env->DeleteGlobalRef(tls_state->jobj);
+        if (tls_state->jobj != NULL) {
+            env->DeleteGlobalRef(tls_state->jobj);
+        }
         delete tls_state;
     };
 
     params.on_create_incr_cb = [](struct PerfettoDsImpl* ds_impl, PerfettoDsInstanceIndex inst_id,
                                   struct PerfettoDsTracerImpl* tracer, void* user_arg) -> void* {
-        JNIEnv* env = GetOrAttachJNIEnvironment(gVm, JNI_VERSION_1_6);
-
-        auto* datasource = reinterpret_cast<PerfettoDataSource*>(user_arg);
-        jobject java_incr_state = datasource->createIncrementalStateGlobalRef(env, inst_id);
-
-        auto* incr_state = new IncrementalState(java_incr_state);
-
-        ALOG(LOG_DEBUG, LOG_TAG, "on_create_incr_cb ds=%p, incr_state=%p", datasource, incr_state);
-
+        // Populated later and only if required by the java side
+        auto* incr_state = new IncrementalState(NULL);
         return static_cast<void*>(incr_state);
     };
 
@@ -335,9 +313,9 @@ void nativeRegisterDataSource(JNIEnv* env, jclass clazz, jlong datasource_ptr,
 
         IncrementalState* incr_state = reinterpret_cast<IncrementalState*>(ptr);
 
-        ALOG(LOG_DEBUG, LOG_TAG, "on_delete_incr_cb incr_state=%p", incr_state);
-
-        env->DeleteGlobalRef(incr_state->jobj);
+        if (incr_state->jobj != NULL) {
+            env->DeleteGlobalRef(incr_state->jobj);
+        }
         delete incr_state;
     };
 
@@ -346,31 +324,24 @@ void nativeRegisterDataSource(JNIEnv* env, jclass clazz, jlong datasource_ptr,
         JNIEnv* env = GetOrAttachJNIEnvironment(gVm, JNI_VERSION_1_6);
 
         auto* datasource_instance = static_cast<PerfettoDataSourceInstance*>(inst_ctx);
-
-        ALOG(LOG_DEBUG, LOG_TAG, "on_start_cb ds_instance=%p", datasource_instance);
-
         datasource_instance->onStart(env);
     };
 
-    params.on_flush_cb = [](struct PerfettoDsImpl*, PerfettoDsInstanceIndex, void*, void* inst_ctx,
-                            struct PerfettoDsOnFlushArgs*) {
-        JNIEnv* env = GetOrAttachJNIEnvironment(gVm, JNI_VERSION_1_6);
+    if (!no_flush) {
+        params.on_flush_cb = [](struct PerfettoDsImpl*, PerfettoDsInstanceIndex, void*,
+                                void* inst_ctx, struct PerfettoDsOnFlushArgs*) {
+            JNIEnv* env = GetOrAttachJNIEnvironment(gVm, JNI_VERSION_1_6);
 
-        auto* datasource_instance = static_cast<PerfettoDataSourceInstance*>(inst_ctx);
-
-        ALOG(LOG_DEBUG, LOG_TAG, "on_flush_cb ds_instance=%p", datasource_instance);
-
-        datasource_instance->onFlush(env);
-    };
+            auto* datasource_instance = static_cast<PerfettoDataSourceInstance*>(inst_ctx);
+            datasource_instance->onFlush(env);
+        };
+    }
 
     params.on_stop_cb = [](struct PerfettoDsImpl*, PerfettoDsInstanceIndex inst_id, void* user_arg,
                            void* inst_ctx, struct PerfettoDsOnStopArgs*) {
         JNIEnv* env = GetOrAttachJNIEnvironment(gVm, JNI_VERSION_1_6);
 
         auto* datasource_instance = static_cast<PerfettoDataSourceInstance*>(inst_ctx);
-
-        ALOG(LOG_DEBUG, LOG_TAG, "on_stop_cb ds_instance=%p", datasource_instance);
-
         datasource_instance->onStop(env);
     };
 
@@ -378,18 +349,14 @@ void nativeRegisterDataSource(JNIEnv* env, jclass clazz, jlong datasource_ptr,
                               void* inst_ctx) -> void {
         auto* datasource_instance = static_cast<PerfettoDataSourceInstance*>(inst_ctx);
 
-        ALOG(LOG_DEBUG, LOG_TAG, "on_destroy_cb ds_instance=%p", datasource_instance);
-
         delete datasource_instance;
     };
 
     PerfettoDsRegister(&datasource->dataSource, datasource->dataSourceName.c_str(), params);
 }
 
-jobject nativeGetPerfettoInstanceLocked(JNIEnv* env, jclass clazz, jlong dataSourcePtr,
+jobject nativeGetPerfettoInstanceLocked(JNIEnv* /* env */, jclass /* clazz */, jlong dataSourcePtr,
                                         PerfettoDsInstanceIndex instance_idx) {
-    ALOG(LOG_DEBUG, LOG_TAG, "nativeGetPerfettoInstanceLocked ds=%p, idx=%d", (void*)dataSourcePtr,
-         instance_idx);
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
     auto* datasource_instance = static_cast<PerfettoDataSourceInstance*>(
             PerfettoDsImplGetInstanceLocked(datasource->dataSource.impl, instance_idx));
@@ -401,36 +368,83 @@ jobject nativeGetPerfettoInstanceLocked(JNIEnv* env, jclass clazz, jlong dataSou
         return nullptr;
     }
 
-    ALOG(LOG_DEBUG, LOG_TAG, "\tnativeGetPerfettoInstanceLocked got lock ds=%p, idx=%d",
-         (void*)dataSourcePtr, instance_idx);
     return datasource_instance->GetJavaDataSourceInstance();
 }
 
-void nativeReleasePerfettoInstanceLocked(JNIEnv* env, jclass clazz, jlong dataSourcePtr,
+void nativeReleasePerfettoInstanceLocked(JNIEnv* /* env */, jclass /* clazz */, jlong dataSourcePtr,
                                          PerfettoDsInstanceIndex instance_idx) {
-    ALOG(LOG_DEBUG, LOG_TAG, "nativeReleasePerfettoInstanceLocked got lock ds=%p, idx=%d",
-         (void*)dataSourcePtr, instance_idx);
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
     PerfettoDsImplReleaseInstanceLocked(datasource->dataSource.impl, instance_idx);
+}
+
+bool nativePerfettoDsTraceIterateBegin(JNIEnv* /* env */, jclass /* clazz */, jlong dataSourcePtr) {
+    sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
+    return datasource->TraceIterateBegin();
+}
+
+bool nativePerfettoDsTraceIterateNext(JNIEnv* /* env */, jclass /* clazz */, jlong dataSourcePtr) {
+    sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
+    return datasource->TraceIterateNext();
+}
+
+void nativePerfettoDsTraceIterateBreak(JNIEnv* /* env */, jclass /* clazz */, jlong dataSourcePtr) {
+    sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
+    return datasource->TraceIterateBreak();
+}
+
+jint nativeGetPerfettoDsInstanceIndex(JNIEnv* /* env */, jclass /* clazz */, jlong dataSourcePtr) {
+    sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
+    return (jint)datasource->GetInstanceIndex();
+}
+
+jobject nativeGetCustomTls(JNIEnv* /* env */, jclass /* clazz */, jlong dataSourcePtr) {
+    sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
+    return datasource->GetCustomTls();
+}
+
+void nativeSetCustomTls(JNIEnv* env, jclass /* clazz */, jlong dataSourcePtr, jobject tlsState) {
+    sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
+    tlsState = env->NewGlobalRef(tlsState);
+    return datasource->SetCustomTls(tlsState);
+}
+
+jobject nativeGetIncrementalState(JNIEnv* /* env */, jclass /* clazz */, jlong dataSourcePtr) {
+    sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
+    return datasource->GetIncrementalState();
+}
+
+void nativeSetIncrementalState(JNIEnv* env, jclass /* clazz */, jlong dataSourcePtr,
+                               jobject incrementalState) {
+    sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
+    incrementalState = env->NewGlobalRef(incrementalState);
+    return datasource->SetIncrementalState(incrementalState);
 }
 
 const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
         {"nativeCreate", "(Landroid/tracing/perfetto/DataSource;Ljava/lang/String;)J",
          (void*)nativeCreate},
-        {"nativeTrace", "(JLandroid/tracing/perfetto/TraceFunction;)V", (void*)nativeTrace},
         {"nativeFlushAll", "(J)V", (void*)nativeFlushAll},
         {"nativeGetFinalizer", "()J", (void*)nativeGetFinalizer},
-        {"nativeRegisterDataSource", "(JI)V", (void*)nativeRegisterDataSource},
+        {"nativeRegisterDataSource", "(JIZZ)V", (void*)nativeRegisterDataSource},
         {"nativeGetPerfettoInstanceLocked", "(JI)Landroid/tracing/perfetto/DataSourceInstance;",
          (void*)nativeGetPerfettoInstanceLocked},
         {"nativeReleasePerfettoInstanceLocked", "(JI)V",
          (void*)nativeReleasePerfettoInstanceLocked},
-};
+
+        {"nativePerfettoDsTraceIterateBegin", "(J)Z", (void*)nativePerfettoDsTraceIterateBegin},
+        {"nativePerfettoDsTraceIterateNext", "(J)Z", (void*)nativePerfettoDsTraceIterateNext},
+        {"nativePerfettoDsTraceIterateBreak", "(J)V", (void*)nativePerfettoDsTraceIterateBreak},
+        {"nativeGetPerfettoDsInstanceIndex", "(J)I", (void*)nativeGetPerfettoDsInstanceIndex},
+
+        {"nativeWritePackets", "(J[[B)V", (void*)nativeWritePackets}};
 
 const JNINativeMethod gMethodsTracingContext[] = {
         /* name, signature, funcPtr */
-        {"nativeFlush", "(Landroid/tracing/perfetto/TracingContext;J)V", (void*)nativeFlush},
+        {"nativeGetCustomTls", "(J)Ljava/lang/Object;", (void*)nativeGetCustomTls},
+        {"nativeGetIncrementalState", "(J)Ljava/lang/Object;", (void*)nativeGetIncrementalState},
+        {"nativeSetCustomTls", "(JLjava/lang/Object;)V", (void*)nativeSetCustomTls},
+        {"nativeSetIncrementalState", "(JLjava/lang/Object;)V", (void*)nativeSetIncrementalState},
 };
 
 int register_android_tracing_PerfettoDataSource(JNIEnv* env) {
@@ -460,14 +474,6 @@ int register_android_tracing_PerfettoDataSource(JNIEnv* env) {
             env->GetMethodID(gPerfettoDataSourceClassInfo.clazz, "createIncrementalState",
                              "(Landroid/tracing/perfetto/CreateIncrementalStateArgs;)Ljava/lang/"
                              "Object;");
-
-    clazz = env->FindClass("android/tracing/perfetto/TracingContext");
-    gTracingContextClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
-    gTracingContextClassInfo.init = env->GetMethodID(gTracingContextClassInfo.clazz, "<init>",
-                                                     "(JLjava/lang/Object;Ljava/lang/Object;)V");
-    gTracingContextClassInfo.getAndClearAllPendingTracePackets =
-            env->GetMethodID(gTracingContextClassInfo.clazz, "getAndClearAllPendingTracePackets",
-                             "()[[B");
 
     clazz = env->FindClass("android/tracing/perfetto/CreateTlsStateArgs");
     gCreateTlsStateArgsClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);

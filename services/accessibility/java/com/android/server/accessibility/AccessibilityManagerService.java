@@ -16,7 +16,15 @@
 
 package com.android.server.accessibility;
 
+import static android.Manifest.permission.CREATE_VIRTUAL_DEVICE;
+import static android.Manifest.permission.INJECT_EVENTS;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+import static android.Manifest.permission.MANAGE_ACCESSIBILITY;
+import static android.Manifest.permission.MANAGE_BIND_INSTANT_SERVICE;
+import static android.Manifest.permission.MODIFY_ACCESSIBILITY_DATA;
+import static android.Manifest.permission.RETRIEVE_WINDOW_CONTENT;
+import static android.Manifest.permission.SET_SYSTEM_AUDIO_CAPTION;
+import static android.Manifest.permission.STATUS_BAR_SERVICE;
 import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_MANAGER;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_MANAGER_CLIENT;
@@ -31,23 +39,20 @@ import static android.companion.virtual.VirtualDeviceManager.ACTION_VIRTUAL_DEVI
 import static android.companion.virtual.VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID;
 import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.provider.Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 import static android.view.accessibility.AccessibilityManager.FlashNotificationReason;
-import static android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 import static com.android.internal.accessibility.common.ShortcutConstants.USER_SHORTCUT_TYPES;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import static com.android.internal.accessibility.util.AccessibilityStatsLogUtils.logAccessibilityShortcutActivated;
 import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.accessibility.AccessibilityUserState.doesShortcutTargetsStringContain;
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
-import android.Manifest;
 import android.accessibilityservice.AccessibilityGestureEvent;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -55,9 +60,12 @@ import android.accessibilityservice.AccessibilityShortcutInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.MagnificationConfig;
 import android.accessibilityservice.TouchInteractionController;
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
+import android.annotation.PermissionManuallyEnforced;
+import android.annotation.RequiresNoPermission;
+import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
@@ -97,6 +105,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PermissionEnforcer;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
@@ -149,7 +158,6 @@ import com.android.internal.accessibility.AccessibilityShortcutController.Framew
 import com.android.internal.accessibility.AccessibilityShortcutController.LaunchableFrameworkFeatureInfo;
 import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.accessibility.common.ShortcutConstants.FloatingMenuSize;
-import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
 import com.android.internal.accessibility.dialog.AccessibilityShortcutChooserActivity;
 import com.android.internal.accessibility.util.AccessibilityUtils;
@@ -164,6 +172,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IntPair;
 import com.android.internal.util.Preconditions;
+import com.android.modules.expresslog.Counter;
 import com.android.server.AccessibilityManagerInternal;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -206,7 +215,6 @@ import java.util.stream.Collectors;
  * event dispatch for {@link AccessibilityEvent}s generated across all processes
  * on the device. Events are dispatched to {@link AccessibilityService}s.
  */
-@SuppressWarnings("MissingPermissionAnnotation")
 public class AccessibilityManagerService extends IAccessibilityManager.Stub
         implements AbstractAccessibilityServiceConnection.SystemSupport,
         AccessibilityUserState.ServiceInfoChangeListener,
@@ -242,6 +250,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private static final String SET_PIP_ACTION_REPLACEMENT =
             "setPictureInPictureActionReplacingConnection";
 
+    /**
+     * An intent action to launch Hearing devices dialog.
+     */
+    @VisibleForTesting
+    static final String ACTION_LAUNCH_HEARING_DEVICES_DIALOG =
+            "com.android.systemui.action.LAUNCH_HEARING_DEVICES_DIALOG";
+
     private static final char COMPONENT_NAME_SEPARATOR = ':';
 
     private static final int OWN_PROCESS_ID = android.os.Process.myPid();
@@ -252,6 +267,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     public static final int MAGNIFICATION_GESTURE_HANDLER_ID = 0;
 
     private static int sIdCounter = MAGNIFICATION_GESTURE_HANDLER_ID + 1;
+    /**
+     * The counter metric id tracking how many times users add qs shortcut for a11y features.
+     *
+     * <p>Defined in frameworks/proto_logging/stats/express/catalog/accessibility.cfg.
+     */
+    static final String METRIC_ID_QS_SHORTCUT_ADD = "accessibility.value_qs_shortcut_add";
+
+    /**
+     * The counter metric id tracking how many times users remove qs shortcut for a11y features.
+     *
+     * <p>Defined in frameworks/proto_logging/stats/express/catalog/accessibility.cfg.
+     */
+    static final String METRIC_ID_QS_SHORTCUT_REMOVE = "accessibility.value_qs_shortcut_remove";
+
 
     private final Context mContext;
 
@@ -460,7 +489,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             AccessibilityDisplayListener a11yDisplayListener,
             MagnificationController magnificationController,
             @Nullable AccessibilityInputFilter inputFilter,
-            ProxyManager proxyManager) {
+            ProxyManager proxyManager,
+            PermissionEnforcer permissionEnforcer) {
+        super(permissionEnforcer);
         mContext = context;
         mPowerManager =  (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWindowManagerService = LocalServices.getService(WindowManagerInternal.class);
@@ -495,6 +526,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * @param context A {@link Context} instance.
      */
     public AccessibilityManagerService(Context context) {
+        super(PermissionEnforcer.fromContext(context));
         mContext = context;
         mPowerManager = context.getSystemService(PowerManager.class);
         mWindowManagerService = LocalServices.getService(WindowManagerInternal.class);
@@ -556,6 +588,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return Thread.holdsLock(mLock);
     }
 
+    /**
+     * Returns if the service is initialized.
+     *
+     * The service is considered initialized when the user switch happened.
+     */
+    private boolean isServiceInitializedLocked() {
+        return mInitialized;
+    }
+
     @Override
     public int getCurrentUserIdLocked() {
         return mCurrentUserId;
@@ -608,6 +649,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public IAccessibilityManager.WindowTransformationSpec getWindowTransformationSpec(
             int windowId) {
         IAccessibilityManager.WindowTransformationSpec windowTransformationSpec =
@@ -665,7 +707,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     /**
      * Returns the lock object for any synchronized test blocks.
-     * Should not be used outside of testing.
+     * External classes should only use for testing.
      * @return lock object.
      */
     @VisibleForTesting
@@ -704,8 +746,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     void setBindInstantServiceAllowed(int userId, boolean allowed) {
         mContext.enforceCallingOrSelfPermission(
-                Manifest.permission.MANAGE_BIND_INSTANT_SERVICE,
-                "setBindInstantServiceAllowed");
+                MANAGE_BIND_INSTANT_SERVICE, "setBindInstantServiceAllowed");
         synchronized (mLock) {
             final AccessibilityUserState userState = getUserStateLocked(userId);
             if (allowed != userState.getBindInstantServiceAllowedLocked()) {
@@ -770,7 +811,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      *
      * @param packages list of packages that have stopped.
      * @param userState user state to be read & modified.
-     * @return {@code true} if a service was enabled or a button target was removed,
+     * @return {@code true} if the lists of enabled services or buttons were changed,
      * {@code false} otherwise.
      */
     @VisibleForTesting
@@ -793,6 +834,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     userState.getBindingServicesLocked().remove(comp);
                     userState.getCrashedServicesLocked().remove(comp);
                     enabledServicesChanged = true;
+                    break;
                 }
             }
         }
@@ -820,132 +862,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return mPackageMonitor;
     }
 
+    @VisibleForTesting
+    void setPackageMonitor(PackageMonitor monitor) {
+        mPackageMonitor = monitor;
+    }
+
+    @SuppressLint("MissingPermission")
     private void registerBroadcastReceivers() {
-        mPackageMonitor = new PackageMonitor() {
-            @Override
-            public void onSomePackagesChanged() {
-                if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_PACKAGE_BROADCAST_RECEIVER)) {
-                    mTraceManager.logTrace(LOG_TAG + ".PM.onSomePackagesChanged",
-                            FLAGS_PACKAGE_BROADCAST_RECEIVER);
-                }
-
-                final int userId = getChangingUserId();
-                List<AccessibilityServiceInfo> parsedAccessibilityServiceInfos = null;
-                List<AccessibilityShortcutInfo> parsedAccessibilityShortcutInfos = null;
-                parsedAccessibilityServiceInfos = parseAccessibilityServiceInfos(userId);
-                parsedAccessibilityShortcutInfos = parseAccessibilityShortcutInfos(userId);
-                synchronized (mLock) {
-                    // Only the profile parent can install accessibility services.
-                    // Therefore we ignore packages from linked profiles.
-                    if (userId != mCurrentUserId) {
-                        return;
-                    }
-                    onSomePackagesChangedLocked(parsedAccessibilityServiceInfos,
-                            parsedAccessibilityShortcutInfos);
-                }
-            }
-
-            @Override
-            public void onPackageUpdateFinished(String packageName, int uid) {
-                // The package should already be removed from mBoundServices, and added into
-                // mBindingServices in binderDied() during updating. Remove services from  this
-                // package from mBindingServices, and then update the user state to re-bind new
-                // versions of them.
-                if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_PACKAGE_BROADCAST_RECEIVER)) {
-                    mTraceManager.logTrace(LOG_TAG + ".PM.onPackageUpdateFinished",
-                            FLAGS_PACKAGE_BROADCAST_RECEIVER,
-                            "packageName=" + packageName + ";uid=" + uid);
-                }
-                final int userId = getChangingUserId();
-                List<AccessibilityServiceInfo> parsedAccessibilityServiceInfos = null;
-                List<AccessibilityShortcutInfo> parsedAccessibilityShortcutInfos = null;
-                parsedAccessibilityServiceInfos = parseAccessibilityServiceInfos(userId);
-                parsedAccessibilityShortcutInfos = parseAccessibilityShortcutInfos(userId);
-                synchronized (mLock) {
-                    if (userId != mCurrentUserId) {
-                        return;
-                    }
-                    final AccessibilityUserState userState = getUserStateLocked(userId);
-                    final boolean reboundAService = userState.getBindingServicesLocked().removeIf(
-                            component -> component != null
-                                    && component.getPackageName().equals(packageName))
-                            || userState.mCrashedServices.removeIf(component -> component != null
-                                    && component.getPackageName().equals(packageName));
-                    // Reloads the installed services info to make sure the rebound service could
-                    // get a new one.
-                    userState.mInstalledServices.clear();
-                    final boolean configurationChanged;
-                    configurationChanged = readConfigurationForUserStateLocked(userState,
-                            parsedAccessibilityServiceInfos, parsedAccessibilityShortcutInfos);
-                    if (reboundAService || configurationChanged) {
-                        onUserStateChangedLocked(userState);
-                    }
-                    // Passing 0 for restoreFromSdkInt to have this migration check execute each
-                    // time. It can make sure a11y button settings are correctly if there's an a11y
-                    // service updated and modifies the a11y button configuration.
-                    migrateAccessibilityButtonSettingsIfNecessaryLocked(userState, packageName,
-                            /* restoreFromSdkInt = */0);
-                }
-            }
-
-            @Override
-            public void onPackageRemoved(String packageName, int uid) {
-                if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_PACKAGE_BROADCAST_RECEIVER)) {
-                    mTraceManager.logTrace(LOG_TAG + ".PM.onPackageRemoved",
-                            FLAGS_PACKAGE_BROADCAST_RECEIVER,
-                            "packageName=" + packageName + ";uid=" + uid);
-                }
-
-                synchronized (mLock) {
-                    final int userId = getChangingUserId();
-                    // Only the profile parent can install accessibility services.
-                    // Therefore we ignore packages from linked profiles.
-                    if (userId != mCurrentUserId) {
-                        return;
-                    }
-                    onPackageRemovedLocked(packageName);
-                }
-            }
-
-            /**
-             * Handles instances in which a package or packages have forcibly stopped.
-             *
-             * @param intent intent containing package event information.
-             * @param uid linux process user id (different from Android user id).
-             * @param packages array of package names that have stopped.
-             * @param doit whether to try and handle the stop or just log the trace.
-             *
-             * @return {@code true} if package should be restarted, {@code false} otherwise.
-             */
-            @Override
-            public boolean onHandleForceStop(Intent intent, String[] packages,
-                    int uid, boolean doit) {
-                if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_PACKAGE_BROADCAST_RECEIVER)) {
-                    mTraceManager.logTrace(LOG_TAG + ".PM.onHandleForceStop",
-                            FLAGS_PACKAGE_BROADCAST_RECEIVER,
-                            "intent=" + intent + ";packages=" + Arrays.toString(packages)
-                            + ";uid=" + uid + ";doit=" + doit);
-                }
-                synchronized (mLock) {
-                    final int userId = getChangingUserId();
-                    // Only the profile parent can install accessibility services.
-                    // Therefore we ignore packages from linked profiles.
-                    if (userId != mCurrentUserId) {
-                        return false;
-                    }
-                    final AccessibilityUserState userState = getUserStateLocked(userId);
-
-                    if (doit && onPackagesForceStoppedLocked(packages, userState)) {
-                        onUserStateChangedLocked(userState);
-                        return false;
-                    } else {
-                        return true;
-                    }
-                }
-            }
-        };
-
         // package changes
+        mPackageMonitor = new ManagerPackageMonitor(this);
         mPackageMonitor.register(mContext, null,  UserHandle.ALL, true);
 
         // user change and unlock
@@ -955,11 +880,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
         intentFilter.addAction(Intent.ACTION_SETTING_RESTORED);
 
+        Handler receiverHandler =
+                Flags.managerAvoidReceiverTimeout() ? BackgroundThread.getHandler() : null;
         mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_USER_BROADCAST_RECEIVER)) {
-                    mTraceManager.logTrace(LOG_TAG + ".BR.onReceive", FLAGS_USER_BROADCAST_RECEIVER,
+                    mTraceManager.logTrace(
+                            LOG_TAG + ".BR.onReceive",
+                            FLAGS_USER_BROADCAST_RECEIVER,
                             "context=" + context + ";intent=" + intent);
                 }
 
@@ -972,37 +901,51 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     removeUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
                 } else if (Intent.ACTION_SETTING_RESTORED.equals(action)) {
                     final String which = intent.getStringExtra(Intent.EXTRA_SETTING_NAME);
-                    if (Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES.equals(which)) {
-                        synchronized (mLock) {
-                            restoreEnabledAccessibilityServicesLocked(
-                                    intent.getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE),
-                                    intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE),
-                                    intent.getIntExtra(Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT,
-                                            0));
+                    if (which == null) {
+                        return;
+                    }
+                    final String previousValue =
+                            intent.getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE);
+                    final String newValue =
+                            intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE);
+                    final int restoredFromSdk =
+                            intent.getIntExtra(Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT, 0);
+                    switch (which) {
+                        case Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES -> {
+                            synchronized (mLock) {
+                                restoreEnabledAccessibilityServicesLocked(
+                                        previousValue, newValue, restoredFromSdk);
+                            }
                         }
-                    } else if (ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED.equals(which)) {
-                        synchronized (mLock) {
-                            restoreLegacyDisplayMagnificationNavBarIfNeededLocked(
-                                    intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE),
-                                    intent.getIntExtra(Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT,
-                                            0));
+                        case ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED -> {
+                            synchronized (mLock) {
+                                restoreLegacyDisplayMagnificationNavBarIfNeededLocked(
+                                        newValue, restoredFromSdk);
+                            }
                         }
-                    } else if (Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS.equals(which)) {
-                        synchronized (mLock) {
-                            restoreAccessibilityButtonTargetsLocked(
-                                    intent.getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE),
-                                    intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE));
+                        case Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS -> {
+                            synchronized (mLock) {
+                                restoreAccessibilityButtonTargetsLocked(
+                                        previousValue, newValue);
+                            }
                         }
-                    } else if (Settings.Secure.ACCESSIBILITY_QS_TARGETS.equals(which)) {
-                        if (!android.view.accessibility.Flags.a11yQsShortcut()) {
-                            return;
+                        case Settings.Secure.ACCESSIBILITY_QS_TARGETS -> {
+                            if (!android.view.accessibility.Flags.a11yQsShortcut()) {
+                                return;
+                            }
+                            restoreAccessibilityQsTargets(newValue);
                         }
-                        restoreAccessibilityQsTargets(
-                                    intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE));
+                        case Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE -> {
+                            if (!android.view.accessibility.Flags
+                                    .restoreA11yShortcutTargetService()) {
+                                return;
+                            }
+                            restoreAccessibilityShortcutTargetService(previousValue, newValue);
+                        }
                     }
                 }
             }
-        }, UserHandle.ALL, intentFilter, null, null);
+        }, UserHandle.ALL, intentFilter, null, receiverHandler);
 
         final IntentFilter filter = new IntentFilter();
         filter.addAction(SafetyCenterManager.ACTION_SAFETY_CENTER_ENABLED_CHANGED);
@@ -1012,7 +955,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 setNonA11yToolNotificationToMatchSafetyCenter();
             }
         };
-        mContext.registerReceiverAsUser(receiver, UserHandle.ALL, filter, null, mMainHandler,
+        mContext.registerReceiverAsUser(
+                receiver, UserHandle.ALL, filter, null, mMainHandler,
                 Context.RECEIVER_EXPORTED);
 
         if (!android.companion.virtual.flags.Flags.vdmPublicApis()) {
@@ -1101,6 +1045,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public long addClient(IAccessibilityManagerClient callback, int userId) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".addClient", FLAGS_ACCESSIBILITY_MANAGER,
@@ -1164,6 +1109,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public boolean removeClient(IAccessibilityManagerClient callback, int userId) {
         // TODO(b/190216606): Add tracing for removeClient when implementation is the same in master
 
@@ -1192,6 +1138,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public void sendAccessibilityEvent(AccessibilityEvent event, int userId) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".sendAccessibilityEvent", FLAGS_ACCESSIBILITY_MANAGER,
@@ -1308,12 +1255,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * system action.
      */
     @Override
+    @EnforcePermission(MANAGE_ACCESSIBILITY)
     public void registerSystemAction(RemoteAction action, int actionId) {
+        registerSystemAction_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".registerSystemAction",
                     FLAGS_ACCESSIBILITY_MANAGER, "action=" + action + ";actionId=" + actionId);
         }
-        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
         getSystemActionPerformer().registerSystemAction(actionId, action);
     }
 
@@ -1323,12 +1271,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * system action.
      */
     @Override
+    @EnforcePermission(MANAGE_ACCESSIBILITY)
     public void unregisterSystemAction(int actionId) {
+        unregisterSystemAction_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".unregisterSystemAction",
                     FLAGS_ACCESSIBILITY_MANAGER, "actionId=" + actionId);
         }
-        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
+
         getSystemActionPerformer().unregisterSystemAction(actionId);
     }
 
@@ -1341,6 +1291,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public ParceledListSlice<AccessibilityServiceInfo> getInstalledAccessibilityServiceList(
             int userId) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
@@ -1384,6 +1335,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType,
             int userId) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
@@ -1426,6 +1378,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public void interrupt(int userId) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".interrupt",
@@ -1479,6 +1432,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public int addAccessibilityInteractionConnection(IWindow windowToken, IBinder leashToken,
             IAccessibilityInteractionConnection connection, String packageName,
             int userId) throws RemoteException {
@@ -1494,6 +1448,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public void removeAccessibilityInteractionConnection(IWindow window) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".removeAccessibilityInteractionConnection",
@@ -1503,32 +1458,31 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @EnforcePermission(MODIFY_ACCESSIBILITY_DATA)
     public void setPictureInPictureActionReplacingConnection(
             IAccessibilityInteractionConnection connection) throws RemoteException {
+        setPictureInPictureActionReplacingConnection_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".setPictureInPictureActionReplacingConnection",
                     FLAGS_ACCESSIBILITY_MANAGER, "connection=" + connection);
         }
-        mSecurityPolicy.enforceCallingPermission(Manifest.permission.MODIFY_ACCESSIBILITY_DATA,
-                SET_PIP_ACTION_REPLACEMENT);
         mA11yWindowManager.setPictureInPictureActionReplacingConnection(connection);
     }
 
     @Override
+    @EnforcePermission(RETRIEVE_WINDOW_CONTENT)
     public void registerUiTestAutomationService(IBinder owner,
             IAccessibilityServiceClient serviceClient,
             AccessibilityServiceInfo accessibilityServiceInfo,
             int userId,
             int flags) {
+        registerUiTestAutomationService_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".registerUiTestAutomationService",
                     FLAGS_ACCESSIBILITY_MANAGER,
                     "owner=" + owner + ";serviceClient=" + serviceClient
                     + ";accessibilityServiceInfo=" + accessibilityServiceInfo + ";flags=" + flags);
         }
-
-        mSecurityPolicy.enforceCallingPermission(Manifest.permission.RETRIEVE_WINDOW_CONTENT,
-                FUNCTION_REGISTER_UI_TEST_AUTOMATION_SERVICE);
 
         synchronized (mLock) {
             changeCurrentUserForTestAutomationIfNeededLocked(userId);
@@ -1541,6 +1495,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public void unregisterUiTestAutomationService(IAccessibilityServiceClient serviceClient) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".unregisterUiTestAutomationService",
@@ -1600,15 +1555,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @EnforcePermission(RETRIEVE_WINDOW_CONTENT)
     public IBinder getWindowToken(int windowId, int userId) {
+        getWindowToken_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".getWindowToken",
                     FLAGS_ACCESSIBILITY_MANAGER, "windowId=" + windowId + ";userId=" + userId);
         }
 
-        mSecurityPolicy.enforceCallingPermission(
-                Manifest.permission.RETRIEVE_WINDOW_TOKEN,
-                GET_WINDOW_TOKEN);
         synchronized (mLock) {
             // We treat calls from a profile as if made by its parent as profiles
             // share the accessibility state of the parent. The call below
@@ -1644,18 +1598,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      *        specified target.
      */
     @Override
+    @EnforcePermission(STATUS_BAR_SERVICE)
     public void notifyAccessibilityButtonClicked(int displayId, String targetName) {
+        notifyAccessibilityButtonClicked_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".notifyAccessibilityButtonClicked",
                     FLAGS_ACCESSIBILITY_MANAGER,
                     "displayId=" + displayId + ";targetName=" + targetName);
         }
 
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Caller does not hold permission "
-                    + android.Manifest.permission.STATUS_BAR_SERVICE);
-        }
         if (targetName == null) {
             synchronized (mLock) {
                 final AccessibilityUserState userState = getCurrentUserStateLocked();
@@ -1664,7 +1615,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         mMainHandler.sendMessage(obtainMessage(
                 AccessibilityManagerService::performAccessibilityShortcutInternal, this,
-                displayId, ACCESSIBILITY_BUTTON, targetName));
+                displayId, UserShortcutType.SOFTWARE, targetName));
     }
 
     /**
@@ -1675,37 +1626,27 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      *                  user, {@code false} otherwise
      */
     @Override
+    @EnforcePermission(STATUS_BAR_SERVICE)
     public void notifyAccessibilityButtonVisibilityChanged(boolean shown) {
+        notifyAccessibilityButtonVisibilityChanged_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".notifyAccessibilityButtonVisibilityChanged",
                     FLAGS_ACCESSIBILITY_MANAGER, "shown=" + shown);
         }
 
-        mSecurityPolicy.enforceCallingOrSelfPermission(
-                android.Manifest.permission.STATUS_BAR_SERVICE);
         synchronized (mLock) {
             notifyAccessibilityButtonVisibilityChangedLocked(shown);
         }
     }
 
     @Override
-    @RequiresPermission(allOf = {
-            Manifest.permission.STATUS_BAR_SERVICE,
-            Manifest.permission.MANAGE_ACCESSIBILITY
-    })
+    @EnforcePermission(allOf = { STATUS_BAR_SERVICE, MANAGE_ACCESSIBILITY })
     public void notifyQuickSettingsTilesChanged(
             @UserIdInt int userId, @NonNull List<ComponentName> tileComponentNames) {
+        notifyQuickSettingsTilesChanged_enforcePermission();
         if (!android.view.accessibility.Flags.a11yQsShortcut()) {
             return;
         }
-
-        mContext.enforceCallingPermission(
-                Manifest.permission.STATUS_BAR_SERVICE,
-                /* function= */ "notifyQuickSettingsTilesChanged");
-        mContext.enforceCallingPermission(
-                Manifest.permission.MANAGE_ACCESSIBILITY,
-                /* function= */ "notifyQuickSettingsTilesChanged");
-
         if (DEBUG) {
             Slog.d(LOG_TAG, TextUtils.formatSimple(
                     "notifyQuickSettingsTilesChanged userId: %d, tileComponentNames: %s",
@@ -1767,6 +1708,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (serviceInfo != null && isAccessibilityServiceWarningRequired(serviceInfo)) {
                     // TODO(b/314850435): show full device control warning if needed after
                     // SysUI QS Panel can update live
+                    // The user attempts to add QS shortcut in QS Panel, but we don't actually
+                    // turn on the shortcut due to lack of full device control permission
+                    logMetricForQsShortcutConfiguration(/* enable= */ true, /* numOfFeatures= */ 1);
                     continue;
                 }
                 a11yFeaturesToEnable.add(a11yFeature);
@@ -1864,6 +1808,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 return false;
             }
             return getKeyEventDispatcher().notifyKeyEventLocked(event, policyFlags, boundServices);
+        }
+    }
+
+    /**
+     * Called by the MagnificationController when the magnification systemui connection changes.
+     *
+     * @param connected Whether the connection is ready.
+     */
+    public void notifyMagnificationSystemUIConnectionChanged(boolean connected) {
+        synchronized (mLock) {
+            notifyMagnificationSystemUIConnectionChangedLocked(connected);
         }
     }
 
@@ -2160,6 +2115,65 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    /**
+     * Merges the old and restored value of
+     * {@link Settings.Secure#ACCESSIBILITY_SHORTCUT_TARGET_SERVICE}.
+     *
+     * <p>Also clears out {@link R.string#config_defaultAccessibilityService} from
+     * the merged set if it was not present before restoring.
+     */
+    private void restoreAccessibilityShortcutTargetService(
+            String oldValue, String restoredValue) {
+        final Set<String> targetsFromSetting = new ArraySet<>();
+        readColonDelimitedStringToSet(oldValue, str -> str,
+                targetsFromSetting, /*doMerge=*/false);
+        final String defaultService =
+                mContext.getString(R.string.config_defaultAccessibilityService);
+        final ComponentName defaultServiceComponent = TextUtils.isEmpty(defaultService)
+                ? null : ComponentName.unflattenFromString(defaultService);
+        boolean shouldClearDefaultService = defaultServiceComponent != null
+                && !stringSetContainsComponentName(targetsFromSetting, defaultServiceComponent);
+        readColonDelimitedStringToSet(restoredValue, str -> str,
+                targetsFromSetting, /*doMerge=*/true);
+        if (Flags.clearDefaultFromA11yShortcutTargetServiceRestore()) {
+            if (shouldClearDefaultService && stringSetContainsComponentName(
+                    targetsFromSetting, defaultServiceComponent)) {
+                Slog.i(LOG_TAG, "Removing default service " + defaultService
+                        + " from restore of "
+                        + Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE);
+                targetsFromSetting.removeIf(str ->
+                        defaultServiceComponent.equals(ComponentName.unflattenFromString(str)));
+            }
+            if (targetsFromSetting.isEmpty()) {
+                return;
+            }
+        }
+        synchronized (mLock) {
+            final AccessibilityUserState userState = getUserStateLocked(UserHandle.USER_SYSTEM);
+            final Set<String> shortcutTargets =
+                    userState.getShortcutTargetsLocked(UserShortcutType.HARDWARE);
+            shortcutTargets.clear();
+            shortcutTargets.addAll(targetsFromSetting);
+            persistColonDelimitedSetToSettingLocked(
+                    Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
+                    UserHandle.USER_SYSTEM, targetsFromSetting, str -> str);
+            scheduleNotifyClientsOfServicesStateChangeLocked(userState);
+            onUserStateChangedLocked(userState);
+        }
+    }
+
+    /**
+     * Returns {@code true} if the set contains the provided non-null {@link ComponentName}.
+     *
+     * <p>This ignores values in the set that are not valid {@link ComponentName}s.
+     */
+    private boolean stringSetContainsComponentName(Set<String> set,
+            @NonNull ComponentName componentName) {
+        return componentName != null && set.stream()
+                .map(ComponentName::unflattenFromString)
+                .anyMatch(componentName::equals);
+    }
+
     private int getClientStateLocked(AccessibilityUserState userState) {
         return userState.getClientStateLocked(
             mUiAutomationManager.canIntrospect(),
@@ -2240,6 +2254,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mProxyManager.clearCacheLocked();
     }
 
+    private void notifyMagnificationSystemUIConnectionChangedLocked(boolean connected) {
+        final AccessibilityUserState state = getCurrentUserStateLocked();
+        for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
+            final AccessibilityServiceConnection service = state.mBoundServices.get(i);
+            service.notifyMagnificationSystemUIConnectionChangedLocked(connected);
+        }
+    }
+
     private void notifyMagnificationChangedLocked(int displayId, @NonNull Region region,
             @NonNull MagnificationConfig config) {
         final AccessibilityUserState state = getCurrentUserStateLocked();
@@ -2258,9 +2280,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private void showAccessibilityTargetsSelection(int displayId,
-            @ShortcutType int shortcutType) {
+            @UserShortcutType int shortcutType) {
         final Intent intent = new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
-        final String chooserClassName = (shortcutType == ACCESSIBILITY_SHORTCUT_KEY)
+        final String chooserClassName = (shortcutType == UserShortcutType.HARDWARE)
                 ? AccessibilityShortcutChooserActivity.class.getName()
                 : AccessibilityButtonChooserActivity.class.getName();
         intent.setClassName(CHOOSER_PACKAGE_NAME, chooserClassName);
@@ -2291,6 +2313,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         } catch (ActivityNotFoundException ignore) {
             // ignore the exception
         }
+    }
+
+    private void launchHearingDevicesDialog() {
+        final Intent intent = new Intent(ACTION_LAUNCH_HEARING_DEVICES_DIALOG);
+        intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        intent.setPackage(
+                mContext.getString(com.android.internal.R.string.config_systemUi));
+        mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
     }
 
     private void notifyAccessibilityButtonVisibilityChangedLocked(boolean available) {
@@ -2678,12 +2708,35 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
             builder.append(str);
         }
+        final String builderValue = builder.toString();
+        final String settingValue = TextUtils.isEmpty(builderValue)
+                ? defaultEmptyString : builderValue;
+        if (android.view.accessibility.Flags.restoreA11yShortcutTargetService()) {
+            final String currentValue = Settings.Secure.getStringForUser(
+                    mContext.getContentResolver(), settingName, userId);
+            if (Objects.equals(settingValue, currentValue)) {
+                // This logic exists to fix a bug where AccessibilityManagerService was writing
+                // `null` to the ACCESSIBILITY_SHORTCUT_TARGET_SERVICE setting during early boot
+                // during setup, due to a race condition in package scanning making A11yMS think
+                // that the default service was not installed.
+                //
+                // Writing `null` was implicitly causing that Setting to have the default
+                // `DEFAULT_OVERRIDEABLE_BY_RESTORE` property, which was preventing B&R for that
+                // Setting altogether.
+                //
+                // The "quick fix" here is to not write `null` if the existing value is already
+                // `null`. The ideal fix would be use the Settings.Secure#putStringForUser overload
+                // that allows override-by-restore, but the full repercussions of using that here
+                // have not yet been evaluated.
+                // TODO: b/333457719 - Evaluate and fix AccessibilityManagerService's usage of
+                //  "overridable by restore" when writing secure settings.
+                return;
+            }
+        }
         final long identity = Binder.clearCallingIdentity();
         try {
-            final String settingValue = builder.toString();
             Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                    settingName,
-                    TextUtils.isEmpty(settingValue) ? defaultEmptyString : settingValue, userId);
+                    settingName, settingValue, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -2703,13 +2756,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         Map<ComponentName, AccessibilityServiceConnection> componentNameToServiceMap =
                 userState.mComponentNameToServiceMap;
         boolean isUnlockingOrUnlocked = mUmi.isUserUnlockingOrUnlocked(userState.mUserId);
-        Set<ComponentName> installedComponentNames = new HashSet<>();
 
+        // Store the list of installed services.
+        mTempComponentNameSet.clear();
         for (int i = 0, count = userState.mInstalledServices.size(); i < count; i++) {
             AccessibilityServiceInfo installedService = userState.mInstalledServices.get(i);
             ComponentName componentName = ComponentName.unflattenFromString(
                     installedService.getId());
-            installedComponentNames.add(componentName);
+            mTempComponentNameSet.add(componentName);
 
             AccessibilityServiceConnection service = componentNameToServiceMap.get(componentName);
 
@@ -2769,16 +2823,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             audioManager.setAccessibilityServiceUids(mTempIntArray);
         }
         mActivityTaskManagerService.setAccessibilityServiceUids(mTempIntArray);
-        final Iterator<ComponentName> it = userState.mEnabledServices.iterator();
-        boolean anyServiceRemoved = false;
-        while (it.hasNext()) {
-            final ComponentName comp = it.next();
-            if (!installedComponentNames.contains(comp)) {
-                it.remove();
-                userState.mTouchExplorationGrantedServices.remove(comp);
-                anyServiceRemoved = true;
-            }
-        }
+
+        // If any services have been removed, remove them from the enabled list and the touch
+        // exploration granted list.
+        boolean anyServiceRemoved =
+                userState.mEnabledServices.removeIf((comp) -> !mTempComponentNameSet.contains(comp))
+                        || userState.mTouchExplorationGrantedServices.removeIf(
+                                (comp) -> !mTempComponentNameSet.contains(comp));
         if (anyServiceRemoved) {
             // Update the enabled services setting.
             persistComponentNamesToSettingLocked(
@@ -3369,7 +3420,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         final Set<String> currentTargets =
-                userState.getShortcutTargetsLocked(ACCESSIBILITY_SHORTCUT_KEY);
+                userState.getShortcutTargetsLocked(UserShortcutType.HARDWARE);
         if (targetsFromSetting.equals(currentTargets)) {
             return false;
         }
@@ -3400,7 +3451,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 userState.mUserId, str -> str, targetsFromSetting);
 
         final Set<String> currentTargets =
-                userState.getShortcutTargetsLocked(ACCESSIBILITY_BUTTON);
+                userState.getShortcutTargetsLocked(UserShortcutType.SOFTWARE);
         if (targetsFromSetting.equals(currentTargets)) {
             return false;
         }
@@ -3455,7 +3506,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     private void updateAccessibilityShortcutKeyTargetsLocked(AccessibilityUserState userState) {
         final Set<String> currentTargets =
-                userState.getShortcutTargetsLocked(ACCESSIBILITY_SHORTCUT_KEY);
+                userState.getShortcutTargetsLocked(UserShortcutType.HARDWARE);
         final int lastSize = currentTargets.size();
         if (lastSize == 0) {
             return;
@@ -3556,7 +3607,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     && userState.isMagnificationTwoFingerTripleTapEnabledLocked()));
 
         final boolean createConnectionForCurrentCapability =
-                com.android.window.flags.Flags.magnificationAlwaysDrawFullscreenBorder()
+                com.android.window.flags.Flags.alwaysDrawMagnificationFullscreenBorder()
                         || (userState.getMagnificationCapabilitiesLocked()
                                 != Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
 
@@ -3647,7 +3698,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         final Set<String> currentTargets =
-                userState.getShortcutTargetsLocked(ACCESSIBILITY_BUTTON);
+                userState.getShortcutTargetsLocked(UserShortcutType.SOFTWARE);
         final int lastSize = currentTargets.size();
         if (lastSize == 0) {
             return;
@@ -3687,7 +3738,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return;
         }
         final Set<String> buttonTargets =
-                userState.getShortcutTargetsLocked(ACCESSIBILITY_BUTTON);
+                userState.getShortcutTargetsLocked(UserShortcutType.SOFTWARE);
         int lastSize = buttonTargets.size();
         buttonTargets.removeIf(name -> {
             if (packageName != null && name != null && !name.contains(packageName)) {
@@ -3724,7 +3775,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         lastSize = buttonTargets.size();
 
         final Set<String> shortcutKeyTargets =
-                userState.getShortcutTargetsLocked(ACCESSIBILITY_SHORTCUT_KEY);
+                userState.getShortcutTargetsLocked(UserShortcutType.HARDWARE);
         final Set<String> qsShortcutTargets =
                 userState.getShortcutTargetsLocked(UserShortcutType.QUICK_SETTINGS);
         userState.mEnabledServices.forEach(componentName -> {
@@ -3830,10 +3881,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         final List<Pair<Integer, String>> shortcutTypeAndShortcutSetting = new ArrayList<>(3);
         shortcutTypeAndShortcutSetting.add(
-                new Pair<>(ACCESSIBILITY_SHORTCUT_KEY,
+                new Pair<>(UserShortcutType.HARDWARE,
                         Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE));
         shortcutTypeAndShortcutSetting.add(
-                new Pair<>(ACCESSIBILITY_BUTTON,
+                new Pair<>(UserShortcutType.SOFTWARE,
                         Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS));
         if (android.view.accessibility.Flags.a11yQsShortcut()) {
             shortcutTypeAndShortcutSetting.add(
@@ -3925,22 +3976,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      *        class implementing a supported accessibility feature, or {@code null} if there's no
      *        specified target.
      */
+    @EnforcePermission(MANAGE_ACCESSIBILITY)
     @Override
     public void performAccessibilityShortcut(String targetName) {
+        performAccessibilityShortcut_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".performAccessibilityShortcut",
                     FLAGS_ACCESSIBILITY_MANAGER, "targetName=" + targetName);
         }
 
-        if ((UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID)
-                && (mContext.checkCallingPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
-                != PackageManager.PERMISSION_GRANTED)) {
-            throw new SecurityException(
-                    "performAccessibilityShortcut requires the MANAGE_ACCESSIBILITY permission");
-        }
         mMainHandler.sendMessage(obtainMessage(
                 AccessibilityManagerService::performAccessibilityShortcutInternal, this,
-                Display.DEFAULT_DISPLAY, ACCESSIBILITY_SHORTCUT_KEY, targetName));
+                Display.DEFAULT_DISPLAY, UserShortcutType.HARDWARE, targetName));
     }
 
     /**
@@ -3953,7 +4000,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      *        specified target.
      */
     private void performAccessibilityShortcutInternal(int displayId,
-            @ShortcutType int shortcutType, @Nullable String targetName) {
+            @UserShortcutType int shortcutType, @Nullable String targetName) {
         final List<String> shortcutTargets = getAccessibilityShortcutTargetsInternal(shortcutType);
         if (shortcutTargets.isEmpty()) {
             Slog.d(LOG_TAG, "No target to perform shortcut, shortcutType=" + shortcutType);
@@ -4004,7 +4051,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private boolean performAccessibilityFrameworkFeature(int displayId,
-            ComponentName assignedTarget, @ShortcutType int shortcutType) {
+            ComponentName assignedTarget, @UserShortcutType int shortcutType) {
         final Map<ComponentName, FrameworkFeatureInfo> frameworkFeatureMap =
                 AccessibilityShortcutController.getFrameworkShortcutFeaturesMap();
         if (!frameworkFeatureMap.containsKey(assignedTarget)) {
@@ -4053,12 +4100,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     /**
      * Perform accessibility service shortcut action.
      *
-     * 1) For {@link AccessibilityManager#ACCESSIBILITY_BUTTON} type and services targeting sdk
+     * 1) For {@link UserShortcutType#SOFTWARE} type and services targeting sdk
      *    version <= Q: callbacks to accessibility service if service is bounded and requests
      *    accessibility button.
-     * 2) For {@link AccessibilityManager#ACCESSIBILITY_SHORTCUT_KEY} type and service targeting sdk
+     * 2) For {@link UserShortcutType#HARDWARE} type and service targeting sdk
      *    version <= Q: turns on / off the accessibility service.
-     * 3) For {@link AccessibilityManager#ACCESSIBILITY_SHORTCUT_KEY} type and service targeting sdk
+     * 3) For {@link UserShortcutType#HARDWARE} type and service targeting sdk
      *    version > Q and request accessibility button: turn on the accessibility service if it's
      *    not in the enabled state.
      *    (It'll happen when a service is disabled and assigned to shortcut then upgraded.)
@@ -4069,7 +4116,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      *       button.
      */
     private boolean performAccessibilityShortcutTargetService(int displayId,
-            @ShortcutType int shortcutType, ComponentName assignedTarget) {
+            @UserShortcutType int shortcutType, ComponentName assignedTarget) {
         synchronized (mLock) {
             final AccessibilityUserState userState = getCurrentUserStateLocked();
             final AccessibilityServiceInfo installedServiceInfo =
@@ -4087,7 +4134,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final boolean requestA11yButton = (installedServiceInfo.flags
                     & FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0;
             // Turns on / off the accessibility service
-            if ((targetSdk <= Build.VERSION_CODES.Q && shortcutType == ACCESSIBILITY_SHORTCUT_KEY)
+            if ((targetSdk <= Build.VERSION_CODES.Q && shortcutType == UserShortcutType.HARDWARE)
                     || (targetSdk > Build.VERSION_CODES.Q && !requestA11yButton)) {
                 if (serviceConnection == null) {
                     logAccessibilityShortcutActivated(mContext, assignedTarget, shortcutType,
@@ -4101,7 +4148,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 }
                 return true;
             }
-            if (shortcutType == ACCESSIBILITY_SHORTCUT_KEY && targetSdk > Build.VERSION_CODES.Q
+            if (shortcutType == UserShortcutType.HARDWARE && targetSdk > Build.VERSION_CODES.Q
                     && requestA11yButton) {
                 if (!userState.getEnabledServicesLocked().contains(assignedTarget)) {
                     enableAccessibilityServiceLocked(assignedTarget, mCurrentUserId);
@@ -4126,7 +4173,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private void launchAccessibilityFrameworkFeature(int displayId, ComponentName assignedTarget) {
         if (assignedTarget.equals(ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME)) {
-            launchAccessibilitySubSettings(displayId, ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME);
+            //import com.android.systemui.Flags;
+            if (com.android.systemui.Flags.hearingAidsQsTileDialog()) {
+                launchHearingDevicesDialog();
+            } else {
+                launchAccessibilitySubSettings(displayId,
+                        ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME);
+            }
         }
     }
 
@@ -4138,11 +4191,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * @hide
      */
     @Override
+    @EnforcePermission(MANAGE_ACCESSIBILITY)
     public void enableShortcutsForTargets(
             boolean enable, @UserShortcutType int shortcutTypes,
             @NonNull List<String> shortcutTargets, @UserIdInt int userId) {
-        mContext.enforceCallingPermission(
-                Manifest.permission.MANAGE_ACCESSIBILITY, "enableShortcutsForTargets");
+        enableShortcutsForTargets_enforcePermission();
         for (int shortcutType : USER_SHORTCUT_TYPES) {
             if ((shortcutTypes & shortcutType) == shortcutType) {
                 enableShortcutForTargets(enable, shortcutType, shortcutTargets, userId);
@@ -4207,6 +4260,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             );
 
             if (shortcutType == UserShortcutType.QUICK_SETTINGS) {
+                int numOfFeatureChanged = Math.abs(currentTargets.size() - validNewTargets.size());
+                logMetricForQsShortcutConfiguration(enable, numOfFeatureChanged);
                 userState.updateA11yQsTargetLocked(validNewTargets);
                 scheduleNotifyClientsOfServicesStateChangeLocked(userState);
                 onUserStateChangedLocked(userState);
@@ -4232,6 +4287,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         if (shortcutType == UserShortcutType.HARDWARE) {
             skipVolumeShortcutDialogTimeoutRestriction(userId);
+            if (com.android.server.accessibility.Flags.enableHardwareShortcutDisablesWarning()) {
+                persistIntToSetting(
+                        userId,
+                        Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
+                        AccessibilityShortcutController.DialogStatus.SHOWN
+                );
+            }
         } else if (shortcutType == UserShortcutType.SOFTWARE) {
             // Update the A11y FAB size to large when the Magnification shortcut is
             // enabled and the user hasn't changed the floating button size
@@ -4321,17 +4383,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 );
 
         if (!targetWithNoTile.isEmpty()) {
-            throw new IllegalArgumentException(
+            Slog.e(LOG_TAG,
                     "Unable to add/remove Tiles for a11y features: " + targetWithNoTile
                             + "as the Tiles aren't provided");
         }
     }
 
     @Override
+    @EnforcePermission(MANAGE_ACCESSIBILITY)
     public Bundle getA11yFeatureToTileMap(@UserIdInt int userId) {
-        mContext.enforceCallingPermission(
-                Manifest.permission.MANAGE_ACCESSIBILITY, "getA11yFeatureToTileMap");
-
+        getA11yFeatureToTileMap_enforcePermission();
         Bundle bundle = new Bundle();
         Map<ComponentName, ComponentName> a11yFeatureToTile =
                 getA11yFeatureToTileMapInternal(userId);
@@ -4387,26 +4448,23 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
-    public List<String> getAccessibilityShortcutTargets(@ShortcutType int shortcutType) {
+    @EnforcePermission(MANAGE_ACCESSIBILITY)
+    public List<String> getAccessibilityShortcutTargets(@UserShortcutType int shortcutType) {
+        getAccessibilityShortcutTargets_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".getAccessibilityShortcutTargets",
                     FLAGS_ACCESSIBILITY_MANAGER, "shortcutType=" + shortcutType);
         }
-
-        if (mContext.checkCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException(
-                    "getAccessibilityShortcutService requires the MANAGE_ACCESSIBILITY permission");
-        }
         return getAccessibilityShortcutTargetsInternal(shortcutType);
     }
 
-    private List<String> getAccessibilityShortcutTargetsInternal(@ShortcutType int shortcutType) {
+    private List<String> getAccessibilityShortcutTargetsInternal(
+            @UserShortcutType int shortcutType) {
         synchronized (mLock) {
             final AccessibilityUserState userState = getCurrentUserStateLocked();
             final ArrayList<String> shortcutTargets = new ArrayList<>(
                     userState.getShortcutTargetsLocked(shortcutType));
-            if (shortcutType != ACCESSIBILITY_BUTTON) {
+            if (shortcutType != UserShortcutType.SOFTWARE) {
                 return shortcutTargets;
             }
             // Adds legacy a11y services requesting a11y button into the list.
@@ -4487,6 +4545,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * doesn't.
      */
     @Override
+    @RequiresNoPermission
     public boolean sendFingerprintGesture(int gestureKeyCode) {
         if (mTraceManager.isA11yTracingEnabledForTypes(
                 FLAGS_ACCESSIBILITY_MANAGER | FLAGS_FINGERPRINT)) {
@@ -4497,6 +4556,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         synchronized(mLock) {
             if (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID) {
+                // TODO(b/333547153) remove the AIDL definitions for these functions that are
+                // restricted to system server and move them to AccessibilityManagerInternal.
                 throw new SecurityException("Only SYSTEM can call sendFingerprintGesture");
             }
         }
@@ -4515,6 +4576,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      *   registered.
      */
     @Override
+    @RequiresNoPermission
     public int getAccessibilityWindowId(@Nullable IBinder windowToken) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".getAccessibilityWindowId",
@@ -4537,6 +4599,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * integer for non-interactive one.
      */
     @Override
+    @RequiresNoPermission
     public long getRecommendedTimeoutMillis() {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(
@@ -4561,8 +4624,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @EnforcePermission(STATUS_BAR_SERVICE)
     public void setMagnificationConnection(
             IMagnificationConnection connection) throws RemoteException {
+        setMagnificationConnection_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(
                 FLAGS_ACCESSIBILITY_MANAGER | FLAGS_MAGNIFICATION_CONNECTION)) {
             mTraceManager.logTrace(LOG_TAG + ".setMagnificationConnection",
@@ -4570,10 +4635,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     "connection=" + connection);
         }
 
-        mSecurityPolicy.enforceCallingOrSelfPermission(
-                android.Manifest.permission.STATUS_BAR_SERVICE);
-
         getMagnificationConnectionManager().setConnection(connection);
+
+        if (com.android.window.flags.Flags.alwaysDrawMagnificationFullscreenBorder()
+                && connection == null
+                && mMagnificationController.isFullScreenMagnificationControllerInitialized()) {
+            // Since the connection does not exist, the system ui cannot provide the border
+            // implementation for fullscreen magnification. So we call reset to deactivate the
+            // fullscreen magnification to prevent the magnified but no border situation.
+            final ArrayList<Display> displays = getValidDisplayList();
+            for (int i = 0; i < displays.size(); i++) {
+                final Display display = displays.get(i);
+                getMagnificationController().getFullScreenMagnificationController()
+                        .reset(display.getDisplayId(), false);
+            }
+        }
     }
 
     /**
@@ -4597,6 +4673,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public void associateEmbeddedHierarchy(@NonNull IBinder host, @NonNull IBinder embedded) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".associateEmbeddedHierarchy",
@@ -4609,6 +4686,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public void disassociateEmbeddedHierarchy(@NonNull IBinder token) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".disassociateEmbeddedHierarchy",
@@ -4625,6 +4703,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * @return The stroke width.
      */
     @Override
+    @RequiresNoPermission
     public int getFocusStrokeWidth() {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".getFocusStrokeWidth", FLAGS_ACCESSIBILITY_MANAGER);
@@ -4646,6 +4725,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * @return The color.
      */
     @Override
+    @RequiresNoPermission
     public int getFocusColor() {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".getFocusColor", FLAGS_ACCESSIBILITY_MANAGER);
@@ -4667,6 +4747,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * @return {@code true} if the audio description is enabled, {@code false} otherwise.
      */
     @Override
+    @RequiresNoPermission
     public boolean isAudioDescriptionByDefaultEnabled() {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".isAudioDescriptionByDefaultEnabled",
@@ -4689,6 +4770,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * @param attributes The accessibility window attributes.
      */
     @Override
+    @RequiresNoPermission
     public void setAccessibilityWindowAttributes(int displayId, int windowId, int userId,
             AccessibilityWindowAttributes attributes) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
@@ -4700,34 +4782,30 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
-    @RequiresPermission(Manifest.permission.SET_SYSTEM_AUDIO_CAPTION)
+    @EnforcePermission(SET_SYSTEM_AUDIO_CAPTION)
     public void setSystemAudioCaptioningEnabled(boolean isEnabled, int userId) {
-        mContext.enforceCallingOrSelfPermission(
-                Manifest.permission.SET_SYSTEM_AUDIO_CAPTION,
-                "setSystemAudioCaptioningEnabled");
-
+        setSystemAudioCaptioningEnabled_enforcePermission();
         mCaptioningManagerImpl.setSystemAudioCaptioningEnabled(isEnabled, userId);
     }
 
     @Override
+    @RequiresNoPermission
     public boolean isSystemAudioCaptioningUiEnabled(int userId) {
         return mCaptioningManagerImpl.isSystemAudioCaptioningUiEnabled(userId);
     }
 
     @Override
-    @RequiresPermission(Manifest.permission.SET_SYSTEM_AUDIO_CAPTION)
+    @EnforcePermission(SET_SYSTEM_AUDIO_CAPTION)
     public void setSystemAudioCaptioningUiEnabled(boolean isEnabled, int userId) {
-        mContext.enforceCallingOrSelfPermission(
-                Manifest.permission.SET_SYSTEM_AUDIO_CAPTION,
-                "setSystemAudioCaptioningUiEnabled");
-
+        setSystemAudioCaptioningUiEnabled_enforcePermission();
         mCaptioningManagerImpl.setSystemAudioCaptioningUiEnabled(isEnabled, userId);
     }
 
     @Override
+    @EnforcePermission(CREATE_VIRTUAL_DEVICE)
     public boolean registerProxyForDisplay(IAccessibilityServiceClient client, int displayId)
             throws RemoteException {
-        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.CREATE_VIRTUAL_DEVICE);
+        registerProxyForDisplay_enforcePermission();
         mSecurityPolicy.checkForAccessibilityPermissionOrRole();
         if (client == null) {
             return false;
@@ -4763,8 +4841,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @EnforcePermission(CREATE_VIRTUAL_DEVICE)
     public boolean unregisterProxyForDisplay(int displayId) {
-        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.CREATE_VIRTUAL_DEVICE);
+        unregisterProxyForDisplay_enforcePermission();
         mSecurityPolicy.checkForAccessibilityPermissionOrRole();
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -4779,6 +4858,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public boolean startFlashNotificationSequence(String opPkg,
             @FlashNotificationReason int reason, IBinder token) {
         final long identity = Binder.clearCallingIdentity();
@@ -4791,6 +4871,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public boolean stopFlashNotificationSequence(String opPkg) {
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -4801,6 +4882,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public boolean startFlashNotificationEvent(String opPkg,
             @FlashNotificationReason int reason, String reasonPkg) {
         final long identity = Binder.clearCallingIdentity();
@@ -4813,6 +4895,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public boolean isAccessibilityTargetAllowed(String packageName, int uid, int userId) {
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -4839,7 +4922,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                                         uid, packageName);
                         final boolean ecmEnabled = mContext.getResources().getBoolean(
                                 com.android.internal.R.bool.config_enhancedConfirmationModeEnabled);
-                        return !ecmEnabled || mode == AppOpsManager.MODE_ALLOWED;
+                        return !ecmEnabled || mode == AppOpsManager.MODE_ALLOWED
+                                || mode == AppOpsManager.MODE_DEFAULT;
                     } catch (Exception e) {
                         // Fallback in case if app ops is not available in testing.
                         return false;
@@ -4853,6 +4937,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public boolean sendRestrictedDialogIntent(String packageName, int uid, int userId) {
         // The accessibility service is allowed. Don't show the restricted dialog.
         if (isAccessibilityTargetAllowed(packageName, uid, userId)) {
@@ -4886,8 +4971,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @EnforcePermission(MANAGE_ACCESSIBILITY)
     public boolean isAccessibilityServiceWarningRequired(AccessibilityServiceInfo info) {
-        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
+        isAccessibilityServiceWarningRequired_enforcePermission();
         final ComponentName componentName = info.getComponentName();
 
         // Warning is not required if the service is already enabled.
@@ -4898,7 +4984,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
         }
         // Warning is not required if the service is already assigned to a shortcut.
-        for (int shortcutType : AccessibilityManager.SHORTCUT_TYPES) {
+        for (int shortcutType : ShortcutConstants.USER_SHORTCUT_TYPES) {
             if (getAccessibilityShortcutTargets(shortcutType).contains(
                     componentName.flattenToString())) {
                 return false;
@@ -4933,6 +5019,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @PermissionManuallyEnforced // DUMP
     public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
         synchronized (mLock) {
@@ -5075,6 +5162,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public void onShellCommand(FileDescriptor in, FileDescriptor out,
             FileDescriptor err, String[] args, ShellCallback callback,
             ResultReceiver resultReceiver) {
@@ -5184,7 +5272,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
                 //Clip to the window bounds.
                 Rect windowBounds = mTempRect1;
-                getWindowBounds(focus.getWindowId(), windowBounds);
+                AccessibilityWindowInfo window = focus.getWindow();
+                if (window != null) {
+                    window.getBoundsInScreen(windowBounds);
+                }
                 if (!boundsInScreenBeforeMagnification.intersect(windowBounds)) {
                     return false;
                 }
@@ -6088,9 +6179,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @EnforcePermission(INJECT_EVENTS)
     public void injectInputEventToInputFilter(InputEvent event) {
-        mSecurityPolicy.enforceCallingPermission(Manifest.permission.INJECT_EVENTS,
-                "injectInputEventToInputFilter");
+        injectInputEventToInputFilter_enforcePermission();
         synchronized (mLock) {
             final long endMillis =
                     SystemClock.uptimeMillis() + WAIT_INPUT_FILTER_INSTALL_TIMEOUT_MS;
@@ -6140,6 +6231,178 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    @VisibleForTesting
+    public static class ManagerPackageMonitor extends PackageMonitor {
+        private final AccessibilityManagerService mManagerService;
+        public ManagerPackageMonitor(AccessibilityManagerService managerService) {
+            super(/* supportsPackageRestartQuery = */ true);
+            mManagerService = managerService;
+        }
+
+        @Override
+        public void onSomePackagesChanged() {
+            if (mManagerService.mTraceManager.isA11yTracingEnabledForTypes(
+                    FLAGS_PACKAGE_BROADCAST_RECEIVER)) {
+                mManagerService.mTraceManager.logTrace(LOG_TAG + ".PM.onSomePackagesChanged",
+                        FLAGS_PACKAGE_BROADCAST_RECEIVER);
+            }
+
+            final int userId = getChangingUserId();
+            List<AccessibilityServiceInfo> parsedAccessibilityServiceInfos = mManagerService
+                    .parseAccessibilityServiceInfos(userId);
+            List<AccessibilityShortcutInfo> parsedAccessibilityShortcutInfos = mManagerService
+                    .parseAccessibilityShortcutInfos(userId);
+            synchronized (mManagerService.getLock()) {
+                // Only the profile parent can install accessibility services.
+                // Therefore we ignore packages from linked profiles.
+                if (userId != mManagerService.getCurrentUserIdLocked()) {
+                    return;
+                }
+
+                // Only continue setting up the packages if the service has been initialized.
+                // See: b/340927041
+                if (Flags.skipPackageChangeBeforeUserSwitch()
+                        && !mManagerService.isServiceInitializedLocked()) {
+                    Slog.w(LOG_TAG,
+                            "onSomePackagesChanged: service not initialized, skip the callback.");
+                    return;
+                }
+                mManagerService.onSomePackagesChangedLocked(parsedAccessibilityServiceInfos,
+                        parsedAccessibilityShortcutInfos);
+            }
+        }
+
+        @Override
+        public void onPackageUpdateFinished(String packageName, int uid) {
+            // The package should already be removed from mBoundServices, and added into
+            // mBindingServices in binderDied() during updating. Remove services from  this
+            // package from mBindingServices, and then update the user state to re-bind new
+            // versions of them.
+            if (mManagerService.mTraceManager.isA11yTracingEnabledForTypes(
+                    FLAGS_PACKAGE_BROADCAST_RECEIVER)) {
+                mManagerService.mTraceManager.logTrace(
+                        LOG_TAG + ".PM.onPackageUpdateFinished",
+                        FLAGS_PACKAGE_BROADCAST_RECEIVER,
+                        "packageName=" + packageName + ";uid=" + uid);
+            }
+            final int userId = getChangingUserId();
+            List<AccessibilityServiceInfo> parsedAccessibilityServiceInfos = mManagerService
+                    .parseAccessibilityServiceInfos(userId);
+            List<AccessibilityShortcutInfo> parsedAccessibilityShortcutInfos =
+                    mManagerService.parseAccessibilityShortcutInfos(userId);
+            synchronized (mManagerService.getLock()) {
+                if (userId != mManagerService.getCurrentUserIdLocked()) {
+                    return;
+                }
+                final AccessibilityUserState userState = mManagerService.getUserStateLocked(userId);
+                final boolean reboundAService = userState.getBindingServicesLocked().removeIf(
+                        component -> component != null
+                                && component.getPackageName().equals(packageName))
+                        || userState.mCrashedServices.removeIf(component -> component != null
+                        && component.getPackageName().equals(packageName));
+                // Reloads the installed services info to make sure the rebound service could
+                // get a new one.
+                userState.mInstalledServices.clear();
+                final boolean configurationChanged;
+                configurationChanged = mManagerService.readConfigurationForUserStateLocked(
+                        userState, parsedAccessibilityServiceInfos,
+                        parsedAccessibilityShortcutInfos);
+                if (reboundAService || configurationChanged) {
+                    mManagerService.onUserStateChangedLocked(userState);
+                }
+                // Passing 0 for restoreFromSdkInt to have this migration check execute each
+                // time. It can make sure a11y button settings are correctly if there's an a11y
+                // service updated and modifies the a11y button configuration.
+                mManagerService.migrateAccessibilityButtonSettingsIfNecessaryLocked(
+                        userState, packageName, /* restoreFromSdkInt = */0);
+            }
+        }
+
+        @Override
+        public void onPackageRemoved(String packageName, int uid) {
+            if (mManagerService.mTraceManager.isA11yTracingEnabledForTypes(
+                    FLAGS_PACKAGE_BROADCAST_RECEIVER)) {
+                mManagerService.mTraceManager.logTrace(LOG_TAG + ".PM.onPackageRemoved",
+                        FLAGS_PACKAGE_BROADCAST_RECEIVER,
+                        "packageName=" + packageName + ";uid=" + uid);
+            }
+
+            synchronized (mManagerService.getLock()) {
+                final int userId = getChangingUserId();
+                // Only the profile parent can install accessibility services.
+                // Therefore we ignore packages from linked profiles.
+                if (userId != mManagerService.getCurrentUserIdLocked()) {
+                    return;
+                }
+                mManagerService.onPackageRemovedLocked(packageName);
+            }
+        }
+
+        /**
+         * Handles instances in which a package or packages have forcibly stopped.
+         *
+         * @param intent intent containing package event information.
+         * @param uid linux process user id (different from Android user id).
+         * @param packages array of package names that have stopped.
+         * @param doit whether to try and handle the stop or just log the trace.
+         *
+         * @return {@code true} if doit == {@code false}
+         * and at least one of the provided packages is enabled.
+         * In any other case, returns {@code false}.
+         * This is to indicate whether further action is necessary.
+         */
+        @Override
+        public boolean onHandleForceStop(Intent intent, String[] packages,
+                int uid, boolean doit) {
+            if (mManagerService.mTraceManager.isA11yTracingEnabledForTypes(
+                    FLAGS_PACKAGE_BROADCAST_RECEIVER)) {
+                mManagerService.mTraceManager.logTrace(LOG_TAG + ".PM.onHandleForceStop",
+                        FLAGS_PACKAGE_BROADCAST_RECEIVER,
+                        "intent=" + intent + ";packages=" + Arrays.toString(packages)
+                                + ";uid=" + uid + ";doit=" + doit);
+            }
+            synchronized (mManagerService.getLock()) {
+                final int userId = getChangingUserId();
+                // Only the profile parent can install accessibility services.
+                // Therefore we ignore packages from linked profiles.
+                if (userId != mManagerService.getCurrentUserIdLocked()) {
+                    return false;
+                }
+                final AccessibilityUserState userState = mManagerService.getUserStateLocked(userId);
+
+                if (Flags.managerPackageMonitorLogicFix()) {
+                    if (!doit) {
+                        // if we're not handling the stop here, then we only need to know
+                        // if any of the force-stopped packages are currently enabled.
+                        return userState.mEnabledServices.stream().anyMatch(
+                                (comp) -> Arrays.stream(packages).anyMatch(
+                                        (pkg) -> pkg.equals(comp.getPackageName()))
+                        );
+                    } else if (mManagerService.onPackagesForceStoppedLocked(packages, userState)) {
+                        mManagerService.onUserStateChangedLocked(userState);
+                    }
+                    return false;
+                } else {
+                    // this old logic did not properly indicate when base packageMonitor's routine
+                    // should handle stopping the package.
+                    if (doit && mManagerService.onPackagesForceStoppedLocked(packages, userState)) {
+                        mManagerService.onUserStateChangedLocked(userState);
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        @Override
+        public boolean onPackageChanged(String packageName, int uid, String[] components) {
+            // We care about all package changes, not just the whole package itself which is
+            // default behavior.
+            return true;
+        }
+    }
+
     void sendPendingWindowStateChangedEventsForAvailableWindowLocked(int windowId) {
         final int eventSize =  mSendWindowStateChangedEventRunnables.size();
         for (int i = eventSize - 1; i >= 0; i--) {
@@ -6175,11 +6438,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    /** Used to attach accessibility overlays from the system itself i.e. magnification. */
+    @EnforcePermission(INTERNAL_SYSTEM_WINDOW)
     @Override
-    public void attachAccessibilityOverlayToDisplay(
-            int displayId, SurfaceControl sc) {
-        mContext.enforceCallingPermission(
-                INTERNAL_SYSTEM_WINDOW, "attachAccessibilityOverlayToDisplay");
+    public void attachAccessibilityOverlayToDisplay(int displayId, SurfaceControl sc) {
+        attachAccessibilityOverlayToDisplay_enforcePermission();
         mMainHandler.sendMessage(
                 obtainMessage(
                         AccessibilityManagerService::attachAccessibilityOverlayToDisplayInternal,
@@ -6190,6 +6453,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         null));
     }
 
+    /** Called by services to attach accessibility overlays. */
     @Override
     public void attachAccessibilityOverlayToDisplay(
             int interactionId,
@@ -6238,7 +6502,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-
     /**
      * Bypasses the timeout restriction if volume key shortcut assigned.
      */
@@ -6247,5 +6510,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 userId,
                 Settings.Secure.SKIP_ACCESSIBILITY_SHORTCUT_DIALOG_TIMEOUT_RESTRICTION,
                 /* true */ 1);
+    }
+
+    /**
+     * Log the metric when the user add/remove qs shortcut for accessibility features. Use the
+     * callingUid to know where the users configure the a11y qs shortcuts.
+     */
+    private void logMetricForQsShortcutConfiguration(boolean enable, int numOfFeatures) {
+        if (numOfFeatures <= 0) {
+            // Skip logging metric if no a11y features are configured
+            return;
+        }
+        String metricId = enable ? METRIC_ID_QS_SHORTCUT_ADD : METRIC_ID_QS_SHORTCUT_REMOVE;
+        Counter.logIncrementWithUid(metricId, Binder.getCallingUid(), numOfFeatures);
     }
 }

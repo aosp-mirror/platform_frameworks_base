@@ -16,70 +16,80 @@
 
 package com.android.systemui.statusbar.ui.viewmodel
 
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
-import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
-import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.fromGoneTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.flags.andSceneContainer
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.power.domain.interactor.PowerInteractorFactory
-import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
-import com.android.systemui.shade.data.repository.FakeShadeRepository
-import com.android.systemui.statusbar.CommandQueue
-import com.android.systemui.statusbar.data.repository.FakeKeyguardStatusBarRepository
-import com.android.systemui.statusbar.domain.interactor.KeyguardStatusBarInteractor
+import com.android.systemui.statusbar.domain.interactor.keyguardStatusBarInteractor
+import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
+import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
+import com.android.systemui.statusbar.notification.stack.data.repository.setNotifications
+import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.policy.BatteryController
+import com.android.systemui.statusbar.policy.batteryController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
-import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
-class KeyguardStatusBarViewModelTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class KeyguardStatusBarViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val keyguardRepository = FakeKeyguardRepository()
-    private val keyguardInteractor =
-        KeyguardInteractor(
-            keyguardRepository,
-            mock<CommandQueue>(),
-            PowerInteractorFactory.create().powerInteractor,
-            kosmos.fakeSceneContainerFlags,
-            FakeKeyguardBouncerRepository(),
-            ConfigurationInteractor(FakeConfigurationRepository()),
-            FakeShadeRepository(),
-            kosmos.keyguardTransitionInteractor,
-            { kosmos.sceneInteractor },
-            { kosmos.fromGoneTransitionInteractor },
-        )
-    private val keyguardStatusBarInteractor =
-        KeyguardStatusBarInteractor(
-            FakeKeyguardStatusBarRepository(),
-        )
-    private val batteryController = mock<BatteryController>()
+    private val faceAuthRepository by lazy { kosmos.fakeDeviceEntryFaceAuthRepository }
+    private val headsUpRepository by lazy { kosmos.headsUpNotificationRepository }
+    private val headsUpNotificationInteractor by lazy { kosmos.headsUpNotificationInteractor }
+    private val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
+    private val keyguardTransitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
+    private val keyguardInteractor by lazy { kosmos.keyguardInteractor }
+    private val keyguardStatusBarInteractor by lazy { kosmos.keyguardStatusBarInteractor }
+    private val batteryController = kosmos.batteryController
 
-    private val underTest =
-        KeyguardStatusBarViewModel(
-            testScope.backgroundScope,
-            keyguardInteractor,
-            keyguardStatusBarInteractor,
-            batteryController,
-        )
+    lateinit var underTest: KeyguardStatusBarViewModel
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
+
+    @Before
+    fun setup() {
+        underTest =
+            KeyguardStatusBarViewModel(
+                testScope.backgroundScope,
+                headsUpNotificationInteractor,
+                keyguardInteractor,
+                keyguardStatusBarInteractor,
+                batteryController,
+            )
+    }
 
     @Test
     fun isVisible_dozing_false() =
@@ -113,7 +123,22 @@ class KeyguardStatusBarViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun isVisible_statusBarStateKeyguard_andNotDozing_true() =
+    fun isVisible_headsUpStatusBarShown_false() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isVisible)
+
+            // WHEN HUN displayed on the bypass lock screen
+            headsUpRepository.setNotifications(FakeHeadsUpRowRepository("key 0", isPinned = true))
+            keyguardTransitionRepository.emitInitialStepsFromOff(KeyguardState.LOCKSCREEN)
+            keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+            faceAuthRepository.isBypassEnabled.value = true
+
+            // THEN KeyguardStatusBar is NOT visible to make space for HeadsUpStatusBar
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun isVisible_statusBarStateKeyguard_andNotDozing_andNotShowingHeadsUpStatusBar_true() =
         testScope.runTest {
             val latest by collectLastValue(underTest.isVisible)
 

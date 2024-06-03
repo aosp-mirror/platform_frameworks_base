@@ -40,6 +40,7 @@ import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.getflow.findAutoSelectEntry
 import com.android.credentialmanager.common.ProviderActivityState
 import com.android.credentialmanager.createflow.isFlowAutoSelectable
+import com.android.credentialmanager.getflow.findBiometricFlowEntry
 
 /**
  * Client for interacting with Credential Manager. Also holds data inputs from it.
@@ -57,7 +58,6 @@ class CredentialManagerRepo(
     private val providerEnabledList: List<ProviderData>
     private val providerDisabledList: List<DisabledProviderData>?
     val resultReceiver: ResultReceiver?
-    val finalResponseReceiver: ResultReceiver?
 
     var initialUiState: UiState
 
@@ -104,12 +104,6 @@ class CredentialManagerRepo(
             Constants.EXTRA_RESULT_RECEIVER,
             ResultReceiver::class.java
         )
-
-        finalResponseReceiver = intent.getParcelableExtra(
-                Constants.EXTRA_FINAL_RESPONSE_RECEIVER,
-                ResultReceiver::class.java
-        )
-
         isReqForAllOptions = requestInfo?.isShowAllOptionsRequested ?: false
 
         val cancellationRequest = getCancelUiRequest(intent)
@@ -148,10 +142,17 @@ class CredentialManagerRepo(
                 )
             }
             RequestInfo.TYPE_GET -> {
-                val getCredentialInitialUiState = getCredentialInitialUiState(originName,
+                var getCredentialInitialUiState = getCredentialInitialUiState(originName,
                         isReqForAllOptions)!!
                 val autoSelectEntry =
                     findAutoSelectEntry(getCredentialInitialUiState.providerDisplayInfo)
+                val biometricEntry = findBiometricFlowEntry(
+                    getCredentialInitialUiState.providerDisplayInfo,
+                    autoSelectEntry != null)
+                if (biometricEntry != null) {
+                    getCredentialInitialUiState = getCredentialInitialUiState.copy(
+                        activeEntry = biometricEntry)
+                }
                 UiState(
                     createCredentialUiState = null,
                     getCredentialUiState = getCredentialInitialUiState,
@@ -198,7 +199,7 @@ class CredentialManagerRepo(
     }
 
     fun onCancel(cancelCode: Int) {
-        sendCancellationCode(cancelCode, requestInfo?.token, resultReceiver, finalResponseReceiver)
+        sendCancellationCode(cancelCode, requestInfo?.token, resultReceiver)
     }
 
     fun onOptionSelected(
@@ -217,9 +218,6 @@ class CredentialManagerRepo(
         )
         val resultDataBundle = Bundle()
         UserSelectionDialogResult.addToBundle(userSelectionDialogResult, resultDataBundle)
-
-        resultDataBundle.putParcelable(Constants.EXTRA_FINAL_RESPONSE_RECEIVER,
-                finalResponseReceiver)
 
         resultReceiver?.send(
             BaseDialogResult.RESULT_CODE_DIALOG_COMPLETE_WITH_SELECTION,
@@ -288,13 +286,10 @@ class CredentialManagerRepo(
         fun sendCancellationCode(
             cancelCode: Int,
             requestToken: IBinder?,
-            resultReceiver: ResultReceiver?,
-            finalResponseReceiver: ResultReceiver?
+            resultReceiver: ResultReceiver?
         ) {
             if (requestToken != null && resultReceiver != null) {
                 val resultData = Bundle()
-                resultData.putParcelable(Constants.EXTRA_FINAL_RESPONSE_RECEIVER,
-                        finalResponseReceiver)
 
                 BaseDialogResult.addToBundle(BaseDialogResult(requestToken), resultData)
                 resultReceiver.send(cancelCode, resultData)

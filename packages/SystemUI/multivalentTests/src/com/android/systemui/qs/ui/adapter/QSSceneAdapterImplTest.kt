@@ -35,6 +35,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.QSImpl
 import com.android.systemui.qs.dagger.QSComponent
 import com.android.systemui.qs.dagger.QSSceneComponent
+import com.android.systemui.settings.brightness.MirrorController
 import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
@@ -53,9 +54,11 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.inOrder
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 
 @SmallTest
@@ -161,16 +164,25 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
 
             with(qsImpl!!) {
                 verify(this).setQsVisible(false)
-                verify(this)
+                verify(this, never())
                     .setQsExpansion(
-                        /* expansion= */ 0f,
-                        /* panelExpansionFraction= */ 1f,
-                        /* proposedTranslation= */ 0f,
-                        /* squishinessFraction= */ 1f,
+                        /* expansion= */ anyFloat(),
+                        /* panelExpansionFraction= */ anyFloat(),
+                        /* proposedTranslation= */ anyFloat(),
+                        /* squishinessFraction= */ anyFloat(),
                     )
                 verify(this).setListening(false)
                 verify(this).setExpanded(false)
             }
+
+            underTest.applyLatestExpansionAndSquishiness()
+            verify(qsImpl!!)
+                .setQsExpansion(
+                    /* expansion= */ 0f,
+                    /* panelExpansionFraction= */ 1f,
+                    /* proposedTranslation= */ 0f,
+                    /* squishinessFraction= */ 1f,
+                )
         }
 
     @Test
@@ -185,16 +197,25 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
             underTest.setState(QSSceneAdapter.State.QQS)
             with(qsImpl!!) {
                 verify(this).setQsVisible(true)
-                verify(this)
+                verify(this, never())
                     .setQsExpansion(
-                        /* expansion= */ 0f,
-                        /* panelExpansionFraction= */ 1f,
-                        /* proposedTranslation= */ 0f,
-                        /* squishinessFraction= */ 1f,
+                        /* expansion= */ anyFloat(),
+                        /* panelExpansionFraction= */ anyFloat(),
+                        /* proposedTranslation= */ anyFloat(),
+                        /* squishinessFraction= */ anyFloat(),
                     )
                 verify(this).setListening(true)
                 verify(this).setExpanded(false)
             }
+
+            underTest.applyLatestExpansionAndSquishiness()
+            verify(qsImpl!!)
+                .setQsExpansion(
+                    /* expansion= */ 0f,
+                    /* panelExpansionFraction= */ 1f,
+                    /* proposedTranslation= */ 0f,
+                    /* squishinessFraction= */ 1f,
+                )
         }
 
     @Test
@@ -209,16 +230,25 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
             underTest.setState(QSSceneAdapter.State.QS)
             with(qsImpl!!) {
                 verify(this).setQsVisible(true)
-                verify(this)
+                verify(this, never())
                     .setQsExpansion(
-                        /* expansion= */ 1f,
-                        /* panelExpansionFraction= */ 1f,
-                        /* proposedTranslation= */ 0f,
-                        /* squishinessFraction= */ 1f,
+                        /* expansion= */ anyFloat(),
+                        /* panelExpansionFraction= */ anyFloat(),
+                        /* proposedTranslation= */ anyFloat(),
+                        /* squishinessFraction= */ anyFloat(),
                     )
                 verify(this).setListening(true)
                 verify(this).setExpanded(true)
             }
+
+            underTest.applyLatestExpansionAndSquishiness()
+            verify(qsImpl!!)
+                .setQsExpansion(
+                    /* expansion= */ 1f,
+                    /* panelExpansionFraction= */ 1f,
+                    /* proposedTranslation= */ 0f,
+                    /* squishinessFraction= */ 1f,
+                )
         }
 
     @Test
@@ -234,16 +264,25 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
             underTest.setState(QSSceneAdapter.State.Expanding(progress))
             with(qsImpl!!) {
                 verify(this).setQsVisible(true)
-                verify(this)
+                verify(this, never())
                     .setQsExpansion(
-                        /* expansion= */ progress,
-                        /* panelExpansionFraction= */ 1f,
-                        /* proposedTranslation= */ 0f,
-                        /* squishinessFraction= */ 1f,
+                        /* expansion= */ anyFloat(),
+                        /* panelExpansionFraction= */ anyFloat(),
+                        /* proposedTranslation= */ anyFloat(),
+                        /* squishinessFraction= */ anyFloat(),
                     )
                 verify(this).setListening(true)
                 verify(this).setExpanded(true)
             }
+
+            underTest.applyLatestExpansionAndSquishiness()
+            verify(qsImpl!!)
+                .setQsExpansion(
+                    /* expansion= */ progress,
+                    /* panelExpansionFraction= */ 1f,
+                    /* proposedTranslation= */ 0f,
+                    /* squishinessFraction= */ 1f,
+                )
         }
 
     @Test
@@ -256,37 +295,81 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
             runCurrent()
             clearInvocations(qsImpl!!)
 
-            underTest.setState(QSSceneAdapter.State.UnsquishingQQS(squishiness))
+            underTest.setState(QSSceneAdapter.State.UnsquishingQQS { squishiness })
             with(qsImpl!!) {
                 verify(this).setQsVisible(true)
-                verify(this)
+                verify(this, never())
                     .setQsExpansion(
-                        /* expansion= */ 0f,
-                        /* panelExpansionFraction= */ 1f,
-                        /* proposedTranslation= */ 0f,
-                        /* squishinessFraction= */ squishiness,
+                        /* expansion= */ anyFloat(),
+                        /* panelExpansionFraction= */ anyFloat(),
+                        /* proposedTranslation= */ anyFloat(),
+                        /* squishinessFraction= */ anyFloat(),
                     )
                 verify(this).setListening(true)
                 verify(this).setExpanded(false)
             }
+
+            underTest.applyLatestExpansionAndSquishiness()
+            verify(qsImpl!!)
+                .setQsExpansion(
+                    /* expansion= */ 0f,
+                    /* panelExpansionFraction= */ 1f,
+                    /* proposedTranslation= */ 0f,
+                    /* squishinessFraction= */ squishiness,
+                )
         }
 
     @Test
-    fun customizing_QS() =
+    fun customizing_QS_noAnimations() =
         testScope.runTest {
-            val customizing by collectLastValue(underTest.isCustomizing)
+            val customizerState by collectLastValue(underTest.customizerState)
 
             underTest.inflate(context)
             runCurrent()
             underTest.setState(QSSceneAdapter.State.QS)
 
-            assertThat(customizing).isFalse()
+            assertThat(customizerState).isEqualTo(CustomizerState.Hidden)
 
             underTest.setCustomizerShowing(true)
-            assertThat(customizing).isTrue()
+            assertThat(customizerState).isEqualTo(CustomizerState.Showing)
 
             underTest.setCustomizerShowing(false)
-            assertThat(customizing).isFalse()
+            assertThat(customizerState).isEqualTo(CustomizerState.Hidden)
+        }
+
+    // This matches the calls made by QSCustomizer
+    @Test
+    fun customizing_QS_animations_correctStates() =
+        testScope.runTest {
+            val customizerState by collectLastValue(underTest.customizerState)
+            val animatingInDuration = 100L
+            val animatingOutDuration = 50L
+
+            underTest.inflate(context)
+            runCurrent()
+            underTest.setState(QSSceneAdapter.State.QS)
+
+            assertThat(customizerState).isEqualTo(CustomizerState.Hidden)
+
+            // Start showing customizer with animation
+            underTest.setCustomizerAnimating(true)
+            underTest.setCustomizerShowing(true, animatingInDuration)
+            assertThat(customizerState)
+                .isEqualTo(CustomizerState.AnimatingIntoCustomizer(animatingInDuration))
+
+            // Finish animation
+            underTest.setCustomizerAnimating(false)
+            assertThat(customizerState).isEqualTo(CustomizerState.Showing)
+
+            // Start closing customizer with animation
+            underTest.setCustomizerAnimating(true)
+            underTest.setCustomizerShowing(false, animatingOutDuration)
+            assertThat(customizerState)
+                .isEqualTo(CustomizerState.AnimatingOutOfCustomizer(animatingOutDuration))
+
+            // Finish animation
+            underTest.setCustomizerAnimating(false)
+            assertThat(customizerState).isEqualTo(CustomizerState.Hidden)
         }
 
     @Test
@@ -495,5 +578,34 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
             shadeRepository.setShadeMode(ShadeMode.Split)
             runCurrent()
             verify(qsImpl!!).setInSplitShade(true)
+        }
+
+    @Test
+    fun requestCloseCustomizer() =
+        testScope.runTest {
+            val qsImpl by collectLastValue(underTest.qsImpl)
+
+            underTest.inflate(context)
+            runCurrent()
+
+            underTest.requestCloseCustomizer()
+            verify(qsImpl!!).closeCustomizer()
+        }
+
+    @Test
+    fun setBrightnessMirrorController() =
+        testScope.runTest {
+            val qsImpl by collectLastValue(underTest.qsImpl)
+
+            underTest.inflate(context)
+            runCurrent()
+
+            val mirrorController = mock<MirrorController>()
+            underTest.setBrightnessMirrorController(mirrorController)
+
+            verify(qsImpl!!).setBrightnessMirrorController(mirrorController)
+
+            underTest.setBrightnessMirrorController(null)
+            verify(qsImpl!!).setBrightnessMirrorController(null)
         }
 }

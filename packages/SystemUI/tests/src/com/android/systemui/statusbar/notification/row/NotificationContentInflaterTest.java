@@ -40,7 +40,6 @@ import android.os.AsyncTask;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.Looper;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.TypedValue;
@@ -49,6 +48,7 @@ import android.view.ViewGroup;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.filters.Suppress;
 
@@ -79,7 +79,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper(setAsMainLooper = true)
 @Suppress
 public class NotificationContentInflaterTest extends SysuiTestCase {
@@ -95,6 +95,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     @Mock private InflatedSmartReplyState mInflatedSmartReplyState;
     @Mock private InflatedSmartReplyViewHolder mInflatedSmartReplies;
     @Mock private NotifLayoutInflaterFactory.Provider mNotifLayoutInflaterFactoryProvider;
+    @Mock private HeadsUpStyleProvider mHeadsUpStyleProvider;
     @Mock private NotifLayoutInflaterFactory mNotifLayoutInflaterFactory;
 
     private final SmartReplyStateInflater mSmartReplyStateInflater =
@@ -138,7 +139,8 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 mock(Executor.class),
                 mSmartReplyStateInflater,
                 mNotifLayoutInflaterFactoryProvider,
-                mock(NotificationContentInflaterLogger.class));
+                mHeadsUpStyleProvider,
+                mock(NotificationRowContentBinderLogger.class));
     }
 
     @Test
@@ -263,7 +265,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                                 R.layout.custom_view_dark);
                     }
                 },
-                mock(NotificationContentInflaterLogger.class));
+                mock(NotificationRowContentBinderLogger.class));
         assertTrue(countDownLatch.await(500, TimeUnit.MILLISECONDS));
     }
 

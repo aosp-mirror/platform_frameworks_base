@@ -1,0 +1,78 @@
+// Copyright (C) 2024 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package {
+    default_applicable_licenses: ["frameworks_base_license"],
+    default_team: "trendy_team_android_kernel",
+}
+
+cc_library {
+    name: "libpunchtest",
+    stl: "none",
+    host_supported: true,
+    srcs: ["jni/android_test_jni_source.cpp"],
+    header_libs: ["jni_headers"],
+}
+
+android_test_helper_app {
+    name: "embedded_native_libs_test_app",
+    srcs: ["apk_embedded_native_libs/src/**/*.java"],
+    manifest: "apk_embedded_native_libs/embedded_native_libs_test_app.xml",
+    compile_multilib: "64",
+    jni_libs: [
+        "libpunchtest",
+    ],
+    static_libs: [
+        "androidx.test.rules",
+        "platform-test-annotations",
+    ],
+    use_embedded_native_libs: true,
+}
+
+android_test_helper_app {
+    name: "extract_native_libs_test_app",
+    srcs: ["apk_extract_native_libs/src/**/*.java"],
+    manifest: "apk_extract_native_libs/extract_native_libs_test_app.xml",
+    compile_multilib: "64",
+    jni_libs: [
+        "libpunchtest",
+    ],
+    static_libs: [
+        "androidx.test.rules",
+        "platform-test-annotations",
+    ],
+    use_embedded_native_libs: false,
+}
+
+java_test_host {
+    name: "FileSystemUtilsTests",
+    // Include all test java files
+    srcs: ["src/**/*.java"],
+    static_libs: [
+        "junit",
+        "platform-test-annotations",
+        "truth",
+    ],
+    libs: [
+        "tradefed",
+        "compatibility-host-util",
+        "compatibility-tradefed",
+    ],
+    data: [
+        ":embedded_native_libs_test_app",
+        ":extract_native_libs_test_app",
+    ],
+    test_suites: ["general-tests"],
+    test_config: "AndroidTest.xml",
+}

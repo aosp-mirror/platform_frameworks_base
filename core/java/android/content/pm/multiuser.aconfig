@@ -1,4 +1,5 @@
 package: "android.multiuser"
+container: "system"
 
 flag {
     name: "save_global_and_guest_restrictions_on_system_user_xml"
@@ -24,6 +25,7 @@ flag {
 
 flag {
     name: "support_communal_profile"
+    is_exported: true
     namespace: "multiuser"
     description: "Framework support for communal profile."
     bug: "285426179"
@@ -31,6 +33,7 @@ flag {
 
 flag {
     name: "support_communal_profile_nextgen"
+    is_exported: true
     namespace: "multiuser"
     description: "Further framework support for communal profile, beyond the basics, for later releases."
     bug: "285426179"
@@ -58,7 +61,15 @@ flag {
 }
 
 flag {
+    name: "new_multiuser_settings_ux"
+    namespace: "multiuser"
+    description: "Update multiuser settings UI"
+    bug: "298008926"
+}
+
+flag {
     name: "enable_biometrics_to_unlock_private_space"
+    is_exported: true
     namespace: "profile_experiences"
     description: "Add support to unlock the private space using biometrics"
     bug: "312184187"
@@ -102,10 +113,41 @@ flag {
 
 flag {
     name: "enable_system_user_only_for_services_and_providers"
+    is_exported: true
     namespace: "multiuser"
     description: "Enable systemUserOnly manifest attribute for services and providers."
     bug: "302354856"
     is_fixed_read_only: true
+}
+
+flag {
+    name: "fix_avatar_picker_read_back_order"
+    namespace: "multiuser"
+    description: "Talkback focus doesn't move to the 'If you change your Google Account picture…' after swiping next to move the focus from 'Choose a picture'"
+    bug: "330835921"
+    metadata {
+    	purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "fix_avatar_picker_selected_read_back"
+    namespace: "multiuser"
+    description: "Talkback doesn't announce 'selected' after double tapping the button in the picture list in 'Choose a picture' page."
+    bug: "330840549"
+    metadata {
+    	purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "fix_avatar_concurrent_file_write"
+    namespace: "multiuser"
+    description: "Fix potential unexpected behavior due to concurrent file writing"
+    bug: "339351031"
+    metadata {
+    	purpose: PURPOSE_BUGFIX
+  }
 }
 
 # This flag guards the private space feature and all its implementations excluding the APIs. APIs are guarded by android.os.Flags.allow_private_profile.
@@ -118,6 +160,7 @@ flag {
 
 flag {
     name: "enable_permission_to_access_hidden_profiles"
+    is_exported: true
     namespace: "profile_experiences"
     description: "Add permission to access API hidden users data via system APIs"
     bug: "321988638"
@@ -166,6 +209,13 @@ flag {
 }
 
 flag {
+    name: "schedule_stop_of_background_user"
+    namespace: "multiuser"
+    description: "Schedule background users to be stopped at a future point."
+    bug: "330351042"
+}
+
+flag {
     name: "disable_private_space_items_on_home"
     namespace: "profile_experiences"
     description: "Disables adding items belonging to Private Space on Home Screen manually as well as automatically"
@@ -199,4 +249,21 @@ flag {
     namespace: "profile_experiences"
     description: "Add entrypoint in Settings Reset options for deleting private space when lock is forgotten"
     bug: "329601751"
+}
+
+flag {
+    name: "allow_main_user_to_access_blocked_number_provider"
+    namespace: "multiuser"
+    description: "Allow MAIN user to access blocked number provider"
+    bug: "338579331"
+}
+
+flag {
+    name: "restrict_quiet_mode_credential_bug_fix_to_managed_profiles"
+    namespace: "profile_experiences"
+    description: "Use user states to check the state of quiet mode for managed profiles only"
+    bug: "332812630"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
 }

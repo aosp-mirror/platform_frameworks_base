@@ -21,6 +21,7 @@ import android.media.MediaDescription
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.service.notification.StatusBarNotification
+import com.android.internal.logging.InstanceId
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -34,7 +35,9 @@ import com.android.systemui.media.controls.domain.pipeline.MediaDeviceManager
 import com.android.systemui.media.controls.domain.pipeline.MediaSessionBasedFilter
 import com.android.systemui.media.controls.domain.pipeline.MediaTimeoutListener
 import com.android.systemui.media.controls.domain.resume.MediaResumeListener
+import com.android.systemui.media.controls.shared.model.MediaCommonModel
 import com.android.systemui.media.controls.util.MediaFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -42,7 +45,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
@@ -61,7 +63,7 @@ constructor(
     private val mediaDeviceManager: MediaDeviceManager,
     private val mediaDataCombineLatest: MediaDataCombineLatest,
     private val mediaDataFilter: MediaDataFilterImpl,
-    mediaFilterRepository: MediaFilterRepository,
+    private val mediaFilterRepository: MediaFilterRepository,
     private val mediaFlags: MediaFlags,
 ) : MediaDataManager, CoreStartable {
 
@@ -70,14 +72,17 @@ constructor(
         combine(
                 mediaFilterRepository.selectedUserEntries,
                 mediaFilterRepository.smartspaceMediaData,
-                mediaFilterRepository.reactivatedKey
+                mediaFilterRepository.reactivatedId
             ) { entries, smartspaceMediaData, reactivatedKey ->
                 entries.any { it.value.active } ||
                     (smartspaceMediaData.isActive &&
                         (smartspaceMediaData.isValid() || reactivatedKey != null))
             }
-            .distinctUntilChanged()
-            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), false)
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
 
     /** Are there any media entries we should display, including the recommendations? */
     val hasAnyMediaOrRecommendation: StateFlow<Boolean> =
@@ -92,25 +97,37 @@ constructor(
                         smartspaceMediaData.isActive && smartspaceMediaData.isValid()
                     })
             }
-            .distinctUntilChanged()
-            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), false)
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
 
     /** Are there any media notifications active, excluding the recommendations? */
     val hasActiveMedia: StateFlow<Boolean> =
         mediaFilterRepository.selectedUserEntries
             .mapLatest { entries -> entries.any { it.value.active } }
-            .distinctUntilChanged()
-            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), false)
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
 
     /** Are there any media notifications, excluding the recommendations? */
     val hasAnyMedia: StateFlow<Boolean> =
         mediaFilterRepository.selectedUserEntries
             .mapLatest { entries -> entries.isNotEmpty() }
-            .distinctUntilChanged()
-            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), false)
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
+
+    /** The current list for user media instances */
+    val currentMedia: StateFlow<List<MediaCommonModel>> = mediaFilterRepository.currentMedia
 
     override fun start() {
-        if (!mediaFlags.isMediaControlsRefactorEnabled()) {
+        if (!mediaFlags.isSceneContainerEnabled()) {
             return
         }
 
@@ -130,7 +147,7 @@ constructor(
 
         // Set up links back into the pipeline for listeners that need to send events upstream.
         mediaTimeoutListener.timeoutCallback = { key: String, timedOut: Boolean ->
-            setInactive(key, timedOut)
+            mediaDataProcessor.setInactive(key, timedOut)
         }
         mediaTimeoutListener.stateCallback = { key: String, state: PlaybackState ->
             mediaDataProcessor.updateState(key, state)
@@ -139,7 +156,7 @@ constructor(
             mediaDataProcessor.onSessionDestroyed(key)
         }
         mediaResumeListener.setManager(this)
-        mediaDataFilter.mediaDataManager = this
+        mediaDataFilter.mediaDataProcessor = mediaDataProcessor
     }
 
     override fun addListener(listener: MediaDataManager.Listener) {
@@ -150,9 +167,7 @@ constructor(
         mediaDataFilter.removeListener(listener)
     }
 
-    override fun setInactive(key: String, timedOut: Boolean, forceUpdate: Boolean) {
-        mediaDataProcessor.setInactive(key, timedOut, forceUpdate)
-    }
+    override fun setInactive(key: String, timedOut: Boolean, forceUpdate: Boolean) = unsupported
 
     override fun onNotificationAdded(key: String, sbn: StatusBarNotification) {
         mediaDataProcessor.onNotificationAdded(key, sbn)
@@ -190,17 +205,19 @@ constructor(
         )
     }
 
-    override fun dismissMediaData(key: String, delay: Long): Boolean {
-        return mediaDataProcessor.dismissMediaData(key, delay)
+    override fun dismissMediaData(key: String, delay: Long, userInitiated: Boolean): Boolean {
+        return mediaDataProcessor.dismissMediaData(key, delay, userInitiated)
+    }
+
+    fun removeMediaControl(instanceId: InstanceId, delay: Long) {
+        mediaDataProcessor.dismissMediaData(instanceId, delay, userInitiated = false)
     }
 
     override fun dismissSmartspaceRecommendation(key: String, delay: Long) {
         return mediaDataProcessor.dismissSmartspaceRecommendation(key, delay)
     }
 
-    override fun setRecommendationInactive(key: String) {
-        mediaDataProcessor.setRecommendationInactive(key)
-    }
+    override fun setRecommendationInactive(key: String) = unsupported
 
     override fun onNotificationRemoved(key: String) {
         mediaDataProcessor.onNotificationRemoved(key)
@@ -224,11 +241,21 @@ constructor(
 
     override fun isRecommendationActive() = mediaDataRepository.smartspaceMediaData.value.isActive
 
+    fun reorderMedia() {
+        mediaFilterRepository.setOrderedMedia()
+    }
+
     /** Add a listener for internal events. */
     private fun addInternalListener(listener: MediaDataManager.Listener) =
         mediaDataProcessor.addInternalListener(listener)
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         mediaDeviceManager.dump(pw)
+    }
+
+    companion object {
+        val unsupported: Nothing
+            get() =
+                error("Code path not supported when ${SceneContainerFlag.DESCRIPTION} is enabled")
     }
 }

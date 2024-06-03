@@ -49,9 +49,13 @@ constructor(
     sharedNotificationContainerInteractor: SharedNotificationContainerInteractor,
     shadeRepository: ShadeRepository,
 ) : BaseShadeInteractor {
-    override val shadeExpansion: Flow<Float> = sceneBasedExpansion(sceneInteractor, Scenes.Shade)
+    override val shadeMode: StateFlow<ShadeMode> = shadeRepository.shadeMode
 
-    private val sceneBasedQsExpansion = sceneBasedExpansion(sceneInteractor, Scenes.QuickSettings)
+    override val shadeExpansion: StateFlow<Float> =
+        sceneBasedExpansion(sceneInteractor, notificationsScene)
+            .stateIn(scope, SharingStarted.Eagerly, 0f)
+
+    private val sceneBasedQsExpansion = sceneBasedExpansion(sceneInteractor, quickSettingsScene)
 
     override val qsExpansion: StateFlow<Float> =
         combine(
@@ -79,7 +83,7 @@ constructor(
                 when (state) {
                     is ObservableTransitionState.Idle -> false
                     is ObservableTransitionState.Transition ->
-                        state.toScene == Scenes.QuickSettings && state.fromScene != Scenes.Shade
+                        state.toScene == quickSettingsScene && state.fromScene != notificationsScene
                 }
             }
             .distinctUntilChanged()
@@ -88,7 +92,7 @@ constructor(
         sceneInteractor.transitionState
             .map { state ->
                 when (state) {
-                    is ObservableTransitionState.Idle -> state.scene == Scenes.QuickSettings
+                    is ObservableTransitionState.Idle -> state.currentScene == quickSettingsScene
                     is ObservableTransitionState.Transition -> false
                 }
             }
@@ -104,12 +108,10 @@ constructor(
             .stateIn(scope, SharingStarted.Eagerly, false)
 
     override val isUserInteractingWithShade: Flow<Boolean> =
-        sceneBasedInteracting(sceneInteractor, Scenes.Shade)
+        sceneBasedInteracting(sceneInteractor, notificationsScene)
 
     override val isUserInteractingWithQs: Flow<Boolean> =
-        sceneBasedInteracting(sceneInteractor, Scenes.QuickSettings)
-
-    override val shadeMode: StateFlow<ShadeMode> = shadeRepository.shadeMode
+        sceneBasedInteracting(sceneInteractor, quickSettingsScene)
 
     /**
      * Returns a flow that uses scene transition progress to and from a scene that is pulled down
@@ -120,7 +122,7 @@ constructor(
             .flatMapLatest { state ->
                 when (state) {
                     is ObservableTransitionState.Idle ->
-                        if (state.scene == sceneKey) {
+                        if (state.currentScene == sceneKey) {
                             flowOf(1f)
                         } else {
                             flowOf(0f)
@@ -152,4 +154,20 @@ constructor(
                 }
             }
             .distinctUntilChanged()
+
+    private val notificationsScene: SceneKey
+        get() =
+            if (shadeMode.value is ShadeMode.Dual) {
+                Scenes.NotificationsShade
+            } else {
+                Scenes.Shade
+            }
+
+    private val quickSettingsScene: SceneKey
+        get() =
+            if (shadeMode.value is ShadeMode.Dual) {
+                Scenes.QuickSettingsShade
+            } else {
+                Scenes.QuickSettings
+            }
 }

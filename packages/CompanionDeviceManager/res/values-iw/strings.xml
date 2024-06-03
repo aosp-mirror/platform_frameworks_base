@@ -26,14 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"מכשיר"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"האפליקציה הזו תוכל לגשת להרשאות האלה ב<xliff:g id="DEVICE_NAME">%1$s</xliff:g> שלך"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"‏מתן אישור לאפליקציה &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; לגשת למידע הזה מהטלפון שלך"</string>
-    <!-- no translation found for title_app_streaming_with_mirroring (3364582597581570658) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (295548145144086753) -->
-    <skip />
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"‏לאשר לאפליקציית &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; לשדר את האפליקציות של הטלפון?"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"‏ל-%1$s תהיה גישה לכל מה שרואים או מפעילים בטלפון, כולל אודיו, תמונות, סיסמאות והודעות.&lt;br/&gt;&lt;br/&gt;‎‏ל-%1$s תהיה אפשרות לשדר אפליקציות עד שהגישה להרשאה הזו תוסר."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"שירותים למספר מכשירים"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> מבקשת הרשאה עבור המכשיר <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> כדי לשדר אפליקציות בין המכשירים שלך"</string>
-    <!-- no translation found for helper_summary_app_streaming_with_mirroring (6138581029144467467) -->
-    <skip />
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"האפליקציה \'<xliff:g id="APP_NAME">%1$s</xliff:g>\' מבקשת הרשאה למכשיר <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> כדי להציג ולשדר אפליקציות בין המכשירים שלך"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"‏מתן אישור לאפליקציה &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; לגשת למידע הזה מהטלפון שלך"</string>
@@ -41,10 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play Services"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> מבקשת הרשאה עבור המכשיר <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> כדי לגשת לתמונות, למדיה ולהתראות בטלפון שלך"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"‏לתת הרשאה למכשיר &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; לבצע את הפעולה הזו?"</string>
-    <!-- no translation found for title_nearby_device_streaming_with_mirroring (242855799919611657) -->
-    <skip />
-    <!-- no translation found for summary_nearby_device_streaming (4039565463149145573) -->
-    <skip />
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"‏לאשר לאפליקציית &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; לשדר את האפליקציות ואת תכונות המערכת של הטלפון?"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"‏ל-%1$s תהיה גישה לכל מה שרואים או מפעילים בטלפון, כולל אודיו, תמונות, פרטי תשלום, סיסמאות והודעות.&lt;br/&gt;&lt;br/&gt;‎‏ל-%1$s תהיה אפשרות לשדר אפליקציות ותכונות מערכת עד שהגישה להרשאה הזו תוסר."</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> מבקשת הרשאה עבור <xliff:g id="DEVICE_NAME">%2$s</xliff:g> כדי להעביר אפליקציות ותכונות מערכת אחרות בסטרימינג למכשירים בקרבת מקום"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"מכשיר"</string>
     <string name="summary_generic" msgid="1761976003668044801">"האפליקציה הזו תוכל לסנכרן מידע, כמו השם של מישהו שמתקשר, מהטלפון שלך למכשיר שבחרת"</string>
@@ -81,7 +76,7 @@
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"שידור אפליקציות מהטלפון"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"העברה של אפליקציות ותכונות מערכת אחרות בסטרימינג מהטלפון"</string>
-    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"‏גישה לרשימה של מכשירים זמינים ובחירה איזה מהם ישמש כדי לשדר או להעביר (cast) אודיו או וידאו מאפליקציות אחרות"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"‏גישה לרשימה של מכשירים זמינים ובחירה איזה מהם ישמש כדי לשדר אודיו או וידאו או להפעיל Cast שלהם מאפליקציות אחרות"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"טלפון"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"טאבלט"</string>
 </resources>

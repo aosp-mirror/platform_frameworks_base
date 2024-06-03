@@ -94,24 +94,40 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Conectat (fără telefon), baterie <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Conectat (fără conținut media), baterie <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Conectat (fără telefon sau conținut media), baterie <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Activ, baterie <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Activ, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> baterie, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> baterie"</string>
+    <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"Activ. Nivelul bateriei <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"Activ. Nivelul bateriei din stânga: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, dreapta: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
+    <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"Activ. Nivelul bateriei din stânga: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"Activ. Nivelul bateriei din dreapta: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Nivelul bateriei: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"Baterie: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> baterie, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> baterie"</string>
-    <string name="bluetooth_battery_level_untethered_left" msgid="2952823007648782646">"Stânga: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered_right" msgid="6525710737740083276">"Dreapta: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"Nivelul bateriei din stânga: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, dreapta: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
+    <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"Nivelul bateriei din stânga: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"Nivelul bateriei din dreapta:<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"Stânga: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_right" msgid="8610019317279155595">"Dreapta: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Activ"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Salvat"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Activ, numai stânga"</string>
-    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Activ, numai dreapta"</string>
-    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Activ, stânga și dreapta"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Activ (numai stânga)"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Activ (numai dreapta)"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Activ (stânga și dreapta)"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Activ (numai pentru conținut media). Nivelul bateriei <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Activ (numai pentru conținut media): nivelul bateriei din stânga: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, nivelul bateriei din dreapta: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Conectat (acceptă permiterea accesului la audio). Nivelul bateriei: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"Conectat (acceptă permiterea accesului la audio), nivelul bateriei din stânga: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, nivelul bateriei din dreapta: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="7707464334346454950">"Conectat (acceptă permiterea accesului la audio). Nivelul bateriei din stânga: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"Conectat (acceptă permiterea accesului la audio). Nivelul bateriei din dreapta: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"Conectat (acceptă permiterea accesului la audio)"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Activ (numai pentru conținut media)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Acceptă permiterea accesului la audio"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Activ (numai pentru conținut media), numai stânga"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Activ (numai pentru conținut media), numai dreapta"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Activ (numai pentru conținut media), stânga și dreapta"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Conținut media audio"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Apeluri telefonice"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transfer de fișiere"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Dispozitiv de intrare"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Acces la internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Permite accesul la agendă și la istoric"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Oferă acces la agendă și istoric apeluri"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Informațiile se vor folosi pentru notificări de apeluri etc."</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Distribuirea conexiunii la internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Mesaje text"</string>
@@ -180,7 +196,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"Unele valori prestabilite sunt configurate"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Nu este configurată nicio valoare prestabilită"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Setări redare vocală a textului"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Rezultatul redării vocale a textului"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Setări pentru redarea vocală a textului"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Ritmul vorbirii"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Viteza cu care este vorbit textul"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Înălțime"</string>
@@ -375,7 +391,7 @@
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Folosește mereu GPU pentru compunerea ecranului"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Simulează spațiu culoare"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Monitorizări OpenGL"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Dezactivați rutarea audio USB"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Dezactivează rutarea audio USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Dezact. rutarea automată către perif. audio USB"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Afișează limite aspect"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Afișează limitele clipului, marginile etc."</string>
@@ -437,9 +453,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Presupune că aplicațiile acceptă formatele moderne"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Vezi notificările privind transcodarea"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Dezactivează memoria cache pentru transcodare"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Setări Widevine"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Forțează alternativa L3"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Selectează pentru a forța alternativa L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Servicii în curs de funcționare"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Vezi și controlează serviciile care funcționează în prezent"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementare WebView"</string>
@@ -479,6 +492,10 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> până la finalizare"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – Încărcare optimizată"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – Se încarcă"</string>
+    <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - Timp rămas <xliff:g id="TIME">%3$s</xliff:g>"</string>
+    <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - Complet încărcat în <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"Complet încărcat în <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"Încărcare completă la <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Necunoscut"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Se încarcă"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Se încarcă rapid"</string>
@@ -490,6 +507,8 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"Încărcată"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Complet încărcată"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Încărcare întreruptă"</string>
+    <string name="battery_info_status_charging_v2" msgid="6118522107222245505">"Încărcare"</string>
+    <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"Încărcare rapidă"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlată de administrator"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Controlată de setarea restricționată"</string>
     <string name="disabled" msgid="8017887509554714950">"Dezactivată"</string>
@@ -534,7 +553,7 @@
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Gata"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarme și mementouri"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permite setarea pentru alarme și mementouri"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permite setarea de alarme și mementouri"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarme și mementouri"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permite acestei aplicații să seteze alarme și să planifice acțiuni care trebuie realizate în timp scurt. Astfel, aplicația poate să ruleze în fundal, ceea ce ar putea crește consumul de baterie.\n\nDacă permisiunea este dezactivată, alarmele și evenimentele dependente de timp planificate de aplicație nu vor funcționa."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programare, alarmă, memento, ceas"</string>
@@ -619,8 +638,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Nu s-a creat noul utilizator"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Nu s-a putut crea un invitat nou"</string>
     <string name="user_nickname" msgid="262624187455825083">"Pseudonim"</string>
-    <!-- no translation found for edit_user_info_message (6677556031419002895) -->
-    <skip />
+    <string name="edit_user_info_message" msgid="6677556031419002895">"Toată lumea care folosește dispozitivul va vedea numele și fotografia pe care le-ai ales."</string>
     <string name="user_add_user" msgid="7876449291500212468">"Adaugă un utilizator"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Adaugă un invitat"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Șterge invitatul"</string>
@@ -628,7 +646,7 @@
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Resetezi invitatul?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Excluzi invitatul?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Resetează"</string>
-    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Elimină"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Exclude"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Se resetează invitatul…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Resetezi sesiunea pentru invitați?"</string>
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Astfel, va începe o nouă sesiune pentru invitați și se vor șterge toate aplicațiile și datele din sesiunea actuală"</string>
@@ -647,8 +665,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Toate activitățile vor fi șterse la ieșire"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Poți să salvezi sau să ștergi activitatea la ieșire"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Resetează pentru a șterge acum activitatea din sesiune sau salvează ori șterge activitatea la ieșire"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Fă o fotografie"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"Alege o imagine"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Selectează fotografia"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Prea multe încercări incorecte. Datele de pe acest dispozitiv vor fi șterse."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Prea multe încercări incorecte. Acest utilizator va fi șters."</string>
@@ -679,6 +695,7 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"Semnal pentru telefon: o bară."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"Semnal pentru telefon: două bare."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"Semnal pentru telefon: trei bare."</string>
+    <string name="accessibility_phone_four_bars" msgid="4477202400261338403">"Patru bare pe telefon."</string>
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"Semnal pentru telefon: complet."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"Nu există semnal pentru date."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Semnal pentru date: o bară."</string>
@@ -688,12 +705,10 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet deconectat."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Apelarea nu este disponibilă."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Alege o fotografie de profil"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"Pictograma prestabilită a utilizatorului"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Tastatură fizică"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Alege aspectul tastaturii"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Prestabilit"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Activează ecranul"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"Comandă pentru activarea ecranului"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permite activarea ecranului"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permite unei aplicații să activeze ecranul. Dacă acorzi permisiunea, aplicația poate să activeze oricând ecranul, fără intenția ta explicită."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Oprești difuzarea <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
@@ -708,4 +723,5 @@
     <string name="neuter" msgid="2075249330106127310">"Neutru"</string>
     <string name="feminine" msgid="1529155595310784757">"Feminin"</string>
     <string name="masculine" msgid="4653978041013996303">"Masculin"</string>
+    <string name="system_update_settings_list_item_title" msgid="6618098383615432484">"Actualizări de sistem"</string>
 </resources>

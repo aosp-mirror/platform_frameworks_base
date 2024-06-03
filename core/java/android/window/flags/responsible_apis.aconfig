@@ -1,4 +1,5 @@
 package: "com.android.window.flags"
+container: "system"
 
 flag {
     name: "bal_require_opt_in_by_pending_intent_creator"
@@ -47,4 +48,11 @@ flag {
     namespace: "responsible_apis"
     description: "Prevent BAL based on it is bound by foreground Uid but the app switch is stopped."
     bug: "283801068"
+}
+
+flag {
+    name: "bal_improved_metrics"
+    namespace: "responsible_apis"
+    description: "Improved metrics."
+    bug: "339245692"
 }

@@ -42,7 +42,6 @@ import com.android.systemui.model.sceneContainerPlugin
 import com.android.systemui.navigationbar.NavigationBarController
 import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.recents.OverviewProxyService.ACTION_QUICKSTEP
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.settings.FakeDisplayTracker
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.ShadeViewController
@@ -73,7 +72,7 @@ import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.atLeast
 import org.mockito.Mockito.clearInvocations
-import org.mockito.Mockito.intThat
+import org.mockito.Mockito.longThat
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
@@ -163,7 +162,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
 
         verify(overviewProxy)
             .onSystemUiStateChanged(
-                intThat { it and SYSUI_STATE_WAKEFULNESS_MASK == WAKEFULNESS_AWAKE }
+                longThat { it and SYSUI_STATE_WAKEFULNESS_MASK == WAKEFULNESS_AWAKE }
             )
     }
 
@@ -173,7 +172,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
 
         verify(overviewProxy)
             .onSystemUiStateChanged(
-                intThat { it and SYSUI_STATE_WAKEFULNESS_MASK == WAKEFULNESS_WAKING }
+                longThat { it and SYSUI_STATE_WAKEFULNESS_MASK == WAKEFULNESS_WAKING }
             )
     }
 
@@ -183,7 +182,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
 
         verify(overviewProxy)
             .onSystemUiStateChanged(
-                intThat { it and SYSUI_STATE_WAKEFULNESS_MASK == WAKEFULNESS_ASLEEP }
+                longThat { it and SYSUI_STATE_WAKEFULNESS_MASK == WAKEFULNESS_ASLEEP }
             )
     }
 
@@ -195,7 +194,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
 
         verify(overviewProxy)
             .onSystemUiStateChanged(
-                intThat { it and SYSUI_STATE_WAKEFULNESS_MASK == WAKEFULNESS_GOING_TO_SLEEP }
+                longThat { it and SYSUI_STATE_WAKEFULNESS_MASK == WAKEFULNESS_GOING_TO_SLEEP }
             )
     }
 
@@ -242,6 +241,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
             statusBarWinController,
             sysUiState,
             mock(),
+            mock(),
             userTracker,
             wakefulnessLifecycle,
             uiEventLogger,
@@ -249,7 +249,6 @@ class OverviewProxyServiceTest : SysuiTestCase() {
             sysuiUnlockAnimationController,
             inWindowLauncherUnlockAnimationManager,
             assistUtils,
-            FakeSceneContainerFlags(),
             dumpManager,
             unfoldTransitionProgressForwarder,
             broadcastDispatcher

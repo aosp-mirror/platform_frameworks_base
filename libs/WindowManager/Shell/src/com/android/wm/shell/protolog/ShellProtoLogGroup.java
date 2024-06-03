@@ -52,7 +52,7 @@ public enum ShellProtoLogGroup implements IProtoLogGroup {
     WM_SHELL_SYSUI_EVENTS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
             Consts.TAG_WM_SHELL),
     WM_SHELL_DESKTOP_MODE(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, true,
-            Consts.TAG_WM_SHELL),
+            Consts.TAG_WM_DESKTOP_MODE),
     WM_SHELL_FLOATING_APPS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
             Consts.TAG_WM_SHELL),
     WM_SHELL_FOLDABLE(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
@@ -120,6 +120,7 @@ public enum ShellProtoLogGroup implements IProtoLogGroup {
         private static final String TAG_WM_SHELL = "WindowManagerShell";
         private static final String TAG_WM_STARTING_WINDOW = "ShellStartingWindow";
         private static final String TAG_WM_SPLIT_SCREEN = "ShellSplitScreen";
+        private static final String TAG_WM_DESKTOP_MODE = "ShellDesktopMode";
 
         private static final boolean ENABLE_DEBUG = true;
         private static final boolean ENABLE_LOG_TO_PROTO_DEBUG = true;

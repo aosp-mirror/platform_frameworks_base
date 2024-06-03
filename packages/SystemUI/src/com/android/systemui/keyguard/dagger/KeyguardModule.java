@@ -36,9 +36,11 @@ import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
 import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.animation.ActivityTransitionAnimator;
+import com.android.systemui.bouncer.dagger.BouncerLoggerModule;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingModule;
+import com.android.systemui.communal.ui.viewmodel.CommunalTransitionViewModel;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
@@ -89,10 +91,10 @@ import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 
-import java.util.concurrent.Executor;
-
 import kotlinx.coroutines.CoroutineDispatcher;
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
+
+import java.util.concurrent.Executor;
 
 /**
  * Dagger Module providing keyguard.
@@ -112,6 +114,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi;
             KeyguardDisplayModule.class,
             StartKeyguardTransitionModule.class,
             ResourceTrimmerModule.class,
+            BouncerLoggerModule.class,
         })
 public interface KeyguardModule {
     /**
@@ -161,6 +164,7 @@ public interface KeyguardModule {
             SystemClock systemClock,
             @Main CoroutineDispatcher mainDispatcher,
             Lazy<DreamViewModel> dreamViewModel,
+            Lazy<CommunalTransitionViewModel> communalTransitionViewModel,
             SystemPropertiesHelper systemPropertiesHelper,
             Lazy<WindowManagerLockscreenVisibilityManager> wmLockscreenVisibilityManager,
             SelectedUserInteractor selectedUserInteractor,
@@ -208,6 +212,7 @@ public interface KeyguardModule {
                 systemClock,
                 mainDispatcher,
                 dreamViewModel,
+                communalTransitionViewModel,
                 systemPropertiesHelper,
                 wmLockscreenVisibilityManager,
                 selectedUserInteractor,

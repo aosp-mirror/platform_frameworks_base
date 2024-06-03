@@ -333,14 +333,12 @@ public final class DeviceState {
         private final ArraySet<@PhysicalDeviceStateProperties Integer> mPhysicalProperties;
 
         private Configuration(int identifier, @NonNull String name,
-                @NonNull Set<@SystemDeviceStateProperties Integer> systemProperties,
-                @NonNull Set<@PhysicalDeviceStateProperties Integer> physicalProperties) {
+                @NonNull ArraySet<@SystemDeviceStateProperties Integer> systemProperties,
+                @NonNull ArraySet<@PhysicalDeviceStateProperties Integer> physicalProperties) {
             mIdentifier = identifier;
             mName = name;
-            mSystemProperties = new ArraySet<@SystemDeviceStateProperties Integer>(
-                    systemProperties);
-            mPhysicalProperties = new ArraySet<@PhysicalDeviceStateProperties Integer>(
-                    physicalProperties);
+            mSystemProperties = systemProperties;
+            mPhysicalProperties = physicalProperties;
         }
 
         /** Returns the unique identifier for the device state. */
@@ -401,16 +399,8 @@ public final class DeviceState {
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeInt(mIdentifier);
             dest.writeString8(mName);
-
-            dest.writeInt(mSystemProperties.size());
-            for (int i = 0; i < mSystemProperties.size(); i++) {
-                dest.writeInt(mSystemProperties.valueAt(i));
-            }
-
-            dest.writeInt(mPhysicalProperties.size());
-            for (int i = 0; i < mPhysicalProperties.size(); i++) {
-                dest.writeInt(mPhysicalProperties.valueAt(i));
-            }
+            dest.writeArraySet(mSystemProperties);
+            dest.writeArraySet(mPhysicalProperties);
         }
 
         @NonNull
@@ -419,16 +409,11 @@ public final class DeviceState {
             public DeviceState.Configuration createFromParcel(Parcel source) {
                 int identifier = source.readInt();
                 String name = source.readString8();
-                ArraySet<@DeviceStateProperties Integer> systemProperties = new ArraySet<>();
-                int systemPropertySize = source.readInt();
-                for (int i = 0; i < systemPropertySize; i++) {
-                    systemProperties.add(source.readInt());
-                }
-                ArraySet<@DeviceStateProperties Integer> physicalProperties = new ArraySet<>();
-                int physicalPropertySize = source.readInt();
-                for (int j = 0; j < physicalPropertySize; j++) {
-                    physicalProperties.add(source.readInt());
-                }
+                ArraySet<@SystemDeviceStateProperties Integer> systemProperties =
+                        (ArraySet<Integer>) source.readArraySet(null /* classLoader */);
+                ArraySet<@PhysicalDeviceStateProperties Integer> physicalProperties =
+                        (ArraySet<Integer>) source.readArraySet(null /* classLoader */);
+
                 return new DeviceState.Configuration(identifier, name, systemProperties,
                         physicalProperties);
             }
@@ -479,8 +464,8 @@ public final class DeviceState {
              */
             @NonNull
             public DeviceState.Configuration build() {
-                return new DeviceState.Configuration(mIdentifier, mName, mSystemProperties,
-                        mPhysicalProperties);
+                return new DeviceState.Configuration(mIdentifier, mName,
+                        new ArraySet<>(mSystemProperties), new ArraySet<>(mPhysicalProperties));
             }
         }
     }

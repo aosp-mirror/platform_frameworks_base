@@ -124,6 +124,43 @@ public abstract class RemoteViewsService extends Service {
          * @return True if the same id always refers to the same object.
          */
         public boolean hasStableIds();
+
+        /**
+         * @hide
+         */
+        default RemoteViews.RemoteCollectionItems getRemoteCollectionItems(int capSize) {
+            RemoteViews.RemoteCollectionItems items = new RemoteViews.RemoteCollectionItems
+                    .Builder().build();
+            Parcel capSizeTestParcel = Parcel.obtain();
+            // restore allowSquashing to reduce the noise in error messages
+            boolean prevAllowSquashing = capSizeTestParcel.allowSquashing();
+
+            try {
+                RemoteViews.RemoteCollectionItems.Builder itemsBuilder =
+                        new RemoteViews.RemoteCollectionItems.Builder();
+                onDataSetChanged();
+
+                itemsBuilder.setHasStableIds(hasStableIds());
+                final int numOfEntries = getCount();
+
+                for (int i = 0; i < numOfEntries; i++) {
+                    final long currentItemId = getItemId(i);
+                    final RemoteViews currentView = getViewAt(i);
+                    currentView.writeToParcel(capSizeTestParcel, 0);
+                    if (capSizeTestParcel.dataSize() > capSize) {
+                        break;
+                    }
+                    itemsBuilder.addItem(currentItemId, currentView);
+                }
+
+                items = itemsBuilder.build();
+            } finally {
+                capSizeTestParcel.restoreAllowSquashing(prevAllowSquashing);
+                // Recycle the parcel
+                capSizeTestParcel.recycle();
+            }
+            return items;
+        }
     }
 
     /**
@@ -232,33 +269,11 @@ public abstract class RemoteViewsService extends Service {
         public RemoteViews.RemoteCollectionItems getRemoteCollectionItems(int capSize) {
             RemoteViews.RemoteCollectionItems items = new RemoteViews.RemoteCollectionItems
                     .Builder().build();
-            Parcel capSizeTestParcel = Parcel.obtain();
-
             try {
-                RemoteViews.RemoteCollectionItems.Builder itemsBuilder =
-                        new RemoteViews.RemoteCollectionItems.Builder();
-                mFactory.onDataSetChanged();
-
-                itemsBuilder.setHasStableIds(mFactory.hasStableIds());
-                final int numOfEntries = mFactory.getCount();
-
-                for (int i = 0; i < numOfEntries; i++) {
-                    final long currentItemId = mFactory.getItemId(i);
-                    final RemoteViews currentView = mFactory.getViewAt(i);
-                    currentView.writeToParcel(capSizeTestParcel, 0);
-                    if (capSizeTestParcel.dataSize() > capSize) {
-                        break;
-                    }
-                    itemsBuilder.addItem(currentItemId, currentView);
-                }
-
-                items = itemsBuilder.build();
+                items = mFactory.getRemoteCollectionItems(capSize);
             } catch (Exception ex) {
                 Thread t = Thread.currentThread();
                 Thread.getDefaultUncaughtExceptionHandler().uncaughtException(t, ex);
-            } finally {
-                // Recycle the parcel
-                capSizeTestParcel.recycle();
             }
             return items;
         }

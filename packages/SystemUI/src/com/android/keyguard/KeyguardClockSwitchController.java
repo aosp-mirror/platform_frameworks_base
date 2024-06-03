@@ -68,14 +68,14 @@ import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.settings.SecureSettings;
 
+import kotlinx.coroutines.DisposableHandle;
+
 import java.io.PrintWriter;
 import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
-
-import kotlinx.coroutines.DisposableHandle;
 
 /**
  * Injectable controller for {@link KeyguardClockSwitch}.
@@ -250,7 +250,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             mLargeClockFrame = mView.findViewById(R.id.lockscreen_clock_view_large);
         }
 
-
         if (!mOnlyClock) {
             mDumpManager.unregisterDumpable(getClass().getSimpleName()); // unregister previous
             mDumpManager.registerDumpable(getClass().getSimpleName(), this);
@@ -282,7 +281,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     protected void onViewAttached() {
         mClockRegistry.registerClockChangeListener(mClockChangedListener);
         setClock(mClockRegistry.createCurrentClock());
-        mClockEventController.registerListeners(mView);
+        if (!MigrateClocksToBlueprint.isEnabled()) {
+            mClockEventController.registerListeners(mView);
+        }
         mKeyguardSmallClockTopMargin =
                 mView.getResources().getDimensionPixelSize(R.dimen.keyguard_clock_top_margin);
         mKeyguardLargeClockTopMargin =
@@ -365,7 +366,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     @Override
     protected void onViewDetached() {
         mClockRegistry.unregisterClockChangeListener(mClockChangedListener);
-        mClockEventController.unregisterListeners();
+        if (!MigrateClocksToBlueprint.isEnabled()) {
+            mClockEventController.unregisterListeners();
+        }
         setClock(null);
 
         mBgExecutor.execute(() -> {
@@ -590,7 +593,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     boolean isClockTopAligned() {
         if (MigrateClocksToBlueprint.isEnabled()) {
-            return mKeyguardClockInteractor.getClockSize().getValue() == LARGE;
+            return mKeyguardClockInteractor.getClockSize().getValue().getLegacyValue() == LARGE;
         }
         return mLargeClockFrame.getVisibility() != View.VISIBLE;
     }

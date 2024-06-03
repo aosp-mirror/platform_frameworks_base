@@ -17,9 +17,9 @@
 package com.android.systemui.biometrics.domain.interactor
 
 import android.graphics.Rect
-import android.test.suitebuilder.annotation.SmallTest
 import android.view.MotionEvent
 import android.view.Surface
+import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams

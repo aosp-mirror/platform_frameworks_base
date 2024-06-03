@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.DismissAction
@@ -101,7 +102,8 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     private val _isKeyguardGoingAway = MutableStateFlow(false)
     override val isKeyguardGoingAway: Flow<Boolean> = _isKeyguardGoingAway
 
-    private val _biometricUnlockState = MutableStateFlow(BiometricUnlockModel.NONE)
+    private val _biometricUnlockState =
+        MutableStateFlow(BiometricUnlockModel(BiometricUnlockMode.NONE, null))
     override val biometricUnlockState: Flow<BiometricUnlockModel> = _biometricUnlockState
 
     private val _fingerprintSensorLocation = MutableStateFlow<Point?>(null)
@@ -109,9 +111,6 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     private val _faceSensorLocation = MutableStateFlow<Point?>(null)
     override val faceSensorLocation: Flow<Point?> = _faceSensorLocation
-
-    private val _biometricUnlockSource = MutableStateFlow<BiometricUnlockSource?>(null)
-    override val biometricUnlockSource: Flow<BiometricUnlockSource?> = _biometricUnlockSource
 
     private val _isQuickSettingsVisible = MutableStateFlow(false)
     override val isQuickSettingsVisible: Flow<Boolean> = _isQuickSettingsVisible.asStateFlow()
@@ -125,6 +124,9 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     private val _isEncryptedOrLockdown = MutableStateFlow(true)
     override val isEncryptedOrLockdown: Flow<Boolean> = _isEncryptedOrLockdown
+
+    private val _isKeyguardEnabled = MutableStateFlow(true)
+    override val isKeyguardEnabled: StateFlow<Boolean> = _isKeyguardEnabled.asStateFlow()
 
     override val topClippingBounds = MutableStateFlow<Int?>(null)
 
@@ -185,6 +187,10 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
         _clockShouldBeCentered.value = shouldBeCentered
     }
 
+    override fun setKeyguardEnabled(enabled: Boolean) {
+        _isKeyguardEnabled.value = enabled
+    }
+
     fun dozeTimeTick(millis: Long) {
         _dozeTimeTick.value = millis
     }
@@ -213,12 +219,19 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
         _dozeAmount.value = dozeAmount
     }
 
-    override fun setBiometricUnlockState(value: BiometricUnlockModel) {
-        _biometricUnlockState.tryEmit(value)
+    override fun setBiometricUnlockState(
+        mode: BiometricUnlockMode,
+        source: BiometricUnlockSource?
+    ) {
+        _biometricUnlockState.tryEmit(BiometricUnlockModel(mode, source))
+    }
+
+    fun setBiometricUnlockState(mode: BiometricUnlockMode) {
+        setBiometricUnlockState(mode, BiometricUnlockSource.FINGERPRINT_SENSOR)
     }
 
     fun setBiometricUnlockSource(source: BiometricUnlockSource?) {
-        _biometricUnlockSource.tryEmit(source)
+        setBiometricUnlockState(BiometricUnlockMode.NONE, source)
     }
 
     fun setFaceSensorLocation(location: Point?) {

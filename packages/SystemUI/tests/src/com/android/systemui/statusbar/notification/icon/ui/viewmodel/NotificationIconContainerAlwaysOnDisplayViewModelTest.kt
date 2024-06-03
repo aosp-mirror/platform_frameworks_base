@@ -109,7 +109,6 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
         testComponent.apply {
             keyguardRepository.setKeyguardShowing(true)
             keyguardRepository.setKeyguardOccluded(false)
-            deviceProvisioningRepository.setFactoryResetProtectionActive(false)
             powerRepository.updateWakefulness(
                 rawState = WakefulnessState.AWAKE,
                 lastWakeReason = WakeSleepReason.OTHER,
@@ -118,20 +117,6 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
         }
         mSetFlagsRule.enableFlags(FLAG_NEW_AOD_TRANSITION)
     }
-
-    @Test
-    fun animationsEnabled_isFalse_whenFrpIsActive() =
-        testComponent.runTest {
-            deviceProvisioningRepository.setFactoryResetProtectionActive(true)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                )
-            )
-            val animationsEnabled by collectLastValue(underTest.areContainerChangesAnimated)
-            runCurrent()
-            assertThat(animationsEnabled).isFalse()
-        }
 
     @Test
     fun animationsEnabled_isFalse_whenDeviceAsleepAndNotPulsing() =
@@ -203,6 +188,9 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
     @Test
     fun animationsEnabled_isTrue_whenStartingToSleepAndControlScreenOff() =
         testComponent.runTest {
+            val animationsEnabled by collectLastValue(underTest.areContainerChangesAnimated)
+            assertThat(animationsEnabled).isTrue()
+
             powerRepository.updateWakefulness(
                 rawState = WakefulnessState.STARTING_TO_SLEEP,
                 lastWakeReason = WakeSleepReason.POWER_BUTTON,
@@ -216,8 +204,6 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
                 )
             )
             whenever(dozeParams.shouldControlScreenOff()).thenReturn(true)
-            val animationsEnabled by collectLastValue(underTest.areContainerChangesAnimated)
-            runCurrent()
             assertThat(animationsEnabled).isTrue()
         }
 

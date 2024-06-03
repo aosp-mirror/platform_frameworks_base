@@ -34,9 +34,9 @@ import androidx.appcompat.content.res.AppCompatResources
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.res.R
-import com.android.systemui.screenshot.scroll.ScrollCaptureController
 import com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER
+import com.android.systemui.screenshot.scroll.ScrollCaptureController
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -113,7 +113,7 @@ constructor(
     override fun setChipIntents(imageData: ScreenshotController.SavedImageData) =
         view.setChipIntents(imageData)
 
-    override fun requestDismissal(event: ScreenshotEvent) {
+    override fun requestDismissal(event: ScreenshotEvent?) {
         if (DEBUG_DISMISS) {
             Log.d(TAG, "screenshot dismissal requested")
         }
@@ -124,7 +124,7 @@ constructor(
             }
             return
         }
-        logger.log(event, 0, packageName)
+        event?.let { logger.log(event, 0, packageName) }
         view.animateDismissal()
     }
 
@@ -156,6 +156,8 @@ constructor(
     ) = view.startLongScreenshotTransition(transitionDestination, onTransitionEnd, longScreenshot)
 
     override fun restoreNonScrollingUi() = view.restoreNonScrollingUi()
+
+    override fun fadeForSharedTransition() {} // unused
 
     override fun stopInputListening() = view.stopInputListening()
 

@@ -29,17 +29,6 @@
   public protected *;
 }
 
-# Derivatives of SystemService and other services created via reflection
--keep,allowoptimization,allowaccessmodification class * extends com.android.server.SystemService {
-  public <methods>;
-}
--keep,allowoptimization,allowaccessmodification class * extends com.android.server.devicepolicy.BaseIDevicePolicyManager {
-  public <init>(...);
-}
--keep,allowoptimization,allowaccessmodification class com.android.server.wallpaper.WallpaperManagerService {
-  public <init>(...);
-}
-
 # Accessed from com.android.compos APEX
 -keep,allowoptimization,allowaccessmodification class com.android.internal.art.ArtStatsLog {
    public static void write(...);
@@ -54,7 +43,10 @@
 -keep,allowoptimization,allowaccessmodification class android.app.admin.flags.FeatureFlagsImpl { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.input.NativeInputManagerService$NativeImpl { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.ThreadPriorityBooster { *; }
--keep,allowaccessmodification class android.app.admin.flags.Flags { *; }
+
+# Keep all aconfig Flag class as they might be statically referenced by other packages
+# An merge or inlining could lead to missing dependencies that cause run time errors
+-keepclassmembernames class android.**.Flags, com.android.**.Flags { public *; }
 
 # Referenced via CarServiceHelperService in car-frameworks-service (avoid removing)
 -keep public class com.android.server.utils.Slogf { *; }
@@ -64,13 +56,6 @@
 -keep public class android.hidl.base.** { *; }
 -keep public class android.hidl.manager.** { *; }
 -keep public class com.android.server.wm.WindowManagerInternal { *; }
-
-# Notification extractors
-# TODO(b/210510433): Revisit and consider generating from frameworks/base/core/res/res/values/config.xml.
--keep,allowoptimization,allowaccessmodification public class com.android.server.notification.** implements com.android.server.notification.NotificationSignalExtractor
-
-# OEM provided DisplayAreaPolicy.Provider defined in frameworks/base/core/res/res/values/config.xml.
--keep,allowoptimization,allowaccessmodification class com.android.server.wm.** implements com.android.server.wm.DisplayAreaPolicy$Provider
 
 # JNI keep rules
 # The global keep rule for native methods allows stripping of such methods if they're unreferenced
@@ -115,9 +100,6 @@
 
 # Miscellaneous reflection keep rules
 # TODO(b/210510433): Revisit and fix with @Keep.
--keep,allowoptimization,allowaccessmodification class com.android.server.usage.AppStandbyController {
-  public <init>(...);
-}
 -keep,allowoptimization,allowaccessmodification class android.hardware.usb.gadget.** { *; }
 
 # Needed when optimizations enabled

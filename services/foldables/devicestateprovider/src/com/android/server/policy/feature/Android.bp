@@ -1,6 +1,7 @@
 aconfig_declarations {
     name: "device_state_flags",
     package: "com.android.server.policy.feature.flags",
+    container: "system",
     srcs: [
         "device_state_flags.aconfig",
     ],

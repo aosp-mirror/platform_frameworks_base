@@ -68,7 +68,8 @@ oneway interface IWindow {
     /**
      * Called when this window retrieved control over a specified set of insets sources.
      */
-    void insetsControlChanged(in InsetsState insetsState, in InsetsSourceControl[] activeControls);
+    void insetsControlChanged(in InsetsState insetsState,
+            in InsetsSourceControl.Array activeControls);
 
     /**
      * Called when a set of insets source window should be shown by policy.
@@ -108,11 +109,6 @@ oneway interface IWindow {
     void dispatchDragEvent(in DragEvent event);
 
     /**
-     * Pointer icon events
-     */
-    void updatePointerIcon(float x, float y);
-
-    /**
      * Called for non-application windows when the enter animation has completed.
      */
     void dispatchWindowShown();
@@ -128,4 +124,9 @@ oneway interface IWindow {
      * @param callbacks to receive responses
      */
     void requestScrollCapture(in IScrollCaptureResponseListener callbacks);
+
+    /**
+     * Dump the details of a window.
+     */
+    void dumpWindow(in ParcelFileDescriptor pfd);
 }

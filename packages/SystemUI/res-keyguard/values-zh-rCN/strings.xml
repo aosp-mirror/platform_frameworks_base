@@ -22,8 +22,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"输入您的 PIN 码"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"输入 PIN 码"</string>
-    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"绘制您的图案"</string>
-    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"绘制图案"</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"绘制解锁图案"</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"绘制解锁图案"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"输入您的密码"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"输入密码"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"SIM 卡无效。"</string>
@@ -61,7 +61,7 @@
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"无法识别面孔"</string>
     <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"请重试，或输入 PIN 码"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"请重试，或输入密码"</string>
-    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"请重试，或绘制图案"</string>
+    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"请重试，或绘制解锁图案"</string>
     <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"如果出错的尝试次数太多，必须输入 PIN 码才能解锁"</string>
     <string name="kg_bio_too_many_attempts_password" msgid="5551690347827728042">"如果出错的尝试次数太多，必须输入密码才能解锁"</string>
     <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"如果出错的尝试次数太多，必须绘制图案才能解锁"</string>
@@ -108,15 +108,12 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"设备重启后，必须绘制图案才能解锁"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"设备重启后，必须输入 PIN 码才能解锁"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"设备重启后，必须输入密码才能解锁"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"为增强安全性，请改用图案"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"为增强安全性，请改用解锁图案"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"为增强安全性，请改用 PIN 码"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"为增强安全性，请改用密码"</string>
-    <!-- no translation found for kg_prompt_added_security_pin (5487992065995475528) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_pattern (1017068086102168544) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_password (6053156069765029006) -->
-    <skip />
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"需要输入 PIN 码以进一步确保安全"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"需要绘制解锁图案以进一步确保安全"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"需要输入密码以进一步确保安全"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"管理员已锁定设备"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"此设备已手动锁定"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"无法识别"</string>

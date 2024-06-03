@@ -403,7 +403,7 @@ public class BatteryStatsHistoryTest {
 
     @Test
     public void recordPowerStats() {
-        PowerStats.Descriptor descriptor = new PowerStats.Descriptor(42, "foo", 1, 2,
+        PowerStats.Descriptor descriptor = new PowerStats.Descriptor(42, "foo", 1, null, 0, 2,
                 new PersistableBundle());
         PowerStats powerStats = new PowerStats(descriptor);
         powerStats.durationMs = 100;

@@ -23,7 +23,7 @@
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"የእርስዎን ፒን ያስገቡ"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"ፒን ያስገቡ"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"ሥርዓተ-ጥለትዎን ያስገቡ"</string>
-    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"ስርዓተ ጥለት ይሳሉ"</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"ሥርዓተ ጥለት ይሳሉ"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"ይለፍ ቃልዎን ያስገቡ"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"የይለፍ ቃል ያስገቡ"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"ልክ ያልሆነ ካርድ።"</string>
@@ -108,15 +108,12 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"መሣሪያ እንደገና ከጀመረ በኋላ ስርዓተ ጥለት ያስፈልጋል"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"መሣሪያ እንደገና ከጀመረ በኋላ ፒን ያስፈልጋል"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"መሣሪያ እንደገና ከጀመረ በኋላ የይለፍ ቃል ያስፈልጋል"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"ለተጨማሪ ደህንነት በምትኩ ስርዓተ ጥለት ይጠቀሙ"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"ለተጨማሪ ደህንነት በምትኩ ሥርዓተ ጥለት ይጠቀሙ"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"ለተጨማሪ ደህንነት በምትኩ ፒን ይጠቀሙ"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"ለተጨማሪ ደህንነት በምትኩ የይለፍ ቃል ይጠቀሙ"</string>
-    <!-- no translation found for kg_prompt_added_security_pin (5487992065995475528) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_pattern (1017068086102168544) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_password (6053156069765029006) -->
-    <skip />
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"ፒን ለተጨማሪ ደህንነት ያስፈልጋል"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"ሥርዓተ ጥለት ለተጨማሪ ደህንነት ያስፈልጋል"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"የይለፍ ቃል ለተጨማሪ ደህንነት ያስፈልጋል"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"መሣሪያ በአስተዳዳሪ ተቆልፏል"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"መሣሪያ በተጠቃሚው ራሱ ተቆልፏል"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"አልታወቀም"</string>

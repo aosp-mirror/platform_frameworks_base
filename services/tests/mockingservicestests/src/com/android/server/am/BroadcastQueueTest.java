@@ -940,8 +940,7 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
 
         final ProcessRecord receiverGreenApp = mAms.getProcessRecordLocked(PACKAGE_GREEN,
                 getUidForPackage(PACKAGE_GREEN));
-        // Modern queue always kills the target process when broadcast delivery fails, where as
-        // the legacy queue leaves the process killing task to AMS
+        // Broadcast queue always kills the target process when broadcast delivery fails.
         assertNull(receiverGreenApp);
         final ProcessRecord receiverBlueApp = mAms.getProcessRecordLocked(PACKAGE_BLUE,
                 getUidForPackage(PACKAGE_BLUE));
@@ -1054,8 +1053,6 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         }
 
         waitForIdle();
-        // Legacy stack does not remove registered receivers as part of
-        // cleanUpDisabledPackageReceiversLocked() call, so verify this only on modern queue.
         verifyScheduleReceiver(never(), callerApp, USER_GUEST);
         verifyScheduleRegisteredReceiver(never(), callerApp, USER_GUEST);
         for (String pkg : new String[] {
@@ -1166,8 +1163,7 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         final ProcessRecord receiverOrangeApp = mAms.getProcessRecordLocked(PACKAGE_ORANGE,
                 getUidForPackage(PACKAGE_ORANGE));
 
-        // Modern queue always kills the target process when broadcast delivery fails, where as
-        // the legacy queue leaves the process killing task to AMS
+        // Broadcast queue always kills the target process when broadcast delivery fails.
         assertNull(receiverGreenApp);
         verifyScheduleRegisteredReceiver(times(1), receiverBlueApp, airplane);
         verifyScheduleReceiver(times(1), receiverYellowApp, airplane);
@@ -1210,8 +1206,6 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         final ProcessRecord restartedReceiverBlueApp = mAms.getProcessRecordLocked(PACKAGE_BLUE,
                 getUidForPackage(PACKAGE_BLUE));
         assertNotEquals(receiverBlueApp, restartedReceiverBlueApp);
-        // Legacy queue will always try delivering the broadcast even if the process
-        // has been killed.
         verifyScheduleReceiver(never(), receiverBlueApp, airplane);
         // Verify that the new process receives the broadcast.
         verifyScheduleReceiver(times(1), restartedReceiverBlueApp, airplane);
@@ -2397,6 +2391,20 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
 
         waitForIdle();
         assertNull(mAms.getProcessRecordLocked(PACKAGE_BLUE, getUidForPackage(PACKAGE_BLUE)));
+    }
+
+    @Test
+    public void testBroadcastAppStartInfoReported() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+
+        final Intent timezone = new Intent(Intent.ACTION_TIME_TICK);
+        enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN))));
+
+        waitForIdle();
+
+        verify(mAppStartInfoTracker, times(1)).handleProcessBroadcastStart(anyLong(), any(), any(),
+                anyBoolean());
     }
 
     private long getReceiverScheduledTime(@NonNull BroadcastRecord r, @NonNull Object receiver) {

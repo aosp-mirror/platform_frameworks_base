@@ -18,6 +18,7 @@ package android.provider.settings.validators;
 
 import static android.provider.settings.validators.SettingsValidators.ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.ANY_INTEGER_VALIDATOR;
+import static android.provider.settings.validators.SettingsValidators.ANY_LONG_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.ANY_STRING_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.AUTOFILL_SERVICE_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.BOOLEAN_VALIDATOR;
@@ -326,6 +327,9 @@ public class SecureSettingsValidators {
                 Secure.ACCESSIBILITY_BUTTON_TARGETS,
                 ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR);
         VALIDATORS.put(
+                Secure.ACCESSIBILITY_GESTURE_TARGETS,
+                ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR);
+        VALIDATORS.put(
                 Secure.ACCESSIBILITY_QS_TARGETS,
                 ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR);
         VALIDATORS.put(Secure.ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED, BOOLEAN_VALIDATOR);
@@ -389,6 +393,7 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.WEAR_TALKBACK_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.HBM_SETTING_KEY, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO, ANY_STRING_VALIDATOR);
+        VALIDATORS.put(Secure.BLUETOOTH_LE_BROADCAST_NAME, ANY_STRING_VALIDATOR);
         VALIDATORS.put(Secure.BLUETOOTH_LE_BROADCAST_CODE, ANY_STRING_VALIDATOR);
         VALIDATORS.put(Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME, ANY_STRING_VALIDATOR);
         VALIDATORS.put(
@@ -413,6 +418,7 @@ public class SecureSettingsValidators {
                 BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.DND_CONFIGS_MIGRATED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.HUB_MODE_TUTORIAL_STATE, NON_NEGATIVE_INTEGER_VALIDATOR);
+        VALIDATORS.put(Secure.GLANCEABLE_HUB_ENABLED, new InclusiveIntegerRangeValidator(0, 1));
         VALIDATORS.put(Secure.STYLUS_BUTTONS_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.STYLUS_HANDWRITING_ENABLED,
                 new DiscreteValueValidator(new String[] {"-1", "0", "1"}));
@@ -424,5 +430,13 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.CAMERA_EXTENSIONS_FALLBACK, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.IMMERSIVE_MODE_CONFIRMATIONS, ANY_STRING_VALIDATOR);
         VALIDATORS.put(Secure.AUDIO_DEVICE_INVENTORY, ANY_STRING_VALIDATOR);
+        VALIDATORS.put(Secure.SCREEN_RESOLUTION_MODE, new InclusiveIntegerRangeValidator(
+                Secure.RESOLUTION_MODE_UNKNOWN, Secure.RESOLUTION_MODE_FULL));
+        VALIDATORS.put(Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_SATURATION_LEVEL,
+                new InclusiveIntegerRangeValidator(0, 10));
+        VALIDATORS.put(Secure.CHARGE_OPTIMIZATION_MODE, new InclusiveIntegerRangeValidator(0, 10));
+        VALIDATORS.put(Secure.ON_DEVICE_INFERENCE_UNBIND_TIMEOUT_MS, ANY_LONG_VALIDATOR);
+        VALIDATORS.put(Secure.ON_DEVICE_INTELLIGENCE_UNBIND_TIMEOUT_MS, ANY_LONG_VALIDATOR);
+        VALIDATORS.put(Secure.ON_DEVICE_INTELLIGENCE_IDLE_TIMEOUT_MS, NONE_NEGATIVE_LONG_VALIDATOR);
     }
 }

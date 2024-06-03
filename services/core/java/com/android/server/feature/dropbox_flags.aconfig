@@ -1,7 +1,9 @@
 package: "com.android.server.feature.flags"
+container: "system"
 
 flag{
     name: "enable_read_dropbox_permission"
+    is_exported: true
     namespace: "preload_safety"
     description: "Feature flag for permission to Read dropbox data"
     bug: "287512663"

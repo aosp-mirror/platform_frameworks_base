@@ -22,7 +22,7 @@
 
     <HorizontalScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:id="@+id/horizontal_scroll_view">
 
         <LinearLayout
@@ -133,31 +133,31 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="horizontal">
             <View
                 android:background="#00F"
-                android:layout_width="90dp"
-                android:layout_height="50dp"/>
+                android:layout_width="100dp"
+                android:layout_height="90dp"/>
             <View
                 android:background="#0FF"
-                android:layout_width="90dp"
-                android:layout_height="50dp"/>
+                android:layout_width="100dp"
+                android:layout_height="90dp"/>
             <View
                 android:background="#0F0"
-                android:layout_width="90dp"
-                android:layout_height="50dp"/>
+                android:layout_width="100dp"
+                android:layout_height="90dp"/>
             <View
                 android:background="#FF0"
-                android:layout_width="90dp"
-                android:layout_height="50dp"/>
+                android:layout_width="100dp"
+                android:layout_height="90dp"/>
             <View
                 android:background="#F00"
-                android:layout_width="90dp"
-                android:layout_height="50dp"/>
+                android:layout_width="100dp"
+                android:layout_height="90dp"/>
             <View
                 android:background="#F0F"
-                android:layout_width="90dp"
-                android:layout_height="50dp"/>
+                android:layout_width="100dp"
+                android:layout_height="90dp"/>
         </LinearLayout>
     </view>
 </LinearLayout>

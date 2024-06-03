@@ -57,7 +57,7 @@
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Nesprávny kód PIN"</string>
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"Nesprávny kód PIN. Zopakujte."</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"Alebo odomknite odtlačkom prsta"</string>
-    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Nerozpoz. odtlačok prsta"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Odtlačok prsta nebol rozpoznaný"</string>
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"Tvár nebola rozpoznaná"</string>
     <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Skúste to znova alebo zadajte PIN"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Skúste to znova alebo zadajte heslo"</string>
@@ -108,15 +108,12 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Po reštarte zariadenia sa vyžaduje vzor"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"Po reštarte zariadenia sa vyžaduje kód PIN"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Po reštarte zariadenia sa vyžaduje heslo"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"V rámci zvýšenia zabezpečenia použite radšej vzor"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Z bezpečnostných dôvodov použite radšej vzor"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"V rámci zvýšenia zabezpečenia použite radšej PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"V rámci zvýšenia zabezpečenia použite radšej heslo"</string>
-    <!-- no translation found for kg_prompt_added_security_pin (5487992065995475528) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_pattern (1017068086102168544) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_password (6053156069765029006) -->
-    <skip />
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Zvýšenie zabezpečenia vyžaduje kód PIN"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Zvýšenie zabezpečenia vyžaduje vzor"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Zvýšenie zabezpečenia vyžaduje heslo"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Zariadenie zamkol správca"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Zariadenie bolo uzamknuté ručne"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nerozpoznané"</string>

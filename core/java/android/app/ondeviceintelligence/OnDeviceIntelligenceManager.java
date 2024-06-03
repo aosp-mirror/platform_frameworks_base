@@ -365,7 +365,6 @@ public final class OnDeviceIntelligenceManager {
      *                           associated params.
      */
     @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
-
     public void processRequest(@NonNull Feature feature, @NonNull @InferenceParams Bundle request,
             @RequestType int requestType,
             @Nullable CancellationSignal cancellationSignal,
@@ -423,16 +422,16 @@ public final class OnDeviceIntelligenceManager {
      * when the final response contains an enhanced aggregation of the contents already
      * streamed.
      *
-     * @param feature                   feature associated with the request.
-     * @param request                   request and associated params represented by the Bundle
-     *                                  data.
-     * @param requestType               type of request being sent for processing the content.
-     * @param cancellationSignal        signal to invoke cancellation.
-     * @param processingSignal          signal to send custom signals in the
-     *                                  remote implementation.
-     * @param streamingResponseCallback streaming callback to populate the response content and
-     *                                  associated params.
-     * @param callbackExecutor          executor to run the callback on.
+     * @param feature                     feature associated with the request.
+     * @param request                     request and associated params represented by the Bundle
+     *                                    data.
+     * @param requestType                 type of request being sent for processing the content.
+     * @param cancellationSignal          signal to invoke cancellation.
+     * @param processingSignal            signal to send custom signals in the
+     *                                    remote implementation.
+     * @param streamingProcessingCallback streaming callback to populate the response content and
+     *                                    associated params.
+     * @param callbackExecutor            executor to run the callback on.
      */
     @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
     public void processRequestStreaming(@NonNull Feature feature,
@@ -528,19 +527,17 @@ public final class OnDeviceIntelligenceManager {
 
     /**
      * {@link Bundle}s annotated with this type will be validated that they are in-effect read-only
-     * when passed to inference service via Binder IPC. Following restrictions apply :
+     * when passed via Binder IPC. Following restrictions apply :
      * <ul>
+     * <li> {@link PersistableBundle}s are allowed.</li>
      * <li> Any primitive types or their collections can be added as usual.</li>
      * <li>IBinder objects should *not* be added.</li>
      * <li>Parcelable data which has no active-objects, should be added as
      * {@link Bundle#putByteArray}</li>
      * <li>Parcelables have active-objects, only following types will be allowed</li>
      * <ul>
-     *  <li>{@link Bitmap} set as {@link Bitmap#setImmutable()}</li>
-     *  <li>{@link android.database.CursorWindow}</li>
      *  <li>{@link android.os.ParcelFileDescriptor} opened in
      *  {@link android.os.ParcelFileDescriptor#MODE_READ_ONLY}</li>
-     *  <li>{@link android.os.SharedMemory} set to {@link OsConstants#PROT_READ}</li>
      * </ul>
      * </ul>
      *
@@ -550,9 +547,40 @@ public final class OnDeviceIntelligenceManager {
      * @hide
      */
     @Target({ElementType.PARAMETER, ElementType.FIELD})
+    public @interface StateParams {
+    }
+
+    /**
+     * This is an extension of {@link StateParams} but for purpose of inference few other types are
+     * also allowed as read-only, as listed below.
+     *
+     * <li>{@link Bitmap} set as immutable.</li>
+     * <li>{@link android.database.CursorWindow}</li>
+     * <li>{@link android.os.SharedMemory} set to {@link OsConstants#PROT_READ}</li>
+     * </ul>
+     * </ul>
+     *
+     * In all other scenarios the system-server might throw a
+     * {@link android.os.BadParcelableException} if the Bundle validation fails.
+     *
+     * @hide
+     */
+    @Target({ElementType.PARAMETER, ElementType.FIELD, ElementType.TYPE_USE})
     public @interface InferenceParams {
     }
 
+    /**
+     * This is an extension of {@link StateParams} with the exception that it allows writing
+     * {@link Bitmap} as part of the response.
+     *
+     * In all other scenarios the system-server might throw a
+     * {@link android.os.BadParcelableException} if the Bundle validation fails.
+     *
+     * @hide
+     */
+    @Target({ElementType.PARAMETER, ElementType.FIELD})
+    public @interface ResponseParams {
+    }
 
     @Nullable
     private static AndroidFuture<IBinder> configureRemoteCancellationFuture(

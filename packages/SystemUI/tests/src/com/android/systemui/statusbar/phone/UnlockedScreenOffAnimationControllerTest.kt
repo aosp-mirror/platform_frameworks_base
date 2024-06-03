@@ -18,9 +18,9 @@ package com.android.systemui.statusbar.phone
 
 import android.os.Handler
 import android.os.PowerManager
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.Display
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.SysuiTestCase
@@ -28,6 +28,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
+import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.StatusBarStateControllerImpl
@@ -50,7 +51,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
 
@@ -67,6 +68,8 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
     private lateinit var centralSurfaces: CentralSurfaces
     @Mock
     private lateinit var shadeViewController: ShadeViewController
+    @Mock
+    private lateinit var shadeLockscreenInteractor: ShadeLockscreenInteractor
     @Mock
     private lateinit var panelExpansionInteractor: PanelExpansionInteractor
     @Mock
@@ -100,6 +103,7 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
             { notifShadeWindowController },
             interactionJankMonitor,
             powerManager,
+            { shadeLockscreenInteractor },
             { panelExpansionInteractor },
             handler,
         )
@@ -133,7 +137,7 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
 
         callbackCaptor.value.run()
 
-        verify(shadeViewController, times(1)).showAodUi()
+        verify(shadeLockscreenInteractor, times(1)).showAodUi()
     }
 
     @Test
@@ -149,7 +153,7 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
 
         callbackCaptor.value.run()
 
-        verify(shadeViewController, never()).showAodUi()
+        verify(shadeLockscreenInteractor, never()).showAodUi()
     }
 
     /**
@@ -171,7 +175,7 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
         verify(handler).postDelayed(callbackCaptor.capture(), anyLong())
         callbackCaptor.value.run()
 
-        verify(shadeViewController, never()).showAodUi()
+        verify(shadeLockscreenInteractor, never()).showAodUi()
     }
 
     @Test
@@ -186,7 +190,7 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
         verify(handler).postDelayed(callbackCaptor.capture(), anyLong())
         callbackCaptor.value.run()
 
-        verify(shadeViewController).showAodUi()
+        verify(shadeLockscreenInteractor).showAodUi()
     }
 
     @Test

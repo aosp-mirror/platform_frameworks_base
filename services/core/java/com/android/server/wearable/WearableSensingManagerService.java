@@ -20,11 +20,13 @@ import static android.provider.DeviceConfig.NAMESPACE_WEARABLE_SENSING;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityOptions;
 import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.app.ambientcontext.AmbientContextEvent;
+import android.app.wearable.IWearableSensingCallback;
 import android.app.wearable.IWearableSensingManager;
 import android.app.wearable.WearableSensingDataRequest;
 import android.app.wearable.WearableSensingManager;
@@ -33,6 +35,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
@@ -187,6 +190,9 @@ public class WearableSensingManagerService extends
 
     @Override
     protected int getMaximumTemporaryServiceDurationMs() {
+        if (Build.isDebuggable()) {
+            return Integer.MAX_VALUE;
+        }
         return MAX_TEMPORARY_SERVICE_DURATION_MS;
     }
 
@@ -213,21 +219,37 @@ public class WearableSensingManagerService extends
         return null;
     }
 
+    /**
+     * Provides a data stream to the WearableSensingService.
+     *
+     * <p>This method is only called from adb command via {@link WearableSensingShellCommand}.
+     */
     @VisibleForTesting
-    void provideDataStream(@UserIdInt int userId, ParcelFileDescriptor parcelFileDescriptor,
+    void provideDataStream(
+            @UserIdInt int userId,
+            ParcelFileDescriptor parcelFileDescriptor,
             RemoteCallback callback) {
         synchronized (mLock) {
             final WearableSensingManagerPerUserService mService = getServiceForUserLocked(userId);
             if (mService != null) {
-                mService.onProvideDataStream(parcelFileDescriptor, callback);
+                mService.onProvideDataStream(
+                        parcelFileDescriptor, /* wearableSensingCallback= */ null, callback);
             } else {
                 Slog.w(TAG, "Service not available.");
             }
         }
     }
 
+    /**
+     * Provides data to the WearableSensingService.
+     *
+     * <p>This method is only called from adb command via {@link WearableSensingShellCommand}.
+     */
     @VisibleForTesting
-    void provideData(@UserIdInt int userId, PersistableBundle data, SharedMemory sharedMemory,
+    void provideData(
+            @UserIdInt int userId,
+            PersistableBundle data,
+            SharedMemory sharedMemory,
             RemoteCallback callback) {
         synchronized (mLock) {
             final WearableSensingManagerPerUserService mService = getServiceForUserLocked(userId);
@@ -400,40 +422,48 @@ public class WearableSensingManagerService extends
 
         @Override
         public void provideConnection(
-                ParcelFileDescriptor wearableConnection, RemoteCallback callback) {
+                ParcelFileDescriptor wearableConnection,
+                IWearableSensingCallback wearableSensingCallback,
+                RemoteCallback statusCallback) {
             Slog.i(TAG, "WearableSensingManagerInternal provideConnection.");
             Objects.requireNonNull(wearableConnection);
-            Objects.requireNonNull(callback);
+            Objects.requireNonNull(statusCallback);
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE, TAG);
             if (!mIsServiceEnabled) {
                 Slog.w(TAG, "Service not available.");
                 WearableSensingManagerPerUserService.notifyStatusCallback(
-                        callback, WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
+                        statusCallback, WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
                 return;
             }
             callPerUserServiceIfExist(
-                    service -> service.onProvideConnection(wearableConnection, callback),
-                    callback);
+                    service ->
+                            service.onProvideConnection(
+                                    wearableConnection, wearableSensingCallback, statusCallback),
+                    statusCallback);
         }
 
         @Override
         public void provideDataStream(
-                ParcelFileDescriptor parcelFileDescriptor, RemoteCallback callback) {
+                ParcelFileDescriptor parcelFileDescriptor,
+                @Nullable IWearableSensingCallback wearableSensingCallback,
+                RemoteCallback statusCallback) {
             Slog.i(TAG, "WearableSensingManagerInternal provideDataStream.");
             Objects.requireNonNull(parcelFileDescriptor);
-            Objects.requireNonNull(callback);
+            Objects.requireNonNull(statusCallback);
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE, TAG);
             if (!mIsServiceEnabled) {
                 Slog.w(TAG, "Service not available.");
-                WearableSensingManagerPerUserService.notifyStatusCallback(callback,
-                        WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
+                WearableSensingManagerPerUserService.notifyStatusCallback(
+                        statusCallback, WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
                 return;
             }
             callPerUserServiceIfExist(
-                    service -> service.onProvideDataStream(parcelFileDescriptor, callback),
-                    callback);
+                    service ->
+                            service.onProvideDataStream(
+                                    parcelFileDescriptor, wearableSensingCallback, statusCallback),
+                    statusCallback);
         }
 
         @Override

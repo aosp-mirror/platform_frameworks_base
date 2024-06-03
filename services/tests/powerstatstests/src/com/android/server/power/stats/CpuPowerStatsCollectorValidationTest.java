@@ -25,9 +25,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.UserHandle;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.RavenwoodFlagsValueProvider;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.provider.DeviceConfig;
 
 import androidx.test.InstrumentationRegistry;
@@ -44,7 +47,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -52,11 +57,15 @@ import java.util.regex.Pattern;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
-@android.platform.test.annotations.IgnoreUnderRavenwood
+@android.platform.test.annotations.DisabledOnRavenwood(reason = "Integration test")
 public class CpuPowerStatsCollectorValidationTest {
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
+    @Rule(order = 0)
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
+    @Rule(order = 1)
+    public final CheckFlagsRule mCheckFlagsRule = RavenwoodRule.isOnRavenwood()
+            ? RavenwoodFlagsValueProvider.createAllOnCheckFlagsRule()
+            : DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private static final int WORK_DURATION_MS = 2000;
     private static final String TEST_PKG = "com.android.coretests.apps.bstatstestapp";
@@ -86,9 +95,10 @@ public class CpuPowerStatsCollectorValidationTest {
         long duration = 0;
         long[] stats = null;
 
-        String[] cpuStatsDump = dumpCpuStats();
+        List<String> cpuStatsDump = dumpCpuStats();
         Pattern durationPattern = Pattern.compile("duration=([0-9]*)");
-        Pattern uidPattern = Pattern.compile("UID " + mTestPkgUid + ": \\[([0-9,\\s]*)]");
+        Pattern uidPattern = Pattern.compile(
+                "UID " + UserHandle.formatUid(mTestPkgUid) + ": time: [\\[]?([0-9,\\s]*)[]]?");
         for (String line : cpuStatsDump) {
             Matcher durationMatcher = durationPattern.matcher(line);
             if (durationMatcher.find()) {
@@ -113,15 +123,23 @@ public class CpuPowerStatsCollectorValidationTest {
         assertThat(total).isAtLeast((long) (WORK_DURATION_MS * 0.8));
     }
 
-    private String[] dumpCpuStats() throws Exception {
+    private List<String> dumpCpuStats() throws Exception {
+        ArrayList<String> cpuStats = new ArrayList<>();
         String dump = executeCmdSilent("dumpsys batterystats --sample");
         String[] lines = dump.split("\n");
+        boolean inCpuSection = false;
         for (int i = 0; i < lines.length; i++) {
-            if (lines[i].startsWith("CpuPowerStatsCollector")) {
-                return Arrays.copyOfRange(lines, i + 1, lines.length);
+            if (!inCpuSection) {
+                if (lines[i].startsWith("CpuPowerStatsCollector")) {
+                    inCpuSection = true;
+                }
+            } else if (lines[i].startsWith(" ")) {
+                cpuStats.add(lines[i]);
+            } else {
+                break;
             }
         }
-        return new String[0];
+        return cpuStats;
     }
 
     private void doSomeWork() throws Exception {

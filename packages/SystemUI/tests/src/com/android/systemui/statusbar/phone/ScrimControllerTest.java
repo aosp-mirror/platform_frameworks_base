@@ -24,6 +24,8 @@ import static com.android.systemui.statusbar.phone.ScrimState.SHADE_LOCKED;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,20 +43,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
-
 import android.animation.Animator;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.ViewUtils;
 import android.util.MathUtils;
 import android.view.View;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
@@ -89,6 +89,8 @@ import com.android.systemui.wallpapers.data.repository.FakeWallpaperRepository;
 
 import com.google.common.truth.Expect;
 
+import kotlinx.coroutines.test.TestScope;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -105,9 +107,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import kotlinx.coroutines.test.TestScope;
-
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class ScrimControllerTest extends SysuiTestCase {

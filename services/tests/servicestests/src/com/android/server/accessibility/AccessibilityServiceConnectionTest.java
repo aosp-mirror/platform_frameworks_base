@@ -26,7 +26,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -56,6 +55,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.test.FakePermissionEnforcer;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
@@ -81,7 +81,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-
 
 /**
  * Tests for AccessibilityServiceConnection
@@ -130,6 +129,7 @@ public class AccessibilityServiceConnectionTest {
     IBrailleDisplayController mMockBrailleDisplayController;
     @Mock
     MotionEventInjector mMockMotionEventInjector;
+    FakePermissionEnforcer mFakePermissionEnforcer = new FakePermissionEnforcer();
 
     MessageCapturingHandler mHandler = new MessageCapturingHandler(null);
 
@@ -151,12 +151,14 @@ public class AccessibilityServiceConnectionTest {
         when(mMockA11yTrace.isA11yTracingEnabled()).thenReturn(false);
         when(mMockContext.getSystemService(Context.DISPLAY_SERVICE))
                 .thenReturn(new DisplayManager(mMockContext));
+        when(mMockContext.getSystemService(Context.PERMISSION_ENFORCER_SERVICE))
+                .thenReturn(mFakePermissionEnforcer);
 
         mConnection = new AccessibilityServiceConnection(mMockUserState, mMockContext,
-                COMPONENT_NAME, mServiceInfo, SERVICE_ID, mHandler, new Object(),
-                mMockSecurityPolicy, mMockSystemSupport, mMockA11yTrace,
-                mMockWindowManagerInternal, mMockSystemActionPerformer,
-                mMockA11yWindowManager, mMockActivityTaskManagerInternal);
+                        COMPONENT_NAME, mServiceInfo, SERVICE_ID, mHandler, new Object(),
+                        mMockSecurityPolicy, mMockSystemSupport, mMockA11yTrace,
+                        mMockWindowManagerInternal, mMockSystemActionPerformer,
+                        mMockA11yWindowManager, mMockActivityTaskManagerInternal);
         when(mMockSecurityPolicy.canPerformGestures(mConnection)).thenReturn(true);
         when(mMockSecurityPolicy.checkAccessibilityAccess(mConnection)).thenReturn(true);
     }
@@ -317,6 +319,8 @@ public class AccessibilityServiceConnectionTest {
     @Test
     @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_BRAILLE_DISPLAY_HID)
     public void connectBluetoothBrailleDisplay() throws Exception {
+        mFakePermissionEnforcer.grant(Manifest.permission.BLUETOOTH_CONNECT);
+        mFakePermissionEnforcer.grant(Manifest.permission.MANAGE_ACCESSIBILITY);
         final String macAddress = "00:11:22:33:AA:BB";
         final byte[] descriptor = {0x05, 0x41};
         Bundle bd = new Bundle();
@@ -338,9 +342,6 @@ public class AccessibilityServiceConnectionTest {
     @Test
     @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_BRAILLE_DISPLAY_HID)
     public void connectBluetoothBrailleDisplay_throwsForMissingBluetoothConnectPermission() {
-        doThrow(SecurityException.class).when(mMockContext)
-                .enforceCallingPermission(eq(Manifest.permission.BLUETOOTH_CONNECT), any());
-
         assertThrows(SecurityException.class,
                 () -> mConnection.connectBluetoothBrailleDisplay("unused",
                         mMockBrailleDisplayController));
@@ -349,6 +350,7 @@ public class AccessibilityServiceConnectionTest {
     @Test
     @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_BRAILLE_DISPLAY_HID)
     public void connectBluetoothBrailleDisplay_throwsForNullMacAddress() {
+        mFakePermissionEnforcer.grant(Manifest.permission.BLUETOOTH_CONNECT);
         assertThrows(NullPointerException.class,
                 () -> mConnection.connectBluetoothBrailleDisplay(null,
                         mMockBrailleDisplayController));
@@ -357,6 +359,7 @@ public class AccessibilityServiceConnectionTest {
     @Test
     @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_BRAILLE_DISPLAY_HID)
     public void connectBluetoothBrailleDisplay_throwsForMisformattedMacAddress() {
+        mFakePermissionEnforcer.grant(Manifest.permission.BLUETOOTH_CONNECT);
         assertThrows(IllegalArgumentException.class,
                 () -> mConnection.connectBluetoothBrailleDisplay("12:34",
                         mMockBrailleDisplayController));
@@ -365,6 +368,7 @@ public class AccessibilityServiceConnectionTest {
     @Test
     @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_BRAILLE_DISPLAY_HID)
     public void connectUsbBrailleDisplay() throws Exception {
+        mFakePermissionEnforcer.grant(Manifest.permission.MANAGE_ACCESSIBILITY);
         final String serialNumber = "myUsbDevice";
         final byte[] descriptor = {0x05, 0x41};
         Bundle bd = new Bundle();
@@ -428,7 +432,6 @@ public class AccessibilityServiceConnectionTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_RESETTABLE_DYNAMIC_PROPERTIES)
     public void binderDied_resetA11yServiceInfo() {
         final int flag = AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS;
         setServiceBinding(COMPONENT_NAME);

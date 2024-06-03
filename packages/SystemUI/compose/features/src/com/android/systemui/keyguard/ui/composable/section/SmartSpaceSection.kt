@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.padding
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
@@ -160,7 +160,7 @@ constructor(
     private fun Weather(
         modifier: Modifier = Modifier,
     ) {
-        val isVisible by keyguardSmartspaceViewModel.isWeatherVisible.collectAsState()
+        val isVisible by keyguardSmartspaceViewModel.isWeatherVisible.collectAsStateWithLifecycle()
         if (!isVisible) {
             return
         }
@@ -187,7 +187,7 @@ constructor(
     private fun Date(
         modifier: Modifier = Modifier,
     ) {
-        val isVisible by keyguardSmartspaceViewModel.isDateVisible.collectAsState()
+        val isVisible by keyguardSmartspaceViewModel.isDateVisible.collectAsStateWithLifecycle()
         if (!isVisible) {
             return
         }

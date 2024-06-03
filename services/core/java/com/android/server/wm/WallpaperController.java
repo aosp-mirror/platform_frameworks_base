@@ -22,7 +22,6 @@ import static android.app.WallpaperManager.COMMAND_UNFREEZE;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WALLPAPER;
@@ -166,7 +165,7 @@ class WallpaperController {
                             || (w.mActivityRecord != null && !w.mActivityRecord.fillsParent());
                 }
             } else if (w.hasWallpaper() && mService.mPolicy.isKeyguardHostWindow(w.mAttrs)
-                    && w.mTransitionController.isTransitionOnDisplay(mDisplayContent)) {
+                    && w.mTransitionController.hasTransientLaunch(mDisplayContent)) {
                 // If we have no candidates at all, notification shade is allowed to be the target
                 // of last resort even if it has not been made visible yet.
                 if (DEBUG_WALLPAPER) Slog.v(TAG, "Found keyguard as wallpaper target: " + w);
@@ -857,19 +856,12 @@ class WallpaperController {
         result.setWallpaperTarget(wallpaperTarget);
     }
 
-    public void updateWallpaperTokens(boolean keyguardLocked) {
-        if (DEBUG_WALLPAPER) {
-            Slog.v(TAG, "Wallpaper vis: target " + mWallpaperTarget + " prev="
-                    + mPrevWallpaperTarget);
-        }
-        updateWallpaperTokens(mWallpaperTarget != null || mPrevWallpaperTarget != null,
-                keyguardLocked);
-    }
-
     /**
      * Change the visibility of the top wallpaper to {@param visibility} and hide all the others.
      */
     private void updateWallpaperTokens(boolean visibility, boolean keyguardLocked) {
+        ProtoLog.v(WM_DEBUG_WALLPAPER, "updateWallpaperTokens requestedVisibility=%b on"
+                + " keyguardLocked=%b", visibility, keyguardLocked);
         WindowState topWallpaper = mFindResults.getTopWallpaper(keyguardLocked);
         WallpaperWindowToken topWallpaperToken =
                 topWallpaper == null ? null : topWallpaper.mToken.asWallpaperToken();

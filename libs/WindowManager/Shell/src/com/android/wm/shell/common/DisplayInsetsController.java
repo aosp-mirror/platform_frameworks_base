@@ -30,7 +30,7 @@ import android.view.inputmethod.ImeTracker;
 
 import androidx.annotation.BinderThread;
 
-import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.concurrent.CopyOnWriteArrayList;

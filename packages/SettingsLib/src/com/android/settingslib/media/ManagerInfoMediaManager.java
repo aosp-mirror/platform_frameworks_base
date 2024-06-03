@@ -21,6 +21,8 @@ import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.media.RouteListingPreference;
 import android.media.RoutingSessionInfo;
+import android.media.session.MediaController;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -53,8 +55,10 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
     /* package */ ManagerInfoMediaManager(
             Context context,
             @NonNull String packageName,
-            LocalBluetoothManager localBluetoothManager) {
-        super(context, packageName, localBluetoothManager);
+            @NonNull UserHandle userHandle,
+            LocalBluetoothManager localBluetoothManager,
+            @Nullable MediaController mediaController) {
+        super(context, packageName, userHandle, localBluetoothManager, mediaController);
 
         mRouterManager = MediaRouter2Manager.getInstance(context);
     }
@@ -62,25 +66,32 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
     @Override
     protected void startScanOnRouter() {
         if (!mIsScanning) {
-            mRouterManager.registerCallback(mExecutor, mMediaRouterCallback);
             mRouterManager.registerScanRequest();
             mIsScanning = true;
         }
     }
 
     @Override
-    public void stopScan() {
+    protected void registerRouter() {
+        mRouterManager.registerCallback(mExecutor, mMediaRouterCallback);
+    }
+
+    @Override
+    protected void stopScanOnRouter() {
         if (mIsScanning) {
-            mRouterManager.unregisterCallback(mMediaRouterCallback);
             mRouterManager.unregisterScanRequest();
             mIsScanning = false;
         }
     }
 
     @Override
+    protected void unregisterRouter() {
+        mRouterManager.unregisterCallback(mMediaRouterCallback);
+    }
+
+    @Override
     protected void transferToRoute(@NonNull MediaRoute2Info route) {
-        // TODO: b/279555229 - provide real user handle of a caller.
-        mRouterManager.transfer(mPackageName, route, android.os.Process.myUserHandle());
+        mRouterManager.transfer(mPackageName, route, mUserHandle);
     }
 
     @Override

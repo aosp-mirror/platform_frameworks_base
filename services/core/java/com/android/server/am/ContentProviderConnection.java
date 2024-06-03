@@ -82,6 +82,12 @@ public final class ContentProviderConnection extends Binder implements
                 false, oomAdjReason, UNKNOWN_ADJ, false, false);
     }
 
+    @Override
+    public boolean canAffectCapabilities() {
+        return false;
+    }
+
+
     public void startAssociationIfNeeded() {
         // If we don't already have an active association, create one...  but only if this
         // is an association between two different processes.

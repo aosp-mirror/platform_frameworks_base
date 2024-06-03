@@ -111,12 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Papildomai saugai užtikrinti geriau naudokite atrakinimo piešinį"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Papildomai saugai užtikrinti geriau naudokite PIN kodą"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Papildomai saugai užtikrinti geriau naudokite slaptažodį"</string>
-    <!-- no translation found for kg_prompt_added_security_pin (5487992065995475528) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_pattern (1017068086102168544) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_password (6053156069765029006) -->
-    <skip />
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Norint užtikrinti papildomą saugą būtinas PIN kodas"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Norint užtikrinti papildomą saugą būtinas atrakinimo piešinys"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Norint užtikrinti papildomą saugą būtinas slaptažodis"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Įrenginį užrakino administratorius"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Įrenginys užrakintas neautomatiškai"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Neatpažinta"</string>

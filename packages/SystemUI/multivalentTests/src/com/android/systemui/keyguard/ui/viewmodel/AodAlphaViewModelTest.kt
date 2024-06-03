@@ -23,12 +23,18 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.DisableSceneContainer
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.data.repository.Idle
+import com.android.systemui.scene.data.repository.Transition
+import com.android.systemui.scene.data.repository.setSceneTransition
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -67,6 +73,7 @@ class AodAlphaViewModelTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun alpha_WhenNotGone_clockMigrationFlagIsOff_emitsKeyguardAlpha() =
         testScope.runTest {
             mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
@@ -86,6 +93,7 @@ class AodAlphaViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun alpha_WhenGoneToAod() =
         testScope.runTest {
             val alpha by collectLastValue(underTest.alpha)
@@ -110,6 +118,35 @@ class AodAlphaViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableSceneContainer
+    fun alpha_WhenGoneToAod_scene_container() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.alpha)
+
+            kosmos.setSceneTransition(Transition(from = Scenes.Lockscreen, to = Scenes.Gone))
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.AOD,
+                to = KeyguardState.UNDEFINED,
+                testScope = testScope,
+            )
+            kosmos.setSceneTransition(Idle(Scenes.Gone))
+            assertThat(alpha).isEqualTo(0f)
+
+            kosmos.setSceneTransition(Transition(from = Scenes.Gone, to = Scenes.Lockscreen))
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.UNDEFINED,
+                to = KeyguardState.AOD,
+                testScope = testScope,
+            )
+            enterFromTopAnimationAlpha.value = 0.5f
+            assertThat(alpha).isEqualTo(0.5f)
+
+            enterFromTopAnimationAlpha.value = 1f
+            assertThat(alpha).isEqualTo(1f)
+        }
+
+    @Test
+    @DisableSceneContainer
     fun alpha_WhenGoneToDozing() =
         testScope.runTest {
             val alpha by collectLastValue(underTest.alpha)
@@ -130,6 +167,25 @@ class AodAlphaViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableSceneContainer
+    fun alpha_WhenGoneToDozing_scene_container() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.alpha)
+
+            kosmos.setSceneTransition(Idle(Scenes.Gone))
+            assertThat(alpha).isEqualTo(0f)
+
+            kosmos.setSceneTransition(Transition(from = Scenes.Gone, to = Scenes.Lockscreen))
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.UNDEFINED,
+                to = KeyguardState.DOZING,
+                testScope = testScope,
+            )
+            assertThat(alpha).isEqualTo(1f)
+        }
+
+    @Test
+    @DisableSceneContainer
     fun alpha_whenGone_equalsZero() =
         testScope.runTest {
             mSetFlagsRule.enableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
@@ -166,6 +222,7 @@ class AodAlphaViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun enterFromTopAlpha() =
         testScope.runTest {
             val alpha by collectLastValue(underTest.alpha)
@@ -173,6 +230,28 @@ class AodAlphaViewModelTest : SysuiTestCase() {
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                    transitionState = TransitionState.STARTED,
+                )
+            )
+
+            enterFromTopAnimationAlpha.value = 0.2f
+            assertThat(alpha).isEqualTo(0.2f)
+
+            enterFromTopAnimationAlpha.value = 1f
+            assertThat(alpha).isEqualTo(1f)
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun enterFromTopAlpha_scene_container() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.alpha)
+
+            kosmos.setSceneTransition(Transition(from = Scenes.Gone, to = Scenes.Lockscreen))
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.UNDEFINED,
                     to = KeyguardState.AOD,
                     transitionState = TransitionState.STARTED,
                 )

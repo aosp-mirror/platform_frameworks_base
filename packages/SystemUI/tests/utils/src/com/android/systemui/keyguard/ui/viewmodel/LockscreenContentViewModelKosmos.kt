@@ -20,7 +20,9 @@ import com.android.systemui.biometrics.authController
 import com.android.systemui.keyguard.domain.interactor.keyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.unfold.domain.interactor.unfoldTransitionInteractor
 
 val Kosmos.lockscreenContentViewModel by
     Kosmos.Fixture {
@@ -30,5 +32,7 @@ val Kosmos.lockscreenContentViewModel by
             authController = authController,
             longPress = keyguardLongPressViewModel,
             shadeInteractor = shadeInteractor,
+            applicationScope = applicationCoroutineScope,
+            unfoldTransitionInteractor = unfoldTransitionInteractor,
         )
     }

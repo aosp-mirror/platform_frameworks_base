@@ -40,12 +40,14 @@ fun SettingsOutlinedTextField(
     singleLine: Boolean = true,
     enabled: Boolean = true,
     shape: Shape = OutlinedTextFieldDefaults.shape,
+    placeholder: @Composable (() -> Unit)? = null,
+    modifier: Modifier = Modifier
+        .fillMaxWidth()
+        .padding(SettingsDimension.textFieldPadding),
     onTextChange: (String) -> Unit
 ) {
     OutlinedTextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(SettingsDimension.textFieldPadding),
+        modifier = modifier,
         value = value,
         onValueChange = onTextChange,
         label = {
@@ -59,6 +61,7 @@ fun SettingsOutlinedTextField(
                 Text(text = errorMessage)
             }
         },
+        placeholder = placeholder,
         shape = shape
     )
 }

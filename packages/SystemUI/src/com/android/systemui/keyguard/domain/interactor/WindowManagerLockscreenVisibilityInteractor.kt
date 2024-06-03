@@ -14,14 +14,24 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.keyguard.domain.interactor
 
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
 import com.android.systemui.util.kotlin.sample
+import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -42,6 +52,8 @@ constructor(
     fromBouncerInteractor: FromPrimaryBouncerTransitionInteractor,
     fromAlternateBouncerInteractor: FromAlternateBouncerTransitionInteractor,
     notificationLaunchAnimationInteractor: NotificationLaunchAnimationInteractor,
+    sceneInteractor: Lazy<SceneInteractor>,
+    deviceEntryInteractor: Lazy<DeviceEntryInteractor>,
 ) {
     private val defaultSurfaceBehindVisibility =
         transitionInteractor.finishedKeyguardState.map(::isSurfaceVisible)
@@ -74,25 +86,52 @@ constructor(
             }
             .distinctUntilChanged()
 
+    private val isDeviceEntered: Flow<Boolean> by lazy {
+        deviceEntryInteractor.get().isDeviceEntered
+    }
+
+    private val isDeviceNotEntered: Flow<Boolean> by lazy { isDeviceEntered.map { !it } }
+
     /**
-     * Surface visibility, which is either determined by the default visibility in the FINISHED
-     * KeyguardState, or the transition-specific visibility used during certain RUNNING transitions.
+     * Surface visibility, which is either determined by the default visibility when not
+     * transitioning between [KeyguardState]s or [Scenes] or the transition-specific visibility used
+     * during certain ongoing transitions.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     val surfaceBehindVisibility: Flow<Boolean> =
-        transitionInteractor.isInTransitionToAnyState
-            .flatMapLatest { isInTransition ->
-                if (!isInTransition) {
-                    defaultSurfaceBehindVisibility
-                } else {
-                    combine(
-                        transitionSpecificSurfaceBehindVisibility,
-                        defaultSurfaceBehindVisibility,
-                    ) { transitionVisibility, defaultVisibility ->
-                        // Defer to the transition-specific visibility since we're RUNNING a
-                        // transition, but fall back to the default visibility if the current
-                        // transition's interactor did not specify a visibility.
-                        transitionVisibility ?: defaultVisibility
+        if (SceneContainerFlag.isEnabled) {
+                sceneInteractor.get().transitionState.flatMapLatestConflated { transitionState ->
+                    when (transitionState) {
+                        is ObservableTransitionState.Transition ->
+                            when {
+                                transitionState.fromScene == Scenes.Lockscreen &&
+                                    transitionState.toScene == Scenes.Gone -> flowOf(true)
+                                transitionState.fromScene == Scenes.Bouncer &&
+                                    transitionState.toScene == Scenes.Gone ->
+                                    transitionState.progress.map { progress ->
+                                        progress >
+                                            FromPrimaryBouncerTransitionInteractor
+                                                .TO_GONE_SURFACE_BEHIND_VISIBLE_THRESHOLD
+                                    }
+                                else -> isDeviceEntered
+                            }
+                        is ObservableTransitionState.Idle -> isDeviceEntered
+                    }
+                }
+            } else {
+                transitionInteractor.isInTransitionToAnyState.flatMapLatest { isInTransition ->
+                    if (!isInTransition) {
+                        defaultSurfaceBehindVisibility
+                    } else {
+                        combine(
+                            transitionSpecificSurfaceBehindVisibility,
+                            defaultSurfaceBehindVisibility,
+                        ) { transitionVisibility, defaultVisibility ->
+                            // Defer to the transition-specific visibility since we're RUNNING a
+                            // transition, but fall back to the default visibility if the current
+                            // transition's interactor did not specify a visibility.
+                            transitionVisibility ?: defaultVisibility
+                        }
                     }
                 }
             }
@@ -103,21 +142,45 @@ constructor(
      * animation. This is used to keep the RemoteAnimationTarget alive until we're done using it.
      */
     val usingKeyguardGoingAwayAnimation: Flow<Boolean> =
-        combine(
-                transitionInteractor.isInTransitionToState(KeyguardState.GONE),
-                transitionInteractor.finishedKeyguardState,
-                surfaceBehindInteractor.isAnimatingSurface,
-                notificationLaunchAnimationInteractor.isLaunchAnimationRunning,
-            ) { isInTransitionToGone, finishedState, isAnimatingSurface, notifLaunchRunning ->
-                // Using the animation if we're animating it directly, or if the
-                // ActivityLaunchAnimator is in the process of animating it.
-                val animationsRunning = isAnimatingSurface || notifLaunchRunning
-                // We may still be animating the surface after the keyguard is fully GONE, since
-                // some animations (like the translation spring) are not tied directly to the
-                // transition step amount.
-                isInTransitionToGone || (finishedState == KeyguardState.GONE && animationsRunning)
-            }
-            .distinctUntilChanged()
+        if (SceneContainerFlag.isEnabled) {
+            combine(
+                    sceneInteractor.get().transitionState,
+                    surfaceBehindInteractor.isAnimatingSurface,
+                    notificationLaunchAnimationInteractor.isLaunchAnimationRunning,
+                ) { transition, isAnimatingSurface, isLaunchAnimationRunning ->
+                    // Using the animation if we're animating it directly, or if the
+                    // ActivityLaunchAnimator is in the process of animating it.
+                    val isAnyAnimationRunning = isAnimatingSurface || isLaunchAnimationRunning
+                    // We may still be animating the surface after the keyguard is fully GONE, since
+                    // some animations (like the translation spring) are not tied directly to the
+                    // transition step amount.
+                    transition.isTransitioning(to = Scenes.Gone) ||
+                        (isAnyAnimationRunning &&
+                            (transition.isIdle(Scenes.Gone) ||
+                                transition.isTransitioning(from = Scenes.Gone)))
+                }
+                .distinctUntilChanged()
+        } else {
+            combine(
+                    transitionInteractor.isInTransition(
+                        edge = Edge.create(to = Scenes.Gone),
+                        edgeWithoutSceneContainer = Edge.create(to = KeyguardState.GONE)
+                    ),
+                    transitionInteractor.finishedKeyguardState,
+                    surfaceBehindInteractor.isAnimatingSurface,
+                    notificationLaunchAnimationInteractor.isLaunchAnimationRunning,
+                ) { isInTransitionToGone, finishedState, isAnimatingSurface, notifLaunchRunning ->
+                    // Using the animation if we're animating it directly, or if the
+                    // ActivityLaunchAnimator is in the process of animating it.
+                    val animationsRunning = isAnimatingSurface || notifLaunchRunning
+                    // We may still be animating the surface after the keyguard is fully GONE, since
+                    // some animations (like the translation spring) are not tied directly to the
+                    // transition step amount.
+                    isInTransitionToGone ||
+                        (finishedState == KeyguardState.GONE && animationsRunning)
+                }
+                .distinctUntilChanged()
+        }
 
     /**
      * Whether the lockscreen is visible, from the Window Manager (WM) perspective.
@@ -127,28 +190,33 @@ constructor(
      * want to know if the AOD/clock/notifs/etc. are visible.
      */
     val lockscreenVisibility: Flow<Boolean> =
-        transitionInteractor.currentKeyguardState
-            .sample(transitionInteractor.startedStepWithPrecedingStep, ::Pair)
-            .map { (currentState, startedWithPrev) ->
-                val startedFromStep = startedWithPrev?.previousValue
-                val startedStep = startedWithPrev?.newValue
-                val returningToGoneAfterCancellation =
-                    startedStep?.to == KeyguardState.GONE &&
-                        startedFromStep?.transitionState == TransitionState.CANCELED &&
-                        startedFromStep.from == KeyguardState.GONE
+        if (SceneContainerFlag.isEnabled) {
+            isDeviceNotEntered
+        } else {
+            transitionInteractor.currentKeyguardState
+                .sample(transitionInteractor.startedStepWithPrecedingStep, ::Pair)
+                .map { (currentState, startedWithPrev) ->
+                    val startedFromStep = startedWithPrev?.previousValue
+                    val startedStep = startedWithPrev?.newValue
+                    val returningToGoneAfterCancellation =
+                        startedStep?.to == KeyguardState.GONE &&
+                            startedFromStep?.transitionState == TransitionState.CANCELED &&
+                            startedFromStep.from == KeyguardState.GONE
 
-                if (!returningToGoneAfterCancellation) {
-                    // By default, apply the lockscreen visibility of the current state.
-                    KeyguardState.lockscreenVisibleInState(currentState)
-                } else {
-                    // If we're transitioning to GONE after a prior canceled transition from GONE,
-                    // then this is the camera launch transition from an asleep state back to GONE.
-                    // We don't want to show the lockscreen since we're aborting the lock and going
-                    // back to GONE.
-                    KeyguardState.lockscreenVisibleInState(KeyguardState.GONE)
+                    if (!returningToGoneAfterCancellation) {
+                        // By default, apply the lockscreen visibility of the current state.
+                        deviceEntryInteractor.get().isLockscreenEnabled() &&
+                            KeyguardState.lockscreenVisibleInState(currentState)
+                    } else {
+                        // If we're transitioning to GONE after a prior canceled transition from
+                        // GONE, then this is the camera launch transition from an asleep state back
+                        // to GONE. We don't want to show the lockscreen since we're aborting the
+                        // lock and going back to GONE.
+                        KeyguardState.lockscreenVisibleInState(KeyguardState.GONE)
+                    }
                 }
-            }
-            .distinctUntilChanged()
+                .distinctUntilChanged()
+        }
 
     /**
      * Whether always-on-display (AOD) is visible when the lockscreen is visible, from window
@@ -165,7 +233,7 @@ constructor(
             ) { isDozing, biometricUnlockState ->
                 // AOD is visible if we're dozing, unless we are wake and unlocking (where we go
                 // directly from AOD to unlocked while dozing).
-                isDozing && !BiometricUnlockModel.isWakeAndUnlock(biometricUnlockState)
+                isDozing && !BiometricUnlockMode.isWakeAndUnlock(biometricUnlockState.mode)
             }
             .distinctUntilChanged()
 

@@ -2359,7 +2359,10 @@ public abstract class CameraMetadata<TKey> {
      * FPS.</p>
      * <p>If the session configuration is not supported, the AE mode reported in the
      * CaptureResult will be 'ON' instead of 'ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY'.</p>
-     * <p>The application can observe the CapturerResult field
+     * <p>When this AE mode is enabled, the CaptureResult field
+     * {@link CaptureResult#CONTROL_LOW_LIGHT_BOOST_STATE android.control.lowLightBoostState} will be present and not null. Otherwise, the
+     * {@link CaptureResult#CONTROL_LOW_LIGHT_BOOST_STATE android.control.lowLightBoostState} field will not be present in the CaptureResult.</p>
+     * <p>The application can observe the CaptureResult field
      * {@link CaptureResult#CONTROL_LOW_LIGHT_BOOST_STATE android.control.lowLightBoostState} to determine when low light boost is 'ACTIVE' or
      * 'INACTIVE'.</p>
      * <p>The low light boost is 'ACTIVE' once the scene lighting condition is less than the

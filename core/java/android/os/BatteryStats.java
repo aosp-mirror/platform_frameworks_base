@@ -1948,6 +1948,10 @@ public abstract class BatteryStats {
 
         public static final int SETTLE_TO_ZERO_STATES = 0xffff0000 & ~MOST_INTERESTING_STATES;
 
+        // STATES bits that are used for Power Stats tracking
+        public static final int IMPORTANT_FOR_POWER_STATS_STATES =
+                STATE_GPS_ON_FLAG | STATE_SENSOR_ON_FLAG | STATE_AUDIO_ON_FLAG;
+
         @UnsupportedAppUsage
         public int states;
 
@@ -1987,6 +1991,10 @@ public abstract class BatteryStats {
                 | STATE2_CHARGING_FLAG | STATE2_PHONE_IN_CALL_FLAG | STATE2_BLUETOOTH_ON_FLAG;
 
         public static final int SETTLE_TO_ZERO_STATES2 = 0xffff0000 & ~MOST_INTERESTING_STATES2;
+
+        // STATES2 bits that are used for Power Stats tracking
+        public static final int IMPORTANT_FOR_POWER_STATS_STATES2 =
+                STATE2_VIDEO_ON_FLAG | STATE2_FLASHLIGHT_FLAG | STATE2_CAMERA_FLAG;
 
         @UnsupportedAppUsage
         public int states2;
@@ -2053,6 +2061,8 @@ public abstract class BatteryStats {
         public static final int EVENT_WAKEUP_AP = 0x0013;
         // Event for reporting that a specific partial wake lock has been held for a long duration.
         public static final int EVENT_LONG_WAKE_LOCK = 0x0014;
+        // Event for reporting change of some device states, triggered by a specific UID
+        public static final int EVENT_STATE_CHANGE = 0x0015;
 
         // Number of event types.
         public static final int EVENT_COUNT = 0x0016;
@@ -3066,13 +3076,13 @@ public abstract class BatteryStats {
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
             "null", "proc", "fg", "top", "sync", "wake_lock_in", "job", "user", "userfg", "conn",
             "active", "pkginst", "pkgunin", "alarm", "stats", "pkginactive", "pkgactive",
-            "tmpwhitelist", "screenwake", "wakeupap", "longwake", "est_capacity"
+            "tmpwhitelist", "screenwake", "wakeupap", "longwake", "est_capacity", "state"
     };
 
     public static final String[] HISTORY_EVENT_CHECKIN_NAMES = new String[] {
             "Enl", "Epr", "Efg", "Etp", "Esy", "Ewl", "Ejb", "Eur", "Euf", "Ecn",
             "Eac", "Epi", "Epu", "Eal", "Est", "Eai", "Eaa", "Etw",
-            "Esw", "Ewa", "Elw", "Eec"
+            "Esw", "Ewa", "Elw", "Eec", "Esc"
     };
 
     @FunctionalInterface
@@ -3087,7 +3097,7 @@ public abstract class BatteryStats {
             sUidToString, sUidToString, sUidToString, sUidToString, sUidToString, sUidToString,
             sUidToString, sUidToString, sUidToString, sUidToString, sUidToString, sIntToString,
             sUidToString, sUidToString, sUidToString, sUidToString, sUidToString, sUidToString,
-            sUidToString, sUidToString, sUidToString, sIntToString
+            sUidToString, sUidToString, sUidToString, sIntToString, sUidToString
     };
 
     /**

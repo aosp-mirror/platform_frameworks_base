@@ -19,9 +19,14 @@ package com.android.systemui.statusbar;
 import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 
+import static com.android.systemui.Flags.validateKeyboardShortcutHelperIconUri;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.AppGlobals;
+import android.app.SynchronousUserSwitchObserver;
+import android.app.UserSwitchObserver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -37,9 +42,11 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.hardware.input.InputManagerGlobal;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Pair;
@@ -57,6 +64,7 @@ import android.view.View;
 import android.view.View.AccessibilityDelegate;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
@@ -95,7 +103,7 @@ import java.util.Map;
 public final class KeyboardShortcutListSearch {
     private static final String TAG = KeyboardShortcutListSearch.class.getSimpleName();
     private static final Object sLock = new Object();
-    @VisibleForTesting static KeyboardShortcutListSearch sInstance;
+    @VisibleForTesting public static KeyboardShortcutListSearch sInstance;
 
     private static int SHORTCUT_SYSTEM_INDEX = 0;
     private static int SHORTCUT_INPUT_INDEX = 1;
@@ -104,6 +112,7 @@ public final class KeyboardShortcutListSearch {
 
     private WindowManager mWindowManager;
     private EditText mSearchEditText;
+    private ImageButton mEditTextCancel;
     private String mQueryString;
     private int mCurrentCategoryIndex = 0;
     private Map<Integer, Boolean> mKeySearchResultMap = new HashMap<>();
@@ -133,17 +142,26 @@ public final class KeyboardShortcutListSearch {
     };
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
-    @VisibleForTesting Context mContext;
+    private final HandlerThread mHandlerThread = new HandlerThread("KeyboardShortcutHelper");
+    @VisibleForTesting Handler mBackgroundHandler;
+    @VisibleForTesting public Context mContext;
     private final IPackageManager mPackageManager;
 
     @VisibleForTesting BottomSheetDialog mKeyboardShortcutsBottomSheetDialog;
     private KeyCharacterMap mKeyCharacterMap;
     private KeyCharacterMap mBackupKeyCharacterMap;
 
+    private final UserSwitchObserver mUserSwitchObserver = new SynchronousUserSwitchObserver() {
+            @Override
+            public void onUserSwitching(int newUserId) throws RemoteException {
+                dismiss();
+            }
+    };
+
     @VisibleForTesting
     KeyboardShortcutListSearch(Context context, WindowManager windowManager) {
         this.mContext = new ContextThemeWrapper(
-                context, android.R.style.Theme_DeviceDefault_Settings);
+                context, R.style.KeyboardShortcutHelper);
         this.mPackageManager = AppGlobals.getPackageManager();
         if (windowManager != null) {
             this.mWindowManager = windowManager;
@@ -410,36 +428,75 @@ public final class KeyboardShortcutListSearch {
     private boolean mAppShortcutsReceived;
     private boolean mImeShortcutsReceived;
 
-    @VisibleForTesting
-    void showKeyboardShortcuts(int deviceId) {
-        retrieveKeyCharacterMap(deviceId);
-        mAppShortcutsReceived = false;
-        mImeShortcutsReceived = false;
-        mWindowManager.requestAppKeyboardShortcuts(result -> {
-            // Add specific app shortcuts
+    private void onAppSpecificShortcutsReceived(List<KeyboardShortcutGroup> result) {
+        // Add specific app shortcuts
+        if (result != null) {
             if (result.isEmpty()) {
                 mCurrentAppPackageName = null;
                 mKeySearchResultMap.put(SHORTCUT_SPECIFICAPP_INDEX, false);
             } else {
                 mCurrentAppPackageName = result.get(0).getPackageName();
-                mSpecificAppGroup.addAll(reMapToKeyboardShortcutMultiMappingGroup(result));
+                if (validateKeyboardShortcutHelperIconUri()) {
+                    KeyboardShortcuts.sanitiseShortcuts(result);
+                }
+                mSpecificAppGroup.addAll(
+                        reMapToKeyboardShortcutMultiMappingGroup(result));
                 mKeySearchResultMap.put(SHORTCUT_SPECIFICAPP_INDEX, true);
             }
-            mAppShortcutsReceived = true;
-            if (mImeShortcutsReceived) {
-                mergeAndShowKeyboardShortcutsGroups();
-            }
-        }, deviceId);
-        mWindowManager.requestImeKeyboardShortcuts(result -> {
-            // Add specific Ime shortcuts
+        }
+        mAppShortcutsReceived = true;
+        if (mImeShortcutsReceived) {
+            mergeAndShowKeyboardShortcutsGroups();
+        }
+    }
+
+    private void onImeSpecificShortcutsReceived(List<KeyboardShortcutGroup> result) {
+        // Add specific Ime shortcuts
+        if (result != null) {
             if (!result.isEmpty()) {
-                mInputGroup.addAll(reMapToKeyboardShortcutMultiMappingGroup(result));
+                if (validateKeyboardShortcutHelperIconUri()) {
+                    KeyboardShortcuts.sanitiseShortcuts(result);
+                }
+                mInputGroup.addAll(
+                        reMapToKeyboardShortcutMultiMappingGroup(result));
             }
-            mImeShortcutsReceived = true;
-            if (mAppShortcutsReceived) {
-                mergeAndShowKeyboardShortcutsGroups();
+        }
+        mImeShortcutsReceived = true;
+        if (mAppShortcutsReceived) {
+            mergeAndShowKeyboardShortcutsGroups();
+        }
+    }
+
+    @VisibleForTesting
+    public void showKeyboardShortcuts(int deviceId) {
+        if (mBackgroundHandler == null) {
+            mHandlerThread.start();
+            mBackgroundHandler = new Handler(mHandlerThread.getLooper());
+        }
+
+        if (validateKeyboardShortcutHelperIconUri()) {
+            try {
+                ActivityManager.getService().registerUserSwitchObserver(mUserSwitchObserver, TAG);
+            } catch (RemoteException e) {
+                Log.e(TAG, "could not register user switch observer", e);
             }
-        }, deviceId);
+        }
+
+        retrieveKeyCharacterMap(deviceId);
+        mAppShortcutsReceived = false;
+        mImeShortcutsReceived = false;
+        mWindowManager.requestAppKeyboardShortcuts(
+                result -> {
+                    mBackgroundHandler.post(() -> {
+                        onAppSpecificShortcutsReceived(result);
+                    });
+                }, deviceId);
+        mWindowManager.requestImeKeyboardShortcuts(
+                result -> {
+                    mBackgroundHandler.post(() -> {
+                        onImeSpecificShortcutsReceived(result);
+                    });
+                }, deviceId);
     }
 
     private void mergeAndShowKeyboardShortcutsGroups() {
@@ -499,10 +556,19 @@ public final class KeyboardShortcutListSearch {
         return keyboardShortcutMultiMappingGroups;
     }
 
-    private void dismissKeyboardShortcuts() {
+    @VisibleForTesting
+    public void dismissKeyboardShortcuts() {
         if (mKeyboardShortcutsBottomSheetDialog != null) {
             mKeyboardShortcutsBottomSheetDialog.dismiss();
             mKeyboardShortcutsBottomSheetDialog = null;
+        }
+        mHandlerThread.quit();
+        if (validateKeyboardShortcutHelperIconUri()) {
+            try {
+                ActivityManager.getService().unregisterUserSwitchObserver(mUserSwitchObserver);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Could not unregister user switch observer", e);
+            }
         }
     }
 
@@ -853,13 +919,14 @@ public final class KeyboardShortcutListSearch {
             List<List<KeyboardShortcutMultiMappingGroup>> keyboardShortcutMultiMappingGroupList) {
         mQueryString = null;
         LayoutInflater inflater = mContext.getSystemService(LayoutInflater.class);
-        mKeyboardShortcutsBottomSheetDialog =
-                new BottomSheetDialog(mContext);
+        mKeyboardShortcutsBottomSheetDialog  = new BottomSheetDialog(mContext);
         final View keyboardShortcutsView = inflater.inflate(
                 R.layout.keyboard_shortcuts_search_view, null);
         LinearLayout shortcutsContainer = keyboardShortcutsView.findViewById(
                 R.id.keyboard_shortcuts_container);
         mNoSearchResults = keyboardShortcutsView.findViewById(R.id.shortcut_search_no_result);
+        Window keyboardShortcutsWindow = mKeyboardShortcutsBottomSheetDialog.getWindow();
+        setWindowProperties(keyboardShortcutsWindow);
         mKeyboardShortcutsBottomSheetDialog.setContentView(keyboardShortcutsView);
         setButtonsDefaultStatus(keyboardShortcutsView);
         populateCurrentAppButton();
@@ -874,25 +941,11 @@ public final class KeyboardShortcutListSearch {
         }
 
         BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(bottomSheet);
+        behavior.setDraggable(true);
         behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         behavior.setSkipCollapsed(true);
-        behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-                    @Override
-                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                        if (newState == BottomSheetBehavior.STATE_DRAGGING) {
-                            behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                        }
-                    }
 
-                    @Override
-                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                        // Do nothing.
-                    }
-                });
 
-        mKeyboardShortcutsBottomSheetDialog.setCanceledOnTouchOutside(true);
-        Window keyboardShortcutsWindow = mKeyboardShortcutsBottomSheetDialog.getWindow();
-        keyboardShortcutsWindow.setType(TYPE_SYSTEM_DIALOG);
         synchronized (sLock) {
             // show KeyboardShortcutsBottomSheetDialog only if it has not been dismissed already
             if (sInstance != null) {
@@ -908,6 +961,8 @@ public final class KeyboardShortcutListSearch {
             }
         }
         mSearchEditText = keyboardShortcutsView.findViewById(R.id.keyboard_shortcuts_search);
+        mEditTextCancel = keyboardShortcutsView.findViewById(
+                R.id.keyboard_shortcuts_search_cancel);
         mSearchEditText.addTextChangedListener(
                 new TextWatcher() {
                     @Override
@@ -921,6 +976,8 @@ public final class KeyboardShortcutListSearch {
                             shortcutsContainer.setAccessibilityPaneTitle(mContext.getString(
                                     R.string.keyboard_shortcut_a11y_show_search_results));
                         }
+                        mEditTextCancel.setVisibility(
+                                TextUtils.isEmpty(mQueryString) ? View.GONE : View.VISIBLE);
                     }
 
                     @Override
@@ -933,9 +990,28 @@ public final class KeyboardShortcutListSearch {
                         // Do nothing.
                     }
                 });
-        ImageButton editTextCancel = keyboardShortcutsView.findViewById(
-                R.id.keyboard_shortcuts_search_cancel);
-        editTextCancel.setOnClickListener(v -> mSearchEditText.setText(null));
+
+        mEditTextCancel.setOnClickListener(v -> mSearchEditText.setText(null));
+    }
+
+    private static void setWindowProperties(Window keyboardShortcutsWindow) {
+        keyboardShortcutsWindow.setType(TYPE_SYSTEM_DIALOG);
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+        params.copyFrom(keyboardShortcutsWindow.getAttributes());
+        // Allows the bottom sheet dialog to render all the way to the bottom of the screen,
+        // behind the gesture navigation bar.
+        params.flags |= WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+        params.setFitInsetsTypes(WindowInsets.Type.statusBars());
+        keyboardShortcutsWindow.setAttributes(params);
+        keyboardShortcutsWindow.getDecorView().setOnApplyWindowInsetsListener((v, insets) -> {
+            int bottom = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
+            View container = v.findViewById(R.id.keyboard_shortcuts_container);
+            container.setPadding(container.getPaddingLeft(), container.getPaddingTop(),
+                    container.getPaddingRight(), bottom);
+            return WindowInsets.CONSUMED;
+        });
+        keyboardShortcutsWindow.setWindowAnimations(
+                R.style.KeyboardShortcutHelper_BottomSheetDialogAnimation);
     }
 
     private void populateKeyboardShortcutSearchList(LinearLayout keyboardShortcutsLayout) {
@@ -1256,10 +1332,10 @@ public final class KeyboardShortcutListSearch {
         if (mContext.getResources().getConfiguration().orientation
                 == Configuration.ORIENTATION_PORTRAIT) {
             lp.width = (int) (display.getWidth() * 0.8);
-            lp.height = (int) (display.getHeight() * 0.7);
+            lp.height = (int) (display.getHeight() * 0.8);
         } else {
             lp.width = (int) (display.getWidth() * 0.7);
-            lp.height = (int) (display.getHeight() * 0.8);
+            lp.height = (int) (display.getHeight() * 0.95);
         }
         window.setGravity(Gravity.BOTTOM);
         window.setAttributes(lp);

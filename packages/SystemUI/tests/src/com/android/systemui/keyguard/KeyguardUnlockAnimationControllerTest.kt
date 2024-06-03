@@ -7,13 +7,14 @@ import android.graphics.Point
 import android.graphics.Rect
 import android.os.PowerManager
 import android.platform.test.annotations.DisableFlags
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.RemoteAnimationTarget
 import android.view.SurfaceControl
 import android.view.SyncRtSurfaceTransactionApplier
 import android.view.View
 import android.view.ViewRootImpl
+import android.view.WindowManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
 import com.android.systemui.Flags
@@ -45,12 +46,14 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 import java.util.function.Predicate
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 @SmallTest
 class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
 
+    @Mock
+    private lateinit var windowManager: WindowManager
     @Mock
     private lateinit var keyguardViewMediator: KeyguardViewMediator
     @Mock
@@ -99,7 +102,8 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         keyguardUnlockAnimationController = KeyguardUnlockAnimationController(
-            context, keyguardStateController, { keyguardViewMediator }, keyguardViewController,
+            windowManager, context.resources,
+            keyguardStateController, { keyguardViewMediator }, keyguardViewController,
             featureFlags, { biometricUnlockController }, statusBarStateController,
             notificationShadeWindowController, powerManager, wallpaperManager
         )

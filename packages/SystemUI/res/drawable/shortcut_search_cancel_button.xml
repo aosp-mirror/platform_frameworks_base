@@ -20,7 +20,7 @@
     <shape android:shape="oval">
       <size android:width="24dp"
         android:height="24dp" />
-      <solid android:color="?androidprv:attr/colorSurface"/>
+      <solid android:color="?androidprv:attr/materialColorSurfaceBright"/>
     </shape>
   </item>
 </ripple>

@@ -18,9 +18,9 @@ package com.android.systemui.volume.panel.component.volume.ui.composable
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.PlatformSliderColors
 import com.android.compose.grid.VerticalGrid
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.SliderViewModel
@@ -39,13 +39,14 @@ fun GridVolumeSliders(
         horizontalSpacing = 24.dp,
     ) {
         for (sliderViewModel in viewModels) {
-            val sliderState = sliderViewModel.slider.collectAsState().value
+            val sliderState = sliderViewModel.slider.collectAsStateWithLifecycle().value
             VolumeSlider(
                 modifier = Modifier.fillMaxWidth(),
                 state = sliderState,
                 onValueChange = { newValue: Float ->
                     sliderViewModel.onValueChanged(sliderState, newValue)
                 },
+                onValueChangeFinished = { sliderViewModel.onValueChangeFinished() },
                 onIconTapped = { sliderViewModel.toggleMuted(sliderState) },
                 sliderColors = sliderColors,
             )

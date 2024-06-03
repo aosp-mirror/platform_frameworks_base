@@ -16,7 +16,7 @@
 
 package com.android.server.pm;
 
-import static android.app.admin.flags.Flags.crossUserSuspensionEnabled;
+import static android.app.admin.flags.Flags.crossUserSuspensionEnabledRo;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
@@ -93,6 +93,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.pm.parsing.pkg.AndroidPackageInternal;
 import com.android.internal.pm.pkg.component.ParsedComponent;
 import com.android.internal.pm.pkg.component.ParsedIntentInfo;
 import com.android.internal.pm.pkg.component.ParsedPermission;
@@ -911,8 +912,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             sharedUserSetting.mDisabledPackages.remove(p);
         }
         p.getPkgState().setUpdatedSystemApp(false);
+        final AndroidPackageInternal pkg = p.getPkg();
         PackageSetting ret = addPackageLPw(name, p.getRealName(), p.getPath(), p.getAppId(),
-                p.getFlags(), p.getPrivateFlags(), mDomainVerificationManager.generateNewId());
+                p.getFlags(), p.getPrivateFlags(), mDomainVerificationManager.generateNewId(),
+                pkg == null ? false : pkg.isSdkLibrary());
         if (ret != null) {
             ret.setLegacyNativeLibraryPath(p.getLegacyNativeLibraryPath());
             ret.setPrimaryCpuAbi(p.getPrimaryCpuAbiLegacy());
@@ -951,8 +954,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         }
     }
 
-    PackageSetting addPackageLPw(String name, String realName, File codePath, int uid, int pkgFlags,
-                                 int pkgPrivateFlags, @NonNull UUID domainSetId) {
+    PackageSetting addPackageLPw(String name, String realName, File codePath, int uid,
+            int pkgFlags, int pkgPrivateFlags, @NonNull UUID domainSetId, boolean isSdkLibrary) {
         PackageSetting p = mPackages.get(name);
         if (p != null) {
             if (p.getAppId() == uid) {
@@ -964,7 +967,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         }
         p = new PackageSetting(name, realName, codePath, pkgFlags, pkgPrivateFlags, domainSetId)
                 .setAppId(uid);
-        if (mAppIds.registerExistingAppId(uid, p, name)) {
+        if ((uid == Process.INVALID_UID && isSdkLibrary && Flags.disallowSdkLibsToBeApps())
+                || mAppIds.registerExistingAppId(uid, p, name)) {
             mPackages.put(name, p);
             return p;
         }
@@ -2054,7 +2058,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             return null;
         }
         int suspendingUserId;
-        if (crossUserSuspensionEnabled()) {
+        if (crossUserSuspensionEnabledRo()) {
             suspendingUserId = parser.getAttributeInt(
                     null, ATTR_SUSPENDING_USER, UserHandle.USER_NULL);
             if (suspendingUserId == UserHandle.USER_NULL) {
@@ -2135,10 +2139,18 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     continue;
                 }
 
+                ComponentName unflattenOriginalComponentName = ComponentName.unflattenFromString(
+                        originalComponentName);
+                if (unflattenOriginalComponentName == null) {
+                    Slog.wtf(TAG, "Incorrect component name: " + originalComponentName
+                            + " from the attributes");
+                    continue;
+                }
+
                 activityInfos.add(
                         new ArchiveState.ArchiveActivityInfo(
                                 title,
-                                ComponentName.unflattenFromString(originalComponentName),
+                                unflattenOriginalComponentName,
                                 iconPath,
                                 monochromeIconPath));
             }
@@ -2433,7 +2445,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                 serializer.startTag(null, TAG_SUSPEND_PARAMS);
                                 serializer.attribute(null, ATTR_SUSPENDING_PACKAGE,
                                         suspendingPackage.packageName);
-                                if (crossUserSuspensionEnabled()) {
+                                if (crossUserSuspensionEnabledRo()) {
                                     serializer.attributeInt(null, ATTR_SUSPENDING_USER,
                                             suspendingPackage.userId);
                                 }
@@ -3239,6 +3251,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         if (pkg.isForceQueryableOverride()) {
             serializer.attributeBoolean(null, "forceQueryable", true);
         }
+        if (pkg.isPendingRestore()) {
+            serializer.attributeBoolean(null, "pendingRestore", true);
+        }
         if (pkg.isLoading()) {
             serializer.attributeBoolean(null, "isLoading", true);
         }
@@ -4042,6 +4057,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         PackageSetting packageSetting = null;
         long versionCode = 0;
         boolean installedForceQueryable = false;
+        boolean isPendingRestore = false;
         float loadingProgress = 0;
         long loadingCompletedTime = 0;
         UUID domainSetId;
@@ -4067,6 +4083,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             cpuAbiOverrideString = parser.getAttributeValue(null, "cpuAbiOverride");
             updateAvailable = parser.getAttributeBoolean(null, "updateAvailable", false);
             installedForceQueryable = parser.getAttributeBoolean(null, "forceQueryable", false);
+            isPendingRestore = parser.getAttributeBoolean(null, "pendingRestore", false);
             loadingProgress = parser.getAttributeFloat(null, "loadingProgress", 0);
             loadingCompletedTime = parser.getAttributeLongHex(null, "loadingCompletedTime", 0);
 
@@ -4176,7 +4193,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             } else if (appId > 0 || (appId == Process.INVALID_UID && isSdkLibrary
                     && Flags.disallowSdkLibsToBeApps())) {
                 packageSetting = addPackageLPw(name.intern(), realName, new File(codePathStr),
-                        appId, pkgFlags, pkgPrivateFlags, domainSetId);
+                        appId, pkgFlags, pkgPrivateFlags, domainSetId, isSdkLibrary);
                 if (PackageManagerService.DEBUG_SETTINGS)
                     Log.i(PackageManagerService.TAG, "Reading package " + name + ": appId="
                             + appId + " pkg=" + packageSetting);
@@ -4240,6 +4257,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     .setSecondaryCpuAbi(secondaryCpuAbiString)
                     .setUpdateAvailable(updateAvailable)
                     .setForceQueryableOverride(installedForceQueryable)
+                    .setPendingRestore(isPendingRestore)
                     .setLoadingProgress(loadingProgress)
                     .setLoadingCompletedTime(loadingCompletedTime)
                     .setAppMetadataFilePath(appMetadataFilePath)

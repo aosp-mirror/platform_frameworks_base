@@ -43,6 +43,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.assertSizeIsEqualTo
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -157,8 +158,8 @@ class MovableElementTest {
                             fromSceneZIndex: Float,
                             toSceneZIndex: Float
                         ): SceneKey {
-                            assertThat(transition.fromScene).isEqualTo(TestScenes.SceneA)
-                            assertThat(transition.toScene).isEqualTo(TestScenes.SceneB)
+                            assertThat(transition).hasFromScene(TestScenes.SceneA)
+                            assertThat(transition).hasToScene(TestScenes.SceneB)
                             assertThat(fromSceneZIndex).isEqualTo(0)
                             assertThat(toSceneZIndex).isEqualTo(1)
 

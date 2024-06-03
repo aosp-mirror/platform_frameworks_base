@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import static com.android.internal.pm.pkg.parsing.ParsingPackageUtils.PARSE_APEX;
+
 import android.apex.ApexInfo;
 import android.apex.ApexInfoList;
 import android.apex.ApexSessionInfo;
@@ -399,7 +401,7 @@ final class PackageSessionVerifier {
             final ParsedPackage parsedPackage;
             try (PackageParser2 packageParser = mPackageParserSupplier.get()) {
                 File apexFile = new File(apexInfo.modulePath);
-                parsedPackage = packageParser.parsePackage(apexFile, 0, false);
+                parsedPackage = packageParser.parsePackage(apexFile, PARSE_APEX, false);
             } catch (PackageParserException e) {
                 throw new PackageManagerException(
                         PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,

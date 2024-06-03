@@ -31,6 +31,7 @@ import com.android.systemui.log.dagger.DreamLog
 import com.android.systemui.util.wakelock.WakeLock
 import com.android.systemui.util.wakelock.WakeLock.Builder.NO_TIMEOUT
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -46,7 +47,7 @@ constructor(
     private val taskFragmentFactory: TaskFragmentComponent.Factory,
     private val homeControlsComponentInteractor: HomeControlsComponentInteractor,
     private val wakeLockBuilder: WakeLock.Builder,
-    private val dreamActivityProvider: DreamActivityProvider,
+    private val dreamServiceDelegate: DreamServiceDelegate,
     @Background private val bgDispatcher: CoroutineDispatcher,
     @DreamLog logBuffer: LogBuffer
 ) : DreamService() {
@@ -65,7 +66,7 @@ constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        val activity = dreamActivityProvider.getActivity(this)
+        val activity = dreamServiceDelegate.getActivity(this)
         if (activity == null) {
             finish()
             return
@@ -79,9 +80,9 @@ constructor(
             taskFragmentFactory
                 .create(
                     activity = activity,
-                    onCreateCallback = this::onTaskFragmentCreated,
+                    onCreateCallback = { launchActivity() },
                     onInfoChangedCallback = this::onTaskFragmentInfoChanged,
-                    hide = { finish() }
+                    hide = { endDream(false) }
                 )
                 .apply { createTaskFragment() }
 
@@ -91,12 +92,24 @@ constructor(
     private fun onTaskFragmentInfoChanged(taskFragmentInfo: TaskFragmentInfo) {
         if (taskFragmentInfo.isEmpty) {
             logger.d("Finishing dream due to TaskFragment being empty")
-            finish()
-            homeControlsComponentInteractor.onTaskFragmentEmpty()
+            endDream(true)
         }
     }
 
-    private fun onTaskFragmentCreated(taskFragmentInfo: TaskFragmentInfo) {
+    private fun endDream(handleRedirect: Boolean) {
+        homeControlsComponentInteractor.onDreamEndUnexpectedly()
+        if (handleRedirect && dreamServiceDelegate.redirectWake(this)) {
+            dreamServiceDelegate.wakeUp(this)
+            serviceScope.launch {
+                delay(ACTIVITY_RESTART_DELAY)
+                launchActivity()
+            }
+        } else {
+            dreamServiceDelegate.finish(this)
+        }
+    }
+
+    private fun launchActivity() {
         val setting = controlsSettingsRepository.allowActionOnTrivialControlsInLockscreen.value
         val componentName = homeControlsComponentInteractor.panelComponent.value
         logger.d("Starting embedding $componentName")
@@ -130,6 +143,14 @@ constructor(
          * complete.
          */
         val CANCELLATION_DELAY_AFTER_DETACHED = 5.seconds
+
+        /**
+         * Defines the delay after wakeup where we should attempt to restart the embedded activity.
+         * When a wakeup is redirected, the dream service may keep running. In this case, we should
+         * restart the activity if it finished. This delays ensures the activity is only restarted
+         * after the wakeup transition has played.
+         */
+        val ACTIVITY_RESTART_DELAY = 334.milliseconds
         const val TAG = "HomeControlsDreamService"
     }
 }

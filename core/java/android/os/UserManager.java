@@ -18,6 +18,7 @@ package android.os;
 
 import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
 import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_BADGED_LABEL;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.STATUS_BAR_WORK_ICON_ACCESSIBILITY;
 import static android.app.admin.DevicePolicyResources.UNDEFINED;
 
 import android.Manifest;
@@ -367,17 +368,18 @@ public class UserManager {
     public static final String DISALLOW_WIFI_TETHERING = "no_wifi_tethering";
 
     /**
-     * Specifies if a user is disallowed from being granted admin privileges.
+     * Restricts a user's ability to possess or grant admin privileges.
      *
-     * <p>This restriction limits ability of other admin users to grant admin
-     * privileges to selected user.
+     * <p>When set to <code>true</code>, this prevents the user from:
+     *     <ul>
+     *         <li>Becoming an admin</li>
+     *         <li>Giving other users admin privileges</li>
+     *     </ul>
      *
-     * <p>This restriction has no effect in a mode that does not allow multiple admins.
+     * <p>This restriction is only effective in environments where multiple admins are allowed.
      *
-     * <p>The default value is <code>false</code>.
+     * <p>Key for user restrictions. Type: Boolean. Default: <code>false</code>.
      *
-     * <p>Key for user restrictions.
-     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -705,7 +707,7 @@ public class UserManager {
      * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_BLUETOOTH}
      * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
-     * <p>Default is <code>true</code> for managed profiles and false otherwise.
+     * <p>Default is <code>true</code> for managed and private profiles, false otherwise.
      *
      * <p>When a device upgrades to {@link android.os.Build.VERSION_CODES#O}, the system sets it
      * for all existing managed profiles.
@@ -1929,12 +1931,10 @@ public class UserManager {
     public static final String DISALLOW_THREAD_NETWORK = "no_thread_network";
 
     /**
-     * This user restriction specifies if the user is able to add SIMs to the device.
+     * This user restriction specifies if the user is able to add embedded SIMs to the device.
      *
      * <p>
-     * This restriction blocks the download of embedded SIMs, and disables any physical SIMs.
-     * If any embedded SIMs are already on the device, then they are removed. This restriction
-     * does not affect SIMs provisioned to the device by device owners or profile owners.
+     * This restriction blocks the download of embedded SIMs.
      *
      * <p>
      * This restriction can only be set by a device owner or a profile owner of an
@@ -1950,6 +1950,7 @@ public class UserManager {
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
+     *
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -1988,85 +1989,86 @@ public class UserManager {
      * @hide
      */
     @StringDef(value = {
-            DISALLOW_MODIFY_ACCOUNTS,
-            DISALLOW_CONFIG_WIFI,
-            DISALLOW_CONFIG_LOCALE,
-            DISALLOW_INSTALL_APPS,
-            DISALLOW_UNINSTALL_APPS,
-            DISALLOW_SHARE_LOCATION,
+            ALLOW_PARENT_PROFILE_APP_LINKING,
+            DISALLOW_ADD_CLONE_PROFILE,
+            DISALLOW_ADD_MANAGED_PROFILE,
+            DISALLOW_ADD_PRIVATE_PROFILE,
+            DISALLOW_ADD_USER,
+            DISALLOW_ADD_WIFI_CONFIG,
+            DISALLOW_ADJUST_VOLUME,
             DISALLOW_AIRPLANE_MODE,
-            DISALLOW_CONFIG_BRIGHTNESS,
             DISALLOW_AMBIENT_DISPLAY,
-            DISALLOW_CONFIG_SCREEN_TIMEOUT,
-            DISALLOW_INSTALL_UNKNOWN_SOURCES,
-            DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY,
-            DISALLOW_CONFIG_BLUETOOTH,
+            DISALLOW_APPS_CONTROL,
+            DISALLOW_ASSIST_CONTENT,
+            DISALLOW_AUTOFILL,
+            DISALLOW_BIOMETRIC,
             DISALLOW_BLUETOOTH,
             DISALLOW_BLUETOOTH_SHARING,
-            DISALLOW_USB_FILE_TRANSFER,
-            DISALLOW_CONFIG_CREDENTIALS,
-            DISALLOW_REMOVE_USER,
-            DISALLOW_REMOVE_MANAGED_PROFILE,
-            DISALLOW_DEBUGGING_FEATURES,
-            DISALLOW_CONFIG_VPN,
-            DISALLOW_CONFIG_LOCATION,
-            DISALLOW_CONFIG_DATE_TIME,
-            DISALLOW_CONFIG_TETHERING,
-            DISALLOW_NETWORK_RESET,
-            DISALLOW_FACTORY_RESET,
-            DISALLOW_ADD_USER,
-            DISALLOW_ADD_MANAGED_PROFILE,
-            DISALLOW_ADD_CLONE_PROFILE,
-            DISALLOW_ADD_PRIVATE_PROFILE,
-            ENSURE_VERIFY_APPS,
-            DISALLOW_CONFIG_CELL_BROADCASTS,
-            DISALLOW_CONFIG_MOBILE_NETWORKS,
-            DISALLOW_APPS_CONTROL,
-            DISALLOW_MOUNT_PHYSICAL_MEDIA,
-            DISALLOW_UNMUTE_MICROPHONE,
-            DISALLOW_ADJUST_VOLUME,
-            DISALLOW_OUTGOING_CALLS,
-            DISALLOW_SMS,
-            DISALLOW_FUN,
-            DISALLOW_CREATE_WINDOWS,
-            DISALLOW_SYSTEM_ERROR_DIALOGS,
-            DISALLOW_CROSS_PROFILE_COPY_PASTE,
-            DISALLOW_OUTGOING_BEAM,
-            DISALLOW_WALLPAPER,
-            DISALLOW_SET_WALLPAPER,
-            DISALLOW_SAFE_BOOT,
-            DISALLOW_RECORD_AUDIO,
-            DISALLOW_RUN_IN_BACKGROUND,
             DISALLOW_CAMERA,
-            DISALLOW_UNMUTE_DEVICE,
-            DISALLOW_DATA_ROAMING,
-            DISALLOW_SET_USER_ICON,
-            DISALLOW_OEM_UNLOCK,
-            DISALLOW_UNIFIED_PASSWORD,
-            ALLOW_PARENT_PROFILE_APP_LINKING,
-            DISALLOW_AUTOFILL,
+            DISALLOW_CAMERA_TOGGLE,
+            DISALLOW_CELLULAR_2G,
+            DISALLOW_CHANGE_WIFI_STATE,
+            DISALLOW_CONFIG_BLUETOOTH,
+            DISALLOW_CONFIG_BRIGHTNESS,
+            DISALLOW_CONFIG_CELL_BROADCASTS,
+            DISALLOW_CONFIG_CREDENTIALS,
+            DISALLOW_CONFIG_DATE_TIME,
+            DISALLOW_CONFIG_DEFAULT_APPS,
+            DISALLOW_CONFIG_LOCALE,
+            DISALLOW_CONFIG_LOCATION,
+            DISALLOW_CONFIG_MOBILE_NETWORKS,
+            DISALLOW_CONFIG_PRIVATE_DNS,
+            DISALLOW_CONFIG_SCREEN_TIMEOUT,
+            DISALLOW_CONFIG_TETHERING,
+            DISALLOW_CONFIG_VPN,
+            DISALLOW_CONFIG_WIFI,
             DISALLOW_CONTENT_CAPTURE,
             DISALLOW_CONTENT_SUGGESTIONS,
-            DISALLOW_USER_SWITCH,
-            DISALLOW_SHARE_INTO_MANAGED_PROFILE,
-            DISALLOW_PRINTING,
-            DISALLOW_CONFIG_PRIVATE_DNS,
-            DISALLOW_MICROPHONE_TOGGLE,
-            DISALLOW_CAMERA_TOGGLE,
-            KEY_RESTRICTIONS_PENDING,
-            DISALLOW_BIOMETRIC,
-            DISALLOW_CHANGE_WIFI_STATE,
-            DISALLOW_WIFI_TETHERING,
-            DISALLOW_SHARING_ADMIN_CONFIGURED_WIFI,
-            DISALLOW_WIFI_DIRECT,
-            DISALLOW_ADD_WIFI_CONFIG,
-            DISALLOW_CELLULAR_2G,
-            DISALLOW_ULTRA_WIDEBAND_RADIO,
+            DISALLOW_CREATE_WINDOWS,
+            DISALLOW_CROSS_PROFILE_COPY_PASTE,
+            DISALLOW_DATA_ROAMING,
+            DISALLOW_DEBUGGING_FEATURES,
+            DISALLOW_FACTORY_RESET,
+            DISALLOW_FUN,
             DISALLOW_GRANT_ADMIN,
+            DISALLOW_INSTALL_APPS,
+            DISALLOW_INSTALL_UNKNOWN_SOURCES,
+            DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY,
+            DISALLOW_MICROPHONE_TOGGLE,
+            DISALLOW_MODIFY_ACCOUNTS,
+            DISALLOW_MOUNT_PHYSICAL_MEDIA,
             DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO,
-            DISALLOW_THREAD_NETWORK,
+            DISALLOW_NETWORK_RESET,
+            DISALLOW_OEM_UNLOCK,
+            DISALLOW_OUTGOING_BEAM,
+            DISALLOW_OUTGOING_CALLS,
+            DISALLOW_PRINTING,
+            DISALLOW_RECORD_AUDIO,
+            DISALLOW_REMOVE_MANAGED_PROFILE,
+            DISALLOW_REMOVE_USER,
+            DISALLOW_RUN_IN_BACKGROUND,
+            DISALLOW_SAFE_BOOT,
+            DISALLOW_SET_USER_ICON,
+            DISALLOW_SET_WALLPAPER,
+            DISALLOW_SHARE_INTO_MANAGED_PROFILE,
+            DISALLOW_SHARE_LOCATION,
+            DISALLOW_SHARING_ADMIN_CONFIGURED_WIFI,
             DISALLOW_SIM_GLOBALLY,
-            DISALLOW_ASSIST_CONTENT,
+            DISALLOW_SMS,
+            DISALLOW_SYSTEM_ERROR_DIALOGS,
+            DISALLOW_THREAD_NETWORK,
+            DISALLOW_ULTRA_WIDEBAND_RADIO,
+            DISALLOW_UNIFIED_PASSWORD,
+            DISALLOW_UNINSTALL_APPS,
+            DISALLOW_UNMUTE_DEVICE,
+            DISALLOW_UNMUTE_MICROPHONE,
+            DISALLOW_USB_FILE_TRANSFER,
+            DISALLOW_USER_SWITCH,
+            DISALLOW_WALLPAPER,
+            DISALLOW_WIFI_DIRECT,
+            DISALLOW_WIFI_TETHERING,
+            ENSURE_VERIFY_APPS,
+            KEY_RESTRICTIONS_PENDING,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserRestrictionKey {}
@@ -5950,6 +5952,46 @@ public class UserManager {
             return Resources.getSystem().getString(resourceId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the string used to represent the profile associated with the given userId. This
+     * string typically includes the profile name used by accessibility services like TalkBack.
+     *
+     * @return String representing the accessibility label for the given profile user.
+     *
+     * @throws android.content.res.Resources.NotFoundException if the user does not have a label
+     * defined.
+     *
+     * @see #getBadgedLabelForUser(CharSequence, UserHandle)
+     *
+     * @hide
+     */
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    Manifest.permission.MANAGE_USERS,
+                    Manifest.permission.QUERY_USERS,
+                    Manifest.permission.INTERACT_ACROSS_USERS})
+    public String getProfileAccessibilityString(@UserIdInt int userId) {
+        if (isManagedProfile(mUserId)) {
+            DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+            dpm.getResources().getString(
+                    STATUS_BAR_WORK_ICON_ACCESSIBILITY,
+                    () -> getProfileAccessibilityLabel(userId));
+        }
+        return getProfileAccessibilityLabel(userId);
+    }
+
+    private String getProfileAccessibilityLabel(@UserIdInt int userId) {
+        try {
+            final int resourceId = mService.getProfileAccessibilityLabelResId(userId);
+            return Resources.getSystem().getString(resourceId);
+        } catch (Resources.NotFoundException nfe) {
+            Log.e(TAG, "Accessibility label not defined for user " + userId);
+            throw nfe;
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
         }
     }
 

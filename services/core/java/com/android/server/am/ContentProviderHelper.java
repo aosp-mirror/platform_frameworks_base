@@ -179,6 +179,7 @@ public class ContentProviderHelper {
         final int expectedUserId = userId;
         synchronized (mService) {
             long startTime = SystemClock.uptimeMillis();
+            long startTimeNs = SystemClock.uptimeNanos();
 
             ProcessRecord r = null;
             if (caller != null) {
@@ -585,6 +586,8 @@ public class ContentProviderHelper {
                                     callingProcessState, ActivityManager.PROCESS_STATE_NONEXISTENT,
                                     firstLaunch,
                                     0L /* TODO: stoppedDuration */);
+                            mService.mProcessList.getAppStartInfoTracker()
+                                    .handleProcessContentProviderStart(startTimeNs, proc);
                         }
                         cpr.launchingApp = proc;
                         mLaunchingProviders.add(cpr);

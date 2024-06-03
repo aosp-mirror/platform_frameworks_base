@@ -18,5 +18,7 @@ package com.android.systemui
 
 import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.util.mockito.mock
 
-val Kosmos.activityIntentHelper by Kosmos.Fixture { ActivityIntentHelper(applicationContext) }
+val Kosmos.mockActivityIntentHelper by Kosmos.Fixture { mock<ActivityIntentHelper>() }
+var Kosmos.activityIntentHelper by Kosmos.Fixture { ActivityIntentHelper(applicationContext) }

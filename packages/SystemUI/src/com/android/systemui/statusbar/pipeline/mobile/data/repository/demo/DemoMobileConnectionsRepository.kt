@@ -27,6 +27,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.ServiceStateModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
@@ -135,6 +136,9 @@ constructor(
         MutableStateFlow(MobileMappings.Config.readConfig(context))
 
     override val defaultMobileIconGroup = flowOf(TelephonyIcons.THREE_G)
+
+    // TODO(b/339023069): demo command for device-based connectivity state
+    override val deviceServiceState: StateFlow<ServiceStateModel?> = MutableStateFlow(null)
 
     override val isAnySimSecure: Flow<Boolean> = flowOf(getIsAnySimSecure())
     override fun getIsAnySimSecure(): Boolean = false

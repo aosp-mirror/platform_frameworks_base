@@ -19,9 +19,16 @@ package com.android.server.net;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_BACKGROUND;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_DOZABLE;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_LOW_POWER_STANDBY;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_METERED_ALLOW;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_METERED_DENY_ADMIN;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_METERED_DENY_USER;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_POWERSAVE;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_RESTRICTED;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_STANDBY;
+import static android.net.ConnectivityManager.FIREWALL_RULE_ALLOW;
+import static android.net.ConnectivityManager.FIREWALL_RULE_DEFAULT;
+import static android.net.ConnectivityManager.FIREWALL_RULE_DENY;
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 import static android.util.DebugUtils.valueToString;
 
 import static org.junit.Assert.assertEquals;
@@ -51,7 +58,10 @@ import android.os.PermissionEnforcer;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.test.FakePermissionEnforcer;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 
 import androidx.test.filters.SmallTest;
@@ -62,6 +72,7 @@ import com.android.modules.utils.build.SdkLevel;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -83,6 +94,9 @@ public class NetworkManagementServiceTest {
     @Mock private ConnectivityManager mCm;
     @Mock private IBatteryStats.Stub mBatteryStatsService;
     @Mock private INetd.Stub mNetdService;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
 
     private static final int TEST_UID = 111;
 
@@ -254,6 +268,7 @@ public class NetworkManagementServiceTest {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_USE_METERED_FIREWALL_CHAINS)
     public void testMeteredNetworkRestrictions() throws RemoteException {
         // Make sure the mocked netd method returns true.
         doReturn(true).when(mNetdService).bandwidthEnableDataSaver(anyBoolean());
@@ -290,6 +305,69 @@ public class NetworkManagementServiceTest {
         } else {
             verify(mNetdService).bandwidthEnableDataSaver(false);
         }
+        assertFalse("Network should not be restricted when data saver is off",
+                mNMService.isNetworkRestricted(TEST_UID));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_USE_METERED_FIREWALL_CHAINS)
+    public void testMeteredNetworkRestrictionsByAdminChain() {
+        mNMService.setFirewallUidRule(FIREWALL_CHAIN_METERED_DENY_ADMIN, TEST_UID,
+                FIREWALL_RULE_DENY);
+        verify(mCm).setUidFirewallRule(FIREWALL_CHAIN_METERED_DENY_ADMIN, TEST_UID,
+                FIREWALL_RULE_DENY);
+        assertTrue("Should be true since mobile data usage is restricted by admin chain",
+                mNMService.isNetworkRestricted(TEST_UID));
+
+        mNMService.setFirewallUidRule(FIREWALL_CHAIN_METERED_DENY_ADMIN, TEST_UID,
+                FIREWALL_RULE_DEFAULT);
+        verify(mCm).setUidFirewallRule(FIREWALL_CHAIN_METERED_DENY_ADMIN, TEST_UID,
+                FIREWALL_RULE_DEFAULT);
+        assertFalse("Should be false since mobile data usage is no longer restricted by admin",
+                mNMService.isNetworkRestricted(TEST_UID));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_USE_METERED_FIREWALL_CHAINS)
+    public void testMeteredNetworkRestrictionsByUserChain() {
+        mNMService.setFirewallUidRule(FIREWALL_CHAIN_METERED_DENY_USER, TEST_UID,
+                FIREWALL_RULE_DENY);
+        verify(mCm).setUidFirewallRule(FIREWALL_CHAIN_METERED_DENY_USER, TEST_UID,
+                FIREWALL_RULE_DENY);
+        assertTrue("Should be true since mobile data usage is restricted by user chain",
+                mNMService.isNetworkRestricted(TEST_UID));
+
+        mNMService.setFirewallUidRule(FIREWALL_CHAIN_METERED_DENY_USER, TEST_UID,
+                FIREWALL_RULE_DEFAULT);
+        verify(mCm).setUidFirewallRule(FIREWALL_CHAIN_METERED_DENY_USER, TEST_UID,
+                FIREWALL_RULE_DEFAULT);
+        assertFalse("Should be false since mobile data usage is no longer restricted by user",
+                mNMService.isNetworkRestricted(TEST_UID));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_USE_METERED_FIREWALL_CHAINS)
+    public void testDataSaverRestrictionsWithAllowChain() {
+        mNMService.setDataSaverModeEnabled(true);
+        verify(mCm).setDataSaverEnabled(true);
+
+        assertTrue("Should be true since data saver is on and the uid is not allowlisted",
+                mNMService.isNetworkRestricted(TEST_UID));
+
+        mNMService.setFirewallUidRule(FIREWALL_CHAIN_METERED_ALLOW, TEST_UID, FIREWALL_RULE_ALLOW);
+        verify(mCm).setUidFirewallRule(FIREWALL_CHAIN_METERED_ALLOW, TEST_UID, FIREWALL_RULE_ALLOW);
+        assertFalse("Should be false since data saver is on and the uid is allowlisted",
+                mNMService.isNetworkRestricted(TEST_UID));
+
+        // remove uid from allowlist and turn datasaver off again
+
+        mNMService.setFirewallUidRule(FIREWALL_CHAIN_METERED_ALLOW, TEST_UID,
+                FIREWALL_RULE_DEFAULT);
+        verify(mCm).setUidFirewallRule(FIREWALL_CHAIN_METERED_ALLOW, TEST_UID,
+                FIREWALL_RULE_DEFAULT);
+        mNMService.setDataSaverModeEnabled(false);
+        verify(mCm).setDataSaverEnabled(false);
+
         assertFalse("Network should not be restricted when data saver is off",
                 mNMService.isNetworkRestricted(TEST_UID));
     }

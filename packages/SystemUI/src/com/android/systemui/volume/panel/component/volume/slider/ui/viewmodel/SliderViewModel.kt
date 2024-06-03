@@ -25,10 +25,7 @@ interface SliderViewModel {
 
     fun onValueChanged(state: SliderState, newValue: Float)
 
+    fun onValueChangeFinished()
+
     fun toggleMuted(state: SliderState)
-
-    companion object {
-
-        fun formatValue(value: Float): String = "%.0f".format(value)
-    }
 }

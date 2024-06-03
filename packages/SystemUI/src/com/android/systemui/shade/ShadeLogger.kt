@@ -17,9 +17,9 @@
 package com.android.systemui.shade
 
 import android.view.MotionEvent
-import com.android.systemui.log.dagger.ShadeLog
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.dagger.ShadeLog
 import com.android.systemui.shade.ShadeViewController.Companion.FLING_COLLAPSE
 import com.android.systemui.shade.ShadeViewController.Companion.FLING_EXPAND
 import com.android.systemui.shade.ShadeViewController.Companion.FLING_HIDE
@@ -304,8 +304,7 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         msg: String,
         forceCancel: Boolean,
         expand: Boolean,
-    )
-    {
+    ) {
         buffer.log(
             TAG,
             LogLevel.VERBOSE,
@@ -322,8 +321,7 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         msg: String,
         panelClosedOnDown: Boolean,
         expandFraction: Float,
-    )
-    {
+    ) {
         buffer.log(
             TAG,
             LogLevel.VERBOSE,
@@ -381,7 +379,6 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         shouldControlScreenOff: Boolean,
         deviceInteractive: Boolean,
         isPulsing: Boolean,
-        isFrpActive: Boolean,
     ) {
         buffer.log(
             TAG,
@@ -392,12 +389,11 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
                 bool3 = shouldControlScreenOff
                 bool4 = deviceInteractive
                 str1 = isPulsing.toString()
-                str2 = isFrpActive.toString()
             },
             {
                 "CentralSurfaces updateNotificationPanelTouchState set disabled to: $bool1\n" +
                         "isGoingToSleep: $bool2, !shouldControlScreenOff: $bool3," +
-                        "!mDeviceInteractive: $bool4, !isPulsing: $str1, isFrpActive: $str2"
+                        "!mDeviceInteractive: $bool4, !isPulsing: $str1"
             }
         )
     }

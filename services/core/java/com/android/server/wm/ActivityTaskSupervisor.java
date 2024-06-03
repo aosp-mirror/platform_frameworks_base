@@ -902,10 +902,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                                 + " andResume=" + andResume);
                 EventLogTags.writeWmRestartActivity(r.mUserId, System.identityHashCode(r),
                         task.mTaskId, r.shortComponentName);
-                if (r.isActivityTypeHome()) {
-                    // Home process is the root process of the task.
-                    updateHomeProcess(task.getBottomMostActivity().app);
-                }
+                updateHomeProcessIfNeeded(r);
                 mService.getPackageManagerInternalLocked().notifyPackageUse(
                         r.intent.getComponent().getPackageName(), NOTIFY_PACKAGE_USE_ACTIVITY);
                 mService.getAppWarningsLocked().onStartActivity(r);
@@ -1048,6 +1045,16 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         }
 
         return true;
+    }
+
+    void updateHomeProcessIfNeeded(@NonNull ActivityRecord r) {
+        if (!r.isActivityTypeHome()) return;
+        // Make sure that we use the bottom most activity from the same package, because the home
+        // task can also embed third-party -1 activities.
+        final ActivityRecord bottom = r.getTask().getBottomMostActivityInSamePackage();
+        if (bottom != null) {
+            updateHomeProcess(bottom.app);
+        }
     }
 
     void updateHomeProcess(WindowProcessController app) {
@@ -1512,7 +1519,10 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         }
 
         try {
-            if ((flags & ActivityManager.MOVE_TASK_NO_USER_ACTION) == 0) {
+            // We allow enter PiP for previous front task if not requested otherwise via options.
+            boolean shouldCauseEnterPip = options == null
+                    || !options.disallowEnterPictureInPictureWhileLaunching();
+            if ((flags & ActivityManager.MOVE_TASK_NO_USER_ACTION) == 0 && shouldCauseEnterPip) {
                 mUserLeaving = true;
             }
 
@@ -1697,6 +1707,15 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         final Transition transit = task.mTransitionController.requestCloseTransitionIfNeeded(task);
         if (transit != null) {
             transit.collectClose(task);
+            if (!task.mTransitionController.useFullReadyTracking()) {
+                // If a transition was created here, it means this is an isolated removeTask. It's
+                // possible for there to be no consequent operations (eg. this is a multiwindow task
+                // closing so nothing becomes visible in response) so we must "touch" the old ready
+                // tracker so that it doesn't get stuck. However, since the old ready tracker
+                // doesn't support multiple conditions, we have to touch it here at the beginning
+                // before anything that may need it to wait (setReady(false)).
+                transit.setReady(task, true);
+            }
         } else if (task.mTransitionController.isCollecting()) {
             task.mTransitionController.getCollectingTransition().collectClose(task);
         }
@@ -2266,7 +2285,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
      * activity releases the top state and reports back, message about acquiring top state will be
      * sent to the new top resumed activity.
      */
-    void updateTopResumedActivityIfNeeded(String reason) {
+    ActivityRecord updateTopResumedActivityIfNeeded(String reason) {
         final ActivityRecord prevTopActivity = mTopResumedActivity;
         final Task topRootTask = mRootWindowContainer.getTopDisplayFocusedRootTask();
         if (topRootTask == null || topRootTask.getTopResumedActivity() == prevTopActivity) {
@@ -2279,7 +2298,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 // according to the current top focused activity.
                 mService.updateTopApp(null /* topResumedActivity */);
             }
-            return;
+            return mTopResumedActivity;
         }
 
         // Ask previous activity to release the top state.
@@ -2304,8 +2323,14 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             mService.setLastResumedActivityUncheckLocked(mTopResumedActivity, reason);
         }
         scheduleTopResumedActivityStateIfNeeded();
+        // If the device is not sleeping and there is no top resumed, do not update top app because
+        // it may be an intermediate state while moving a task to front. The actual top will be set
+        // when TaskFragment#setResumedActivity is called.
+        if (mTopResumedActivity != null || mService.isSleepingLocked()) {
+            mService.updateTopApp(mTopResumedActivity);
+        }
 
-        mService.updateTopApp(mTopResumedActivity);
+        return mTopResumedActivity;
     }
 
     /** Schedule current top resumed activity state loss */

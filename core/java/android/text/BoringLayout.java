@@ -28,7 +28,6 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.text.LineBreakConfig;
-import android.os.Trace;
 import android.text.style.ParagraphStyle;
 
 /**
@@ -568,59 +567,49 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
     public static @Nullable Metrics isBoring(@NonNull CharSequence text, @NonNull TextPaint paint,
             @NonNull TextDirectionHeuristic textDir, boolean useFallbackLineSpacing,
             @Nullable Paint.FontMetrics minimumFontMetrics, @Nullable Metrics metrics) {
-        if (TRACE_LAYOUT) {
-            Trace.beginSection("BoringLayout#isBoring");
-            Trace.setCounter("BoringLayout#textLength", text.length());
+        final int textLength = text.length();
+        if (hasAnyInterestingChars(text, textLength)) {
+           return null;  // There are some interesting characters. Not boring.
         }
-        try {
-            final int textLength = text.length();
-            if (hasAnyInterestingChars(text, textLength)) {
-                return null;  // There are some interesting characters. Not boring.
-            }
-            if (textDir != null && textDir.isRtl(text, 0, textLength)) {
-                return null;  // The heuristic considers the whole text RTL. Not boring.
-            }
-            if (text instanceof Spanned) {
-                Spanned sp = (Spanned) text;
-                Object[] styles = sp.getSpans(0, textLength, ParagraphStyle.class);
-                if (styles.length > 0) {
-                    return null;  // There are some ParagraphStyle spans. Not boring.
-                }
-            }
-
-            Metrics fm = metrics;
-            if (fm == null) {
-                fm = new Metrics();
-            } else {
-                fm.reset();
-            }
-
-            if (ClientFlags.fixLineHeightForLocale()) {
-                if (minimumFontMetrics != null) {
-                    fm.set(minimumFontMetrics);
-                    // Because the font metrics is provided by public APIs, adjust the top/bottom
-                    // with ascent/descent: top must be smaller than ascent, bottom must be larger
-                    // than descent.
-                    fm.top = Math.min(fm.top, fm.ascent);
-                    fm.bottom = Math.max(fm.bottom, fm.descent);
-                }
-            }
-
-            TextLine line = TextLine.obtain();
-            line.set(paint, text, 0, textLength, Layout.DIR_LEFT_TO_RIGHT,
-                    Layout.DIRS_ALL_LEFT_TO_RIGHT, false, null,
-                    0 /* ellipsisStart, 0 since text has not been ellipsized at this point */,
-                    0 /* ellipsisEnd, 0 since text has not been ellipsized at this point */,
-                    useFallbackLineSpacing);
-            fm.width = (int) Math.ceil(line.metrics(fm, fm.mDrawingBounds, false, null));
-            TextLine.recycle(line);
-
-            return fm;
-        } finally {
-            if (TRACE_LAYOUT) {
-                Trace.endSection();
+        if (textDir != null && textDir.isRtl(text, 0, textLength)) {
+           return null;  // The heuristic considers the whole text RTL. Not boring.
+        }
+        if (text instanceof Spanned) {
+            Spanned sp = (Spanned) text;
+            Object[] styles = sp.getSpans(0, textLength, ParagraphStyle.class);
+            if (styles.length > 0) {
+                return null;  // There are some ParagraphStyle spans. Not boring.
             }
         }
+
+        Metrics fm = metrics;
+        if (fm == null) {
+            fm = new Metrics();
+        } else {
+            fm.reset();
+        }
+
+        if (ClientFlags.fixLineHeightForLocale()) {
+            if (minimumFontMetrics != null) {
+                fm.set(minimumFontMetrics);
+                // Because the font metrics is provided by public APIs, adjust the top/bottom with
+                // ascent/descent: top must be smaller than ascent, bottom must be larger than
+                // descent.
+                fm.top = Math.min(fm.top, fm.ascent);
+                fm.bottom = Math.max(fm.bottom, fm.descent);
+            }
+        }
+
+        TextLine line = TextLine.obtain();
+        line.set(paint, text, 0, textLength, Layout.DIR_LEFT_TO_RIGHT,
+                Layout.DIRS_ALL_LEFT_TO_RIGHT, false, null,
+                0 /* ellipsisStart, 0 since text has not been ellipsized at this point */,
+                0 /* ellipsisEnd, 0 since text has not been ellipsized at this point */,
+                useFallbackLineSpacing);
+        fm.width = (int) Math.ceil(line.metrics(fm, fm.mDrawingBounds, false, null));
+        TextLine.recycle(line);
+
+        return fm;
     }
 
     @Override

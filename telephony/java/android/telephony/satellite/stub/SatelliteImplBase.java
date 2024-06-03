@@ -90,11 +90,11 @@ public class SatelliteImplBase extends SatelliteService {
 
         @Override
         public void requestSatelliteEnabled(boolean enableSatellite, boolean enableDemoMode,
-                IIntegerConsumer resultCallback) throws RemoteException {
+                boolean isEmergency, IIntegerConsumer resultCallback) throws RemoteException {
             executeMethodAsync(
                     () -> SatelliteImplBase.this
                             .requestSatelliteEnabled(
-                                    enableSatellite, enableDemoMode, resultCallback),
+                                    enableSatellite, enableDemoMode, isEmergency, resultCallback),
                     "requestSatelliteEnabled");
         }
 
@@ -262,6 +262,22 @@ public class SatelliteImplBase extends SatelliteService {
                     "abortSendingSatelliteDatagrams");
         }
 
+        @Override
+        public void updateSatelliteSubscription(String iccId, IIntegerConsumer resultCallback)
+                throws RemoteException {
+            executeMethodAsync(() -> SatelliteImplBase.this.updateSatelliteSubscription(
+                    iccId, resultCallback), "updateSatelliteSubscription");
+        }
+
+        @Override
+        public void updateSystemSelectionChannels(
+                List<SystemSelectionSpecifier> systemSelectionSpecifiers,
+                IIntegerConsumer resultCallback) throws RemoteException {
+            executeMethodAsync(() -> SatelliteImplBase.this.updateSystemSelectionChannels(
+                    systemSelectionSpecifiers, resultCallback),
+                    "updateSystemSelectionChannels");
+        }
+
         // Call the methods with a clean calling identity on the executor and wait indefinitely for
         // the future to return.
         private void executeMethodAsync(Runnable r, String errorLogName) throws RemoteException {
@@ -337,6 +353,9 @@ public class SatelliteImplBase extends SatelliteService {
      *
      * @param enableSatellite True to enable the satellite modem and false to disable.
      * @param enableDemoMode True to enable demo mode and false to disable.
+     * @param isEmergency To specify the satellite is enabled for emergency session and false for
+     * non emergency session. Note: it is possible that a emergency session started get converted
+     * to a non emergency session and vice versa.
      * @param resultCallback The callback to receive the error code result of the operation.
      *
      * Valid result codes returned:
@@ -350,7 +369,7 @@ public class SatelliteImplBase extends SatelliteService {
      *   SatelliteResult:SATELLITE_RESULT_NO_RESOURCES
      */
     public void requestSatelliteEnabled(boolean enableSatellite, boolean enableDemoMode,
-            @NonNull IIntegerConsumer resultCallback) {
+            boolean isEmergency, @NonNull IIntegerConsumer resultCallback) {
         // stub implementation
     }
 
@@ -763,6 +782,29 @@ public class SatelliteImplBase extends SatelliteService {
      * @param resultCallback The {@link SatelliteError} result of the operation.
      */
     public void abortSendingSatelliteDatagrams(@NonNull IIntegerConsumer resultCallback){
+        // stub implementation
+    }
+
+    /**
+     * Request to update the satellite subscription to be used for Non-Terrestrial network.
+     *
+     * @param iccId The ICCID of the subscription
+     * @param resultCallback The callback to receive the error code result of the operation.
+     */
+    public void updateSatelliteSubscription(String iccId,
+            @NonNull IIntegerConsumer resultCallback) {
+        // stub implementation
+    }
+
+    /**
+     * Request to update system selection channels
+     *
+     * @param systemSelectionSpecifiers list of system selection specifiers
+     * @param resultCallback The callback to receive the error code result of the operation.
+     */
+    public void updateSystemSelectionChannels(
+            @NonNull List<SystemSelectionSpecifier> systemSelectionSpecifiers,
+            @NonNull IIntegerConsumer resultCallback) {
         // stub implementation
     }
 }

@@ -1445,6 +1445,9 @@ class PermissionService(private val service: AccessCheckingService) :
         val packageStates = packageManagerLocal.withUnfilteredSnapshot().use { it.packageStates }
         service.mutateState {
             packageStates.forEach { (packageName, packageState) ->
+                if (packageState.isApex) {
+                    return@forEach
+                }
                 val androidPackage = packageState.androidPackage ?: return@forEach
                 androidPackage.requestedPermissions.forEach { permissionName ->
                     updatePermissionFlags(
@@ -1598,7 +1601,7 @@ class PermissionService(private val service: AccessCheckingService) :
         ) {
             with(policy) { getPermissionFlags(appId, userId, permissionName) }
         } else {
-            if (permissionName !in DEVICE_AWARE_PERMISSIONS) {
+            if (permissionName !in PermissionManager.DEVICE_AWARE_PERMISSIONS) {
                 Slog.i(
                     LOG_TAG,
                     "$permissionName is not device aware permission, " +
@@ -1623,7 +1626,7 @@ class PermissionService(private val service: AccessCheckingService) :
         ) {
             with(policy) { setPermissionFlags(appId, userId, permissionName, flags) }
         } else {
-            if (permissionName !in DEVICE_AWARE_PERMISSIONS) {
+            if (permissionName !in PermissionManager.DEVICE_AWARE_PERMISSIONS) {
                 Slog.i(
                     LOG_TAG,
                     "$permissionName is not device aware permission, " +
@@ -1877,6 +1880,9 @@ class PermissionService(private val service: AccessCheckingService) :
         packageManagerLocal.withUnfilteredSnapshot().use { snapshot ->
             service.mutateState {
                 snapshot.packageStates.forEach { (_, packageState) ->
+                    if (packageState.isApex) {
+                        return@forEach
+                    }
                     with(policy) { resetRuntimePermissions(packageState.packageName, userId) }
                     with(devicePolicy) { resetRuntimePermissions(packageState.packageName, userId) }
                 }
@@ -1918,8 +1924,11 @@ class PermissionService(private val service: AccessCheckingService) :
         }
 
         packageManagerLocal.withUnfilteredSnapshot().use { snapshot ->
-            snapshot.packageStates.forEach packageStates@{ (_, packageState) ->
-                val androidPackage = packageState.androidPackage ?: return@packageStates
+            snapshot.packageStates.forEach { (_, packageState) ->
+                if (packageState.isApex) {
+                    return@forEach
+                }
+                val androidPackage = packageState.androidPackage ?: return@forEach
                 if (permissionName in androidPackage.requestedPermissions) {
                     packageNames += androidPackage.packageName
                 }
@@ -1934,6 +1943,9 @@ class PermissionService(private val service: AccessCheckingService) :
         val permissions = service.getState { with(policy) { getPermissions() } }
         packageManagerLocal.withUnfilteredSnapshot().use { snapshot ->
             snapshot.packageStates.forEach packageStates@{ (_, packageState) ->
+                if (packageState.isApex) {
+                    return@packageStates
+                }
                 val androidPackage = packageState.androidPackage ?: return@packageStates
                 androidPackage.requestedPermissions.forEach requestedPermissions@{ permissionName ->
                     val permission = permissions[permissionName] ?: return@requestedPermissions
@@ -2015,7 +2027,7 @@ class PermissionService(private val service: AccessCheckingService) :
 
         val writer = IndentingPrintWriter(pw, "  ")
 
-        if (args.isNullOrEmpty()) {
+        if (args.isNullOrEmpty() || args[0] == "-a") {
             service.getState {
                 writer.dumpSystemState(state)
                 getAllAppIdPackageNames(state).forEachIndexed { _, appId, packageNames ->
@@ -2034,8 +2046,20 @@ class PermissionService(private val service: AccessCheckingService) :
                     writer.println("Unknown app ID $appId.")
                 }
             }
+        } else if (args[0] == "--package" && args.size == 2) {
+            val packageName = args[1]
+            service.getState {
+                val packageState = state.externalState.packageStates[packageName]
+                if (packageState != null) {
+                    writer.dumpAppIdState(packageState.appId, state, indexedSetOf(packageName))
+                } else {
+                    writer.println("Unknown package $packageName.")
+                }
+            }
         } else {
-            writer.println("Usage: dumpsys permission [--app-id APP_ID]")
+            writer.println(
+                "Usage: dumpsys permissionmgr [--app-id <APP_ID>] [--package <PACKAGE_NAME>]"
+            )
         }
     }
 
@@ -2060,6 +2084,9 @@ class PermissionService(private val service: AccessCheckingService) :
 
         val appIdPackageNames = MutableIndexedMap<Int, MutableIndexedSet<String>>()
         packageStates.forEach { (_, packageState) ->
+            if (packageState.isApex) {
+                return@forEach
+            }
             appIdPackageNames
                 .getOrPut(packageState.appId) { MutableIndexedSet() }
                 .add(packageState.packageName)
@@ -2313,6 +2340,10 @@ class PermissionService(private val service: AccessCheckingService) :
         isInstantApp: Boolean,
         oldPackage: AndroidPackage?
     ) {
+        if (packageState.isApex) {
+            return
+        }
+
         synchronized(storageVolumeLock) {
             // Accumulating the package names here because we want to maintain the same call order
             // of onPackageAdded() and reuse this order in onStorageVolumeAdded(). We need the
@@ -2339,6 +2370,10 @@ class PermissionService(private val service: AccessCheckingService) :
         params: PermissionManagerServiceInternal.PackageInstalledParams,
         userId: Int
     ) {
+        if (androidPackage.isApex) {
+            return
+        }
+
         if (params === PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT) {
             // TODO: We should actually stop calling onPackageInstalled() when we are passing
             //  PackageInstalledParams.DEFAULT in InstallPackageHelper, because there's actually no
@@ -2391,6 +2426,10 @@ class PermissionService(private val service: AccessCheckingService) :
         sharedUserPkgs: List<AndroidPackage>,
         userId: Int
     ) {
+        if (packageState.isApex) {
+            return
+        }
+
         val userIds =
             if (userId == UserHandle.USER_ALL) {
                 userManagerService.userIdsIncludingPreCreated
@@ -2819,15 +2858,6 @@ class PermissionService(private val service: AccessCheckingService) :
             PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE or
                 PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM or
                 PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER
-
-        /** These permissions are supported for virtual devices. */
-        // TODO: b/298661870 - Use new API to get the list of device aware permissions.
-        val DEVICE_AWARE_PERMISSIONS =
-            if (Flags.deviceAwarePermissionsEnabled()) {
-                setOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
-            } else {
-                emptySet<String>()
-            }
 
         fun getFullerPermission(permissionName: String): String? =
             FULLER_PERMISSIONS[permissionName]

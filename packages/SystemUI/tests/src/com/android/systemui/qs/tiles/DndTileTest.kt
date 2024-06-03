@@ -26,12 +26,12 @@ import android.provider.Settings.Global.ZEN_MODE_OFF
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.ContextThemeWrapper
-import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.qs.QSTile
@@ -42,7 +42,6 @@ import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.policy.ZenModeController
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.SecureSettings
@@ -99,6 +98,12 @@ class DndTileTest : SysuiTestCase() {
     @Mock
     private lateinit var hostDialog: Dialog
 
+    @Mock
+    private lateinit var expandable: Expandable
+
+    @Mock
+    private lateinit var controller: DialogTransitionAnimator.Controller
+
     private lateinit var secureSettings: SecureSettings
     private lateinit var testableLooper: TestableLooper
     private lateinit var tile: DndTile
@@ -119,6 +124,7 @@ class DndTileTest : SysuiTestCase() {
             }
         }
         whenever(qsHost.context).thenReturn(wrappedContext)
+        whenever(expandable.dialogTransitionController(any())).thenReturn(controller)
 
         tile = DndTile(
             qsHost,
@@ -187,11 +193,10 @@ class DndTileTest : SysuiTestCase() {
         secureSettings.putIntForUser(KEY, Settings.Secure.ZEN_DURATION_PROMPT, DEFAULT_USER)
         testableLooper.processAllMessages()
 
-        val view = View(context)
-        tile.handleClick(view)
+        tile.handleClick(expandable)
         testableLooper.processAllMessages()
 
-        verify(mDialogTransitionAnimator).showFromView(any(), eq(view), nullable(), anyBoolean())
+        verify(mDialogTransitionAnimator).show(any(), any(), anyBoolean())
     }
 
     @Test
@@ -201,8 +206,7 @@ class DndTileTest : SysuiTestCase() {
         secureSettings.putIntForUser(KEY, 60, DEFAULT_USER)
         testableLooper.processAllMessages()
 
-        val view = View(context)
-        tile.handleClick(view)
+        tile.handleClick(expandable)
         testableLooper.processAllMessages()
 
         verify(mDialogTransitionAnimator, never())

@@ -25,6 +25,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.server.RescueParty.DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN;
 import static com.android.server.RescueParty.LEVEL_FACTORY_RESET;
 import static com.android.server.RescueParty.RESCUE_LEVEL_FACTORY_RESET;
 
@@ -102,8 +103,6 @@ public class RescuePartyTest {
             "persist.device_config.configuration.disable_rescue_party";
     private static final String PROP_DISABLE_FACTORY_RESET_FLAG =
             "persist.device_config.configuration.disable_rescue_party_factory_reset";
-
-    private static final int THROTTLING_DURATION_MIN = 10;
 
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
@@ -228,6 +227,9 @@ public class RescuePartyTest {
         setCrashRecoveryPropRescueBootCount(0);
         SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(true));
         SystemProperties.set(PROP_DEVICE_CONFIG_DISABLE_FLAG, Boolean.toString(false));
+
+        // enable flag resets for tests
+        mSetFlagsRule.enableFlags(Flags.FLAG_ALLOW_RESCUE_PARTY_FLAG_RESETS);
     }
 
     @After
@@ -237,6 +239,9 @@ public class RescuePartyTest {
 
     @Test
     public void testBootLoopDetectionWithExecutionForAllRescueLevels() {
+        // this is old test where the flag needs to be disabled
+        mSetFlagsRule.disableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+
         RescueParty.onSettingsProviderPublished(mMockContext);
         verify(() -> DeviceConfig.setMonitorCallback(eq(mMockContentResolver),
                 any(Executor.class),
@@ -312,6 +317,9 @@ public class RescuePartyTest {
 
     @Test
     public void testPersistentAppCrashDetectionWithExecutionForAllRescueLevels() {
+        // this is old test where the flag needs to be disabled
+        mSetFlagsRule.disableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+
         noteAppCrash(1, true);
 
         verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_DEFAULTS, /*resetNamespaces=*/ null,
@@ -378,6 +386,9 @@ public class RescuePartyTest {
 
     @Test
     public void testNonPersistentAppOnlyPerformsFlagResets() {
+        // this is old test where the flag needs to be disabled
+        mSetFlagsRule.disableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+
         noteAppCrash(1, false);
 
         verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_DEFAULTS, /*resetNamespaces=*/ null,
@@ -441,6 +452,9 @@ public class RescuePartyTest {
 
     @Test
     public void testNonPersistentAppCrashDetectionWithScopedResets() {
+        // this is old test where the flag needs to be disabled
+        mSetFlagsRule.disableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+
         RescueParty.onSettingsProviderPublished(mMockContext);
         verify(() -> DeviceConfig.setMonitorCallback(eq(mMockContentResolver),
                 any(Executor.class),
@@ -498,6 +512,9 @@ public class RescuePartyTest {
 
     @Test
     public void testNonDeviceConfigSettingsOnlyResetOncePerLevel() {
+        // this is old test where the flag needs to be disabled
+        mSetFlagsRule.disableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+
         RescueParty.onSettingsProviderPublished(mMockContext);
         verify(() -> DeviceConfig.setMonitorCallback(eq(mMockContentResolver),
                 any(Executor.class),
@@ -628,7 +645,8 @@ public class RescuePartyTest {
     public void testThrottlingOnBootFailures() {
         setCrashRecoveryPropAttemptingReboot(false);
         long now = System.currentTimeMillis();
-        long beforeTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN - 1);
+        long beforeTimeout = now - TimeUnit.MINUTES.toMillis(
+                DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN - 1);
         setCrashRecoveryPropLastFactoryReset(beforeTimeout);
         for (int i = 1; i <= LEVEL_FACTORY_RESET; i++) {
             noteBoot(i);
@@ -641,7 +659,8 @@ public class RescuePartyTest {
         mSetFlagsRule.enableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
         setCrashRecoveryPropAttemptingReboot(false);
         long now = System.currentTimeMillis();
-        long beforeTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN - 1);
+        long beforeTimeout = now - TimeUnit.MINUTES.toMillis(
+                DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN - 1);
         setCrashRecoveryPropLastFactoryReset(beforeTimeout);
         for (int i = 1; i <= RESCUE_LEVEL_FACTORY_RESET; i++) {
             noteBoot(i);
@@ -653,7 +672,8 @@ public class RescuePartyTest {
     public void testThrottlingOnAppCrash() {
         setCrashRecoveryPropAttemptingReboot(false);
         long now = System.currentTimeMillis();
-        long beforeTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN - 1);
+        long beforeTimeout = now - TimeUnit.MINUTES.toMillis(
+                DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN - 1);
         setCrashRecoveryPropLastFactoryReset(beforeTimeout);
         for (int i = 0; i <= LEVEL_FACTORY_RESET; i++) {
             noteAppCrash(i + 1, true);
@@ -666,7 +686,8 @@ public class RescuePartyTest {
         mSetFlagsRule.enableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
         setCrashRecoveryPropAttemptingReboot(false);
         long now = System.currentTimeMillis();
-        long beforeTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN - 1);
+        long beforeTimeout = now - TimeUnit.MINUTES.toMillis(
+                DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN - 1);
         setCrashRecoveryPropLastFactoryReset(beforeTimeout);
         for (int i = 0; i <= RESCUE_LEVEL_FACTORY_RESET; i++) {
             noteAppCrash(i + 1, true);
@@ -678,7 +699,8 @@ public class RescuePartyTest {
     public void testNotThrottlingAfterTimeoutOnBootFailures() {
         setCrashRecoveryPropAttemptingReboot(false);
         long now = System.currentTimeMillis();
-        long afterTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN + 1);
+        long afterTimeout = now - TimeUnit.MINUTES.toMillis(
+                DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN + 1);
         setCrashRecoveryPropLastFactoryReset(afterTimeout);
         for (int i = 1; i <= LEVEL_FACTORY_RESET; i++) {
             noteBoot(i);
@@ -691,7 +713,8 @@ public class RescuePartyTest {
         mSetFlagsRule.enableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
         setCrashRecoveryPropAttemptingReboot(false);
         long now = System.currentTimeMillis();
-        long afterTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN + 1);
+        long afterTimeout = now - TimeUnit.MINUTES.toMillis(
+                DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN + 1);
         setCrashRecoveryPropLastFactoryReset(afterTimeout);
         for (int i = 1; i <= RESCUE_LEVEL_FACTORY_RESET; i++) {
             noteBoot(i);
@@ -703,7 +726,8 @@ public class RescuePartyTest {
     public void testNotThrottlingAfterTimeoutOnAppCrash() {
         setCrashRecoveryPropAttemptingReboot(false);
         long now = System.currentTimeMillis();
-        long afterTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN + 1);
+        long afterTimeout = now - TimeUnit.MINUTES.toMillis(
+                DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN + 1);
         setCrashRecoveryPropLastFactoryReset(afterTimeout);
         for (int i = 0; i <= LEVEL_FACTORY_RESET; i++) {
             noteAppCrash(i + 1, true);
@@ -716,7 +740,8 @@ public class RescuePartyTest {
         mSetFlagsRule.enableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
         setCrashRecoveryPropAttemptingReboot(false);
         long now = System.currentTimeMillis();
-        long afterTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN + 1);
+        long afterTimeout = now - TimeUnit.MINUTES.toMillis(
+                DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN + 1);
         setCrashRecoveryPropLastFactoryReset(afterTimeout);
         for (int i = 0; i <= RESCUE_LEVEL_FACTORY_RESET; i++) {
             noteAppCrash(i + 1, true);
@@ -794,6 +819,9 @@ public class RescuePartyTest {
 
     @Test
     public void testHealthCheckLevels() {
+        // this is old test where the flag needs to be disabled
+        mSetFlagsRule.disableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+
         RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
 
         // Ensure that no action is taken for cases where the failure reason is unknown
@@ -860,6 +888,9 @@ public class RescuePartyTest {
 
     @Test
     public void testBootLoopLevels() {
+        // this is old test where the flag needs to be disabled
+        mSetFlagsRule.disableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+
         RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
 
         assertEquals(observer.onBootLoop(0), PackageHealthObserverImpact.USER_IMPACT_LEVEL_0);
@@ -1111,16 +1142,9 @@ public class RescuePartyTest {
 
         // mock properties in BootThreshold
         try {
-            if (Flags.recoverabilityDetection()) {
-                mSpyBootThreshold = spy(watchdog.new BootThreshold(
-                    PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT,
-                    PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS,
-                    PackageWatchdog.DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT));
-            } else {
-                mSpyBootThreshold = spy(watchdog.new BootThreshold(
+            mSpyBootThreshold = spy(watchdog.new BootThreshold(
                     PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT,
                     PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS));
-            }
             mCrashRecoveryPropertiesMap = new HashMap<>();
 
             doAnswer((Answer<Integer>) invocationOnMock -> {

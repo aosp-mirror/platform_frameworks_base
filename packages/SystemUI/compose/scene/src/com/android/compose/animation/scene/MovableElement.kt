@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.util.fastLastOrNull
 
 @Composable
 internal fun Element(
@@ -76,7 +77,7 @@ private abstract class BaseElementScope<ContentScope>(
     override fun <T> animateElementValueAsState(
         value: T,
         key: ValueKey,
-        lerp: (start: T, stop: T, fraction: Float) -> T,
+        type: SharedValueType<T, *>,
         canOverflow: Boolean
     ): AnimatedState<T> {
         return animateSharedValueAsState(
@@ -85,7 +86,7 @@ private abstract class BaseElementScope<ContentScope>(
             element,
             key,
             value,
-            lerp,
+            type,
             canOverflow,
         )
     }
@@ -165,18 +166,32 @@ private fun shouldComposeMovableElement(
     scene: SceneKey,
     element: ElementKey,
 ): Boolean {
-    val transition =
-        layoutImpl.state.currentTransition
+    val transitions = layoutImpl.state.currentTransitions
+    if (transitions.isEmpty()) {
         // If we are idle, there is only one [scene] that is composed so we can compose our
-        // movable content here.
-        ?: return true
+        // movable content here. We still check that [scene] is equal to the current idle scene, to
+        // make sure we only compose it there.
+        return layoutImpl.state.transitionState.currentScene == scene
+    }
+
+    // The current transition for this element is the last transition in which either fromScene or
+    // toScene contains the element.
+    val transition =
+        transitions.fastLastOrNull { transition ->
+            element.scenePicker.sceneDuringTransition(
+                element = element,
+                transition = transition,
+                fromSceneZIndex = layoutImpl.scenes.getValue(transition.fromScene).zIndex,
+                toSceneZIndex = layoutImpl.scenes.getValue(transition.toScene).zIndex,
+            ) != null
+        } ?: return false
 
     // Always compose movable elements in the scene picked by their scene picker.
     return shouldDrawOrComposeSharedElement(
         layoutImpl,
-        transition,
         scene,
         element,
+        transition,
     )
 }
 

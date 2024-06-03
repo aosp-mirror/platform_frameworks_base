@@ -20,7 +20,15 @@ import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyResources
 import android.content.Context
 import android.graphics.Bitmap
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.core.graphics.drawable.toBitmap
+import com.android.compose.animation.scene.Back
+import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.Swipe
+import com.android.compose.animation.scene.SwipeDirection
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationWipeModel
@@ -35,6 +43,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.inputmethod.domain.interactor.InputMethodInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.user.ui.viewmodel.UserActionViewModel
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
@@ -80,6 +89,15 @@ class BouncerViewModel(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = null,
+            )
+
+    val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
+        bouncerInteractor.dismissDestination
+            .map(::destinationSceneMap)
+            .stateIn(
+                applicationScope,
+                SharingStarted.WhileSubscribed(),
+                initialValue = destinationSceneMap(Scenes.Lockscreen),
             )
 
     val message: BouncerMessageViewModel = bouncerMessageViewModel
@@ -357,6 +375,25 @@ class BouncerViewModel(
         }
     }
 
+    private fun destinationSceneMap(prevScene: SceneKey) =
+        mapOf(
+            Back to UserActionResult(prevScene),
+            Swipe(SwipeDirection.Down) to UserActionResult(prevScene),
+        )
+
+    /**
+     * Notifies that a key event has occurred.
+     *
+     * @return `true` when the [KeyEvent] was consumed as user input on bouncer; `false` otherwise.
+     */
+    fun onKeyEvent(keyEvent: KeyEvent): Boolean {
+        return (authMethodViewModel.value as? PinBouncerViewModel)?.onKeyEvent(
+            keyEvent.type,
+            keyEvent.nativeKeyEvent.keyCode
+        )
+            ?: false
+    }
+
     data class DialogViewModel(
         val text: String,
 
@@ -400,13 +437,13 @@ object BouncerViewModelModule {
             simBouncerInteractor = simBouncerInteractor,
             authenticationInteractor = authenticationInteractor,
             selectedUserInteractor = selectedUserInteractor,
+            devicePolicyManager = devicePolicyManager,
+            bouncerMessageViewModel = bouncerMessageViewModel,
             flags = flags,
             selectedUser = userSwitcherViewModel.selectedUser,
             users = userSwitcherViewModel.users,
             userSwitcherMenu = userSwitcherViewModel.menu,
             actionButton = actionButtonInteractor.actionButton,
-            devicePolicyManager = devicePolicyManager,
-            bouncerMessageViewModel = bouncerMessageViewModel,
         )
     }
 }

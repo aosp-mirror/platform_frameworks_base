@@ -30,7 +30,7 @@
     <string name="summary_app_streaming" msgid="295548145144086753">"%1$s ще има достъп до всичко, което се показва или възпроизвежда на телефона, включително аудиосъдържание, снимки, пароли и съобщения.&lt;br/&gt;&lt;br/&gt;%1$s ще може да предава поточно приложения, докато не премахнете това разрешение."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Услуги за различни устройства"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> иска разрешение от името на <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> да предава поточно приложения между устройствата ви"</string>
-    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g> иска разрешение от името на <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> да показва и да предава поточно приложения между устройствата ви"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"„<xliff:g id="APP_NAME">%1$s</xliff:g>“ иска разрешение от името на <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> да показва и да предава поточно приложения между устройствата ви"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"Разрешете на &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; да осъществява достъп до тази информация от телефона ви"</string>

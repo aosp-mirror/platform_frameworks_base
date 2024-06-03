@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.pipeline.mobile.data.model
 
 import android.os.PersistableBundle
 import android.telephony.CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL
-import android.telephony.CarrierConfigManager.KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT
 import android.telephony.CarrierConfigManager.KEY_SHOW_OPERATOR_NAME_IN_STATUSBAR_BOOL
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,11 +42,10 @@ import kotlinx.coroutines.flow.asStateFlow
  * using the default config for logging purposes.
  *
  * NOTE to add new keys to be tracked:
- * 1. Define a new `private val` wrapping the key using [BooleanCarrierConfig] or [IntCarrierConfig]
- * 2. Define a public `val` exposing the wrapped flow using [BooleanCarrierConfig.config] or
- *    [IntCarrierConfig.config]
- * 3. Add the new wrapped public flow to the list of tracked configs, so they are properly updated
- *    when a new carrier config comes down
+ * 1. Define a new `private val` wrapping the key using [BooleanCarrierConfig]
+ * 2. Define a public `val` exposing the wrapped flow using [BooleanCarrierConfig.config]
+ * 3. Add the new [BooleanCarrierConfig] to the list of tracked configs, so they are properly
+ *    updated when a new carrier config comes down
  */
 class SystemUiCarrierConfig
 internal constructor(
@@ -68,16 +66,10 @@ internal constructor(
     /** Flow tracking the [KEY_SHOW_OPERATOR_NAME_IN_STATUSBAR_BOOL] config */
     val showOperatorNameInStatusBar: StateFlow<Boolean> = showOperatorName.config
 
-    private val satelliteHysteresisSeconds =
-        IntCarrierConfig(KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT, defaultConfig)
-    /** Flow tracking the [KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT] config */
-    val satelliteConnectionHysteresisSeconds: StateFlow<Int> = satelliteHysteresisSeconds.config
-
     private val trackedConfigs =
         listOf(
             inflateSignalStrength,
             showOperatorName,
-            satelliteHysteresisSeconds,
         )
 
     /** Ingest a new carrier config, and switch all of the tracked keys over to the new values */
@@ -98,37 +90,16 @@ internal constructor(
     override fun toString(): String = trackedConfigs.joinToString { it.toString() }
 }
 
-interface CarrierConfig {
-    fun update(config: PersistableBundle)
-}
-
 /** Extracts [key] from the carrier config, and stores it in a flow */
 private class BooleanCarrierConfig(
     val key: String,
     defaultConfig: PersistableBundle,
-) : CarrierConfig {
+) {
     private val _configValue = MutableStateFlow(defaultConfig.getBoolean(key))
     val config = _configValue.asStateFlow()
 
-    override fun update(config: PersistableBundle) {
+    fun update(config: PersistableBundle) {
         _configValue.value = config.getBoolean(key)
-    }
-
-    override fun toString(): String {
-        return "$key=${config.value}"
-    }
-}
-
-/** Extracts [key] from the carrier config, and stores it in a flow */
-private class IntCarrierConfig(
-    val key: String,
-    defaultConfig: PersistableBundle,
-) : CarrierConfig {
-    private val _configValue = MutableStateFlow(defaultConfig.getInt(key))
-    val config = _configValue.asStateFlow()
-
-    override fun update(config: PersistableBundle) {
-        _configValue.value = config.getInt(key)
     }
 
     override fun toString(): String {

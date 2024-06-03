@@ -21,6 +21,7 @@ import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_FRONT;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ANIMATION_PARAMS;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_DIM_ON_TASK;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ISOLATED_NAVIGATION;
+import static android.window.TaskFragmentOperation.OP_TYPE_SET_PINNED;
 
 import static androidx.window.extensions.embedding.SplitContainer.getFinishPrimaryWithSecondaryBehavior;
 import static androidx.window.extensions.embedding.SplitContainer.getFinishSecondaryWithPrimaryBehavior;
@@ -165,7 +166,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     /**
      * Expands an existing TaskFragment to fill parent.
      * @param wct WindowContainerTransaction in which the task fragment should be resized.
-     * @param fragmentToken token of an existing TaskFragment.
+     * @param container the {@link TaskFragmentContainer} to be expanded.
      */
     void expandTaskFragment(@NonNull WindowContainerTransaction wct,
             @NonNull TaskFragmentContainer container) {
@@ -174,8 +175,6 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         clearAdjacentTaskFragments(wct, fragmentToken);
         updateWindowingMode(wct, fragmentToken, WINDOWING_MODE_UNDEFINED);
         updateAnimationParams(wct, fragmentToken, TaskFragmentAnimationParams.DEFAULT);
-
-        container.getTaskContainer().updateDivider(wct);
     }
 
     /**
@@ -356,14 +355,21 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     void setTaskFragmentIsolatedNavigation(@NonNull WindowContainerTransaction wct,
             @NonNull IBinder fragmentToken, boolean isolatedNav) {
         final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
-                OP_TYPE_SET_ISOLATED_NAVIGATION).setIsolatedNav(isolatedNav).build();
+                OP_TYPE_SET_ISOLATED_NAVIGATION).setBooleanValue(isolatedNav).build();
+        wct.addTaskFragmentOperation(fragmentToken, operation);
+    }
+
+    void setTaskFragmentPinned(@NonNull WindowContainerTransaction wct,
+            @NonNull IBinder fragmentToken, boolean pinned) {
+        final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
+                OP_TYPE_SET_PINNED).setBooleanValue(pinned).build();
         wct.addTaskFragmentOperation(fragmentToken, operation);
     }
 
     void setTaskFragmentDimOnTask(@NonNull WindowContainerTransaction wct,
             @NonNull IBinder fragmentToken, boolean dimOnTask) {
         final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
-                OP_TYPE_SET_DIM_ON_TASK).setDimOnTask(dimOnTask).build();
+                OP_TYPE_SET_DIM_ON_TASK).setBooleanValue(dimOnTask).build();
         wct.addTaskFragmentOperation(fragmentToken, operation);
     }
 

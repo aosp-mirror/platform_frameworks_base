@@ -33,21 +33,12 @@ interface ShadeViewController {
     /** Returns whether the shade's top level view is enabled. */
     @Deprecated("No longer supported. Do not add new calls to this.") val isViewEnabled: Boolean
 
-    /** Returns whether status bar icons should be hidden when the shade is expanded. */
-    fun shouldHideStatusBarIconsWhenExpanded(): Boolean
-
-    /**
-     * Disables the shade header.
-     *
-     * @see ShadeHeaderController.disable
-     */
-    fun disableHeader(state1: Int, state2: Int, animated: Boolean)
-
     /** If the latency tracker is enabled, begins tracking expand latency. */
     @Deprecated("No longer supported. Do not add new calls to this.")
     fun startExpandLatencyTracking()
 
     /** Sets the alpha value of the shade to a value between 0 and 255. */
+    @Deprecated("No longer supported. Do not add new calls to this.")
     fun setAlpha(alpha: Int, animate: Boolean)
 
     /**
@@ -55,6 +46,7 @@ interface ShadeViewController {
      *
      * @see .setAlpha
      */
+    @Deprecated("No longer supported. Do not add new calls to this.")
     fun setAlphaChangeAnimationEndAction(r: Runnable)
 
     /** Sets Qs ScrimEnabled and updates QS state. */
@@ -62,21 +54,14 @@ interface ShadeViewController {
     fun setQsScrimEnabled(qsScrimEnabled: Boolean)
 
     /** Sets the top spacing for the ambient indicator. */
+    @Deprecated("Does nothing when scene container is enabled.")
     fun setAmbientIndicationTop(ambientIndicationTop: Int, ambientTextVisible: Boolean)
 
     /** Updates notification panel-specific flags on [SysUiState]. */
     @Deprecated("Does nothing when scene container is enabled.") fun updateSystemUiStateFlags()
 
     /** Ensures that the touchable region is updated. */
-    fun updateTouchableRegion()
-
-    /**
-     * Reconfigures the shade to show the AOD UI (clock, smartspace, etc). This is called by the
-     * screen off animation controller in order to animate in AOD without "actually" fully switching
-     * to the KEYGUARD state, which is a heavy transition that causes jank as 10+ files react to the
-     * change.
-     */
-    fun showAodUi()
+    @Deprecated("No longer supported. Do not add new calls to this.") fun updateTouchableRegion()
 
     /**
      * Sends an external (e.g. Status Bar) touch event to the Shade touch handler.
@@ -86,6 +71,9 @@ interface ShadeViewController {
      * threshold.
      */
     fun handleExternalTouch(event: MotionEvent): Boolean
+
+    /** Sends an external (e.g. Status Bar) intercept touch event to the Shade touch handler. */
+    fun handleExternalInterceptTouch(event: MotionEvent): Boolean
 
     /**
      * Triggered when an input focus transfer gesture has started.
@@ -111,6 +99,7 @@ interface ShadeViewController {
     val shadeHeadsUpTracker: ShadeHeadsUpTracker
 
     /** Returns the ShadeFoldAnimator. */
+    @Deprecated("This interface is deprecated in Scene Container")
     val shadeFoldAnimator: ShadeFoldAnimator
 
     companion object {
@@ -157,8 +146,10 @@ interface ShadeHeadsUpTracker {
 }
 
 /** Handles the lifecycle of the shade's animation that happens when folding a foldable. */
+@Deprecated("This interface should not be used in scene container. Needs flexiglass equivalent.")
 interface ShadeFoldAnimator {
     /** Updates the views to the initial state for the fold to AOD animation. */
+    @Deprecated("Used by the Keyguard Fold Transition. Needs flexiglass equivalent.")
     fun prepareFoldToAodAnimation()
 
     /**
@@ -168,31 +159,31 @@ interface ShadeFoldAnimator {
      * @param endAction invoked when the animation finishes, also if it was cancelled.
      * @param cancelAction invoked when the animation is cancelled, before endAction.
      */
+    @Deprecated("Not used when migrateClocksToBlueprint enabled.")
     fun startFoldToAodAnimation(startAction: Runnable, endAction: Runnable, cancelAction: Runnable)
 
     /** Cancels fold to AOD transition and resets view state. */
+    @Deprecated("Used by the Keyguard Fold Transition. Needs flexiglass equivalent.")
     fun cancelFoldToAodAnimation()
 
     /** Returns the main view of the shade. */
-    val view: ViewGroup?
+    @Deprecated("Not used when migrateClocksToBlueprint enabled.") val view: ViewGroup?
 }
 
 /**
  * An interface that provides the current state of the notification panel and related views, which
  * is needed to calculate [KeyguardStatusBarView]'s state in [KeyguardStatusBarViewController].
  */
+@Deprecated("This interface should not be used in scene container.")
 interface ShadeViewStateProvider {
     /** Returns the expanded height of the panel view. */
-    val panelViewExpandedHeight: Float
+    @Deprecated("deprecated by SceneContainerFlag.isEnabled") val panelViewExpandedHeight: Float
 
     /**
      * Returns true if heads up should be visible.
-     *
-     * TODO(b/138786270): If HeadsUpAppearanceController was injectable, we could inject it into
-     *   [KeyguardStatusBarViewController] and remove this method.
      */
-    fun shouldHeadsUpBeVisible(): Boolean
+    @Deprecated("deprecated by SceneContainerFlag.isEnabled.") fun shouldHeadsUpBeVisible(): Boolean
 
     /** Return the fraction of the shade that's expanded, when in lockscreen. */
-    val lockscreenShadeDragProgress: Float
+    @Deprecated("deprecated by SceneContainerFlag.isEnabled") val lockscreenShadeDragProgress: Float
 }

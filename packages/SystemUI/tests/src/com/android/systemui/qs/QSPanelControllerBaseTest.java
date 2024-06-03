@@ -16,7 +16,13 @@
 
 package com.android.systemui.qs;
 
+import static com.android.systemui.Flags.FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS;
+import static com.android.systemui.flags.SceneContainerFlagParameterizationKt.parameterizeSceneContainerFlag;
+
 import static com.google.common.truth.Truth.assertThat;
+
+import static kotlinx.coroutines.flow.FlowKt.asStateFlow;
+import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,9 +39,12 @@ import static org.mockito.Mockito.when;
 
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.testing.AndroidTestingRunner;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.ContextThemeWrapper;
+import android.view.ViewTreeObserver;
 
 import androidx.test.filters.SmallTest;
 
@@ -45,17 +54,26 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.DisableSceneContainer;
+import com.android.systemui.haptics.qs.QSLongPressEffect;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
+import com.android.systemui.lifecycle.InstantTaskExecutorRule;
 import com.android.systemui.media.controls.ui.view.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
-import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 import com.android.systemui.util.animation.DisappearParameters;
 
+import kotlinx.coroutines.flow.MutableStateFlow;
+import kotlinx.coroutines.flow.StateFlow;
+
+import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -66,11 +84,25 @@ import java.io.StringWriter;
 import java.util.Collections;
 import java.util.List;
 
-@RunWith(AndroidTestingRunner.class)
+import javax.inject.Provider;
+
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
+@RunWith(ParameterizedAndroidJunit4.class)
 @RunWithLooper
 @SmallTest
 public class QSPanelControllerBaseTest extends SysuiTestCase {
 
+    @Rule
+    public final InstantTaskExecutorRule mInstantTaskExecutor = new InstantTaskExecutorRule();
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return parameterizeSceneContainerFlag();
+    }
+
+    private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
     @Mock
     private QSPanel mQSPanel;
     @Mock
@@ -102,9 +134,12 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     @Mock
     Runnable mHorizontalLayoutListener;
     @Mock
-    VibratorHelper mVibratorHelper;
+    private ViewTreeObserver mViewTreeObserver;
 
-    private QSPanelControllerBase<QSPanel> mController;
+    private TestableLongPressEffectProvider mLongPressEffectProvider =
+            new TestableLongPressEffectProvider();
+
+    private TestableQSPanelControllerBase mController;
 
     /** Implementation needed to ensure we have a reflectively-available class name. */
     private class TestableQSPanelControllerBase extends QSPanelControllerBase<QSPanel> {
@@ -112,20 +147,50 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
                 QSCustomizerController qsCustomizerController, MediaHost mediaHost,
                 MetricsLogger metricsLogger, UiEventLogger uiEventLogger, QSLogger qsLogger,
                 DumpManager dumpManager) {
-            super(view, host, qsCustomizerController, true, mediaHost, metricsLogger, uiEventLogger,
+            super(view, host, qsCustomizerController, usingMediaPlayer(),
+                    mediaHost, metricsLogger, uiEventLogger,
                     qsLogger, dumpManager, new ResourcesSplitShadeStateController(),
-                    mVibratorHelper);
+                    mLongPressEffectProvider);
         }
+
+        private MutableStateFlow<Boolean> mMediaVisible = MutableStateFlow(false);
 
         @Override
         protected QSTileRevealController createTileRevealController() {
             return mQSTileRevealController;
         }
+
+        @Override
+        StateFlow<Boolean> getMediaVisibleFlow() {
+            return asStateFlow(mMediaVisible);
+        }
+
+        void setMediaVisible(boolean visible) {
+            mMediaVisible.tryEmit(visible);
+        }
+    }
+
+    private class TestableLongPressEffectProvider implements Provider<QSLongPressEffect> {
+
+        private int mEffectsProvided = 0;
+
+        @Override
+        public QSLongPressEffect get() {
+            mEffectsProvided++;
+            return mKosmos.getQsLongPressEffect();
+        }
+    }
+
+    public QSPanelControllerBaseTest(FlagsParameterization flags) {
+        super();
+        mSetFlagsRule.setFlagsParameterization(flags);
     }
 
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
+
+        allowTestableLooperAsMainThread();
 
         when(mQSPanel.isAttachedToWindow()).thenReturn(true);
         when(mQSPanel.getDumpableTag()).thenReturn("QSPanel");
@@ -133,6 +198,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         when(mQSPanel.closePanelEvent()).thenReturn(QSEvent.QS_PANEL_COLLAPSED);
         when(mQSPanel.getOrCreateTileLayout()).thenReturn(mPagedTileLayout);
         when(mQSPanel.getTileLayout()).thenReturn(mPagedTileLayout);
+        when(mQSPanel.getViewTreeObserver()).thenReturn(mViewTreeObserver);
         when(mQSTile.getTileSpec()).thenReturn("dnd");
         when(mQSHost.getTiles()).thenReturn(Collections.singleton(mQSTile));
         when(mQSTileRevealControllerFactory.create(any(), any()))
@@ -153,6 +219,11 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
         mController.init();
         reset(mQSTileRevealController);
+    }
+
+    @After
+    public void tearDown() {
+        disallowTestableLooperAsMainThread();
     }
 
     @Test
@@ -250,6 +321,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
 
     @Test
+    @DisableSceneContainer
     public void testShouldUseHorizontalLayout_falseForSplitShade() {
         mConfiguration.orientation = Configuration.ORIENTATION_LANDSCAPE;
         mConfiguration.screenLayout = Configuration.SCREENLAYOUT_LONG_YES;
@@ -275,6 +347,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void testChangeConfiguration_shouldUseHorizontalLayoutInLandscape_true() {
         when(mMediaHost.getVisible()).thenReturn(true);
         mController.setUsingHorizontalLayoutChangeListener(mHorizontalLayoutListener);
@@ -298,6 +371,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void testChangeConfiguration_shouldUseHorizontalLayoutInLongDevices_true() {
         when(mMediaHost.getVisible()).thenReturn(true);
         mController.setUsingHorizontalLayoutChangeListener(mHorizontalLayoutListener);
@@ -334,6 +408,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void configurationChange_onlySplitShadeConfigChanges_horizontalLayoutStatusUpdated() {
         // Preconditions for horizontal layout
         when(mMediaHost.getVisible()).thenReturn(true);
@@ -421,6 +496,27 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS)
+    public void setTiles_longPressEffectEnabled_nonNullLongPressEffectsAreProvided() {
+        mLongPressEffectProvider.mEffectsProvided = 0;
+        when(mQSHost.getTiles()).thenReturn(List.of(mQSTile, mOtherTile));
+        mController.setTiles();
+
+        // There is one non-null effect provided for each tile in the host
+        assertThat(mLongPressEffectProvider.mEffectsProvided).isEqualTo(2);
+    }
+
+    @Test
+    @DisableFlags(FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS)
+    public void setTiles_longPressEffectDisabled_noLongPressEffectsAreProvided() {
+        mLongPressEffectProvider.mEffectsProvided = 0;
+        when(mQSHost.getTiles()).thenReturn(List.of(mQSTile, mOtherTile));
+        mController.setTiles();
+
+        assertThat(mLongPressEffectProvider.mEffectsProvided).isEqualTo(0);
+    }
+
+    @Test
     public void setTiles_differentTiles_extraTileRemoved() {
         when(mQSHost.getTiles()).thenReturn(List.of(mQSTile, mOtherTile));
         mController.setTiles();
@@ -461,5 +557,21 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
         verify(mQSPanel, times(2)).removeTile(any());
         verify(mQSPanel, times(2)).addTile(any());
+    }
+
+    @Test
+    public void dettach_destroy_attach_tilesAreNotReadded() {
+        when(mQSHost.getTiles()).thenReturn(List.of(mQSTile, mOtherTile));
+        mController.setTiles();
+
+        mController.onViewDetached();
+        mController.destroy();
+        mController.onViewAttached();
+
+        assertThat(mController.mRecords).isEmpty();
+    }
+
+    private boolean usingMediaPlayer() {
+        return !SceneContainerFlag.isEnabled();
     }
 }

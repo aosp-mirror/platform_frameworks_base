@@ -41,6 +41,9 @@ public class LottieColorUtils {
     static {
         HashMap<String, Integer> map = new HashMap<>();
         map.put(
+                ".grey200",
+                R.color.settingslib_color_grey800);
+        map.put(
                 ".grey600",
                 R.color.settingslib_color_grey400);
         map.put(
@@ -67,6 +70,9 @@ public class LottieColorUtils {
         map.put(
                 ".red200",
                 R.color.settingslib_color_red500);
+        map.put(
+                ".cream",
+                R.color.settingslib_color_charcoal);
         DARK_TO_LIGHT_THEME_COLOR_MAP = Collections.unmodifiableMap(map);
     }
 

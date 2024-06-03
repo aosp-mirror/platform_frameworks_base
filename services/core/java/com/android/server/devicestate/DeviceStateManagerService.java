@@ -399,7 +399,7 @@ public final class DeviceStateManagerService extends SystemService {
         final DeviceState baseState = mBaseState.orElse(INVALID_DEVICE_STATE);
         final DeviceState currentState = mCommittedState.orElse(INVALID_DEVICE_STATE);
 
-        return new DeviceStateInfo(supportedStates, baseState,
+        return new DeviceStateInfo(new ArrayList<>(supportedStates), baseState,
                 createMergedDeviceState(currentState, baseState));
     }
 

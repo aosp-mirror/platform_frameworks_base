@@ -22,11 +22,12 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.SensorProps;
+import android.os.Binder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Slog;
 
 import androidx.annotation.NonNull;
@@ -36,7 +37,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * Provides the sensor props for face sensor, if available.
@@ -74,22 +74,10 @@ public class FaceSensorConfigurations implements Parcelable {
     /**
      * Process AIDL instances to extract sensor props and add it to the sensor map.
      * @param aidlInstances available face AIDL instances
-     * @param getIFace function that provides the daemon for the specific instance
      */
-    public void addAidlConfigs(@NonNull String[] aidlInstances,
-            @NonNull Function<String, IFace> getIFace) {
+    public void addAidlConfigs(@NonNull String[] aidlInstances) {
         for (String aidlInstance : aidlInstances) {
-            final String fqName = IFace.DESCRIPTOR + "/" + aidlInstance;
-            IFace face = getIFace.apply(fqName);
-            try {
-                if (face != null) {
-                    mSensorPropsMap.put(aidlInstance, face.getSensorProps());
-                } else {
-                    Slog.e(TAG, "Unable to get declared service: " + fqName);
-                }
-            } catch (RemoteException e) {
-                Log.d(TAG, "Unable to get sensor properties!");
-            }
+            mSensorPropsMap.put(aidlInstance, null);
         }
     }
 
@@ -131,38 +119,31 @@ public class FaceSensorConfigurations implements Parcelable {
     }
 
     /**
-     * Return sensor props for the given instance. If instance is not available,
-     * then null is returned.
+     * Checks if {@param instance} exists.
      */
     @Nullable
-    public Pair<String, SensorProps[]> getSensorPairForInstance(String instance) {
-        if (mSensorPropsMap.containsKey(instance)) {
-            return new Pair<>(instance, mSensorPropsMap.get(instance));
-        }
-
-        return null;
+    public boolean doesInstanceExist(String instance) {
+        return mSensorPropsMap.containsKey(instance);
     }
 
     /**
-     * Return the first pair of instance and sensor props, which does not correspond to the given
-     * If instance is not available, then null is returned.
+     * Return the first HAL instance, which does not correspond to the given {@param instance}.
+     * If another instance is not available, then null is returned.
      */
     @Nullable
-    public Pair<String, SensorProps[]> getSensorPairNotForInstance(String instance) {
+    public String getSensorNameNotForInstance(String instance) {
         Optional<String> notAVirtualInstance = mSensorPropsMap.keySet().stream().filter(
                 (instanceName) -> !instanceName.equals(instance)).findFirst();
-        return notAVirtualInstance.map(this::getSensorPairForInstance).orElseGet(
-                this::getSensorPair);
+        return notAVirtualInstance.orElse(null);
     }
 
     /**
-     * Returns the first pair of instance and sensor props that has been added to the map.
+     * Returns the first instance that has been added to the map.
      */
     @Nullable
-    public Pair<String, SensorProps[]> getSensorPair() {
+    public String getSensorInstance() {
         Optional<String> optionalInstance = mSensorPropsMap.keySet().stream().findFirst();
-        return optionalInstance.map(this::getSensorPairForInstance).orElse(null);
-
+        return optionalInstance.orElse(null);
     }
 
     public boolean getResetLockoutRequiresChallenge() {
@@ -178,5 +159,32 @@ public class FaceSensorConfigurations implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeByte((byte) (mResetLockoutRequiresChallenge ? 1 : 0));
         dest.writeMap(mSensorPropsMap);
+    }
+
+    /**
+     * Returns face sensor props for the HAL {@param instance}.
+     */
+    @Nullable
+    public SensorProps[] getSensorPropForInstance(String instance) {
+        SensorProps[] props = mSensorPropsMap.get(instance);
+
+        //Props should not be null for HIDL configs
+        if (props != null) {
+            return props;
+        }
+
+        final String fqName = IFace.DESCRIPTOR + "/" + instance;
+        IFace face = IFace.Stub.asInterface(Binder.allowBlocking(
+                ServiceManager.waitForDeclaredService(fqName)));
+        try {
+            if (face != null) {
+                props = face.getSensorProps();
+            } else {
+                Slog.e(TAG, "Unable to get declared service: " + fqName);
+            }
+        } catch (RemoteException e) {
+            Log.d(TAG, "Unable to get sensor properties!");
+        }
+        return props;
     }
 }

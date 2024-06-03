@@ -243,6 +243,7 @@ public class SecureSettings {
         Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED,
         Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED,
         Settings.Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO,
+        Settings.Secure.BLUETOOTH_LE_BROADCAST_NAME,
         Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE,
         Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME,
         Settings.Secure.BLUETOOTH_LE_BROADCAST_IMPROVE_COMPATIBILITY,
@@ -258,6 +259,7 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
         Settings.Secure.SEARCH_ALL_ENTRYPOINTS_ENABLED,
         Settings.Secure.HUB_MODE_TUTORIAL_STATE,
+        Settings.Secure.GLANCEABLE_HUB_ENABLED,
         Settings.Secure.STYLUS_BUTTONS_ENABLED,
         Settings.Secure.STYLUS_HANDWRITING_ENABLED,
         Settings.Secure.DEFAULT_NOTE_TASK_PROFILE,
@@ -269,6 +271,13 @@ public class SecureSettings {
         Settings.Secure.CAMERA_EXTENSIONS_FALLBACK,
         Settings.Secure.VISUAL_QUERY_ACCESSIBILITY_DETECTION_ENABLED,
         Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
-        Settings.Secure.AUDIO_DEVICE_INVENTORY
+        Settings.Secure.AUDIO_DEVICE_INVENTORY,
+        Settings.Secure.SCREEN_RESOLUTION_MODE,
+        Settings.Secure.ACCESSIBILITY_GESTURE_TARGETS,
+        Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_SATURATION_LEVEL,
+        Settings.Secure.CHARGE_OPTIMIZATION_MODE,
+        Settings.Secure.ON_DEVICE_INTELLIGENCE_UNBIND_TIMEOUT_MS,
+        Settings.Secure.ON_DEVICE_INFERENCE_UNBIND_TIMEOUT_MS,
+        Settings.Secure.ON_DEVICE_INTELLIGENCE_IDLE_TIMEOUT_MS,
     };
 }

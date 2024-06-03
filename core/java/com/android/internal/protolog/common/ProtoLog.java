@@ -135,7 +135,7 @@ public class ProtoLog {
      * @param group Group to check enable status of.
      * @return true iff this is being logged.
      */
-    public static boolean isEnabled(IProtoLogGroup group) {
+    public static boolean isEnabled(IProtoLogGroup group, LogLevel level) {
         if (REQUIRE_PROTOLOGTOOL) {
             throw new UnsupportedOperationException(
                     "ProtoLog calls MUST be processed with ProtoLogTool");

@@ -49,7 +49,7 @@
     <string name="disable_carrier_button_text" msgid="7153361131709275746">"Оневозможи ја eSIM"</string>
     <string name="error_disable_esim_title" msgid="3802652622784813119">"Не може да се оневозможи eSIM"</string>
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"eSIM-картичката не може да се оневозможи поради грешка."</string>
-    <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Внеси"</string>
+    <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Enter"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Погрешна шема"</string>
     <string name="kg_wrong_pattern_try_again" msgid="3603524940234151881">"Погрешна шема. Обидете се повторно."</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Погрешна лозинка"</string>
@@ -111,12 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"За дополнителна безбедност, користете шема"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"За дополнителна безбедност, користете PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"За дополнителна безбедност, користете лозинка"</string>
-    <!-- no translation found for kg_prompt_added_security_pin (5487992065995475528) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_pattern (1017068086102168544) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_password (6053156069765029006) -->
-    <skip />
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Потребен е PIN за дополнителна безбедност"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Потребна е шема за дополнителна безбедност"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Потребна е лозинка за дополнителна безбедност"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Уредот е заклучен од администраторот"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Уредот е заклучен рачно"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Непознат"</string>

@@ -19,6 +19,7 @@
 
 #include <android/native_window.h>
 #include <ui/PublicFormat.h>
+#include <utils/StrongPointer.h>
 
 #include "jni.h"
 

@@ -38,7 +38,14 @@ constructor(
         // Dismiss the previous dialog, if any.
         mediaOutputBroadcastDialog?.dismiss()
 
-        val controller = mediaOutputControllerFactory.create(packageName)
+        // TODO: b/321969740 - Populate the userHandle parameter. The user handle is necessary to
+        //  disambiguate the same package running on different users.
+        val controller =
+            mediaOutputControllerFactory.create(
+                packageName,
+                /* userHandle= */ null,
+                /* token */ null,
+            )
         val dialog =
             MediaOutputBroadcastDialog(context, aboveStatusBar, broadcastSender, controller)
         mediaOutputBroadcastDialog = dialog

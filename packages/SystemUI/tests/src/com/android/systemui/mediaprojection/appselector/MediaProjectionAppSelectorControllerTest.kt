@@ -2,7 +2,7 @@ package com.android.systemui.mediaprojection.appselector
 
 import android.content.ComponentName
 import android.os.UserHandle
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
@@ -24,7 +24,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
 
@@ -257,6 +257,8 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
             userId = userId,
             colorBackground = 0,
             isForegroundTask = isForegroundTask,
+            userType = RecentTask.UserType.STANDARD,
+            splitBounds = null,
         )
     }
 

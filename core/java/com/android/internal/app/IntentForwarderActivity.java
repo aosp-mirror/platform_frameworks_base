@@ -28,6 +28,7 @@ import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.android.internal.app.ResolverActivity.EXTRA_CALLING_USER;
+import static com.android.internal.app.ResolverActivity.EXTRA_RESTRICT_TO_SINGLE_USER;
 import static com.android.internal.app.ResolverActivity.EXTRA_SELECTED_PROFILE;
 
 import android.annotation.Nullable;
@@ -190,7 +191,7 @@ public class IntentForwarderActivity extends Activity  {
                 .thenApplyAsync(targetResolveInfo -> {
                     if (isResolverActivityResolveInfo(targetResolveInfo)) {
                         launchResolverActivityWithCorrectTab(intentReceived, className, newIntent,
-                                callingUserId, targetUserId);
+                                callingUserId, targetUserId, false);
                     // When switching to the personal profile, automatically start the activity
                     } else if (className.equals(FORWARD_INTENT_TO_PARENT)) {
                         startActivityAsCaller(newIntent, targetUserId);
@@ -218,7 +219,7 @@ public class IntentForwarderActivity extends Activity  {
                 .thenAcceptAsync(targetResolveInfo -> {
                     if (isResolverActivityResolveInfo(targetResolveInfo)) {
                         launchResolverActivityWithCorrectTab(intentReceived, className, newIntent,
-                                callingUserId, targetUserId);
+                                callingUserId, targetUserId, true);
                     } else {
                         maybeShowUserConsentMiniResolverPrivate(targetResolveInfo, newIntent,
                                 targetUserId);
@@ -271,6 +272,7 @@ public class IntentForwarderActivity extends Activity  {
                 getOpenInWorkMessage(launchIntent, target.loadLabel(packageManagerForTargetUser)),
                 packageManagerForTargetUser);
 
+        ((Button) findViewById(R.id.button_open)).setText(getOpenInWorkButtonString(launchIntent));
 
         View telephonyInfo = findViewById(R.id.miniresolver_info_section);
 
@@ -309,7 +311,15 @@ public class IntentForwarderActivity extends Activity  {
                 packageManagerForTargetUser);
 
         View telephonyInfo = findViewById(R.id.miniresolver_info_section);
-        telephonyInfo.setVisibility(View.GONE);
+        telephonyInfo.setVisibility(View.VISIBLE);
+
+        if (isTextMessageIntent(launchIntent)) {
+            ((TextView) findViewById(R.id.miniresolver_info_section_text)).setText(
+                    R.string.miniresolver_private_space_messages_information);
+        } else {
+            ((TextView) findViewById(R.id.miniresolver_info_section_text)).setText(
+                    R.string.miniresolver_private_space_phone_information);
+        }
     }
 
     private void buildMiniResolver(ResolveInfo target, Intent launchIntent, int targetUserId,
@@ -333,7 +343,6 @@ public class IntentForwarderActivity extends Activity  {
         ((Button) findViewById(R.id.use_same_profile_browser)).setText(R.string.cancel);
         findViewById(R.id.use_same_profile_browser).setOnClickListener(v -> finish());
 
-        ((Button) findViewById(R.id.button_open)).setText(getOpenInWorkButtonString(launchIntent));
         findViewById(R.id.button_open).setOnClickListener(v -> {
             startActivityAsCaller(
                     launchIntent,
@@ -490,7 +499,7 @@ public class IntentForwarderActivity extends Activity  {
     }
 
     private void launchResolverActivityWithCorrectTab(Intent intentReceived, String className,
-            Intent newIntent, int callingUserId, int targetUserId) {
+            Intent newIntent, int callingUserId, int targetUserId, boolean singleTabOnly) {
         // When showing the intent resolver, instead of forwarding to the other profile,
         // we launch it in the current user and select the other tab. This fixes b/155874820.
         //
@@ -505,6 +514,9 @@ public class IntentForwarderActivity extends Activity  {
         sanitizeIntent(intentReceived);
         intentReceived.putExtra(EXTRA_SELECTED_PROFILE, selectedProfile);
         intentReceived.putExtra(EXTRA_CALLING_USER, UserHandle.of(callingUserId));
+        if (singleTabOnly) {
+            intentReceived.putExtra(EXTRA_RESTRICT_TO_SINGLE_USER, true);
+        }
         startActivityAsCaller(intentReceived, null, false, userId);
         finish();
     }

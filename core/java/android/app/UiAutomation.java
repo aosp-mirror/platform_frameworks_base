@@ -33,6 +33,7 @@ import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -649,6 +650,81 @@ public final class UiAutomation {
             return permissions == null ? ALL_PERMISSIONS : new ArraySet<>(permissions);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Adds permission to be overridden to the given state. UiAutomation must be connected to
+     * root user.
+     *
+     * @param uid The UID of the app whose permission will be overridden
+     * @param permission The permission whose state will be overridden
+     * @param result The state to override the permission to
+     *
+     * @see PackageManager#PERMISSION_GRANTED
+     * @see PackageManager#PERMISSION_DENIED
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("UnflaggedApi")
+    public void addOverridePermissionState(int uid, @NonNull String permission,
+            @PackageManager.PermissionResult int result) {
+        try {
+            mUiAutomationConnection.addOverridePermissionState(uid, permission, result);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Removes overridden permission. UiAutomation must be connected to root user.
+     *
+     * @param uid The UID of the app whose permission is overridden
+     * @param permission The permission whose state will no longer be overridden
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("UnflaggedApi")
+    public void removeOverridePermissionState(int uid, @NonNull String permission) {
+        try {
+            mUiAutomationConnection.removeOverridePermissionState(uid, permission);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears all overridden permissions for the given UID. UiAutomation must be connected to
+     * root user.
+     *
+     * @param uid The UID of the app whose permissions will no longer be overridden
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("UnflaggedApi")
+    public void clearOverridePermissionStates(int uid) {
+        try {
+            mUiAutomationConnection.clearOverridePermissionStates(uid);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears all overridden permissions on the device. UiAutomation must be connected to root user.
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("UnflaggedApi")
+    public void clearAllOverridePermissionStates() {
+        try {
+            mUiAutomationConnection.clearAllOverridePermissionStates();
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
         }
     }
 
@@ -1890,6 +1966,11 @@ public final class UiAutomation {
                 @Override
                 public boolean onKeyEvent(KeyEvent event) {
                     return false;
+                }
+
+                @Override
+                public void onMagnificationSystemUIConnectionChanged(boolean connected) {
+                    /* do nothing */
                 }
 
                 @Override

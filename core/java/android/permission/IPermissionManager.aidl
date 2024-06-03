@@ -98,6 +98,8 @@ interface IPermissionManager {
 
     IBinder registerAttributionSource(in AttributionSourceState source);
 
+    int getRegisteredAttributionSourceCount(int uid);
+
     boolean isRegisteredAttributionSource(in AttributionSourceState source);
 
     int checkPermission(String packageName, String permissionName, String persistentDeviceId,

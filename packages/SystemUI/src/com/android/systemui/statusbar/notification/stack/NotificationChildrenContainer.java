@@ -56,6 +56,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.HybridGroupManager;
 import com.android.systemui.statusbar.notification.row.HybridNotificationView;
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
+import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationHeaderViewWrapper;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 
@@ -436,6 +437,15 @@ public class NotificationChildrenContainer extends ViewGroup
         updateHeaderVisibility(false /* animate */);
         updateChildrenAppearance();
         Trace.endSection();
+    }
+
+    /**
+     * Update the expand state of the group header.
+     */
+    public void updateGroupHeaderExpandState() {
+        if (mGroupHeaderWrapper != null) {
+            mGroupHeaderWrapper.setExpanded(mChildrenExpanded);
+        }
     }
 
     private void removeGroupHeader() {
@@ -1429,7 +1439,7 @@ public class NotificationChildrenContainer extends ViewGroup
             if (singleLineView != null) {
                 minExpandHeight += singleLineView.getHeight();
             } else {
-                if (AsyncGroupHeaderViewInflation.isEnabled()) {
+                if (AsyncHybridViewInflation.isEnabled()) {
                     minExpandHeight += mMinSingleLineHeight;
                 } else {
                     Log.e(TAG, "getMinHeight: child " + child.getEntry().getKey()

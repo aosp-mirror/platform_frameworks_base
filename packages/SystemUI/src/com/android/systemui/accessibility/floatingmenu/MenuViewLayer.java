@@ -17,13 +17,13 @@
 package com.android.systemui.accessibility.floatingmenu;
 
 import static android.view.WindowInsets.Type.ime;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 
 import static androidx.core.view.WindowInsetsCompat.Type;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_BUTTON_COMPONENT_NAME;
 import static com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType.INVISIBLE_TOGGLE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.internal.accessibility.util.AccessibilityUtils.getAccessibilityServiceFragmentType;
 import static com.android.internal.accessibility.util.AccessibilityUtils.setAccessibilityServiceState;
 import static com.android.systemui.accessibility.floatingmenu.MenuMessageView.Index;
@@ -105,14 +105,14 @@ class MenuViewLayer extends FrameLayout implements
      *
      * <p>Defined in frameworks/proto_logging/stats/express/catalog/accessibility.cfg.
      */
-    static final String TEX_METRIC_DISMISS = "accessibility.value_fab_shortcut_action_dismiss";
+    static final String TEX_METRIC_DISMISS = "accessibility.value_fab_shortcut_dismiss";
 
     /**
      * Counter indicating the FAB was dragged to the Edit action button.
      *
      * <p>Defined in frameworks/proto_logging/stats/express/catalog/accessibility.cfg.
      */
-    static final String TEX_METRIC_EDIT = "accessibility.value_fab_shortcut_action_edit";
+    static final String TEX_METRIC_EDIT = "accessibility.value_fab_shortcut_edit";
 
     private final WindowManager mWindowManager;
     private final MenuView mMenuView;
@@ -175,8 +175,8 @@ class MenuViewLayer extends FrameLayout implements
                 mAccessibilityManager.enableShortcutsForTargets(
                         /* enable= */ false,
                         ShortcutConstants.UserShortcutType.SOFTWARE,
-                        new ArraySet<>(mAccessibilityManager.getAccessibilityShortcutTargets(
-                                ACCESSIBILITY_BUTTON)),
+                        new ArraySet<>(
+                                mAccessibilityManager.getAccessibilityShortcutTargets(SOFTWARE)),
                         mSecureSettings.getRealUserHandle(UserHandle.USER_CURRENT)
                 );
             } else {
@@ -185,8 +185,7 @@ class MenuViewLayer extends FrameLayout implements
                         UserHandle.USER_CURRENT);
 
                 final List<ComponentName> hardwareKeyShortcutComponents =
-                        mAccessibilityManager.getAccessibilityShortcutTargets(
-                                        ACCESSIBILITY_SHORTCUT_KEY)
+                        mAccessibilityManager.getAccessibilityShortcutTargets(HARDWARE)
                                 .stream()
                                 .map(ComponentName::unflattenFromString)
                                 .toList();
@@ -323,9 +322,8 @@ class MenuViewLayer extends FrameLayout implements
         }
         addView(mMessageView, LayerIndex.MESSAGE_VIEW);
 
-        if (Flags.floatingMenuAnimatedTuck()) {
-            setClipChildren(true);
-        }
+        setClipChildren(true);
+
         setClickable(false);
         setFocusable(false);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
@@ -477,10 +475,8 @@ class MenuViewLayer extends FrameLayout implements
             mMenuAnimationController.startTuckedAnimationPreview();
         }
 
-        if (Flags.floatingMenuAnimatedTuck()) {
-            if (!mMenuView.isMoveToTucked()) {
-                setClipBounds(null);
-            }
+        if (!mMenuView.isMoveToTucked()) {
+            setClipBounds(null);
         }
         mMenuView.onArrivalAtPosition(false);
     }
@@ -492,11 +488,11 @@ class MenuViewLayer extends FrameLayout implements
             } else {
                 hideMenuAndShowMessage();
             }
-            mMenuView.incrementTexMetricForAllTargets(TEX_METRIC_DISMISS);
+            mMenuView.incrementTexMetric(TEX_METRIC_DISMISS);
         } else if (id == R.id.action_edit
                 && Flags.floatingMenuDragToEdit()) {
             gotoEditScreen();
-            mMenuView.incrementTexMetricForAllTargets(TEX_METRIC_EDIT);
+            mMenuView.incrementTexMetric(TEX_METRIC_EDIT);
         }
         mDismissView.hide();
         mDragToInteractView.hide();

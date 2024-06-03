@@ -16,14 +16,15 @@
 
 package android.tracing.perfetto;
 
-import static android.internal.perfetto.protos.PerfettoTrace.TestEvent.PAYLOAD;
-import static android.internal.perfetto.protos.PerfettoTrace.TestEvent.TestPayload.SINGLE_INT;
-import static android.internal.perfetto.protos.PerfettoTrace.TracePacket.FOR_TESTING;
+import static android.internal.perfetto.protos.TestEventOuterClass.TestEvent.PAYLOAD;
+import static android.internal.perfetto.protos.TestEventOuterClass.TestEvent.TestPayload.SINGLE_INT;
+import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket.FOR_TESTING;
 
 import static java.io.File.createTempFile;
 import static java.nio.file.Files.createTempDirectory;
 
-import android.internal.perfetto.protos.PerfettoTrace;
+import android.internal.perfetto.protos.DataSourceConfigOuterClass.DataSourceConfig;
+import android.internal.perfetto.protos.TestConfigOuterClass.TestConfig;
 import android.tools.ScenarioBuilder;
 import android.tools.Tag;
 import android.tools.io.TraceType;
@@ -46,6 +47,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import perfetto.protos.PerfettoConfig;
+import perfetto.protos.TracePacketOuterClass;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,9 +59,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-
-import perfetto.protos.PerfettoConfig;
-import perfetto.protos.TracePacketOuterClass;
 
 @RunWith(AndroidJUnit4.class)
 public class DataSourceTest {
@@ -328,19 +329,19 @@ public class DataSourceTest {
         int configDummyIntValue = 0;
         while (configStream.get().nextField() != ProtoInputStream.NO_MORE_FIELDS) {
             if (configStream.get().getFieldNumber()
-                    == (int) PerfettoTrace.DataSourceConfig.FOR_TESTING) {
+                    == (int) DataSourceConfig.FOR_TESTING) {
                 final long forTestingToken = configStream.get()
-                        .start(PerfettoTrace.DataSourceConfig.FOR_TESTING);
+                        .start(DataSourceConfig.FOR_TESTING);
                 while (configStream.get().nextField() != ProtoInputStream.NO_MORE_FIELDS) {
                     if (configStream.get().getFieldNumber()
-                            == (int) PerfettoTrace.TestConfig.DUMMY_FIELDS) {
+                            == (int) TestConfig.DUMMY_FIELDS) {
                         final long dummyFieldsToken = configStream.get()
-                                .start(PerfettoTrace.TestConfig.DUMMY_FIELDS);
+                                .start(TestConfig.DUMMY_FIELDS);
                         while (configStream.get().nextField() != ProtoInputStream.NO_MORE_FIELDS) {
                             if (configStream.get().getFieldNumber()
-                                    == (int) PerfettoTrace.TestConfig.DummyFields.FIELD_INT32) {
+                                    == (int) TestConfig.DummyFields.FIELD_INT32) {
                                 int val = configStream.get().readInt(
-                                        PerfettoTrace.TestConfig.DummyFields.FIELD_INT32);
+                                        TestConfig.DummyFields.FIELD_INT32);
                                 if (val != 0) {
                                     configDummyIntValue = val;
                                     break;
@@ -673,8 +674,6 @@ public class DataSourceTest {
                             protoOutputStream.write(SINGLE_INT, singleIntValue);
                             protoOutputStream.end(payloadToken);
                             protoOutputStream.end(forTestingToken);
-
-                            ctx.flush();
                         }),
                         (args) -> {}
                 );

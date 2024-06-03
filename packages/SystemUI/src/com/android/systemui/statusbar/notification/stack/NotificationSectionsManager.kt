@@ -40,7 +40,9 @@ import javax.inject.Inject
  *
  * TODO: Move remaining sections logic from NSSL into this class.
  */
-class NotificationSectionsManager @Inject internal constructor(
+class NotificationSectionsManager
+@Inject
+internal constructor(
     private val configurationController: ConfigurationController,
     private val keyguardMediaController: KeyguardMediaController,
     private val sectionsFeatureManager: NotificationSectionsFeatureManager,
@@ -52,11 +54,12 @@ class NotificationSectionsManager @Inject internal constructor(
     @SilentHeader private val silentHeaderController: SectionHeaderController
 ) : SectionProvider {
 
-    private val configurationListener = object : ConfigurationController.ConfigurationListener {
-        override fun onLocaleListChanged() {
-            reinflateViews()
+    private val configurationListener =
+        object : ConfigurationController.ConfigurationListener {
+            override fun onLocaleListChanged() {
+                reinflateViews()
+            }
         }
-    }
 
     private lateinit var parent: NotificationStackScrollLayout
     private var initialized = false
@@ -81,7 +84,7 @@ class NotificationSectionsManager @Inject internal constructor(
     val mediaControlsView: MediaContainerView?
         get() = mediaContainerController.mediaContainerView
 
-    /** Must be called before use.  */
+    /** Must be called before use. */
     fun initialize(parent: NotificationStackScrollLayout) {
         check(!initialized) { "NotificationSectionsManager already initialized" }
         initialized = true
@@ -91,13 +94,12 @@ class NotificationSectionsManager @Inject internal constructor(
     }
 
     fun createSectionsForBuckets(): Array<NotificationSection> =
-            sectionsFeatureManager.getNotificationBuckets()
-                    .map { NotificationSection(parent, it) }
-                    .toTypedArray()
+        sectionsFeatureManager
+            .getNotificationBuckets()
+            .map { NotificationSection(it) }
+            .toTypedArray()
 
-    /**
-     * Reinflates the entire notification header, including all decoration views.
-     */
+    /** Reinflates the entire notification header, including all decoration views. */
     fun reinflateViews() {
         silentHeaderController.reinflateView(parent)
         alertingHeaderController.reinflateView(parent)
@@ -108,44 +110,44 @@ class NotificationSectionsManager @Inject internal constructor(
     }
 
     override fun beginsSection(view: View, previous: View?): Boolean =
-            view === silentHeaderView ||
+        view === silentHeaderView ||
             view === mediaControlsView ||
             view === peopleHeaderView ||
             view === alertingHeaderView ||
             view === incomingHeaderView ||
             getBucket(view) != getBucket(previous)
 
-    private fun getBucket(view: View?): Int? = when {
-        view === silentHeaderView -> BUCKET_SILENT
-        view === incomingHeaderView -> BUCKET_HEADS_UP
-        view === mediaControlsView -> BUCKET_MEDIA_CONTROLS
-        view === peopleHeaderView -> BUCKET_PEOPLE
-        view === alertingHeaderView -> BUCKET_ALERTING
-        view is ExpandableNotificationRow -> view.entry.bucket
-        else -> null
-    }
+    private fun getBucket(view: View?): Int? =
+        when {
+            view === silentHeaderView -> BUCKET_SILENT
+            view === incomingHeaderView -> BUCKET_HEADS_UP
+            view === mediaControlsView -> BUCKET_MEDIA_CONTROLS
+            view === peopleHeaderView -> BUCKET_PEOPLE
+            view === alertingHeaderView -> BUCKET_ALERTING
+            view is ExpandableNotificationRow -> view.entry.bucket
+            else -> null
+        }
 
     private sealed class SectionBounds {
 
-        data class Many(
-            val first: ExpandableView,
-            val last: ExpandableView
-        ) : SectionBounds()
+        data class Many(val first: ExpandableView, val last: ExpandableView) : SectionBounds()
 
         data class One(val lone: ExpandableView) : SectionBounds()
         object None : SectionBounds()
 
-        fun addNotif(notif: ExpandableView): SectionBounds = when (this) {
-            is None -> One(notif)
-            is One -> Many(lone, notif)
-            is Many -> copy(last = notif)
-        }
+        fun addNotif(notif: ExpandableView): SectionBounds =
+            when (this) {
+                is None -> One(notif)
+                is One -> Many(lone, notif)
+                is Many -> copy(last = notif)
+            }
 
-        fun updateSection(section: NotificationSection): Boolean = when (this) {
-            is None -> section.setFirstAndLastVisibleChildren(null, null)
-            is One -> section.setFirstAndLastVisibleChildren(lone, lone)
-            is Many -> section.setFirstAndLastVisibleChildren(first, last)
-        }
+        fun updateSection(section: NotificationSection): Boolean =
+            when (this) {
+                is None -> section.setFirstAndLastVisibleChildren(null, null)
+                is One -> section.setFirstAndLastVisibleChildren(lone, lone)
+                is Many -> section.setFirstAndLastVisibleChildren(first, last)
+            }
 
         private fun NotificationSection.setFirstAndLastVisibleChildren(
             first: ExpandableView?,
@@ -167,17 +169,19 @@ class NotificationSectionsManager @Inject internal constructor(
         children: List<ExpandableView>
     ): Boolean {
         // Create mapping of bucket to section
-        val sectionBounds = children.asSequence()
+        val sectionBounds =
+            children
+                .asSequence()
                 // Group children by bucket
                 .groupingBy {
                     getBucket(it)
-                            ?: throw IllegalArgumentException("Cannot find section bucket for view")
+                        ?: throw IllegalArgumentException("Cannot find section bucket for view")
                 }
                 // Combine each bucket into a SectionBoundary
                 .foldToSparseArray(
-                        SectionBounds.None,
-                        size = sections.size,
-                        operation = SectionBounds::addNotif
+                    SectionBounds.None,
+                    size = sections.size,
+                    operation = SectionBounds::addNotif
                 )
 
         // Build a set of the old first/last Views of the sections
@@ -185,11 +189,12 @@ class NotificationSectionsManager @Inject internal constructor(
         val oldLastChildren = sections.mapNotNull { it.lastVisibleChild }.toSet().toMutableSet()
 
         // Update each section with the associated boundary, tracking if there was a change
-        val changed = sections.fold(false) { changed, section ->
-            val bounds = sectionBounds[section.bucket] ?: SectionBounds.None
-            val isSectionChanged = bounds.updateSection(section)
-            isSectionChanged || changed
-        }
+        val changed =
+            sections.fold(false) { changed, section ->
+                val bounds = sectionBounds[section.bucket] ?: SectionBounds.None
+                val isSectionChanged = bounds.updateSection(section)
+                isSectionChanged || changed
+            }
 
         val newFirstChildren = sections.mapNotNull { it.firstVisibleChild }
         val newLastChildren = sections.mapNotNull { it.lastVisibleChild }
@@ -229,16 +234,18 @@ class NotificationSectionsManager @Inject internal constructor(
     private fun logSections(sections: Array<NotificationSection>) {
         for (i in sections.indices) {
             val s = sections[i]
-            val fs = when (val first = s.firstVisibleChild) {
-                null -> "(null)"
-                is ExpandableNotificationRow -> first.entry.key
-                else -> Integer.toHexString(System.identityHashCode(first))
-            }
-            val ls = when (val last = s.lastVisibleChild) {
-                null -> "(null)"
-                is ExpandableNotificationRow -> last.entry.key
-                else -> Integer.toHexString(System.identityHashCode(last))
-            }
+            val fs =
+                when (val first = s.firstVisibleChild) {
+                    null -> "(null)"
+                    is ExpandableNotificationRow -> first.entry.key
+                    else -> Integer.toHexString(System.identityHashCode(first))
+                }
+            val ls =
+                when (val last = s.lastVisibleChild) {
+                    null -> "(null)"
+                    is ExpandableNotificationRow -> last.entry.key
+                    else -> Integer.toHexString(System.identityHashCode(last))
+                }
             Log.d(TAG, "updateSections: f=$fs s=$i")
             Log.d(TAG, "updateSections: l=$ls s=$i")
         }

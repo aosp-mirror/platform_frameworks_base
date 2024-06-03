@@ -15,12 +15,13 @@
 
 package com.android.systemui.statusbar.notification.icon.domain.interactor
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysUITestComponent
 import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.TestMocksModule
+import com.android.systemui.biometrics.domain.BiometricsDomainLayerModule
 import com.android.systemui.collectLastValue
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
@@ -51,7 +52,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class NotificationIconsInteractorTest : SysuiTestCase() {
 
     private val bubbles: Bubbles = mock()
@@ -150,12 +151,12 @@ class NotificationIconsInteractorTest : SysuiTestCase() {
 }
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class AlwaysOnDisplayNotificationIconsInteractorTest : SysuiTestCase() {
 
     private val bubbles: Bubbles = mock()
 
-    @Component(modules = [SysUITestModule::class])
+    @Component(modules = [SysUITestModule::class, BiometricsDomainLayerModule::class])
     @SysUISingleton
     interface TestComponent : SysUITestComponent<AlwaysOnDisplayNotificationIconsInteractor> {
 
@@ -255,7 +256,7 @@ class AlwaysOnDisplayNotificationIconsInteractorTest : SysuiTestCase() {
 }
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class StatusBarNotificationIconsInteractorTest : SysuiTestCase() {
 
     private val bubbles: Bubbles = mock()

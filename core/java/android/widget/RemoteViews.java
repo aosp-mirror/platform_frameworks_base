@@ -345,7 +345,7 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * @hide
      */
-    private static final int MAX_ADAPTER_CONVERSION_WAITING_TIME_MS = 5000;
+    private static final int MAX_ADAPTER_CONVERSION_WAITING_TIME_MS = 20_000;
 
     /**
      * Application that hosts the remote views.
@@ -382,7 +382,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Maps Intent ID to RemoteCollectionItems to avoid duplicate items
      */
-    private RemoteCollectionCache mCollectionCache = new RemoteCollectionCache();
+    private @NonNull RemoteCollectionCache mCollectionCache = new RemoteCollectionCache();
 
     /** Cache of ApplicationInfos used by collection items. */
     private ApplicationInfoCache mApplicationInfoCache = new ApplicationInfoCache();
@@ -772,6 +772,16 @@ public class RemoteViews implements Parcelable, Filter {
 
         // Because pruning can remove the need for bitmaps, we reconstruct the caches.
         reconstructCaches();
+    }
+
+    /**
+     * Return {@code true} only if this {@code RemoteViews} is a legacy list widget that uses
+     * {@code Intent} for inflating child entries.
+     *
+     * @hide
+     */
+    public boolean isLegacyListRemoteViews() {
+        return mCollectionCache.mIdToUriMapping.size() > 0;
     }
 
     /**
@@ -1231,8 +1241,8 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     private class RemoteCollectionCache {
-        private SparseArray<String> mIdToUriMapping = new SparseArray<>();
-        private HashMap<String, RemoteCollectionItems> mUriToCollectionMapping = new HashMap<>();
+        private final SparseArray<String> mIdToUriMapping = new SparseArray<>();
+        private final Map<String, RemoteCollectionItems> mUriToCollectionMapping = new HashMap<>();
 
         RemoteCollectionCache() { }
 

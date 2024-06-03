@@ -29,17 +29,19 @@ import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.R
 import com.android.credentialmanager.ui.components.AccountRow
 import com.android.credentialmanager.ui.components.ContinueChip
+import com.android.credentialmanager.ui.components.CredentialsScreenChipSpacer
 import com.android.credentialmanager.ui.components.DismissChip
 import com.android.credentialmanager.ui.components.SignInHeader
 import com.android.credentialmanager.ui.components.SignInOptionsChip
 import com.android.credentialmanager.ui.screens.single.SingleAccountScreen
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
+import com.android.credentialmanager.ui.components.BottomSpacer
 
 /**
- * Screen that shows sign in with provider credential.
+ * Screen that shows single passkey credential.
  *
- * @param entry The password entry
+ * @param entry The passkey entry
  * @param columnState ScalingLazyColumn configuration to be be applied to SingleAccountScreen
  * @param modifier styling for composable
  * @param flowEngine [FlowEngine] that updates ui state for this screen
@@ -49,7 +51,6 @@ import com.google.android.horologist.compose.layout.ScalingLazyColumnState
 fun SinglePasskeyScreen(
     entry: CredentialEntryInfo,
     columnState: ScalingLazyColumnState,
-    modifier: Modifier = Modifier,
     flowEngine: FlowEngine,
 ) {
     SingleAccountScreen(
@@ -60,21 +61,31 @@ fun SinglePasskeyScreen(
             )
         },
         accountContent = {
-            AccountRow(
-                    primaryText = checkNotNull(entry.displayName),
-                    secondaryText = entry.userName,
-                    modifier = Modifier.padding(top = 10.dp),
+            val displayName = entry.displayName
+            if (displayName == null ||
+                entry.displayName.equals(entry.userName, ignoreCase = true)) {
+                AccountRow(
+                    primaryText = entry.userName,
                 )
+            } else {
+                AccountRow(
+                    primaryText = displayName,
+                    secondaryText = entry.userName,
+                )
+            }
         },
         columnState = columnState,
-        modifier = modifier.padding(horizontal = 10.dp)
+        modifier = Modifier.padding(horizontal = 10.dp)
     ) {
         item {
             val selectEntry = flowEngine.getEntrySelector()
             Column {
                 ContinueChip { selectEntry(entry, false) }
+                CredentialsScreenChipSpacer()
                 SignInOptionsChip{ flowEngine.openSecondaryScreen() }
+                CredentialsScreenChipSpacer()
                 DismissChip { flowEngine.cancel() }
+                BottomSpacer()
             }
         }
     }

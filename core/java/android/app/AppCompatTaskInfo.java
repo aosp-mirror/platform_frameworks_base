@@ -16,64 +16,25 @@
 
 package android.app;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
  * Stores App Compat information about a particular Task.
  * @hide
  */
 public class AppCompatTaskInfo implements Parcelable {
-
-    /**
-     * Camera compat control isn't shown because it's not requested by heuristics.
-     */
-    public static final int CAMERA_COMPAT_CONTROL_HIDDEN = 0;
-
-    /**
-     * Camera compat control is shown with the treatment suggested.
-     */
-    public static final int CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED = 1;
-
-    /**
-     * Camera compat control is shown to allow reverting the applied treatment.
-     */
-    public static final int CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED = 2;
-
-    /**
-     * Camera compat control is dismissed by user.
-     */
-    public static final int CAMERA_COMPAT_CONTROL_DISMISSED = 3;
-
-    /**
-     * Enum for the Camera app compat control states.
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "CAMERA_COMPAT_CONTROL_" }, value = {
-            CAMERA_COMPAT_CONTROL_HIDDEN,
-            CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED,
-            CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED,
-            CAMERA_COMPAT_CONTROL_DISMISSED,
-    })
-    public @interface CameraCompatControlState {};
-
-    /**
-     * State of the Camera app compat control which is used to correct stretched viewfinder
-     * in apps that don't handle all possible configurations and changes between them correctly.
-     */
-    @CameraCompatControlState
-    public int cameraCompatControlState = CAMERA_COMPAT_CONTROL_HIDDEN;
-
     /**
      * Whether the direct top activity is eligible for letterbox education.
      */
     public boolean topActivityEligibleForLetterboxEducation;
+
+    /**
+     * Whether the letterbox education is enabled
+     */
+    public boolean isLetterboxEducationEnabled;
 
     /**
      * Whether the direct top activity is in size compat mode on foreground.
@@ -135,6 +96,11 @@ public class AppCompatTaskInfo implements Parcelable {
      */
     public int topActivityLetterboxHeight;
 
+    /**
+     * Stores camera-related app compat information about a particular Task.
+     */
+    public CameraCompatTaskInfo cameraCompatTaskInfo = CameraCompatTaskInfo.create();
+
     private AppCompatTaskInfo() {
         // Do nothing
     }
@@ -167,18 +133,10 @@ public class AppCompatTaskInfo implements Parcelable {
             };
 
     /**
-     * @return {@value true} if the task has camera compat controls.
-     */
-    public boolean hasCameraCompatControl() {
-        return cameraCompatControlState != CAMERA_COMPAT_CONTROL_HIDDEN
-                && cameraCompatControlState != CAMERA_COMPAT_CONTROL_DISMISSED;
-    }
-
-    /**
      * @return {@value true} if the task has some compat ui.
      */
     public boolean hasCompatUI() {
-        return hasCameraCompatControl() || topActivityInSizeCompat
+        return cameraCompatTaskInfo.hasCameraCompatUI() || topActivityInSizeCompat
                 || topActivityEligibleForLetterboxEducation
                 || isLetterboxDoubleTapEnabled
                 || topActivityEligibleForUserAspectRatioButton;
@@ -208,7 +166,8 @@ public class AppCompatTaskInfo implements Parcelable {
                 && topActivityLetterboxHorizontalPosition
                     == that.topActivityLetterboxHorizontalPosition
                 && isUserFullscreenOverrideEnabled == that.isUserFullscreenOverrideEnabled
-                && isSystemFullscreenOverrideEnabled == that.isSystemFullscreenOverrideEnabled;
+                && isSystemFullscreenOverrideEnabled == that.isSystemFullscreenOverrideEnabled
+                && cameraCompatTaskInfo.equalsForTaskOrganizer(that.cameraCompatTaskInfo);
     }
 
     /**
@@ -224,23 +183,24 @@ public class AppCompatTaskInfo implements Parcelable {
                     == that.topActivityEligibleForUserAspectRatioButton
                 && topActivityEligibleForLetterboxEducation
                     == that.topActivityEligibleForLetterboxEducation
+                && isLetterboxEducationEnabled == that.isLetterboxEducationEnabled
                 && topActivityLetterboxVerticalPosition == that.topActivityLetterboxVerticalPosition
                 && topActivityLetterboxHorizontalPosition
                     == that.topActivityLetterboxHorizontalPosition
                 && topActivityLetterboxWidth == that.topActivityLetterboxWidth
                 && topActivityLetterboxHeight == that.topActivityLetterboxHeight
-                && cameraCompatControlState == that.cameraCompatControlState
                 && isUserFullscreenOverrideEnabled == that.isUserFullscreenOverrideEnabled
-                && isSystemFullscreenOverrideEnabled == that.isSystemFullscreenOverrideEnabled;
+                && isSystemFullscreenOverrideEnabled == that.isSystemFullscreenOverrideEnabled
+                && cameraCompatTaskInfo.equalsForCompatUi(that.cameraCompatTaskInfo);
     }
 
     /**
-     * Reads the TaskInfo from a parcel.
+     * Reads the AppCompatTaskInfo from a parcel.
      */
     void readFromParcel(Parcel source) {
+        isLetterboxEducationEnabled = source.readBoolean();
         topActivityInSizeCompat = source.readBoolean();
         topActivityEligibleForLetterboxEducation = source.readBoolean();
-        cameraCompatControlState = source.readInt();
         isLetterboxDoubleTapEnabled = source.readBoolean();
         topActivityEligibleForUserAspectRatioButton = source.readBoolean();
         topActivityBoundsLetterboxed = source.readBoolean();
@@ -251,16 +211,17 @@ public class AppCompatTaskInfo implements Parcelable {
         topActivityLetterboxHeight = source.readInt();
         isUserFullscreenOverrideEnabled = source.readBoolean();
         isSystemFullscreenOverrideEnabled = source.readBoolean();
+        cameraCompatTaskInfo = source.readTypedObject(CameraCompatTaskInfo.CREATOR);
     }
 
     /**
-     * Writes the TaskInfo to a parcel.
+     * Writes the AppCompatTaskInfo to a parcel.
      */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeBoolean(isLetterboxEducationEnabled);
         dest.writeBoolean(topActivityInSizeCompat);
         dest.writeBoolean(topActivityEligibleForLetterboxEducation);
-        dest.writeInt(cameraCompatControlState);
         dest.writeBoolean(isLetterboxDoubleTapEnabled);
         dest.writeBoolean(topActivityEligibleForUserAspectRatioButton);
         dest.writeBoolean(topActivityBoundsLetterboxed);
@@ -271,6 +232,7 @@ public class AppCompatTaskInfo implements Parcelable {
         dest.writeInt(topActivityLetterboxHeight);
         dest.writeBoolean(isUserFullscreenOverrideEnabled);
         dest.writeBoolean(isSystemFullscreenOverrideEnabled);
+        dest.writeTypedObject(cameraCompatTaskInfo, flags);
     }
 
     @Override
@@ -278,6 +240,7 @@ public class AppCompatTaskInfo implements Parcelable {
         return "AppCompatTaskInfo { topActivityInSizeCompat=" + topActivityInSizeCompat
                 + " topActivityEligibleForLetterboxEducation= "
                 + topActivityEligibleForLetterboxEducation
+                + "isLetterboxEducationEnabled= " + isLetterboxEducationEnabled
                 + " isLetterboxDoubleTapEnabled= " + isLetterboxDoubleTapEnabled
                 + " topActivityEligibleForUserAspectRatioButton= "
                 + topActivityEligibleForUserAspectRatioButton
@@ -290,23 +253,7 @@ public class AppCompatTaskInfo implements Parcelable {
                 + " topActivityLetterboxHeight=" + topActivityLetterboxHeight
                 + " isUserFullscreenOverrideEnabled=" + isUserFullscreenOverrideEnabled
                 + " isSystemFullscreenOverrideEnabled=" + isSystemFullscreenOverrideEnabled
-                + " cameraCompatControlState="
-                + cameraCompatControlStateToString(cameraCompatControlState)
+                + " cameraCompatTaskInfo=" + cameraCompatTaskInfo.toString()
                 + "}";
-    }
-
-    /** Human readable version of the camera control state. */
-    @NonNull
-    public static String cameraCompatControlStateToString(
-            @CameraCompatControlState int cameraCompatControlState) {
-        switch (cameraCompatControlState) {
-            case CAMERA_COMPAT_CONTROL_HIDDEN: return "hidden";
-            case CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED: return "treatment-suggested";
-            case CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED: return "treatment-applied";
-            case CAMERA_COMPAT_CONTROL_DISMISSED: return "dismissed";
-            default:
-                throw new AssertionError(
-                        "Unexpected camera compat control state: " + cameraCompatControlState);
-        }
     }
 }

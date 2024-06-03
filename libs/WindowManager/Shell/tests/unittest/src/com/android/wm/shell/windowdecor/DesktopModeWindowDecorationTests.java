@@ -18,6 +18,8 @@ package com.android.wm.shell.windowdecor;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 import static android.view.WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -38,17 +40,22 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Handler;
 import android.os.SystemProperties;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
+import android.view.WindowManager;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
@@ -59,6 +66,7 @@ import com.android.wm.shell.windowdecor.WindowDecoration.RelayoutParams;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -80,6 +88,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
             "persist.wm.debug.desktop_use_window_shadows_focused_window";
     private static final String USE_ROUNDED_CORNERS_SYSPROP_KEY =
             "persist.wm.debug.desktop_use_rounded_corners";
+
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
 
     @Mock
     private DisplayController mMockDisplayController;
@@ -173,10 +183,52 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_ENABLE_APP_HEADER_WITH_TASK_DENSITY)
+    public void updateRelayoutParams_appHeader_usesTaskDensity() {
+        final int systemDensity = mTestableContext.getOrCreateTestableResources().getResources()
+                .getConfiguration().densityDpi;
+        final int customTaskDensity = systemDensity + 300;
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        taskInfo.configuration.densityDpi = customTaskDensity;
+        final RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams,
+                mTestableContext,
+                taskInfo,
+                /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false);
+
+        assertThat(relayoutParams.mWindowDecorConfig.densityDpi).isEqualTo(customTaskDensity);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_APP_HEADER_WITH_TASK_DENSITY)
+    public void updateRelayoutParams_appHeader_usesSystemDensity() {
+        final int systemDensity = mTestableContext.getOrCreateTestableResources().getResources()
+                .getConfiguration().densityDpi;
+        final int customTaskDensity = systemDensity + 300;
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        taskInfo.configuration.densityDpi = customTaskDensity;
+        final RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams,
+                mTestableContext,
+                taskInfo,
+                /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false);
+
+        assertThat(relayoutParams.mWindowDecorConfig.densityDpi).isEqualTo(systemDensity);
+    }
+
+    @Test
     public void updateRelayoutParams_freeformAndTransparentAppearance_allowsInputFallthrough() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        taskInfo.taskDescription.setSystemBarsAppearance(
+        taskInfo.taskDescription.setTopOpaqueSystemBarsAppearance(
                 APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND);
         final RelayoutParams relayoutParams = new RelayoutParams();
 
@@ -187,14 +239,14 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false);
 
-        assertThat(relayoutParams.mAllowCaptionInputFallthrough).isTrue();
+        assertThat(relayoutParams.hasInputFeatureSpy()).isTrue();
     }
 
     @Test
     public void updateRelayoutParams_freeformButOpaqueAppearance_disallowsInputFallthrough() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        taskInfo.taskDescription.setSystemBarsAppearance(0);
+        taskInfo.taskDescription.setTopOpaqueSystemBarsAppearance(0);
         final RelayoutParams relayoutParams = new RelayoutParams();
 
         DesktopModeWindowDecoration.updateRelayoutParams(
@@ -204,7 +256,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false);
 
-        assertThat(relayoutParams.mAllowCaptionInputFallthrough).isFalse();
+        assertThat(relayoutParams.hasInputFeatureSpy()).isFalse();
     }
 
     @Test
@@ -220,7 +272,55 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false);
 
-        assertThat(relayoutParams.mAllowCaptionInputFallthrough).isFalse();
+        assertThat(relayoutParams.hasInputFeatureSpy()).isFalse();
+    }
+
+    @Test
+    public void updateRelayoutParams_freeform_inputChannelNeeded() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        final RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams,
+                mTestableContext,
+                taskInfo,
+                /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false);
+
+        assertThat(hasNoInputChannelFeature(relayoutParams)).isFalse();
+    }
+
+    @Test
+    public void updateRelayoutParams_fullscreen_inputChannelNotNeeded() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        final RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams,
+                mTestableContext,
+                taskInfo,
+                /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false);
+
+        assertThat(hasNoInputChannelFeature(relayoutParams)).isTrue();
+    }
+
+    @Test
+    public void updateRelayoutParams_multiwindow_inputChannelNotNeeded() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        final RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams,
+                mTestableContext,
+                taskInfo,
+                /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false);
+
+        assertThat(hasNoInputChannelFeature(relayoutParams)).isTrue();
     }
 
     private void fillRoundedCornersResources(int fillValue) {
@@ -244,7 +344,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     private DesktopModeWindowDecoration createWindowDecoration(
             ActivityManager.RunningTaskInfo taskInfo) {
         return new DesktopModeWindowDecoration(mContext, mMockDisplayController,
-                mMockShellTaskOrganizer, taskInfo, mMockSurfaceControl, mConfiguration,
+                mMockShellTaskOrganizer, taskInfo, mMockSurfaceControl,
                 mMockHandler, mMockChoreographer, mMockSyncQueue, mMockRootTaskDisplayAreaOrganizer,
                 SurfaceControl.Builder::new, mMockTransactionSupplier,
                 WindowContainerTransaction::new, SurfaceControl::new,
@@ -267,5 +367,10 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 "DesktopModeWindowDecorationTests");
         return taskInfo;
 
+    }
+
+    private static boolean hasNoInputChannelFeature(RelayoutParams params) {
+        return (params.mInputFeatures & WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL)
+                != 0;
     }
 }

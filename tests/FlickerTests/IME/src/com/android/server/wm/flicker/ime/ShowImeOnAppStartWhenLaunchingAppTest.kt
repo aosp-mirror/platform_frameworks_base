@@ -36,7 +36,7 @@ import org.junit.runners.Parameterized
 /**
  * Launch an app that automatically displays the IME
  *
- * To run this test: `atest FlickerTests:LaunchAppShowImeOnStartTest`
+ * To run this test: `atest FlickerTestsIme2:ShowImeOnAppStartWhenLaunchingAppTest`
  *
  * Actions:
  * ```

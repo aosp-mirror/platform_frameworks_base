@@ -24,10 +24,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import com.android.systemui.Gefingerpoken
-import com.android.systemui.res.R
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.shade.ShadeLogger
@@ -65,7 +65,6 @@ private constructor(
     private val moveFromCenterAnimationController: StatusBarMoveFromCenterAnimationController?,
     private val userChipViewModel: StatusBarUserChipViewModel,
     private val viewUtil: ViewUtil,
-    private val sceneContainerFlags: SceneContainerFlags,
     private val configurationController: ConfigurationController,
     private val statusOverlayHoverListenerFactory: StatusOverlayHoverListenerFactory,
 ) : ViewController<PhoneStatusBarView>(view) {
@@ -205,7 +204,7 @@ private constructor(
 
             // If scene framework is enabled, route the touch to it and
             // ignore the rest of the gesture.
-            if (sceneContainerFlags.isEnabled()) {
+            if (SceneContainerFlag.isEnabled) {
                 windowRootView.get().dispatchTouchEvent(event)
                 return true
             }
@@ -267,7 +266,6 @@ private constructor(
         @Named(UNFOLD_STATUS_BAR)
         private val progressProvider: Optional<ScopedUnfoldTransitionProgressProvider>,
         private val featureFlags: FeatureFlags,
-        private val sceneContainerFlags: SceneContainerFlags,
         private val userChipViewModel: StatusBarUserChipViewModel,
         private val centralSurfaces: CentralSurfaces,
         private val statusBarWindowStateController: StatusBarWindowStateController,
@@ -301,7 +299,6 @@ private constructor(
                 statusBarMoveFromCenterAnimationController,
                 userChipViewModel,
                 viewUtil,
-                sceneContainerFlags,
                 configurationController,
                 statusOverlayHoverListenerFactory,
             )

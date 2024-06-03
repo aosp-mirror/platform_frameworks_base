@@ -30,4 +30,12 @@ constructor(
         value: Float,
         transitionState: TransitionState,
     ) : this(info.from, info.to, value, transitionState, info.ownerName)
+
+    fun isTransitioning(from: KeyguardState? = null, to: KeyguardState? = null): Boolean {
+        return (from == null || this.from == from) && (to == null || this.to == to)
+    }
+
+    fun isFinishedIn(state: KeyguardState): Boolean {
+        return to == state && transitionState == TransitionState.FINISHED
+    }
 }

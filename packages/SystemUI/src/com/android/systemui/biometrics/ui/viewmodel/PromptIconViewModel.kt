@@ -66,10 +66,9 @@ constructor(
      */
     val activeAuthType: Flow<AuthType> =
         combine(
-            promptViewModel.size,
             promptViewModel.modalities.distinctUntilChanged(),
             promptViewModel.faceMode.distinctUntilChanged()
-        ) { _, modalities, faceMode ->
+        ) { modalities, faceMode ->
             if (modalities.hasFaceAndFingerprint && !faceMode) {
                 AuthType.Coex
             } else if (modalities.hasFaceOnly || faceMode) {
@@ -94,25 +93,14 @@ constructor(
                     params.naturalDisplayHeight,
                     rotation.ordinal
                 )
-                rotatedBounds
+                Rect(
+                    rotatedBounds.left,
+                    rotatedBounds.top,
+                    params.logicalDisplayWidth - rotatedBounds.right,
+                    params.logicalDisplayHeight - rotatedBounds.bottom
+                )
             }
             .distinctUntilChanged()
-
-    val iconPosition: Flow<Rect> =
-        combine(udfpsSensorBounds, promptViewModel.size, promptViewModel.modalities) {
-            sensorBounds,
-            size,
-            modalities ->
-            // If not Udfps, icon does not change from default layout position
-            if (!modalities.hasUdfps) {
-                Rect() // Empty rect, don't offset from default position
-            } else if (size.isSmall) {
-                // When small with Udfps, only set horizontal position
-                Rect(sensorBounds.left, -1, sensorBounds.right, -1)
-            } else {
-                sensorBounds
-            }
-        }
 
     /** Whether an error message is currently being shown. */
     val showingError = promptViewModel.showingError
@@ -162,10 +150,11 @@ constructor(
 
     val iconSize: Flow<Pair<Int, Int>> =
         combine(
+            promptViewModel.position,
             activeAuthType,
-            promptViewModel.fingerprintSensorWidth,
-            promptViewModel.fingerprintSensorHeight,
-        ) { activeAuthType, fingerprintSensorWidth, fingerprintSensorHeight ->
+            promptViewModel.legacyFingerprintSensorWidth,
+            promptViewModel.legacyFingerprintSensorHeight,
+        ) { _, activeAuthType, fingerprintSensorWidth, fingerprintSensorHeight ->
             if (activeAuthType == AuthType.Face) {
                 Pair(promptViewModel.faceIconWidth, promptViewModel.faceIconHeight)
             } else {

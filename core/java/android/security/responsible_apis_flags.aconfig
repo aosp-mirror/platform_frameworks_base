@@ -1,4 +1,5 @@
 package: "android.security"
+container: "system"
 
 flag {
     name: "extend_ecm_to_all_settings"
@@ -9,6 +10,7 @@ flag {
 
 flag {
     name: "asm_restrictions_enabled"
+    is_exported: true
     namespace: "responsible_apis"
     description: "Enables ASM restrictions for activity starts and finishes"
     bug: "230590090"
@@ -23,6 +25,7 @@ flag {
 
 flag {
     name: "content_uri_permission_apis"
+    is_exported: true
     namespace: "responsible_apis"
     description: "Enables the content URI permission APIs"
     bug: "293467489"
@@ -30,6 +33,7 @@ flag {
 
 flag {
     name: "enforce_intent_filter_match"
+    is_exported: true
     namespace: "responsible_apis"
     description: "Make delivered intents match components' intent filters"
     bug: "293560872"

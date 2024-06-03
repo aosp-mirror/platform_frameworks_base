@@ -350,7 +350,7 @@ final class HdmiCecController {
      * {@link HdmiCecNetwork} only.
      *
      * @return CEC physical address of the device. The range of success address
-     *         is between 0x0000 and 0xFFFF. If failed it returns -1
+     *         is between 0x0000 and 0xFFFE. If failed it returns INVALID_PHYSICAL_ADDRESS.
      */
     @ServiceThreadOnly
     int getPhysicalAddress() {
@@ -528,15 +528,17 @@ final class HdmiCecController {
      */
     @ServiceThreadOnly
     void pollDevices(DevicePollingCallback callback, int sourceAddress, int pickStrategy,
-            int retryCount) {
+            int retryCount, long pollingMessageInterval) {
         assertRunOnServiceThread();
 
         // Extract polling candidates. No need to poll against local devices.
         List<Integer> pollingCandidates = pickPollCandidates(pickStrategy);
         ArrayList<Integer> allocated = new ArrayList<>();
+        // pollStarted indication to avoid polling delay for the first message
         mControlHandler.postDelayed(
-                () -> runDevicePolling(
-                        sourceAddress, pollingCandidates, retryCount, callback, allocated),
+                ()
+                        -> runDevicePolling(sourceAddress, pollingCandidates, retryCount, callback,
+                                allocated, pollingMessageInterval, /**pollStarted**/ false),
                 mPollDevicesDelay);
     }
 
@@ -576,9 +578,10 @@ final class HdmiCecController {
     }
 
     @ServiceThreadOnly
-    private void runDevicePolling(final int sourceAddress,
-            final List<Integer> candidates, final int retryCount,
-            final DevicePollingCallback callback, final List<Integer> allocated) {
+    private void runDevicePolling(final int sourceAddress, final List<Integer> candidates,
+            final int retryCount, final DevicePollingCallback callback,
+            final List<Integer> allocated, final long pollingMessageInterval,
+            final boolean pollStarted) {
         assertRunOnServiceThread();
         if (candidates.isEmpty()) {
             if (callback != null) {
@@ -587,11 +590,10 @@ final class HdmiCecController {
             }
             return;
         }
-
         final Integer candidate = candidates.remove(0);
         // Proceed polling action for the next address once polling action for the
         // previous address is done.
-        runOnIoThread(new Runnable() {
+        mIoHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 if (sendPollMessage(sourceAddress, candidate, retryCount)) {
@@ -600,12 +602,12 @@ final class HdmiCecController {
                 runOnServiceThread(new Runnable() {
                     @Override
                     public void run() {
-                        runDevicePolling(sourceAddress, candidates, retryCount, callback,
-                                allocated);
+                        runDevicePolling(sourceAddress, candidates, retryCount, callback, allocated,
+                                pollingMessageInterval, /**pollStarted**/ true);
                     }
                 });
             }
-        });
+        }, pollStarted ? pollingMessageInterval : 0);
     }
 
     @IoThreadOnly
@@ -1313,7 +1315,7 @@ final class HdmiCecController {
                     hdmiPortInfo[i] = new HdmiPortInfo.Builder(
                             portInfo.portId,
                             portInfo.type,
-                            portInfo.physicalAddress)
+                            Short.toUnsignedInt(portInfo.physicalAddress))
                             .setCecSupported(portInfo.cecSupported)
                             .setMhlSupported(false)
                             .setArcSupported(portInfo.arcSupported)
@@ -1510,7 +1512,7 @@ final class HdmiCecController {
                     hdmiPortInfo[i] = new HdmiPortInfo.Builder(
                             portInfo.portId,
                             portInfo.type,
-                            portInfo.physicalAddress)
+                            Short.toUnsignedInt(portInfo.physicalAddress))
                             .setCecSupported(portInfo.cecSupported)
                             .setMhlSupported(false)
                             .setArcSupported(portInfo.arcSupported)

@@ -192,6 +192,7 @@ public class SystemActions implements CoreStartable, ConfigurationController.Con
     private final ShadeController mShadeController;
     private final Lazy<PanelExpansionInteractor> mPanelExpansionInteractor;
     private final StatusBarWindowCallback mNotificationShadeCallback;
+    private final ScreenshotHelper mScreenshotHelper;
     private boolean mDismissNotificationShadeActionRegistered;
 
     @Inject
@@ -221,6 +222,7 @@ public class SystemActions implements CoreStartable, ConfigurationController.Con
                 (keyguardShowing, keyguardOccluded, keyguardGoingAway, bouncerShowing, mDozing,
                         panelExpanded, isDreaming) ->
                         registerOrUnregisterDismissNotificationShadeAction();
+        mScreenshotHelper = new ScreenshotHelper(mContext);
     }
 
     @Override
@@ -516,8 +518,7 @@ public class SystemActions implements CoreStartable, ConfigurationController.Con
     }
 
     private void handleTakeScreenshot() {
-        ScreenshotHelper screenshotHelper = new ScreenshotHelper(mContext);
-        screenshotHelper.takeScreenshot(
+        mScreenshotHelper.takeScreenshot(
                 SCREENSHOT_ACCESSIBILITY_ACTIONS, new Handler(Looper.getMainLooper()), null);
     }
 

@@ -31,7 +31,7 @@ public final class BundlePolicyValue extends PolicyValue<Bundle> {
 
     public BundlePolicyValue(Bundle value) {
         super(value);
-        if (Flags.devicePolicySizeTrackingInternalEnabled()) {
+        if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
             PolicySizeVerifier.enforceMaxBundleFieldsLength(value);
         }
     }

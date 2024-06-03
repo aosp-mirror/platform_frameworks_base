@@ -1193,23 +1193,6 @@ public class BubbleDataTest extends ShellTestCase {
     }
 
     @Test
-    public void test_removeOverflowBubble() {
-        sendUpdatedEntryAtTime(mEntryA1, 2000);
-        mBubbleData.setListener(mListener);
-
-        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_USER_GESTURE);
-        verifyUpdateReceived();
-        assertOverflowChangedTo(ImmutableList.of(mBubbleA1));
-
-        mBubbleData.removeOverflowBubble(mBubbleA1);
-        verifyUpdateReceived();
-
-        BubbleData.Update update = mUpdateCaptor.getValue();
-        assertThat(update.removedOverflowBubble).isEqualTo(mBubbleA1);
-        assertOverflowChangedTo(ImmutableList.of());
-    }
-
-    @Test
     public void test_getInitialStateForBubbleBar_includesInitialBubblesAndPosition() {
         sendUpdatedEntryAtTime(mEntryA1, 1000);
         sendUpdatedEntryAtTime(mEntryA2, 2000);
@@ -1220,6 +1203,64 @@ public class BubbleDataTest extends ShellTestCase {
         assertThat(update.currentBubbleList.get(0).getKey()).isEqualTo(mEntryA2.getKey());
         assertThat(update.currentBubbleList.get(1).getKey()).isEqualTo(mEntryA1.getKey());
         assertThat(update.bubbleBarLocation).isEqualTo(BubbleBarLocation.LEFT);
+    }
+
+    @Test
+    public void setSelectedBubbleAndExpandStack() {
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        mBubbleData.setListener(mListener);
+
+        mBubbleData.setSelectedBubbleAndExpandStack(mBubbleA1);
+
+        verifyUpdateReceived();
+        assertSelectionChangedTo(mBubbleA1);
+        assertExpandedChangedTo(true);
+    }
+
+    @Test
+    public void testShowOverflowChanged_hasOverflowBubbles() {
+        assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        mBubbleData.setListener(mListener);
+
+        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_USER_GESTURE);
+        verifyUpdateReceived();
+        assertThat(mUpdateCaptor.getValue().showOverflowChanged).isTrue();
+        assertThat(mBubbleData.getOverflowBubbles()).isNotEmpty();
+    }
+
+    @Test
+    public void testShowOverflowChanged_false_hasOverflowBubbles() {
+        assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 1000);
+        mBubbleData.setListener(mListener);
+
+        // First overflowed causes change event
+        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_USER_GESTURE);
+        verifyUpdateReceived();
+        assertThat(mUpdateCaptor.getValue().showOverflowChanged).isTrue();
+        assertThat(mBubbleData.getOverflowBubbles()).isNotEmpty();
+
+        // Second overflow does not
+        mBubbleData.dismissBubbleWithKey(mEntryA2.getKey(), Bubbles.DISMISS_USER_GESTURE);
+        verifyUpdateReceived();
+        assertThat(mUpdateCaptor.getValue().showOverflowChanged).isFalse();
+    }
+
+    @Test
+    public void testShowOverflowChanged_noOverflowBubbles() {
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.getOverflowBubbles()).isNotEmpty();
+        mBubbleData.setListener(mListener);
+
+        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_NOTIF_CANCEL);
+
+        verifyUpdateReceived();
+        assertThat(mUpdateCaptor.getValue().showOverflowChanged).isTrue();
+        assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
     }
 
     private void verifyUpdateReceived() {

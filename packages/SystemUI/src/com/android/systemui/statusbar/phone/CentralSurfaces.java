@@ -37,6 +37,7 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.AuthKeyguardMessageArea;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.RemoteAnimationRunnerCompat;
@@ -50,7 +51,7 @@ import com.android.systemui.util.Compile;
 import java.io.PrintWriter;
 
 /** */
-public interface CentralSurfaces extends Dumpable, LifecycleOwner {
+public interface CentralSurfaces extends Dumpable, LifecycleOwner, CoreStartable {
     boolean MULTIUSER_DEBUG = false;
     // Should match the values in PhoneWindowManager
     String SYSTEM_DIALOG_REASON_KEY = "reason";
@@ -103,8 +104,8 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     /**
      * Returns an ActivityOptions bundle created using the given parameters.
      *
-     * @param displayId The ID of the display to launch the activity in. Typically this would
-     *                  be the display the status bar is on.
+     * @param displayId        The ID of the display to launch the activity in. Typically this would
+     *                         be the display the status bar is on.
      * @param animationAdapter The animation adapter used to start this activity, or {@code null}
      *                         for the default animation.
      */
@@ -182,6 +183,9 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
         return contextForUser.getPackageManager();
     }
 
+    /** Default impl for CoreStartable. */
+    default void start() {}
+
     boolean updateIsKeyguard();
 
     boolean updateIsKeyguard(boolean forceStateChange);
@@ -195,9 +199,14 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     boolean isLaunchingActivityOverLockscreen();
 
+    /**
+     * Whether an activity launch over lockscreen is causing the shade to be dismissed.
+     */
+    boolean isDismissingShadeForActivityLaunch();
+
     void onKeyguardViewManagerStatesUpdated();
 
-    /** */
+    /**  */
     boolean getCommandQueuePanelsEnabled();
 
     void showWirelessChargingAnimation(int batteryLevel);
@@ -318,6 +327,11 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     @Deprecated
     float getDisplayDensity();
 
+    /**
+     * Forwards touch events to communal hub
+     */
+    void handleCommunalHubTouch(MotionEvent event);
+
     public static class KeyboardShortcutsMessage {
         final int mDeviceId;
 
@@ -329,7 +343,8 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     /**
      * Sets launching activity over LS state in central surfaces.
      */
-    void setIsLaunchingActivityOverLockscreen(boolean isLaunchingActivityOverLockscreen);
+    void setIsLaunchingActivityOverLockscreen(
+            boolean isLaunchingActivityOverLockscreen, boolean dismissShade);
 
     /**
      * Gets an animation controller from a notification row.

@@ -22,6 +22,7 @@ import android.view.View
 import android.view.WindowManager
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Constraints
@@ -68,7 +69,7 @@ constructor(
     private val notificationPanelView: NotificationPanelView,
 ) {
     @Composable
-    fun SceneScope.LockIcon(modifier: Modifier = Modifier) {
+    fun SceneScope.LockIcon(overrideColor: Color? = null, modifier: Modifier = Modifier) {
         if (!KeyguardBottomAreaRefactor.isEnabled && !DeviceEntryUdfpsRefactor.isEnabled) {
             return
         }
@@ -93,6 +94,7 @@ constructor(
                                 deviceEntryBackgroundViewModel.get(),
                                 falsingManager.get(),
                                 vibratorHelper.get(),
+                                overrideColor,
                             )
                         }
                     } else {

@@ -2655,13 +2655,12 @@ public class AssistStructure implements Parcelable {
             );
         }
         GetCredentialRequest getCredentialRequest = node.getPendingCredentialRequest();
-        if (getCredentialRequest == null) {
-            Log.i(TAG, prefix + " No Credential Manager Request");
-        } else {
-            Log.i(TAG, prefix + "  GetCredentialRequest: no. of options= "
-                    + getCredentialRequest.getCredentialOptions().size()
-            );
-        }
+        Log.i(TAG, prefix + "  Credential Manager info:"
+                + " hasCredentialManagerRequest=" + (getCredentialRequest != null)
+                + (getCredentialRequest != null
+                        ? ", sizeOfOptions=" + getCredentialRequest.getCredentialOptions().size()
+                        : "")
+        );
 
         final int NCHILDREN = node.getChildCount();
         if (NCHILDREN > 0) {

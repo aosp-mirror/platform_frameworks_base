@@ -1410,6 +1410,70 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
+    public void performHapticFeedback_restrictedConstantsWithoutPermission_doesNotVibrate()
+            throws Exception {
+        // Deny permission to vibrate with restricted constants
+        denyPermission(android.Manifest.permission.VIBRATE_SYSTEM_CONSTANTS);
+        // Public constant, no permission required
+        mHapticFeedbackVibrationMap.put(
+                HapticFeedbackConstants.CONFIRM,
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
+        // Hidden system-only constant, permission required
+        mHapticFeedbackVibrationMap.put(
+                HapticFeedbackConstants.BIOMETRIC_CONFIRM,
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK));
+        mockVibrators(1);
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
+        fakeVibrator.setSupportedEffects(
+                VibrationEffect.EFFECT_CLICK, VibrationEffect.EFFECT_HEAVY_CLICK);
+        VibratorManagerService service = createSystemReadyService();
+
+        performHapticFeedbackAndWaitUntilFinished(
+                service, HapticFeedbackConstants.CONFIRM, /* always= */ false);
+
+        performHapticFeedbackAndWaitUntilFinished(
+                service, HapticFeedbackConstants.BIOMETRIC_CONFIRM, /* always= */ false);
+
+        List<VibrationEffectSegment> playedSegments = fakeVibrator.getAllEffectSegments();
+        assertEquals(1, playedSegments.size());
+        PrebakedSegment segment = (PrebakedSegment) playedSegments.get(0);
+        assertEquals(VibrationEffect.EFFECT_CLICK, segment.getEffectId());
+    }
+
+    @Test
+    public void performHapticFeedback_restrictedConstantsWithPermission_playsVibration()
+            throws Exception {
+        // Grant permission to vibrate with restricted constants
+        grantPermission(android.Manifest.permission.VIBRATE_SYSTEM_CONSTANTS);
+        // Public constant, no permission required
+        mHapticFeedbackVibrationMap.put(
+                HapticFeedbackConstants.CONFIRM,
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
+        // Hidden system-only constant, permission required
+        mHapticFeedbackVibrationMap.put(
+                HapticFeedbackConstants.BIOMETRIC_CONFIRM,
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK));
+        mockVibrators(1);
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
+        fakeVibrator.setSupportedEffects(
+                VibrationEffect.EFFECT_CLICK, VibrationEffect.EFFECT_HEAVY_CLICK);
+        VibratorManagerService service = createSystemReadyService();
+
+        performHapticFeedbackAndWaitUntilFinished(
+                service, HapticFeedbackConstants.CONFIRM, /* always= */ false);
+
+        performHapticFeedbackAndWaitUntilFinished(
+                service, HapticFeedbackConstants.BIOMETRIC_CONFIRM, /* always= */ false);
+
+        List<VibrationEffectSegment> playedSegments = fakeVibrator.getAllEffectSegments();
+        assertEquals(2, playedSegments.size());
+        assertEquals(VibrationEffect.EFFECT_CLICK,
+                ((PrebakedSegment) playedSegments.get(0)).getEffectId());
+        assertEquals(VibrationEffect.EFFECT_HEAVY_CLICK,
+                ((PrebakedSegment) playedSegments.get(1)).getEffectId());
+    }
+
+    @Test
     public void performHapticFeedback_doesNotVibrateWhenVibratorInfoNotReady() throws Exception {
         denyPermission(android.Manifest.permission.VIBRATE);
         mHapticFeedbackVibrationMap.put(
@@ -1589,7 +1653,8 @@ public class VibratorManagerServiceTest {
         assertEquals(1f, ((PrimitiveSegment) segments.get(2)).getScale(), 1e-5);
         verify(mVibratorFrameworkStatsLoggerMock).logVibrationAdaptiveHapticScale(UID, 0.7f);
         verify(mVibratorFrameworkStatsLoggerMock).logVibrationAdaptiveHapticScale(UID, 0.4f);
-        verify(mVibratorFrameworkStatsLoggerMock).logVibrationAdaptiveHapticScale(UID, 1f);
+        verify(mVibratorFrameworkStatsLoggerMock,
+                timeout(TEST_TIMEOUT_MILLIS)).logVibrationAdaptiveHapticScale(UID, 1f);
     }
 
     @Test

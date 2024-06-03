@@ -21,8 +21,8 @@ import android.app.TaskInfo
 import android.content.Intent
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.mediaprojection.taskswitcher.data.model.MediaProjectionState
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.MediaProjectionRepository
+import com.android.systemui.mediaprojection.data.model.MediaProjectionState
+import com.android.systemui.mediaprojection.data.repository.MediaProjectionRepository
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.TasksRepository
 import com.android.systemui.mediaprojection.taskswitcher.domain.model.TaskSwitchState
 import javax.inject.Inject

@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.content.Context
 import com.android.settingslib.Utils
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import javax.inject.Inject
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.onStart
 /** Models the UI state for the device entry icon background view. */
 @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA")
 @ExperimentalCoroutinesApi
+@SysUISingleton
 class DeviceEntryBackgroundViewModel
 @Inject
 constructor(
@@ -115,7 +117,8 @@ constructor(
                             KeyguardState.DOZING,
                             KeyguardState.DREAMING,
                             KeyguardState.PRIMARY_BOUNCER,
-                            KeyguardState.AOD -> emit(0f)
+                            KeyguardState.AOD,
+                            KeyguardState.UNDEFINED -> emit(0f)
                             KeyguardState.ALTERNATE_BOUNCER,
                             KeyguardState.LOCKSCREEN -> emit(1f)
                         }

@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
 import android.net.ConnectivityManager
+import android.os.PersistableBundle
 import android.telephony.ServiceState
 import android.telephony.SignalStrength
 import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
@@ -98,6 +99,9 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
                 profileClass = PROFILE_CLASS_UNSET,
             )
         )
+
+    // Use a real config, with no overrides
+    private val systemUiCarrierConfig = SystemUiCarrierConfig(SUB_ID, PersistableBundle())
 
     private lateinit var mobileRepo: FakeMobileConnectionRepository
     private lateinit var carrierMergedRepo: FakeMobileConnectionRepository
@@ -680,10 +684,6 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
         telephonyManager: TelephonyManager,
     ): MobileConnectionRepositoryImpl {
         whenever(telephonyManager.subscriptionId).thenReturn(SUB_ID)
-        val systemUiCarrierConfigMock: SystemUiCarrierConfig = mock()
-        whenever(systemUiCarrierConfigMock.satelliteConnectionHysteresisSeconds)
-            .thenReturn(MutableStateFlow(0))
-
         val realRepo =
             MobileConnectionRepositoryImpl(
                 SUB_ID,
@@ -693,7 +693,7 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
                 SEP,
                 connectivityManager,
                 telephonyManager,
-                systemUiCarrierConfig = systemUiCarrierConfigMock,
+                systemUiCarrierConfig = systemUiCarrierConfig,
                 fakeBroadcastDispatcher,
                 mobileMappingsProxy = mock(),
                 testDispatcher,

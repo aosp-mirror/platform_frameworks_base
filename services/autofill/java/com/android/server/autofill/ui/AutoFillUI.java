@@ -413,6 +413,8 @@ public final class AutoFillUI {
                     callback.startIntentSender(intentSender, intent);
                 }
             }, mUiModeMgr.isNightMode(), isUpdate, compatMode, showServiceIcon);
+
+            mSaveEventLogger.maybeSetLatencySaveUiDisplayMillis();
         });
     }
 

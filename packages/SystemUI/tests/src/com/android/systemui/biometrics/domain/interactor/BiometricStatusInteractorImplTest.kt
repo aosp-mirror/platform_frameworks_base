@@ -17,62 +17,67 @@
 package com.android.systemui.biometrics.domain.interactor
 
 import android.app.ActivityManager
-import android.app.ActivityTaskManager
 import android.content.ComponentName
 import android.hardware.biometrics.BiometricFingerprintConstants
 import androidx.test.filters.SmallTest
+import com.android.app.activityTaskManager
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.biometrics.data.repository.FakeBiometricStatusRepository
+import com.android.systemui.biometrics.data.repository.biometricStatusRepository
+import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
 import com.android.systemui.biometrics.shared.model.AuthenticationReason
 import com.android.systemui.biometrics.shared.model.AuthenticationReason.SettingsOperations
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
-import com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
-import org.mockito.junit.MockitoJUnit
-import org.mockito.junit.MockitoRule
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
 class BiometricStatusInteractorImplTest : SysuiTestCase() {
-    @JvmField @Rule var mockitoRule: MockitoRule = MockitoJUnit.rule()
-    @Mock private lateinit var activityTaskManager: ActivityTaskManager
-
-    private lateinit var biometricStatusRepository: FakeBiometricStatusRepository
+    private val kosmos = testKosmos()
     private lateinit var underTest: BiometricStatusInteractorImpl
-
-    private val testScope = TestScope(StandardTestDispatcher())
 
     @Before
     fun setup() {
-        mSetFlagsRule.enableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
-        biometricStatusRepository = FakeBiometricStatusRepository()
-        underTest = BiometricStatusInteractorImpl(activityTaskManager, biometricStatusRepository)
+        underTest = kosmos.biometricStatusInteractor
     }
 
     @Test
-    fun updatesSfpsAuthenticationReason_whenBiometricPromptAuthenticationStarted() =
-        testScope.runTest {
+    fun doesNotUpdatesSfpsAuthenticationReason_whenUdfpsAuthenticationStarted() =
+        kosmos.testScope.runTest {
+            kosmos.fingerprintPropertyRepository.supportsUdfps()
             val sfpsAuthenticationReason by collectLastValue(underTest.sfpsAuthenticationReason)
             runCurrent()
 
             assertThat(sfpsAuthenticationReason).isEqualTo(AuthenticationReason.NotRunning)
 
-            biometricStatusRepository.setFingerprintAuthenticationReason(
+            kosmos.biometricStatusRepository.setFingerprintAuthenticationReason(
+                AuthenticationReason.BiometricPromptAuthentication
+            )
+            assertThat(sfpsAuthenticationReason).isEqualTo(AuthenticationReason.NotRunning)
+        }
+
+    @Test
+    fun updatesSfpsAuthenticationReason_whenSfpsBiometricPromptAuthenticationStarted() =
+        kosmos.testScope.runTest {
+            kosmos.fingerprintPropertyRepository.supportsSideFps()
+            val sfpsAuthenticationReason by collectLastValue(underTest.sfpsAuthenticationReason)
+            runCurrent()
+
+            assertThat(sfpsAuthenticationReason).isEqualTo(AuthenticationReason.NotRunning)
+
+            kosmos.biometricStatusRepository.setFingerprintAuthenticationReason(
                 AuthenticationReason.BiometricPromptAuthentication
             )
             assertThat(sfpsAuthenticationReason)
@@ -80,58 +85,62 @@ class BiometricStatusInteractorImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun doesNotUpdateSfpsAuthenticationReason_whenDeviceEntryAuthenticationStarted() =
-        testScope.runTest {
+    fun doesNotUpdateSfpsAuthenticationReason_whenSfpsDeviceEntryAuthenticationStarted() =
+        kosmos.testScope.runTest {
+            kosmos.fingerprintPropertyRepository.supportsSideFps()
             val sfpsAuthenticationReason by collectLastValue(underTest.sfpsAuthenticationReason)
             runCurrent()
 
             assertThat(sfpsAuthenticationReason).isEqualTo(AuthenticationReason.NotRunning)
 
-            biometricStatusRepository.setFingerprintAuthenticationReason(
+            kosmos.biometricStatusRepository.setFingerprintAuthenticationReason(
                 AuthenticationReason.DeviceEntryAuthentication
             )
             assertThat(sfpsAuthenticationReason).isEqualTo(AuthenticationReason.NotRunning)
         }
 
     @Test
-    fun updatesSfpsAuthenticationReason_whenOtherAuthenticationStarted() =
-        testScope.runTest {
+    fun updatesSfpsAuthenticationReason_whenOtherSfpsAuthenticationStarted() =
+        kosmos.testScope.runTest {
+            kosmos.fingerprintPropertyRepository.supportsSideFps()
             val sfpsAuthenticationReason by collectLastValue(underTest.sfpsAuthenticationReason)
             runCurrent()
 
             assertThat(sfpsAuthenticationReason).isEqualTo(AuthenticationReason.NotRunning)
 
-            biometricStatusRepository.setFingerprintAuthenticationReason(
+            kosmos.biometricStatusRepository.setFingerprintAuthenticationReason(
                 AuthenticationReason.OtherAuthentication
             )
             assertThat(sfpsAuthenticationReason).isEqualTo(AuthenticationReason.OtherAuthentication)
         }
 
     @Test
-    fun doesNotUpdateSfpsAuthenticationReason_whenOtherSettingsAuthenticationStarted() =
-        testScope.runTest {
+    fun doesNotUpdateSfpsAuthenticationReason_whenOtherSfpsSettingsAuthenticationStarted() =
+        kosmos.testScope.runTest {
+            kosmos.fingerprintPropertyRepository.supportsSideFps()
             val sfpsAuthenticationReason by collectLastValue(underTest.sfpsAuthenticationReason)
             runCurrent()
 
             assertThat(sfpsAuthenticationReason).isEqualTo(AuthenticationReason.NotRunning)
 
-            `when`(activityTaskManager.getTasks(Mockito.anyInt()))
+            `when`(kosmos.activityTaskManager.getTasks(Mockito.anyInt()))
                 .thenReturn(listOf(fpSettingsTask()))
-            biometricStatusRepository.setFingerprintAuthenticationReason(
+            kosmos.biometricStatusRepository.setFingerprintAuthenticationReason(
                 AuthenticationReason.SettingsAuthentication(SettingsOperations.OTHER)
             )
             assertThat(sfpsAuthenticationReason).isEqualTo(AuthenticationReason.NotRunning)
         }
 
     @Test
-    fun updatesSfpsAuthenticationReason_whenEnrollmentAuthenticationStarted() =
-        testScope.runTest {
+    fun updatesSfpsAuthenticationReason_whenSfpsEnrollmentStarted() =
+        kosmos.testScope.runTest {
+            kosmos.fingerprintPropertyRepository.supportsSideFps()
             val sfpsAuthenticationReason by collectLastValue(underTest.sfpsAuthenticationReason)
             runCurrent()
 
             assertThat(sfpsAuthenticationReason).isEqualTo(AuthenticationReason.NotRunning)
 
-            biometricStatusRepository.setFingerprintAuthenticationReason(
+            kosmos.biometricStatusRepository.setFingerprintAuthenticationReason(
                 AuthenticationReason.SettingsAuthentication(SettingsOperations.ENROLL_FIND_SENSOR)
             )
             assertThat(sfpsAuthenticationReason)
@@ -141,7 +150,7 @@ class BiometricStatusInteractorImplTest : SysuiTestCase() {
                     )
                 )
 
-            biometricStatusRepository.setFingerprintAuthenticationReason(
+            kosmos.biometricStatusRepository.setFingerprintAuthenticationReason(
                 AuthenticationReason.SettingsAuthentication(SettingsOperations.ENROLL_ENROLLING)
             )
             assertThat(sfpsAuthenticationReason)
@@ -151,15 +160,16 @@ class BiometricStatusInteractorImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun updatesFingerprintAuthenticationReason_whenAuthenticationStopped() =
-        testScope.runTest {
+    fun updatesFingerprintAuthenticationReason_whenSfpsAuthenticationStopped() =
+        kosmos.testScope.runTest {
+            kosmos.fingerprintPropertyRepository.supportsSideFps()
             val sfpsAuthenticationReason by collectLastValue(underTest.sfpsAuthenticationReason)
             runCurrent()
 
-            biometricStatusRepository.setFingerprintAuthenticationReason(
+            kosmos.biometricStatusRepository.setFingerprintAuthenticationReason(
                 AuthenticationReason.BiometricPromptAuthentication
             )
-            biometricStatusRepository.setFingerprintAuthenticationReason(
+            kosmos.biometricStatusRepository.setFingerprintAuthenticationReason(
                 AuthenticationReason.NotRunning
             )
             assertThat(sfpsAuthenticationReason).isEqualTo(AuthenticationReason.NotRunning)
@@ -167,11 +177,11 @@ class BiometricStatusInteractorImplTest : SysuiTestCase() {
 
     @Test
     fun updatesFingerprintAcquiredStatusWhenBiometricPromptAuthenticationAcquired() =
-        testScope.runTest {
+        kosmos.testScope.runTest {
             val fingerprintAcquiredStatus by collectLastValue(underTest.fingerprintAcquiredStatus)
             runCurrent()
 
-            biometricStatusRepository.setFingerprintAcquiredStatus(
+            kosmos.biometricStatusRepository.setFingerprintAcquiredStatus(
                 AcquiredFingerprintAuthenticationStatus(
                     AuthenticationReason.BiometricPromptAuthentication,
                     BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START

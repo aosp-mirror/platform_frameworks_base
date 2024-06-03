@@ -111,12 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"У мэтах дадатковай бяспекі скарыстайце ўзор разблакіроўкі"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"У мэтах дадатковай бяспекі скарыстайце PIN-код"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"У мэтах дадатковай бяспекі скарыстайце пароль"</string>
-    <!-- no translation found for kg_prompt_added_security_pin (5487992065995475528) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_pattern (1017068086102168544) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_password (6053156069765029006) -->
-    <skip />
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Для дадатковай бяспекі неабходна ўвесці PIN-код"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Для дадатковай бяспекі неабходна ўвесці ўзор разблакіроўкі"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Для дадатковай бяспекі неабходна ўвесці пароль"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Прылада заблакіравана адміністратарам"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Прылада была заблакіравана ўручную"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Не распазнана"</string>

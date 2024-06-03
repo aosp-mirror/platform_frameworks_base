@@ -24,7 +24,7 @@ import android.view.MotionEvent
 import android.view.ViewGroup
 import android.widget.HorizontalScrollView
 import com.android.systemui.Gefingerpoken
-import com.android.wm.shell.animation.physicsAnimator
+import com.android.wm.shell.shared.animation.physicsAnimator
 
 /**
  * A ScrollView used in Media that doesn't limit itself to the childs bounds. This is useful when

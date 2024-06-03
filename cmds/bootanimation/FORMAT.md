@@ -126,7 +126,7 @@ the system property `service.bootanim.exit` to a nonzero string.)
 Use `zopflipng` if you have it, otherwise `pngcrush` will do. e.g.:
 
     for fn in *.png ; do
-        zopflipng -m ${fn}s ${fn}s.new && mv -f ${fn}s.new ${fn}
+        zopflipng -m ${fn} ${fn}.new && mv -f ${fn}.new ${fn}
         # or: pngcrush -q ....
     done
 

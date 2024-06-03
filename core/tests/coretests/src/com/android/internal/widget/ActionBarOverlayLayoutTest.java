@@ -29,6 +29,7 @@ import static org.junit.Assert.assertThat;
 import android.content.Context;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.platform.test.annotations.Presubmit;
 import android.view.DisplayCutout;
 import android.view.View;
 import android.view.View.OnApplyWindowInsetsListener;
@@ -49,6 +50,7 @@ import java.lang.reflect.Field;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@Presubmit
 public class ActionBarOverlayLayoutTest {
 
     private static final Insets TOP_INSET_5 = Insets.of(0, 5, 0, 0);
@@ -167,10 +169,67 @@ public class ActionBarOverlayLayoutTest {
         assertThat(mContentInsetsListener.captured, is(insetsWith(Insets.NONE, NO_CUTOUT)));
     }
 
+    @Test
+    public void topInset_cutout_noContentOnApplyWindowInsetsListener() {
+        mLayout.setHasContentOnApplyWindowInsetsListener(false);
+        mLayout.dispatchApplyWindowInsets(insetsWith(TOP_INSET_5, CUTOUT_5));
+
+        assertThat(mContentInsetsListener.captured, nullValue());
+
+        mLayout.measure(EXACTLY_1000, EXACTLY_1000);
+
+        // Action bar height is added to the top inset
+        assertThat(mContentInsetsListener.captured, is(insetsWith(TOP_INSET_25, CUTOUT_5)));
+    }
+
+    @Test
+    public void topInset_cutout__hasContentOnApplyWindowInsetsListener() {
+        mLayout.setHasContentOnApplyWindowInsetsListener(true);
+        mLayout.dispatchApplyWindowInsets(insetsWith(TOP_INSET_5, CUTOUT_5));
+
+        assertThat(mContentInsetsListener.captured, nullValue());
+
+        mLayout.measure(EXACTLY_1000, EXACTLY_1000);
+
+        assertThat(mContentInsetsListener.captured, is(insetsWith(Insets.NONE, NO_CUTOUT)));
+    }
+
+    @Test
+    public void topInset_noCutout_noContentOnApplyWindowInsetsListener() {
+        mLayout.setHasContentOnApplyWindowInsetsListener(false);
+        mLayout.dispatchApplyWindowInsets(insetsWith(TOP_INSET_5, NO_CUTOUT));
+
+        assertThat(mContentInsetsListener.captured, nullValue());
+
+        mLayout.measure(EXACTLY_1000, EXACTLY_1000);
+
+        // Action bar height is added to the top inset
+        assertThat(mContentInsetsListener.captured, is(insetsWith(TOP_INSET_25, NO_CUTOUT)));
+    }
+
+    @Test
+    public void topInset_noCutout__hasContentOnApplyWindowInsetsListener() {
+        mLayout.setHasContentOnApplyWindowInsetsListener(true);
+        mLayout.dispatchApplyWindowInsets(insetsWith(TOP_INSET_5, NO_CUTOUT));
+
+        assertThat(mContentInsetsListener.captured, nullValue());
+
+        mLayout.measure(EXACTLY_1000, EXACTLY_1000);
+
+        assertThat(mContentInsetsListener.captured, is(insetsWith(Insets.NONE, NO_CUTOUT)));
+    }
+
     private WindowInsets insetsWith(Insets content, DisplayCutout cutout) {
-        return new WindowInsets(WindowInsets.createCompatTypeMap(content.toRect()), null, null,
-                false, 0, 0, cutout, null, null, null, WindowInsets.Type.systemBars(), false,
-                null, null, 0, 0);
+        final Insets cutoutInsets = cutout != null
+                ? Insets.of(cutout.getSafeInsets())
+                : Insets.NONE;
+        return new WindowInsets.Builder()
+                .setSystemWindowInsets(content)
+                .setDisplayCutout(cutout)
+                .setInsets(WindowInsets.Type.displayCutout(), cutoutInsets)
+                .setInsetsIgnoringVisibility(WindowInsets.Type.displayCutout(), cutoutInsets)
+                .setVisible(WindowInsets.Type.displayCutout(), true)
+                .build();
     }
 
     private ViewGroup createViewGroupWithId(int id) {
@@ -181,14 +240,16 @@ public class ActionBarOverlayLayoutTest {
 
     static class TestActionBarOverlayLayout extends ActionBarOverlayLayout {
         private boolean mStable;
+        private boolean mHasContentOnApplyWindowInsetsListener;
 
         public TestActionBarOverlayLayout(Context context) {
             super(context);
+            mHasContentOnApplyWindowInsetsListener = true;
         }
 
         @Override
         public WindowInsets computeSystemWindowInsets(WindowInsets in, Rect outLocalInsets) {
-            if (mStable) {
+            if (mStable || !hasContentOnApplyWindowInsetsListener()) {
                 // Emulate the effect of makeOptionalFitsSystemWindows, because we can't do that
                 // without being attached to a window.
                 outLocalInsets.setEmpty();
@@ -200,6 +261,15 @@ public class ActionBarOverlayLayoutTest {
         void setStable(boolean stable) {
             mStable = stable;
             setSystemUiVisibility(stable ? SYSTEM_UI_FLAG_LAYOUT_STABLE : 0);
+        }
+
+        void setHasContentOnApplyWindowInsetsListener(boolean hasListener) {
+            mHasContentOnApplyWindowInsetsListener = hasListener;
+        }
+
+        @Override
+        protected boolean hasContentOnApplyWindowInsetsListener() {
+            return mHasContentOnApplyWindowInsetsListener;
         }
 
         @Override

@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
@@ -38,5 +39,7 @@ val Kosmos.fromGoneTransitionInteractor by
             communalInteractor = communalInteractor,
             keyguardOcclusionInteractor = keyguardOcclusionInteractor,
             biometricSettingsRepository = biometricSettingsRepository,
+            keyguardRepository = keyguardRepository,
+            keyguardEnabledInteractor = keyguardEnabledInteractor,
         )
     }

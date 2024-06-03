@@ -110,6 +110,12 @@ public final class Debug
     private static final String DEFAULT_TRACE_BODY = "dmtrace";
     private static final String DEFAULT_TRACE_EXTENSION = ".trace";
 
+    private static final String[] FRAMEWORK_FEATURES = new String[] {
+        "opengl-tracing",
+        "view-hierarchy",
+        "support_boot_stages",
+    };
+
     /**
      * This class is used to retrieved various statistics about the memory mappings for this
      * process. The returned info is broken down by dalvik, native, and other. All results are in kB.
@@ -210,6 +216,7 @@ public final class Debug
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public boolean hasSwappedOutPss;
 
+        // LINT.IfChange
         /** @hide */
         public static final int HEAP_UNKNOWN = 0;
         /** @hide */
@@ -311,6 +318,7 @@ public final class Debug
         public static final int OTHER_ART_APP = 30;
         /** @hide */
         public static final int OTHER_ART_BOOT = 31;
+        // LINT.ThenChange(/system/memory/libmeminfo/include/meminfo/androidprocheaps.h)
         /** @hide */
         public static final int OTHER_DVK_STAT_ART_START = OTHER_ART_APP - NUM_OTHER_STATS;
         /** @hide */
@@ -1101,6 +1109,17 @@ public final class Debug
      */
     public static String[] getVmFeatureList() {
         return VMDebug.getVmFeatureList();
+    }
+
+    /**
+     * Returns an array of strings that identify Framework features. This is
+     * used by DDMS to determine what sorts of operations the Framework can
+     * perform.
+     *
+     * @hide
+     */
+    public static String[] getFeatureList() {
+        return FRAMEWORK_FEATURES;
     }
 
     /**

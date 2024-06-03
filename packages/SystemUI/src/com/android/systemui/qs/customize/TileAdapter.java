@@ -332,6 +332,14 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         return mTiles.size();
     }
 
+    public int getItemCountForAccessibility() {
+        if (mAccessibilityAction == ACTION_MOVE) {
+            return mEditIndex;
+        } else {
+            return getItemCount();
+        }
+    }
+
     @Override
     public boolean onFailedToRecycleView(Holder holder) {
         holder.stopDrag();
@@ -406,6 +414,10 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         } else if (selectable && mAccessibilityAction == ACTION_MOVE) {
             info.state.contentDescription = mContext.getString(
                     R.string.accessibility_qs_edit_tile_move_to_position, position);
+        } else if (!selectable && (mAccessibilityAction == ACTION_MOVE
+                || mAccessibilityAction == ACTION_ADD)) {
+            info.state.contentDescription = mContext.getString(
+                    R.string.accessibilit_qs_edit_tile_add_move_invalid_position);
         } else {
             info.state.contentDescription = info.state.label;
         }
@@ -424,14 +436,15 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         holder.mTileView.setOnClickListener(null);
         holder.mTileView.setFocusable(true);
         holder.mTileView.setFocusableInTouchMode(true);
+        holder.mTileView.setAccessibilityTraversalBefore(View.NO_ID);
 
         if (mAccessibilityAction != ACTION_NONE) {
             holder.mTileView.setClickable(selectable);
             holder.mTileView.setFocusable(selectable);
             holder.mTileView.setFocusableInTouchMode(selectable);
-            holder.mTileView.setImportantForAccessibility(selectable
-                    ? View.IMPORTANT_FOR_ACCESSIBILITY_YES
-                    : View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+//            holder.mTileView.setImportantForAccessibility(selectable
+//                    ? View.IMPORTANT_FOR_ACCESSIBILITY_YES
+//                    : View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
             if (selectable) {
                 holder.mTileView.setOnClickListener(new OnClickListener() {
                     @Override
@@ -911,4 +924,5 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         int estimatedTileViewHeight = mTempTextView.getMeasuredHeight() * 2 + padding * 2;
         mMinTileViewHeight = Math.max(minHeight, estimatedTileViewHeight);
     }
+
 }

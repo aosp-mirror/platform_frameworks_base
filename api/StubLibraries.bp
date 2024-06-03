@@ -27,7 +27,12 @@
 // These modules provide source files for the stub libraries
 /////////////////////////////////////////////////////////////////////
 
-droidstubs {
+soong_config_module_type_import {
+    from: "frameworks/base/api/Android.bp",
+    module_types: ["non_updatable_exportable_droidstubs"],
+}
+
+non_updatable_exportable_droidstubs {
     name: "api-stubs-docs-non-updatable",
     defaults: [
         "android-non-updatable-stubs-defaults",
@@ -39,30 +44,50 @@ droidstubs {
             removed_api_file: ":non-updatable-removed.txt",
         },
         last_released: {
-            api_file: ":android-non-updatable.api.public.latest",
-            removed_api_file: ":android-non-updatable-removed.api.public.latest",
+            api_file: ":android-non-updatable.api.combined.public.latest",
+            removed_api_file: ":android-non-updatable-removed.api.combined.public.latest",
             baseline_file: ":android-non-updatable-incompatibilities.api.public.latest",
         },
         api_lint: {
             enabled: true,
-            new_since: ":android.api.public.latest",
+            new_since: ":android.api.combined.public.latest",
             baseline_file: ":non-updatable-lint-baseline.txt",
         },
     },
-    dists: [
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/public/api",
-            dest: "android-non-updatable.txt",
-            tag: ".api.txt",
+    soong_config_variables: {
+        release_hidden_api_exportable_stubs: {
+            dists: [
+                {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/public/api",
+                    dest: "android-non-updatable.txt",
+                    tag: ".exportable.api.txt",
+                },
+                {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/public/api",
+                    dest: "android-non-updatable-removed.txt",
+                    tag: ".exportable.removed-api.txt",
+                },
+            ],
+            conditions_default: {
+                dists: [
+                    {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/public/api",
+                        dest: "android-non-updatable.txt",
+                        tag: ".api.txt",
+                    },
+                    {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/public/api",
+                        dest: "android-non-updatable-removed.txt",
+                        tag: ".removed-api.txt",
+                    },
+                ],
+            },
         },
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/public/api",
-            dest: "android-non-updatable-removed.txt",
-            tag: ".removed-api.txt",
-        },
-    ],
+    },
     api_surface: "public",
 }
 
@@ -86,7 +111,7 @@ module_libs = [
         "\\)",
 ]
 
-droidstubs {
+non_updatable_exportable_droidstubs {
     name: "system-api-stubs-docs-non-updatable",
     defaults: [
         "android-non-updatable-stubs-defaults",
@@ -99,34 +124,54 @@ droidstubs {
             removed_api_file: ":non-updatable-system-removed.txt",
         },
         last_released: {
-            api_file: ":android-non-updatable.api.system.latest",
-            removed_api_file: ":android-non-updatable-removed.api.system.latest",
+            api_file: ":android-non-updatable.api.combined.system.latest",
+            removed_api_file: ":android-non-updatable-removed.api.combined.system.latest",
             baseline_file: ":android-non-updatable-incompatibilities.api.system.latest",
         },
         api_lint: {
             enabled: true,
-            new_since: ":android.api.system.latest",
+            new_since: ":android.api.combined.system.latest",
             baseline_file: ":non-updatable-system-lint-baseline.txt",
         },
     },
-    dists: [
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/system/api",
-            dest: "android-non-updatable.txt",
-            tag: ".api.txt",
+    soong_config_variables: {
+        release_hidden_api_exportable_stubs: {
+            dists: [
+                {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/system/api",
+                    dest: "android-non-updatable.txt",
+                    tag: ".exportable.api.txt",
+                },
+                {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/system/api",
+                    dest: "android-non-updatable-removed.txt",
+                    tag: ".exportable.removed-api.txt",
+                },
+            ],
+            conditions_default: {
+                dists: [
+                    {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/system/api",
+                        dest: "android-non-updatable.txt",
+                        tag: ".api.txt",
+                    },
+                    {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/system/api",
+                        dest: "android-non-updatable-removed.txt",
+                        tag: ".removed-api.txt",
+                    },
+                ],
+            },
         },
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/system/api",
-            dest: "android-non-updatable-removed.txt",
-            tag: ".removed-api.txt",
-        },
-    ],
+    },
     api_surface: "system",
 }
 
-droidstubs {
+non_updatable_exportable_droidstubs {
     name: "test-api-stubs-docs-non-updatable",
     defaults: [
         "android-non-updatable-stubs-defaults",
@@ -140,40 +185,72 @@ droidstubs {
         },
         api_lint: {
             enabled: true,
-            new_since: ":android.api.test.latest",
+            new_since: ":android.api.combined.test.latest",
             baseline_file: ":non-updatable-test-lint-baseline.txt",
         },
     },
-    dists: [
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/test/api",
-            dest: "android.txt",
-            tag: ".api.txt",
+    soong_config_variables: {
+        release_hidden_api_exportable_stubs: {
+            dists: [
+                {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/test/api",
+                    dest: "android.txt",
+                    tag: ".exportable.api.txt",
+                },
+                {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/test/api",
+                    dest: "removed.txt",
+                    tag: ".exportable.removed-api.txt",
+                },
+                {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/test/api",
+                    dest: "android-non-updatable.txt",
+                    tag: ".exportable.api.txt",
+                },
+                {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/test/api",
+                    dest: "android-non-updatable-removed.txt",
+                    tag: ".exportable.removed-api.txt",
+                },
+            ],
+            conditions_default: {
+                dists: [
+                    {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/test/api",
+                        dest: "android.txt",
+                        tag: ".api.txt",
+                    },
+                    {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/test/api",
+                        dest: "removed.txt",
+                        tag: ".removed-api.txt",
+                    },
+                    {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/test/api",
+                        dest: "android-non-updatable.txt",
+                        tag: ".api.txt",
+                    },
+                    {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/test/api",
+                        dest: "android-non-updatable-removed.txt",
+                        tag: ".removed-api.txt",
+                    },
+                ],
+            },
         },
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/test/api",
-            dest: "removed.txt",
-            tag: ".removed-api.txt",
-        },
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/test/api",
-            dest: "android-non-updatable.txt",
-            tag: ".api.txt",
-        },
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/test/api",
-            dest: "android-non-updatable-removed.txt",
-            tag: ".removed-api.txt",
-        },
-    ],
+    },
     api_surface: "test",
 }
 
-droidstubs {
+non_updatable_exportable_droidstubs {
     name: "module-lib-api-stubs-docs-non-updatable",
     defaults: [
         "android-non-updatable-stubs-defaults",
@@ -186,30 +263,50 @@ droidstubs {
             removed_api_file: ":non-updatable-module-lib-removed.txt",
         },
         last_released: {
-            api_file: ":android-non-updatable.api.module-lib.latest",
-            removed_api_file: ":android-non-updatable-removed.api.module-lib.latest",
+            api_file: ":android-non-updatable.api.combined.module-lib.latest",
+            removed_api_file: ":android-non-updatable-removed.api.combined.module-lib.latest",
             baseline_file: ":android-non-updatable-incompatibilities.api.module-lib.latest",
         },
         api_lint: {
             enabled: true,
-            new_since: ":android.api.module-lib.latest",
+            new_since: ":android.api.combined.module-lib.latest",
             baseline_file: ":non-updatable-module-lib-lint-baseline.txt",
         },
     },
-    dists: [
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/module-lib/api",
-            dest: "android-non-updatable.txt",
-            tag: ".api.txt",
+    soong_config_variables: {
+        release_hidden_api_exportable_stubs: {
+            dists: [
+                {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/module-lib/api",
+                    dest: "android-non-updatable.txt",
+                    tag: ".exportable.api.txt",
+                },
+                {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/module-lib/api",
+                    dest: "android-non-updatable-removed.txt",
+                    tag: ".exportable.removed-api.txt",
+                },
+            ],
+            conditions_default: {
+                dists: [
+                    {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/module-lib/api",
+                        dest: "android-non-updatable.txt",
+                        tag: ".api.txt",
+                    },
+                    {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/module-lib/api",
+                        dest: "android-non-updatable-removed.txt",
+                        tag: ".removed-api.txt",
+                    },
+                ],
+            },
         },
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/module-lib/api",
-            dest: "android-non-updatable-removed.txt",
-            tag: ".removed-api.txt",
-        },
-    ],
+    },
     api_surface: "module-lib",
 }
 
@@ -1047,31 +1144,47 @@ java_library {
     ],
 }
 
-droidstubs {
-    name: "api_versions_public",
-    srcs: [":android_stubs_current_with_test_libs{.jar}"],
+// Defaults for `droidstubs` modules that generate `api-versions.xml` files for
+// the various API surfaces.
+stubs_defaults {
+    name: "api_versions_base_defaults",
+    defaults_visibility: ["//visibility:private"],
     generate_stubs: false,
     api_levels_annotations_enabled: true,
     api_levels_annotations_dirs: [
         "sdk-dir",
         "api-versions-jars-dir",
     ],
-    api_levels_sdk_type: "public",
+}
+
+// Defaults for `droidstubs` modules that generate complete `api-versions.xml`
+// files, i.e. include SDK extensions.
+stubs_defaults {
+    name: "api_versions_complete_defaults",
+    defaults_visibility: ["//visibility:private"],
+    defaults: ["api_versions_base_defaults"],
     extensions_info_file: ":sdk-extensions-info",
+}
+
+// Produces an `api-versions.xml` file that includes up-to-date information
+// about all the public APIs, both updatable and non-updatable and historic
+// information about all previous dessert and SDK extension releases.
+droidstubs {
+    name: "api_versions_public",
+    defaults: ["api_versions_complete_defaults"],
+    srcs: [":android_stubs_current_with_test_libs{.jar}"],
+    api_levels_sdk_type: "public",
     visibility: ["//frameworks/base"],
 }
 
+// Produces an `api-versions.xml` file that includes up-to-date information
+// about all the system APIs, both updatable and non-updatable and historic
+// information about all previous dessert and SDK extension releases.
 droidstubs {
     name: "api_versions_system",
+    defaults: ["api_versions_complete_defaults"],
     srcs: [":android_system_stubs_current_with_test_libs{.jar}"],
-    generate_stubs: false,
-    api_levels_annotations_enabled: true,
-    api_levels_annotations_dirs: [
-        "sdk-dir",
-        "api-versions-jars-dir",
-    ],
     api_levels_sdk_type: "system",
-    extensions_info_file: ":sdk-extensions-info",
     dists: [
         // Make the api-versions.xml file for the system API available in the
         // sdk build target.
@@ -1083,42 +1196,99 @@ droidstubs {
     ],
 }
 
-// This module can be built with:
-// m out/soong/.intermediates/frameworks/base/api/api_versions_module_lib/android_common/metalava/api-versions.xml
-droidstubs {
-    name: "api_versions_module_lib",
-    srcs: [":android_module_stubs_current_with_test_libs{.jar}"],
-    generate_stubs: false,
-    api_levels_annotations_enabled: true,
+// Defaults for `droidstubs` modules that generate `api-versions.xml` files that
+// only include non-updatable code, i.e. for platform API only, not SDK
+// extensions.
+stubs_defaults {
+    name: "api_versions_non_updatable_defaults",
+    defaults_visibility: ["//visibility:private"],
+    defaults: ["api_versions_base_defaults"],
     // this only has the non-updatable portions of the module lib sdk,
     // which can reference classes from updatable apexes, so remove references to them
     // from this api_versions file.
     flags: ["--remove-missing-class-references-in-api-levels"],
-    api_levels_annotations_dirs: [
-        "sdk-dir",
-        "api-versions-jars-dir",
-    ],
-    api_levels_sdk_type: "module-lib",
     // extensions_info_file is purposefully omitted, because this module should just be
     // the non-updatable portions of the sdk, and extension sdks are updatable.
 }
 
+// Produces an `api-versions.xml` file that includes up-to-date information
+// about only the non-updatable module-lib APIs and historic information about
+// all previous dessert and SDK extension releases. That historic information
+// may include information about APIs that were previously not-updatable which
+// have since become updatable.
+droidstubs {
+    name: "api_versions_module_lib",
+    defaults: ["api_versions_non_updatable_defaults"],
+    srcs: [":android_module_stubs_current_with_test_libs{.jar}"],
+    api_levels_sdk_type: "module-lib",
+}
+
+// Create a single jar containing the whole module-lib API surface.
+// This is needed because Metalava only consumes the first jar file it is given
+// and ignores the rest.
+java_library {
+    name: "android_module_stubs_complete_current_with_test_libs",
+    static_libs: [
+        "android_module_stubs_current_with_test_libs",
+        "framework-updatable-stubs-module_libs_api-exportable",
+    ],
+    defaults: ["android.jar_defaults"],
+    visibility: [
+        "//visibility:override",
+        "//visibility:private",
+    ],
+}
+
+// Produces an `api-versions.xml` file that includes up-to-date information
+// about all the module-lib APIs, both updatable and non-updatable and historic
+// information about all previous dessert and SDK extension releases.
+droidstubs {
+    name: "api_versions_module_lib_complete",
+    defaults: ["api_versions_complete_defaults"],
+    srcs: [":android_module_stubs_complete_current_with_test_libs{.jar}"],
+    api_levels_sdk_type: "module-lib",
+}
+
+// Produces an `api-versions.xml` file that includes up-to-date information
+// about only the non-updatable system-server APIs and historic information
+// about all previous dessert and SDK extension releases. That historic
+// information may include information about APIs that were previously
+// not-updatable which have since become updatable.
 droidstubs {
     name: "api_versions_system_server",
+    defaults: ["api_versions_non_updatable_defaults"],
     srcs: [":android_system_server_stubs_current_with_test_libs{.jar}"],
-    generate_stubs: false,
-    api_levels_annotations_enabled: true,
-    // this only has the non-updatable portions of the system server sdk,
-    // which can reference classes from updatable apexes, so remove references to them
-    // from this api_versions file.
-    flags: ["--remove-missing-class-references-in-api-levels"],
-    api_levels_annotations_dirs: [
-        "sdk-dir",
-        "api-versions-jars-dir",
-    ],
     api_levels_sdk_type: "system-server",
-    // extensions_info_file is purposefully omitted, because this module should just be
-    // the non-updatable portions of the sdk, and extension sdks are updatable.
+}
+
+// Create a single jar containing the whole system-server API surface.
+// This is needed because Metalava only consumes the first jar file it is given
+// and ignores the rest.
+java_library {
+    name: "android_system_server_stubs_complete_current_with_test_libs",
+    static_libs: [
+        "android_system_server_stubs_current_with_test_libs",
+        // system-server extends module-lib but libraries which only service-*
+        // libraries provided system-server APIs, so include module-lib APIs for
+        // the others, e.g. framework-* libraries.
+        "framework-updatable-stubs-module_libs_api-exportable",
+        "framework-updatable-stubs-system_server_api-exportable",
+    ],
+    defaults: ["android.jar_defaults"],
+    visibility: [
+        "//visibility:override",
+        "//visibility:private",
+    ],
+}
+
+// Produces an `api-versions.xml` file that includes up-to-date information
+// about all the system-server APIs, both updatable and non-updatable and
+// historic information about all previous dessert and SDK extension releases.
+droidstubs {
+    name: "api_versions_system_server_complete",
+    defaults: ["api_versions_complete_defaults"],
+    srcs: [":android_system_server_stubs_complete_current_with_test_libs{.jar}"],
+    api_levels_sdk_type: "system-server",
 }
 
 /////////////////////////////////////////////////////////////////////

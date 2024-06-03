@@ -16,11 +16,14 @@
 
 package com.android.server.hdmi;
 
+import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_TV;
+
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.os.Looper;
 import android.os.test.TestLooper;
@@ -35,6 +38,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.Collections;
+import java.util.List;
 
 /**
  * TV specific tests for {@link HdmiControlService} class.
@@ -47,6 +51,7 @@ public class HdmiControlServiceTvTest {
     private static final String TAG = "HdmiControlServiceTvTest";
     private HdmiControlService mHdmiControlService;
     private HdmiCecController mHdmiCecController;
+    private HdmiCecLocalDeviceTv mHdmiCecLocalDeviceTv;
     private FakeNativeWrapper mNativeWrapper;
     private HdmiEarcController mHdmiEarcController;
     private FakeEarcNativeWrapper mEarcNativeWrapper;
@@ -90,6 +95,8 @@ public class HdmiControlServiceTvTest {
         mHdmiControlService.initService();
 
         mTestLooper.dispatchAll();
+
+        mHdmiCecLocalDeviceTv = mHdmiControlService.tv();
     }
 
     @Test
@@ -138,5 +145,24 @@ public class HdmiControlServiceTvTest {
                 .verifyPhysicalAddresses(HdmiUtils.buildMessage("4F:82:10:00"))).isTrue();
         assertThat(mHdmiControlService
                 .verifyPhysicalAddresses(HdmiUtils.buildMessage("4F:82:10"))).isFalse();
+    }
+
+    @Test
+    public void setRcProfileTv_reportFeatureBroadcast() {
+        mNativeWrapper.clearResultMessages();
+
+        mHdmiControlService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
+                HdmiControlManager.HDMI_CEC_VERSION_2_0);
+        mHdmiControlService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV,
+                HdmiControlManager.RC_PROFILE_TV_NONE);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportFeatures = ReportFeaturesMessage.build(Constants.ADDR_TV,
+                HdmiControlManager.HDMI_CEC_VERSION_2_0, List.of(DEVICE_TV),
+                mHdmiCecLocalDeviceTv.getRcProfile(), mHdmiCecLocalDeviceTv.getRcFeatures(),
+                mHdmiCecLocalDeviceTv.getDeviceFeatures());
+        assertThat(mNativeWrapper.getResultMessages()).contains(reportFeatures);
     }
 }

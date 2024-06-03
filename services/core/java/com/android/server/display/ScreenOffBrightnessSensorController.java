@@ -25,8 +25,6 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.util.IndentingPrintWriter;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 import java.io.PrintWriter;
 
 /**
@@ -79,7 +77,10 @@ public class ScreenOffBrightnessSensorController implements SensorEventListener 
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
-    void setLightSensorEnabled(boolean enabled) {
+    /**
+     * Changes the state of the associated light sensor
+     */
+    public void setLightSensorEnabled(boolean enabled) {
         if (enabled && !mRegistered) {
             // Wait until we get an event from the sensor indicating ready.
             mRegistered = mSensorManager.registerListener(this, mLightSensor,
@@ -92,11 +93,17 @@ public class ScreenOffBrightnessSensorController implements SensorEventListener 
         }
     }
 
-    void stop() {
+    /**
+     * Stops the associated sensor, and cleans up the state
+     */
+    public void stop() {
         setLightSensorEnabled(false);
     }
 
-    float getAutomaticScreenBrightness() {
+    /**
+     * Gets the automatic screen brightness based on the ambient lux
+     */
+    public float getAutomaticScreenBrightness() {
         if (mLastSensorValue < 0 || mLastSensorValue >= mSensorValueToLux.length
                 || (!mRegistered
                 && mClock.uptimeMillis() - mSensorDisableTime > SENSOR_VALUE_VALID_TIME_MILLIS)) {
@@ -121,8 +128,7 @@ public class ScreenOffBrightnessSensorController implements SensorEventListener 
     }
 
     /** Functional interface for providing time. */
-    @VisibleForTesting
-    interface Clock {
+    public interface Clock {
         /**
          * Returns current time in milliseconds since boot, not counting time spent in deep sleep.
          */

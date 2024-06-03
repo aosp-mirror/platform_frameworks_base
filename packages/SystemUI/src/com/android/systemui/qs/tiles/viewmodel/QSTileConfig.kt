@@ -65,10 +65,10 @@ sealed interface QSTilePolicy {
     data object NoRestrictions : QSTilePolicy
 
     /**
-     * Tile might be disabled by policy. [userRestriction] is usually a constant from
+     * Tile might be disabled by policy. Each item in [userRestrictions] is usually a constant from
      * [android.os.UserManager] like [android.os.UserManager.DISALLOW_AIRPLANE_MODE].
      * [com.android.systemui.qs.tiles.base.interactor.DisabledByPolicyInteractor] is commonly used
      * to resolve this and show user a message when needed.
      */
-    data class Restricted(val userRestriction: String) : QSTilePolicy
+    data class Restricted(val userRestrictions: List<String>) : QSTilePolicy
 }

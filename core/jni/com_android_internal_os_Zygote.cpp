@@ -116,7 +116,7 @@ using android::base::GetBoolProperty;
 
 using android::zygote::ZygoteFailure;
 
-using Action = android_mallopt_gwp_asan_options_t::Action;
+using Mode = android_mallopt_gwp_asan_options_t::Mode;
 
 // This type is duplicated in fd_utils.h
 typedef const std::function<void(std::string)>& fail_fn_t;
@@ -1828,10 +1828,10 @@ static void BindMountSyspropOverride(fail_fn_t fail_fn, JNIEnv* env) {
   std::string source = "/dev/__properties__/appcompat_override";
   std::string target = "/dev/__properties__";
   if (access(source.c_str(), F_OK) != 0) {
-    fail_fn(CREATE_ERROR("Error accessing %s: %s", source.c_str(), strerror(errno)));
+      return;
   }
   if (access(target.c_str(), F_OK) != 0) {
-    fail_fn(CREATE_ERROR("Error accessing %s: %s", target.c_str(), strerror(errno)));
+      return;
   }
   BindMount(source, target, fail_fn);
   // Reload the system properties file, to ensure new values are read into memory
@@ -2101,21 +2101,21 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
     switch (runtime_flags & RuntimeFlags::GWP_ASAN_LEVEL_MASK) {
         default:
         case RuntimeFlags::GWP_ASAN_LEVEL_DEFAULT:
-            gwp_asan_options.desire = GetBoolProperty(kGwpAsanAppRecoverableSysprop, true)
-                    ? Action::TURN_ON_FOR_APP_SAMPLED_NON_CRASHING
-                    : Action::DONT_TURN_ON_UNLESS_OVERRIDDEN;
+            gwp_asan_options.mode = GetBoolProperty(kGwpAsanAppRecoverableSysprop, true)
+                    ? Mode::APP_MANIFEST_DEFAULT
+                    : Mode::APP_MANIFEST_NEVER;
             android_mallopt(M_INITIALIZE_GWP_ASAN, &gwp_asan_options, sizeof(gwp_asan_options));
             break;
         case RuntimeFlags::GWP_ASAN_LEVEL_NEVER:
-            gwp_asan_options.desire = Action::DONT_TURN_ON_UNLESS_OVERRIDDEN;
+            gwp_asan_options.mode = Mode::APP_MANIFEST_NEVER;
             android_mallopt(M_INITIALIZE_GWP_ASAN, &gwp_asan_options, sizeof(gwp_asan_options));
             break;
         case RuntimeFlags::GWP_ASAN_LEVEL_ALWAYS:
-            gwp_asan_options.desire = Action::TURN_ON_FOR_APP;
+            gwp_asan_options.mode = Mode::APP_MANIFEST_ALWAYS;
             android_mallopt(M_INITIALIZE_GWP_ASAN, &gwp_asan_options, sizeof(gwp_asan_options));
             break;
         case RuntimeFlags::GWP_ASAN_LEVEL_LOTTERY:
-            gwp_asan_options.desire = Action::TURN_ON_WITH_SAMPLING;
+            gwp_asan_options.mode = Mode::APP_MANIFEST_DEFAULT;
             android_mallopt(M_INITIALIZE_GWP_ASAN, &gwp_asan_options, sizeof(gwp_asan_options));
             break;
     }

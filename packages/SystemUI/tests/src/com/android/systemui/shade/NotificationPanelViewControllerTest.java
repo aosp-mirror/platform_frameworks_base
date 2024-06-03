@@ -18,6 +18,7 @@ package com.android.systemui.shade;
 
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
+import static com.android.systemui.Flags.FLAG_SHADE_COLLAPSE_ACTIVITY_LAUNCH_FIX;
 import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_CLOSED;
 import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_OPEN;
 import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_OPENING;
@@ -46,6 +47,8 @@ import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.graphics.Point;
 import android.os.PowerManager;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
@@ -62,6 +65,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
+import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.KeyguardClockPositionAlgorithm;
@@ -364,6 +368,24 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    public void alternateBouncerVisible_onTouchEvent_notHandled() {
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
+        // GIVEN alternate bouncer is visible
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+
+        // WHEN touch DOWN event received; THEN touch is NOT handled
+        assertThat(onTouchEvent(MotionEvent.obtain(0L /* downTime */,
+                0L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 0f /* y */,
+                0 /* metaState */))).isFalse();
+
+        // WHEN touch MOVE event received; THEN touch is NOT handled
+        assertThat(onTouchEvent(MotionEvent.obtain(0L /* downTime */,
+                0L /* eventTime */, MotionEvent.ACTION_MOVE, 0f /* x */, 200f /* y */,
+                0 /* metaState */))).isFalse();
+
+    }
+
+    @Test
     public void test_onTouchEvent_startTracking() {
         // GIVEN device is NOT pulsing
         mNotificationPanelViewController.setPulsing(false);
@@ -406,6 +428,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     public void testOnTouchEvent_expansionResumesAfterBriefTouch() {
         mFalsingManager.setIsClassifierEnabled(true);
         mFalsingManager.setIsFalseTouch(false);
+        mNotificationPanelViewController.setForceFlingAnimationForTest(true);
         // Start shade collapse with swipe up
         onTouchEvent(MotionEvent.obtain(0L /* downTime */,
                 0L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 0f /* y */,
@@ -434,6 +457,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         // fling should still be called after a touch that does not exceed touch slop
         assertThat(mNotificationPanelViewController.isClosing()).isTrue();
         assertThat(mNotificationPanelViewController.isFlinging()).isTrue();
+        mNotificationPanelViewController.setForceFlingAnimationForTest(false);
     }
 
     @Test
@@ -655,6 +679,33 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @EnableFlags(FLAG_SHADE_COLLAPSE_ACTIVITY_LAUNCH_FIX)
+    public void testCanBeCollapsed_expandedInKeyguard() {
+        mStatusBarStateController.setState(KEYGUARD);
+        mNotificationPanelViewController.setExpandedFraction(1f);
+
+        assertThat(mNotificationPanelViewController.canBeCollapsed()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(FLAG_SHADE_COLLAPSE_ACTIVITY_LAUNCH_FIX)
+    public void testCanBeCollapsed_expandedInShade() {
+        mStatusBarStateController.setState(SHADE);
+        mNotificationPanelViewController.setExpandedFraction(1f);
+        assertThat(mNotificationPanelViewController.canBeCollapsed()).isTrue();
+    }
+
+    @Test
+    @DisableFlags(FLAG_SHADE_COLLAPSE_ACTIVITY_LAUNCH_FIX)
+    public void testCanBeCollapsed_expandedInKeyguard_flagDisabled() {
+        mStatusBarStateController.setState(KEYGUARD);
+        mNotificationPanelViewController.setExpandedFraction(1f);
+
+        assertThat(mNotificationPanelViewController.canBeCollapsed()).isTrue();
+    }
+
+    @Test
+    @Ignore("b/341163515 - fails to clean up animators correctly")
     public void testSwipeWhileLocked_notifiesKeyguardState() {
         mStatusBarStateController.setState(KEYGUARD);
 
@@ -1043,7 +1094,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void testPanelClosedWhenClosingQsInSplitShade() {
         mShadeExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 1,
-                /* expanded= */ true, /* tracking= */ false, /* dragDownPxAmount= */ 0);
+                /* expanded= */ true, /* tracking= */ false);
         enableSplitShade(/* enabled= */ true);
         mNotificationPanelViewController.setExpandedFraction(1f);
 
@@ -1269,6 +1320,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
     public void shadeExpanded_whenHunIsPresent() {
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(true);
         assertThat(mNotificationPanelViewController.isExpanded()).isTrue();

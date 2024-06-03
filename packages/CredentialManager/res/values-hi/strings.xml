@@ -20,7 +20,7 @@
     <string name="app_name" msgid="4539824758261855508">"CredentialManager"</string>
     <string name="string_cancel" msgid="6369133483981306063">"रद्द करें"</string>
     <string name="string_continue" msgid="1346732695941131882">"जारी रखें"</string>
-    <string name="string_more_options" msgid="2763852250269945472">"दूसरा तरीका सेव करें"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"दूसरे तरीके से सेव करें"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"ज़्यादा जानें"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"पासवर्ड दिखाएं"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"पासवर्ड छिपाएं"</string>
@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"आने वाले समय में बिना पासवर्ड वाली टेक्नोलॉजी यानी पासकी का इस्तेमाल बढ़ेगा, हालांकि इसके साथ-साथ पासवर्ड भी इस्तेमाल किए जा सकेंगे."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"चुनें कि अपनी <xliff:g id="CREATETYPES">%1$s</xliff:g> कहां सेव करनी हैं"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"अपनी जानकारी सेव करने के लिए, पासवर्ड मैनेजर चुनें और अगली बार ज़्यादा तेज़ी से साइन इन करें"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"क्या आपको <xliff:g id="APPNAME">%1$s</xliff:g> में साइन इन करने के लिए पासकी बनानी है?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"क्या आपको <xliff:g id="APPNAME">%1$s</xliff:g> में साइन इन करने के लिए पासवर्ड सेव करना है?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"क्या आपको <xliff:g id="APPNAME">%1$s</xliff:g> के लिए साइन-इन की जानकारी सेव करनी है?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"क्या आपको <xliff:g id="APP_NAME">%1$s</xliff:g> में साइन इन करने के लिए पासकी बनानी है?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"क्या आपको <xliff:g id="APP_NAME">%1$s</xliff:g> में साइन इन करने के लिए पासवर्ड सेव करना है?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"क्या आपको <xliff:g id="APP_NAME">%1$s</xliff:g> के लिए साइन-इन की जानकारी सेव करनी है?"</string>
     <string name="passkey" msgid="632353688396759522">"पासकी"</string>
     <string name="password" msgid="6738570945182936667">"पासवर्ड"</string>
     <string name="passkeys" msgid="5733880786866559847">"पासकी"</string>
@@ -68,30 +68,31 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"पिछले पेज पर वापस जाएं"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"बंद करें"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"खारिज करें"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"क्या आपको <xliff:g id="APP_NAME">%1$s</xliff:g> पर साइन इन करने के लिए, सेव की गई पासकी का इस्तेमाल करना है?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"क्या आपको <xliff:g id="APP_NAME">%1$s</xliff:g> के लिए सेव किया हुआ पासवर्ड इस्तेमाल करना है?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"क्या आपको <xliff:g id="APP_NAME">%1$s</xliff:g> के लिए अपने साइन-इन क्रेडेंशियल का इस्तेमाल करना है?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"क्या आपको <xliff:g id="APP_NAME">%1$s</xliff:g> में साइन इन करने के विकल्पों को अनलॉक करना है?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"<xliff:g id="APP_NAME">%1$s</xliff:g> में साइन इन करने के लिए, सेव की गई पासकी का इस्तेमाल करें"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"<xliff:g id="APP_NAME">%1$s</xliff:g> में साइन इन करने के लिए सेव किया हुआ पासवर्ड इस्तेमाल करें"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"<xliff:g id="APP_NAME">%1$s</xliff:g> में साइन करने के लिए अपने खाते का इस्तेमाल करें"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"<xliff:g id="USERNAME">%2$s</xliff:g> से <xliff:g id="APP_NAME">%1$s</xliff:g> में साइन इन करने के लिए, स्क्रीन लॉक का इस्तेमाल करें"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"<xliff:g id="APP_NAME">%1$s</xliff:g> में साइन इन करने के लिए, विकल्पों को अनलॉक करें"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g> के लिए सेव की गई पासकी चुनें"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"<xliff:g id="APP_NAME">%1$s</xliff:g> के लिए सेव किया गया पासवर्ड चुनें"</string>
-    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"<xliff:g id="APP_NAME">%1$s</xliff:g> के लिए सेव किया गया साइन इन क्रेडेंशियल चुनें"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"<xliff:g id="APP_NAME">%1$s</xliff:g> के लिए साइन-इन क्रेडेंशियल चुनें"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"<xliff:g id="APP_NAME">%1$s</xliff:g> के लिए सेव किया गया क्रेडेंशियल चुनें"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"<xliff:g id="APP_NAME">%1$s</xliff:g> में साइन इन करने के लिए कोई खाता चुनें"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"<xliff:g id="APP_NAME">%1$s</xliff:g> में साइन इन करने के लिए सेव किए गए विकल्पों में से किसी को चुनना है?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"<xliff:g id="APP_NAME">%1$s</xliff:g> के लिए, क्या इस जानकारी का इस्तेमाल करना है?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"किसी दूसरे तरीके से साइन इन करें"</string>
     <string name="snackbar_action" msgid="37373514216505085">"विकल्प देखें"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"जारी रखें"</string>
-    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"साइन इन करने के विकल्प"</string>
+    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"साइन-इन करने के लिए विकल्प"</string>
     <string name="button_label_view_more" msgid="3429098227286495651">"ज़्यादा देखें"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> के लिए"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"लॉक किए गए पासवर्ड मैनेजर"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"अनलॉक करने के लिए टैप करें"</string>
     <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"साइन-इन करने से जुड़ी कोई जानकारी उपलब्ध नहीं है"</string>
     <string name="no_sign_in_info_in" msgid="2641118151920288356">"<xliff:g id="SOURCE">%1$s</xliff:g> में साइन-इन की जानकारी नहीं है"</string>
-    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"साइन इन करने की सुविधा को मैनेज करें"</string>
+    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"साइन-इन किए गए खाते मैनेज करें"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"किसी दूसरे डिवाइस से"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"दूसरे डिवाइस का इस्तेमाल करें"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g> की ओर से अनुरोध रद्द किया गया"</string>
-    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"साइन-इन करने के विकल्प"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"साइन-इन करने के लिए विकल्प"</string>
     <string name="more_options_content_description" msgid="1323427365788198808">"ज़्यादा"</string>
 </resources>

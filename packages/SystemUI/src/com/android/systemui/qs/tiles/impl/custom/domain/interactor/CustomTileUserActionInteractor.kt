@@ -29,9 +29,9 @@ import android.os.UserHandle
 import android.provider.Settings
 import android.service.quicksettings.TileService
 import android.view.IWindowManager
-import android.view.View
 import android.view.WindowManager
 import androidx.annotation.GuardedBy
+import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandler
@@ -65,20 +65,21 @@ constructor(
 
     @GuardedBy("token") private var isTokenGranted: Boolean = false
     @GuardedBy("token") private var isShowingDialog: Boolean = false
-    private val lastClickedView: AtomicReference<View> = AtomicReference<View>()
+    private val lastClickedExpandable: AtomicReference<Expandable> = AtomicReference<Expandable>()
 
     override suspend fun handleInput(input: QSTileInput<CustomTileDataModel>) =
         with(input) {
             when (action) {
-                is QSTileUserAction.Click -> click(action.view, data.tile.activityLaunchForClick)
+                is QSTileUserAction.Click ->
+                    click(action.expandable, data.tile.activityLaunchForClick)
                 is QSTileUserAction.LongClick ->
-                    longClick(user, action.view, data.componentName, data.tile.state)
+                    longClick(user, action.expandable, data.componentName, data.tile.state)
             }
             qsTileLogger.logCustomTileUserActionDelivered(tileSpec)
         }
 
     private suspend fun click(
-        view: View?,
+        expandable: Expandable?,
         activityLaunchForClick: PendingIntent?,
     ) {
         grantToken()
@@ -86,10 +87,10 @@ constructor(
             // Bind active tile to deliver user action
             serviceInteractor.bindOnClick()
             if (activityLaunchForClick == null) {
-                lastClickedView.set(view)
+                lastClickedExpandable.set(expandable)
                 serviceInteractor.onClick(token)
             } else {
-                qsTileIntentUserInputHandler.handle(view, activityLaunchForClick)
+                qsTileIntentUserInputHandler.handle(expandable, activityLaunchForClick)
             }
         } catch (e: RemoteException) {
             qsTileLogger.logError(tileSpec, "Failed to deliver click", e)
@@ -117,10 +118,10 @@ constructor(
         if (!isTokenGranted) {
             return
         }
-        qsTileIntentUserInputHandler.handle(lastClickedView.getAndSet(null), pendingIntent)
+        qsTileIntentUserInputHandler.handle(lastClickedExpandable.getAndSet(null), pendingIntent)
     }
 
-    fun clearLastClickedView() = lastClickedView.set(null)
+    fun clearLastClickedView() = lastClickedExpandable.set(null)
 
     private fun grantToken() {
         synchronized(token) {
@@ -142,7 +143,7 @@ constructor(
 
     private suspend fun longClick(
         user: UserHandle,
-        view: View?,
+        expandable: Expandable?,
         componentName: ComponentName,
         state: Int
     ) {
@@ -159,14 +160,14 @@ constructor(
                 }
         if (resolvedIntent == null) {
             qsTileIntentUserInputHandler.handle(
-                view,
+                expandable,
                 Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                     .setData(
                         Uri.fromParts(IntentFilter.SCHEME_PACKAGE, componentName.packageName, null)
                     )
             )
         } else {
-            qsTileIntentUserInputHandler.handle(view, resolvedIntent)
+            qsTileIntentUserInputHandler.handle(expandable, resolvedIntent)
         }
     }
 

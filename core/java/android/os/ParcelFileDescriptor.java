@@ -52,6 +52,8 @@ import android.util.CloseGuard;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.ravenwood.RavenwoodEnvironment;
+
 import dalvik.system.VMRuntime;
 
 import libcore.io.IoUtils;
@@ -388,7 +390,6 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * new file descriptor shared state such as file position with the
      * original file descriptor.
      */
-    @RavenwoodThrow(reason = "Requires JNI support")
     public static ParcelFileDescriptor dup(FileDescriptor orig) throws IOException {
         try {
             final FileDescriptor fd = new FileDescriptor();
@@ -406,7 +407,6 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * new file descriptor shared state such as file position with the
      * original file descriptor.
      */
-    @RavenwoodThrow(reason = "Requires JNI support")
     public ParcelFileDescriptor dup() throws IOException {
         if (mWrapped != null) {
             return mWrapped.dup();
@@ -425,7 +425,6 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * @return Returns a new ParcelFileDescriptor holding a FileDescriptor
      * for a dup of the given fd.
      */
-    @RavenwoodThrow(reason = "Requires JNI support")
     public static ParcelFileDescriptor fromFd(int fd) throws IOException {
         final FileDescriptor original = new FileDescriptor();
         setFdInt(original, fd);
@@ -485,7 +484,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      *
      * @throws UncheckedIOException if {@link #dup(FileDescriptor)} throws IOException.
      */
-    @RavenwoodThrow(reason = "Requires JNI support")
+    @RavenwoodThrow(reason = "Socket.getFileDescriptor$()")
     public static ParcelFileDescriptor fromSocket(Socket socket) {
         FileDescriptor fd = socket.getFileDescriptor$();
         try {
@@ -519,7 +518,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      *
      * @throws UncheckedIOException if {@link #dup(FileDescriptor)} throws IOException.
      */
-    @RavenwoodThrow(reason = "Requires JNI support")
+    @RavenwoodThrow(reason = "DatagramSocket.getFileDescriptor$()")
     public static ParcelFileDescriptor fromDatagramSocket(DatagramSocket datagramSocket) {
         FileDescriptor fd = datagramSocket.getFileDescriptor$();
         try {
@@ -534,7 +533,6 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * ParcelFileDescriptor in the returned array is the read side; the second
      * is the write side.
      */
-    @RavenwoodThrow(reason = "Requires JNI support")
     public static ParcelFileDescriptor[] createPipe() throws IOException {
         try {
             final FileDescriptor[] fds = Os.pipe2(ifAtLeastQ(O_CLOEXEC));
@@ -556,7 +554,6 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * calling {@link #checkError()}, usually after detecting an EOF.
      * This can also be used to detect remote crashes.
      */
-    @RavenwoodThrow(reason = "Requires JNI support")
     public static ParcelFileDescriptor[] createReliablePipe() throws IOException {
         try {
             final FileDescriptor[] comm = createCommSocketPair();
@@ -573,7 +570,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * Create two ParcelFileDescriptors structured as a pair of sockets
      * connected to each other. The two sockets are indistinguishable.
      */
-    @RavenwoodThrow(reason = "Requires JNI support")
+    @RavenwoodThrow(reason = "Os.socketpair()")
     public static ParcelFileDescriptor[] createSocketPair() throws IOException {
         return createSocketPair(SOCK_STREAM);
     }
@@ -581,7 +578,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     /**
      * @hide
      */
-    @RavenwoodThrow(reason = "Requires JNI support")
+    @RavenwoodThrow(reason = "Os.socketpair()")
     public static ParcelFileDescriptor[] createSocketPair(int type) throws IOException {
         try {
             final FileDescriptor fd0 = new FileDescriptor();
@@ -604,7 +601,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * calling {@link #checkError()}, usually after detecting an EOF.
      * This can also be used to detect remote crashes.
      */
-    @RavenwoodThrow(reason = "Requires JNI support")
+    @RavenwoodThrow(reason = "Os.socketpair()")
     public static ParcelFileDescriptor[] createReliableSocketPair() throws IOException {
         return createReliableSocketPair(SOCK_STREAM);
     }
@@ -612,7 +609,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     /**
      * @hide
      */
-    @RavenwoodThrow(reason = "Requires JNI support")
+    @RavenwoodThrow(reason = "Os.socketpair()")
     public static ParcelFileDescriptor[] createReliableSocketPair(int type) throws IOException {
         try {
             final FileDescriptor[] comm = createCommSocketPair();
@@ -627,7 +624,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         }
     }
 
-    @RavenwoodThrow(reason = "Requires JNI support")
+    @RavenwoodThrow(reason = "Os.socketpair()")
     private static FileDescriptor[] createCommSocketPair() throws IOException {
         try {
             // Use SOCK_SEQPACKET so that we have a guarantee that the status
@@ -656,7 +653,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      */
     @UnsupportedAppUsage
     @Deprecated
-    @RavenwoodThrow(reason = "Requires JNI support")
+    @RavenwoodThrow(blockedBy = MemoryFile.class)
     public static ParcelFileDescriptor fromData(byte[] data, String name) throws IOException {
         if (data == null) return null;
         MemoryFile file = new MemoryFile(name, data.length);
@@ -712,7 +709,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * @hide
      */
     @TestApi
-    @RavenwoodThrow(reason = "Requires kernel support")
+    @RavenwoodThrow(reason = "Os.readlink() and Os.stat()")
     public static File getFile(FileDescriptor fd) throws IOException {
         try {
             final String path = Os.readlink("/proc/self/fd/" + getFdInt(fd));
@@ -744,7 +741,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * Return the total size of the file representing this fd, as determined by
      * {@code stat()}. Returns -1 if the fd is not a file.
      */
-    @RavenwoodThrow(reason = "Requires JNI support")
+    @RavenwoodThrow(reason = "Os.readlink() and Os.stat()")
     public long getStatSize() {
         if (mWrapped != null) {
             return mWrapped.getStatSize();
@@ -769,7 +766,6 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * @hide
      */
     @UnsupportedAppUsage
-    @RavenwoodThrow(reason = "Requires JNI support")
     public long seekTo(long pos) throws IOException {
         if (mWrapped != null) {
             return mWrapped.seekTo(pos);
@@ -1037,7 +1033,6 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * take care of calling {@link ParcelFileDescriptor#close
      * ParcelFileDescriptor.close()} for you when the stream is closed.
      */
-    @RavenwoodKeepWholeClass
     public static class AutoCloseInputStream extends FileInputStream {
         private final ParcelFileDescriptor mPfd;
 
@@ -1326,12 +1321,15 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
 
     }
 
-    @RavenwoodThrow
+    @RavenwoodReplace
     private static boolean isAtLeastQ() {
         return (VMRuntime.getRuntime().getTargetSdkVersion() >= Build.VERSION_CODES.Q);
     }
 
-    @RavenwoodThrow
+    private static boolean isAtLeastQ$ravenwood() {
+        return RavenwoodEnvironment.workaround().isTargetSdkAtLeastQ();
+    }
+
     private static int ifAtLeastQ(int value) {
         return isAtLeastQ() ? value : 0;
     }

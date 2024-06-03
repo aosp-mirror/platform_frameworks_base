@@ -583,8 +583,8 @@ public class ShortcutManager {
      *
      * @return {@code TRUE} if the launcher supports this feature.  Note the API will return without
      *    waiting for the user to respond, so getting {@code TRUE} from this API does *not* mean
-     *    the shortcut was pinned successfully.  {@code FALSE} if the launcher doesn't support this
-     *    feature.
+     *    the shortcut was pinned successfully. {@code FALSE} if the launcher doesn't support this
+     *    feature or if calling app belongs to a user-profile with items restricted on home screen.
      *
      * @see #isRequestPinShortcutSupported()
      * @see IntentSender

@@ -45,15 +45,17 @@ public class FontFamily {
 
     private static String TAG = "FontFamily";
 
-    private static final NativeAllocationRegistry sBuilderRegistry =
-            NativeAllocationRegistry.createMalloced(
-            FontFamily.class.getClassLoader(), nGetBuilderReleaseFunc());
-
     private @Nullable Runnable mNativeBuilderCleaner;
 
-    private static final NativeAllocationRegistry sFamilyRegistry =
-            NativeAllocationRegistry.createMalloced(
-            FontFamily.class.getClassLoader(), nGetFamilyReleaseFunc());
+    private static class NoImagePreloadHolder {
+        private static final NativeAllocationRegistry sBuilderRegistry =
+                NativeAllocationRegistry.createMalloced(
+                        FontFamily.class.getClassLoader(), nGetBuilderReleaseFunc());
+
+        private static final NativeAllocationRegistry sFamilyRegistry =
+                NativeAllocationRegistry.createMalloced(
+                        FontFamily.class.getClassLoader(), nGetFamilyReleaseFunc());
+    }
 
     /**
      * @hide
@@ -74,7 +76,8 @@ public class FontFamily {
             publicAlternatives = "Use {@link android.graphics.fonts.FontFamily} instead.")
     public FontFamily() {
         mBuilderPtr = nInitBuilder(null, 0);
-        mNativeBuilderCleaner = sBuilderRegistry.registerNativeAllocation(this, mBuilderPtr);
+        mNativeBuilderCleaner = NoImagePreloadHolder.sBuilderRegistry.registerNativeAllocation(this,
+                mBuilderPtr);
     }
 
     /**
@@ -92,7 +95,8 @@ public class FontFamily {
             langsString = TextUtils.join(",", langs);
         }
         mBuilderPtr = nInitBuilder(langsString, variant);
-        mNativeBuilderCleaner = sBuilderRegistry.registerNativeAllocation(this, mBuilderPtr);
+        mNativeBuilderCleaner = NoImagePreloadHolder.sBuilderRegistry.registerNativeAllocation(this,
+                mBuilderPtr);
     }
 
     /**
@@ -113,7 +117,7 @@ public class FontFamily {
         mNativeBuilderCleaner.run();
         mBuilderPtr = 0;
         if (mNativePtr != 0) {
-            sFamilyRegistry.registerNativeAllocation(this, mNativePtr);
+            NoImagePreloadHolder.sFamilyRegistry.registerNativeAllocation(this, mNativePtr);
         }
         return mNativePtr != 0;
     }
@@ -215,7 +219,7 @@ public class FontFamily {
 
     @CriticalNative
     private static native long nGetFamilyReleaseFunc();
-    // By passing -1 to weigth argument, the weight value is resolved by OS/2 table in the font.
+    // By passing -1 to weight argument, the weight value is resolved by OS/2 table in the font.
     // By passing -1 to italic argument, the italic value is resolved by OS/2 table in the font.
     private static native boolean nAddFont(long builderPtr, ByteBuffer font, int ttcIndex,
             int weight, int isItalic);

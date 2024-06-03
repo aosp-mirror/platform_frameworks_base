@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -70,7 +71,7 @@ public class PackageMonitorTest {
 
         spyPackageMonitor.register(mMockContext, UserHandle.ALL, mMockHandler);
         assertThat(spyPackageMonitor.getRegisteredHandler()).isEqualTo(mMockHandler);
-        verify(mMockContext, times(1)).registerReceiverAsUser(any(), eq(UserHandle.ALL), any(),
+        verify(mMockContext, never()).registerReceiverAsUser(any(), eq(UserHandle.ALL), any(),
                 eq(null), eq(mMockHandler));
 
         assertThrows(IllegalStateException.class,
@@ -92,6 +93,26 @@ public class PackageMonitorTest {
         PackageMonitor spyPackageMonitor = spy(new TestPackageMonitor());
 
         assertThrows(IllegalStateException.class, spyPackageMonitor::unregister);
+    }
+
+    @Test
+    public void testPackageMonitorNotRegisterWithoutSupportPackageRestartQuery() throws Exception {
+        PackageMonitor spyPackageMonitor = spy(new TestPackageMonitor());
+
+        spyPackageMonitor.register(mMockContext, UserHandle.ALL, mMockHandler);
+
+        verify(mMockContext, never()).registerReceiverAsUser(any(), eq(UserHandle.ALL), any(),
+                eq(null), eq(mMockHandler));
+    }
+
+    @Test
+    public void testPackageMonitorRegisterWithSupportPackageRestartQuery() throws Exception {
+        PackageMonitor spyPackageMonitor = spy(new TestPackageMonitor(true));
+
+        spyPackageMonitor.register(mMockContext, UserHandle.ALL, mMockHandler);
+
+        verify(mMockContext, times(1)).registerReceiverAsUser(any(), eq(UserHandle.ALL), any(),
+                eq(null), eq(mMockHandler));
     }
 
     @Test
@@ -307,8 +328,11 @@ public class PackageMonitorTest {
         verify(spyPackageMonitor, times(1)).onBeginPackageChanges();
         verify(spyPackageMonitor, times(1))
                 .onPackageUpdateStarted(eq(FAKE_PACKAGE_NAME), eq(FAKE_PACKAGE_UID));
-
         ArgumentCaptor<Bundle> argumentCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(spyPackageMonitor, times(1))
+                .onPackageUpdateStartedWithExtras(eq(FAKE_PACKAGE_NAME), eq(FAKE_PACKAGE_UID),
+                        argumentCaptor.capture());
+
         verify(spyPackageMonitor, times(1)).onPackageDisappearedWithExtras(eq(FAKE_PACKAGE_NAME),
                 argumentCaptor.capture());
         Bundle capturedExtras = argumentCaptor.getValue();
@@ -341,11 +365,16 @@ public class PackageMonitorTest {
         spyPackageMonitor.doHandlePackageEvent(intent);
 
         verify(spyPackageMonitor, times(1)).onBeginPackageChanges();
+        ArgumentCaptor<Bundle> argumentCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(spyPackageMonitor, times(1))
                 .onPackageUpdateStarted(eq(FAKE_PACKAGE_NAME), eq(FAKE_PACKAGE_UID));
+        verify(spyPackageMonitor, times(1))
+                .onPackageUpdateStartedWithExtras(eq(FAKE_PACKAGE_NAME), eq(FAKE_PACKAGE_UID),
+                        argumentCaptor.capture());
         verify(spyPackageMonitor, times(1)).onPackageModified(eq(FAKE_PACKAGE_NAME));
+        verify(spyPackageMonitor, times(1)).onPackageModifiedWithExtras(eq(FAKE_PACKAGE_NAME),
+                argumentCaptor.capture());
 
-        ArgumentCaptor<Bundle> argumentCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(spyPackageMonitor, times(1))
                 .onPackageDisappearedWithExtras(eq(FAKE_PACKAGE_NAME), argumentCaptor.capture());
         Bundle capturedExtras = argumentCaptor.getValue();
@@ -378,12 +407,18 @@ public class PackageMonitorTest {
         spyPackageMonitor.doHandlePackageEvent(intent);
 
         verify(spyPackageMonitor, times(1)).onBeginPackageChanges();
+        ArgumentCaptor<Bundle> argumentCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(spyPackageMonitor, times(1))
                 .onPackageRemoved(eq(FAKE_PACKAGE_NAME), eq(FAKE_PACKAGE_UID));
         verify(spyPackageMonitor, times(1))
+                .onPackageRemovedWithExtras(eq(FAKE_PACKAGE_NAME), eq(FAKE_PACKAGE_UID),
+                        argumentCaptor.capture());
+        verify(spyPackageMonitor, times(1))
                 .onPackageRemovedAllUsers(eq(FAKE_PACKAGE_NAME), eq(FAKE_PACKAGE_UID));
+        verify(spyPackageMonitor, times(1))
+                .onPackageRemovedAllUsersWithExtras(eq(FAKE_PACKAGE_NAME), eq(FAKE_PACKAGE_UID),
+                        argumentCaptor.capture());
 
-        ArgumentCaptor<Bundle> argumentCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(spyPackageMonitor, times(1)).onPackageDisappearedWithExtras(eq(FAKE_PACKAGE_NAME),
                 argumentCaptor.capture());
         Bundle capturedExtras = argumentCaptor.getValue();
@@ -415,11 +450,16 @@ public class PackageMonitorTest {
         spyPackageMonitor.doHandlePackageEvent(intent);
 
         verify(spyPackageMonitor, times(1)).onBeginPackageChanges();
+        ArgumentCaptor<Bundle> argumentCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(spyPackageMonitor, times(1))
                 .onPackageUpdateFinished(eq(FAKE_PACKAGE_NAME), eq(FAKE_PACKAGE_UID));
+        verify(spyPackageMonitor, times(1))
+                .onPackageModifiedWithExtras(eq(FAKE_PACKAGE_NAME), argumentCaptor.capture());
         verify(spyPackageMonitor, times(1)).onPackageModified(eq(FAKE_PACKAGE_NAME));
+        verify(spyPackageMonitor, times(1))
+                .onPackageModifiedWithExtras(eq(FAKE_PACKAGE_NAME), argumentCaptor.capture());
 
-        ArgumentCaptor<Bundle> argumentCaptor = ArgumentCaptor.forClass(Bundle.class);
+
         verify(spyPackageMonitor, times(1)).onPackageAppearedWithExtras(eq(FAKE_PACKAGE_NAME),
                 argumentCaptor.capture());
         Bundle capturedExtras = argumentCaptor.getValue();
@@ -451,8 +491,11 @@ public class PackageMonitorTest {
         verify(spyPackageMonitor, times(1)).onBeginPackageChanges();
         verify(spyPackageMonitor, times(1))
                 .onPackageAdded(eq(FAKE_PACKAGE_NAME), eq(FAKE_PACKAGE_UID));
-
         ArgumentCaptor<Bundle> argumentCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(spyPackageMonitor, times(1))
+                .onPackageAddedWithExtras(eq(FAKE_PACKAGE_NAME), eq(FAKE_PACKAGE_UID),
+                        argumentCaptor.capture());
+
         verify(spyPackageMonitor, times(1)).onPackageAppearedWithExtras(eq(FAKE_PACKAGE_NAME),
                 argumentCaptor.capture());
         Bundle capturedExtras = argumentCaptor.getValue();
@@ -471,5 +514,12 @@ public class PackageMonitorTest {
     }
 
     public static class TestPackageMonitor extends PackageMonitor {
+        public TestPackageMonitor(boolean b) {
+            super(b);
+        }
+
+        public TestPackageMonitor() {
+            super(false);
+        }
     }
 }

@@ -18,7 +18,11 @@ package com.android.systemui.statusbar.notification.data.repository
 
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class FakeHeadsUpRowRepository(override val key: String, override val elementKey: Any) :
+class FakeHeadsUpRowRepository(override val key: String, override val elementKey: Any = Any()) :
     HeadsUpRowRepository {
+    constructor(key: String, isPinned: Boolean) : this(key = key) {
+        this.isPinned.value = isPinned
+    }
+
     override val isPinned: MutableStateFlow<Boolean> = MutableStateFlow(false)
 }

@@ -16,15 +16,17 @@
 
 package com.android.systemui.deviceentry.domain.interactor
 
+import com.android.systemui.CoreStartable
 import com.android.systemui.deviceentry.shared.model.FaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.FaceDetectionStatus
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Interactor that exposes API to get the face authentication status and handle any events that can
  * cause face authentication to run for device entry.
  */
-interface DeviceEntryFaceAuthInteractor {
+interface DeviceEntryFaceAuthInteractor : CoreStartable {
 
     /** Current authentication status */
     val authenticationStatus: Flow<FaceAuthenticationStatus>
@@ -32,9 +34,12 @@ interface DeviceEntryFaceAuthInteractor {
     /** Current detection status */
     val detectionStatus: Flow<FaceDetectionStatus>
 
-    val lockedOut: Flow<Boolean>
+    val isLockedOut: StateFlow<Boolean>
 
-    val authenticated: Flow<Boolean>
+    val isAuthenticated: StateFlow<Boolean>
+
+    /** Whether bypass is enabled. If enabled, face unlock dismisses the lock screen. */
+    val isBypassEnabled: Flow<Boolean>
 
     /** Can face auth be run right now */
     fun canFaceAuthRun(): Boolean
@@ -42,14 +47,9 @@ interface DeviceEntryFaceAuthInteractor {
     /** Whether face auth is currently running or not. */
     fun isRunning(): Boolean
 
-    /** Whether face auth is in lock out state. */
-    fun isLockedOut(): Boolean
-
     /** Whether face auth is enrolled and enabled for the current user */
     fun isFaceAuthEnabledAndEnrolled(): Boolean
 
-    /** Whether the current user is authenticated successfully with face auth */
-    fun isAuthenticated(): Boolean
     /**
      * Register listener for use from code that cannot use [authenticationStatus] or
      * [detectionStatus]
@@ -68,6 +68,7 @@ interface DeviceEntryFaceAuthInteractor {
     fun onPrimaryBouncerUserInput()
     fun onAccessibilityAction()
     fun onWalletLaunched()
+    fun onDeviceUnfolded()
 
     /** Whether face auth is considered class 3 */
     fun isFaceAuthStrong(): Boolean

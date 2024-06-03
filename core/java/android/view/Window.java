@@ -334,7 +334,12 @@ public abstract class Window {
     private boolean mOverlayWithDecorCaptionEnabled = true;
     private boolean mCloseOnSwipeEnabled = false;
 
-    private static boolean sToolkitSetFrameRateReadOnlyFlagValue =
+    /**
+     * To check if toolkitSetFrameRateReadOnly flag is enabled
+     *
+     * @hide
+     */
+    protected static boolean sToolkitSetFrameRateReadOnlyFlagValue =
                 android.view.flags.Flags.toolkitSetFrameRateReadOnly();
 
     // The current window attributes.

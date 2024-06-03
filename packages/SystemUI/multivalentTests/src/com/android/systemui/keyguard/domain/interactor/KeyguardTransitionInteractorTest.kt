@@ -19,62 +19,110 @@ package com.android.systemui.keyguard.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.flags.DisableSceneContainer
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
+import com.android.systemui.keyguard.shared.model.KeyguardState.UNDEFINED
 import com.android.systemui.keyguard.shared.model.TransitionState.CANCELED
 import com.android.systemui.keyguard.shared.model.TransitionState.FINISHED
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.data.repository.Idle
+import com.android.systemui.scene.data.repository.Transition
+import com.android.systemui.scene.data.repository.sceneContainerRepository
+import com.android.systemui.scene.data.repository.setSceneTransition
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertEquals
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertThrows
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-@android.platform.test.annotations.EnabledOnRavenwood
 class KeyguardTransitionInteractorTest : SysuiTestCase() {
     val kosmos = testKosmos()
     val underTest = kosmos.keyguardTransitionInteractor
     val repository = kosmos.fakeKeyguardTransitionRepository
     val testScope = kosmos.testScope
 
-    @Test
-    fun transitionCollectorsReceivesOnlyAppropriateEvents() = runTest {
-        val lockscreenToAodSteps by collectValues(underTest.lockscreenToAodTransition)
-        val aodToLockscreenSteps by collectValues(underTest.aodToLockscreenTransition)
+    private val sceneTransitions =
+        MutableStateFlow<ObservableTransitionState>(
+            ObservableTransitionState.Idle(Scenes.Lockscreen)
+        )
 
-        val steps = mutableListOf<TransitionStep>()
-        steps.add(TransitionStep(AOD, GONE, 0f, STARTED))
-        steps.add(TransitionStep(AOD, GONE, 1f, FINISHED))
-        steps.add(TransitionStep(AOD, LOCKSCREEN, 0f, STARTED))
-        steps.add(TransitionStep(AOD, LOCKSCREEN, 0.5f, RUNNING))
-        steps.add(TransitionStep(AOD, LOCKSCREEN, 1f, FINISHED))
-        steps.add(TransitionStep(LOCKSCREEN, AOD, 0f, STARTED))
-        steps.add(TransitionStep(LOCKSCREEN, AOD, 0.1f, RUNNING))
-        steps.add(TransitionStep(LOCKSCREEN, AOD, 0.2f, RUNNING))
+    private val lsToGone =
+        ObservableTransitionState.Transition(
+            Scenes.Lockscreen,
+            Scenes.Gone,
+            flowOf(Scenes.Lockscreen),
+            flowOf(0f),
+            false,
+            flowOf(false)
+        )
 
-        steps.forEach {
-            repository.sendTransitionStep(it)
-            runCurrent()
-        }
+    private val goneToLs =
+        ObservableTransitionState.Transition(
+            Scenes.Gone,
+            Scenes.Lockscreen,
+            flowOf(Scenes.Lockscreen),
+            flowOf(0f),
+            false,
+            flowOf(false)
+        )
 
-        assertThat(aodToLockscreenSteps).isEqualTo(steps.subList(2, 5))
-        assertThat(lockscreenToAodSteps).isEqualTo(steps.subList(5, 8))
+    @Before
+    fun setUp() {
+        kosmos.sceneContainerRepository.setTransitionState(sceneTransitions)
     }
+
+    @Test
+    fun transitionCollectorsReceivesOnlyAppropriateEvents() =
+        testScope.runTest {
+            val lockscreenToAodSteps by
+                collectValues(underTest.transition(Edge.create(LOCKSCREEN, AOD)))
+            val aodToLockscreenSteps by
+                collectValues(underTest.transition(Edge.create(AOD, LOCKSCREEN)))
+
+            val steps = mutableListOf<TransitionStep>()
+            steps.add(TransitionStep(AOD, GONE, 0f, STARTED))
+            steps.add(TransitionStep(AOD, GONE, 1f, FINISHED))
+            steps.add(TransitionStep(AOD, LOCKSCREEN, 0f, STARTED))
+            steps.add(TransitionStep(AOD, LOCKSCREEN, 0.5f, RUNNING))
+            steps.add(TransitionStep(AOD, LOCKSCREEN, 1f, FINISHED))
+            steps.add(TransitionStep(LOCKSCREEN, AOD, 0f, STARTED))
+            steps.add(TransitionStep(LOCKSCREEN, AOD, 0.1f, RUNNING))
+            steps.add(TransitionStep(LOCKSCREEN, AOD, 0.2f, RUNNING))
+
+            steps.forEach {
+                repository.sendTransitionStep(it)
+                runCurrent()
+            }
+
+            assertThat(aodToLockscreenSteps).isEqualTo(steps.subList(2, 5))
+            assertThat(lockscreenToAodSteps).isEqualTo(steps.subList(5, 8))
+        }
 
     @Test
     fun dozeAmountTransitionTest_AodToFromLockscreen() =
@@ -185,64 +233,72 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun finishedKeyguardTransitionStepTests() = runTest {
-        val finishedSteps by collectValues(underTest.finishedKeyguardTransitionStep)
+    fun finishedKeyguardTransitionStepTests() =
+        testScope.runTest {
+            val finishedSteps by collectValues(underTest.finishedKeyguardTransitionStep)
+            val steps = mutableListOf<TransitionStep>()
 
-        val steps = mutableListOf<TransitionStep>()
+            steps.add(TransitionStep(LOCKSCREEN, AOD, 0f, STARTED))
+            steps.add(TransitionStep(LOCKSCREEN, AOD, 0.9f, RUNNING))
+            steps.add(TransitionStep(LOCKSCREEN, AOD, 1f, FINISHED))
+            steps.add(TransitionStep(AOD, LOCKSCREEN, 0f, STARTED))
+            steps.add(TransitionStep(AOD, LOCKSCREEN, 0.5f, RUNNING))
+            steps.add(TransitionStep(AOD, LOCKSCREEN, 1f, FINISHED))
+            steps.add(TransitionStep(AOD, GONE, 1f, STARTED))
 
-        steps.add(TransitionStep(LOCKSCREEN, AOD, 0f, STARTED))
-        steps.add(TransitionStep(LOCKSCREEN, AOD, 0.9f, RUNNING))
-        steps.add(TransitionStep(LOCKSCREEN, AOD, 1f, FINISHED))
-        steps.add(TransitionStep(AOD, LOCKSCREEN, 0f, STARTED))
-        steps.add(TransitionStep(AOD, LOCKSCREEN, 0.5f, RUNNING))
-        steps.add(TransitionStep(AOD, LOCKSCREEN, 1f, FINISHED))
-        steps.add(TransitionStep(AOD, GONE, 1f, STARTED))
+            steps.forEach {
+                repository.sendTransitionStep(it)
+                runCurrent()
+            }
 
-        steps.forEach {
-            repository.sendTransitionStep(it)
-            runCurrent()
+            // Ignore the default state.
+            assertThat(finishedSteps.subList(1, finishedSteps.size))
+                .isEqualTo(listOf(steps[2], steps[5]))
         }
-
-        // Ignore the default state.
-        assertThat(finishedSteps.subList(1, finishedSteps.size))
-            .isEqualTo(listOf(steps[2], steps[5]))
-    }
 
     @Test
-    fun startedKeyguardTransitionStepTests() = runTest {
-        val startedSteps by collectValues(underTest.startedKeyguardTransitionStep)
+    fun startedKeyguardTransitionStepTests() =
+        testScope.runTest {
+            val startedSteps by collectValues(underTest.startedKeyguardTransitionStep)
 
-        val steps = mutableListOf<TransitionStep>()
+            val steps = mutableListOf<TransitionStep>()
 
-        steps.add(TransitionStep(AOD, LOCKSCREEN, 0f, STARTED))
-        steps.add(TransitionStep(AOD, LOCKSCREEN, 0.5f, RUNNING))
-        steps.add(TransitionStep(AOD, LOCKSCREEN, 1f, FINISHED))
-        steps.add(TransitionStep(LOCKSCREEN, AOD, 0f, STARTED))
-        steps.add(TransitionStep(LOCKSCREEN, AOD, 0.9f, RUNNING))
-        steps.add(TransitionStep(LOCKSCREEN, AOD, 1f, FINISHED))
-        steps.add(TransitionStep(AOD, GONE, 1f, STARTED))
+            steps.add(TransitionStep(AOD, LOCKSCREEN, 0f, STARTED))
+            steps.add(TransitionStep(AOD, LOCKSCREEN, 0.5f, RUNNING))
+            steps.add(TransitionStep(AOD, LOCKSCREEN, 1f, FINISHED))
+            steps.add(TransitionStep(LOCKSCREEN, AOD, 0f, STARTED))
+            steps.add(TransitionStep(LOCKSCREEN, AOD, 0.9f, RUNNING))
+            steps.add(TransitionStep(LOCKSCREEN, AOD, 1f, FINISHED))
+            steps.add(TransitionStep(AOD, GONE, 1f, STARTED))
 
-        steps.forEach {
-            repository.sendTransitionStep(it)
-            runCurrent()
-        }
+            steps.forEach {
+                repository.sendTransitionStep(it)
+                runCurrent()
+            }
 
-        assertThat(startedSteps)
-            .isEqualTo(
-                listOf(
-                    // The initial transition will also get sent when collect started
-                    TransitionStep(OFF, LOCKSCREEN, 0f, STARTED),
-                    steps[0],
-                    steps[3],
-                    steps[6]
+            assertThat(startedSteps)
+                .isEqualTo(
+                    listOf(
+                        // The initial transition will also get sent when collect started
+                        TransitionStep(
+                            OFF,
+                            LOCKSCREEN,
+                            0f,
+                            STARTED,
+                            ownerName = "KeyguardTransitionRepository(boot)"
+                        ),
+                        steps[0],
+                        steps[3],
+                        steps[6]
+                    )
                 )
-            )
-    }
+        }
 
     @Test
     fun transitionValue() =
         testScope.runTest {
-            val startedSteps by collectValues(underTest.transitionValue(state = DOZING))
+            resetTransitionValueReplayCache(setOf(AOD, DOZING, LOCKSCREEN))
+            val transitionValues by collectValues(underTest.transitionValue(state = DOZING))
 
             val toSteps =
                 listOf(
@@ -266,12 +322,14 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
                 runCurrent()
             }
 
-            assertThat(startedSteps).isEqualTo(listOf(0f, 0.5f, 1f, 1f, 0.5f, 0f))
+            assertThat(transitionValues).isEqualTo(listOf(0f, 0.5f, 1f, 1f, 0.5f, 0f))
         }
 
     @Test
     fun transitionValue_canceled_toAnotherState() =
         testScope.runTest {
+            resetTransitionValueReplayCache(setOf(AOD, GONE, LOCKSCREEN))
+
             val transitionValuesGone by collectValues(underTest.transitionValue(state = GONE))
             val transitionValuesAod by collectValues(underTest.transitionValue(state = AOD))
             val transitionValuesLs by collectValues(underTest.transitionValue(state = LOCKSCREEN))
@@ -297,6 +355,8 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
     @Test
     fun transitionValue_canceled_backToOriginalState() =
         testScope.runTest {
+            resetTransitionValueReplayCache(setOf(AOD, GONE))
+
             val transitionValuesGone by collectValues(underTest.transitionValue(state = GONE))
             val transitionValuesAod by collectValues(underTest.transitionValue(state = AOD))
 
@@ -467,9 +527,16 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun isInTransitionToState() =
         testScope.runTest {
-            val results by collectValues(underTest.isInTransitionToState(GONE))
+            val results by
+                collectValues(
+                    underTest.isInTransition(
+                        edge = Edge.create(OFF, OFF),
+                        edgeWithoutSceneContainer = Edge.create(to = LOCKSCREEN)
+                    )
+                )
 
             sendSteps(
                 TransitionStep(AOD, DOZING, 0f, STARTED),
@@ -485,7 +552,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
                 )
 
             sendSteps(
-                TransitionStep(DOZING, GONE, 0f, STARTED),
+                TransitionStep(DOZING, LOCKSCREEN, 0f, STARTED),
             )
 
             assertThat(results)
@@ -497,7 +564,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
                 )
 
             sendSteps(
-                TransitionStep(DOZING, GONE, 0f, RUNNING),
+                TransitionStep(DOZING, LOCKSCREEN, 0f, RUNNING),
             )
 
             assertThat(results)
@@ -509,22 +576,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
                 )
 
             sendSteps(
-                TransitionStep(DOZING, GONE, 0f, FINISHED),
-            )
-
-            assertThat(results)
-                .isEqualTo(
-                    listOf(
-                        false,
-                        true,
-                        false,
-                    )
-                )
-
-            sendSteps(
-                TransitionStep(GONE, DOZING, 0f, STARTED),
-                TransitionStep(GONE, DOZING, 0f, RUNNING),
-                TransitionStep(GONE, DOZING, 1f, FINISHED),
+                TransitionStep(DOZING, LOCKSCREEN, 0f, FINISHED),
             )
 
             assertThat(results)
@@ -537,8 +589,23 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
                 )
 
             sendSteps(
-                TransitionStep(DOZING, GONE, 0f, STARTED),
-                TransitionStep(DOZING, GONE, 0f, RUNNING),
+                TransitionStep(LOCKSCREEN, DOZING, 0f, STARTED),
+                TransitionStep(LOCKSCREEN, DOZING, 0f, RUNNING),
+                TransitionStep(LOCKSCREEN, DOZING, 1f, FINISHED),
+            )
+
+            assertThat(results)
+                .isEqualTo(
+                    listOf(
+                        false,
+                        true,
+                        false,
+                    )
+                )
+
+            sendSteps(
+                TransitionStep(DOZING, LOCKSCREEN, 0f, STARTED),
+                TransitionStep(DOZING, LOCKSCREEN, 0f, RUNNING),
             )
 
             assertThat(results)
@@ -553,9 +620,96 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableSceneContainer
+    fun isInTransitionFromScene() =
+        testScope.runTest {
+            val results by
+                collectValues(underTest.isInTransition(edge = Edge.create(Scenes.Lockscreen, null)))
+
+            kosmos.setSceneTransition(Transition(from = Scenes.Gone, to = Scenes.Lockscreen))
+            kosmos.setSceneTransition(Idle(Scenes.Lockscreen))
+
+            assertThat(results)
+                .isEqualTo(
+                    listOf(
+                        false,
+                    )
+                )
+
+            kosmos.setSceneTransition(Transition(from = Scenes.Lockscreen, to = Scenes.Shade))
+
+            assertThat(results)
+                .isEqualTo(
+                    listOf(
+                        false,
+                        true,
+                    )
+                )
+
+            kosmos.setSceneTransition(Idle(Scenes.Shade))
+
+            assertThat(results)
+                .isEqualTo(
+                    listOf(
+                        false,
+                        true,
+                        false,
+                    )
+                )
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun isInTransitionToScene() =
+        testScope.runTest {
+            val results by
+                collectValues(underTest.isInTransition(edge = Edge.create(null, Scenes.Lockscreen)))
+
+            kosmos.setSceneTransition(Transition(from = Scenes.Gone, to = Scenes.Lockscreen))
+            kosmos.setSceneTransition(Idle(Scenes.Lockscreen))
+            kosmos.setSceneTransition(Transition(from = Scenes.Lockscreen, to = Scenes.Gone))
+
+            assertThat(results)
+                .isEqualTo(
+                    listOf(
+                        false,
+                        true,
+                        false,
+                    )
+                )
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun isInTransitionStateToScene() =
+        testScope.runTest {
+            val results by
+                collectValues(underTest.isInTransition(edge = Edge.create(AOD, Scenes.Gone)))
+
+            kosmos.setSceneTransition(Transition(from = Scenes.Lockscreen, to = Scenes.Gone))
+
+            sendSteps(
+                TransitionStep(AOD, UNDEFINED, 0f, STARTED),
+                TransitionStep(AOD, UNDEFINED, 0.5f, RUNNING),
+                TransitionStep(AOD, UNDEFINED, 1f, FINISHED),
+            )
+
+            kosmos.setSceneTransition(Idle(Scenes.Gone))
+
+            assertThat(results)
+                .isEqualTo(
+                    listOf(
+                        false,
+                        true,
+                        false,
+                    )
+                )
+        }
+
+    @Test
     fun isInTransitionFromState() =
         testScope.runTest {
-            val results by collectValues(underTest.isInTransitionFromState(DOZING))
+            val results by collectValues(underTest.isInTransition(Edge.create(from = DOZING)))
 
             sendSteps(
                 TransitionStep(AOD, DOZING, 0f, STARTED),
@@ -571,7 +725,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
                 )
 
             sendSteps(
-                TransitionStep(DOZING, GONE, 0f, STARTED),
+                TransitionStep(DOZING, LOCKSCREEN, 0f, STARTED),
             )
 
             assertThat(results)
@@ -583,7 +737,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
                 )
 
             sendSteps(
-                TransitionStep(DOZING, GONE, 0f, RUNNING),
+                TransitionStep(DOZING, LOCKSCREEN, 0f, RUNNING),
             )
 
             assertThat(results)
@@ -595,22 +749,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
                 )
 
             sendSteps(
-                TransitionStep(DOZING, GONE, 0f, FINISHED),
-            )
-
-            assertThat(results)
-                .isEqualTo(
-                    listOf(
-                        false,
-                        true,
-                        false,
-                    )
-                )
-
-            sendSteps(
-                TransitionStep(GONE, DOZING, 0f, STARTED),
-                TransitionStep(GONE, DOZING, 0f, RUNNING),
-                TransitionStep(GONE, DOZING, 1f, FINISHED),
+                TransitionStep(DOZING, LOCKSCREEN, 0f, FINISHED),
             )
 
             assertThat(results)
@@ -623,8 +762,23 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
                 )
 
             sendSteps(
-                TransitionStep(DOZING, GONE, 0f, STARTED),
-                TransitionStep(DOZING, GONE, 0f, RUNNING),
+                TransitionStep(LOCKSCREEN, DOZING, 0f, STARTED),
+                TransitionStep(LOCKSCREEN, DOZING, 0f, RUNNING),
+                TransitionStep(LOCKSCREEN, DOZING, 1f, FINISHED),
+            )
+
+            assertThat(results)
+                .isEqualTo(
+                    listOf(
+                        false,
+                        true,
+                        false,
+                    )
+                )
+
+            sendSteps(
+                TransitionStep(DOZING, LOCKSCREEN, 0f, STARTED),
+                TransitionStep(DOZING, LOCKSCREEN, 0f, RUNNING),
             )
 
             assertThat(results)
@@ -1389,10 +1543,151 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
             )
         }
 
+    @Test
+    @DisableSceneContainer
+    fun transition_no_conversion_with_flag_off() =
+        testScope.runTest {
+            val currentStates by
+                collectValues(underTest.transition(Edge.create(PRIMARY_BOUNCER, GONE)))
+
+            val sendStep1 = TransitionStep(PRIMARY_BOUNCER, GONE, 0f, STARTED)
+            sendSteps(sendStep1)
+
+            assertEquals(listOf(sendStep1), currentStates)
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun transition_conversion_with_flag_on() =
+        testScope.runTest {
+            val currentStates by
+                collectValues(underTest.transition(Edge.create(PRIMARY_BOUNCER, GONE)))
+
+            val sendStep1 = TransitionStep(PRIMARY_BOUNCER, GONE, 0f, STARTED)
+            sendSteps(sendStep1)
+
+            assertEquals(listOf<TransitionStep>(), currentStates)
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun transition_conversion_emits_values_with_sceneContainer_in_correct_state() =
+        testScope.runTest {
+            val currentStates by collectValues(underTest.transition(Edge.create(LOCKSCREEN, GONE)))
+            val currentStatesConverted by
+                collectValues(underTest.transition(Edge.create(LOCKSCREEN, UNDEFINED)))
+
+            sceneTransitions.value = lsToGone
+            val sendStep1 = TransitionStep(LOCKSCREEN, UNDEFINED, 0f, STARTED)
+            val sendStep2 = TransitionStep(LOCKSCREEN, UNDEFINED, 1f, FINISHED)
+            val sendStep3 = TransitionStep(LOCKSCREEN, AOD, 0f, STARTED)
+            sendSteps(sendStep1, sendStep2, sendStep3)
+
+            assertEquals(listOf(sendStep1, sendStep2), currentStates)
+            assertEquals(listOf(sendStep1, sendStep2), currentStatesConverted)
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun transition_conversion_emits_nothing_with_sceneContainer_in_wrong_state() =
+        testScope.runTest {
+            val currentStates by collectValues(underTest.transition(Edge.create(LOCKSCREEN, GONE)))
+
+            sceneTransitions.value = goneToLs
+            val sendStep1 = TransitionStep(LOCKSCREEN, UNDEFINED, 0f, STARTED)
+            val sendStep2 = TransitionStep(LOCKSCREEN, UNDEFINED, 1f, FINISHED)
+            val sendStep3 = TransitionStep(LOCKSCREEN, AOD, 0f, STARTED)
+            sendSteps(sendStep1, sendStep2, sendStep3)
+
+            assertEquals(listOf<TransitionStep>(), currentStates)
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun transition_conversion_emits_values_when_edge_within_lockscreen_scene() =
+        testScope.runTest {
+            val currentStates by
+                collectValues(underTest.transition(Edge.create(LOCKSCREEN, DOZING)))
+
+            sceneTransitions.value = goneToLs
+            val sendStep1 = TransitionStep(LOCKSCREEN, DOZING, 0f, STARTED)
+            val sendStep2 = TransitionStep(LOCKSCREEN, DOZING, 1f, FINISHED)
+            val sendStep3 = TransitionStep(LOCKSCREEN, AOD, 0f, STARTED)
+            sendSteps(sendStep1, sendStep2, sendStep3)
+
+            assertEquals(listOf(sendStep1, sendStep2), currentStates)
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun transition_conversion_emits_values_with_null_edge_within_lockscreen_scene() =
+        testScope.runTest {
+            val currentStates by collectValues(underTest.transition(Edge.create(LOCKSCREEN, null)))
+            val currentStatesReversed by
+                collectValues(underTest.transition(Edge.create(null, LOCKSCREEN)))
+
+            sceneTransitions.value = goneToLs
+            val sendStep1 = TransitionStep(LOCKSCREEN, DOZING, 0f, STARTED)
+            val sendStep2 = TransitionStep(LOCKSCREEN, DOZING, 1f, FINISHED)
+            val sendStep3 = TransitionStep(LOCKSCREEN, AOD, 0f, STARTED)
+            val sendStep4 = TransitionStep(AOD, LOCKSCREEN, 0f, STARTED)
+            sendSteps(sendStep1, sendStep2, sendStep3, sendStep4)
+
+            assertEquals(listOf(sendStep1, sendStep2, sendStep3), currentStates)
+            assertEquals(listOf(sendStep4), currentStatesReversed)
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun transition_conversion_emits_values_with_null_edge_out_of_lockscreen_scene() =
+        testScope.runTest {
+            val currentStates by collectValues(underTest.transition(Edge.create(null, UNDEFINED)))
+            val currentStatesMapped by collectValues(underTest.transition(Edge.create(null, GONE)))
+
+            sceneTransitions.value = lsToGone
+            val sendStep1 = TransitionStep(LOCKSCREEN, UNDEFINED, 0f, STARTED)
+            val sendStep2 = TransitionStep(LOCKSCREEN, UNDEFINED, 1f, FINISHED)
+            val sendStep3 = TransitionStep(UNDEFINED, AOD, 0f, STARTED)
+            val sendStep4 = TransitionStep(AOD, LOCKSCREEN, 0f, STARTED)
+            sendSteps(sendStep1, sendStep2, sendStep3, sendStep4)
+
+            assertEquals(listOf(sendStep1, sendStep2), currentStates)
+            assertEquals(listOf(sendStep1, sendStep2), currentStatesMapped)
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun transition_conversion_does_not_emit_with_null_edge_with_wrong_stl_state() =
+        testScope.runTest {
+            val currentStatesMapped by collectValues(underTest.transition(Edge.create(null, GONE)))
+
+            sceneTransitions.value = goneToLs
+            val sendStep1 = TransitionStep(LOCKSCREEN, UNDEFINED, 0f, STARTED)
+            val sendStep2 = TransitionStep(LOCKSCREEN, UNDEFINED, 1f, FINISHED)
+            val sendStep3 = TransitionStep(UNDEFINED, AOD, 0f, STARTED)
+            val sendStep4 = TransitionStep(AOD, LOCKSCREEN, 0f, STARTED)
+            sendSteps(sendStep1, sendStep2, sendStep3, sendStep4)
+
+            assertEquals(listOf<TransitionStep>(), currentStatesMapped)
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun transition_null_edges_throw() =
+        testScope.runTest {
+            assertThrows(IllegalStateException::class.java) {
+                underTest.transition(Edge.create(null, null))
+            }
+        }
+
     private suspend fun sendSteps(vararg steps: TransitionStep) {
         steps.forEach {
             repository.sendTransitionStep(it)
             testScope.runCurrent()
         }
+    }
+
+    private fun resetTransitionValueReplayCache(states: Set<KeyguardState>) {
+        states.forEach { (underTest.transitionValue(it) as MutableSharedFlow).resetReplayCache() }
     }
 }

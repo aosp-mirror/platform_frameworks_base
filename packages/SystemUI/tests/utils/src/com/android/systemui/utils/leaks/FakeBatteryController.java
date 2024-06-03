@@ -16,8 +16,8 @@ package com.android.systemui.utils.leaks;
 
 import android.os.Bundle;
 import android.testing.LeakCheck;
-import android.view.View;
 
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
@@ -61,7 +61,7 @@ public class FakeBatteryController extends BaseLeakChecker<BatteryStateChangeCal
      * Note: this method ignores the View argument
      */
     @Override
-    public void setPowerSaveMode(boolean powerSave, View view) {
+    public void setPowerSaveMode(boolean powerSave, Expandable expandable) {
         setPowerSaveMode(powerSave);
     }
 

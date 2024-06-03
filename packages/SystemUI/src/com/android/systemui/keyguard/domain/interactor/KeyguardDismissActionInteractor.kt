@@ -25,6 +25,9 @@ import com.android.systemui.keyguard.shared.model.KeyguardDone
 import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -48,6 +51,7 @@ constructor(
     transitionInteractor: KeyguardTransitionInteractor,
     val dismissInteractor: KeyguardDismissInteractor,
     @Application private val applicationScope: CoroutineScope,
+    sceneInteractor: SceneInteractor,
 ) {
     val dismissAction: Flow<DismissAction> = repository.dismissAction
 
@@ -72,7 +76,12 @@ constructor(
             )
 
     private val finishedTransitionToGone: Flow<Unit> =
-        transitionInteractor.finishedKeyguardState.filter { it == GONE }.map {} // map to Unit
+        if (SceneContainerFlag.isEnabled) {
+            sceneInteractor.transitionState.filter { it.isIdle(Scenes.Gone) }.map {}
+        } else {
+            transitionInteractor.finishedKeyguardState.filter { it == GONE }.map {}
+        }
+
     val executeDismissAction: Flow<() -> KeyguardDone> =
         merge(
                 finishedTransitionToGone,

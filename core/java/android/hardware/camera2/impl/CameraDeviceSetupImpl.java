@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.hardware.camera2.impl;
 
 import android.annotation.CallbackExecutor;
@@ -71,7 +72,8 @@ public class CameraDeviceSetupImpl extends CameraDevice.CameraDeviceSetup {
 
             try {
                 CameraMetadataNative defaultRequest = cameraService.createDefaultRequest(mCameraId,
-                        templateType);
+                        templateType, mContext.getDeviceId(),
+                        mCameraManager.getDevicePolicyFromContext(mContext));
                 CameraDeviceImpl.disableZslIfNeeded(defaultRequest, mTargetSdkVersion,
                         templateType);
 
@@ -102,8 +104,9 @@ public class CameraDeviceSetupImpl extends CameraDevice.CameraDeviceSetup {
             }
 
             try {
-                return cameraService.isSessionConfigurationWithParametersSupported(
-                        mCameraId, config);
+                return cameraService.isSessionConfigurationWithParametersSupported(mCameraId,
+                        mTargetSdkVersion, config, mContext.getDeviceId(),
+                        mCameraManager.getDevicePolicyFromContext(mContext));
             } catch (ServiceSpecificException e) {
                 throw ExceptionUtils.throwAsPublicException(e);
             } catch (RemoteException e) {
@@ -129,11 +132,15 @@ public class CameraDeviceSetupImpl extends CameraDevice.CameraDeviceSetup {
             }
 
             try {
-                CameraMetadataNative metadataNative = cameraService.getSessionCharacteristics(
+                CameraMetadataNative metadata = cameraService.getSessionCharacteristics(
                         mCameraId, mTargetSdkVersion,
-                        CameraManager.shouldOverrideToPortrait(mContext), sessionConfig);
+                        CameraManager.getRotationOverride(mContext),
+                        sessionConfig,
+                        mContext.getDeviceId(),
+                        mCameraManager.getDevicePolicyFromContext(mContext));
 
-                return new CameraCharacteristics(metadataNative);
+                return mCameraManager.prepareCameraCharacteristics(mCameraId, metadata,
+                        cameraService);
             } catch (ServiceSpecificException e) {
                 switch (e.errorCode) {
                     case ICameraService.ERROR_INVALID_OPERATION ->

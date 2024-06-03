@@ -577,6 +577,11 @@ public final class Parcel {
             }
             res.mReadWriteHelper = ReadWriteHelper.DEFAULT;
         }
+
+        if (res.mNativePtr == 0) {
+            Log.e(TAG, "Obtained Parcel object has null native pointer. Invalid state.");
+        }
+
         return res;
     }
 
@@ -855,6 +860,28 @@ public final class Parcel {
     @Nullable
     public final Object getClassCookie(Class clz) {
         return mClassCookies != null ? mClassCookies.get(clz) : null;
+    }
+
+    /** @hide */
+    public void removeClassCookie(Class clz, Object expectedCookie) {
+        if (mClassCookies != null) {
+            Object removedCookie = mClassCookies.remove(clz);
+            if (removedCookie != expectedCookie) {
+                Log.wtf(TAG, "Expected to remove " + expectedCookie + " (with key=" + clz
+                        + ") but instead removed " + removedCookie);
+            }
+        } else {
+            Log.wtf(TAG, "Expected to remove " + expectedCookie + " (with key=" + clz
+                    + ") but no cookies were present");
+        }
+    }
+
+    /**
+     * Whether {@link #setClassCookie} has been called with the specified {@code clz}.
+     * @hide
+     */
+    public boolean hasClassCookie(Class clz) {
+        return mClassCookies != null && mClassCookies.containsKey(clz);
     }
 
     /** @hide */

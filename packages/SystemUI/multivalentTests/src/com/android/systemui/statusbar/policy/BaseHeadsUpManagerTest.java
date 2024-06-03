@@ -38,13 +38,16 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Person;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.testing.TestableLooper;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -61,9 +64,14 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
+import java.util.List;
+
 @SmallTest
 @TestableLooper.RunWithLooper
-@RunWith(AndroidJUnit4.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
@@ -73,7 +81,9 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
 
     private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
     private final HeadsUpManagerLogger mLogger = spy(new HeadsUpManagerLogger(logcatLogBuffer()));
-    private AvalancheController mAvalancheController = new AvalancheController();
+
+    @Mock private DumpManager dumpManager;
+    private AvalancheController mAvalancheController;
 
     @Mock private AccessibilityManagerWrapper mAccessibilityMgr;
 
@@ -126,10 +136,75 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         }
     }
 
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getFlags() {
+        return FlagsParameterization.allCombinationsOf(NotificationThrottleHun.FLAG_NAME);
+    }
+
+    public BaseHeadsUpManagerTest(FlagsParameterization flags) {
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
+
     @Override
     public void SysuiSetup() throws Exception {
         super.SysuiSetup();
-        mSetFlagsRule.disableFlags(NotificationThrottleHun.FLAG_NAME);
+        mAvalancheController = new AvalancheController(dumpManager, mUiEventLoggerFake);
+    }
+
+    @Test
+    public void testHasNotifications_headsUpManagerMapNotEmpty_true() {
+        final BaseHeadsUpManager bhum = createHeadsUpManager();
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
+        bhum.showNotification(entry);
+
+        assertThat(bhum.mHeadsUpEntryMap).isNotEmpty();
+        assertThat(bhum.hasNotifications()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    public void testHasNotifications_avalancheMapNotEmpty_true() {
+        final BaseHeadsUpManager bhum = createHeadsUpManager();
+        final NotificationEntry notifEntry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0,
+                mContext);
+        final BaseHeadsUpManager.HeadsUpEntry headsUpEntry = bhum.createHeadsUpEntry(notifEntry);
+        mAvalancheController.addToNext(headsUpEntry, () -> {});
+
+        assertThat(mAvalancheController.getWaitingEntryList()).isNotEmpty();
+        assertThat(bhum.hasNotifications()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    public void testHasNotifications_false() {
+        final BaseHeadsUpManager bhum = createHeadsUpManager();
+        assertThat(bhum.mHeadsUpEntryMap).isEmpty();
+        assertThat(mAvalancheController.getWaitingEntryList()).isEmpty();
+        assertThat(bhum.hasNotifications()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    public void testGetHeadsUpEntryList_includesAvalancheEntryList() {
+        final BaseHeadsUpManager bhum = createHeadsUpManager();
+        final NotificationEntry notifEntry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0,
+                mContext);
+        final BaseHeadsUpManager.HeadsUpEntry headsUpEntry = bhum.createHeadsUpEntry(notifEntry);
+        mAvalancheController.addToNext(headsUpEntry, () -> {});
+
+        assertThat(bhum.getHeadsUpEntryList()).contains(headsUpEntry);
+    }
+
+    @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    public void testGetHeadsUpEntry_returnsAvalancheEntry() {
+        final BaseHeadsUpManager bhum = createHeadsUpManager();
+        final NotificationEntry notifEntry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0,
+                mContext);
+        final BaseHeadsUpManager.HeadsUpEntry headsUpEntry = bhum.createHeadsUpEntry(notifEntry);
+        mAvalancheController.addToNext(headsUpEntry, () -> {});
+
+        assertThat(bhum.getHeadsUpEntry(notifEntry.getKey())).isEqualTo(headsUpEntry);
     }
 
     @Test
@@ -536,7 +611,31 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testPinEntry_logsPeek() {
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    public void testPinEntry_logsPeek_throttleEnabled() {
+        final BaseHeadsUpManager hum = createHeadsUpManager();
+
+        // Needs full screen intent in order to be pinned
+        final BaseHeadsUpManager.HeadsUpEntry entryToPin = hum.new HeadsUpEntry(
+                HeadsUpManagerTestUtil.createFullScreenIntentEntry(/* id = */ 0, mContext));
+
+        // Note: the standard way to show a notification would be calling showNotification rather
+        // than onAlertEntryAdded. However, in practice showNotification in effect adds
+        // the notification and then updates it; in order to not log twice, the entry needs
+        // to have a functional ExpandableNotificationRow that can keep track of whether it's
+        // pinned or not (via isRowPinned()). That feels like a lot to pull in to test this one bit.
+        hum.onEntryAdded(entryToPin);
+
+        assertEquals(2, mUiEventLoggerFake.numLogs());
+        assertEquals(AvalancheController.ThrottleEvent.SHOWN.getId(),
+                mUiEventLoggerFake.eventId(0));
+        assertEquals(BaseHeadsUpManager.NotificationPeekEvent.NOTIFICATION_PEEK.getId(),
+                mUiEventLoggerFake.eventId(1));
+    }
+
+    @Test
+    @DisableFlags(NotificationThrottleHun.FLAG_NAME)
+    public void testPinEntry_logsPeek_throttleDisabled() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
 
         // Needs full screen intent in order to be pinned

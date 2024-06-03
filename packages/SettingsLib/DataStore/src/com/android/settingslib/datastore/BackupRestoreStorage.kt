@@ -22,6 +22,8 @@ import android.app.backup.BackupDataOutput
 import android.app.backup.BackupHelper
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import androidx.annotation.BinderThread
+import androidx.annotation.VisibleForTesting
 import androidx.collection.MutableScatterMap
 import com.google.common.io.ByteStreams
 import java.io.ByteArrayOutputStream
@@ -37,16 +39,22 @@ import java.util.zip.CRC32
 import java.util.zip.CheckedInputStream
 import java.util.zip.CheckedOutputStream
 import java.util.zip.Checksum
+import javax.annotation.concurrent.ThreadSafe
 
 internal const val LOG_TAG = "BackupRestoreStorage"
 
 /**
- * Storage with backup and restore support. Subclass must implement either [Observable] or
- * [KeyedObservable] interface.
+ * Storage with backup and restore support.
+ *
+ * Subclass MUST
+ * - implement either [Observable] or [KeyedObservable] interface.
+ * - be thread safe, backup/restore happens on Binder thread, while general data read/write
+ *   operations occur on other threads.
  *
  * The storage is identified by a unique string [name] and data set is split into entities
  * ([BackupRestoreEntity]).
  */
+@ThreadSafe
 abstract class BackupRestoreStorage : BackupHelper {
     /**
      * A unique string used to disambiguate the various storages within backup agent.
@@ -60,13 +68,14 @@ abstract class BackupRestoreStorage : BackupHelper {
      *
      * Map key is the entity key, map value is the checksum of backup data.
      */
-    protected val entityStates = MutableScatterMap<String, Long>()
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    val entityStates = MutableScatterMap<String, Long>()
 
     /** Entities created by [createBackupRestoreEntities]. This field is for restore only. */
-    private var entities: List<BackupRestoreEntity>? = null
+    @VisibleForTesting internal var entities: List<BackupRestoreEntity>? = null
 
     /** Entities to back up and restore. */
-    abstract fun createBackupRestoreEntities(): List<BackupRestoreEntity>
+    @BinderThread abstract fun createBackupRestoreEntities(): List<BackupRestoreEntity>
 
     /** Default codec used to encode/decode the entity data. */
     open fun defaultCodec(): BackupCodec = BackupZipCodec.BEST_COMPRESSION
@@ -76,7 +85,7 @@ abstract class BackupRestoreStorage : BackupHelper {
         data: BackupDataOutput,
         newState: ParcelFileDescriptor,
     ) {
-        oldState.readEntityStates(entityStates)
+        readEntityStates(oldState, entityStates)
         val backupContext = BackupContext(data)
         if (!enableBackup(backupContext)) {
             Log.i(LOG_TAG, "[$name] Backup disabled")
@@ -94,7 +103,10 @@ abstract class BackupRestoreStorage : BackupHelper {
             val codec = entity.codec() ?: defaultCodec()
             val result =
                 try {
-                    entity.backup(backupContext, wrapBackupOutputStream(codec, checkedOutputStream))
+                    // MUST close to flush all data
+                    wrapBackupOutputStream(codec, checkedOutputStream).use {
+                        entity.backup(backupContext, it)
+                    }
                 } catch (exception: Exception) {
                     Log.e(LOG_TAG, "[$name] Fail to backup entity $key", exception)
                     continue
@@ -129,7 +141,11 @@ abstract class BackupRestoreStorage : BackupHelper {
         Log.i(LOG_TAG, "[$name] Backup end")
     }
 
-    /** Returns if backup is enabled. */
+    /**
+     * Returns if backup is enabled.
+     *
+     * If disabled, [performBackup] will be no-op, all entities backup are skipped.
+     */
     open fun enableBackup(backupContext: BackupContext): Boolean = true
 
     open fun wrapBackupOutputStream(codec: BackupCodec, outputStream: OutputStream): OutputStream {
@@ -167,7 +183,11 @@ abstract class BackupRestoreStorage : BackupHelper {
     private fun ensureEntities(): List<BackupRestoreEntity> =
         entities ?: createBackupRestoreEntities().also { entities = it }
 
-    /** Returns if restore is enabled. */
+    /**
+     * Returns if restore is enabled.
+     *
+     * If disabled, [restoreEntity] will be no-op, all entities restore are skipped.
+     */
     open fun enableRestore(): Boolean = true
 
     open fun wrapRestoreInputStream(
@@ -183,17 +203,22 @@ abstract class BackupRestoreStorage : BackupHelper {
     }
 
     final override fun writeNewStateDescription(newState: ParcelFileDescriptor) {
+        if (!enableRestore()) return
         entities = null // clear to reduce memory footprint
         newState.writeAndClearEntityStates()
         onRestoreFinished()
     }
 
-    /** Callbacks when restore finished. */
+    /** Callbacks when entity data are all restored. */
     open fun onRestoreFinished() {}
 
-    private fun ParcelFileDescriptor?.readEntityStates(state: MutableScatterMap<String, Long>) {
+    @VisibleForTesting
+    internal fun readEntityStates(
+        parcelFileDescriptor: ParcelFileDescriptor?,
+        state: MutableScatterMap<String, Long>,
+    ) {
         state.clear()
-        if (this == null) return
+        val fileDescriptor = parcelFileDescriptor?.fileDescriptor ?: return
         // do not close the streams
         val fileInputStream = FileInputStream(fileDescriptor)
         val dataInputStream = DataInputStream(fileInputStream)
@@ -233,6 +258,7 @@ abstract class BackupRestoreStorage : BackupHelper {
                 dataOutputStream.writeUTF(key)
                 dataOutputStream.writeLong(value)
             }
+            dataOutputStream.flush()
         } catch (exception: Exception) {
             Log.e(LOG_TAG, "[$name] Fail to write state file", exception)
         }
@@ -241,7 +267,7 @@ abstract class BackupRestoreStorage : BackupHelper {
     }
 
     companion object {
-        private const val STATE_VERSION: Byte = 0
+        internal const val STATE_VERSION: Byte = 0
 
         /** Checksum for entity backup data. */
         fun createChecksum(): Checksum = CRC32()

@@ -2,28 +2,18 @@ package com.android.systemui.shade.ui.viewmodel
 
 import android.content.Intent
 import android.provider.AlarmClock
+import android.provider.Settings
 import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.FakeFeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.activityStarter
-import com.android.systemui.shade.domain.interactor.privacyChipInteractor
-import com.android.systemui.shade.domain.interactor.shadeHeaderClockInteractor
-import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
-import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
-import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor
-import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
-import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
-import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
+import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.fakeMobileIconsInteractor
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.argThat
-import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -39,42 +29,13 @@ import org.mockito.MockitoAnnotations
 class ShadeHeaderViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
+    private val mobileIconsInteractor = kosmos.fakeMobileIconsInteractor
 
-    private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
-    private val flags = FakeFeatureFlagsClassic().also { it.set(Flags.NEW_NETWORK_SLICE_UI, false) }
-
-    private var mobileIconsViewModel: MobileIconsViewModel =
-        MobileIconsViewModel(
-            logger = mock(),
-            verboseLogger = mock(),
-            interactor = mobileIconsInteractor,
-            airplaneModeInteractor =
-                AirplaneModeInteractor(
-                    FakeAirplaneModeRepository(),
-                    FakeConnectivityRepository(),
-                    FakeMobileConnectionsRepository(),
-                ),
-            constants = mock(),
-            flags,
-            scope = testScope.backgroundScope,
-        )
-
-    private lateinit var underTest: ShadeHeaderViewModel
+    private val underTest: ShadeHeaderViewModel = kosmos.shadeHeaderViewModel
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
-        underTest =
-            ShadeHeaderViewModel(
-                applicationScope = testScope.backgroundScope,
-                context = context,
-                mobileIconsInteractor = mobileIconsInteractor,
-                mobileIconsViewModel = mobileIconsViewModel,
-                privacyChipInteractor = kosmos.privacyChipInteractor,
-                clockInteractor = kosmos.shadeHeaderClockInteractor,
-                broadcastDispatcher = fakeBroadcastDispatcher,
-            )
     }
 
     @Test
@@ -99,6 +60,19 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
             verify(activityStarter)
                 .postStartActivityDismissingKeyguard(
                     argThat(IntentMatcherAction(AlarmClock.ACTION_SHOW_ALARMS)),
+                    anyInt(),
+                )
+        }
+
+    @Test
+    fun onShadeCarrierGroupClicked_launchesNetworkSettings() =
+        testScope.runTest {
+            val activityStarter = kosmos.activityStarter
+            underTest.onShadeCarrierGroupClicked()
+
+            verify(activityStarter)
+                .postStartActivityDismissingKeyguard(
+                    argThat(IntentMatcherAction(Settings.ACTION_WIRELESS_SETTINGS)),
                     anyInt(),
                 )
         }

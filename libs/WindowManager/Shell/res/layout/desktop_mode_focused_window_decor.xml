@@ -22,14 +22,15 @@
     android:layout_height="wrap_content"
     android:gravity="center_horizontal">
 
-    <ImageButton
+    <com.android.wm.shell.windowdecor.HandleImageButton
         android:id="@+id/caption_handle"
         android:layout_width="@dimen/desktop_mode_fullscreen_decor_caption_width"
         android:layout_height="@dimen/desktop_mode_fullscreen_decor_caption_height"
         android:paddingVertical="16dp"
+        android:paddingHorizontal="10dp"
         android:contentDescription="@string/handle_text"
         android:src="@drawable/decor_handle_dark"
         tools:tint="@color/desktop_mode_caption_handle_bar_dark"
         android:scaleType="fitXY"
-        android:background="?android:selectableItemBackground"/>
+        android:background="@android:color/transparent"/>
 </com.android.wm.shell.windowdecor.WindowDecorLinearLayout>

@@ -12,7 +12,7 @@ package android {
     field public static final String ACCESS_DRM_CERTIFICATES = "android.permission.ACCESS_DRM_CERTIFICATES";
     field @Deprecated public static final String ACCESS_FM_RADIO = "android.permission.ACCESS_FM_RADIO";
     field public static final String ACCESS_FPS_COUNTER = "android.permission.ACCESS_FPS_COUNTER";
-    field @FlaggedApi("android.multiuser.flags.enable_permission_to_access_hidden_profiles") public static final String ACCESS_HIDDEN_PROFILES_FULL = "android.permission.ACCESS_HIDDEN_PROFILES_FULL";
+    field @FlaggedApi("android.multiuser.enable_permission_to_access_hidden_profiles") public static final String ACCESS_HIDDEN_PROFILES_FULL = "android.permission.ACCESS_HIDDEN_PROFILES_FULL";
     field public static final String ACCESS_INSTANT_APPS = "android.permission.ACCESS_INSTANT_APPS";
     field @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final String ACCESS_LAST_KNOWN_CELL_ID = "android.permission.ACCESS_LAST_KNOWN_CELL_ID";
     field public static final String ACCESS_LOCUS_ID_USAGE_STATS = "android.permission.ACCESS_LOCUS_ID_USAGE_STATS";
@@ -319,9 +319,8 @@ package android {
     field public static final String RECEIVE_DATA_ACTIVITY_CHANGE = "android.permission.RECEIVE_DATA_ACTIVITY_CHANGE";
     field public static final String RECEIVE_DEVICE_CUSTOMIZATION_READY = "android.permission.RECEIVE_DEVICE_CUSTOMIZATION_READY";
     field public static final String RECEIVE_EMERGENCY_BROADCAST = "android.permission.RECEIVE_EMERGENCY_BROADCAST";
-    field @FlaggedApi("android.permission.flags.voice_activation_permission_apis") public static final String RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA = "android.permission.RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA";
     field @FlaggedApi("android.permission.flags.voice_activation_permission_apis") public static final String RECEIVE_SANDBOX_TRIGGER_AUDIO = "android.permission.RECEIVE_SANDBOX_TRIGGER_AUDIO";
-    field @FlaggedApi("com.android.server.notification.flags.redact_otp_notifications_from_untrusted_listeners") public static final String RECEIVE_SENSITIVE_NOTIFICATIONS = "android.permission.RECEIVE_SENSITIVE_NOTIFICATIONS";
+    field @FlaggedApi("android.view.flags.sensitive_content_app_protection_api") public static final String RECEIVE_SENSITIVE_NOTIFICATIONS = "android.permission.RECEIVE_SENSITIVE_NOTIFICATIONS";
     field public static final String RECEIVE_WIFI_CREDENTIAL_CHANGE = "android.permission.RECEIVE_WIFI_CREDENTIAL_CHANGE";
     field public static final String RECORD_BACKGROUND_AUDIO = "android.permission.RECORD_BACKGROUND_AUDIO";
     field public static final String RECOVERY = "android.permission.RECOVERY";
@@ -356,6 +355,7 @@ package android {
     field public static final String SEND_SHOW_SUSPENDED_APP_DETAILS = "android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS";
     field public static final String SEND_SMS_NO_CONFIRMATION = "android.permission.SEND_SMS_NO_CONFIRMATION";
     field public static final String SERIAL_PORT = "android.permission.SERIAL_PORT";
+    field @FlaggedApi("android.security.fsverity_api") public static final String SETUP_FSVERITY = "android.permission.SETUP_FSVERITY";
     field public static final String SET_ACTIVITY_WATCHER = "android.permission.SET_ACTIVITY_WATCHER";
     field public static final String SET_CLIP_SOURCE = "android.permission.SET_CLIP_SOURCE";
     field public static final String SET_DEFAULT_ACCOUNT_FOR_CONTACTS = "android.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS";
@@ -437,10 +437,10 @@ package android {
 
   public static final class R.attr {
     field public static final int allowClearUserDataOnFailedRestore = 16844288; // 0x1010600
-    field @FlaggedApi("android.content.res.manifest_flagging") public static final int featureFlag;
+    field @FlaggedApi("android.content.res.manifest_flagging") public static final int featureFlag = 16844428; // 0x101068c
     field public static final int gameSessionService = 16844373; // 0x1010655
     field public static final int hotwordDetectionService = 16844326; // 0x1010626
-    field @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") public static final int isVirtualDeviceOnly;
+    field @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") public static final int isVirtualDeviceOnly = 16844425; // 0x1010689
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int minExtensionVersion = 16844305; // 0x1010611
     field public static final int playHomeTransitionSound = 16844358; // 0x1010646
@@ -492,9 +492,9 @@ package android {
     field public static final int config_defaultCallScreening = 17039398; // 0x1040026
     field public static final int config_defaultDialer = 17039395; // 0x1040023
     field public static final int config_defaultNotes = 17039429; // 0x1040045
-    field @FlaggedApi("android.permission.flags.retail_demo_role_enabled") public static final int config_defaultRetailDemo;
+    field @FlaggedApi("android.permission.flags.retail_demo_role_enabled") public static final int config_defaultRetailDemo = 17039432; // 0x1040048
     field public static final int config_defaultSms = 17039396; // 0x1040024
-    field @FlaggedApi("android.permission.flags.wallet_role_enabled") public static final int config_defaultWallet;
+    field @FlaggedApi("android.permission.flags.wallet_role_enabled") public static final int config_defaultWallet = 17039433; // 0x1040049
     field public static final int config_devicePolicyManagement = 17039421; // 0x104003d
     field public static final int config_feedbackIntentExtraKey = 17039391; // 0x104001f
     field public static final int config_feedbackIntentNameKey = 17039392; // 0x1040020
@@ -872,6 +872,7 @@ package android.app {
   public static final class AppOpsManager.OpEventProxyInfo implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public String getAttributionTag();
+    method @FlaggedApi("android.permission.flags.device_id_in_op_proxy_info_enabled") @Nullable public String getDeviceId();
     method @Nullable public String getPackageName();
     method @IntRange(from=0) public int getUid();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -1142,16 +1143,13 @@ package android.app {
     field public static final int NAV_BAR_MODE_KIDS = 1; // 0x1
   }
 
-  public static final class StatusBarManager.DisableInfo implements android.os.Parcelable {
+  public static final class StatusBarManager.DisableInfo {
     method public boolean areAllComponentsEnabled();
-    method public int describeContents();
     method public boolean isNavigateToHomeDisabled();
     method public boolean isNotificationPeekingDisabled();
     method public boolean isRecentsDisabled();
     method public boolean isSearchDisabled();
     method public boolean isStatusBarExpansionDisabled();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.StatusBarManager.DisableInfo> CREATOR;
   }
 
   public final class SystemServiceRegistry {
@@ -2178,8 +2176,15 @@ package android.app.contentsuggestions {
 
 package android.app.contextualsearch {
 
-  @FlaggedApi("android.app.contextualsearch.flags.enable_service") public class ContextualSearchManager {
-    method public void getContextualSearchState(@NonNull android.os.IBinder, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.app.contextualsearch.ContextualSearchState,java.lang.Throwable>);
+  @FlaggedApi("android.app.contextualsearch.flags.enable_service") public final class CallbackToken implements android.os.Parcelable {
+    ctor public CallbackToken();
+    method public int describeContents();
+    method public void getContextualSearchState(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.app.contextualsearch.ContextualSearchState,java.lang.Throwable>);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.contextualsearch.CallbackToken> CREATOR;
+  }
+
+  @FlaggedApi("android.app.contextualsearch.flags.enable_service") public final class ContextualSearchManager {
     method @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXTUAL_SEARCH) public void startContextualSearch(int);
     field public static final String ACTION_LAUNCH_CONTEXTUAL_SEARCH = "android.app.contextualsearch.action.LAUNCH_CONTEXTUAL_SEARCH";
     field public static final int ENTRYPOINT_LONG_PRESS_HOME = 2; // 0x2
@@ -10334,7 +10339,7 @@ package android.net.wifi.sharedconnectivity.app {
     method public int getDeviceType();
     method @NonNull public android.os.Bundle getExtras();
     method @NonNull public String getModelName();
-    method @FlaggedApi("com.android.wifi.flags.network_provider_battery_charging_status") public boolean isBatteryCharging();
+    method @FlaggedApi("android.net.wifi.flags.network_provider_battery_charging_status") public boolean isBatteryCharging();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.sharedconnectivity.app.NetworkProviderInfo> CREATOR;
     field public static final int DEVICE_TYPE_AUTO = 5; // 0x5
@@ -10348,7 +10353,7 @@ package android.net.wifi.sharedconnectivity.app {
   public static final class NetworkProviderInfo.Builder {
     ctor public NetworkProviderInfo.Builder(@NonNull String, @NonNull String);
     method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo build();
-    method @FlaggedApi("com.android.wifi.flags.network_provider_battery_charging_status") @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder setBatteryCharging(boolean);
+    method @FlaggedApi("android.net.wifi.flags.network_provider_battery_charging_status") @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder setBatteryCharging(boolean);
     method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder setBatteryPercentage(@IntRange(from=0, to=100) int);
     method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder setConnectionStrength(@IntRange(from=0, to=4) int);
     method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder setDeviceName(@NonNull String);
@@ -12100,6 +12105,11 @@ package android.se.omapi {
 
 package android.security {
 
+  public final class FileIntegrityManager {
+    method @FlaggedApi("android.security.fsverity_api") @Nullable public byte[] getFsVerityDigest(@NonNull java.io.File) throws java.io.IOException;
+    method @FlaggedApi("android.security.fsverity_api") public void setupFsVerity(@NonNull java.io.File) throws java.io.IOException;
+  }
+
   public final class KeyChain {
     method @Nullable @WorkerThread public static String getWifiKeyGrantAsUser(@NonNull android.content.Context, @NonNull android.os.UserHandle, @NonNull String);
     method @WorkerThread public static boolean hasWifiKeyGrantAsUser(@NonNull android.content.Context, @NonNull android.os.UserHandle, @NonNull String);
@@ -13483,12 +13493,12 @@ package android.service.voice {
     method public static int getMaxBundleSize();
     method public static int getMaxHotwordPhraseId();
     method public static int getMaxScore();
-    method @FlaggedApi("android.service.voice.flags.allow_speaker_id_egress") public static int getMaxSpeakerId();
+    method public static int getMaxSpeakerId();
     method @Nullable public android.media.MediaSyncEvent getMediaSyncEvent();
     method public int getPersonalizedScore();
     method public int getProximity();
     method public int getScore();
-    method @FlaggedApi("android.service.voice.flags.allow_speaker_id_egress") public int getSpeakerId();
+    method public int getSpeakerId();
     method public boolean isHotwordDetectionPersonalized();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int AUDIO_CHANNEL_UNSET = -1; // 0xffffffff
@@ -13522,7 +13532,7 @@ package android.service.voice {
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setMediaSyncEvent(@NonNull android.media.MediaSyncEvent);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setPersonalizedScore(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setScore(int);
-    method @FlaggedApi("android.service.voice.flags.allow_speaker_id_egress") @NonNull public android.service.voice.HotwordDetectedResult.Builder setSpeakerId(int);
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setSpeakerId(int);
   }
 
   public abstract class HotwordDetectionService extends android.app.Service implements android.service.voice.SandboxedDetectionInitializer {
@@ -13621,7 +13631,7 @@ package android.service.voice {
     field public static final int ERROR_CODE_UNKNOWN = 0; // 0x0
   }
 
-  @FlaggedApi("android.service.voice.flags.allow_various_attention_types") public final class VisualQueryAttentionResult implements android.os.Parcelable {
+  public final class VisualQueryAttentionResult implements android.os.Parcelable {
     method public int describeContents();
     method @IntRange(from=1, to=100) public int getEngagementLevel();
     method public int getInteractionIntention();
@@ -13638,7 +13648,7 @@ package android.service.voice {
     method @NonNull public android.service.voice.VisualQueryAttentionResult.Builder setInteractionIntention(int);
   }
 
-  @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public final class VisualQueryDetectedResult implements android.os.Parcelable {
+  public final class VisualQueryDetectedResult implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public byte[] getAccessibilityDetectionData();
     method public static int getMaxSpeakerId();
@@ -13660,16 +13670,16 @@ package android.service.voice {
     ctor public VisualQueryDetectionService();
     method public final void finishQuery() throws java.lang.IllegalStateException;
     method public final void gainedAttention();
-    method @FlaggedApi("android.service.voice.flags.allow_various_attention_types") public final void gainedAttention(@NonNull android.service.voice.VisualQueryAttentionResult);
+    method public final void gainedAttention(@NonNull android.service.voice.VisualQueryAttentionResult);
     method public final void lostAttention();
-    method @FlaggedApi("android.service.voice.flags.allow_various_attention_types") public final void lostAttention(int);
+    method public final void lostAttention(int);
     method @Nullable public android.os.IBinder onBind(@NonNull android.content.Intent);
     method public void onStartDetection();
     method public void onStopDetection();
     method public void onUpdateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, long, @Nullable java.util.function.IntConsumer);
     method public final void rejectQuery() throws java.lang.IllegalStateException;
     method public final void streamQuery(@NonNull String) throws java.lang.IllegalStateException;
-    method @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public final void streamQuery(@NonNull android.service.voice.VisualQueryDetectedResult);
+    method public final void streamQuery(@NonNull android.service.voice.VisualQueryDetectedResult);
     field public static final String SERVICE_INTERFACE = "android.service.voice.VisualQueryDetectionService";
   }
 
@@ -13689,10 +13699,10 @@ package android.service.voice {
   }
 
   public class VisualQueryDetector {
-    method @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public void clearAccessibilityDetectionEnabledListener();
+    method public void clearAccessibilityDetectionEnabledListener();
     method public void destroy();
-    method @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public boolean isAccessibilityDetectionEnabled();
-    method @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public void setAccessibilityDetectionEnabledListener(@NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method public boolean isAccessibilityDetectionEnabled();
+    method public void setAccessibilityDetectionEnabledListener(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @RequiresPermission(allOf={android.Manifest.permission.CAMERA, android.Manifest.permission.RECORD_AUDIO}) public boolean startRecognition();
     method @RequiresPermission(allOf={android.Manifest.permission.CAMERA, android.Manifest.permission.RECORD_AUDIO}) public boolean stopRecognition();
     method public void updateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory);
@@ -13701,7 +13711,7 @@ package android.service.voice {
   public static interface VisualQueryDetector.Callback {
     method public void onFailure(@NonNull android.service.voice.VisualQueryDetectionServiceFailure);
     method public void onQueryDetected(@NonNull String);
-    method @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public default void onQueryDetected(@NonNull android.service.voice.VisualQueryDetectedResult);
+    method public default void onQueryDetected(@NonNull android.service.voice.VisualQueryDetectedResult);
     method public void onQueryFinished();
     method public void onQueryRejected();
     method public void onUnknownFailure(@NonNull String);
@@ -14425,6 +14435,7 @@ package android.telephony {
     method @NonNull public android.telephony.CarrierRestrictionRules build();
     method @NonNull public android.telephony.CarrierRestrictionRules.Builder setAllCarriersAllowed();
     method @NonNull public android.telephony.CarrierRestrictionRules.Builder setAllowedCarriers(@NonNull java.util.List<android.service.carrier.CarrierIdentifier>);
+    method @FlaggedApi("com.android.internal.telephony.flags.set_carrier_restriction_status") @NonNull public android.telephony.CarrierRestrictionRules.Builder setCarrierRestrictionStatus(int);
     method @NonNull public android.telephony.CarrierRestrictionRules.Builder setDefaultCarrierRestriction(int);
     method @NonNull public android.telephony.CarrierRestrictionRules.Builder setExcludedCarriers(@NonNull java.util.List<android.service.carrier.CarrierIdentifier>);
     method @NonNull public android.telephony.CarrierRestrictionRules.Builder setMultiSimPolicy(int);
@@ -15342,7 +15353,7 @@ package android.telephony {
     method @Deprecated public boolean getDataEnabled(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public android.content.ComponentName getDefaultRespondViaMessageApplication();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getDeviceSoftwareVersion(int);
-    method @FlaggedApi("android.permission.flags.get_emergency_role_holder_api_enabled") @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getEmergencyAssistancePackageName();
+    method @FlaggedApi("android.permission.flags.get_emergency_role_holder_api_enabled") @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getEmergencyAssistancePackageName();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean getEmergencyCallbackMode();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getEmergencyNumberDbVersion();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimDomain();

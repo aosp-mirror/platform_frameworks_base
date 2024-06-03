@@ -124,13 +124,17 @@ import com.android.server.power.stats.BatteryExternalStatsWorker;
 import com.android.server.power.stats.BatteryStatsDumpHelperImpl;
 import com.android.server.power.stats.BatteryStatsImpl;
 import com.android.server.power.stats.BatteryUsageStatsProvider;
-import com.android.server.power.stats.CpuAggregatedPowerStatsProcessor;
+import com.android.server.power.stats.BluetoothPowerStatsProcessor;
+import com.android.server.power.stats.CpuPowerStatsProcessor;
+import com.android.server.power.stats.MobileRadioPowerStatsProcessor;
+import com.android.server.power.stats.PhoneCallPowerStatsProcessor;
 import com.android.server.power.stats.PowerStatsAggregator;
 import com.android.server.power.stats.PowerStatsExporter;
 import com.android.server.power.stats.PowerStatsScheduler;
 import com.android.server.power.stats.PowerStatsStore;
 import com.android.server.power.stats.PowerStatsUidResolver;
 import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
+import com.android.server.power.stats.WifiPowerStatsProcessor;
 import com.android.server.power.stats.wakeups.CpuWakeupStats;
 
 import java.io.File;
@@ -156,6 +160,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * All information we are collecting about things that can happen that impact
@@ -406,14 +412,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 com.android.internal.R.bool.config_batteryStatsResetOnUnplugHighBatteryLevel);
         final boolean resetOnUnplugAfterSignificantCharge = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_batteryStatsResetOnUnplugAfterSignificantCharge);
-        final long powerStatsThrottlePeriodCpu = context.getResources().getInteger(
-                com.android.internal.R.integer.config_defaultPowerStatsThrottlePeriodCpu);
-        mBatteryStatsConfig =
+        BatteryStatsImpl.BatteryStatsConfig.Builder batteryStatsConfigBuilder =
                 new BatteryStatsImpl.BatteryStatsConfig.Builder()
                         .setResetOnUnplugHighBatteryLevel(resetOnUnplugHighBatteryLevel)
-                        .setResetOnUnplugAfterSignificantCharge(resetOnUnplugAfterSignificantCharge)
-                        .setPowerStatsThrottlePeriodCpu(powerStatsThrottlePeriodCpu)
-                        .build();
+                        .setResetOnUnplugAfterSignificantCharge(
+                                resetOnUnplugAfterSignificantCharge);
+        setPowerStatsThrottlePeriods(batteryStatsConfigBuilder, context.getResources().getString(
+                com.android.internal.R.string.config_powerStatsThrottlePeriods));
+        mBatteryStatsConfig = batteryStatsConfigBuilder.build();
         mPowerStatsUidResolver = new PowerStatsUidResolver();
         mStats = new BatteryStatsImpl(mBatteryStatsConfig, Clock.SYSTEM_CLOCK, mMonotonicClock,
                 systemDir, mHandler, this, this, mUserManagerUserInfoProvider, mPowerProfile,
@@ -470,8 +476,65 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
                 .setProcessor(
-                        new CpuAggregatedPowerStatsProcessor(mPowerProfile, mCpuScalingPolicies));
+                        new CpuPowerStatsProcessor(mPowerProfile, mCpuScalingPolicies));
+
+        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)
+                .trackDeviceStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN)
+                .trackUidStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN,
+                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
+                .setProcessor(
+                        new MobileRadioPowerStatsProcessor(mPowerProfile));
+
+        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_PHONE,
+                        BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)
+                .setProcessor(new PhoneCallPowerStatsProcessor());
+
+        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_WIFI)
+                .trackDeviceStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN)
+                .trackUidStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN,
+                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
+                .setProcessor(
+                        new WifiPowerStatsProcessor(mPowerProfile));
+
+        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_BLUETOOTH)
+                .trackDeviceStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN)
+                .trackUidStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN,
+                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
+                .setProcessor(
+                        new BluetoothPowerStatsProcessor(mPowerProfile));
         return config;
+    }
+
+    private void setPowerStatsThrottlePeriods(BatteryStatsImpl.BatteryStatsConfig.Builder builder,
+            String configString) {
+        Matcher matcher = Pattern.compile("([^:]+):(\\d+)\\s*").matcher(configString);
+        while (matcher.find()) {
+            String powerComponentName = matcher.group(1);
+            long throttlePeriod;
+            try {
+                throttlePeriod = Long.parseLong(matcher.group(2));
+            } catch (NumberFormatException nfe) {
+                throw new IllegalArgumentException(
+                        "Invalid config_powerStatsThrottlePeriods format: " + configString);
+            }
+            if (powerComponentName.equals("*")) {
+                builder.setDefaultPowerStatsThrottlePeriodMillis(throttlePeriod);
+            } else {
+                builder.setPowerStatsThrottlePeriodMillis(powerComponentName, throttlePeriod);
+            }
+        }
     }
 
     /**
@@ -494,8 +557,30 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     public void systemServicesReady() {
-        mStats.setPowerStatsCollectorEnabled(Flags.streamlinedBatteryStats());
-        mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(Flags.streamlinedBatteryStats());
+        mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_CPU,
+                Flags.streamlinedBatteryStats());
+        mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
+                BatteryConsumer.POWER_COMPONENT_CPU,
+                Flags.streamlinedBatteryStats());
+
+        mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
+                Flags.streamlinedConnectivityBatteryStats());
+        mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
+                BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
+                Flags.streamlinedConnectivityBatteryStats());
+
+        mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_WIFI,
+                Flags.streamlinedConnectivityBatteryStats());
+        mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
+                BatteryConsumer.POWER_COMPONENT_WIFI,
+                Flags.streamlinedConnectivityBatteryStats());
+
+        mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
+                Flags.streamlinedConnectivityBatteryStats());
+        mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
+                BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
+                Flags.streamlinedConnectivityBatteryStats());
+
         mWorker.systemServicesReady();
         mStats.systemServicesReady(mContext);
         mCpuWakeupStats.systemServicesReady();
@@ -536,7 +621,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
      * Notifies BatteryStatsService that the system server is ready.
      */
     public void onSystemReady() {
-        mStats.onSystemReady();
+        mStats.onSystemReady(mContext);
         mPowerStatsScheduler.start(Flags.streamlinedBatteryStats());
     }
 
@@ -1591,18 +1676,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
-                final boolean update;
                 synchronized (mStats) {
                     // Ignore if no power state change.
                     if (mLastPowerStateFromRadio == powerState) return;
 
                     mLastPowerStateFromRadio = powerState;
-                    update = mStats.noteMobileRadioPowerStateLocked(powerState, timestampNs, uid,
+                    mStats.noteMobileRadioPowerStateLocked(powerState, timestampNs, uid,
                             elapsedRealtime, uptime);
-                }
-
-                if (update) {
-                    mWorker.scheduleSync("modem-data", BatteryExternalStatsWorker.UPDATE_RADIO);
                 }
             });
         }

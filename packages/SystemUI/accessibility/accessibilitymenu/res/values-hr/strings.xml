@@ -2,7 +2,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"Izbornik pristupačnosti"</string>
-    <string name="accessibility_menu_intro" msgid="3164193281544042394">"Izbornik pristupačnosti veliki je zaslonski izbornik koji vam omogućuje upravljanje uređajem. Putem ovog izbornika možete zaključati uređaj, upravljati glasnoćom i svjetlinom, izrađivati snimke zaslona i drugo."</string>
+    <string name="accessibility_menu_intro" msgid="3164193281544042394">"Izbornik pristupačnosti veliki je zaslonski izbornik koji vam omogućuje upravljanje uređajem. Putem njega možete zaključati uređaj, upravljati glasnoćom i svjetlinom, izrađivati snimke zaslona i drugo."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Asistent"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"Asistent"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"Postavke pristupačnosti"</string>
@@ -20,7 +20,7 @@
     <string name="brightness_down_label" msgid="7115662941913272072">"Smanji svjetlinu"</string>
     <string name="previous_button_content_description" msgid="840869171117765966">"Idi na prethodni zaslon"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"Idi na sljedeći zaslon"</string>
-    <string name="accessibility_menu_description" msgid="4458354794093858297">"Izbornik pristupačnosti pruža velik izbornik na zaslonu u svrhu upravljanja uređajem. Možete zaključati uređaj, upravljati glasnoćom i svjetlinom, izrađivati snimke zaslona i drugo."</string>
+    <string name="accessibility_menu_description" msgid="4458354794093858297">"Izbornik pristupačnosti veliki je zaslonski izbornik koji vam omogućuje upravljanje uređajem. Putem njega možete zaključati uređaj, upravljati glasnoćom i svjetlinom, izrađivati snimke zaslona i drugo."</string>
     <string name="accessibility_menu_summary" msgid="340071398148208130">"Upravljanje uređajem pomoću velikog izbornika"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Postavke izbornika pristupačnosti"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Veliki gumbi"</string>

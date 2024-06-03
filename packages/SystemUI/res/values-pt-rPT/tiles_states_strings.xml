@@ -63,8 +63,8 @@
   </string-array>
   <string-array name="tile_states_rotation">
     <item msgid="4578491772376121579">"Indisponível"</item>
-    <item msgid="5776427577477729185">"Desligado"</item>
-    <item msgid="7105052717007227415">"Ligado"</item>
+    <item msgid="5776427577477729185">"Desligada"</item>
+    <item msgid="7105052717007227415">"Ligada"</item>
   </string-array>
   <string-array name="tile_states_bt">
     <item msgid="5330252067413512277">"Indisponível"</item>
@@ -118,7 +118,7 @@
   </string-array>
   <string-array name="tile_states_night">
     <item msgid="7857498964264855466">"Indisponível"</item>
-    <item msgid="2744885441164350155">"Desligado"</item>
+    <item msgid="2744885441164350155">"Desligada"</item>
     <item msgid="151121227514952197">"Ligado"</item>
   </string-array>
   <string-array name="tile_states_screenrecord">
@@ -185,5 +185,10 @@
     <item msgid="3173069902082305985">"Indisponível"</item>
     <item msgid="2478289035899842865">"Desativado"</item>
     <item msgid="5137565285664080143">"Ativado"</item>
+  </string-array>
+  <string-array name="tile_states_hearing_devices">
+    <item msgid="1235334096484287173">"Indisponíveis"</item>
+    <item msgid="3079622119444911877">"Desativados"</item>
+    <item msgid="3028994095749238254">"Ativados"</item>
   </string-array>
 </resources>

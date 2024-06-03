@@ -1,15 +1,19 @@
 package com.android.systemui.biometrics.domain.interactor
 
+import android.hardware.biometrics.PromptContentViewWithMoreOptionsButton
 import android.hardware.biometrics.PromptInfo
+import android.hardware.biometrics.PromptVerticalListContentView
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
 import com.android.systemui.biometrics.domain.model.BiometricOperationInfo
 import com.android.systemui.biometrics.domain.model.BiometricPromptRequest
 import com.android.systemui.biometrics.promptInfo
 import com.android.systemui.biometrics.shared.model.BiometricUserInfo
+import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -29,6 +33,7 @@ import org.junit.runners.JUnit4
 import org.mockito.junit.MockitoJUnit
 
 private const val USER_ID = 22
+private const val REQUEST_ID = 22L
 private const val OPERATION_ID = 100L
 private const val OP_PACKAGE_NAME = "biometric.testapp"
 
@@ -43,6 +48,7 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
     private val testScope = TestScope(testDispatcher)
     private val biometricPromptRepository = FakePromptRepository()
     private val credentialInteractor = FakeCredentialInteractor()
+    private val fakeExecutor = FakeExecutor(FakeSystemClock())
 
     private lateinit var interactor: PromptCredentialInteractor
 
@@ -90,13 +96,92 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
             assertThat(prompt).isNull()
         }
 
-    @Test fun usePinCredentialForPrompt() = useCredentialForPrompt(Utils.CREDENTIAL_PIN)
+    @Test
+    fun testShowTitleOnlyValue_description() =
+        testScope.runTest {
+            val title = "what a prompt"
+            val subtitle = "s"
+            val description = "something to see"
 
-    @Test fun usePasswordCredentialForPrompt() = useCredentialForPrompt(Utils.CREDENTIAL_PASSWORD)
+            val showTitleOnly by collectLastValue(interactor.showTitleOnly)
 
-    @Test fun usePatternCredentialForPrompt() = useCredentialForPrompt(Utils.CREDENTIAL_PATTERN)
+            interactor.useCredentialsForAuthentication(
+                PromptInfo().also {
+                    it.title = title
+                    it.description = description
+                    it.subtitle = subtitle
+                },
+                kind = PromptKind.Pin,
+                userId = USER_ID,
+                requestId = REQUEST_ID,
+                challenge = OPERATION_ID,
+                opPackageName = OP_PACKAGE_NAME
+            )
+            assertThat(showTitleOnly).isFalse()
+        }
 
-    private fun useCredentialForPrompt(kind: Int) =
+    @Test
+    fun testShowTitleOnlyValue_verticalListContentView() =
+        testScope.runTest {
+            val title = "what a prompt"
+            val subtitle = "s"
+            val description = "something to see"
+            val contentView = PromptVerticalListContentView.Builder().build()
+
+            val showTitleOnly by collectLastValue(interactor.showTitleOnly)
+
+            interactor.useCredentialsForAuthentication(
+                PromptInfo().also {
+                    it.title = title
+                    it.description = description
+                    it.subtitle = subtitle
+                    it.contentView = contentView
+                },
+                kind = PromptKind.Pin,
+                userId = USER_ID,
+                requestId = REQUEST_ID,
+                challenge = OPERATION_ID,
+                opPackageName = OP_PACKAGE_NAME
+            )
+            assertThat(showTitleOnly).isTrue()
+        }
+
+    @Test
+    fun testShowTitleOnlyValue_ContentViewWithButton() =
+        testScope.runTest {
+            val title = "what a prompt"
+            val subtitle = "s"
+            val description = "something to see"
+            val contentView =
+                PromptContentViewWithMoreOptionsButton.Builder()
+                    .setMoreOptionsButtonListener(fakeExecutor) { _, _ -> }
+                    .build()
+
+            val showTitleOnly by collectLastValue(interactor.showTitleOnly)
+
+            interactor.useCredentialsForAuthentication(
+                PromptInfo().also {
+                    it.title = title
+                    it.description = description
+                    it.subtitle = subtitle
+                    it.contentView = contentView
+                },
+                kind = PromptKind.Pin,
+                userId = USER_ID,
+                requestId = REQUEST_ID,
+                challenge = OPERATION_ID,
+                opPackageName = OP_PACKAGE_NAME
+            )
+            assertThat(showTitleOnly).isFalse()
+        }
+
+    @Test fun usePinCredentialForPrompt() = useCredentialForPrompt(PromptKind.Pin)
+
+    @Test fun usePasswordCredentialForPrompt() = useCredentialForPrompt(PromptKind.Password)
+
+    @Test fun usePatternCredentialForPrompt() = useCredentialForPrompt(PromptKind.Pattern)
+
+    private fun useCredentialForPrompt(kind: PromptKind) =
         testScope.runTest {
             val isStealth = false
             credentialInteractor.stealthMode = isStealth
@@ -106,15 +191,18 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
             val title = "what a prompt"
             val subtitle = "s"
             val description = "something to see"
+            val contentView = PromptVerticalListContentView.Builder().build()
 
             interactor.useCredentialsForAuthentication(
                 PromptInfo().also {
                     it.title = title
                     it.description = description
                     it.subtitle = subtitle
+                    it.contentView = contentView
                 },
                 kind = kind,
                 userId = USER_ID,
+                requestId = REQUEST_ID,
                 challenge = OPERATION_ID,
                 opPackageName = OP_PACKAGE_NAME
             )
@@ -122,16 +210,16 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
             assertThat(prompt?.title).isEqualTo(title)
             assertThat(prompt?.subtitle).isEqualTo(subtitle)
             assertThat(prompt?.description).isEqualTo(description)
+            assertThat(prompt?.contentView).isEqualTo(contentView)
             assertThat(prompt?.userInfo).isEqualTo(BiometricUserInfo(USER_ID))
             assertThat(prompt?.operationInfo).isEqualTo(BiometricOperationInfo(OPERATION_ID))
             assertThat(prompt)
                 .isInstanceOf(
                     when (kind) {
-                        Utils.CREDENTIAL_PIN -> BiometricPromptRequest.Credential.Pin::class.java
-                        Utils.CREDENTIAL_PASSWORD ->
+                        PromptKind.Pin -> BiometricPromptRequest.Credential.Pin::class.java
+                        PromptKind.Password ->
                             BiometricPromptRequest.Credential.Password::class.java
-                        Utils.CREDENTIAL_PATTERN ->
-                            BiometricPromptRequest.Credential.Pattern::class.java
+                        PromptKind.Pattern -> BiometricPromptRequest.Credential.Pattern::class.java
                         else -> throw Exception("wrong kind")
                     }
                 )
@@ -140,7 +228,7 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
                 assertThat(pattern.stealthMode).isEqualTo(isStealth)
             }
 
-            interactor.resetPrompt()
+            interactor.resetPrompt(REQUEST_ID)
 
             assertThat(prompt).isNull()
         }
@@ -257,6 +345,30 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
 
             job.cancel()
         }
+
+    /** Update the current request to use credential-based authentication instead of biometrics. */
+    private fun PromptCredentialInteractor.useCredentialsForAuthentication(
+        promptInfo: PromptInfo,
+        kind: PromptKind,
+        userId: Int,
+        requestId: Long,
+        challenge: Long,
+        opPackageName: String,
+    ) {
+        biometricPromptRepository.setPrompt(
+            promptInfo,
+            userId,
+            requestId,
+            challenge,
+            kind,
+            opPackageName,
+        )
+    }
+
+    /** Unset the current authentication request. */
+    private fun PromptCredentialInteractor.resetPrompt(requestId: Long) {
+        biometricPromptRepository.unsetPrompt(requestId)
+    }
 }
 
 private fun pinRequest(): BiometricPromptRequest.Credential.Pin =

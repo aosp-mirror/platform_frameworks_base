@@ -386,7 +386,7 @@ public class GnssConfiguration {
             configs = CarrierConfigManager.getDefaultConfig();
         }
         for (String configKey : configs.keySet()) {
-            if (configKey.startsWith(CarrierConfigManager.Gps.KEY_PREFIX)) {
+            if (configKey != null && configKey.startsWith(CarrierConfigManager.Gps.KEY_PREFIX)) {
                 String key = configKey
                         .substring(CarrierConfigManager.Gps.KEY_PREFIX.length())
                         .toUpperCase(Locale.ROOT);

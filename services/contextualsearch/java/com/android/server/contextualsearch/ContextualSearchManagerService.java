@@ -17,18 +17,31 @@
 package com.android.server.contextualsearch;
 
 import static android.Manifest.permission.ACCESS_CONTEXTUAL_SEARCH;
+import static android.app.AppOpsManager.OP_ASSIST_SCREENSHOT;
+import static android.app.AppOpsManager.OP_ASSIST_STRUCTURE;
 import static android.content.Context.CONTEXTUAL_SEARCH_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
 import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.content.pm.PackageManager.MATCH_FACTORY_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
+
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_CONTENT;
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.ActivityOptions;
+import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.app.assist.AssistContent;
+import android.app.assist.AssistStructure;
+import android.app.contextualsearch.CallbackToken;
 import android.app.contextualsearch.ContextualSearchManager;
 import android.app.contextualsearch.ContextualSearchState;
 import android.app.contextualsearch.IContextualSearchCallback;
@@ -36,6 +49,7 @@ import android.app.contextualsearch.IContextualSearchManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.os.Binder;
@@ -48,15 +62,20 @@ import android.os.ParcelableException;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.ServiceManager;
 import android.os.ShellCallback;
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.Slog;
+import android.view.IWindowManager;
 import android.window.ScreenCapture;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.am.AssistDataRequester;
+import com.android.server.am.AssistDataRequester.AssistDataRequesterCallbacks;
 import com.android.server.wm.ActivityAssistInfo;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
@@ -65,21 +84,69 @@ import java.io.FileDescriptor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public class ContextualSearchManagerService extends SystemService {
-
+    private static final String TAG = ContextualSearchManagerService.class.getSimpleName();
     private static final int MSG_RESET_TEMPORARY_PACKAGE = 0;
     private static final int MAX_TEMP_PACKAGE_DURATION_MS = 1_000 * 60 * 2; // 2 minutes
+
     private final Context mContext;
     private final ActivityTaskManagerInternal mAtmInternal;
+    private final PackageManagerInternal mPackageManager;
     private final WindowManagerInternal mWmInternal;
     private final DevicePolicyManagerInternal mDpmInternal;
+    private final Object mLock = new Object();
+    private final AssistDataRequester mAssistDataRequester;
 
-    private Handler mTemporaryHandler;
+    private final AssistDataRequesterCallbacks mAssistDataCallbacks =
+            new AssistDataRequesterCallbacks() {
+                @Override
+                public boolean canHandleReceivedAssistDataLocked() {
+                    synchronized (mLock) {
+                        return mStateCallback != null;
+                    }
+                }
+
+                @Override
+                public void onAssistDataReceivedLocked(
+                        final Bundle data,
+                        final int activityIndex,
+                        final int activityCount) {
+                    final IContextualSearchCallback callback;
+                    synchronized (mLock) {
+                        callback = mStateCallback;
+                    }
+
+                    if (callback != null) {
+                        try {
+                            callback.onResult(new ContextualSearchState(
+                                    data.getParcelable(ASSIST_KEY_STRUCTURE, AssistStructure.class),
+                                    data.getParcelable(ASSIST_KEY_CONTENT, AssistContent.class),
+                                    data));
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Error invoking ContextualSearchCallback", e);
+                        }
+                    } else {
+                        Log.w(TAG, "Callback went away!");
+                    }
+                }
+
+                @Override
+                public void onAssistRequestCompleted() {
+                    synchronized (mLock) {
+                        mStateCallback = null;
+                    }
+                }
+            };
 
     @GuardedBy("this")
+    private Handler mTemporaryHandler;
+    @GuardedBy("this")
     private String mTemporaryPackage = null;
-    private static final String TAG = ContextualSearchManagerService.class.getSimpleName();
+
+    @GuardedBy("mLock")
+    private IContextualSearchCallback mStateCallback;
 
     public ContextualSearchManagerService(@NonNull Context context) {
         super(context);
@@ -87,8 +154,14 @@ public class ContextualSearchManagerService extends SystemService {
         mContext = context;
         mAtmInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityTaskManagerInternal.class));
+        mPackageManager = LocalServices.getService(PackageManagerInternal.class);
         mWmInternal = Objects.requireNonNull(LocalServices.getService(WindowManagerInternal.class));
         mDpmInternal = LocalServices.getService(DevicePolicyManagerInternal.class);
+        mAssistDataRequester = new AssistDataRequester(
+                mContext,
+                IWindowManager.Stub.asInterface(ServiceManager.getService(Context.WINDOW_SERVICE)),
+                mContext.getSystemService(AppOpsManager.class),
+                mAssistDataCallbacks, mLock, OP_ASSIST_STRUCTURE, OP_ASSIST_SCREENSHOT);
     }
 
     @Override
@@ -164,7 +237,7 @@ public class ContextualSearchManagerService extends SystemService {
         }
     }
 
-    private Intent getContextualSearchIntent(int entrypoint, IBinder mToken) {
+    private Intent getContextualSearchIntent(int entrypoint, CallbackToken mToken) {
         final Intent launchIntent = getResolvedLaunchIntent();
         if (launchIntent == null) {
             return null;
@@ -173,25 +246,51 @@ public class ContextualSearchManagerService extends SystemService {
         if (DEBUG_USER) Log.d(TAG, "Launch component: " + launchIntent.getComponent());
         launchIntent.addFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_NO_ANIMATION
                 | FLAG_ACTIVITY_NO_USER_ACTION);
+        launchIntent.putExtra(
+                ContextualSearchManager.EXTRA_INVOCATION_TIME_MS,
+                SystemClock.uptimeMillis());
         launchIntent.putExtra(ContextualSearchManager.EXTRA_ENTRYPOINT, entrypoint);
         launchIntent.putExtra(ContextualSearchManager.EXTRA_TOKEN, mToken);
         boolean isAssistDataAllowed = mAtmInternal.isAssistDataAllowed();
         final List<ActivityAssistInfo> records = mAtmInternal.getTopVisibleActivities();
+        final List<IBinder> activityTokens = new ArrayList<>(records.size());
         ArrayList<String> visiblePackageNames = new ArrayList<>();
         boolean isManagedProfileVisible = false;
         for (ActivityAssistInfo record : records) {
             // Add the package name to the list only if assist data is allowed.
             if (isAssistDataAllowed) {
                 visiblePackageNames.add(record.getComponentName().getPackageName());
+                activityTokens.add(record.getActivityToken());
             }
             if (mDpmInternal != null
                     && mDpmInternal.isUserOrganizationManaged(record.getUserId())) {
                 isManagedProfileVisible = true;
             }
         }
+        if (isAssistDataAllowed) {
+            try {
+                final String csPackage = Objects.requireNonNull(launchIntent.getPackage());
+                final int csUid = mPackageManager.getPackageUid(csPackage, 0, 0);
+                mAssistDataRequester.requestAssistData(
+                        activityTokens,
+                        /* fetchData */ true,
+                        /* fetchScreenshot */ false,
+                        /* allowFetchData */ true,
+                        /* allowFetchScreenshot */ false,
+                        csUid,
+                        csPackage,
+                        null);
+            } catch (Exception e) {
+                Log.e(TAG, "Could not request assist data", e);
+            }
+        }
         final ScreenCapture.ScreenshotHardwareBuffer shb;
         if (mWmInternal != null) {
-            shb = mWmInternal.takeAssistScreenshot();
+            shb = mWmInternal.takeAssistScreenshot(Set.of(
+                    TYPE_STATUS_BAR,
+                    TYPE_NAVIGATION_BAR,
+                    TYPE_NAVIGATION_BAR_PANEL,
+                    TYPE_POINTER));
         } else {
             shb = null;
         }
@@ -256,14 +355,15 @@ public class ContextualSearchManagerService extends SystemService {
     }
 
     private class ContextualSearchManagerStub extends IContextualSearchManager.Stub {
-        private @Nullable IBinder mToken;
+        private @Nullable CallbackToken mToken;
 
         @Override
         public void startContextualSearch(int entrypoint) {
             synchronized (this) {
                 if (DEBUG_USER) Log.d(TAG, "startContextualSearch");
                 enforcePermission("startContextualSearch");
-                mToken = new Binder();
+                mAssistDataRequester.cancel();
+                mToken = new CallbackToken();
                 // We get the launch intent with the system server's identity because the system
                 // server has READ_FRAME_BUFFER permission to get the screenshot and because only
                 // the system server can invoke non-exported activities.
@@ -284,7 +384,7 @@ public class ContextualSearchManagerService extends SystemService {
             if (DEBUG_USER) {
                 Log.i(TAG, "getContextualSearchState token: " + token + ", callback: " + callback);
             }
-            if (mToken == null || !mToken.equals(token)) {
+            if (mToken == null || !mToken.getToken().equals(token)) {
                 if (DEBUG_USER) {
                     Log.e(TAG, "getContextualSearchState: invalid token, returning error");
                 }
@@ -297,17 +397,19 @@ public class ContextualSearchManagerService extends SystemService {
                 return;
             }
             mToken = null;
-            // Process data request
-            try {
-                callback.onResult(new ContextualSearchState(null, null, Bundle.EMPTY));
-            } catch (RemoteException e) {
-                Log.e(TAG, "Could not invoke onResult callback", e);
+            synchronized (mLock) {
+                mStateCallback = callback;
             }
+            mAssistDataRequester.processPendingAssistData();
         }
 
-        public void onShellCommand(@Nullable FileDescriptor in, @Nullable FileDescriptor out,
-                @Nullable FileDescriptor err, @NonNull String[] args,
-                @Nullable ShellCallback callback, @NonNull ResultReceiver resultReceiver) {
+        public void onShellCommand(
+                @Nullable FileDescriptor in,
+                @Nullable FileDescriptor out,
+                @Nullable FileDescriptor err,
+                @NonNull String[] args,
+                @Nullable ShellCallback callback,
+                @NonNull ResultReceiver resultReceiver) {
             new ContextualSearchManagerShellCommand(ContextualSearchManagerService.this)
                     .exec(this, in, out, err, args, callback, resultReceiver);
         }

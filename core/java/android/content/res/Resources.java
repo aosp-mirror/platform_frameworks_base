@@ -339,14 +339,17 @@ public class Resources {
     public Resources(@Nullable ClassLoader classLoader) {
         mClassLoader = classLoader == null ? ClassLoader.getSystemClassLoader() : classLoader;
         sResourcesHistory.add(this);
+        ResourcesManager.getInstance().registerAllResourcesReference(this);
     }
 
     /**
-     * Only for creating the System resources.
+     * Only for creating the System resources. This is the only constructor that doesn't add
+     * Resources itself to the ResourcesManager list of all Resources references.
      */
     @UnsupportedAppUsage
     private Resources() {
-        this(null);
+        mClassLoader = ClassLoader.getSystemClassLoader();
+        sResourcesHistory.add(this);
 
         final DisplayMetrics metrics = new DisplayMetrics();
         metrics.setToDefaults();
@@ -2742,17 +2745,6 @@ public class Resources {
                 ar.recycle();
                 Log.i(TAG, "...preloaded " + numberOfEntries + " resources in "
                         + (SystemClock.uptimeMillis() - startTime) + "ms.");
-
-                if (sysRes.getBoolean(
-                        com.android.internal.R.bool.config_freeformWindowManagement)) {
-                    startTime = SystemClock.uptimeMillis();
-                    ar = sysRes.obtainTypedArray(
-                            com.android.internal.R.array.preloaded_freeform_multi_window_drawables);
-                    numberOfEntries = preloadDrawables(sysRes, ar);
-                    ar.recycle();
-                    Log.i(TAG, "...preloaded " + numberOfEntries + " resource in "
-                            + (SystemClock.uptimeMillis() - startTime) + "ms.");
-                }
             }
             sysRes.finishPreloading();
         } catch (RuntimeException e) {

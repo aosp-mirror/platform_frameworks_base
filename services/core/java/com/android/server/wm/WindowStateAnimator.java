@@ -45,6 +45,7 @@ import static com.android.server.wm.WindowStateAnimatorProto.DRAW_STATE;
 import static com.android.server.wm.WindowStateAnimatorProto.SURFACE;
 import static com.android.server.wm.WindowStateAnimatorProto.SYSTEM_DECOR_RECT;
 import static com.android.window.flags.Flags.secureWindowState;
+import static com.android.window.flags.Flags.setScPropertiesInClient;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
@@ -60,6 +61,7 @@ import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.policy.WindowManagerPolicy;
 
@@ -311,8 +313,10 @@ class WindowStateAnimator {
 
             mSurfaceController = new WindowSurfaceController(attrs.getTitle().toString(), format,
                     flags, this, attrs.type);
-            mSurfaceController.setColorSpaceAgnostic(w.getPendingTransaction(),
-                    (attrs.privateFlags & LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC) != 0);
+            if (!setScPropertiesInClient()) {
+                mSurfaceController.setColorSpaceAgnostic(w.getPendingTransaction(),
+                        (attrs.privateFlags & LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC) != 0);
+            }
 
             w.setHasSurface(true);
             // The surface instance is changed. Make sure the input info can be applied to the
@@ -583,7 +587,7 @@ class WindowStateAnimator {
                             mWin.mAttrs, attr, TRANSIT_OLD_NONE);
                 }
             }
-            if (ProtoLog.isEnabled(WM_DEBUG_ANIM)) {
+            if (ProtoLog.isEnabled(WM_DEBUG_ANIM, LogLevel.VERBOSE)) {
                 ProtoLog.v(WM_DEBUG_ANIM, "applyAnimation: win=%s"
                         + " anim=%d attr=0x%x a=%s transit=%d type=%d isEntrance=%b Callers %s",
                         this, anim, attr, a, transit, mAttrType, isEntrance, Debug.getCallers(20));

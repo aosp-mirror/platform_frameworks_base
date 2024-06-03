@@ -44,22 +44,18 @@ import android.hardware.face.FaceAuthenticateOptions;
 import android.hardware.face.HidlFaceSensorConfig;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserManager;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.server.biometrics.BiometricHandlerProvider;
-import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.AuthenticationStateListeners;
@@ -134,13 +130,8 @@ public class FaceProviderTest {
         when(mBiometricHandlerProvider.getBiometricCallbackHandler()).thenReturn(
                 mBiometricCallbackHandler);
         when(mBiometricContext.getAuthSessionCoordinator()).thenReturn(mAuthSessionCoordinator);
-        if (Flags.deHidl()) {
-            when(mBiometricHandlerProvider.getFaceHandler()).thenReturn(new Handler(
-                    mLooper.getLooper()));
-        } else {
-            when(mBiometricHandlerProvider.getFaceHandler()).thenReturn(new Handler(
-                    Looper.getMainLooper()));
-        }
+        when(mBiometricHandlerProvider.getFaceHandler()).thenReturn(new Handler(
+                mLooper.getLooper()));
 
         final SensorProps sensor1 = new SensorProps();
         sensor1.commonProps = new CommonProps();
@@ -176,7 +167,6 @@ public class FaceProviderTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
     public void testAddingHidlSensors() {
         when(mResources.getIntArray(anyInt())).thenReturn(new int[]{});
         when(mResources.getBoolean(anyInt())).thenReturn(false);
@@ -247,7 +237,6 @@ public class FaceProviderTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
     public void testAuthenticateCallbackHandler() {
         waitForIdle();
 
@@ -295,10 +284,6 @@ public class FaceProviderTest {
     }
 
     private void waitForIdle() {
-        if (Flags.deHidl()) {
-            mLooper.dispatchAll();
-        } else {
-            InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-        }
+        mLooper.dispatchAll();
     }
 }

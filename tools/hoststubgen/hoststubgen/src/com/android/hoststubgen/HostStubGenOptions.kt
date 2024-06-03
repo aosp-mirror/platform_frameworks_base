@@ -110,6 +110,8 @@ class HostStubGenOptions(
         var enableNonStubMethodCallDetection: SetOnce<Boolean> = SetOnce(false),
 
         var statsFile: SetOnce<String?> = SetOnce(null),
+
+        var apiListFile: SetOnce<String?> = SetOnce(null),
 ) {
     companion object {
 
@@ -255,6 +257,7 @@ class HostStubGenOptions(
                         "--debug-log" -> setLogFile(LogLevel.Debug, nextArg())
 
                         "--stats-file" -> ret.statsFile.setNextStringArg()
+                        "--supported-api-list-file" -> ret.apiListFile.setNextStringArg()
 
                         else -> throw ArgumentsException("Unknown option: $arg")
                     }
@@ -268,7 +271,7 @@ class HostStubGenOptions(
             }
             if (!ret.outStubJar.isSet && !ret.outImplJar.isSet) {
                 log.w("Neither --out-stub-jar nor --out-impl-jar is set." +
-                        " $COMMAND_NAME will not generate jar files.")
+                        " $executableName will not generate jar files.")
             }
 
             if (ret.enableNonStubMethodCallDetection.get) {
@@ -392,6 +395,7 @@ class HostStubGenOptions(
               enablePostTrace=$enablePostTrace,
               enableNonStubMethodCallDetection=$enableNonStubMethodCallDetection,
               statsFile=$statsFile,
+              apiListFile=$apiListFile,
             }
             """.trimIndent()
     }

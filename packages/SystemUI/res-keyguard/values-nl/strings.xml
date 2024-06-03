@@ -21,11 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Geef je pincode op"</string>
-    <string name="keyguard_enter_pin" msgid="8114529922480276834">"Geef de pincode op"</string>
-    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Geef je patroon op"</string>
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"Voer pincode in"</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Voer je patroon in"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Teken het patroon"</string>
-    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Geef je wachtwoord op"</string>
-    <string name="keyguard_enter_password" msgid="6483623792371009758">"Geef het wachtwoord op"</string>
+    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Voer je wachtwoord in"</string>
+    <string name="keyguard_enter_password" msgid="6483623792371009758">"Voer het wachtwoord in"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Ongeldige kaart."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Opgeladen"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Draadloos opladen"</string>
@@ -59,7 +59,7 @@
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"Of ontgrendel met vingerafdruk"</string>
     <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Vingerafdruk niet herkend"</string>
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"Gezicht niet herkend"</string>
-    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Probeer het opnieuw of geef de pincode op"</string>
+    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Probeer het opnieuw of voer de pincode in"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Probeer het opnieuw of geef het wachtwoord op"</string>
     <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"Probeer het opnieuw of teken het patroon"</string>
     <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"Na te veel pogingen is de pincode vereist"</string>
@@ -80,9 +80,9 @@
     <string name="kg_face_locked_out" msgid="2751559491287575">"Kan niet ontgrendelen met gezicht. Te veel pogingen."</string>
     <string name="kg_fp_locked_out" msgid="6228277682396768830">"Niet ontgrendeld met vingerafdruk. Te veel pogingen."</string>
     <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"Trust agent is niet beschikbaar"</string>
-    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Te veel pogingen met onjuiste pincode"</string>
-    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Te veel pogingen met onjuist patroon"</string>
-    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Te veel pogingen met onjuist wachtwoord"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Pincode te vaak verkeerd ingevoerd"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Patroon te vaak verkeerd getekend"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Wachtwoord te vaak verkeerd ingevoerd"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Probeer het over # seconde opnieuw.}other{Probeer het over # seconden opnieuw.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Geef de pincode van de simkaart op."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Geef de pincode voor de simkaart van \'<xliff:g id="CARRIER">%1$s</xliff:g>\' op."</string>
@@ -108,15 +108,12 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Patroon is vereist na opnieuw opstarten apparaat"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"Pincode is vereist na opnieuw opstarten apparaat"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Wachtwoord is vereist na opnieuw opstarten apparaat"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Gebruik in plaats daarvan het patroon voor extra beveiliging"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Gebruik het patroon voor extra beveiliging"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Gebruik de pincode voor extra beveiliging"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Gebruik in plaats daarvan het wachtwoord voor extra beveiliging"</string>
-    <!-- no translation found for kg_prompt_added_security_pin (5487992065995475528) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_pattern (1017068086102168544) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_password (6053156069765029006) -->
-    <skip />
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Gebruik het wachtwoord voor extra beveiliging"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Pincode vereist voor extra beveiliging"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Patroon vereist voor extra beveiliging"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Wachtwoord vereist voor extra beveiliging"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Apparaat vergrendeld door beheerder"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Apparaat is handmatig vergrendeld"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Niet herkend"</string>

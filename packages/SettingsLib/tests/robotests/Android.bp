@@ -41,7 +41,10 @@ android_app {
 //###########################################################
 android_robolectric_test {
     name: "SettingsLibRoboTests",
-    srcs: ["src/**/*.java"],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
     static_libs: [
         "Settings_robolectric_meta_service_file",
         "Robolectric_shadows_androidx_fragment_upstream",
@@ -51,6 +54,7 @@ android_robolectric_test {
         "androidx.core_core",
         "flag-junit",
         "settingslib_media_flags_lib",
+        "settingslib_illustrationpreference_flags_lib",
         "testng", // TODO: remove once JUnit on Android provides assertThrows
     ],
     java_resource_dirs: ["config"],
@@ -60,6 +64,8 @@ android_robolectric_test {
         timeout: 36000,
     },
     upstream: true,
+
+    strict_mode: false,
 }
 
 java_genrule {

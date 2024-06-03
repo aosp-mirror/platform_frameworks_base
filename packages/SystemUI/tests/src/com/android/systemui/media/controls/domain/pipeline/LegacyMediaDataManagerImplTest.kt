@@ -66,9 +66,6 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.SbnBuilder
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.capture
-import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
@@ -90,6 +87,9 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoSession
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.any
+import org.mockito.kotlin.capture
+import org.mockito.kotlin.eq
 import org.mockito.quality.Strictness
 
 private const val KEY = "KEY"
@@ -346,7 +346,7 @@ class LegacyMediaDataManagerImplTest : SysuiTestCase() {
         // THEN it is removed and listeners are informed
         foregroundExecutor.advanceClockToLast()
         foregroundExecutor.runAllReady()
-        verify(listener).onMediaDataRemoved(PACKAGE_NAME)
+        verify(listener).onMediaDataRemoved(PACKAGE_NAME, false)
     }
 
     @Test
@@ -532,7 +532,7 @@ class LegacyMediaDataManagerImplTest : SysuiTestCase() {
         addNotificationAndLoad()
         val data = mediaDataCaptor.value
         mediaDataManager.onNotificationRemoved(KEY)
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
         verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
     }
 
@@ -777,7 +777,7 @@ class LegacyMediaDataManagerImplTest : SysuiTestCase() {
                 eq(false)
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
-        verify(listener, never()).onMediaDataRemoved(eq(KEY))
+        verify(listener, never()).onMediaDataRemoved(eq(KEY), eq(false))
         // WHEN the second is removed
         mediaDataManager.onNotificationRemoved(KEY_2)
         // THEN the data is for resumption and the second key is removed
@@ -791,7 +791,7 @@ class LegacyMediaDataManagerImplTest : SysuiTestCase() {
                 eq(false)
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
-        verify(listener).onMediaDataRemoved(eq(KEY_2))
+        verify(listener).onMediaDataRemoved(eq(KEY_2), eq(false))
     }
 
     @Test
@@ -816,7 +816,7 @@ class LegacyMediaDataManagerImplTest : SysuiTestCase() {
         mediaDataManager.onNotificationRemoved(KEY)
 
         // THEN the media data is removed
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
     }
 
     @Test
@@ -866,7 +866,7 @@ class LegacyMediaDataManagerImplTest : SysuiTestCase() {
         mediaDataManager.onNotificationRemoved(KEY)
 
         // THEN the media data is removed
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
     }
 
     @Test
@@ -905,7 +905,7 @@ class LegacyMediaDataManagerImplTest : SysuiTestCase() {
         assertThat(mediaDataCaptor.value.isPlaying).isFalse()
 
         // And the oldest resume control was removed
-        verify(listener).onMediaDataRemoved(eq("0:$PACKAGE_NAME"))
+        verify(listener).onMediaDataRemoved(eq("0:$PACKAGE_NAME"), eq(false))
     }
 
     fun testOnNotificationRemoved_lockDownMode() {
@@ -915,7 +915,7 @@ class LegacyMediaDataManagerImplTest : SysuiTestCase() {
         val data = mediaDataCaptor.value
         mediaDataManager.onNotificationRemoved(KEY)
 
-        verify(listener, never()).onMediaDataRemoved(eq(KEY))
+        verify(listener, never()).onMediaDataRemoved(eq(KEY), anyBoolean())
         verify(logger, never())
             .logActiveConvertedToResume(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
         verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
@@ -1148,7 +1148,7 @@ class LegacyMediaDataManagerImplTest : SysuiTestCase() {
         mediaDataManager.setMediaResumptionEnabled(false)
 
         // THEN the resume controls are dismissed
-        verify(listener).onMediaDataRemoved(eq(PACKAGE_NAME))
+        verify(listener).onMediaDataRemoved(eq(PACKAGE_NAME), eq(false))
         verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
     }
 
@@ -1156,19 +1156,19 @@ class LegacyMediaDataManagerImplTest : SysuiTestCase() {
     fun testDismissMedia_listenerCalled() {
         addNotificationAndLoad()
         val data = mediaDataCaptor.value
-        val removed = mediaDataManager.dismissMediaData(KEY, 0L)
+        val removed = mediaDataManager.dismissMediaData(KEY, 0L, true)
         assertThat(removed).isTrue()
 
         foregroundExecutor.advanceClockToLast()
         foregroundExecutor.runAllReady()
 
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(true))
         verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
     }
 
     @Test
     fun testDismissMedia_keyDoesNotExist_returnsFalse() {
-        val removed = mediaDataManager.dismissMediaData(KEY, 0L)
+        val removed = mediaDataManager.dismissMediaData(KEY, 0L, true)
         assertThat(removed).isFalse()
     }
 
@@ -2077,7 +2077,7 @@ class LegacyMediaDataManagerImplTest : SysuiTestCase() {
         sessionCallbackCaptor.value.invoke(KEY)
 
         // It remains as a regular player
-        verify(listener, never()).onMediaDataRemoved(eq(KEY))
+        verify(listener, never()).onMediaDataRemoved(eq(KEY), anyBoolean())
         verify(listener, never())
             .onMediaDataLoaded(eq(PACKAGE_NAME), any(), any(), anyBoolean(), anyInt(), anyBoolean())
     }
@@ -2093,7 +2093,7 @@ class LegacyMediaDataManagerImplTest : SysuiTestCase() {
         mediaDataManager.onNotificationRemoved(KEY)
 
         // It is fully removed
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
         verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
         verify(listener, never())
             .onMediaDataLoaded(eq(PACKAGE_NAME), any(), any(), anyBoolean(), anyInt(), anyBoolean())
@@ -2146,7 +2146,7 @@ class LegacyMediaDataManagerImplTest : SysuiTestCase() {
         mediaDataManager.onNotificationRemoved(KEY)
 
         // It remains as a regular player
-        verify(listener, never()).onMediaDataRemoved(eq(KEY))
+        verify(listener, never()).onMediaDataRemoved(eq(KEY), anyBoolean())
         verify(listener, never())
             .onMediaDataLoaded(eq(PACKAGE_NAME), any(), any(), anyBoolean(), anyInt(), anyBoolean())
     }
@@ -2199,7 +2199,7 @@ class LegacyMediaDataManagerImplTest : SysuiTestCase() {
         sessionCallbackCaptor.value.invoke(KEY)
 
         // It is fully removed
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
         verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
         verify(listener, never())
             .onMediaDataLoaded(eq(PACKAGE_NAME), any(), any(), anyBoolean(), anyInt(), anyBoolean())
@@ -2253,7 +2253,7 @@ class LegacyMediaDataManagerImplTest : SysuiTestCase() {
         sessionCallbackCaptor.value.invoke(KEY)
 
         // It is fully removed.
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
         verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
         verify(listener, never())
             .onMediaDataLoaded(
@@ -2279,7 +2279,7 @@ class LegacyMediaDataManagerImplTest : SysuiTestCase() {
         sessionCallbackCaptor.value.invoke(KEY)
 
         // It is fully removed
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
         verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
         verify(listener, never())
             .onMediaDataLoaded(eq(PACKAGE_NAME), any(), any(), anyBoolean(), anyInt(), anyBoolean())
@@ -2329,7 +2329,7 @@ class LegacyMediaDataManagerImplTest : SysuiTestCase() {
         mediaDataManager.onNotificationRemoved(KEY)
 
         // We still make sure to remove it
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
     }
 
     @Test

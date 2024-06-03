@@ -434,6 +434,40 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
+    public NotificationChannel copy() {
+        NotificationChannel copy = new NotificationChannel(mId, mName, mImportance);
+        copy.setDescription(mDesc);
+        copy.setBypassDnd(mBypassDnd);
+        copy.setLockscreenVisibility(mLockscreenVisibility);
+        copy.setSound(mSound, mAudioAttributes);
+        copy.setLightColor(mLightColor);
+        copy.enableLights(mLights);
+        copy.setVibrationPattern(mVibrationPattern);
+        if (Flags.notificationChannelVibrationEffectApi()) {
+            copy.setVibrationEffect(mVibrationEffect);
+        }
+        copy.lockFields(mUserLockedFields);
+        copy.setUserVisibleTaskShown(mUserVisibleTaskShown);
+        copy.enableVibration(mVibrationEnabled);
+        copy.setShowBadge(mShowBadge);
+        copy.setDeleted(mDeleted);
+        copy.setGroup(mGroup);
+        copy.setBlockable(mBlockableSystem);
+        copy.setAllowBubbles(mAllowBubbles);
+        copy.setOriginalImportance(mOriginalImportance);
+        copy.setConversationId(mParentId, mConversationId);
+        copy.setDemoted(mDemoted);
+        copy.setImportantConversation(mImportantConvo);
+        copy.setDeletedTimeMs(mDeletedTime);
+        copy.setImportanceLockedByCriticalDeviceFunction(mImportanceLockedDefaultApp);
+        copy.setLastNotificationUpdateTimeMs(mLastNotificationUpdateTimeMs);
+
+        return copy;
+    }
+
+    /**
+     * @hide
+     */
     @TestApi
     public void lockFields(int field) {
         mUserLockedFields |= field;
@@ -661,8 +695,8 @@ public final class NotificationChannel implements Parcelable {
      * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.
      *
      * @see #getVibrationEffect()
-     * @see Vibrator#areEffectsSupported(int...)
-     * @see Vibrator#arePrimitivesSupported(int...)
+     * @see android.os.Vibrator#areEffectsSupported(int...)
+     * @see android.os.Vibrator#arePrimitivesSupported(int...)
      */
     @FlaggedApi(Flags.FLAG_NOTIFICATION_CHANNEL_VIBRATION_EFFECT_API)
     public void setVibrationEffect(@Nullable VibrationEffect effect) {

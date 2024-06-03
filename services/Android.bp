@@ -241,6 +241,7 @@ java_library {
     libs: [
         "android.hidl.manager-V1.0-java",
         "framework-tethering.stubs.module_lib",
+        "keepanno-annotations",
         "service-art.stubs.system_server",
         "service-permission.stubs.system_server",
         "service-rkp.stubs.system_server",
@@ -254,6 +255,7 @@ java_library {
     required: [
         "libukey2_jni_shared",
         "protolog.conf.json.gz",
+        "core.protolog.pb",
     ],
     lint: {
         baseline_filename: "lint-baseline.xml",
@@ -285,6 +287,11 @@ filegroup {
 // API stub
 // =============================================================
 
+soong_config_module_type_import {
+    from: "frameworks/base/api/Android.bp",
+    module_types: ["non_updatable_exportable_droidstubs"],
+}
+
 stubs_defaults {
     name: "services-stubs-default",
     installable: false,
@@ -300,10 +307,12 @@ stubs_defaults {
     filter_packages: ["com.android."],
 }
 
-droidstubs {
+non_updatable_exportable_droidstubs {
     name: "services-non-updatable-stubs",
     srcs: [":services-non-updatable-sources"],
-    defaults: ["services-stubs-default"],
+    defaults: [
+        "services-stubs-default",
+    ],
     check_api: {
         current: {
             api_file: "api/current.txt",
@@ -315,19 +324,39 @@ droidstubs {
             baseline_file: "api/lint-baseline.txt",
         },
     },
-    dists: [
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/system-server/api",
-            dest: "android-non-updatable.txt",
-            tag: ".api.txt",
+    soong_config_variables: {
+        release_hidden_api_exportable_stubs: {
+            dists: [
+                {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/system-server/api",
+                    dest: "android-non-updatable.txt",
+                    tag: ".exportable.api.txt",
+                },
+                {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/system-server/api",
+                    dest: "android-non-updatable-removed.txt",
+                    tag: ".exportable.removed-api.txt",
+                },
+            ],
+            conditions_default: {
+                dists: [
+                    {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/system-server/api",
+                        dest: "android-non-updatable.txt",
+                        tag: ".api.txt",
+                    },
+                    {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/system-server/api",
+                        dest: "android-non-updatable-removed.txt",
+                        tag: ".removed-api.txt",
+                    },
+                ],
+            },
         },
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/system-server/api",
-            dest: "android-non-updatable-removed.txt",
-            tag: ".removed-api.txt",
-        },
-    ],
+    },
     api_surface: "system-server",
 }

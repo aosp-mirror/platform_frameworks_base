@@ -16,7 +16,6 @@
 
 package com.android.keyguard.logging
 
-import android.hardware.biometrics.BiometricSourceType
 import com.android.systemui.biometrics.AuthRippleController
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController
 import com.android.systemui.log.LogBuffer
@@ -81,6 +80,23 @@ constructor(
         )
     }
 
+    fun delayShowingTrustAgentError(
+        msg: CharSequence,
+        fpEngaged: Boolean,
+        faceRunning: Boolean,
+    ) {
+        buffer.log(
+            BIO_TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = msg.toString()
+                bool1 = fpEngaged
+                bool2 = faceRunning
+            },
+            { "Delay showing trustAgentError:$str1. fpEngaged:$bool1 faceRunning:$bool2 " }
+        )
+    }
+
     fun logUpdateDeviceEntryIndication(
         animate: Boolean,
         visible: Boolean,
@@ -118,10 +134,9 @@ constructor(
         )
     }
 
-    fun logDropNonFingerprintMessage(
+    fun logDropFaceMessage(
         message: CharSequence,
         followUpMessage: CharSequence?,
-        biometricSourceType: BiometricSourceType?,
     ) {
         buffer.log(
             KeyguardIndicationController.TAG,
@@ -129,12 +144,8 @@ constructor(
             {
                 str1 = message.toString()
                 str2 = followUpMessage?.toString()
-                str3 = biometricSourceType?.name
             },
-            {
-                "droppingNonFingerprintMessage message=$str1 " +
-                    "followUpMessage:$str2 biometricSourceType:$str3"
-            }
+            { "droppingFaceMessage message=$str1 followUpMessage:$str2" }
         )
     }
 

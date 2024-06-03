@@ -172,7 +172,7 @@ public class DynamicSystemInstallationService extends Service
 
     // This is for testing only now
     private boolean mEnableWhenCompleted;
-    private boolean mOneShot;
+    private boolean mOneShot = true;
     private boolean mHideNotification;
 
     private InstallationAsyncTask.Progress mInstallTaskProgress;

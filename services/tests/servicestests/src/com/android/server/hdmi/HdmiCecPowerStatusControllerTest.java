@@ -21,8 +21,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.spy;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
@@ -88,6 +90,11 @@ public class HdmiCecPowerStatusControllerTest {
             boolean isPowerStandby() {
                 return false;
             }
+
+            @Override
+            protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+                // do nothing
+            }
         };
         mHdmiControlService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
@@ -108,12 +115,12 @@ public class HdmiCecPowerStatusControllerTest {
                         .build();
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mNativeWrapper.setPortConnectionStatus(1, true);
+        mNativeWrapper.setPhysicalAddress(0x2000);
         mHdmiControlService.initService();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(contextSpy);
         mHdmiControlService.setPowerManager(mPowerManager);
         mHdmiControlService.getHdmiCecNetwork().initPortInfo();
-        mNativeWrapper.setPhysicalAddress(0x2000);
         mTestLooper.dispatchAll();
         mHdmiCecLocalDevicePlayback = mHdmiControlService.playback();
         mHdmiCecPowerStatusController = new HdmiCecPowerStatusController(mHdmiControlService);

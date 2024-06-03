@@ -9,7 +9,6 @@ mwachens@google.com
 sudheersai@google.com
 suprabh@google.com
 varunshah@google.com
-kwekua@google.com
 bookatz@google.com
 jji@google.com
 
@@ -18,6 +17,7 @@ ogunwale@google.com
 
 # Permissions & Packages
 patb@google.com
+per-file AccessCheckDelegateHelper.java = file:/core/java/android/permission/OWNERS
 
 # Battery Stats
 joeo@google.com

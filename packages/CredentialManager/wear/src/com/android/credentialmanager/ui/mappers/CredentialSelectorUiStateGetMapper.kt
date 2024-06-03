@@ -16,11 +16,13 @@
 
 package com.android.credentialmanager.ui.mappers
 
+import android.graphics.drawable.Drawable
 import com.android.credentialmanager.model.Request
 import com.android.credentialmanager.CredentialSelectorUiState
 import com.android.credentialmanager.CredentialSelectorUiState.Get.MultipleEntry.PerUserNameEntries
 import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.model.get.CredentialEntryInfo
+import java.time.Instant
 
 fun Request.Get.toGet(isPrimary: Boolean): CredentialSelectorUiState.Get {
     val accounts = providerInfos
@@ -35,10 +37,19 @@ fun Request.Get.toGet(isPrimary: Boolean): CredentialSelectorUiState.Get {
                 entry = accounts[0].value.minWith(comparator)
             )
         } else {
-            CredentialSelectorUiState.Get.SingleEntryPerAccount(
-                sortedEntries = accounts.map {
-                    it.value.minWith(comparator)
-                }.sortedWith(comparator),
+            val sortedEntries = accounts.map {
+                it.value.minWith(comparator)
+            }.sortedWith(comparator)
+
+            var icon: Drawable? = null
+            // provide icon if all entries have the same provider
+            if (sortedEntries.all {it.providerId == sortedEntries[0].providerId}) {
+                icon = providerInfos[0].icon
+            }
+
+            CredentialSelectorUiState.Get.MultipleEntryPrimaryScreen(
+                sortedEntries = sortedEntries,
+                icon = icon,
                 authenticationEntryList = providerInfos.flatMap { it.authenticationEntryList }
             )
         }
@@ -57,4 +68,4 @@ fun Request.Get.toGet(isPrimary: Boolean): CredentialSelectorUiState.Get {
 val comparator = compareBy<CredentialEntryInfo> { entryInfo ->
     // Passkey type always go first
     entryInfo.credentialType.let { if (it == CredentialType.PASSKEY) 0 else 1 }
-}.thenByDescending { it.lastUsedTimeMillis ?: 0 }
+}.thenByDescending { it.lastUsedTimeMillis ?: Instant.EPOCH }

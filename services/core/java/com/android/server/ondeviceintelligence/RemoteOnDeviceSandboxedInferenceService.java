@@ -22,18 +22,24 @@ import static android.content.Context.BIND_INCLUDE_CAPABILITIES;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.provider.Settings;
 import android.service.ondeviceintelligence.IOnDeviceSandboxedInferenceService;
 import android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService;
 
 import com.android.internal.infra.ServiceConnector;
 
+import java.util.concurrent.TimeUnit;
+
 
 /**
- * Manages the connection to the remote on-device sand boxed inference service. Also, handles unbinding
+ * Manages the connection to the remote on-device sand boxed inference service. Also, handles
+ * unbinding
  * logic set by the service implementation via a SecureSettings flag.
  */
 public class RemoteOnDeviceSandboxedInferenceService extends
         ServiceConnector.Impl<IOnDeviceSandboxedInferenceService> {
+    private static final long LONG_TIMEOUT = TimeUnit.HOURS.toMillis(1);
+
     /**
      * Creates an instance of {@link ServiceConnector}
      *
@@ -54,11 +60,17 @@ public class RemoteOnDeviceSandboxedInferenceService extends
         connect();
     }
 
+    @Override
+    protected long getRequestTimeoutMs() {
+        return LONG_TIMEOUT;
+    }
+
 
     @Override
     protected long getAutoDisconnectTimeoutMs() {
-        // Disable automatic unbinding.
-        // TODO: add logic to fetch this flag via SecureSettings.
-        return -1;
+        return Settings.Secure.getLongForUser(mContext.getContentResolver(),
+                Settings.Secure.ON_DEVICE_INFERENCE_UNBIND_TIMEOUT_MS,
+                TimeUnit.SECONDS.toMillis(30),
+                mContext.getUserId());
     }
 }

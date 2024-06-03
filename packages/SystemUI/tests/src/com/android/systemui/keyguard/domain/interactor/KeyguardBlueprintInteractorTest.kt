@@ -24,27 +24,34 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.fakeFingerprintPropertyRepository
+import com.android.systemui.biometrics.shared.model.FingerprintSensorType
+import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor.Companion.SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID
-import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor.Companion.WEATHER_CLOCK_BLUEPRINT_ID
+import com.android.systemui.keyguard.data.repository.keyguardBlueprintRepository
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.SplitShadeKeyguardBlueprint
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.clocks.ClockConfig
 import com.android.systemui.plugins.clocks.ClockController
-import com.android.systemui.res.R
+import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.reset
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @ExperimentalCoroutinesApi
@@ -53,7 +60,8 @@ import org.mockito.MockitoAnnotations
 class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val underTest by lazy { kosmos.keyguardBlueprintInteractor }
+    private val underTest = kosmos.keyguardBlueprintInteractor
+    private val keyguardBlueprintRepository = kosmos.keyguardBlueprintRepository
     private val clockRepository by lazy { kosmos.fakeKeyguardClockRepository }
     private val configurationRepository by lazy { kosmos.fakeConfigurationRepository }
     private val fingerprintPropertyRepository by lazy { kosmos.fakeFingerprintPropertyRepository }
@@ -63,17 +71,25 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        whenever(clockController.config).thenReturn(ClockConfig("TEST", "Test", ""))
+        fingerprintPropertyRepository.setProperties(
+            sensorId = 1,
+            strength = SensorStrength.STRONG,
+            sensorType = FingerprintSensorType.POWER_BUTTON,
+            sensorLocations = mapOf()
+        )
     }
 
     @Test
     fun testAppliesDefaultBlueprint() {
         testScope.runTest {
-            val blueprint by collectLastValue(underTest.blueprint)
-            overrideResource(R.bool.config_use_split_notification_shade, false)
+            val blueprintId by collectLastValue(underTest.blueprintId)
+            kosmos.shadeRepository.setShadeMode(ShadeMode.Single)
             configurationRepository.onConfigurationChange()
-            runCurrent()
 
-            assertThat(blueprint?.id).isEqualTo(DefaultKeyguardBlueprint.Companion.DEFAULT)
+            runCurrent()
+            advanceUntilIdle()
+            assertThat(blueprintId).isEqualTo(DefaultKeyguardBlueprint.Companion.DEFAULT)
         }
     }
 
@@ -81,90 +97,13 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     @DisableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
     fun testAppliesSplitShadeBlueprint() {
         testScope.runTest {
-            val blueprint by collectLastValue(underTest.blueprint)
-            overrideResource(R.bool.config_use_split_notification_shade, true)
+            val blueprintId by collectLastValue(underTest.blueprintId)
+            kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
             configurationRepository.onConfigurationChange()
+
             runCurrent()
-
-            assertThat(blueprint?.id).isEqualTo(SplitShadeKeyguardBlueprint.Companion.ID)
-        }
-    }
-
-    @Test
-    @DisableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
-    fun fingerprintPropertyInitialized_updatesBlueprint() {
-        testScope.runTest {
-            val blueprint by collectLastValue(underTest.blueprint)
-            overrideResource(R.bool.config_use_split_notification_shade, true)
-            fingerprintPropertyRepository.supportsUdfps() // initialize properties
-            runCurrent()
-            assertThat(blueprint?.id).isEqualTo(SplitShadeKeyguardBlueprint.Companion.ID)
-        }
-    }
-
-    @Test
-    @DisableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
-    fun composeLockscreenOff_DoesAppliesSplitShadeWeatherClockBlueprint() {
-        testScope.runTest {
-            val blueprint by collectLastValue(underTest.blueprint)
-            whenever(clockController.config)
-                .thenReturn(
-                    ClockConfig(
-                        id = "DIGITAL_CLOCK_WEATHER",
-                        name = "clock",
-                        description = "clock",
-                    )
-                )
-            clockRepository.setCurrentClock(clockController)
-            overrideResource(R.bool.config_use_split_notification_shade, true)
-            configurationRepository.onConfigurationChange()
-            runCurrent()
-
-            assertThat(blueprint?.id).isNotEqualTo(SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID)
-        }
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
-    fun testDoesAppliesSplitShadeWeatherClockBlueprint() {
-        testScope.runTest {
-            val blueprint by collectLastValue(underTest.blueprint)
-            whenever(clockController.config)
-                .thenReturn(
-                    ClockConfig(
-                        id = "DIGITAL_CLOCK_WEATHER",
-                        name = "clock",
-                        description = "clock",
-                    )
-                )
-            clockRepository.setCurrentClock(clockController)
-            overrideResource(R.bool.config_use_split_notification_shade, true)
-            configurationRepository.onConfigurationChange()
-            runCurrent()
-
-            assertThat(blueprint?.id).isEqualTo(SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID)
-        }
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
-    fun testAppliesWeatherClockBlueprint() {
-        testScope.runTest {
-            val blueprint by collectLastValue(underTest.blueprint)
-            whenever(clockController.config)
-                .thenReturn(
-                    ClockConfig(
-                        id = "DIGITAL_CLOCK_WEATHER",
-                        name = "clock",
-                        description = "clock",
-                    )
-                )
-            clockRepository.setCurrentClock(clockController)
-            overrideResource(R.bool.config_use_split_notification_shade, false)
-            configurationRepository.onConfigurationChange()
-            runCurrent()
-
-            assertThat(blueprint?.id).isEqualTo(WEATHER_CLOCK_BLUEPRINT_ID)
+            advanceUntilIdle()
+            assertThat(blueprintId).isEqualTo(SplitShadeKeyguardBlueprint.Companion.ID)
         }
     }
 
@@ -172,13 +111,43 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     @EnableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
     fun testDoesNotApplySplitShadeBlueprint() {
         testScope.runTest {
-            overrideResource(R.bool.config_use_split_notification_shade, true)
-            val blueprint by collectLastValue(underTest.blueprint)
+            val blueprintId by collectLastValue(underTest.blueprintId)
+            kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
             clockRepository.setCurrentClock(clockController)
             configurationRepository.onConfigurationChange()
-            runCurrent()
 
-            assertThat(blueprint?.id).isEqualTo(DefaultKeyguardBlueprint.DEFAULT)
+            runCurrent()
+            advanceUntilIdle()
+            assertThat(blueprintId).isEqualTo(DefaultKeyguardBlueprint.DEFAULT)
+        }
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
+    fun fingerprintPropertyInitialized_updatesBlueprint() {
+        testScope.runTest {
+            underTest.start()
+            reset(keyguardBlueprintRepository)
+
+            fingerprintPropertyRepository.supportsUdfps() // initialize properties
+
+            runCurrent()
+            advanceUntilIdle()
+            verify(keyguardBlueprintRepository, times(2)).refreshBlueprint(any())
+        }
+    }
+
+    @Test
+    fun testRefreshFromConfigChange() {
+        testScope.runTest {
+            underTest.start()
+            reset(keyguardBlueprintRepository)
+
+            configurationRepository.onConfigurationChange()
+
+            runCurrent()
+            advanceUntilIdle()
+            verify(keyguardBlueprintRepository, times(2)).refreshBlueprint(any())
         }
     }
 }

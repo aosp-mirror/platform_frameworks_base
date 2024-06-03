@@ -16,7 +16,7 @@
 
 package com.android.internal.app;
 
-import static android.app.admin.flags.Flags.crossUserSuspensionEnabled;
+import static android.app.admin.flags.Flags.crossUserSuspensionEnabledRo;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.SuspendDialogInfo.BUTTON_ACTION_MORE_DETAILS;
@@ -234,7 +234,7 @@ public class SuspendedAppActivity extends AlertActivity
         }
         mSuspendedPackage = intent.getStringExtra(EXTRA_SUSPENDED_PACKAGE);
         mSuspendingPackage = intent.getStringExtra(EXTRA_SUSPENDING_PACKAGE);
-        if (crossUserSuspensionEnabled()) {
+        if (crossUserSuspensionEnabledRo()) {
             mSuspendingUserId = intent.getIntExtra(EXTRA_SUSPENDING_USER, mUserId);
         } else {
             mSuspendingUserId = mUserId;
@@ -373,7 +373,7 @@ public class SuspendedAppActivity extends AlertActivity
                 .putExtra(Intent.EXTRA_USER_ID, userId)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        if (crossUserSuspensionEnabled()) {
+        if (crossUserSuspensionEnabledRo() && suspendingPackage != null) {
             intent.putExtra(EXTRA_SUSPENDING_USER, suspendingPackage.userId);
         }
         return intent;

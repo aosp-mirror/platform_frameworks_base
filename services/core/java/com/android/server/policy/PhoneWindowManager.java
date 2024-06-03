@@ -76,6 +76,7 @@ import static android.view.WindowManagerGlobal.ADD_PERMISSION_DENIED;
 import static android.view.contentprotection.flags.Flags.createAccessibilityOverlayAppOpEnabled;
 
 import static com.android.hardware.input.Flags.emojiAndScreenshotKeycodesAvailable;
+import static com.android.server.flags.Flags.newBugreportKeyboardShortcut;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.SCREENSHOT_KEYCHORD_DELAY;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVER_ABSENT;
@@ -174,7 +175,6 @@ import android.service.dreams.IDreamManager;
 import android.service.vr.IPersistentVrStateCallbacks;
 import android.speech.RecognizerIntent;
 import android.telecom.TelecomManager;
-import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.MutableBoolean;
@@ -341,10 +341,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int SHORT_PRESS_SLEEP_GO_TO_SLEEP = 0;
     static final int SHORT_PRESS_SLEEP_GO_TO_SLEEP_AND_GO_HOME = 1;
 
-    // must match: config_shortPressOnSettingsBehavior in config.xml
-    static final int SHORT_PRESS_SETTINGS_NOTHING = 0;
-    static final int SHORT_PRESS_SETTINGS_NOTIFICATION_PANEL = 1;
-    static final int LAST_SHORT_PRESS_SETTINGS_BEHAVIOR = SHORT_PRESS_SETTINGS_NOTIFICATION_PANEL;
+    // must match: config_settingsKeyBehavior in config.xml
+    static final int SETTINGS_KEY_BEHAVIOR_SETTINGS_ACTIVITY = 0;
+    static final int SETTINGS_KEY_BEHAVIOR_NOTIFICATION_PANEL = 1;
+    static final int SETTINGS_KEY_BEHAVIOR_NOTHING = 2;
+    static final int LAST_SETTINGS_KEY_BEHAVIOR = SETTINGS_KEY_BEHAVIOR_NOTHING;
 
     static final int PENDING_KEY_NULL = -1;
 
@@ -370,8 +371,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int TRIPLE_PRESS_PRIMARY_TOGGLE_ACCESSIBILITY = 1;
 
     // Must match: config_searchKeyBehavior in config.xml
-    static final int SEARCH_BEHAVIOR_DEFAULT_SEARCH = 0;
-    static final int SEARCH_BEHAVIOR_TARGET_ACTIVITY = 1;
+    static final int SEARCH_KEY_BEHAVIOR_DEFAULT_SEARCH = 0;
+    static final int SEARCH_KEY_BEHAVIOR_TARGET_ACTIVITY = 1;
 
     static public final String SYSTEM_DIALOG_REASON_KEY = "reason";
     static public final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
@@ -467,8 +468,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Assigned on main thread, accessed on UI thread
     volatile VrManagerInternal mVrManagerInternal;
 
-    /** If true, hitting shift & menu will broadcast Intent.ACTION_BUG_REPORT */
-    boolean mEnableShiftMenuBugReports = false;
+    /** If true, can use a keyboard shortcut to trigger a bugreport. */
+    boolean mEnableBugReportKeyboardShortcut = false;
 
     /** Controller that supports enabling an AccessibilityService by holding down the volume keys */
     private AccessibilityShortcutController mAccessibilityShortcutController;
@@ -643,8 +644,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // What we do when the user double-taps on home
     int mDoubleTapOnHomeBehavior;
 
-    // What we do when the user presses on settings
-    int mShortPressOnSettingsBehavior;
+    // What we do when the user presses the settings key
+    int mSettingsKeyBehavior;
 
     // Must match config_primaryShortPressTargetActivity in config.xml
     ComponentName mPrimaryShortPressTargetActivity;
@@ -2304,7 +2305,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 "PhoneWindowManager.mBroadcastWakeLock");
         mPowerKeyWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "PhoneWindowManager.mPowerKeyWakeLock");
-        mEnableShiftMenuBugReports = "1".equals(SystemProperties.get("ro.debuggable"));
+        mEnableBugReportKeyboardShortcut = "1".equals(SystemProperties.get("ro.debuggable"));
         mLidKeyboardAccessibility = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lidKeyboardAccessibility);
         mLidNavigationAccessibility = mContext.getResources().getInteger(
@@ -2361,8 +2362,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mDisplayFoldController = DisplayFoldController.create(mContext, DEFAULT_DISPLAY);
 
-        mAccessibilityManager = (AccessibilityManager) mContext.getSystemService(
-                Context.ACCESSIBILITY_SERVICE);
+        mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
 
         // register for dock events
         IntentFilter filter = new IntentFilter();
@@ -2859,11 +2859,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mShortPressOnWindowBehavior = SHORT_PRESS_WINDOW_PICTURE_IN_PICTURE;
         }
 
-        mShortPressOnSettingsBehavior = res.getInteger(
-                com.android.internal.R.integer.config_shortPressOnSettingsBehavior);
-        if (mShortPressOnSettingsBehavior < SHORT_PRESS_SETTINGS_NOTHING
-                || mShortPressOnSettingsBehavior > LAST_SHORT_PRESS_SETTINGS_BEHAVIOR) {
-            mShortPressOnSettingsBehavior = SHORT_PRESS_SETTINGS_NOTHING;
+        mSettingsKeyBehavior = res.getInteger(
+                com.android.internal.R.integer.config_settingsKeyBehavior);
+        if (mSettingsKeyBehavior < SETTINGS_KEY_BEHAVIOR_SETTINGS_ACTIVITY
+                || mSettingsKeyBehavior > LAST_SETTINGS_KEY_BEHAVIOR) {
+            mSettingsKeyBehavior = SETTINGS_KEY_BEHAVIOR_SETTINGS_ACTIVITY;
         }
     }
 
@@ -3410,19 +3410,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         switch (keyCode) {
             case KeyEvent.KEYCODE_HOME:
                 return handleHomeShortcuts(focusedToken, event);
-            case KeyEvent.KEYCODE_MENU:
-                // Hijack modified menu keys for debugging features
-                final int chordBug = KeyEvent.META_SHIFT_ON;
-
-                if (mEnableShiftMenuBugReports && firstDown
-                        && (metaState & chordBug) == chordBug) {
-                    Intent intent = new Intent(Intent.ACTION_BUG_REPORT);
-                    mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT,
-                            null, null, null, 0, null, null);
-                    logKeyboardSystemsEvent(event, KeyboardLogEvent.TRIGGER_BUG_REPORT);
-                    return true;
-                }
-                break;
             case KeyEvent.KEYCODE_RECENT_APPS:
                 if (firstDown) {
                     showRecentApps(false /* triggeredFromAltTab */);
@@ -3488,6 +3475,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             case KeyEvent.KEYCODE_DEL:
+                if (newBugreportKeyboardShortcut()) {
+                    if (mEnableBugReportKeyboardShortcut && firstDown
+                            && event.isMetaPressed() && event.isCtrlPressed()) {
+                        try {
+                            mActivityManagerService.requestInteractiveBugReport();
+                        } catch (RemoteException e) {
+                            Slog.d(TAG, "Error taking bugreport", e);
+                        }
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.TRIGGER_BUG_REPORT);
+                        return true;
+                    }
+                }
+                // fall through
             case KeyEvent.KEYCODE_ESCAPE:
                 if (firstDown && event.isMetaPressed()) {
                     logKeyboardSystemsEvent(event, KeyboardLogEvent.BACK);
@@ -3695,12 +3695,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_SEARCH:
                 if (firstDown && !keyguardOn) {
                     switch (mSearchKeyBehavior) {
-                        case SEARCH_BEHAVIOR_TARGET_ACTIVITY: {
+                        case SEARCH_KEY_BEHAVIOR_TARGET_ACTIVITY: {
                             launchTargetSearchActivity();
                             logKeyboardSystemsEvent(event, KeyboardLogEvent.LAUNCH_SEARCH);
                             return true;
                         }
-                        case SEARCH_BEHAVIOR_DEFAULT_SEARCH:
+                        case SEARCH_KEY_BEHAVIOR_DEFAULT_SEARCH:
                         default:
                             break;
                     }
@@ -3779,14 +3779,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         + " interceptKeyBeforeQueueing");
                 return true;
             case KeyEvent.KEYCODE_SETTINGS:
-                if (mShortPressOnSettingsBehavior == SHORT_PRESS_SETTINGS_NOTIFICATION_PANEL) {
-                    if (!down) {
+                if (firstDown) {
+                    if (mSettingsKeyBehavior == SETTINGS_KEY_BEHAVIOR_NOTIFICATION_PANEL) {
                         toggleNotificationPanel();
                         logKeyboardSystemsEvent(event, KeyboardLogEvent.TOGGLE_NOTIFICATION_PANEL);
+                    } else if (mSettingsKeyBehavior == SETTINGS_KEY_BEHAVIOR_SETTINGS_ACTIVITY) {
+                        showSystemSettings();
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.LAUNCH_SYSTEM_SETTINGS);
                     }
-                    return true;
                 }
-                break;
+                return true;
             case KeyEvent.KEYCODE_STEM_PRIMARY:
                 if (prepareToSendSystemKeyToApplication(focusedToken, event)) {
                     // Send to app.
@@ -4121,14 +4123,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void handleSwitchKeyboardLayout(@NonNull KeyEvent event, int direction,
             IBinder focusedToken) {
-        if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_NEW_KEYBOARD_UI)) {
-            IBinder targetWindowToken =
-                    mWindowManagerInternal.getTargetWindowTokenFromInputToken(focusedToken);
-            InputMethodManagerInternal.get().onSwitchKeyboardLayoutShortcut(direction,
-                    event.getDisplayId(), targetWindowToken);
-        } else {
-            mWindowManagerFuncs.switchKeyboardLayout(event.getDeviceId(), direction);
-        }
+        IBinder targetWindowToken =
+                mWindowManagerInternal.getTargetWindowTokenFromInputToken(focusedToken);
+        InputMethodManagerInternal.get().onSwitchKeyboardLayoutShortcut(direction,
+                event.getDisplayId(), targetWindowToken);
     }
 
     private boolean interceptFallback(IBinder focusedToken, KeyEvent fallbackEvent,
@@ -5664,6 +5662,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    @Override
+    public void onDisplaySwitchStart(int displayId) {
+        if (displayId == DEFAULT_DISPLAY) {
+            mDefaultDisplayPolicy.onDisplaySwitchStart();
+        }
+    }
+
     private long getKeyguardDrawnTimeout() {
         final boolean bootCompleted =
                 LocalServices.getService(SystemServiceManager.class).isBootCompleted();
@@ -6561,8 +6566,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print("mLongPressOnPowerBehavior=");
                 pw.println(longPressOnPowerBehaviorToString(mLongPressOnPowerBehavior));
         pw.print(prefix);
-        pw.print("mShortPressOnSettingsBehavior=");
-        pw.println(shortPressOnSettingsBehaviorToString(mShortPressOnSettingsBehavior));
+        pw.print("mSettingsKeyBehavior=");
+        pw.println(settingsKeyBehaviorToString(mSettingsKeyBehavior));
         pw.print(prefix);
         pw.print("mLongPressOnPowerAssistantTimeoutMs=");
         pw.println(mLongPressOnPowerAssistantTimeoutMs);
@@ -6764,12 +6769,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private static String shortPressOnSettingsBehaviorToString(int behavior) {
+    private static String settingsKeyBehaviorToString(int behavior) {
         switch (behavior) {
-            case SHORT_PRESS_SETTINGS_NOTHING:
-                return "SHORT_PRESS_SETTINGS_NOTHING";
-            case SHORT_PRESS_SETTINGS_NOTIFICATION_PANEL:
-                return "SHORT_PRESS_SETTINGS_NOTIFICATION_PANEL";
+            case SETTINGS_KEY_BEHAVIOR_SETTINGS_ACTIVITY:
+                return "SETTINGS_KEY_BEHAVIOR_SETTINGS_ACTIVITY";
+            case SETTINGS_KEY_BEHAVIOR_NOTIFICATION_PANEL:
+                return "SETTINGS_KEY_BEHAVIOR_NOTIFICATION_PANEL";
+            case SETTINGS_KEY_BEHAVIOR_NOTHING:
+                return "SETTINGS_KEY_BEHAVIOR_NOTHING";
             default:
                 return Integer.toString(behavior);
         }

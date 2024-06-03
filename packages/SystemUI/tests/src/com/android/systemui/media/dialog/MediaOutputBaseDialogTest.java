@@ -19,6 +19,7 @@ package com.android.systemui.media.dialog;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -47,6 +48,7 @@ import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
+import com.android.settingslib.media.LocalMediaManager;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
@@ -121,11 +123,29 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
         mMediaControllers.add(mMediaController);
         when(mMediaSessionManager.getActiveSessions(any())).thenReturn(mMediaControllers);
 
-        mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
-                mMediaSessionManager, mLocalBluetoothManager, mStarter,
-                mNotifCollection, mDialogTransitionAnimator,
-                mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
-                mKeyguardManager, mFlags, mUserTracker);
+        mMediaOutputController =
+                new MediaOutputController(
+                        mContext,
+                        TEST_PACKAGE,
+                        mContext.getUser(),
+                        /* token */ null,
+                        mMediaSessionManager,
+                        mLocalBluetoothManager,
+                        mStarter,
+                        mNotifCollection,
+                        mDialogTransitionAnimator,
+                        mNearbyMediaDevicesManager,
+                        mAudioManager,
+                        mPowerExemptionManager,
+                        mKeyguardManager,
+                        mFlags,
+                        mUserTracker);
+
+        // Using a fake package will cause routing operations to fail, so we intercept
+        // scanning-related operations.
+        mMediaOutputController.mLocalMediaManager = mock(LocalMediaManager.class);
+        doNothing().when(mMediaOutputController.mLocalMediaManager).startScan();
+        doNothing().when(mMediaOutputController.mLocalMediaManager).stopScan();
 
         mMediaOutputBaseDialogImpl = new MediaOutputBaseDialogImpl(mContext, mBroadcastSender,
                 mMediaOutputController);

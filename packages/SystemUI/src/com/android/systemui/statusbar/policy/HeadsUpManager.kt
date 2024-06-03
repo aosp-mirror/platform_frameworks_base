@@ -73,7 +73,8 @@ interface HeadsUpManager : Dumpable {
     /** Returns whether or not the given notification is managed by this manager. */
     fun isHeadsUpEntry(key: String): Boolean
 
-    fun isHeadsUpGoingAway(): Boolean
+    /** @see setHeadsUpAnimatingAway */
+    fun isHeadsUpAnimatingAwayValue(): Boolean
 
     /** Returns if the given notification is snoozed or not. */
     fun isSnoozed(packageName: String): Boolean
@@ -130,7 +131,7 @@ interface HeadsUpManager : Dumpable {
      * Set that we are exiting the headsUp pinned mode, but some notifications might still be
      * animating out. This is used to keep the touchable regions in a reasonable state.
      */
-    fun setHeadsUpGoingAway(headsUpGoingAway: Boolean)
+    fun setHeadsUpAnimatingAway(headsUpAnimatingAway: Boolean)
 
     /**
      * Notifies that a remote input textbox in notification gets active or inactive.
@@ -194,10 +195,10 @@ interface AnimationStateHandler {
 interface OnHeadsUpPhoneListenerChange {
     /**
      * Called when a heads up notification is 'going away' or no longer 'going away'. See
-     * [HeadsUpManager.setHeadsUpGoingAway].
+     * [HeadsUpManager.setHeadsUpAnimatingAway].
      */
     // TODO(b/325936094) delete this callback, and listen to the flow instead
-    fun onHeadsUpGoingAwayStateChanged(headsUpGoingAway: Boolean)
+    fun onHeadsUpAnimatingAwayStateChanged(headsUpAnimatingAway: Boolean)
 }
 
 /* No op impl of HeadsUpManager. */
@@ -215,7 +216,7 @@ class HeadsUpManagerEmptyImpl @Inject constructor() : HeadsUpManager {
     override fun getTopEntry() = null
     override fun hasPinnedHeadsUp() = false
     override fun isHeadsUpEntry(key: String) = false
-    override fun isHeadsUpGoingAway() = false
+    override fun isHeadsUpAnimatingAwayValue() = false
     override fun isSnoozed(packageName: String) = false
     override fun isSticky(key: String?) = false
     override fun isTrackingHeadsUp() = false
@@ -228,7 +229,7 @@ class HeadsUpManagerEmptyImpl @Inject constructor() : HeadsUpManager {
     override fun setAnimationStateHandler(handler: AnimationStateHandler) {}
     override fun setExpanded(entry: NotificationEntry, expanded: Boolean) {}
     override fun setGutsShown(entry: NotificationEntry, gutsShown: Boolean) {}
-    override fun setHeadsUpGoingAway(headsUpGoingAway: Boolean) {}
+    override fun setHeadsUpAnimatingAway(headsUpAnimatingAway: Boolean) {}
     override fun setRemoteInputActive(entry: NotificationEntry, remoteInputActive: Boolean) {}
     override fun setTrackingHeadsUp(tracking: Boolean) {}
     override fun setUser(user: Int) {}

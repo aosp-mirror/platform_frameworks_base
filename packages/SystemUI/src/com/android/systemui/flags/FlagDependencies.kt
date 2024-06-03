@@ -25,16 +25,17 @@ import com.android.server.notification.Flags.vibrateWhileUnlocked
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.Flags.communalHub
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.statusbar.notification.collection.SortBySectionTimeFlag
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationAvalancheSuppression
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
+import com.android.systemui.statusbar.notification.shared.PriorityPeopleSection
 import javax.inject.Inject
 
 /** A class in which engineers can define flag dependencies */
@@ -50,10 +51,10 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
         NotificationsLiveDataStoreRefactor.token dependsOn NotificationIconContainerRefactor.token
         FooterViewRefactor.token dependsOn NotificationIconContainerRefactor.token
         NotificationAvalancheSuppression.token dependsOn VisualInterruptionRefactor.token
+        PriorityPeopleSection.token dependsOn SortBySectionTimeFlag.token
 
         // SceneContainer dependencies
         SceneContainerFlag.getFlagDependencies().forEach { (alpha, beta) -> alpha dependsOn beta }
-        SceneContainerFlag.getMainStaticFlag() dependsOn MIGRATE_KEYGUARD_STATUS_BAR_VIEW
 
         // ComposeLockscreen dependencies
         ComposeLockscreen.token dependsOn KeyguardBottomAreaRefactor.token

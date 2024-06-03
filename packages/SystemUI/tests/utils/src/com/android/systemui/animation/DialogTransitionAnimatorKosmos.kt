@@ -16,7 +16,16 @@
 
 package com.android.systemui.animation
 
+import com.android.systemui.jank.interactionJankMonitor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.kosmos.testCase
 
-val Kosmos.dialogTransitionAnimator by Fixture { fakeDialogTransitionAnimator() }
+val Kosmos.dialogTransitionAnimator by Fixture {
+    fakeDialogTransitionAnimator(
+        // The main thread is checked in a bunch of places inside the different transitions
+        // animators, so we have to pass the real main executor here.
+        mainExecutor = testCase.context.mainExecutor,
+        interactionJankMonitor = interactionJankMonitor,
+    )
+}

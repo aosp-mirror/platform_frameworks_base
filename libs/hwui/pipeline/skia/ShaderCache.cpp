@@ -15,14 +15,18 @@
  */
 
 #include "ShaderCache.h"
+
 #include <GrDirectContext.h>
 #include <SkData.h>
 #include <gui/TraceUtils.h>
 #include <log/log.h>
 #include <openssl/sha.h>
+
 #include <algorithm>
 #include <array>
+#include <mutex>
 #include <thread>
+
 #include "FileBlobCache.h"
 #include "Properties.h"
 

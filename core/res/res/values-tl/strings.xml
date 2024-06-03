@@ -84,7 +84,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Hindi makakonekta sa mobile network"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Subukang baguhin ang gustong network. I-tap para baguhin."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Hindi available ang pang-emergency na pagtawag"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Hindi makapagsagawa ng mga emergency na tawag sa pamamagitan ng Wi‑Fi"</string>
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Kailangan ng mobile network para sa mga emergency na tawag"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Mga Alerto"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Pagpasa ng tawag"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Emergency callback mode"</string>
@@ -153,16 +153,19 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> pagkatapos ng <xliff:g id="TIME_DELAY">{2}</xliff:g> (na) segundo"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Hindi naipasa"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Hindi ipinasa"</string>
-    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Seguridad ng cellular network"</string>
-    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Suriin ang mga setting"</string>
-    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Na-access ang identifier ng device"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Naitala ng isang network sa koneksyon sa <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> ang unique identifier (IMSI) ng iyong device nang <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> (na) beses sa pagitan ng <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> at <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
-    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Naka-encrypt na koneksyon sa <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
-    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Nakakonekta ka na sa mas secure na cellular network."</string>
-    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Hindi naka-encrypt na koneksyon sa <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Nakakonekta ka sa hindi naka-encrypt na cellular network. Posibleng mahina ang proteksyon laban pag-intercept ng iyong mga tawag, mensahe, at data."</string>
-    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Mga setting ng seguridad ng cellular"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"Seguridad ng mobile network"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Pag-encrypt, mga notification para sa mga hindi naka-encrypt na network"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"Na-access ang Device ID"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"Nang <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, na-record ng isang kalapit na network ang natatanging ID ng iyong device (IMSI o IMEI) habang ginagamit ang iyong <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> SIM"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"Nang <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, na-record ng isang kalapit na network ang natatanging ID ng iyong device (IMSI o IMEI) habang ginagamit ang iyong <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> SIM.\n\nIbig sabihin, na-log ang iyong lokasyon, aktibidad, o pagkakakilanlan. Isa itong karaniwang kagawian pero posibleng isang isyu para sa mga taong nag-aalala tungkol sa privacy."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Nakakonekta sa naka-encrypt na network na <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"Mas secure na ang koneksyon ng <xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"Nakakonekta sa hindi naka-encrypt na network"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Kasalukuyang walang proteksyon ang tawag, mensahe, at data habang gamit ang <xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM mo"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"Kasalukuyang mas nanganganib ang mga tawag, mensahe, at data habang ginagamit ang iyong <xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM.\n\nKapag na-encrypt ulit ang iyong koneksyon, makakatanggap ka ng isa pang notification."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"Mga setting ng seguridad ng mobile network"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Matuto pa"</string>
+    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"OK"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Kumpleto na ang code ng tampok."</string>
     <string name="fcError" msgid="5325116502080221346">"Problema sa koneksyon o di-wastong code ng tampok."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -198,6 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Hindi na available sa device na ito ang iyong profile sa trabaho"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Masyadong maraming pagsubok sa password"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Inalis ng admin ang device para sa personal na paggamit"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Naalis ang pribadong space"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Hindi pinapayagan ng iyong organisasyon ang mga pribadong space sa pinapamahalaang device na ito."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Pinamamahalaan ang device"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Pinamamahalaan ng iyong organisasyon ang device na ito, at maaari nitong subaybayan ang trapiko sa network. I-tap para sa mga detalye."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Maa-access ng mga app ang iyong lokasyon"</string>
@@ -280,6 +285,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Voice Assist"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"I-lockdown"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"Sumagot"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Bagong notification"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Pisikal na keyboard"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Seguridad"</string>
@@ -356,6 +362,7 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Kumuha ng screenshot"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Puwedeng kumuha ng screenshot ng display."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"Preview, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
+    <string name="dream_accessibility_action_click" msgid="7392398629967797805">"i-dismiss"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"i-disable o baguhin ang status bar"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Pinapayagan ang app na i-disable ang status bar o magdagdag at mag-alis ng mga icon ng system."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"maging status bar"</string>
@@ -662,7 +669,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Hindi nakilala ang fingerprint"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Hindi nakilala ang fingerprint"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Hindi makilala ang mukha. Gumamit ng fingerprint."</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5590293588784953188">"Hindi nakilala ang mukha. Gumamit ng fingerprint."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Na-authenticate ang fingerprint"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Na-authenticate ang mukha"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Na-authenticate ang mukha, pakipindot ang kumpirmahin"</string>
@@ -709,7 +716,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Iusog pakaliwa ang telepono mo"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Iusog pakanan ang telepono mo"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Tumingin nang mas direkta sa iyong device."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Hindi makita ang mukha mo. Hawakan ang telepono kapantay ng mata."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Hindi makita ang mukha mo. Ipantay ang telepono sa mata."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Masyadong magalaw. Hawakang mabuti ang telepono."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Paki-enroll muli ang iyong mukha."</string>
     <string name="face_acquired_too_different" msgid="4505278456634706967">"Hindi nakilala ang mukha. Subukan ulit."</string>
@@ -1183,6 +1190,8 @@
     <string name="deleteText" msgid="4200807474529938112">"I-delete"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Pamamaraan ng pag-input"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Pagkilos ng teksto"</string>
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"Hindi sinusuportahan ang sulat-kamay sa field na ito"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Hindi sinusuportahan ang sulat-kamay sa mga field ng password"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Bumalik"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Magpalit ng pamamaraan ng pag-input"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Nauubusan na ang puwang ng storage"</string>
@@ -1220,7 +1229,7 @@
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"I-edit"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"Ibahagi"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"Ibahagi gamit ang %1$s"</string>
-    <string name="whichSendApplicationLabel" msgid="7467813004769188515">"Ibahagi"</string>
+    <string name="whichSendApplicationLabel" msgid="7467813004769188515">"I-share"</string>
     <string name="whichSendToApplication" msgid="77101541959464018">"Ipadala gamit ang"</string>
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"Ipadala gamit ang %1$s"</string>
     <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"Ipadala"</string>
@@ -1894,7 +1903,7 @@
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Humingi ng PIN bago mag-unpin"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Humingi ng pattern sa pag-unlock bago mag-unpin"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Humingi ng password bago mag-unpin"</string>
-    <string name="package_installed_device_owner" msgid="7035926868974878525">"Na-install ng iyong admin"</string>
+    <string name="package_installed_device_owner" msgid="8684974629306529138">"Na-install ng iyong admin.\nPumunta sa mga setting para makita ang mga ibinigay na pahintulot"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Na-update ng iyong admin"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Na-delete ng iyong admin"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
@@ -1927,6 +1936,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Pinapamahalaan ng <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Naka-on"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Naka-off"</string>
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>, <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Anumang kalendaryo"</string>
     <string name="muted_by" msgid="91464083490094950">"Minu-mute ng <xliff:g id="THIRD_PARTY">%1$s</xliff:g> ang ilang tunog"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"May internal na problema sa iyong device, at maaaring hindi ito maging stable hanggang sa i-reset mo ang factory data."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"May internal na problema sa iyong device. Makipag-ugnayan sa iyong manufacturer upang malaman ang mga detalye."</string>
@@ -2135,6 +2147,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification ng impormasyon ng Routine Mode"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Na-on ang Pantipid ng Baterya"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Binabawasan ang paggamit sa baterya para mapatagal ang baterya"</string>
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"Naka-on ang Pantipid ng Baterya"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"Naka-on ang Pantipid ng Baterya para mapahaba ang tagal ng baterya"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Pantipid ng Baterya"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Na-off ang Pantipid ng Baterya"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"May sapat na charge ang telepono. Hindi na pinaghihigpitan ang mga feature."</string>
@@ -2182,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad Left"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad Right"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad Center"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Caption bar ng <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Inilagay ang <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> sa PINAGHIHIGPITANG bucket"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"nagpadala ng larawan"</string>
@@ -2209,6 +2222,8 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Lumipat sa app para sa trabaho?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"Pinapayagan ka lang ng iyong organisasyon na tumawag mula sa mga app para sa trabaho"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"Pinapayagan ka lang ng iyong organisasyon na magpadala ng mga mensahe mula sa mga app para sa trabaho"</string>
+    <string name="miniresolver_private_space_phone_information" msgid="4469511223312488570">"Puwede ka lang tumawag sa telepono mula sa iyong personal na App na Telepono. Idaragdag sa iyong personal na history ng tawag ang mga tawag na ginawa gamit ang personal na Telepono mo."</string>
+    <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"Puwede ka lang magpadala ng mga mensaheng SMS mula sa iyong personal na Messages app."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Gamitin ang personal na browser"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Gamitin ang browser sa trabaho"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"Tumawag"</string>
@@ -2388,10 +2403,25 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Trabaho 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Communal"</string>
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"Profile sa trabaho"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Pribadong space"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Clone"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Communal"</string>
+    <string name="redacted_notification_message" msgid="1520587845842228816">"Nakatago ang content ng sensitibong notification"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Nakatago ang content ng app mula sa pagbabahagi ng screen para sa seguridad"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Awtomatikong nakakonekta sa satellite"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Puwede kang magpadala at tumanggap ng mga mensahe nang walang mobile o Wi-Fi network"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Buksan ang Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Paano ito gumagana"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Nakabinbin..."</string>
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"I-set up ulit ang Pag-unlock Gamit ang Fingerprint"</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"Hindi gumagana nang maayos ang <xliff:g id="FINGERPRINT">%s</xliff:g> at na-delete ito"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"Hindi gumagana nang maayos ang <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> at <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> at na-delete ang mga ito"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"Hindi gumagana nang maayos ang <xliff:g id="FINGERPRINT">%s</xliff:g> at na-delete na ito. I-set up ulit ito para ma-unlock ang iyong telepono sa pamamagitan ng fingerprint."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"Hindi gumagana nang maayos ang <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> at <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> at na-delete na ang mga ito. I-set up ulit ang mga ito para ma-unlock ang iyong telepono gamit ang fingerprint mo."</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"I-set up ulit ang Pag-unlock Gamit ang Mukha"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Hindi gumagana nang maayos ang iyong face model at na-delete na ito. I-set up ulit ito para ma-unlock ang iyong telepono sa pamamagitan ng mukha."</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"I-set up"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Huwag muna"</string>
 </resources>

@@ -16,6 +16,9 @@
 
 package com.android.server.pm;
 
+import android.annotation.Nullable;
+import android.util.Slog;
+
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -23,4 +26,31 @@ import java.util.concurrent.locks.ReentrantLock;
  * injection, similar to {@link ActivityManagerGlobalLock}.
  */
 public class PackageManagerTracedLock extends ReentrantLock {
+    private static final String TAG = "PackageManagerTracedLock";
+    private static final boolean DEBUG = false;
+    @Nullable private final String mLockName;
+
+    public PackageManagerTracedLock(@Nullable String lockName) {
+        mLockName = lockName;
+    }
+
+    public PackageManagerTracedLock() {
+        this(null);
+    }
+
+    @Override
+    public void lock() {
+        super.lock();
+        if (DEBUG && mLockName != null) {
+            Slog.i(TAG, "locked " + mLockName);
+        }
+    }
+
+    @Override
+    public void unlock() {
+        super.unlock();
+        if (DEBUG && mLockName != null) {
+            Slog.i(TAG, "unlocked " + mLockName);
+        }
+    }
 }

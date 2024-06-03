@@ -54,8 +54,10 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.ext.SdkExtensions;
 import android.provider.DeviceConfig;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.LongArrayQueue;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
@@ -173,6 +175,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
     // Accessed on the handler thread only.
     private long  mRelativeBootTime = calculateRelativeBootTime();
 
+    private final ArrayMap<Integer, Pair<Context, BroadcastReceiver>> mUserBroadcastReceivers;
+
     RollbackManagerServiceImpl(Context context) {
         mContext = context;
         // Note that we're calling onStart here because this object is only constructed on
@@ -209,6 +213,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                 mRollbacks.clear();
             }
         });
+
+        mUserBroadcastReceivers = new ArrayMap<>();
 
         UserManager userManager = mContext.getSystemService(UserManager.class);
         for (UserHandle user : userManager.getUserHandles(true)) {
@@ -275,7 +281,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
             }
         }, enableRollbackTimedOutFilter, null, getHandler());
 
-        IntentFilter userAddedIntentFilter = new IntentFilter(Intent.ACTION_USER_ADDED);
+        IntentFilter userIntentFilter = new IntentFilter();
+        userIntentFilter.addAction(Intent.ACTION_USER_ADDED);
+        userIntentFilter.addAction(Intent.ACTION_USER_REMOVED);
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -287,9 +295,15 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                         return;
                     }
                     registerUserCallbacks(UserHandle.of(newUserId));
+                } else if (Intent.ACTION_USER_REMOVED.equals(intent.getAction())) {
+                    final int newUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                    if (newUserId == -1) {
+                        return;
+                    }
+                    unregisterUserCallbacks(UserHandle.of(newUserId));
                 }
             }
-        }, userAddedIntentFilter, null, getHandler());
+        }, userIntentFilter, null, getHandler());
 
         registerTimeChangeReceiver();
     }
@@ -335,7 +349,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
         filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
         filter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
         filter.addDataScheme("package");
-        context.registerReceiver(new BroadcastReceiver() {
+        BroadcastReceiver receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 assertInWorkerThread();
@@ -354,7 +368,21 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                     onPackageFullyRemoved(packageName);
                 }
             }
-        }, filter, null, getHandler());
+        };
+        context.registerReceiver(receiver, filter, null, getHandler());
+        mUserBroadcastReceivers.put(user.getIdentifier(), new Pair(context, receiver));
+    }
+
+    @AnyThread
+    private void unregisterUserCallbacks(UserHandle user) {
+        Pair<Context, BroadcastReceiver> pair = mUserBroadcastReceivers.get(user.getIdentifier());
+        if (pair == null || pair.first == null || pair.second == null) {
+            Slog.e(TAG, "No receiver found for the user" + user);
+            return;
+        }
+
+        pair.first.unregisterReceiver(pair.second);
+        mUserBroadcastReceivers.remove(user.getIdentifier());
     }
 
     @ExtThread
@@ -898,7 +926,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
         }
         Slog.i(TAG, "Enabling rollback for install of " + packageName
                 + ", session:" + session.sessionId
-                + ", rollbackDataPolicy=" + rollbackDataPolicy);
+                + ", rollbackDataPolicy=" + rollbackDataPolicy
+                + ", rollbackId:" + rollback.info.getRollbackId()
+                + ", originalSessionId:" + rollback.getOriginalSessionId());
 
         final String installerPackageName = session.getInstallerPackageName();
         if (!enableRollbackAllowed(installerPackageName, packageName)) {

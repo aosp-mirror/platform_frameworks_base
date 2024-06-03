@@ -1,6 +1,7 @@
 aconfig_declarations {
     name: "policy_flags",
     package: "com.android.server.policy",
+    container: "system",
     srcs: ["*.aconfig"],
 }
 

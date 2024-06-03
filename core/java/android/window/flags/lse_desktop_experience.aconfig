@@ -1,4 +1,5 @@
 package: "com.android.window.flags"
+container: "system"
 
 flag {
     name: "enable_scaled_resizing"
@@ -20,4 +21,74 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Enables policy for modals activities"
     bug: "319492844"
+}
+
+flag {
+    name: "enable_windowing_dynamic_initial_bounds"
+    namespace: "lse_desktop_experience"
+    description: "Enables new initial bounds for desktop windowing which adjust depending on app constraints"
+    bug: "324377962"
+}
+
+flag {
+    name: "enable_desktop_windowing_task_limit"
+    namespace: "lse_desktop_experience"
+    description: "Enables a limit on the number of Tasks shown in Desktop Mode"
+    bug: "332502912"
+}
+
+flag {
+    name: "enable_windowing_edge_drag_resize"
+    namespace: "lse_desktop_experience"
+    description: "Enables edge drag resizing for all input sources"
+    bug: "323383067"
+}
+
+flag {
+    name: "enable_desktop_windowing_taskbar_running_apps"
+    namespace: "lse_desktop_experience"
+    description: "Shows running apps in Desktop Mode Taskbar"
+    bug: "332504528"
+}
+
+flag {
+    name: "enable_desktop_windowing_wallpaper_activity"
+    namespace: "lse_desktop_experience"
+    description: "Enables desktop wallpaper activity to show wallpaper in the desktop mode"
+    bug: "309014605"
+}
+
+flag {
+    name: "enable_desktop_windowing_immersive_handle_hiding"
+    namespace: "lse_desktop_experience"
+    description: "Hides the App Handle when in fullscreen immersive mode"
+    bug: "336368019"
+}
+
+flag {
+    name: "enable_desktop_windowing_quick_switch"
+    namespace: "lse_desktop_experience"
+    description: "Enables quick switch for desktop mode"
+    bug: "338066529"
+}
+
+flag {
+    name: "enable_additional_windows_above_status_bar"
+    namespace: "lse_desktop_experience"
+    description: "Allows for additional windows tied to WindowDecoration to be layered between status bar and notification shade."
+    bug: "316186265"
+}
+
+flag {
+    name: "enable_app_header_with_task_density"
+    namespace: "lse_desktop_experience"
+    description: "Matches the App Header density to that of the app window, instead of SysUI's"
+    bug: "332414819"
+}
+
+flag {
+    name: "enable_themed_app_headers"
+    namespace: "lse_desktop_experience"
+    description: "Makes the App Header style adapt to the system's and app's light/dark theme"
+    bug: "328668781"
 }

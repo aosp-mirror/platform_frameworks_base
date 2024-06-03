@@ -18,9 +18,12 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromGoneTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.flow.Flow
@@ -33,11 +36,14 @@ constructor(
 ) : DeviceEntryIconTransition {
 
     private val transitionAnimation =
-        animationFlow.setup(
-            duration = TO_LOCKSCREEN_DURATION,
-            from = KeyguardState.GONE,
-            to = KeyguardState.LOCKSCREEN
-        )
+        animationFlow
+            .setup(
+                duration = TO_LOCKSCREEN_DURATION,
+                edge = Edge.create(from = Scenes.Gone, to = LOCKSCREEN),
+            )
+            .setupWithoutSceneContainer(
+                edge = Edge.create(from = GONE, to = LOCKSCREEN),
+            )
 
     val shortcutsAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(

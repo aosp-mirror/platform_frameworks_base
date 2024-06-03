@@ -16,18 +16,16 @@
 
 package com.android.systemui.biometrics.data.repository
 
-import android.hardware.biometrics.BiometricManager
-import android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT
 import android.hardware.biometrics.PromptInfo
-import android.hardware.biometrics.PromptVerticalListContentView
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
@@ -46,6 +44,8 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
 private const val USER_ID = 9
+private const val REQUEST_ID = 9L
+private const val WRONG_REQUEST_ID = 10L
 private const val CHALLENGE = 90L
 private const val OP_PACKAGE_NAME = "biometric.testapp"
 
@@ -58,6 +58,7 @@ class PromptRepositoryImplTest : SysuiTestCase() {
 
     private val testScope = TestScope()
     private val faceSettings = FakeFaceSettingsRepository()
+    private val fakeExecutor = FakeExecutor(FakeSystemClock())
 
     @Mock private lateinit var authController: AuthController
 
@@ -106,6 +107,7 @@ class PromptRepositoryImplTest : SysuiTestCase() {
                 repository.setPrompt(
                     PromptInfo().apply { isConfirmationRequested = case },
                     USER_ID,
+                    REQUEST_ID,
                     CHALLENGE,
                     PromptKind.Biometric(),
                     OP_PACKAGE_NAME
@@ -125,6 +127,7 @@ class PromptRepositoryImplTest : SysuiTestCase() {
                 repository.setPrompt(
                     PromptInfo().apply { isConfirmationRequested = case },
                     USER_ID,
+                    REQUEST_ID,
                     CHALLENGE,
                     PromptKind.Biometric(),
                     OP_PACKAGE_NAME
@@ -135,72 +138,46 @@ class PromptRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun showBpWithoutIconForCredential_withCustomBp() =
-        testScope.runTest {
-            mSetFlagsRule.enableFlags(Flags.FLAG_CONSTRAINT_BP)
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            for (case in
-                listOf(
-                    PromptKind.Biometric(),
-                    PromptKind.Pin,
-                    PromptKind.Password,
-                    PromptKind.Pattern
-                )) {
-                val hasCredentialViewShown = case !is PromptKind.Biometric
-                val promptInfo =
-                    PromptInfo().apply {
-                        authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL
-                        contentView = PromptVerticalListContentView.Builder().build()
-                    }
-                repository.setPrompt(promptInfo, USER_ID, CHALLENGE, case, OP_PACKAGE_NAME)
-                repository.setShouldShowBpWithoutIconForCredential(promptInfo)
-
-                assertThat(repository.showBpWithoutIconForCredential.value)
-                    .isEqualTo(!hasCredentialViewShown)
-            }
-        }
-
-    @Test
-    fun showBpWithoutIconForCredential_withDescription() =
-        testScope.runTest {
-            for (case in
-                listOf(
-                    PromptKind.Biometric(),
-                    PromptKind.Pin,
-                    PromptKind.Password,
-                    PromptKind.Pattern
-                )) {
-                val promptInfo =
-                    PromptInfo().apply {
-                        authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL
-                        description = "description"
-                    }
-                repository.setPrompt(promptInfo, USER_ID, CHALLENGE, case, OP_PACKAGE_NAME)
-                repository.setShouldShowBpWithoutIconForCredential(promptInfo)
-
-                assertThat(repository.showBpWithoutIconForCredential.value).isFalse()
-            }
-        }
-
-    @Test
-    fun setsAndUnsetsPrompt() =
+    fun setsAndUnsetsPrompt_whenRequestIdMatches() =
         testScope.runTest {
             val kind = PromptKind.Pin
             val promptInfo = PromptInfo()
 
-            repository.setPrompt(promptInfo, USER_ID, CHALLENGE, kind, OP_PACKAGE_NAME)
+            repository.setPrompt(promptInfo, USER_ID, REQUEST_ID, CHALLENGE, kind, OP_PACKAGE_NAME)
 
-            assertThat(repository.kind.value).isEqualTo(kind)
+            assertThat(repository.promptKind.value).isEqualTo(kind)
             assertThat(repository.userId.value).isEqualTo(USER_ID)
             assertThat(repository.challenge.value).isEqualTo(CHALLENGE)
             assertThat(repository.promptInfo.value).isSameInstanceAs(promptInfo)
             assertThat(repository.opPackageName.value).isEqualTo(OP_PACKAGE_NAME)
 
-            repository.unsetPrompt()
+            repository.unsetPrompt(REQUEST_ID)
 
             assertThat(repository.promptInfo.value).isNull()
             assertThat(repository.userId.value).isNull()
             assertThat(repository.challenge.value).isNull()
             assertThat(repository.opPackageName.value).isNull()
+        }
+
+    @Test
+    fun setsAndUnsetsPrompt_whenRequestIdDoesNotMatch() =
+        testScope.runTest {
+            val kind = PromptKind.Pin
+            val promptInfo = PromptInfo()
+
+            repository.setPrompt(promptInfo, USER_ID, REQUEST_ID, CHALLENGE, kind, OP_PACKAGE_NAME)
+
+            assertThat(repository.promptKind.value).isEqualTo(kind)
+            assertThat(repository.userId.value).isEqualTo(USER_ID)
+            assertThat(repository.challenge.value).isEqualTo(CHALLENGE)
+            assertThat(repository.promptInfo.value).isSameInstanceAs(promptInfo)
+            assertThat(repository.opPackageName.value).isEqualTo(OP_PACKAGE_NAME)
+
+            repository.unsetPrompt(WRONG_REQUEST_ID)
+
+            assertThat(repository.promptInfo.value).isNotNull()
+            assertThat(repository.userId.value).isNotNull()
+            assertThat(repository.challenge.value).isNotNull()
+            assertThat(repository.opPackageName.value).isNotNull()
         }
 }

@@ -89,11 +89,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Tests for the AccessibilityWindowManager with Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y
+ * Tests for the AccessibilityWindowManager with Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y_V2
  * TODO(b/322444245): Merge with AccessibilityWindowManagerTest
  *  after completing the flag migration.
  */
-@RequiresFlagsEnabled(Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y)
+@RequiresFlagsEnabled(Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y_V2)
 public class AccessibilityWindowManagerWithAccessibilityWindowTest {
     private static final String PACKAGE_NAME = "com.android.server.accessibility";
     private static final boolean FORCE_SEND = true;

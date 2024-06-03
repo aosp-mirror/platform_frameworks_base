@@ -215,6 +215,9 @@ public class OverlayPackagesProvider {
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
+        if (packageInfo.applicationInfo == null || packageInfo.applicationInfo.metaData == null) {
+            return false;
+        }
         final String metadataKey = sActionToMetadataKeyMap.get(provisioningAction);
         return packageInfo.applicationInfo.metaData.getBoolean(metadataKey);
     }

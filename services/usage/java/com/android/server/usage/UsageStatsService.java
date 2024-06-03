@@ -654,7 +654,10 @@ public class UsageStatsService extends SystemService implements
                 }
             } else if (Intent.ACTION_USER_STARTED.equals(action)) {
                 if (userId >= 0) {
-                    mHandler.obtainMessage(MSG_USER_STARTED, userId, 0).sendToTarget();
+                    if (!Flags.disableIdleCheck() || userId > 0) {
+                        // Don't check idle state for USER_SYSTEM during the boot up.
+                        mHandler.obtainMessage(MSG_USER_STARTED, userId, 0).sendToTarget();
+                    }
                 }
             }
         }
@@ -1241,7 +1244,7 @@ public class UsageStatsService extends SystemService implements
                     break;
                 case Event.SHORTCUT_INVOCATION:
                 case Event.CHOOSER_ACTION:
-                case Event.STANDBY_BUCKET_CHANGED:
+                // case Event.STANDBY_BUCKET_CHANGED:
                 case Event.FOREGROUND_SERVICE_START:
                 case Event.FOREGROUND_SERVICE_STOP:
                     logAppUsageEventReportedAtomLocked(event.mEventType, uid, event.mPackage);
@@ -2013,6 +2016,8 @@ public class UsageStatsService extends SystemService implements
                 + ": " + Flags.useParceledList());
         pw.println("    " + Flags.FLAG_FILTER_BASED_EVENT_QUERY_API
                 + ": " + Flags.filterBasedEventQueryApi());
+        pw.println("    " + Flags.FLAG_DISABLE_IDLE_CHECK
+                + ": " + Flags.disableIdleCheck());
 
         final int[] userIds;
         synchronized (mLock) {

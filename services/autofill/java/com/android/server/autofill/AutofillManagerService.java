@@ -79,6 +79,7 @@ import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManager;
 import android.view.autofill.IAutoFillManagerClient;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AbstractRemoteService;
@@ -159,6 +160,7 @@ public final class AutofillManagerService
     final FrameworkResourcesServiceNameResolver mFieldClassificationResolver;
 
     private final AutoFillUI mUi;
+    final ComponentName mCredentialAutofillService;
 
     private final LocalLog mRequestsHistory = new LocalLog(20);
     private final LocalLog mUiLatencyHistory = new LocalLog(20);
@@ -288,6 +290,16 @@ public final class AutofillManagerService
                         mAugmentedAutofillResolver.isTemporary(userId));
             }
         }
+        String credentialManagerAutofillCompName = context.getResources().getString(
+                R.string.config_defaultCredentialManagerAutofillService);
+        if (credentialManagerAutofillCompName != null
+                && !credentialManagerAutofillCompName.isEmpty()) {
+            mCredentialAutofillService = ComponentName.unflattenFromString(
+                    credentialManagerAutofillCompName);
+        } else {
+            mCredentialAutofillService = null;
+            Slog.w(TAG, "Invalid CredentialAutofillService");
+        }
     }
 
     @Override // from AbstractMasterSystemService
@@ -363,6 +375,7 @@ public final class AutofillManagerService
                 case AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_PCC_FEATURE_PROVIDER_HINTS:
                 case AutofillFeatureFlags.DEVICE_CONFIG_PREFER_PROVIDER_OVER_PCC:
                 case AutofillFeatureFlags.DEVICE_CONFIG_PCC_USE_FALLBACK:
+                case AutofillFeatureFlags.DEVICE_CONFIG_FILL_FIELDS_FROM_CURRENT_SESSION_ONLY:
                 case Flags.FLAG_AUTOFILL_CREDMAN_INTEGRATION:
                     setDeviceConfigProperties();
                     break;
@@ -416,7 +429,6 @@ public final class AutofillManagerService
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-
         return managerService;
     }
 
@@ -710,7 +722,8 @@ public final class AutofillManagerService
                     AutofillFeatureFlags.DEVICE_CONFIG_MAX_INPUT_LENGTH_FOR_AUTOFILL,
                     AutofillFeatureFlags.DEFAULT_MAX_INPUT_LENGTH_FOR_AUTOFILL);
             mAutofillCredmanIntegrationEnabled = Flags.autofillCredmanIntegration();
-            mIsFillFieldsFromCurrentSessionOnly = Flags.fillFieldsFromCurrentSessionOnly();
+            mIsFillFieldsFromCurrentSessionOnly = AutofillFeatureFlags
+                    .shouldFillFieldsFromCurrentSessionOnly();
             if (verbose) {
                 Slog.v(mTag, "setDeviceConfigProperties() for PCC: "
                         + "mPccClassificationEnabled=" + mPccClassificationEnabled
@@ -1612,13 +1625,13 @@ public final class AutofillManagerService
     final class AutoFillManagerServiceStub extends IAutoFillManager.Stub {
         @Override
         public void addClient(IAutoFillManagerClient client, ComponentName componentName,
-                int userId, IResultReceiver receiver) {
+                int userId, IResultReceiver receiver, boolean credmanRequested) {
             int flags = 0;
             try {
                 synchronized (mLock) {
                     final int enabledFlags =
                             getServiceForUserWithLocalBinderIdentityLocked(userId)
-                            .addClientLocked(client, componentName);
+                            .addClientLocked(client, componentName, credmanRequested);
                     if (enabledFlags != 0) {
                         flags |= enabledFlags;
                     }
@@ -1631,7 +1644,7 @@ public final class AutofillManagerService
                 }
             } catch (Exception ex) {
                 // Don't do anything, send back default flags
-                Log.wtf(TAG, "addClient(): failed " + ex.toString());
+                Log.wtf(TAG, "addClient(): failed " + ex.toString(), ex);
             } finally {
                 send(receiver, flags);
             }
@@ -1978,6 +1991,19 @@ public final class AutofillManagerService
                         peekServiceForUserWithLocalBinderIdentityLocked(userId);
                 if (service != null) {
                     service.setAutofillFailureLocked(sessionId, getCallingUid(), ids);
+                } else if (sVerbose) {
+                    Slog.v(TAG, "setAutofillFailure(): no service for " + userId);
+                }
+            }
+        }
+
+        @Override
+        public void setViewAutofilled(int sessionId, @NonNull AutofillId id, int userId) {
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service =
+                        peekServiceForUserWithLocalBinderIdentityLocked(userId);
+                if (service != null) {
+                    service.setViewAutofilled(sessionId, getCallingUid(), id);
                 } else if (sVerbose) {
                     Slog.v(TAG, "setAutofillFailure(): no service for " + userId);
                 }

@@ -707,11 +707,11 @@ void BootAnimation::resizeSurface(int newWidth, int newHeight) {
     eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglDestroySurface(mDisplay, mSurface);
 
-    mFlingerSurfaceControl->updateDefaultBufferSize(newWidth, newHeight);
     const auto limitedSize = limitSurfaceSize(newWidth, newHeight);
     mWidth = limitedSize.width;
     mHeight = limitedSize.height;
 
+    mFlingerSurfaceControl->updateDefaultBufferSize(mWidth, mHeight);
     EGLConfig config = getEglConfig(mDisplay);
     EGLSurface surface = eglCreateWindowSurface(mDisplay, config, mFlingerSurface.get(), nullptr);
     if (eglMakeCurrent(mDisplay, surface, surface, mContext) == EGL_FALSE) {

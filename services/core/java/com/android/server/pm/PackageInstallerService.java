@@ -838,7 +838,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         if ((params.installFlags & PackageManager.INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK) != 0
                 && !PackageManagerServiceUtils.isSystemOrRootOrShell(callingUid)
-                && !Build.IS_DEBUGGABLE) {
+                && !Build.IS_DEBUGGABLE
+                && !PackageManagerServiceUtils.isAdoptedShell(callingUid, mContext)) {
             // If the bypass flag is set, but not running as system root or shell then remove
             // the flag
             params.installFlags &= ~PackageManager.INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK;

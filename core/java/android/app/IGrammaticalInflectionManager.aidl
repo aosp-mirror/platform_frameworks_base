@@ -43,4 +43,10 @@ import android.content.AttributionSource;
       * Gets the grammatical gender from system.
       */
      int getSystemGrammaticalGender(in AttributionSource attributionSource, int userId);
+
+     /**
+      * Peeks the grammatical gender from system by user Id.
+      */
+     int peekSystemGrammaticalGenderByUserId(in AttributionSource attributionSource, int userId);
+
  }

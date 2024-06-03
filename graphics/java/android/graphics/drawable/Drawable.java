@@ -839,7 +839,7 @@ public abstract class Drawable {
     }
 
     /**
-     * Describes the current state, as a union of primitve states, such as
+     * Describes the current state, as a union of primitive states, such as
      * {@link android.R.attr#state_focused},
      * {@link android.R.attr#state_selected}, etc.
      * Some drawables may modify their imagery based on the selected state.

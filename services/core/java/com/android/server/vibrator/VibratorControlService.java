@@ -51,8 +51,9 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -66,8 +67,8 @@ final class VibratorControlService extends IVibratorControlService.Stub {
     private static final int UNRECOGNIZED_VIBRATION_TYPE = -1;
     private static final int NO_SCALE = -1;
 
-    private static final SimpleDateFormat DEBUG_DATE_TIME_FORMAT =
-            new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
+    private static final DateTimeFormatter DEBUG_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(
+            "MM-dd HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
 
     private final VibrationParamsRecords mVibrationParamsRecords;
     private final VibratorControllerHolder mVibratorControllerHolder;
@@ -100,7 +101,9 @@ final class VibratorControlService extends IVibratorControlService.Stub {
     }
 
     @Override
-    public void registerVibratorController(IVibratorController controller) {
+    public void registerVibratorController(@NonNull IVibratorController controller) {
+        Objects.requireNonNull(controller);
+
         synchronized (mLock) {
             mVibratorControllerHolder.setVibratorController(controller);
         }
@@ -133,6 +136,7 @@ final class VibratorControlService extends IVibratorControlService.Stub {
     public void setVibrationParams(@SuppressLint("ArrayReturn") VibrationParam[] params,
             @NonNull IVibratorController token) {
         Objects.requireNonNull(token);
+        requireContainsNoNullElement(params);
 
         synchronized (mLock) {
             if (mVibratorControllerHolder.getVibratorController() == null) {
@@ -145,6 +149,13 @@ final class VibratorControlService extends IVibratorControlService.Stub {
                     token.asBinder())) {
                 Slog.wtf(TAG, "Failed to set new VibrationParams. The provided "
                         + "controller doesn't match the registered one. " + this);
+                return;
+            }
+            if (params == null) {
+                // Adaptive haptics scales cannot be set to null. Ignoring request.
+                Slog.d(TAG,
+                        "New vibration params received but are null. New vibration "
+                                + "params ignored.");
                 return;
             }
 
@@ -180,6 +191,7 @@ final class VibratorControlService extends IVibratorControlService.Stub {
     public void onRequestVibrationParamsComplete(
             @NonNull IBinder requestToken, @SuppressLint("ArrayReturn") VibrationParam[] result) {
         Objects.requireNonNull(requestToken);
+        requireContainsNoNullElement(result);
 
         synchronized (mLock) {
             if (mVibrationParamRequest == null) {
@@ -200,6 +212,13 @@ final class VibratorControlService extends IVibratorControlService.Stub {
 
             long latencyMs = SystemClock.uptimeMillis() - mVibrationParamRequest.uptimeMs;
             mStatsLogger.logVibrationParamRequestLatency(mVibrationParamRequest.uid, latencyMs);
+
+            if (result == null) {
+                Slog.d(TAG,
+                        "New vibration params received but are null. New vibration "
+                                + "params ignored.");
+                return;
+            }
 
             updateAdaptiveHapticsScales(result);
             endOngoingRequestVibrationParamsLocked(/* wasCancelled= */ false);
@@ -400,10 +419,9 @@ final class VibratorControlService extends IVibratorControlService.Stub {
      *
      * @param params the new vibration params.
      */
-    private void updateAdaptiveHapticsScales(@Nullable VibrationParam[] params) {
-        if (params == null) {
-            return;
-        }
+    private void updateAdaptiveHapticsScales(@NonNull VibrationParam[] params) {
+        Objects.requireNonNull(params);
+
         for (VibrationParam param : params) {
             if (param.getTag() != VibrationParam.scale) {
                 Slog.e(TAG, "Unsupported vibration param: " + param);
@@ -447,11 +465,10 @@ final class VibratorControlService extends IVibratorControlService.Stub {
         mVibrationScaler.updateAdaptiveHapticsScale(usageHint, scale);
     }
 
-    private void recordUpdateVibrationParams(@Nullable VibrationParam[] params,
+    private void recordUpdateVibrationParams(@NonNull VibrationParam[] params,
             boolean fromRequest) {
-        if (params == null) {
-            return;
-        }
+        Objects.requireNonNull(params);
+
         VibrationParamsRecords.Operation operation =
                 fromRequest ? VibrationParamsRecords.Operation.PULL
                         : VibrationParamsRecords.Operation.PUSH;
@@ -471,6 +488,13 @@ final class VibratorControlService extends IVibratorControlService.Stub {
         long createTime = SystemClock.uptimeMillis();
         mVibrationParamsRecords.add(new VibrationScaleParamRecord(
                 VibrationParamsRecords.Operation.CLEAR, createTime, typesMask, NO_SCALE));
+    }
+
+    private void requireContainsNoNullElement(VibrationParam[] params) {
+        if (ArrayUtils.contains(params, null)) {
+            throw new IllegalArgumentException(
+                    "Invalid vibration params received: null values are not permitted.");
+        }
     }
 
     /**
@@ -567,7 +591,7 @@ final class VibratorControlService extends IVibratorControlService.Stub {
         public void dump(IndentingPrintWriter pw) {
             String line = String.format(Locale.ROOT,
                     "%s | %6s | scale: %5s | typesMask: %6s | usages: %s",
-                    DEBUG_DATE_TIME_FORMAT.format(new Date(mCreateTime)),
+                    DEBUG_DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(mCreateTime)),
                     mOperation.name().toLowerCase(Locale.ROOT),
                     (mScale == NO_SCALE) ? "" : String.format(Locale.ROOT, "%.2f", mScale),
                     Long.toBinaryString(mTypesMask), createVibrationUsagesString());

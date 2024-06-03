@@ -67,6 +67,7 @@ import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogTransitionAnimator;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
@@ -323,7 +324,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         // remaining estimate is disabled
         if (!mCurrentBatterySnapshot.isHybrid() || mBucket < -1
                 || mCurrentBatterySnapshot.getTimeRemainingMillis()
-                        < mCurrentBatterySnapshot.getSevereThresholdMillis()) {
+                < mCurrentBatterySnapshot.getSevereThresholdMillis()) {
             nb.setColor(Utils.getColorAttrDefaultColor(mContext, android.R.attr.colorError));
         }
 
@@ -703,17 +704,23 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             mSaverConfirmation = null;
             logEvent(BatteryWarningEvents.LowBatteryWarningEvent.SAVER_CONFIRM_DISMISS);
         });
-        WeakReference<View> ref = mBatteryControllerLazy.get().getLastPowerSaverStartView();
-        if (ref != null && ref.get() != null && ref.get().isAggregatedVisible()) {
-            mDialogTransitionAnimator.showFromView(d, ref.get(),
+        WeakReference<Expandable> ref =
+                mBatteryControllerLazy.get().getLastPowerSaverStartExpandable();
+        if (ref != null && ref.get() != null) {
+            DialogTransitionAnimator.Controller controller = ref.get().dialogTransitionController(
                     new DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
                             INTERACTION_JANK_TAG));
+            if (controller != null) {
+                mDialogTransitionAnimator.show(d, controller);
+            } else {
+                d.show();
+            }
         } else {
             d.show();
         }
         logEvent(BatteryWarningEvents.LowBatteryWarningEvent.SAVER_CONFIRM_DIALOG);
         mSaverConfirmation = d;
-        mBatteryControllerLazy.get().clearLastPowerSaverStartView();
+        mBatteryControllerLazy.get().clearLastPowerSaverStartExpandable();
     }
 
     @VisibleForTesting

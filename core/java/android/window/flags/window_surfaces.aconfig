@@ -1,4 +1,5 @@
 package: "com.android.window.flags"
+container: "system"
 
 # Project link: https://gantry.corp.google.com/projects/android_platform_window_surfaces/changes
 
@@ -45,6 +46,7 @@ flag {
 flag {
     namespace: "window_surfaces"
     name: "trusted_presentation_listener_for_window"
+    is_exported: true
     description: "Enable trustedPresentationListener on windows public API"
     is_fixed_read_only: true
     bug: "278027319"
@@ -53,6 +55,7 @@ flag {
 flag {
     namespace: "window_surfaces"
     name: "sdk_desired_present_time"
+    is_exported: true
     description: "Feature flag for the new SDK API to set desired present time"
     is_fixed_read_only: true
     bug: "295038072"
@@ -61,6 +64,7 @@ flag {
 flag {
     namespace: "window_surfaces"
     name: "surface_control_input_receiver"
+    is_exported: true
     description: "Enable public API to register an InputReceiver for a SurfaceControl"
     is_fixed_read_only: true
     bug: "278757236"
@@ -69,6 +73,7 @@ flag {
 flag {
     namespace: "window_surfaces"
     name: "screen_recording_callbacks"
+    is_exported: true
     description: "Enable screen recording callbacks public API"
     is_fixed_read_only: true
     bug: "304574518"
@@ -91,4 +96,12 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    namespace: "window_surfaces"
+    name: "set_sc_properties_in_client"
+    description: "Set VRI SC properties in the client instead of system server"
+    is_fixed_read_only: true
+    bug: "308662081"
 }

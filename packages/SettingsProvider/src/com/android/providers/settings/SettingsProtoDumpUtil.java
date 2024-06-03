@@ -1760,6 +1760,9 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER,
                 SecureSettingsProto.Accessibility.DISPLAY_DALTONIZER);
         dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_SATURATION_LEVEL,
+                SecureSettingsProto.Accessibility.DISPLAY_DALTONIZER_SATURATION_LEVEL);
+        dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
                 SecureSettingsProto.Accessibility.DISPLAY_INVERSION_ENABLED);
         dumpSetting(s, p,
@@ -1837,6 +1840,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED,
                 SecureSettingsProto.Accessibility.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_GESTURE_TARGETS,
+                SecureSettingsProto.Accessibility.ACCESSIBILITY_GESTURE_TARGETS);
         dumpSetting(s, p,
                 Settings.Secure.ODI_CAPTIONS_VOLUME_UI_ENABLED,
                 SecureSettingsProto.Accessibility.ODI_CAPTIONS_VOLUME_UI_ENABLED);
@@ -2108,6 +2114,12 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.DOUBLE_TAP_TO_WAKE,
                 SecureSettingsProto.DOUBLE_TAP_TO_WAKE);
+
+        final long displayToken = p.start(SecureSettingsProto.DISPLAY);
+        dumpSetting(s, p,
+                Settings.Secure.SCREEN_RESOLUTION_MODE,
+                SecureSettingsProto.Display.SCREEN_RESOLUTION_MODE);
+        p.end(displayToken);
 
         final long dozeToken = p.start(SecureSettingsProto.DOZE);
         dumpSetting(s, p,
@@ -2733,6 +2745,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.ZEN_SETTINGS_SUGGESTION_VIEWED,
                 SecureSettingsProto.Zen.SETTINGS_SUGGESTION_VIEWED);
+        dumpSetting(s, p,
+                Settings.Secure.CHARGE_OPTIMIZATION_MODE,
+                SecureSettingsProto.CHARGE_OPTIMIZATION_MODE);
         p.end(zenToken);
 
         // Please insert new settings using the same order as in SecureSettingsProto.
@@ -2934,9 +2949,6 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
                 SystemSettingsProto.Screen.AUTO_BRIGHTNESS_ADJ);
-        dumpSetting(s, p,
-                Settings.System.SCREEN_BRIGHTNESS_FLOAT,
-                SystemSettingsProto.Screen.BRIGHTNESS_FLOAT);
         p.end(screenToken);
 
         dumpSetting(s, p,

@@ -1,4 +1,5 @@
 package: "com.android.server.alarm"
+container: "system"
 
 flag {
     name: "use_frozen_state_to_drop_listener_alarms"

@@ -44,6 +44,7 @@ import com.android.wm.shell.bubbles.BubbleViewProvider;
 import com.android.wm.shell.bubbles.DeviceConfig;
 import com.android.wm.shell.bubbles.DismissViewUtils;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedViewDragController.DragListener;
+import com.android.wm.shell.common.bubbles.BaseBubblePinController;
 import com.android.wm.shell.common.bubbles.BubbleBarLocation;
 import com.android.wm.shell.common.bubbles.DismissView;
 
@@ -71,7 +72,7 @@ public class BubbleBarLayerView extends FrameLayout
     private final BubbleBarAnimationHelper mAnimationHelper;
     private final BubbleEducationViewController mEducationViewController;
     private final View mScrimView;
-    private final BubbleBarDropTargetController mDropTargetController;
+    private final BubbleExpandedViewPinController mBubbleExpandedViewPinController;
 
     @Nullable
     private BubbleViewProvider mExpandedBubble;
@@ -116,7 +117,20 @@ public class BubbleBarLayerView extends FrameLayout
 
         setUpDismissView();
 
-        mDropTargetController = new BubbleBarDropTargetController(context, this, mPositioner);
+        mBubbleExpandedViewPinController = new BubbleExpandedViewPinController(
+                context, this, mPositioner);
+        mBubbleExpandedViewPinController.setListener(
+                new BaseBubblePinController.LocationChangeListener() {
+                    @Override
+                    public void onChange(@NonNull BubbleBarLocation bubbleBarLocation) {
+                        mBubbleController.animateBubbleBarLocation(bubbleBarLocation);
+                    }
+
+                    @Override
+                    public void onRelease(@NonNull BubbleBarLocation location) {
+                        mBubbleController.setBubbleBarLocation(location);
+                    }
+                });
 
         setOnClickListener(view -> hideMenuOrCollapse());
     }
@@ -207,12 +221,17 @@ public class BubbleBarLayerView extends FrameLayout
                 }
             });
 
-            DragListener dragListener = createDragListener();
+            DragListener dragListener = inDismiss -> {
+                if (inDismiss && mExpandedBubble != null) {
+                    mBubbleController.dismissBubble(mExpandedBubble.getKey(), DISMISS_USER_GESTURE);
+                }
+            };
             mDragController = new BubbleBarExpandedViewDragController(
                     mExpandedView,
                     mDismissView,
                     mAnimationHelper,
                     mPositioner,
+                    mBubbleExpandedViewPinController,
                     dragListener);
 
             addView(mExpandedView, new LayoutParams(width, height, Gravity.LEFT));
@@ -337,7 +356,7 @@ public class BubbleBarLayerView extends FrameLayout
     }
 
     /** Updates the expanded view size and position. */
-    private void updateExpandedView() {
+    public void updateExpandedView() {
         if (mExpandedView == null || mExpandedBubble == null) return;
         boolean isOverflowExpanded = mExpandedBubble.getKey().equals(BubbleOverflow.KEY);
         mPositioner.getBubbleBarExpandedViewBounds(mPositioner.isBubbleBarOnLeft(),
@@ -377,26 +396,4 @@ public class BubbleBarLayerView extends FrameLayout
         }
     }
 
-    private DragListener createDragListener() {
-        return new DragListener() {
-            @Override
-            public void onLocationChanged(@NonNull BubbleBarLocation location) {
-                mBubbleController.setBubbleBarLocation(location);
-                mDropTargetController.show(location);
-            }
-
-            @Override
-            public void onStuckToDismissChanged(boolean isStuck) {
-                mDropTargetController.setHidden(isStuck);
-            }
-
-            @Override
-            public void onReleased(boolean inDismiss) {
-                mDropTargetController.dismiss();
-                if (inDismiss && mExpandedBubble != null) {
-                    mBubbleController.dismissBubble(mExpandedBubble.getKey(), DISMISS_USER_GESTURE);
-                }
-            }
-        };
-    }
 }

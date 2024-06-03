@@ -272,9 +272,9 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
         assertEquals(View.VISIBLE, mFakeDateView.getVisibility());
 
         when(mSmallClockController.getConfig())
-                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, true, false));
+                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, true, false, true));
         when(mLargeClockController.getConfig())
-                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, true, false));
+                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, true, false, true));
         verify(mClockRegistry).registerClockChangeListener(listenerArgumentCaptor.capture());
         listenerArgumentCaptor.getValue().onCurrentClockChanged();
 

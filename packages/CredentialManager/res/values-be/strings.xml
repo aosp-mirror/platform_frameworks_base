@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Хоць мы ўжо рухаемся ў бок будучыні без выкарыстання пароляў, яны па-ранейшаму застануцца даступнымі нароўні з ключамі доступу."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Выберыце, куды захаваць <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Выберыце менеджар пароляў, каб захаваць свае даныя і забяспечыць хуткі ўваход у наступныя разы"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Стварыць ключ доступу для ўваходу ў праграму \"<xliff:g id="APPNAME">%1$s</xliff:g>\"?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Захаваць пароль для ўваходу ў праграму \"<xliff:g id="APPNAME">%1$s</xliff:g>\"?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Захаваць інфармацыю пра спосаб уваходу ў праграму \"<xliff:g id="APPNAME">%1$s</xliff:g>\"?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Стварыць ключ доступу для ўваходу ў праграму \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"Захаваць пароль для ўваходу ў праграму \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Захаваць даныя для ўваходу ў праграму \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
     <string name="passkey" msgid="632353688396759522">"ключ доступу"</string>
     <string name="password" msgid="6738570945182936667">"пароль"</string>
     <string name="passkeys" msgid="5733880786866559847">"ключы доступу"</string>
@@ -68,14 +68,15 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Вярнуцца да папярэдняй старонкі"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Закрыць"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Закрыць"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Скарыстаць захаваны ключ доступу для праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Выкарыстоўваць пароль, захаваны для праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Скарыстаць ваш спосаб уваходу для праграмы <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Разблакіраваць варыянты ўваходу для праграмы\"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Выкарыстайце захаваны ключ доступу для праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Выкарыстайце захаваны пароль для праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Выкарыстайце ўліковы запіс для ўваходу ў праграму \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Выкарыстайце спосаб разблакіроўкі экрана, каб увайсці ў праграму \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" як <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Разблакіруйце спосабы ўваходу для праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Выберыце захаваны ключ доступу для праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Выберыце захаваны пароль для праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Выберыце захаваны спосаб уваходу для праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Выберыце спосаб уваходу для праграмы <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"Выберыце ўліковы запіс для праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Выберыце ўліковыя даныя для ўваходу ў праграму \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Выкарыстоўваць гэтую інфармацыю на прыладзе <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Увайсці іншым спосабам"</string>

@@ -17,9 +17,12 @@
 package com.android.systemui.shade
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.plugins.qs.QSContainerController
 import com.android.systemui.qs.ui.adapter.QSSceneAdapterImpl
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.shade.carrier.ShadeCarrierGroupControllerLog
 import com.android.systemui.shade.data.repository.PrivacyChipRepository
 import com.android.systemui.shade.data.repository.PrivacyChipRepositoryImpl
 import com.android.systemui.shade.data.repository.ShadeRepository
@@ -36,6 +39,7 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl
 import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl
 import com.android.systemui.shade.domain.interactor.ShadeInteractorSceneContainerImpl
+import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
 import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractorImpl
 import dagger.Binds
 import dagger.Module
@@ -49,11 +53,10 @@ abstract class ShadeModule {
         @Provides
         @SysUISingleton
         fun provideBaseShadeInteractor(
-            sceneContainerFlags: SceneContainerFlags,
             sceneContainerOn: Provider<ShadeInteractorSceneContainerImpl>,
             sceneContainerOff: Provider<ShadeInteractorLegacyImpl>
         ): BaseShadeInteractor {
-            return if (sceneContainerFlags.isEnabled()) {
+            return if (SceneContainerFlag.isEnabled) {
                 sceneContainerOn.get()
             } else {
                 sceneContainerOff.get()
@@ -63,11 +66,10 @@ abstract class ShadeModule {
         @Provides
         @SysUISingleton
         fun provideShadeController(
-            sceneContainerFlags: SceneContainerFlags,
             sceneContainerOn: Provider<ShadeControllerSceneImpl>,
             sceneContainerOff: Provider<ShadeControllerImpl>
         ): ShadeController {
-            return if (sceneContainerFlags.isEnabled()) {
+            return if (SceneContainerFlag.isEnabled) {
                 sceneContainerOn.get()
             } else {
                 sceneContainerOff.get()
@@ -77,11 +79,10 @@ abstract class ShadeModule {
         @Provides
         @SysUISingleton
         fun provideShadeAnimationInteractor(
-            sceneContainerFlags: SceneContainerFlags,
             sceneContainerOn: Provider<ShadeAnimationInteractorSceneContainerImpl>,
             sceneContainerOff: Provider<ShadeAnimationInteractorLegacyImpl>
         ): ShadeAnimationInteractor {
-            return if (sceneContainerFlags.isEnabled()) {
+            return if (SceneContainerFlag.isEnabled) {
                 sceneContainerOn.get()
             } else {
                 sceneContainerOff.get()
@@ -91,11 +92,10 @@ abstract class ShadeModule {
         @Provides
         @SysUISingleton
         fun provideShadeBackActionInteractor(
-            sceneContainerFlags: SceneContainerFlags,
             sceneContainerOn: Provider<ShadeBackActionInteractorImpl>,
             sceneContainerOff: Provider<NotificationPanelViewController>
         ): ShadeBackActionInteractor {
-            return if (sceneContainerFlags.isEnabled()) {
+            return if (SceneContainerFlag.isEnabled) {
                 sceneContainerOn.get()
             } else {
                 sceneContainerOff.get()
@@ -105,11 +105,10 @@ abstract class ShadeModule {
         @Provides
         @SysUISingleton
         fun provideShadeLockscreenInteractor(
-            sceneContainerFlags: SceneContainerFlags,
             sceneContainerOn: Provider<ShadeLockscreenInteractorImpl>,
             sceneContainerOff: Provider<NotificationPanelViewController>
         ): ShadeLockscreenInteractor {
-            return if (sceneContainerFlags.isEnabled()) {
+            return if (SceneContainerFlag.isEnabled) {
                 sceneContainerOn.get()
             } else {
                 sceneContainerOff.get()
@@ -119,11 +118,10 @@ abstract class ShadeModule {
         @Provides
         @SysUISingleton
         fun providePanelExpansionInteractor(
-            sceneContainerFlags: SceneContainerFlags,
             sceneContainerOn: Provider<PanelExpansionInteractorImpl>,
             sceneContainerOff: Provider<NotificationPanelViewController>
         ): PanelExpansionInteractor {
-            return if (sceneContainerFlags.isEnabled()) {
+            return if (SceneContainerFlag.isEnabled) {
                 sceneContainerOn.get()
             } else {
                 sceneContainerOff.get()
@@ -133,11 +131,10 @@ abstract class ShadeModule {
         @Provides
         @SysUISingleton
         fun provideQuickSettingsController(
-            sceneContainerFlags: SceneContainerFlags,
             sceneContainerOn: Provider<QuickSettingsControllerSceneImpl>,
             sceneContainerOff: Provider<QuickSettingsControllerImpl>,
         ): QuickSettingsController {
-            return if (sceneContainerFlags.isEnabled()) {
+            return if (SceneContainerFlag.isEnabled) {
                 sceneContainerOn.get()
             } else {
                 sceneContainerOff.get()
@@ -148,6 +145,13 @@ abstract class ShadeModule {
         @SysUISingleton
         fun providesQSContainerController(impl: QSSceneAdapterImpl): QSContainerController {
             return impl
+        }
+
+        @Provides
+        @SysUISingleton
+        @ShadeCarrierGroupControllerLog
+        fun provideShadeCarrierLog(factory: LogBufferFactory): LogBuffer {
+            return factory.create("ShadeCarrierGroupControllerLog", 400)
         }
     }
 
@@ -161,9 +165,7 @@ abstract class ShadeModule {
 
     @Binds
     @SysUISingleton
-    abstract fun bindsShadeViewController(
-        notificationPanelViewController: NotificationPanelViewController
-    ): ShadeViewController
+    abstract fun bindsShadeViewController(shadeSurface: ShadeSurface): ShadeViewController
 
     @Binds
     @SysUISingleton

@@ -94,24 +94,40 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Միացված է (հեռախոս չկա), մարտկոցի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Միացված է (մեդիա չկա), մարտկոցի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Միացված է (հեռախոս կամ մեդիա չկա), մարտկոցի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Ակտիվ է։ Մարտկոցի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Ակտիվ է, Ա` Մարտկոցի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Ձ՝ Մարտկոցի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"Ակտիվ է։ Մարտկոցի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>։"</string>
+    <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"Ակտիվ է։ Ձախ ականջակալի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, աջ ականջակալի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>։"</string>
+    <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"Ակտիվ է։ Ձախ․ մարտկոցի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>։"</string>
+    <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"Ակտիվ է։ Աջ․ մարտկոցի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>։"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Մարտկոցի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"Մարտկոցի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Ա՝ Մարտկոցի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Ձ՝ Մարտկոցի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered_left" msgid="2952823007648782646">"Ձախը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered_right" msgid="6525710737740083276">"Աջը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"Ձախ ականջակալի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, աջ ականջակալի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>։"</string>
+    <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"Ձախ ականջակալի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"Աջ ականջակալի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"Ձախը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_right" msgid="8610019317279155595">"Աջը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Ակտիվ է"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Պահված է"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Ակտիվ, միայն ձախ"</string>
-    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Ակտիվ, միայն աջ"</string>
-    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Ակտիվ, ձախ և աջ"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Ակտիվ է (միայն ձախ)"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Ակտիվ է (միայն աջ)"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Ակտիվ է (ձախ և աջ)"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Ակտիվ է (միայն մեդիա)։ Մարտկոցի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>։"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Ակտիվ է (միայն մեդիա)։ Ձախ ականջակալի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, աջ ականջակալի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>։"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Միացված է (աջակցում է աուդիոյի փոխանցում)։ Մարտկոցի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>։"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"Միացված է (աջակցում է աուդիոյի փոխանցում)։ Ձախ ականջակալի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, աջ ականջակալի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>։"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="7707464334346454950">"Միացված է (աջակցում է աուդիոյի փոխանցում)։ Ձախ ականջակալի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>։"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"Միացված է (աջակցում է աուդիոյի փոխանցում)։ Աջ ականջակալի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>։"</string>
+    <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"Միացված է (աջակցում է աուդիոյի փոխանցում)"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Ակտիվ է (միայն մեդիա)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Աջակցում է աուդիոյի փոխանցում"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Ակտիվ է (միայն մեդիա), միայն ձախ"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Ակտիվ է (միայն մեդիա), միայն աջ"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Ակտիվ է (միայն մեդիա), աջ և ձախ"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Մեդիա աուդիո"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Հեռախոսազանգեր"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Ֆայլերի փոխանցում"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Ներմուծման սարք"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Ինտերնետի հասանելիություն"</string>
-    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Տրամադրել կոնտակտները և զանգերի պատմութ․"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Կոնտակտների և զանգերի մատյանի հասանելիություն"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Տվյալները կօգտագործվեն զանգերի ծանուցումների համար և այլն"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Ինտերնետ կապի տարածում"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"SMS հաղորդագրություններ"</string>
@@ -145,7 +161,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Չեղարկել"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Զուգակցում է մուտքի թույլտվությունը դեպի ձեր կոնտակտները և զանգերի պատմությունը, երբ միացված է:"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Չհաջողվեց զուգակցել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ:"</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Չհաջողվեց զուգակցել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ սխալ PIN-ի կամ անցաբառի պատճառով:"</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Չհաջողվեց զուգակցել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ՝ սխալ PIN-ի կամ մուտքի բանալու պատճառով:"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Հնարավոր չէ կապ հաստատել  <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ:"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Զուգավորումը մերժվեց <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի կողմից:"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Համակարգիչ"</string>
@@ -244,7 +260,7 @@
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Զուգակցեք նոր սարքեր՝ օգտագործելով վեցանիշ կոդը"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Զուգակցված սարքեր"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Միացված է"</string>
-    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Սարքի տվյալները"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Սարքի տվյալներ"</string>
     <string name="adb_device_forget" msgid="193072400783068417">"Հեռացնել"</string>
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Սարքի մատնահետք՝ <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Չհաջողվեց միացնել"</string>
@@ -437,9 +453,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Ենթադրել, որ հավելվածներն աջակցում են ժամանակակից ձևաչափեր"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Ցույց տալ տրանսկոդավորման մասին ծանուցումները"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Անջատել տրանսկոդավորման քեշը"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine-ի կարգավորումներ"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"L3 պահուստային տարբերակի ստիպողական գործարկում"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Ընտրեք՝ L3 պահուստային տարբերակը ստիպողաբար գործարկելու համար"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Աշխատող ծառայություններ"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Դիտել և վերահսկել ընթացիկ աշխատող ծառայությունները"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView ծառայություն"</string>
@@ -479,6 +492,10 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> մինչև լրիվ լիցքավորումը"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – Լիցքավորումն օպտիմալացված է"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> — Լիցքավորում"</string>
+    <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATUS">%2$s</xliff:g> – Ամբողջովին կլիցքավորվի մինչև <xliff:g id="TIME">%3$s</xliff:g>"</string>
+    <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> – Ամբողջովին կլիցքավորվի մինչև <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"Ամբողջովին կլիցքավորվի մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"Ամբողջովին կլիցքավորվի մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Անհայտ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Լիցքավորում"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Արագ լիցքավորում"</string>
@@ -490,6 +507,8 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"Լիցքավորված է"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Լրիվ լիցքավորված է"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Լրցքավորումը դադարեցված է"</string>
+    <string name="battery_info_status_charging_v2" msgid="6118522107222245505">"Լիցքավորում"</string>
+    <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"Արագ լիցքավորում"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Վերահսկվում է ադմինիստրատորի կողմից"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Կառավարվում է սահմանափակ ռեժիմի կարգավորումներով"</string>
     <string name="disabled" msgid="8017887509554714950">"Կասեցված է"</string>
@@ -578,8 +597,8 @@
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Լարով աուդիո սարք"</string>
     <string name="help_label" msgid="3528360748637781274">"Օգնություն և հետադարձ կապ"</string>
     <string name="storage_category" msgid="2287342585424631813">"Տարածք"</string>
-    <string name="shared_data_title" msgid="1017034836800864953">"Հասանելի դարձված տվյալներ"</string>
-    <string name="shared_data_summary" msgid="5516326713822885652">"Դիտեք և փոփոխեք հասանելի դարձված տվյալները"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Ընդհանուր տվյալներ"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Դիտեք և փոփոխեք ընդհանուր տվյալները"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Այս օգտատիրոջ համար ընդհանուր տվյալներ չկան։"</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Չհաջողվեց բեռնել ընդհանուր տվյալները։ Նորից փորձեք։"</string>
     <string name="blob_id_text" msgid="8680078988996308061">"Հասանելի դարձված տվյալների ID՝ <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
@@ -589,7 +608,7 @@
     <string name="accessor_info_title" msgid="8289823651512477787">"Տվյալներով կիսվող հավելվածներ"</string>
     <string name="accessor_no_description_text" msgid="7510967452505591456">"Հավելվածի կողմից տրամադրված նկարագրություն չկա։"</string>
     <string name="accessor_expires_text" msgid="4625619273236786252">"Վարձակալության ժակետն ավարտվում է՝ <xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="delete_blob_text" msgid="2819192607255625697">"Ջնջել հասանելի դարձված տվյալները"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Ջնջել ընդհանուր տվյալները"</string>
     <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Իսկապե՞ս ուզում եք ջնջել հասանելի դարձված այս տվյալները։"</string>
     <string name="user_add_user_item_summary" msgid="5748424612724703400">"Օգտվողներն իրենց անձնական հավելվածներն ու բովանդակությունն ունեն"</string>
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Դուք կարող եք սահմանափակել մուտքի իրավունքը ծրագրեր և ձեր հաշվի բովանդակություն:"</string>
@@ -619,8 +638,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Չհաջողվեց ստեղծել նոր օգտատեր"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Չհաջողվեց նոր հյուր ստեղծել"</string>
     <string name="user_nickname" msgid="262624187455825083">"Կեղծանուն"</string>
-    <!-- no translation found for edit_user_info_message (6677556031419002895) -->
-    <skip />
+    <string name="edit_user_info_message" msgid="6677556031419002895">"Ձեր ընտրած անունն ու նկարը տեսանելի կլինեն այս սարքն օգտագործող բոլոր մարդկանց։"</string>
     <string name="user_add_user" msgid="7876449291500212468">"Ավելացնել օգտատեր"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Ավելացնել հյուր"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Հեռացնել հյուրին"</string>
@@ -647,8 +665,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Եթե դուրս գաք, ամբողջ պատմությունը կջնջվի"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Դուրս գալիս կարող եք պահել կամ ջնջել ձեր պատմությունը"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Վերակայեք աշխատաշրջանի պատմությունը հիմա կամ պահեք/ջնջեք այն դուրս գալիս"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Լուսանկարել"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"Ընտրել պատկեր"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Ընտրեք լուսանկար"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Չափից շատ սխալ փորձեր են արվել։ Այս սարքի տվյալները կջնջվեն։"</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Չափից շատ սխալ փորձեր են արվել։ Oգտատիրոջ պրոֆիլը կջնջվի։"</string>
@@ -679,6 +695,7 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"Հեռախոսի մեկ գիծ:"</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"Հեռախոսի երկու գիծ:"</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"Հեռախոսի երեք գիծ:"</string>
+    <string name="accessibility_phone_four_bars" msgid="4477202400261338403">"Հեռախոսակապի ուժգնությունը՝ չորս գիծ։"</string>
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"Հեռախոսի ազդանշանը լիքն է:"</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"Տվյալներ չկան:"</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Տվյալների մեկ գիծ:"</string>
@@ -688,12 +705,10 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet-ը անջատված է:"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet։"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Զանգել հնարավոր չէ։"</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Ընտրեք պրոֆիլի նկար"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"Օգտատիրոջ կանխադրված պատկերակ"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Ֆիզիկական ստեղնաշար"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Ընտրեք ստեղնաշարի դասավորությունը"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Կանխադրված"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Էկրանի միացում"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"Էկրանի միացման կառավարում"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Թույլատրել հավելվածին միացնել էկրանը"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Եթե թույլ տաք, հավելվածը ցանկացած ժամանակ կկարողանա միացնել էկրանը՝ առանց ձեր բացահայտ համաձայնության։"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Կանգնեցնել <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի հեռարձակումը"</string>
@@ -708,4 +723,5 @@
     <string name="neuter" msgid="2075249330106127310">"Չեզոք"</string>
     <string name="feminine" msgid="1529155595310784757">"Իգական"</string>
     <string name="masculine" msgid="4653978041013996303">"Արական"</string>
+    <string name="system_update_settings_list_item_title" msgid="6618098383615432484">"Համակարգի թարմացումներ"</string>
 </resources>

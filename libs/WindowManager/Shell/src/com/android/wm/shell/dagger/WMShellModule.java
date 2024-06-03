@@ -29,6 +29,7 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.launcher3.icons.IconProvider;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
@@ -52,16 +53,14 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
-import com.android.wm.shell.common.annotations.ShellAnimationThread;
-import com.android.wm.shell.common.annotations.ShellBackgroundThread;
-import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.dagger.back.ShellBackAnimationModule;
 import com.android.wm.shell.dagger.pip.PipModule;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
 import com.android.wm.shell.desktopmode.DesktopModeLoggerTransitionObserver;
-import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
+import com.android.wm.shell.desktopmode.DesktopTasksLimiter;
+import com.android.wm.shell.desktopmode.DesktopTasksTransitionObserver;
 import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler;
@@ -77,6 +76,10 @@ import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.recents.RecentsTransitionHandler;
+import com.android.wm.shell.shared.DesktopModeStatus;
+import com.android.wm.shell.shared.annotations.ShellAnimationThread;
+import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
@@ -84,6 +87,7 @@ import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.taskview.TaskViewTransitions;
 import com.android.wm.shell.transition.DefaultMixedHandler;
 import com.android.wm.shell.transition.HomeTransitionObserver;
+import com.android.wm.shell.transition.MixedTransitionHandler;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider;
 import com.android.wm.shell.unfold.UnfoldAnimationController;
@@ -217,7 +221,7 @@ public abstract class WMShellModule {
             Transitions transitions,
             Optional<DesktopTasksController> desktopTasksController,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
-        if (DesktopModeStatus.isEnabled()) {
+        if (DesktopModeStatus.canEnterDesktopMode(context)) {
             return new DesktopModeWindowDecorViewModel(
                     context,
                     mainExecutor,
@@ -241,6 +245,7 @@ public abstract class WMShellModule {
                 mainChoreographer,
                 taskOrganizer,
                 displayController,
+                rootTaskDisplayAreaOrganizer,
                 syncQueue,
                 transitions);
     }
@@ -273,8 +278,8 @@ public abstract class WMShellModule {
         ShellInit init = FreeformComponents.isFreeformEnabled(context)
                 ? shellInit
                 : null;
-        return new FreeformTaskListener(init, shellTaskOrganizer, desktopModeTaskRepository,
-                windowDecorViewModel);
+        return new FreeformTaskListener(context, init, shellTaskOrganizer,
+                desktopModeTaskRepository, windowDecorViewModel);
     }
 
     @WMSingleton
@@ -369,8 +374,9 @@ public abstract class WMShellModule {
     //
 
     @WMSingleton
+    @DynamicOverride
     @Provides
-    static DefaultMixedHandler provideDefaultMixedHandler(
+    static MixedTransitionHandler provideMixedTransitionHandler(
             ShellInit shellInit,
             Optional<SplitScreenController> splitScreenOptional,
             @Nullable PipTransitionController pipTransitionController,
@@ -515,23 +521,43 @@ public abstract class WMShellModule {
             LaunchAdjacentController launchAdjacentController,
             RecentsTransitionHandler recentsTransitionHandler,
             MultiInstanceHelper multiInstanceHelper,
-            @ShellMainThread ShellExecutor mainExecutor
-    ) {
+            @ShellMainThread ShellExecutor mainExecutor,
+            Optional<DesktopTasksLimiter> desktopTasksLimiter,
+            Optional<RecentTasksController> recentTasksController) {
         return new DesktopTasksController(context, shellInit, shellCommandHandler, shellController,
                 displayController, shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer,
                 dragAndDropController, transitions, enterDesktopTransitionHandler,
                 exitDesktopTransitionHandler, toggleResizeDesktopTaskTransitionHandler,
                 dragToDesktopTransitionHandler, desktopModeTaskRepository,
                 desktopModeLoggerTransitionObserver, launchAdjacentController,
-                recentsTransitionHandler, multiInstanceHelper, mainExecutor);
+                recentsTransitionHandler, multiInstanceHelper,
+                mainExecutor, desktopTasksLimiter, recentTasksController.orElse(null));
     }
+
+    @WMSingleton
+    @Provides
+    static Optional<DesktopTasksLimiter> provideDesktopTasksLimiter(
+            Context context,
+            Transitions transitions,
+            @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
+            ShellTaskOrganizer shellTaskOrganizer) {
+        if (!DesktopModeStatus.canEnterDesktopMode(context)
+                || !Flags.enableDesktopWindowingTaskLimit()) {
+            return Optional.empty();
+        }
+        return Optional.of(
+                new DesktopTasksLimiter(
+                        transitions, desktopModeTaskRepository, shellTaskOrganizer));
+    }
+
 
     @WMSingleton
     @Provides
     static DragToDesktopTransitionHandler provideDragToDesktopTransitionHandler(
             Context context,
             Transitions transitions,
-            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+            Optional<DesktopTasksLimiter> desktopTasksLimiter) {
         return new DragToDesktopTransitionHandler(context, transitions,
                 rootTaskDisplayAreaOrganizer);
     }
@@ -539,7 +565,8 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     static EnterDesktopTaskTransitionHandler provideEnterDesktopModeTaskTransitionHandler(
-            Transitions transitions) {
+            Transitions transitions,
+            Optional<DesktopTasksLimiter> desktopTasksLimiter) {
         return new EnterDesktopTaskTransitionHandler(transitions);
     }
 
@@ -568,12 +595,27 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
+    static Optional<DesktopTasksTransitionObserver> provideDesktopTasksTransitionObserver(
+            Context context,
+            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
+            Transitions transitions,
+            ShellInit shellInit
+    ) {
+        return desktopModeTaskRepository.flatMap(repository ->
+                Optional.of(new DesktopTasksTransitionObserver(
+                        context, repository, transitions, shellInit))
+        );
+    }
+
+    @WMSingleton
+    @Provides
     static DesktopModeLoggerTransitionObserver provideDesktopModeLoggerTransitionObserver(
+            Context context,
             ShellInit shellInit,
             Transitions transitions,
             DesktopModeEventLogger desktopModeEventLogger) {
         return new DesktopModeLoggerTransitionObserver(
-                shellInit, transitions, desktopModeEventLogger);
+                context, shellInit, transitions, desktopModeEventLogger);
     }
 
     @WMSingleton
@@ -622,7 +664,7 @@ public abstract class WMShellModule {
     @Provides
     static Object provideIndependentShellComponentsToCreate(
             DragAndDropController dragAndDropController,
-            DefaultMixedHandler defaultMixedHandler) {
+            Optional<DesktopTasksTransitionObserver> desktopTasksTransitionObserverOptional) {
         return new Object();
     }
 }

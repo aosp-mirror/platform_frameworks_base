@@ -84,6 +84,7 @@ import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.Watchdog;
+import com.android.server.grammaticalinflection.GrammaticalInflectionManagerInternal;
 import com.android.server.wm.ActivityTaskManagerService.HotPath;
 
 import java.io.IOException;
@@ -110,9 +111,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private static final String TAG_RELEASE = TAG + POSTFIX_RELEASE;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
 
-    private static final int MAX_RAPID_ACTIVITY_LAUNCH_COUNT = 500;
-    private static final long RAPID_ACTIVITY_LAUNCH_MS = 300;
-    private static final long RESET_RAPID_ACTIVITY_LAUNCH_MS = 5 * RAPID_ACTIVITY_LAUNCH_MS;
+    private static final int MAX_RAPID_ACTIVITY_LAUNCH_COUNT = 200;
+    private static final long RAPID_ACTIVITY_LAUNCH_MS = 500;
+    private static final long RESET_RAPID_ACTIVITY_LAUNCH_MS = 3 * RAPID_ACTIVITY_LAUNCH_MS;
 
     public static final int STOPPED_STATE_NOT_STOPPED = 0;
     public static final int STOPPED_STATE_FIRST_LAUNCH = 1;
@@ -201,6 +202,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     // Whether this process has ever started a service with the BIND_INPUT_METHOD permission.
     private volatile boolean mHasImeService;
+
+    /**
+     * Whether this process can use realtime prioirity (SCHED_FIFO) for its UI and render threads
+     * when this process is SCHED_GROUP_TOP_APP.
+     */
+    private final boolean mUseFifoUiScheduling;
 
     /** Whether {@link #mActivities} is not empty. */
     private volatile boolean mHasActivities;
@@ -318,8 +325,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
      */
     private volatile int mActivityStateFlags = ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER;
 
-    private final boolean mCanUseSystemGrammaticalGender;
-
     public WindowProcessController(@NonNull ActivityTaskManagerService atm,
             @NonNull ApplicationInfo info, String name, int uid, int userId, Object owner,
             @NonNull WindowProcessListener listener) {
@@ -340,10 +345,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             // TODO(b/151161907): Remove after support for display-independent (raw) SysUi configs.
             mIsActivityConfigOverrideAllowed = false;
         }
+        mUseFifoUiScheduling = com.android.window.flags.Flags.fifoPriorityForMajorUiProcesses()
+                && (isSysUiPackage || mAtm.isCallerRecents(uid));
 
-        mCanUseSystemGrammaticalGender = mAtm.mGrammaticalManagerInternal != null
-                && mAtm.mGrammaticalManagerInternal.canGetSystemGrammaticalGender(mUid,
-                mInfo.packageName);
         onConfigurationChanged(atm.getGlobalConfiguration());
         mAtm.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, mInfo.packageName);
     }
@@ -623,6 +627,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return;
         }
 
+        final WindowProcessController caller = mAtm.mProcessMap.getProcess(r.launchedFromPid);
+        if (caller != null && caller.mInstrumenting) {
+            return;
+        }
+
         final long diff = launchTime - lastLaunchTime;
         if (diff < RAPID_ACTIVITY_LAUNCH_MS) {
             mRapidActivityLaunchCount++;
@@ -631,9 +640,15 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
 
         if (mRapidActivityLaunchCount > MAX_RAPID_ACTIVITY_LAUNCH_COUNT) {
-            Slog.w(TAG, "Killing " + mPid + " because of rapid activity launch");
-            r.getRootTask().moveTaskToBack(r.getTask());
-            mAtm.mH.post(() -> mAtm.mAmInternal.killProcess(mName, mUid, "rapidActivityLaunch"));
+            mRapidActivityLaunchCount = 0;
+            final Task task = r.getTask();
+            Slog.w(TAG, "Removing task " + task.mTaskId + " because of rapid activity launch");
+            mAtm.mH.post(() -> {
+                synchronized (mAtm.mGlobalLock) {
+                    task.removeImmediately("rapid-activity-launch");
+                }
+                mAtm.mAmInternal.killProcess(mName, mUid, "rapidActivityLaunch");
+            });
         }
     }
 
@@ -1593,11 +1608,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return;
         }
 
-        if (mCanUseSystemGrammaticalGender) {
-            config.setGrammaticalGender(
-                    mAtm.mGrammaticalManagerInternal.getSystemGrammaticalGender(mUserId));
-        }
-
         if (mPauseConfigurationDispatchCount > 0) {
             mHasPendingConfigurationChange = true;
             return;
@@ -1901,6 +1911,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
     }
 
+    /** Returns {@code true} if the process prefers to use fifo scheduling. */
+    public boolean useFifoUiScheduling() {
+        return mUseFifoUiScheduling;
+    }
+
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public void onTopProcChanged() {
         if (mAtm.mVrController.isInterestingToSchedGroup()) {
@@ -2078,6 +2093,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
             pw.println();
         }
+        if (mUseFifoUiScheduling) {
+            pw.println(prefix + " mUseFifoUiScheduling=true");
+        }
 
         final int stateFlags = mActivityStateFlags;
         if (stateFlags != ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER) {
@@ -2111,5 +2129,35 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         mListener.dumpDebug(proto, fieldId);
+    }
+
+    @Override
+    protected boolean setOverrideGender(Configuration requestsTmpConfig, int gender) {
+        return applyConfigGenderOverride(requestsTmpConfig, gender,
+                mAtm.mGrammaticalManagerInternal, mUid);
+    }
+
+    static boolean applyConfigGenderOverride(@NonNull Configuration overrideConfig,
+            @Configuration.GrammaticalGender int override,
+            GrammaticalInflectionManagerInternal service, int uid) {
+        final boolean canGetSystemValue = service != null
+                && service.canGetSystemGrammaticalGender(uid);
+
+        // The priority here is as follows:
+        // - app-specific override if set
+        // - system value if allowed to see it
+        // - global configuration otherwise
+        final int targetValue = (override != Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED)
+                ? override
+                : canGetSystemValue
+                        ? Configuration.GRAMMATICAL_GENDER_UNDEFINED
+                        : service != null
+                                ? service.getGrammaticalGenderFromDeveloperSettings()
+                                : Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED;
+        if (overrideConfig.getGrammaticalGenderRaw() == targetValue) {
+            return false;
+        }
+        overrideConfig.setGrammaticalGender(targetValue);
+        return true;
     }
 }

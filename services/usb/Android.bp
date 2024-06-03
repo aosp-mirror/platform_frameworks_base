@@ -44,6 +44,7 @@ java_library_static {
 aconfig_declarations {
     name: "usb_flags",
     package: "com.android.server.usb.flags",
+    container: "system",
     srcs: ["**/usb_flags.aconfig"],
 }
 

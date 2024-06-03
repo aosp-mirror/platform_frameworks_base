@@ -4,7 +4,6 @@ austindelgado@google.com
 cinek@google.com
 dsandler@android.com
 dsandler@google.com
-dupin@google.com
 hackbod@android.com
 hackbod@google.com
 ilyamaty@google.com
@@ -34,6 +33,19 @@ per-file res/xml/public-final.xml = file:/tools/aapt2/OWNERS
 # Multiuser
 per-file res/xml/config_user_types.xml = file:/MULTIUSER_OWNERS
 
+# Notifications
+per-file res/*/*notification* = file:/packages/SystemUI/src/com/android/systemui/statusbar/notification/OWNERS
+# TODO(b/337816136): Move notification values to separate files
+per-file res/values*/attrs.xml = jeffdq@google.com
+per-file res/values*/colors.xml = jeffdq@google.com
+per-file res/values*/dimens.xml = jeffdq@google.com
+per-file res/values*/config.xml = jeffdq@google.com
+per-file res/values/ids.xml = jeffdq@google.com
+per-file res/values/strings.xml = jeffdq@google.com
+per-file res/values/symbols.xml = jeffdq@google.com
+per-file res/values/themes_device_defaults.xml = jeffdq@google.com
+per-file res/values/styles_material.xml = jeffdq@google.com
+
 # Battery Saver
 per-file res/values/config_battery_saver.xml = file:/services/core/java/com/android/server/power/batterysaver/OWNERS
 
@@ -43,10 +55,13 @@ per-file res/values/dimens_car.xml = file:/platform/packages/services/Car:/OWNER
 # Device Idle
 per-file res/values/config_device_idle.xml = file:/apex/jobscheduler/OWNERS
 
+# Display Manager
+per-file res/values/config_display.xml = file:/services/core/java/com/android/server/display/OWNERS
+
 # Wear
 per-file res/*-watch/* = file:/WEAR_OWNERS
 
-# Peformance
+# Performance
 per-file res/values/config.xml = file:/PERFORMANCE_OWNERS
 per-file res/values/symbols.xml = file:/PERFORMANCE_OWNERS
 
@@ -60,3 +75,11 @@ per-file res/xml/sms_short_codes.xml = file:/platform/frameworks/opt/telephony:/
 
 # TV Input Framework
 per-file res/values/config_tv_external_input_logging.xml = file:/services/core/java/com/android/server/tv/OWNERS
+
+# SysUi Color Team
+per-file res/values/colors.xml = arteiro@google.com
+per-file res/values/attrs.xml = arteiro@google.com
+per-file res/values/styles.xml = arteiro@google.com
+per-file res/values/symbols.xml = arteiro@google.com
+per-file res/values/themes_device_defaults.xml = arteiro@google.com
+per-file res/values/styles_material.xml = arteiro@google.com

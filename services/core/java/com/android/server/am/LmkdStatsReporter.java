@@ -44,6 +44,7 @@ public final class LmkdStatsReporter {
     private static final int LOW_MEM_AND_SWAP_UTIL = 6;
     private static final int LOW_FILECACHE_AFTER_THRASHING = 7;
     private static final int LOW_MEM = 8;
+    private static final int DIRECT_RECL_STUCK = 9;
 
     /**
      * Processes the LMK_KILL_OCCURRED packet data
@@ -98,6 +99,8 @@ public final class LmkdStatsReporter {
                 return FrameworkStatsLog.LMK_KILL_OCCURRED__REASON__LOW_FILECACHE_AFTER_THRASHING;
             case LOW_MEM:
                 return FrameworkStatsLog.LMK_KILL_OCCURRED__REASON__LOW_MEM;
+            case DIRECT_RECL_STUCK:
+                return FrameworkStatsLog.LMK_KILL_OCCURRED__REASON__DIRECT_RECL_STUCK;
             default:
                 return FrameworkStatsLog.LMK_KILL_OCCURRED__REASON__UNKNOWN;
         }

@@ -28,6 +28,7 @@ import android.media.INearbyMediaDevicesProvider;
 import android.media.MediaRoute2Info;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.os.UserHandle;
 import android.view.KeyEvent;
 import android.service.notification.StatusBarNotification;
 
@@ -46,7 +47,7 @@ oneway interface IStatusBar
     void animateExpandNotificationsPanel();
     void animateExpandSettingsPanel(String subPanel);
     void animateCollapsePanels();
-    void togglePanel();
+    void toggleNotificationsPanel();
 
     void showWirelessChargingAnimation(int batteryLevel);
 
@@ -384,9 +385,11 @@ oneway interface IStatusBar
     /**
      * Shows the media output switcher dialog.
      *
-     * @param packageName of the session for which the output switcher is shown.
+     * @param targetPackageName The package name for which to show the output switcher.
+     * @param targetUserHandle The UserHandle on which the package for which to show the output
+     *     switcher is running.
      */
-    void showMediaOutputSwitcher(String packageName);
+    void showMediaOutputSwitcher(String targetPackageName, in UserHandle targetUserHandle);
 
     /** Enters desktop mode from the current focused app.
     *

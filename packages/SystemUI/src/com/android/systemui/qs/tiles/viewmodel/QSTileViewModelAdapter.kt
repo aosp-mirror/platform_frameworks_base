@@ -19,15 +19,16 @@ package com.android.systemui.qs.tiles.viewmodel
 import android.content.Context
 import android.os.UserHandle
 import android.util.Log
-import android.view.View
 import androidx.annotation.GuardedBy
 import com.android.internal.logging.InstanceId
 import com.android.systemui.Dumpable
+import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIcon
+import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIconWithRes
 import com.android.systemui.qs.tileimpl.QSTileImpl.ResourceIcon
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -126,21 +127,21 @@ constructor(
         synchronized(callbacks) { callbacks.clear() }
     }
 
-    override fun click(view: View?) {
+    override fun click(expandable: Expandable?) {
         if (isActionSupported(QSTileState.UserAction.CLICK)) {
-            qsTileViewModel.onActionPerformed(QSTileUserAction.Click(view))
+            qsTileViewModel.onActionPerformed(QSTileUserAction.Click(expandable))
         }
     }
 
-    override fun secondaryClick(view: View?) {
+    override fun secondaryClick(expandable: Expandable?) {
         if (isActionSupported(QSTileState.UserAction.CLICK)) {
-            qsTileViewModel.onActionPerformed(QSTileUserAction.Click(view))
+            qsTileViewModel.onActionPerformed(QSTileUserAction.Click(expandable))
         }
     }
 
-    override fun longClick(view: View?) {
+    override fun longClick(expandable: Expandable?) {
         if (isActionSupported(QSTileState.UserAction.LONG_CLICK)) {
-            qsTileViewModel.onActionPerformed(QSTileUserAction.LongClick(view))
+            qsTileViewModel.onActionPerformed(QSTileUserAction.LongClick(expandable))
         }
     }
 
@@ -201,6 +202,7 @@ constructor(
         qsTileViewModel.currentState?.let { mapState(context, it, qsTileViewModel.config) }
 
     override fun getInstanceId(): InstanceId = qsTileViewModel.config.instanceId
+
     override fun getTileLabel(): CharSequence =
         with(qsTileViewModel.config.uiConfig) {
             when (this) {
@@ -240,7 +242,9 @@ constructor(
 
                 iconSupplier = Supplier {
                     when (val stateIcon = viewModelState.icon()) {
-                        is Icon.Loaded -> DrawableIcon(stateIcon.drawable)
+                        is Icon.Loaded ->
+                            if (viewModelState.iconRes == null) DrawableIcon(stateIcon.drawable)
+                            else DrawableIconWithRes(stateIcon.drawable, viewModelState.iconRes)
                         is Icon.Resource -> ResourceIcon.get(stateIcon.res)
                         null -> null
                     }

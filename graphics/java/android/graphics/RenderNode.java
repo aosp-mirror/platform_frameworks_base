@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.animation.Animator;
 import android.annotation.BytesLong;
 import android.annotation.ColorInt;
 import android.annotation.FloatRange;
@@ -765,12 +766,12 @@ public final class RenderNode {
      * Default value is false. See
      * {@link #setProjectBackwards(boolean)} for a description of what this entails.
      *
-     * @param shouldRecieve True if this RenderNode is a projection receiver, false otherwise.
+     * @param shouldReceive True if this RenderNode is a projection receiver, false otherwise.
      *                      Default is false.
      * @return True if the value changed, false if the new value was the same as the previous value.
      */
-    public boolean setProjectionReceiver(boolean shouldRecieve) {
-        return nSetProjectionReceiver(mNativeRenderNode, shouldRecieve);
+    public boolean setProjectionReceiver(boolean shouldReceive) {
+        return nSetProjectionReceiver(mNativeRenderNode, shouldReceive);
     }
 
     /**
@@ -1639,7 +1640,7 @@ public final class RenderNode {
      */
     public interface AnimationHost {
         /** @hide */
-        void registerAnimatingRenderNode(RenderNode animator);
+        void registerAnimatingRenderNode(RenderNode renderNode, Animator animator);
 
         /** @hide */
         void registerVectorDrawableAnimator(NativeVectorDrawableAnimator animator);
@@ -1654,7 +1655,7 @@ public final class RenderNode {
             throw new IllegalStateException("Cannot start this animator on a detached view!");
         }
         nAddAnimator(mNativeRenderNode, animator.getNativeAnimator());
-        mAnimationHost.registerAnimatingRenderNode(this);
+        mAnimationHost.registerAnimatingRenderNode(this, animator);
     }
 
     /** @hide */
@@ -1799,7 +1800,7 @@ public final class RenderNode {
     private static native boolean nSetProjectBackwards(long renderNode, boolean shouldProject);
 
     @CriticalNative
-    private static native boolean nSetProjectionReceiver(long renderNode, boolean shouldRecieve);
+    private static native boolean nSetProjectionReceiver(long renderNode, boolean shouldReceive);
 
     @CriticalNative
     private static native boolean nSetOutlineRoundRect(long renderNode, int left, int top,

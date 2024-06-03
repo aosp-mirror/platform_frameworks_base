@@ -19,6 +19,7 @@ package com.android.settingslib.datastore
 import android.app.backup.BackupDataInputStream
 import android.content.Context
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
@@ -33,11 +34,9 @@ import java.util.zip.CheckedInputStream
  */
 internal class BackupRestoreFileArchiver(
     private val context: Context,
-    private val fileStorages: List<BackupRestoreFileStorage>,
+    @get:VisibleForTesting internal val fileStorages: List<BackupRestoreFileStorage>,
+    override val name: String,
 ) : BackupRestoreStorage() {
-    override val name: String
-        get() = "file_archiver"
-
     override fun createBackupRestoreEntities(): List<BackupRestoreEntity> =
         fileStorages.map { it.toBackupRestoreEntity() }
 
@@ -88,7 +87,8 @@ internal class BackupRestoreFileArchiver(
     }
 }
 
-private fun BackupRestoreFileStorage.toBackupRestoreEntity() =
+@VisibleForTesting
+internal fun BackupRestoreFileStorage.toBackupRestoreEntity() =
     object : BackupRestoreEntity {
         override val key: String
             get() = storageFilePath
@@ -107,7 +107,7 @@ private fun BackupRestoreFileStorage.toBackupRestoreEntity() =
                 Log.i(LOG_TAG, "[$name] $key not exist")
                 return EntityBackupResult.DELETE
             }
-            val codec = codec() ?: defaultCodec()
+            val codec = defaultCodec()
             // MUST close to flush the data
             wrapBackupOutputStream(codec, outputStream).use { stream ->
                 val bytesCopied = file.inputStream().use { it.copyTo(stream) }

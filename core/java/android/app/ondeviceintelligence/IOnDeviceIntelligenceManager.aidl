@@ -39,7 +39,7 @@
   *
   * @hide
   */
- interface IOnDeviceIntelligenceManager {
+interface IOnDeviceIntelligenceManager {
       @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)")
       void getVersion(in RemoteCallback remoteCallback) = 1;
 

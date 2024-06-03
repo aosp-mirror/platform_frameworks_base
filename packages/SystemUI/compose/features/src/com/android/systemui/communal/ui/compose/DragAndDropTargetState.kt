@@ -161,9 +161,9 @@ internal class DragAndDropTargetState(
     private var isOnRemoveButton = false
 
     fun onStarted() {
-        // assume item will be added to the second to last position before CTA tile.
+        // assume item will be added to the end.
+        contentListState.list.add(placeHolder)
         placeHolderIndex = contentListState.list.size - 1
-        placeHolderIndex?.let { contentListState.list.add(it, placeHolder) }
     }
 
     fun onMoved(event: DragAndDropEvent) {

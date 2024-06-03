@@ -16,18 +16,18 @@
 
 package com.android.systemui.volume.panel.component.mediaoutput.domain.interactor
 
-import android.os.Handler
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.android.systemui.volume.localMediaController
 import com.android.systemui.volume.mediaControllerRepository
+import com.android.systemui.volume.mediaDeviceSessionInteractor
 import com.android.systemui.volume.mediaOutputInteractor
+import com.android.systemui.volume.panel.shared.model.filterData
 import com.android.systemui.volume.remoteMediaController
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -54,12 +54,7 @@ class MediaDeviceSessionInteractorTest : SysuiTestCase() {
                 listOf(localMediaController, remoteMediaController)
             )
 
-            underTest =
-                MediaDeviceSessionInteractor(
-                    testScope.testScheduler,
-                    Handler(TestableLooper.get(kosmos.testCase).looper),
-                    mediaControllerRepository,
-                )
+            underTest = mediaDeviceSessionInteractor
         }
     }
 
@@ -67,7 +62,8 @@ class MediaDeviceSessionInteractorTest : SysuiTestCase() {
     fun playbackInfo_returnsPlaybackInfo() {
         with(kosmos) {
             testScope.runTest {
-                val session by collectLastValue(mediaOutputInteractor.defaultActiveMediaSession)
+                val session by
+                    collectLastValue(mediaOutputInteractor.defaultActiveMediaSession.filterData())
                 runCurrent()
                 val info by collectLastValue(underTest.playbackInfo(session!!))
                 runCurrent()
@@ -81,7 +77,8 @@ class MediaDeviceSessionInteractorTest : SysuiTestCase() {
     fun playbackState_returnsPlaybackState() {
         with(kosmos) {
             testScope.runTest {
-                val session by collectLastValue(mediaOutputInteractor.defaultActiveMediaSession)
+                val session by
+                    collectLastValue(mediaOutputInteractor.defaultActiveMediaSession.filterData())
                 runCurrent()
                 val state by collectLastValue(underTest.playbackState(session!!))
                 runCurrent()

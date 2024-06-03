@@ -39,7 +39,6 @@ import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode
 import android.app.StatusBarManager;
 import android.app.StatusBarManager.WindowVisibleState;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.inputmethodservice.InputMethodService;
@@ -72,7 +71,6 @@ import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoHideController;
-import com.android.systemui.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -250,8 +248,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             mLightBarController.setNavigationBar(mLightBarTransitionsController);
             mPipOptional.ifPresent(this::addPipExclusionBoundsChangeListener);
             mEdgeBackGestureHandler.setBackAnimation(mBackAnimation);
-            mEdgeBackGestureHandler.onConfigurationChanged(
-                    mContext.getResources().getConfiguration());
             mTaskStackChangeListeners.registerTaskStackListener(mTaskStackListener);
             mInitialized = true;
         } finally {
@@ -302,7 +298,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     }
 
     private void updateSysuiFlags() {
-        int a11yFlags = mNavBarHelper.getA11yButtonState();
+        long a11yFlags = mNavBarHelper.getA11yButtonState();
         boolean clickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0;
         boolean longClickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0;
 
@@ -493,10 +489,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
 
     private boolean allowSystemGestureIgnoringBarVisibility() {
         return mBehavior != BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
-    }
-
-    public void onConfigurationChanged(Configuration configuration) {
-        mEdgeBackGestureHandler.onConfigurationChanged(configuration);
     }
 
     @Override

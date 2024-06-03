@@ -21,6 +21,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -36,6 +37,8 @@ class QuickSettingsControllerImplWithCoroutinesTest : QuickSettingsControllerImp
             runCurrent()
 
             assertThat(mQsController.isExpansionEnabled).isFalse()
+
+            coroutineContext.cancelChildren()
         }
 
     @Test
@@ -45,6 +48,8 @@ class QuickSettingsControllerImplWithCoroutinesTest : QuickSettingsControllerImp
             runCurrent()
 
             assertThat(mQsController.isExpansionEnabled).isTrue()
+
+            coroutineContext.cancelChildren()
         }
 
     @Test
@@ -58,6 +63,8 @@ class QuickSettingsControllerImplWithCoroutinesTest : QuickSettingsControllerImp
             runCurrent()
 
             assertThat(mQsController.isExpansionEnabled).isFalse()
+
+            coroutineContext.cancelChildren()
         }
 
     @Test
@@ -71,6 +78,8 @@ class QuickSettingsControllerImplWithCoroutinesTest : QuickSettingsControllerImp
             runCurrent()
 
             assertThat(mQsController.isExpansionEnabled).isFalse()
+
+            coroutineContext.cancelChildren()
         }
 
     @Test
@@ -81,5 +90,7 @@ class QuickSettingsControllerImplWithCoroutinesTest : QuickSettingsControllerImp
             runCurrent()
 
             assertThat(mQsController.isExpansionEnabled).isTrue()
+
+            coroutineContext.cancelChildren()
         }
 }

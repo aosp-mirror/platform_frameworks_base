@@ -14,6 +14,7 @@
 # limitations under the License.
 
 package: "android.companion.virtualdevice.flags"
+container: "system"
 
 flag {
      namespace: "virtual_devices"
@@ -51,4 +52,25 @@ flag {
     description: "Makes MediaDrm APIs device-aware"
     bug: "303535376"
     is_fixed_read_only: true
+}
+
+flag {
+    namespace: "virtual_devices"
+    name: "virtual_display_multi_window_mode_support"
+    description: "Add support for WINDOWING_MODE_MULTI_WINDOW to virtual displays by default"
+    is_fixed_read_only: true
+    bug: "341151395"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "virtual_devices"
+    name: "intent_interception_action_matching_fix"
+    description: "Do not match intents without actions if the filter has actions"
+    bug: "343805037"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

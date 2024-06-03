@@ -1764,6 +1764,10 @@ public class AudioSystem
     public static native int getForceUse(int usage);
     /** @hide */
     @UnsupportedAppUsage
+    public static native int setDeviceAbsoluteVolumeEnabled(int nativeDeviceType,
+            @NonNull String address, boolean enabled, int streamToDriveAbs);
+    /** @hide */
+    @UnsupportedAppUsage
     public static native int initStreamVolume(int stream, int indexMin, int indexMax);
     @UnsupportedAppUsage
     private static native int setStreamVolumeIndex(int stream, int index, int device);

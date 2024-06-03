@@ -141,7 +141,7 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
 
     private fun isLandscape(rotation: Rotation): Boolean {
         val displayBounds = WindowUtils.getDisplayBounds(rotation)
-        return displayBounds.width > displayBounds.height
+        return displayBounds.width() > displayBounds.height()
     }
 
     private fun isTablet(): Boolean {

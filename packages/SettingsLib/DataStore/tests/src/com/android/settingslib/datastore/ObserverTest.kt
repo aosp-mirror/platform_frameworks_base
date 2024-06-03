@@ -22,40 +22,33 @@ import com.google.common.util.concurrent.MoreExecutors
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.Assert.assertThrows
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnit
-import org.mockito.junit.MockitoRule
-import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.reset
 import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
 class ObserverTest {
-    @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
+    private val observer1 = mock<Observer>()
+    private val observer2 = mock<Observer>()
 
-    @Mock private lateinit var observer1: Observer
-
-    @Mock private lateinit var observer2: Observer
-
-    @Mock private lateinit var executor: Executor
-
+    private val executor1: Executor = MoreExecutors.directExecutor()
+    private val executor2: Executor = MoreExecutors.newDirectExecutorService()
     private val observable = DataObservable()
 
     @Test
     fun addObserver_sameExecutor() {
-        observable.addObserver(observer1, executor)
-        observable.addObserver(observer1, executor)
+        observable.addObserver(observer1, executor1)
+        observable.addObserver(observer1, executor1)
     }
 
     @Test
     fun addObserver_differentExecutor() {
-        observable.addObserver(observer1, executor)
+        observable.addObserver(observer1, executor1)
         assertThrows(IllegalStateException::class.java) {
-            observable.addObserver(observer1, MoreExecutors.directExecutor())
+            observable.addObserver(observer1, executor2)
         }
     }
 
@@ -63,9 +56,9 @@ class ObserverTest {
     fun addObserver_weaklyReferenced() {
         val counter = AtomicInteger()
         var observer: Observer? = Observer { counter.incrementAndGet() }
-        observable.addObserver(observer!!, MoreExecutors.directExecutor())
+        observable.addObserver(observer!!, executor1)
 
-        observable.notifyChange(ChangeReason.UPDATE)
+        observable.notifyChange(DataChangeReason.UPDATE)
         assertThat(counter.get()).isEqualTo(1)
 
         // trigger GC, the observer callback should not be invoked
@@ -73,38 +66,34 @@ class ObserverTest {
         System.gc()
         System.runFinalization()
 
-        observable.notifyChange(ChangeReason.UPDATE)
+        observable.notifyChange(DataChangeReason.UPDATE)
         assertThat(counter.get()).isEqualTo(1)
     }
 
     @Test
     fun addObserver_notifyObservers_removeObserver() {
-        observable.addObserver(observer1, MoreExecutors.directExecutor())
-        observable.addObserver(observer2, executor)
+        observable.addObserver(observer1, executor1)
+        observable.addObserver(observer2, executor2)
 
-        observable.notifyChange(ChangeReason.DELETE)
+        observable.notifyChange(DataChangeReason.DELETE)
 
-        verify(observer1).onChanged(ChangeReason.DELETE)
-        verify(observer2, never()).onChanged(any())
-        verify(executor).execute(any())
+        verify(observer1).onChanged(DataChangeReason.DELETE)
+        verify(observer2).onChanged(DataChangeReason.DELETE)
 
-        reset(observer1, executor)
+        reset(observer1, observer2)
         observable.removeObserver(observer2)
 
-        observable.notifyChange(ChangeReason.UPDATE)
-        verify(observer1).onChanged(ChangeReason.UPDATE)
-        verify(executor, never()).execute(any())
+        observable.notifyChange(DataChangeReason.UPDATE)
+        verify(observer1).onChanged(DataChangeReason.UPDATE)
+        verify(observer2, never()).onChanged(DataChangeReason.UPDATE)
     }
 
     @Test
     fun notifyChange_addObserverWithinCallback() {
         // ConcurrentModificationException is raised if it is not implemented correctly
-        val observer = Observer { observable.addObserver(observer1, executor) }
-        observable.addObserver(
-            observer,
-            MoreExecutors.directExecutor()
-        )
-        observable.notifyChange(ChangeReason.UPDATE)
+        val observer = Observer { observable.addObserver(observer1, executor1) }
+        observable.addObserver(observer, executor1)
+        observable.notifyChange(DataChangeReason.UPDATE)
         observable.removeObserver(observer)
     }
 }

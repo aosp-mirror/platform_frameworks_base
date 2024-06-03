@@ -42,9 +42,10 @@ oneway interface IOnDeviceIntelligenceService {
     void getReadOnlyFileDescriptor(in String fileName, in AndroidFuture<ParcelFileDescriptor> future);
     void getReadOnlyFeatureFileDescriptorMap(in Feature feature, in RemoteCallback remoteCallback);
     void requestFeatureDownload(int callerUid, in Feature feature,
-                                in AndroidFuture<ICancellationSignal> cancellationSignal,
+                                in AndroidFuture cancellationSignal,
                                 in IDownloadCallback downloadCallback);
     void registerRemoteServices(in IRemoteProcessingService remoteProcessingService);
     void notifyInferenceServiceConnected();
     void notifyInferenceServiceDisconnected();
+    void ready();
 }

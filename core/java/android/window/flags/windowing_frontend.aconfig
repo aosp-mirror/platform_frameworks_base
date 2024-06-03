@@ -1,10 +1,21 @@
 package: "com.android.window.flags"
+container: "system"
 
 flag {
   name: "nav_bar_transparent_by_default"
   namespace: "windowing_frontend"
   description: "Make nav bar color transparent by default when targeting SDK 35 or greater"
   bug: "232195501"
+}
+
+flag {
+    name: "wait_for_transition_on_display_switch"
+    namespace: "windowing_frontend"
+    description: "Waits for Shell transition to start before unblocking the screen after display switch"
+    bug: "301420598"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -16,6 +27,7 @@ flag {
 
 flag {
   name: "enforce_edge_to_edge"
+  is_exported: true
   namespace: "windowing_frontend"
   description: "Make app go edge-to-edge when targeting SDK level 35 or greater"
   bug: "309578419"
@@ -28,6 +40,17 @@ flag {
     description: "Feature flag for deferring DisplayManager updates to WindowManager if Shell transition is running"
     bug: "259220649"
     is_fixed_read_only: true
+}
+
+flag {
+  name: "remove_prepare_surface_in_placement"
+  namespace: "windowing_frontend"
+  description: "Reduce unnecessary invocation to improve performance"
+  bug: "330721336"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -88,6 +111,7 @@ flag {
 
 flag {
     name: "supports_multi_instance_system_ui"
+    is_exported: true
     namespace: "multitasking"
     description: "Feature flag to enable a multi-instance system ui component property."
     bug: "262864589"
@@ -96,9 +120,18 @@ flag {
 
 flag {
   name: "delegate_unhandled_drags"
+  is_exported: true
   namespace: "multitasking"
   description: "Enables delegating unhandled drags to SystemUI"
   bug: "320797628"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "fifo_priority_for_major_ui_processes"
+  namespace: "windowing_frontend"
+  description: "Use realtime priority for SystemUI and launcher"
+  bug: "288140556"
   is_fixed_read_only: true
 }
 
@@ -108,4 +141,45 @@ flag {
   description: "Configuration decoupled from insets"
   bug: "151861875"
   is_fixed_read_only: true
+}
+
+flag {
+  name: "keyguard_appear_transition"
+  namespace: "windowing_frontend"
+  description: "Add transition when keyguard appears"
+  bug: "327970608"
+  is_fixed_read_only: true
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "get_dimmer_on_closing"
+  namespace: "windowing_frontend"
+  description: "Change check for when to ignore a closing task's dim"
+  bug: "329233513"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "release_snapshot_aggressively"
+    namespace: "windowing_frontend"
+    description: "Actively release task snapshot memory"
+    bug: "238206323"
+    is_fixed_read_only: true
+}
+
+flag {
+  name: "draw_snapshot_aspect_ratio_match"
+  namespace: "windowing_frontend"
+  description: "The aspect ratio should always match when drawing snapshot"
+  bug: "341020277"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

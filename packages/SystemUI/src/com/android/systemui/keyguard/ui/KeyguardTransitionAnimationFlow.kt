@@ -19,8 +19,6 @@ import android.view.animation.Interpolator
 import com.android.app.animation.Interpolators.LINEAR
 import com.android.keyguard.logging.KeyguardTransitionAnimationLogger
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -30,20 +28,16 @@ import com.android.systemui.keyguard.shared.model.TransitionState.FINISHED
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.launch
 
 /**
  * Assists in creating sub-flows for a KeyguardTransition. Call [setup] once for a transition, and
@@ -53,52 +47,26 @@ import kotlinx.coroutines.launch
 class KeyguardTransitionAnimationFlow
 @Inject
 constructor(
-    @Application private val scope: CoroutineScope,
-    @Main private val mainDispatcher: CoroutineDispatcher,
     private val transitionInteractor: KeyguardTransitionInteractor,
     private val logger: KeyguardTransitionAnimationLogger,
 ) {
-    private val transitionMap = mutableMapOf<Edge, MutableSharedFlow<TransitionStep>>()
-
-    init {
-        scope.launch(mainDispatcher) {
-            transitionInteractor.transitions.collect {
-                // FROM->TO
-                transitionMap[Edge(it.from, it.to)]?.emit(it)
-                // FROM->(ANY)
-                transitionMap[Edge(it.from, null)]?.emit(it)
-                // (ANY)->TO
-                transitionMap[Edge(null, it.to)]?.emit(it)
-            }
-        }
-    }
-
-    private fun getOrCreateFlow(edge: Edge): MutableSharedFlow<TransitionStep> {
-        return transitionMap.getOrPut(edge) {
-            MutableSharedFlow<TransitionStep>(
-                extraBufferCapacity = 10,
-                onBufferOverflow = BufferOverflow.DROP_OLDEST
-            )
-        }
-    }
-
     /** Invoke once per transition between FROM->TO states to get access to a shared flow. */
     fun setup(
         duration: Duration,
-        from: KeyguardState?,
-        to: KeyguardState?,
+        edge: Edge,
     ): FlowBuilder {
-        if (from == null && to == null) {
-            throw IllegalArgumentException("from and to are both null")
-        }
-
-        return FlowBuilder(duration, Edge(from, to))
+        return FlowBuilder(duration, edge)
     }
 
     inner class FlowBuilder(
         private val transitionDuration: Duration,
         private val edge: Edge,
     ) {
+        fun setupWithoutSceneContainer(edge: Edge.StateToState): FlowBuilder {
+            if (SceneContainerFlag.isEnabled) return this
+            return setup(this.transitionDuration, edge)
+        }
+
         /**
          * Transitions will occur over a [transitionDuration] with [TransitionStep]s being emitted
          * in the range of [0, 1]. View animations should begin and end within a subset of this
@@ -150,7 +118,7 @@ constructor(
             if (!duration.isPositive()) {
                 throw IllegalArgumentException("duration must be a positive number: $duration")
             }
-            if ((startTime + duration).compareTo(transitionDuration) > 0) {
+            if ((startTime + duration) > transitionDuration) {
                 throw IllegalArgumentException(
                     "startTime($startTime) + duration($duration) must be" +
                         " <= transitionDuration($transitionDuration)"
@@ -185,7 +153,8 @@ constructor(
                 }?.let { onStep(interpolator.getInterpolation(it)) }
             }
 
-            return getOrCreateFlow(edge)
+            return transitionInteractor
+                .transition(edge)
                 .map { step ->
                     StateToValue(
                             from = step.from,

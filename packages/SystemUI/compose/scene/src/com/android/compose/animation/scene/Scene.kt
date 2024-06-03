@@ -24,9 +24,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.intermediateLayout
+import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.zIndex
@@ -44,17 +43,38 @@ internal class Scene(
     internal val scope = SceneScopeImpl(layoutImpl, this)
 
     var content by mutableStateOf(content)
-    var userActions by mutableStateOf(actions)
+    private var _userActions by mutableStateOf(checkValid(actions))
     var zIndex by mutableFloatStateOf(zIndex)
     var targetSize by mutableStateOf(IntSize.Zero)
 
+    var userActions
+        get() = _userActions
+        set(value) {
+            _userActions = checkValid(value)
+        }
+
+    private fun checkValid(
+        userActions: Map<UserAction, UserActionResult>
+    ): Map<UserAction, UserActionResult> {
+        userActions.forEach { (action, result) ->
+            if (key == result.toScene) {
+                error(
+                    "Transition to the same scene is not supported. Scene $key, action $action," +
+                        " result $result"
+                )
+            }
+        }
+        return userActions
+    }
+
     @Composable
-    @OptIn(ExperimentalComposeUiApi::class)
     fun Content(modifier: Modifier = Modifier) {
         Box(
             modifier
                 .zIndex(zIndex)
-                .intermediateLayout { measurable, constraints ->
+                .approachLayout(
+                    isMeasurementApproachInProgress = { scope.layoutState.isTransitioning() }
+                ) { measurable, constraints ->
                     targetSize = lookaheadSize
                     val placeable = measurable.measure(constraints)
                     layout(placeable.width, placeable.height) { placeable.place(0, 0) }
@@ -74,6 +94,7 @@ internal class SceneScopeImpl(
     private val layoutImpl: SceneTransitionLayoutImpl,
     private val scene: Scene,
 ) : SceneScope, ElementStateScope by layoutImpl.elementStateScope {
+    override val sceneKey: SceneKey = scene.key
     override val layoutState: SceneTransitionLayoutState = layoutImpl.state
 
     override fun Modifier.element(key: ElementKey): Modifier {
@@ -102,7 +123,7 @@ internal class SceneScopeImpl(
     override fun <T> animateSceneValueAsState(
         value: T,
         key: ValueKey,
-        lerp: (T, T, Float) -> T,
+        type: SharedValueType<T, *>,
         canOverflow: Boolean
     ): AnimatedState<T> {
         return animateSharedValueAsState(
@@ -111,7 +132,7 @@ internal class SceneScopeImpl(
             element = null,
             key = key,
             value = value,
-            lerp = lerp,
+            type = type,
             canOverflow = canOverflow,
         )
     }
@@ -119,23 +140,27 @@ internal class SceneScopeImpl(
     override fun Modifier.horizontalNestedScrollToScene(
         leftBehavior: NestedScrollBehavior,
         rightBehavior: NestedScrollBehavior,
+        isExternalOverscrollGesture: () -> Boolean,
     ): Modifier =
         nestedScrollToScene(
             layoutImpl = layoutImpl,
             orientation = Orientation.Horizontal,
             topOrLeftBehavior = leftBehavior,
             bottomOrRightBehavior = rightBehavior,
+            isExternalOverscrollGesture = isExternalOverscrollGesture,
         )
 
     override fun Modifier.verticalNestedScrollToScene(
         topBehavior: NestedScrollBehavior,
-        bottomBehavior: NestedScrollBehavior
+        bottomBehavior: NestedScrollBehavior,
+        isExternalOverscrollGesture: () -> Boolean,
     ): Modifier =
         nestedScrollToScene(
             layoutImpl = layoutImpl,
             orientation = Orientation.Vertical,
             topOrLeftBehavior = topBehavior,
             bottomOrRightBehavior = bottomBehavior,
+            isExternalOverscrollGesture = isExternalOverscrollGesture,
         )
 
     override fun Modifier.noResizeDuringTransitions(): Modifier {

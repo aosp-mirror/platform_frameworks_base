@@ -50,6 +50,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.view.KeyEvent;
@@ -133,7 +134,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_DISMISS_KEYBOARD_SHORTCUTS        = 32 << MSG_SHIFT;
     private static final int MSG_HANDLE_SYSTEM_KEY                 = 33 << MSG_SHIFT;
     private static final int MSG_SHOW_GLOBAL_ACTIONS               = 34 << MSG_SHIFT;
-    private static final int MSG_TOGGLE_PANEL                      = 35 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_NOTIFICATION_PANEL         = 35 << MSG_SHIFT;
     private static final int MSG_SHOW_SHUTDOWN_UI                  = 36 << MSG_SHIFT;
     private static final int MSG_SET_TOP_APP_HIDES_STATUS_BAR      = 37 << MSG_SHIFT;
     private static final int MSG_ROTATION_PROPOSAL                 = 38 << MSG_SHIFT;
@@ -179,6 +180,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_SET_QS_TILES = 79 << MSG_SHIFT;
     private static final int MSG_ENTER_DESKTOP = 80 << MSG_SHIFT;
     private static final int MSG_SET_SPLITSCREEN_FOCUS = 81 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_QUICK_SETTINGS_PANEL = 82 << MSG_SHIFT;
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
     public static final int FLAG_EXCLUDE_RECENTS_PANEL = 1 << 1;
@@ -221,10 +223,33 @@ public class CommandQueue extends IStatusBar.Stub implements
          */
         default void disable(int displayId, @DisableFlags int state1, @Disable2Flags int state2,
                 boolean animate) { }
+
+        /**
+         * Called to expand Notifications panel with animation.
+         */
         default void animateExpandNotificationsPanel() { }
+        /**
+         * Called to collapse Notifications panel with animation.
+         * @param flags Exclusion flags. See {@link FLAG_EXCLUDE_NONE}.
+         * @param force True to force the operation.
+         */
         default void animateCollapsePanels(int flags, boolean force) { }
-        default void togglePanel() { }
-        default void animateExpandSettingsPanel(String obj) { }
+
+        /**
+         * Called to toggle Notifications panel.
+         */
+        default void toggleNotificationsPanel() { }
+
+        /**
+         * Called to expand Quick Settings panel with animation.
+         * @param subPanel subPanel one wish to expand.
+         */
+        default void animateExpandSettingsPanel(String subPanel) { }
+
+        /**
+         * Called to toggle Quick Settings panel.
+         */
+        default void toggleQuickSettingsPanel() { }
 
         /**
          * Called to notify IME window status changes.
@@ -516,7 +541,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         /**
          * @see IStatusBar#showMediaOutputSwitcher
          */
-        default void showMediaOutputSwitcher(String packageName) {}
+        default void showMediaOutputSwitcher(String packageName, UserHandle userHandle) {}
 
         /**
          * @see IStatusBar#confirmImmersivePrompt
@@ -695,10 +720,10 @@ public class CommandQueue extends IStatusBar.Stub implements
         }
     }
 
-    public void togglePanel() {
+    public void toggleNotificationsPanel() {
         synchronized (mLock) {
-            mHandler.removeMessages(MSG_TOGGLE_PANEL);
-            mHandler.obtainMessage(MSG_TOGGLE_PANEL, 0, 0).sendToTarget();
+            mHandler.removeMessages(MSG_TOGGLE_NOTIFICATION_PANEL);
+            mHandler.obtainMessage(MSG_TOGGLE_NOTIFICATION_PANEL, 0, 0).sendToTarget();
         }
     }
 
@@ -706,6 +731,13 @@ public class CommandQueue extends IStatusBar.Stub implements
         synchronized (mLock) {
             mHandler.removeMessages(MSG_EXPAND_SETTINGS);
             mHandler.obtainMessage(MSG_EXPAND_SETTINGS, subPanel).sendToTarget();
+        }
+    }
+
+    public void toggleQuickSettingsPanel() {
+        synchronized (mLock) {
+            mHandler.removeMessages(MSG_TOGGLE_QUICK_SETTINGS_PANEL);
+            mHandler.obtainMessage(MSG_TOGGLE_QUICK_SETTINGS_PANEL, 0, 0).sendToTarget();
         }
     }
 
@@ -1361,7 +1393,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         }
     }
     @Override
-    public void showMediaOutputSwitcher(String packageName) {
+    public void showMediaOutputSwitcher(String packageName, UserHandle userHandle) {
         int callingUid = Binder.getCallingUid();
         if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
             throw new SecurityException("Call only allowed from system server.");
@@ -1369,6 +1401,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = packageName;
+            args.arg2 = userHandle;
             mHandler.obtainMessage(MSG_SHOW_MEDIA_OUTPUT_SWITCHER, args).sendToTarget();
         }
     }
@@ -1492,14 +1525,19 @@ public class CommandQueue extends IStatusBar.Stub implements
                         mCallbacks.get(i).animateCollapsePanels(msg.arg1, msg.arg2 != 0);
                     }
                     break;
-                case MSG_TOGGLE_PANEL:
+                case MSG_TOGGLE_NOTIFICATION_PANEL:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).togglePanel();
+                        mCallbacks.get(i).toggleNotificationsPanel();
                     }
                     break;
                 case MSG_EXPAND_SETTINGS:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).animateExpandSettingsPanel((String) msg.obj);
+                    }
+                    break;
+                case MSG_TOGGLE_QUICK_SETTINGS_PANEL:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).toggleQuickSettingsPanel();
                     }
                     break;
                 case MSG_SHOW_IME_BUTTON:
@@ -1939,8 +1977,10 @@ public class CommandQueue extends IStatusBar.Stub implements
                 case MSG_SHOW_MEDIA_OUTPUT_SWITCHER:
                     args = (SomeArgs) msg.obj;
                     String clientPackageName = (String) args.arg1;
+                    UserHandle clientUserHandle = (UserHandle) args.arg2;
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).showMediaOutputSwitcher(clientPackageName);
+                        mCallbacks.get(i).showMediaOutputSwitcher(clientPackageName,
+                                clientUserHandle);
                     }
                     break;
                 case MSG_CONFIRM_IMMERSIVE_PROMPT:

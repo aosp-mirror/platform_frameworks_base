@@ -1,4 +1,5 @@
 package: "android.view.contentprotection.flags"
+container: "system"
 
 flag {
     name: "blocklist_update_enabled"
@@ -23,6 +24,7 @@ flag {
 
 flag {
     name: "create_accessibility_overlay_app_op_enabled"
+    is_exported: true
     namespace: "content_protection"
     description: "If true, an appop is logged on creation of accessibility overlays."
     bug: "289081465"
@@ -30,6 +32,7 @@ flag {
 
 flag {
     name: "rapid_clear_notifications_by_listener_app_op_enabled"
+    is_exported: true
     namespace: "content_protection"
     description: "If true, an appop is logged when a notification is rapidly cleared by a notification listener."
     bug: "289080543"
@@ -37,6 +40,7 @@ flag {
 
 flag {
     name: "manage_device_policy_enabled"
+    is_exported: true
     namespace: "content_protection"
     description: "If true, the APIs to manage content protection device policy will be enabled."
     bug: "319477846"

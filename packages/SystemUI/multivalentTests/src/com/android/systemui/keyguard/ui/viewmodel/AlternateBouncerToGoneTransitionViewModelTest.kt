@@ -30,6 +30,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,13 +45,12 @@ import org.junit.runner.RunWith
 class AlternateBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
     val kosmos =
         testKosmos().apply {
-            fakeFeatureFlagsClassic.apply {
-                set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false)
-                set(Flags.FULL_SCREEN_USER_SWITCHER, false)
-            }
+            fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
         }
+
     private val testScope = kosmos.testScope
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val sysuiStatusBarStateController = kosmos.sysuiStatusBarStateController
     private val underTest by lazy { kosmos.alternateBouncerToGoneTransitionViewModel }
 
     @Test
@@ -109,6 +109,21 @@ class AlternateBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
             keyguardTransitionRepository.sendTransitionStep(step(1f))
             runCurrent()
             assertThat(alpha).isEqualTo(0f)
+        }
+
+    @Test
+    fun notificationAlpha_leaveShadeOpen() =
+        testScope.runTest {
+            val values by collectValues(underTest.notificationAlpha(ViewStateAccessor()))
+            runCurrent()
+
+            sysuiStatusBarStateController.setLeaveOpenOnKeyguardHide(true)
+
+            keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            keyguardTransitionRepository.sendTransitionStep(step(1f))
+
+            assertThat(values.size).isEqualTo(2)
+            values.forEach { assertThat(it).isEqualTo(1f) }
         }
 
     @Test

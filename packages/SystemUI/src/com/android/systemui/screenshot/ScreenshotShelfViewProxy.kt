@@ -22,28 +22,39 @@ import android.app.Notification
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
+import android.graphics.Region
+import android.os.Looper
+import android.view.Choreographer
+import android.view.InputEvent
 import android.view.KeyEvent
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.ScrollCaptureResponse
 import android.view.View
 import android.view.ViewTreeObserver
 import android.view.WindowInsets
+import android.view.WindowManager
 import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.animation.doOnEnd
+import androidx.core.animation.doOnStart
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.log.DebugLogger.debugLog
 import com.android.systemui.res.R
-import com.android.systemui.screenshot.LogConfig.DEBUG_ACTIONS
 import com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS
 import com.android.systemui.screenshot.LogConfig.DEBUG_INPUT
 import com.android.systemui.screenshot.LogConfig.DEBUG_WINDOW
+import com.android.systemui.screenshot.ScreenshotController.SavedImageData
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER
 import com.android.systemui.screenshot.scroll.ScrollCaptureController
 import com.android.systemui.screenshot.ui.ScreenshotAnimationController
 import com.android.systemui.screenshot.ui.ScreenshotShelfView
 import com.android.systemui.screenshot.ui.binder.ScreenshotShelfViewBinder
-import com.android.systemui.screenshot.ui.viewmodel.ActionButtonViewModel
+import com.android.systemui.screenshot.ui.viewmodel.AnimationState
 import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel
+import com.android.systemui.shared.system.InputChannelCompat
+import com.android.systemui.shared.system.InputMonitorCompat
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -54,7 +65,9 @@ class ScreenshotShelfViewProxy
 constructor(
     private val logger: UiEventLogger,
     private val viewModel: ScreenshotViewModel,
-    private val staticActionsProvider: ScreenshotActionsProvider,
+    private val windowManager: WindowManager,
+    shelfViewBinder: ScreenshotShelfViewBinder,
+    private val thumbnailObserver: ThumbnailObserver,
     @Assisted private val context: Context,
     @Assisted private val displayId: Int
 ) : ScreenshotViewProxy {
@@ -65,7 +78,17 @@ constructor(
     override var callbacks: ScreenshotView.ScreenshotViewCallback? = null
     override var screenshot: ScreenshotData? = null
         set(value) {
-            viewModel.setScreenshotBitmap(value?.bitmap)
+            value?.let {
+                viewModel.setScreenshotBitmap(it.bitmap)
+                val badgeBg =
+                    AppCompatResources.getDrawable(context, R.drawable.overlay_badge_background)
+                val user = it.userHandle
+                if (badgeBg != null && user != null) {
+                    viewModel.setScreenshotBadge(
+                        context.packageManager.getUserBadgedIcon(badgeBg, user)
+                    )
+                }
+            }
             field = value
         }
 
@@ -74,46 +97,82 @@ constructor(
     override var isDismissing = false
     override var isPendingSharedTransition = false
 
-    private val animationController = ScreenshotAnimationController(view)
+    private val animationController = ScreenshotAnimationController(view, viewModel)
+    private var inputMonitor: InputMonitorCompat? = null
+    private var inputEventReceiver: InputChannelCompat.InputEventReceiver? = null
 
     init {
-        ScreenshotShelfViewBinder.bind(view, viewModel, LayoutInflater.from(context))
+        shelfViewBinder.bind(
+            view,
+            viewModel,
+            animationController,
+            LayoutInflater.from(context),
+            onDismissalRequested = { event, velocity -> requestDismissal(event, velocity) },
+            onUserInteraction = { callbacks?.onUserInteraction() }
+        )
+        view.updateInsets(windowManager.currentWindowMetrics.windowInsets)
         addPredictiveBackListener { requestDismissal(SCREENSHOT_DISMISSED_OTHER) }
         setOnKeyListener { requestDismissal(SCREENSHOT_DISMISSED_OTHER) }
         debugLog(DEBUG_WINDOW) { "adding OnComputeInternalInsetsListener" }
+        view.viewTreeObserver.addOnComputeInternalInsetsListener { info ->
+            info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION)
+            info.touchableRegion.set(getTouchRegion())
+        }
         screenshotPreview = view.screenshotPreview
+        thumbnailObserver.setViews(
+            view.blurredScreenshotPreview,
+            view.requireViewById(R.id.screenshot_preview_border)
+        )
+        view.addOnAttachStateChangeListener(
+            object : View.OnAttachStateChangeListener {
+                override fun onViewAttachedToWindow(v: View) {
+                    startInputListening()
+                }
+
+                override fun onViewDetachedFromWindow(v: View) {
+                    stopInputListening()
+                }
+            }
+        )
     }
 
     override fun reset() {
         animationController.cancel()
         isPendingSharedTransition = false
-        viewModel.setScreenshotBitmap(null)
-        viewModel.setActions(listOf())
+        viewModel.reset()
     }
-    override fun updateInsets(insets: WindowInsets) {}
+    override fun updateInsets(insets: WindowInsets) {
+        view.updateInsets(insets)
+    }
     override fun updateOrientation(insets: WindowInsets) {}
 
     override fun createScreenshotDropInAnimation(screenRect: Rect, showFlash: Boolean): Animator {
-        return animationController.getEntranceAnimation()
+        val entrance =
+            animationController.getEntranceAnimation(screenRect, showFlash) {
+                viewModel.setAnimationState(AnimationState.ENTRANCE_REVEAL)
+            }
+        entrance.doOnStart {
+            thumbnailObserver.onEntranceStarted()
+            viewModel.setAnimationState(AnimationState.ENTRANCE_STARTED)
+        }
+        entrance.doOnEnd {
+            // reset the timeout when animation finishes
+            callbacks?.onUserInteraction()
+            thumbnailObserver.onEntranceComplete()
+            viewModel.setAnimationState(AnimationState.ENTRANCE_COMPLETE)
+        }
+        return entrance
     }
 
     override fun addQuickShareChip(quickShareAction: Notification.Action) {}
 
-    override fun setChipIntents(imageData: ScreenshotController.SavedImageData) {
-        val staticActions =
-            staticActionsProvider.getActions(context, imageData.owner).map {
-                ActionButtonViewModel(it.icon, it.text) {
-                    val intent = it.retrieveIntent(imageData.uri)
-                    debugLog(DEBUG_ACTIONS) { "Action tapped: $intent" }
-                    isPendingSharedTransition = true
-                    callbacks?.onAction(intent, imageData.owner, it.overrideTransition)
-                }
-            }
+    override fun setChipIntents(imageData: SavedImageData) {}
 
-        viewModel.setActions(staticActions)
+    override fun requestDismissal(event: ScreenshotEvent?) {
+        requestDismissal(event, null)
     }
 
-    override fun requestDismissal(event: ScreenshotEvent) {
+    private fun requestDismissal(event: ScreenshotEvent?, velocity: Float?) {
         debugLog(DEBUG_DISMISS) { "screenshot dismissal requested: $event" }
 
         // If we're already animating out, don't restart the animation
@@ -121,8 +180,8 @@ constructor(
             debugLog(DEBUG_DISMISS) { "Already dismissing, ignoring duplicate command $event" }
             return
         }
-        logger.log(event, 0, packageName)
-        val animator = animationController.getExitAnimation()
+        event?.let { logger.log(it, 0, packageName) }
+        val animator = animationController.getSwipeDismissAnimation(velocity)
         animator.addListener(
             object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animator: Animator) {
@@ -143,21 +202,60 @@ constructor(
 
     override fun prepareScrollingTransition(
         response: ScrollCaptureResponse,
-        screenBitmap: Bitmap,
+        screenBitmap: Bitmap, // unused
         newScreenshot: Bitmap,
         screenshotTakenInPortrait: Boolean,
         onTransitionPrepared: Runnable,
-    ) {}
+    ) {
+        viewModel.setScrollingScrimBitmap(newScreenshot)
+        viewModel.setScrollableRect(scrollableAreaOnScreen(response))
+        animationController.fadeForLongScreenshotTransition()
+        view.post { onTransitionPrepared.run() }
+    }
+
+    private fun scrollableAreaOnScreen(response: ScrollCaptureResponse): Rect {
+        val r = Rect(response.boundsInWindow)
+        val windowInScreen = response.windowBounds
+        r.offset(windowInScreen?.left ?: 0, windowInScreen?.top ?: 0)
+        r.intersect(
+            Rect(
+                0,
+                0,
+                context.resources.displayMetrics.widthPixels,
+                context.resources.displayMetrics.heightPixels
+            )
+        )
+        return r
+    }
 
     override fun startLongScreenshotTransition(
         transitionDestination: Rect,
         onTransitionEnd: Runnable,
-        longScreenshot: ScrollCaptureController.LongScreenshot
-    ) {}
+        longScreenshot: ScrollCaptureController.LongScreenshot,
+    ) {
+        val transitionAnimation =
+            animationController.runLongScreenshotTransition(
+                transitionDestination,
+                longScreenshot,
+                onTransitionEnd
+            )
+        transitionAnimation.doOnEnd { callbacks?.onDismiss() }
+        transitionAnimation.start()
+    }
 
-    override fun restoreNonScrollingUi() {}
+    override fun restoreNonScrollingUi() {
+        viewModel.setScrollableRect(null)
+        viewModel.setScrollingScrimBitmap(null)
+        animationController.restoreUI()
+        callbacks?.onUserInteraction() // reset the timeout
+    }
 
-    override fun stopInputListening() {}
+    override fun stopInputListening() {
+        inputMonitor?.dispose()
+        inputMonitor = null
+        inputEventReceiver?.dispose()
+        inputEventReceiver = null
+    }
 
     override fun requestFocus() {
         view.requestFocus()
@@ -176,6 +274,10 @@ constructor(
                 }
             }
         )
+    }
+
+    override fun fadeForSharedTransition() {
+        animationController.fadeForSharedTransition()
     }
 
     private fun addPredictiveBackListener(onDismissRequested: (ScreenshotEvent) -> Unit) {
@@ -204,6 +306,7 @@ constructor(
             }
         )
     }
+
     private fun setOnKeyListener(onDismissRequested: (ScreenshotEvent) -> Unit) {
         view.setOnKeyListener(
             object : View.OnKeyListener {
@@ -216,6 +319,32 @@ constructor(
                     return false
                 }
             }
+        )
+    }
+
+    private fun startInputListening() {
+        stopInputListening()
+        inputMonitor =
+            InputMonitorCompat("Screenshot", displayId).also {
+                inputEventReceiver =
+                    it.getInputReceiver(Looper.getMainLooper(), Choreographer.getInstance()) {
+                        ev: InputEvent? ->
+                        if (
+                            ev is MotionEvent &&
+                                ev.actionMasked == MotionEvent.ACTION_DOWN &&
+                                !getTouchRegion().contains(ev.rawX.toInt(), ev.rawY.toInt())
+                        ) {
+                            callbacks?.onTouchOutside()
+                        }
+                    }
+            }
+    }
+
+    private fun getTouchRegion(): Region {
+        return view.getTouchRegion(
+            windowManager.currentWindowMetrics.windowInsets.getInsets(
+                WindowInsets.Type.systemGestures()
+            )
         )
     }
 

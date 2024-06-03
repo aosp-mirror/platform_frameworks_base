@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles.impl.alarm.domain
 
 import android.content.res.Resources
 import android.content.res.Resources.Theme
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.alarm.domain.model.AlarmTileModel
@@ -82,7 +83,8 @@ constructor(
                     secondaryLabel = resources.getString(R.string.qs_alarm_tile_no_alarm)
                 }
             }
-
+            iconRes = R.drawable.ic_alarm
+            icon = { Icon.Loaded(resources.getDrawable(iconRes!!, theme), null) }
             sideViewIcon = QSTileState.SideViewIcon.Chevron
             contentDescription = label
             supportedActions = setOf(QSTileState.UserAction.CLICK)

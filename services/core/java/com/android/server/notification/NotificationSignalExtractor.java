@@ -17,6 +17,7 @@
 package com.android.server.notification;
 
 import android.content.Context;
+import com.android.internal.compat.IPlatformCompat;
 
 /**
  * Extracts signals that will be useful to the {@link NotificationComparator} and caches them
@@ -52,4 +53,6 @@ public interface NotificationSignalExtractor {
      *               DND.
      */
     void setZenHelper(ZenModeHelper helper);
+
+    default void setCompatChangeLogger(IPlatformCompat platformCompat){};
 }

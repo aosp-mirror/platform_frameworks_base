@@ -22,10 +22,10 @@ import android.content.res.Configuration
 import android.database.ContentObserver
 import android.os.LocaleList
 import android.provider.Settings
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.util.MathUtils.abs
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -33,10 +33,16 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.DisableSceneContainer
+import com.android.systemui.flags.EnableSceneContainer
+import com.android.systemui.flags.Flags
+import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.domain.pipeline.EMPTY_SMARTSPACE_MEDIA_DATA
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
@@ -44,22 +50,26 @@ import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager.Companion.LOCATION_QS
 import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.controls.ui.view.MediaScrollView
+import com.android.systemui.media.controls.ui.viewmodel.mediaCarouselViewModel
 import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
 import com.android.systemui.res.R
+import com.android.systemui.scene.data.repository.Idle
+import com.android.systemui.scene.data.repository.setSceneTransition
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.notification.collection.provider.OnReorderingAllowedListener
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.capture
-import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.GlobalSettings
+import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.time.FakeSystemClock
 import java.util.Locale
 import javax.inject.Provider
@@ -67,14 +77,17 @@ import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.floatThat
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -83,6 +96,9 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.capture
+import org.mockito.kotlin.eq
 
 private val DATA = MediaTestUtils.emptyMediaData
 
@@ -92,11 +108,12 @@ private const val PLAYING_LOCAL = "playing local"
 
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class MediaCarouselControllerTest : SysuiTestCase() {
     val kosmos = testKosmos()
 
     @Mock lateinit var mediaControlPanelFactory: Provider<MediaControlPanel>
+    @Mock lateinit var mediaViewControllerFactory: Provider<MediaViewController>
     @Mock lateinit var panel: MediaControlPanel
     @Mock lateinit var visualStabilityProvider: VisualStabilityProvider
     @Mock lateinit var mediaHostStatesManager: MediaHostStatesManager
@@ -114,8 +131,8 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var pageIndicator: PageIndicator
     @Mock lateinit var mediaFlags: MediaFlags
     @Mock lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
-    @Mock lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock lateinit var globalSettings: GlobalSettings
+    private lateinit var secureSettings: SecureSettings
     private val transitionRepository = kosmos.fakeKeyguardTransitionRepository
     @Captor lateinit var listener: ArgumentCaptor<MediaDataManager.Listener>
     @Captor
@@ -127,33 +144,46 @@ class MediaCarouselControllerTest : SysuiTestCase() {
 
     private val clock = FakeSystemClock()
     private lateinit var bgExecutor: FakeExecutor
+    private lateinit var testDispatcher: TestDispatcher
     private lateinit var mediaCarouselController: MediaCarouselController
+
+    private var originalResumeSetting =
+        Settings.Secure.getInt(context.contentResolver, Settings.Secure.MEDIA_CONTROLS_RESUME, 1)
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        secureSettings = FakeSettings()
         context.resources.configuration.setLocales(LocaleList(Locale.US, Locale.UK))
         bgExecutor = FakeExecutor(clock)
+        testDispatcher = UnconfinedTestDispatcher()
         mediaCarouselController =
             MediaCarouselController(
-                context,
-                mediaControlPanelFactory,
-                visualStabilityProvider,
-                mediaHostStatesManager,
-                activityStarter,
-                clock,
-                executor,
-                bgExecutor,
-                mediaDataManager,
-                configurationController,
-                falsingManager,
-                dumpManager,
-                logger,
-                debugLogger,
-                mediaFlags,
-                keyguardUpdateMonitor,
-                kosmos.keyguardTransitionInteractor,
-                globalSettings
+                applicationScope = kosmos.applicationCoroutineScope,
+                context = context,
+                mediaControlPanelFactory = mediaControlPanelFactory,
+                visualStabilityProvider = visualStabilityProvider,
+                mediaHostStatesManager = mediaHostStatesManager,
+                activityStarter = activityStarter,
+                systemClock = clock,
+                mainDispatcher = kosmos.testDispatcher,
+                executor = executor,
+                bgExecutor = bgExecutor,
+                backgroundDispatcher = testDispatcher,
+                mediaManager = mediaDataManager,
+                configurationController = configurationController,
+                falsingManager = falsingManager,
+                dumpManager = dumpManager,
+                logger = logger,
+                debugLogger = debugLogger,
+                mediaFlags = mediaFlags,
+                keyguardUpdateMonitor = keyguardUpdateMonitor,
+                keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor,
+                globalSettings = globalSettings,
+                secureSettings = secureSettings,
+                mediaCarouselViewModel = kosmos.mediaCarouselViewModel,
+                mediaViewControllerFactory = mediaViewControllerFactory,
+                sceneInteractor = kosmos.sceneInteractor,
             )
         verify(configurationController).addCallback(capture(configListener))
         verify(mediaDataManager).addListener(capture(listener))
@@ -168,8 +198,17 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(globalSettings)
             .registerContentObserver(
                 eq(Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE)),
-                settingsObserverCaptor.capture()
+                capture(settingsObserverCaptor)
             )
+    }
+
+    @After
+    fun tearDown() {
+        Settings.Secure.putInt(
+            context.contentResolver,
+            Settings.Secure.MEDIA_CONTROLS_RESUME,
+            originalResumeSetting
+        )
     }
 
     @Test
@@ -804,10 +843,14 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(mediaCarousel).visibility = View.VISIBLE
     }
 
+    @DisableSceneContainer
     @ExperimentalCoroutinesApi
     @Test
     fun testKeyguardGone_showMediaCarousel() =
-        runTest(UnconfinedTestDispatcher()) {
+        kosmos.testScope.runTest {
+            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
+            var updatedVisibility = false
+            mediaCarouselController.updateHostVisibility = { updatedVisibility = true }
             mediaCarouselController.mediaCarousel = mediaCarousel
 
             val job = mediaCarouselController.listenForAnyStateToGoneKeyguardTransition(this)
@@ -818,9 +861,90 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             )
 
             verify(mediaCarousel).visibility = View.VISIBLE
+            assertEquals(true, updatedVisibility)
+            assertEquals(false, mediaCarouselController.isLockedAndHidden())
 
             job.cancel()
         }
+
+    @EnableSceneContainer
+    @ExperimentalCoroutinesApi
+    @Test
+    fun testKeyguardGone_showMediaCarousel_scene_container() =
+        kosmos.testScope.runTest {
+            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
+            var updatedVisibility = false
+            mediaCarouselController.updateHostVisibility = { updatedVisibility = true }
+            mediaCarouselController.mediaCarousel = mediaCarousel
+
+            val job = mediaCarouselController.listenForAnyStateToGoneKeyguardTransition(this)
+            kosmos.setSceneTransition(Idle(Scenes.Gone))
+
+            verify(mediaCarousel).visibility = View.VISIBLE
+            assertEquals(true, updatedVisibility)
+
+            job.cancel()
+        }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun keyguardShowing_notAllowedOnLockscreen_updateVisibility() {
+        kosmos.testScope.runTest {
+            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
+            var updatedVisibility = false
+            mediaCarouselController.updateHostVisibility = { updatedVisibility = true }
+            mediaCarouselController.mediaCarousel = mediaCarousel
+
+            val settingsJob =
+                mediaCarouselController.listenForLockscreenSettingChanges(
+                    kosmos.applicationCoroutineScope
+                )
+            secureSettings.putBool(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, false)
+
+            val keyguardJob = mediaCarouselController.listenForAnyStateToLockscreenTransition(this)
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.GONE,
+                to = KeyguardState.LOCKSCREEN,
+                this
+            )
+
+            assertEquals(true, updatedVisibility)
+            assertEquals(true, mediaCarouselController.isLockedAndHidden())
+
+            settingsJob.cancel()
+            keyguardJob.cancel()
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun keyguardShowing_allowedOnLockscreen_updateVisibility() {
+        kosmos.testScope.runTest {
+            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
+            var updatedVisibility = false
+            mediaCarouselController.updateHostVisibility = { updatedVisibility = true }
+            mediaCarouselController.mediaCarousel = mediaCarousel
+
+            val settingsJob =
+                mediaCarouselController.listenForLockscreenSettingChanges(
+                    kosmos.applicationCoroutineScope
+                )
+            secureSettings.putBool(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, true)
+
+            val keyguardJob = mediaCarouselController.listenForAnyStateToLockscreenTransition(this)
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.GONE,
+                to = KeyguardState.LOCKSCREEN,
+                this
+            )
+
+            assertEquals(true, updatedVisibility)
+            assertEquals(false, mediaCarouselController.isLockedAndHidden())
+
+            settingsJob.cancel()
+            keyguardJob.cancel()
+        }
+    }
 
     @Test
     fun testInvisibleToUserAndExpanded_playersNotListening() {
@@ -896,6 +1020,45 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         globalSettings.putFloat(Settings.Global.ANIMATOR_DURATION_SCALE, 0f)
         settingsObserverCaptor.value!!.onChange(false)
         verify(panel).updateAnimatorDurationScale()
+    }
+
+    @Test
+    fun swipeToDismiss_pausedAndResumeOff_userInitiated() {
+        // When resumption is disabled, paused media should be dismissed after being swiped away
+        Settings.Secure.putInt(context.contentResolver, Settings.Secure.MEDIA_CONTROLS_RESUME, 0)
+
+        val pausedMedia = DATA.copy(isPlaying = false)
+        listener.value.onMediaDataLoaded(PAUSED_LOCAL, PAUSED_LOCAL, pausedMedia)
+        mediaCarouselController.onSwipeToDismiss()
+
+        // When it can be removed immediately on update
+        whenever(visualStabilityProvider.isReorderingAllowed).thenReturn(true)
+        val inactiveMedia = pausedMedia.copy(active = false)
+        listener.value.onMediaDataLoaded(PAUSED_LOCAL, PAUSED_LOCAL, inactiveMedia)
+
+        // This is processed as a user-initiated dismissal
+        verify(debugLogger).logMediaRemoved(eq(PAUSED_LOCAL), eq(true))
+        verify(mediaDataManager).dismissMediaData(eq(PAUSED_LOCAL), anyLong(), eq(true))
+    }
+
+    @Test
+    fun swipeToDismiss_pausedAndResumeOff_delayed_userInitiated() {
+        // When resumption is disabled, paused media should be dismissed after being swiped away
+        Settings.Secure.putInt(context.contentResolver, Settings.Secure.MEDIA_CONTROLS_RESUME, 0)
+        mediaCarouselController.updateHostVisibility = {}
+
+        val pausedMedia = DATA.copy(isPlaying = false)
+        listener.value.onMediaDataLoaded(PAUSED_LOCAL, PAUSED_LOCAL, pausedMedia)
+        mediaCarouselController.onSwipeToDismiss()
+
+        // When it can't be removed immediately on update
+        whenever(visualStabilityProvider.isReorderingAllowed).thenReturn(false)
+        val inactiveMedia = pausedMedia.copy(active = false)
+        listener.value.onMediaDataLoaded(PAUSED_LOCAL, PAUSED_LOCAL, inactiveMedia)
+        visualStabilityCallback.value.onReorderingAllowed()
+
+        // This is processed as a user-initiated dismissal
+        verify(mediaDataManager).dismissMediaData(eq(PAUSED_LOCAL), anyLong(), eq(true))
     }
 
     /**

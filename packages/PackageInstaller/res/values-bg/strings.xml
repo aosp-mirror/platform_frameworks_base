@@ -63,7 +63,7 @@
     <string name="archive_application_text_all_users" msgid="3151229641681672580">"Да се архивира ли това приложение за всички потребители? Личните ви данни ще бъдат запазени"</string>
     <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"Да се архивира ли това приложение в служебния ви потребителски профил? Личните ви данни ще бъдат запазени"</string>
     <string name="archive_application_text_user" msgid="2586558895535581451">"Да се архивира ли това приложение за <xliff:g id="USERNAME">%1$s</xliff:g>? Личните ви данни ще бъдат запазени"</string>
-    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Искате ли да архивирате това приложение от личното си пространство? Личните ви данни ще бъдат запазени"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Искате ли да архивирате това приложение от частното си пространство? Личните ви данни ще бъдат запазени"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Искате ли да деинсталирате това приложение за "<b>"всички"</b>" потребители? Приложението и данните му ще бъдат премахнати от "<b>"всички"</b>" потребители на устройството."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Искате ли да деинсталирате това приложение за потребителя <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Искате ли да деинсталирате това приложение от служебния си потребителски профил?"</string>
@@ -72,7 +72,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Запазване на <xliff:g id="SIZE">%1$s</xliff:g> данни от приложението."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Искате ли да изтриете това приложение?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Искате ли да деинсталирате това приложение? Копието на <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> също ще бъде изтрито."</string>
-    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Искате ли да деинсталирате това приложение от личното си пространство?"</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Искате ли да деинсталирате това приложение от частното си пространство?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Активни деинсталирания"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Неуспешни деинсталирания"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Деинсталира се..."</string>

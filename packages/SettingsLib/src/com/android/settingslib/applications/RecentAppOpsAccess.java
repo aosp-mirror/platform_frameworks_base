@@ -29,6 +29,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.permission.PermissionManager;
 import android.text.format.DateUtils;
+import android.util.ArrayMap;
 import android.util.IconDrawableFactory;
 import android.util.Log;
 
@@ -51,6 +52,7 @@ public class RecentAppOpsAccess {
     };
     private static final int[] MICROPHONE_OPS = new int[]{
             AppOpsManager.OP_RECORD_AUDIO,
+            AppOpsManager.OP_PHONE_CALL_MICROPHONE,
     };
     private static final int[] CAMERA_OPS = new int[]{
             AppOpsManager.OP_CAMERA,
@@ -126,6 +128,7 @@ public class RecentAppOpsAccess {
         final long now = mClock.millis();
         final UserManager um = mContext.getSystemService(UserManager.class);
         final List<UserHandle> profiles = um.getUserProfiles();
+        ArrayMap<UserHandle, Boolean> shouldHideAppsByUsers = new ArrayMap<>();
 
         for (int i = 0; i < appOpsCount; ++i) {
             AppOpsManager.PackageOps ops = appOps.get(i);
@@ -133,9 +136,13 @@ public class RecentAppOpsAccess {
             int uid = ops.getUid();
             UserHandle user = UserHandle.getUserHandleForUid(uid);
 
+            if (!shouldHideAppsByUsers.containsKey(user)) {
+                shouldHideAppsByUsers.put(user, shouldHideUser(um, user));
+            }
+
             // Don't show apps belonging to background users except for profiles that shouldn't
             // be shown in quiet mode.
-            if (!profiles.contains(user) || isHideInQuietEnabledForProfile(um, user)) {
+            if (!profiles.contains(user) || shouldHideAppsByUsers.get(user)) {
                 continue;
             }
 
@@ -144,6 +151,11 @@ public class RecentAppOpsAccess {
             if (!showSystemApps) {
                 for (int op : mOps) {
                     final String permission = AppOpsManager.opToPermission(op);
+                    if (permission == null) {
+                        // Some ops like OP_PHONE_CALL_MICROPHONE don't have corresponding
+                        // permissions. No need to check in this case.
+                        continue;
+                    }
                     final int permissionFlags = mPackageManager.getPermissionFlags(permission,
                             packageName,
                             user);
@@ -194,7 +206,7 @@ public class RecentAppOpsAccess {
         return accesses;
     }
 
-    private boolean isHideInQuietEnabledForProfile(UserManager userManager, UserHandle userHandle) {
+    private boolean shouldHideUser(UserManager userManager, UserHandle userHandle) {
         if (android.multiuser.Flags.enablePrivateSpaceFeatures()
                 && android.multiuser.Flags.handleInterleavedSettingsForPrivateSpace()) {
             return userManager.isQuietModeEnabled(userHandle)

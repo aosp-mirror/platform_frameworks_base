@@ -28,7 +28,6 @@ import static android.content.pm.PackageManager.RESTRICTION_HIDE_NOTIFICATIONS;
 import static android.content.pm.PackageManager.RESTRICTION_NONE;
 
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
-import static com.android.server.pm.PackageManagerService.DEFAULT_FILE_ACCESS_MODE;
 
 import android.accounts.IAccountManager;
 import android.annotation.NonNull;
@@ -36,6 +35,8 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.role.RoleManager;
+import android.app.usage.StorageStats;
+import android.app.usage.StorageStatsManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -45,6 +46,7 @@ import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.FeatureInfo;
+import android.content.pm.Flags;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
@@ -136,6 +138,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.security.SecureRandom;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -275,6 +278,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runClear();
                 case "get-archived-package-metadata":
                     return runGetArchivedPackageMetadata();
+                case "get-package-storage-stats":
+                    return runGetPackageStorageStats();
                 case "install-archived":
                     return runArchivedInstall();
                 case "enable":
@@ -323,6 +328,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runGetPrivappDenyPermissions();
                 case "get-oem-permissions":
                     return runGetOemPermissions();
+                case "get-signature-permission-allowlist":
+                    return runGetSignaturePermissionAllowlist();
                 case "trim-caches":
                     return runTrimCaches();
                 case "create-user":
@@ -1861,6 +1868,103 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    /**
+     * Returns a string that shows the number of bytes in b, Kb, Mb or Gb.
+     */
+    protected static String getFormattedBytes(long size) {
+        double k = size/1024.0;
+        double m = size/1048576.0;
+        double g = size/1073741824.0;
+
+        DecimalFormat dec = new DecimalFormat("0.00");
+        if (g > 1) {
+            return dec.format(g).concat(" Gb");
+        } else if (m > 1) {
+            return dec.format(m).concat(" Mb");
+        } else if (k > 1) {
+            return dec.format(k).concat(" Kb");
+        }
+        return "";
+    }
+
+    /**
+     * Return the string that displays the data size.
+     */
+    private String getDataSizeDisplay(long size) {
+        String formattedOutput = getFormattedBytes(size);
+        if (!formattedOutput.isEmpty()) {
+           formattedOutput = " (" + formattedOutput + ")";
+        }
+        return Long.toString(size) + " bytes" + formattedOutput;
+    }
+
+    /**
+     * Display storage stats of the specified package.
+     *
+     * Usage: get-package-storage-stats [--usr USER_ID] PACKAGE
+     */
+    private int runGetPackageStorageStats() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        if (!android.content.pm.Flags.getPackageStorageStats()) {
+            pw.println("Error: get_package_storage_stats flag is not enabled");
+            return 1;
+        }
+        if (!android.app.usage.Flags.getAppBytesByDataTypeApi()) {
+            pw.println("Error: get_app_bytes_by_data_type_api flag is not enabled");
+            return 1;
+        }
+        int userId = UserHandle.USER_CURRENT;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--user":
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+                default:
+                    pw.println("Error: Unknown option: " + opt);
+                    return 1;
+            }
+        }
+
+        final String packageName = getNextArg();
+        if (packageName == null) {
+            pw.println("Error: package name not specified");
+            return 1;
+        }
+        try {
+            StorageStatsManager storageStatsManager =
+                mContext.getSystemService(StorageStatsManager.class);
+            final int translatedUserId = translateUserId(userId, UserHandle.USER_NULL,
+                "runGetPackageStorageStats");
+            StorageStats stats =
+                storageStatsManager.queryStatsForPackage(StorageManager.UUID_DEFAULT,
+                    packageName, UserHandle.of(translatedUserId));
+
+            pw.println("code: " + getDataSizeDisplay(stats.getAppBytes()));
+            pw.println("data: " + getDataSizeDisplay(stats.getDataBytes()));
+            pw.println("cache: " + getDataSizeDisplay(stats.getCacheBytes()));
+            pw.println("apk: " + getDataSizeDisplay(stats.getAppBytesByDataType(
+                StorageStats.APP_DATA_TYPE_FILE_TYPE_APK)));
+            pw.println("lib: " + getDataSizeDisplay(
+                stats.getAppBytesByDataType(StorageStats.APP_DATA_TYPE_LIB)));
+            pw.println("dm: " + getDataSizeDisplay(stats.getAppBytesByDataType(
+                StorageStats.APP_DATA_TYPE_FILE_TYPE_DM)));
+            pw.println("dexopt artifacts: " + getDataSizeDisplay(stats.getAppBytesByDataType(
+                StorageStats.APP_DATA_TYPE_FILE_TYPE_DEXOPT_ARTIFACT)));
+            pw.println("current profile : " + getDataSizeDisplay(stats.getAppBytesByDataType(
+                StorageStats.APP_DATA_TYPE_FILE_TYPE_CURRENT_PROFILE)));
+            pw.println("reference profile: " + getDataSizeDisplay(stats.getAppBytesByDataType(
+                StorageStats.APP_DATA_TYPE_FILE_TYPE_REFERENCE_PROFILE)));
+            pw.println("external cache: " + getDataSizeDisplay(stats.getExternalCacheBytes()));
+        } catch (Exception e) {
+            getErrPrintWriter().println("Failed to get storage stats, reason: " + e);
+            pw.println("Failure [failed to get storage stats], reason: " + e);
+            return -1;
+        }
+        return 0;
+    }
+
     private int runInstallExisting() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
         int userId = UserHandle.USER_CURRENT;
@@ -2818,6 +2922,54 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runGetSignaturePermissionAllowlist() {
+        final var partition = getNextArg();
+        if (partition == null) {
+            getErrPrintWriter().println("Error: no partition specified.");
+            return 1;
+        }
+        final var permissionAllowlist =
+                SystemConfig.getInstance().getPermissionAllowlist();
+        final ArrayMap<String, ArrayMap<String, Boolean>> allowlist;
+        switch (partition) {
+            case "system":
+                allowlist = permissionAllowlist.getSignatureAppAllowlist();
+                break;
+            case "vendor":
+                allowlist = permissionAllowlist.getVendorSignatureAppAllowlist();
+                break;
+            case "product":
+                allowlist = permissionAllowlist.getProductSignatureAppAllowlist();
+                break;
+            case "system-ext":
+                allowlist = permissionAllowlist.getSystemExtSignatureAppAllowlist();
+                break;
+            default:
+                getErrPrintWriter().println("Error: unknown partition: " + partition);
+                return 1;
+        }
+        final var ipw = new IndentingPrintWriter(getOutPrintWriter(), "  ");
+        final var allowlistSize = allowlist.size();
+        for (var allowlistIndex = 0; allowlistIndex < allowlistSize; allowlistIndex++) {
+            final var packageName = allowlist.keyAt(allowlistIndex);
+            final var permissions = allowlist.valueAt(allowlistIndex);
+            ipw.print("Package: ");
+            ipw.println(packageName);
+            ipw.increaseIndent();
+            final var permissionsSize = permissions.size();
+            for (var permissionsIndex = 0; permissionsIndex < permissionsSize; permissionsIndex++) {
+                final var permissionName = permissions.keyAt(permissionsIndex);
+                final var granted = permissions.valueAt(permissionsIndex);
+                if (granted) {
+                    ipw.print("Permission: ");
+                    ipw.println(permissionName);
+                }
+            }
+            ipw.decreaseIndent();
+        }
+        return 0;
+    }
+
     private int runTrimCaches() throws RemoteException {
         String size = getNextArg();
         if (size == null) {
@@ -3387,6 +3539,18 @@ class PackageManagerShellCommand extends ShellCommand {
                     }
                     sessionParams.setEnableRollback(true, rollbackStrategy);
                     break;
+                case "--rollback-impact-level":
+                    if (!Flags.recoverabilityDetection()) {
+                        throw new IllegalArgumentException("Unknown option " + opt);
+                    }
+                    int rollbackImpactLevel = Integer.parseInt(peekNextArg());
+                    if (rollbackImpactLevel < PackageManager.ROLLBACK_USER_IMPACT_LOW
+                            || rollbackImpactLevel
+                                    > PackageManager.ROLLBACK_USER_IMPACT_ONLY_MANUAL) {
+                        throw new IllegalArgumentException(
+                            rollbackImpactLevel + " is not a valid rollback impact level.");
+                    }
+                    sessionParams.setRollbackImpactLevel(rollbackImpactLevel);
                 case "--staged-ready-timeout":
                     params.stagedReadyTimeoutMs = Long.parseLong(getNextArgRequired());
                     break;
@@ -4412,8 +4576,31 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int runGetDomainVerificationAgent() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
+        int userId = UserHandle.USER_ALL;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+                if (userId != UserHandle.USER_ALL && userId != UserHandle.USER_CURRENT) {
+                    UserManagerInternal umi =
+                            LocalServices.getService(UserManagerInternal.class);
+                    UserInfo userInfo = umi.getUserInfo(userId);
+                    if (userInfo == null) {
+                        pw.println("Failure [user " + userId + " doesn't exist]");
+                        return 1;
+                    }
+                }
+            } else {
+                pw.println("Error: Unknown option: " + opt);
+                return 1;
+            }
+        }
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_SYSTEM, "runGetDomainVerificationAgent");
         try {
-            final ComponentName domainVerificationAgent = mInterface.getDomainVerificationAgent();
+            final ComponentName domainVerificationAgent =
+                    mInterface.getDomainVerificationAgent(translatedUserId);
             pw.println(domainVerificationAgent == null
                     ? "No Domain Verifier available!" : domainVerificationAgent.flattenToString());
         } catch (Exception e) {
@@ -4466,7 +4653,9 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -d: filter to only show disabled packages");
         pw.println("      -e: filter to only show enabled packages");
         pw.println("      -s: filter to only show system packages");
-        pw.println("      -q: filter to only show quarantined packages");
+        if (Flags.quarantinedEnabled()) {
+            pw.println("      -q: filter to only show quarantined packages");
+        }
         pw.println("      -3: filter to only show third party packages");
         pw.println("      -i: see the installer for the packages");
         pw.println("      -l: ignored (used for compatibility with older releases)");
@@ -4546,6 +4735,11 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      --full: cause the app to be installed as a non-ephemeral full app");
         pw.println("      --enable-rollback: enable rollbacks for the upgrade.");
         pw.println("          0=restore (default), 1=wipe, 2=retain");
+        if (Flags.recoverabilityDetection()) {
+            pw.println(
+                    "      --rollback-impact-level: set device impact required for rollback.");
+            pw.println("          0=low (default), 1=high, 2=manual only");
+        }
         pw.println("      --install-location: force the install location:");
         pw.println("          0=auto, 1=internal only, 2=prefer external");
         pw.println("      --install-reason: indicates why the app is being installed:");
@@ -4708,6 +4902,10 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("  get-oem-permissions TARGET-PACKAGE");
         pw.println("    Prints all OEM permissions for a package.");
         pw.println("");
+        pw.println("  get-signature-permission-allowlist PARTITION");
+        pw.println("    Prints the signature permission allowlist for a partition.");
+        pw.println("    PARTITION is one of system, vendor, product and system-ext");
+        pw.println("");
         pw.println("  trim-caches DESIRED_FREE_SPACE [internal|UUID]");
         pw.println("    Trim cache files to reach the given free space.");
         pw.println("");
@@ -4823,8 +5021,12 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    to unarchive an app to the responsible installer. Options are:");
         pw.println("      --user: request unarchival of the app from the given user.");
         pw.println("");
-        pw.println("  get-domain-verification-agent");
+        pw.println("  get-domain-verification-agent [--user USER_ID]");
         pw.println("    Displays the component name of the domain verification agent on device.");
+        pw.println("    If the component isn't enabled, an error message will be displayed.");
+        pw.println("      --user: return the agent of the given user (SYSTEM_USER if unspecified)");
+        pw.println("  get-package-storage-stats [--user <USER_ID>] <PACKAGE>");
+        pw.println("    Return the storage stats for the given app, if present");
         pw.println("");
         printArtServiceHelp();
         pw.println("");

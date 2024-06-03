@@ -32,7 +32,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.keyguardRootViewModel by Fixture {
     KeyguardRootViewModel(
-        scope = applicationCoroutineScope,
+        applicationScope = applicationCoroutineScope,
         deviceEntryInteractor = deviceEntryInteractor,
         dozeParameters = dozeParameters,
         keyguardInteractor = keyguardInteractor,
@@ -62,6 +62,7 @@ val Kosmos.keyguardRootViewModel by Fixture {
         lockscreenToPrimaryBouncerTransitionViewModel =
             lockscreenToPrimaryBouncerTransitionViewModel,
         occludedToAodTransitionViewModel = occludedToAodTransitionViewModel,
+        occludedToDozingTransitionViewModel = occludedToDozingTransitionViewModel,
         occludedToLockscreenTransitionViewModel = occludedToLockscreenTransitionViewModel,
         primaryBouncerToAodTransitionViewModel = primaryBouncerToAodTransitionViewModel,
         primaryBouncerToGoneTransitionViewModel = primaryBouncerToGoneTransitionViewModel,

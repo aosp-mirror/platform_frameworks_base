@@ -46,9 +46,11 @@ import java.util.Objects;
  * @see TextRunShaper#shapeTextRun(CharSequence, int, int, int, int, float, float, boolean, Paint)
  */
 public final class PositionedGlyphs {
-    private static final NativeAllocationRegistry REGISTRY =
-            NativeAllocationRegistry.createMalloced(
-                    Typeface.class.getClassLoader(), nReleaseFunc());
+    private static class NoImagePreloadHolder {
+        private static final NativeAllocationRegistry REGISTRY =
+                NativeAllocationRegistry.createMalloced(
+                        Typeface.class.getClassLoader(), nReleaseFunc());
+    }
 
     private final long mLayoutPtr;
     private final float mXOffset;
@@ -137,7 +139,7 @@ public final class PositionedGlyphs {
      * Returns the glyph ID used for drawing the glyph at the given index.
      *
      * @param index the glyph index
-     * @return An glyph ID of the font.
+     * @return A glyph ID of the font.
      */
     @IntRange(from = 0)
     public int getGlyphId(@IntRange(from = 0) int index) {
@@ -259,7 +261,7 @@ public final class PositionedGlyphs {
             mFonts.add(prevFont);
         }
 
-        REGISTRY.registerNativeAllocation(this, layoutPtr);
+        NoImagePreloadHolder.REGISTRY.registerNativeAllocation(this, layoutPtr);
     }
 
     @CriticalNative

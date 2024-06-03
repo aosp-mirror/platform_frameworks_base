@@ -31,6 +31,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.ambient.touch.TouchHandler;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
@@ -54,7 +55,7 @@ public class CommunalTouchHandlerTest extends SysuiTestCase {
     @Mock
     CentralSurfaces mCentralSurfaces;
     @Mock
-    DreamTouchHandler.TouchSession mTouchSession;
+    TouchHandler.TouchSession mTouchSession;
     CommunalTouchHandler mTouchHandler;
     @Mock
     Lifecycle mLifecycle;
@@ -107,7 +108,7 @@ public class CommunalTouchHandlerTest extends SysuiTestCase {
         mTouchHandler.onSessionStart(mTouchSession);
         verify(mTouchSession).registerInputListener(inputEventListenerArgumentCaptor.capture());
         inputEventListenerArgumentCaptor.getValue().onInputEvent(motionEvent);
-        verify(mCentralSurfaces).handleDreamTouch(motionEvent);
+        verify(mCentralSurfaces).handleCommunalHubTouch(motionEvent);
     }
 
     @Test

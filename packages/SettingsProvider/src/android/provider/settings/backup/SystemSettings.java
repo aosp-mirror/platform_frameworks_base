@@ -48,7 +48,6 @@ public class SystemSettings {
                 Settings.System.WIFI_STATIC_DNS2,
                 Settings.System.BLUETOOTH_DISCOVERABILITY,
                 Settings.System.BLUETOOTH_DISCOVERABILITY_TIMEOUT,
-                Settings.System.DEFAULT_DEVICE_FONT_SCALE,
                 Settings.System.FONT_SCALE,
                 Settings.System.DIM_SCREEN,
                 Settings.System.SCREEN_OFF_TIMEOUT,

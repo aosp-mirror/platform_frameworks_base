@@ -11,7 +11,6 @@ zhouwenjie@google.com
 # Frameworks
 ogunwale@google.com
 jjaggi@google.com
-kwekua@google.com
 roosa@google.com
 per-file package_item_info.proto = file:/PACKAGE_MANAGER_OWNERS
 per-file usagestatsservice.proto, usagestatsservice_v2.proto = file:/core/java/android/app/usage/OWNERS

@@ -22,6 +22,9 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.inMultiWindowMode;
 
+import static androidx.window.extensions.embedding.DividerPresenter.RATIO_EXPANDED_PRIMARY;
+import static androidx.window.extensions.embedding.DividerPresenter.RATIO_EXPANDED_SECONDARY;
+
 import android.app.Activity;
 import android.app.ActivityClient;
 import android.app.WindowConfiguration;
@@ -40,6 +43,10 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.window.extensions.core.util.function.Predicate;
+import androidx.window.extensions.embedding.SplitAttributes.SplitType;
+import androidx.window.extensions.embedding.SplitAttributes.SplitType.ExpandContainersSplitType;
+import androidx.window.extensions.embedding.SplitAttributes.SplitType.RatioSplitType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,21 +71,14 @@ class TaskContainer {
     @Nullable
     private SplitPinContainer mSplitPinContainer;
 
-    /** The overlay container in this Task. */
+    /**
+     * The {@link TaskFragmentContainer#isAlwaysOnTopOverlay()} in the Task.
+     */
     @Nullable
-    private TaskFragmentContainer mOverlayContainer;
+    private TaskFragmentContainer mAlwaysOnTopOverlayContainer;
 
     @NonNull
-    private final Configuration mConfiguration;
-
-    private int mDisplayId;
-
-    private boolean mIsVisible;
-
-    private boolean mHasDirectActivity;
-
-    @Nullable
-    private TaskFragmentParentInfo mTaskFragmentParentInfo;
+    private TaskFragmentParentInfo mInfo;
 
     /**
      * TaskFragments that the organizer has requested to be closed. They should be removed when
@@ -88,9 +88,24 @@ class TaskContainer {
      */
     final Set<IBinder> mFinishedContainer = new ArraySet<>();
 
-    // TODO(b/293654166): move DividerPresenter to SplitController.
-    @NonNull
-    final DividerPresenter mDividerPresenter;
+    /**
+     * The {@link RatioSplitType} that will be applied to newly added containers. This is to ensure
+     * the required UX that, after user dragging the divider, the split ratio is persistent after
+     * launching a new activity into a new TaskFragment in the same Task.
+     */
+    private RatioSplitType mOverrideSplitType;
+
+    /**
+     * If {@code true}, suppress the placeholder rules in the {@link TaskContainer}.
+     * <p>
+     * This is used in case the user drags the divider to fully expand the primary container and
+     * dismiss the secondary container while a {@link SplitPlaceholderRule} is used. Without this
+     * flag, after dismissing the secondary container, a placeholder will be launched again.
+     * <p>
+     * This flag is set true when the primary container is fully expanded and cleared when a new
+     * split is added to the {@link TaskContainer}.
+     */
+    private boolean mPlaceholderRuleSuppressed;
 
     /**
      * The {@link TaskContainer} constructor
@@ -107,13 +122,14 @@ class TaskContainer {
         mTaskId = taskId;
         final TaskProperties taskProperties = TaskProperties
                 .getTaskPropertiesFromActivity(activityInTask);
-        mConfiguration = taskProperties.getConfiguration();
-        mDisplayId = taskProperties.getDisplayId();
-        // Note that it is always called when there's a new Activity is started, which implies
-        // the host task is visible and has an activity in the task.
-        mIsVisible = true;
-        mHasDirectActivity = true;
-        mDividerPresenter = new DividerPresenter();
+        mInfo = new TaskFragmentParentInfo(
+                taskProperties.getConfiguration(),
+                taskProperties.getDisplayId(),
+                // Note that it is always called when there's a new Activity is started, which
+                // implies the host task is visible and has an activity in the task.
+                true /* visible */,
+                true /* hasDirectActivity */,
+                null /* decorSurface */);
     }
 
     int getTaskId() {
@@ -121,34 +137,39 @@ class TaskContainer {
     }
 
     int getDisplayId() {
-        return mDisplayId;
+        return mInfo.getDisplayId();
     }
 
     boolean isVisible() {
-        return mIsVisible;
+        return mInfo.isVisible();
+    }
+
+    void setInvisible() {
+        mInfo = new TaskFragmentParentInfo(mInfo.getConfiguration(), mInfo.getDisplayId(),
+                false /* visible */, mInfo.hasDirectActivity(), mInfo.getDecorSurface());
     }
 
     boolean hasDirectActivity() {
-        return mHasDirectActivity;
+        return mInfo.hasDirectActivity();
     }
 
     @NonNull
     Rect getBounds() {
-        return mConfiguration.windowConfiguration.getBounds();
+        return mInfo.getConfiguration().windowConfiguration.getBounds();
     }
 
     @NonNull
     TaskProperties getTaskProperties() {
-        return new TaskProperties(mDisplayId, mConfiguration);
+        return new TaskProperties(mInfo.getDisplayId(), mInfo.getConfiguration());
     }
 
     void updateTaskFragmentParentInfo(@NonNull TaskFragmentParentInfo info) {
-        // TODO(b/293654166): cache the TaskFragmentParentInfo and remove these fields.
-        mConfiguration.setTo(info.getConfiguration());
-        mDisplayId = info.getDisplayId();
-        mIsVisible = info.isVisible();
-        mHasDirectActivity = info.hasDirectActivity();
-        mTaskFragmentParentInfo = info;
+        mInfo = info;
+    }
+
+    @NonNull
+    TaskFragmentParentInfo getTaskFragmentParentInfo() {
+        return mInfo;
     }
 
     /**
@@ -157,13 +178,15 @@ class TaskContainer {
     boolean shouldUpdateContainer(@NonNull TaskFragmentParentInfo info) {
         final Configuration configuration = info.getConfiguration();
 
-        return info.isVisible()
-                // No need to update presentation in PIP until the Task exit PIP.
-                && !isInPictureInPicture(configuration)
-                // If the task properties equals regardless of starting position, don't need to
-                // update the container.
-                && (mConfiguration.diffPublicOnly(configuration) != 0
-                || mDisplayId != info.getDisplayId());
+        if (isInPictureInPicture(configuration)) {
+            // No need to update presentation in PIP until the Task exit PIP.
+            return false;
+        }
+
+        // If the task properties equals regardless of starting position, don't
+        // need to update the container.
+        return mInfo.getConfiguration().diffPublicOnly(configuration) != 0
+                || mInfo.getDisplayId() != info.getDisplayId();
     }
 
     /**
@@ -190,7 +213,7 @@ class TaskContainer {
     }
 
     boolean isInPictureInPicture() {
-        return isInPictureInPicture(mConfiguration);
+        return isInPictureInPicture(mInfo.getConfiguration());
     }
 
     private static boolean isInPictureInPicture(@NonNull Configuration configuration) {
@@ -203,7 +226,7 @@ class TaskContainer {
 
     @WindowingMode
     private int getWindowingMode() {
-        return mConfiguration.windowConfiguration.getWindowingMode();
+        return mInfo.getConfiguration().windowConfiguration.getWindowingMode();
     }
 
     /** Whether there is any {@link TaskFragmentContainer} below this Task. */
@@ -211,10 +234,19 @@ class TaskContainer {
         return mContainers.isEmpty() && mFinishedContainer.isEmpty();
     }
 
-    /** Called when the activity is destroyed. */
-    void onActivityDestroyed(@NonNull IBinder activityToken) {
+    /** Called when the activity {@link Activity#isFinishing()} and paused. */
+    void onFinishingActivityPaused(@NonNull WindowContainerTransaction wct,
+                                   @NonNull IBinder activityToken) {
         for (TaskFragmentContainer container : mContainers) {
-            container.onActivityDestroyed(activityToken);
+            container.onFinishingActivityPaused(wct, activityToken);
+        }
+    }
+
+    /** Called when the activity is destroyed. */
+    void onActivityDestroyed(@NonNull WindowContainerTransaction wct,
+                             @NonNull IBinder activityToken) {
+        for (TaskFragmentContainer container : mContainers) {
+            container.onActivityDestroyed(wct, activityToken);
         }
     }
 
@@ -282,10 +314,44 @@ class TaskContainer {
         return null;
     }
 
-    /** Returns the overlay container in the task, or {@code null} if it doesn't exist. */
     @Nullable
-    TaskFragmentContainer getOverlayContainer() {
-        return mOverlayContainer;
+    TaskFragmentContainer getContainerWithActivity(@NonNull IBinder activityToken) {
+        return getContainer(container -> container.hasAppearedActivity(activityToken)
+                || container.hasPendingAppearedActivity(activityToken));
+    }
+
+    @Nullable
+    TaskFragmentContainer getContainer(@NonNull Predicate<TaskFragmentContainer> predicate) {
+        for (int i = mContainers.size() - 1; i >= 0; i--) {
+            final TaskFragmentContainer container = mContainers.get(i);
+            if (predicate.test(container)) {
+                return container;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    SplitContainer getActiveSplitForContainer(@Nullable TaskFragmentContainer container) {
+        if (container == null) {
+            return null;
+        }
+        for (int i = mSplitContainers.size() - 1; i >= 0; i--) {
+            final SplitContainer splitContainer = mSplitContainers.get(i);
+            if (container.equals(splitContainer.getSecondaryContainer())
+                    || container.equals(splitContainer.getPrimaryContainer())) {
+                return splitContainer;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the always-on-top overlay container in the task, or {@code null} if it doesn't exist.
+     */
+    @Nullable
+    TaskFragmentContainer getAlwaysOnTopOverlayContainer() {
+        return mAlwaysOnTopOverlayContainer;
     }
 
     int indexOf(@NonNull TaskFragmentContainer child) {
@@ -313,6 +379,11 @@ class TaskContainer {
     }
 
     void addSplitContainer(@NonNull SplitContainer splitContainer) {
+        // Reset the placeholder rule suppression when a new split container is added.
+        mPlaceholderRuleSuppressed = false;
+
+        applyOverrideSplitTypeIfNeeded(splitContainer);
+
         if (splitContainer instanceof SplitPinContainer) {
             mSplitPinContainer = (SplitPinContainer) splitContainer;
             mSplitContainers.add(splitContainer);
@@ -325,6 +396,39 @@ class TaskContainer {
         if (mSplitPinContainer != null) {
             mSplitContainers.add(mSplitPinContainer);
         }
+    }
+
+    boolean isPlaceholderRuleSuppressed() {
+        return mPlaceholderRuleSuppressed;
+    }
+
+    // If there is an override SplitType due to user dragging the divider, the split ratio should
+    // be applied to newly added SplitContainers.
+    private void applyOverrideSplitTypeIfNeeded(@NonNull SplitContainer splitContainer) {
+        if (mOverrideSplitType == null) {
+            return;
+        }
+        final SplitAttributes splitAttributes = splitContainer.getCurrentSplitAttributes();
+        final DividerAttributes dividerAttributes = splitAttributes.getDividerAttributes();
+        if (!(splitAttributes.getSplitType() instanceof RatioSplitType)) {
+            // Skip if the original split type is not a ratio type.
+            return;
+        }
+        if (dividerAttributes == null
+                || dividerAttributes.getDividerType() != DividerAttributes.DIVIDER_TYPE_DRAGGABLE) {
+            // Skip if the split does not have a draggable divider.
+            return;
+        }
+        updateDefaultSplitAttributes(splitContainer, mOverrideSplitType);
+    }
+
+    private static void updateDefaultSplitAttributes(
+            @NonNull SplitContainer splitContainer, @NonNull SplitType overrideSplitType) {
+        splitContainer.updateDefaultSplitAttributes(
+                new SplitAttributes.Builder(splitContainer.getDefaultSplitAttributes())
+                        .setSplitType(overrideSplitType)
+                        .build()
+        );
     }
 
     void removeSplitContainers(@NonNull List<SplitContainer> containers) {
@@ -398,16 +502,51 @@ class TaskContainer {
         return mContainers;
     }
 
-    void updateDivider(@NonNull WindowContainerTransaction wct) {
-        if (mTaskFragmentParentInfo != null) {
-            // Update divider only if TaskFragmentParentInfo is available.
-            mDividerPresenter.updateDivider(
-                    wct, mTaskFragmentParentInfo, getTopNonFinishingSplitContainer());
+    void updateTopSplitContainerForDivider(
+            @NonNull DividerPresenter dividerPresenter,
+            @NonNull List<TaskFragmentContainer> outContainersToFinish) {
+        final SplitContainer topSplitContainer = getTopNonFinishingSplitContainer();
+        if (topSplitContainer == null) {
+            return;
+        }
+        final TaskFragmentContainer primaryContainer = topSplitContainer.getPrimaryContainer();
+        final float newRatio = dividerPresenter.calculateNewSplitRatio();
+
+        // If the primary container is fully expanded, we should finish all the associated
+        // secondary containers.
+        if (newRatio == RATIO_EXPANDED_PRIMARY) {
+            for (final SplitContainer splitContainer : mSplitContainers) {
+                if (primaryContainer == splitContainer.getPrimaryContainer()) {
+                    outContainersToFinish.add(splitContainer.getSecondaryContainer());
+                }
+            }
+
+            // Temporarily suppress the placeholder rule in the TaskContainer. This will be restored
+            // if a new split is added into the TaskContainer.
+            mPlaceholderRuleSuppressed = true;
+
+            mOverrideSplitType = null;
+            return;
+        }
+
+        final SplitType newSplitType;
+        if (newRatio == RATIO_EXPANDED_SECONDARY) {
+            newSplitType = new ExpandContainersSplitType();
+            // We do not want to apply ExpandContainersSplitType to new split containers.
+            mOverrideSplitType = null;
+        } else {
+            // We save the override RatioSplitType and apply to new split containers.
+            newSplitType = mOverrideSplitType = new RatioSplitType(newRatio);
+        }
+        for (final SplitContainer splitContainer : mSplitContainers) {
+            if (primaryContainer == splitContainer.getPrimaryContainer()) {
+                updateDefaultSplitAttributes(splitContainer, newSplitType);
+            }
         }
     }
 
     @Nullable
-    private SplitContainer getTopNonFinishingSplitContainer() {
+    SplitContainer getTopNonFinishingSplitContainer() {
         for (int i = mSplitContainers.size() - 1; i >= 0; i--) {
             final SplitContainer splitContainer = mSplitContainers.get(i);
             if (!splitContainer.getPrimaryContainer().isFinished()
@@ -424,7 +563,21 @@ class TaskContainer {
         updateSplitPinContainerIfNecessary();
         // Update overlay container after split pin container since the overlay should be on top of
         // pin container.
-        updateOverlayContainerIfNecessary();
+        updateAlwaysOnTopOverlayIfNecessary();
+    }
+
+    private void updateAlwaysOnTopOverlayIfNecessary() {
+        final List<TaskFragmentContainer> alwaysOnTopOverlays = mContainers
+                .stream().filter(TaskFragmentContainer::isAlwaysOnTopOverlay).toList();
+        if (alwaysOnTopOverlays.size() > 1) {
+            throw new IllegalStateException("There must be at most one always-on-top overlay "
+                    + "container per Task");
+        }
+        mAlwaysOnTopOverlayContainer = alwaysOnTopOverlays.isEmpty()
+                ? null : alwaysOnTopOverlays.getFirst();
+        if (mAlwaysOnTopOverlayContainer != null) {
+            moveContainerToLastIfNecessary(mAlwaysOnTopOverlayContainer);
+        }
     }
 
     private void updateSplitPinContainerIfNecessary() {
@@ -449,18 +602,6 @@ class TaskContainer {
             removeSplitPinContainer();
         } else if (mSplitPinContainer.getPrimaryContainer() != adjacentContainer) {
             mSplitPinContainer.setPrimaryContainer(adjacentContainer);
-        }
-    }
-
-    private void updateOverlayContainerIfNecessary() {
-        final List<TaskFragmentContainer> overlayContainers = mContainers.stream()
-                .filter(TaskFragmentContainer::isOverlay).toList();
-        if (overlayContainers.size() > 1) {
-            throw new IllegalStateException("There must be at most one overlay container per Task");
-        }
-        mOverlayContainer = overlayContainers.isEmpty() ? null : overlayContainers.get(0);
-        if (mOverlayContainer != null) {
-            moveContainerToLastIfNecessary(mOverlayContainer);
         }
     }
 

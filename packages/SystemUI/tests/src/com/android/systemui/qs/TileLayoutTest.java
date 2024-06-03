@@ -31,12 +31,12 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableLooper;
 import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;

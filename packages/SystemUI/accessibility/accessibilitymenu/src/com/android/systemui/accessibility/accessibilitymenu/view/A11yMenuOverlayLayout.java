@@ -17,6 +17,7 @@
 package com.android.systemui.accessibility.accessibilitymenu.view;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 
 import static java.lang.Math.max;
@@ -149,6 +150,14 @@ public class A11yMenuOverlayLayout {
         mLayout.setVisibility(lastVisibilityState);
 
         return mLayout;
+    }
+
+    public void clearLayout() {
+        if (mLayout != null) {
+            mWindowManager.removeView(mLayout);
+            mLayout.setOnTouchListener(null);
+            mLayout = null;
+        }
     }
 
     /** Updates view layout with new layout parameters only. */
@@ -313,7 +322,14 @@ public class A11yMenuOverlayLayout {
                 AccessibilityManager.FLAG_CONTENT_TEXT);
 
         final TextView snackbar = mLayout.findViewById(R.id.snackbar);
+        if (snackbar == null) {
+            return;
+        }
         snackbar.setText(text);
+        if (com.android.systemui.accessibility.accessibilitymenu
+                .Flags.a11yMenuSnackbarLiveRegion()) {
+            snackbar.setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_POLITE);
+        }
 
         // Remove any existing fade-out animation before starting any new animations.
         mHandler.removeCallbacksAndMessages(null);

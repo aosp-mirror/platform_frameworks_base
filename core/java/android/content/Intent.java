@@ -3771,6 +3771,10 @@ public class Intent implements Parcelable, Cloneable {
      *   <li><em>{@link android.content.Intent#EXTRA_PHONE_NUMBER}</em> -
      *       the phone number originally intended to be dialed.</li>
      * </ul>
+     * <p class="note">Starting in Android 15, this broadcast is no longer sent as an ordered
+     * broadcast.  The <code>resultData</code> no longer has any effect and will not determine the
+     * actual routing of the call.  Further, receivers of this broadcast do not get foreground
+     * priority and cannot launch background activities.</p>
      * <p>Once the broadcast is finished, the resultData is used as the actual
      * number to call.  If  <code>null</code>, no call will be placed.</p>
      * <p>It is perfectly acceptable for multiple receivers to process the
@@ -3811,8 +3815,8 @@ public class Intent implements Parcelable, Cloneable {
      * {@link android.telecom.CallRedirectionService} API.  Apps that perform call screening
      * should use the {@link android.telecom.CallScreeningService} API.  Apps which need to be
      * notified of basic call state should use
-     * {@link android.telephony.PhoneStateListener#onCallStateChanged(int, String)} to determine
-     * when a new outgoing call is placed.
+     * {@link android.telephony.TelephonyCallback.CallStateListener} to determine when a new
+     * outgoing call is placed.
      */
     @Deprecated
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
@@ -4347,13 +4351,6 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String EXTRA_BRIGHTNESS_DIALOG_IS_FULL_WIDTH =
             "android.intent.extra.BRIGHTNESS_DIALOG_IS_FULL_WIDTH";
-
-    /**
-     * Activity Action: Shows the contrast setting dialog.
-     * @hide
-     */
-    public static final String ACTION_SHOW_CONTRAST_DIALOG =
-            "com.android.intent.action.SHOW_CONTRAST_DIALOG";
 
     /**
      * Broadcast Action:  A global button was pressed.  Includes a single

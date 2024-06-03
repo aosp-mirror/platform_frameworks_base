@@ -397,6 +397,14 @@ public class ZygoteInit {
                 null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/,
                 false /*isNative*/));
 
+        if (Flags.enableApacheHttpLegacyPreload()) {
+            libs.add(new SharedLibraryInfo(
+                    "/system/framework/org.apache.http.legacy.jar", null /*packageName*/,
+                    null /*codePaths*/, null /*name*/, 0 /*version*/,
+                    SharedLibraryInfo.TYPE_BUILTIN, null /*declaringPackage*/,
+                    null /*dependentPackages*/, null /*dependencies*/, false /*isNative*/));
+        }
+
         // WindowManager Extensions is an optional shared library that is required for WindowManager
         // Jetpack to fully function. Since it is a widely used library, preload it to improve apps
         // startup performance.

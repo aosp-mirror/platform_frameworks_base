@@ -1,4 +1,5 @@
 package: "com.android.server.backup"
+container: "system"
 
 flag {
     name: "enable_skipping_restore_launched_apps"
@@ -49,5 +50,13 @@ flag {
     description: "Increase the number of a supported datatypes that an agent can define for its "
             "logger."
     bug: "296844513"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_increased_bmm_logging_for_restore_at_install"
+    namespace: "onboarding"
+    description: "Increase BMM logging coverage in restore at install flow."
+    bug: "331749778"
     is_fixed_read_only: true
 }

@@ -20,12 +20,12 @@ import android.os.Handler
 import android.provider.Settings
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
-import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.accessibility.fontscaling.FontScalingDialogDelegate
 import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -37,7 +37,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
@@ -67,6 +66,8 @@ class FontScalingTileTest : SysuiTestCase() {
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var fontScalingDialogDelegate: FontScalingDialogDelegate
     @Mock private lateinit var dialog: SystemUIDialog
+    @Mock private lateinit var expandable: Expandable
+    @Mock private lateinit var controller: DialogTransitionAnimator.Controller
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var systemClock: FakeSystemClock
@@ -81,6 +82,7 @@ class FontScalingTileTest : SysuiTestCase() {
         testableLooper = TestableLooper.get(this)
         `when`(qsHost.getContext()).thenReturn(mContext)
         `when`(fontScalingDialogDelegate.createDialog()).thenReturn(dialog)
+        `when`(expandable.dialogTransitionController(any())).thenReturn(controller)
         systemClock = FakeSystemClock()
         backgroundDelayableExecutor = FakeExecutor(systemClock)
 
@@ -119,8 +121,7 @@ class FontScalingTileTest : SysuiTestCase() {
     @Test
     fun clickTile_screenUnlocked_showDialogAnimationFromView() {
         `when`(keyguardStateController.isShowing).thenReturn(false)
-        val view = View(context)
-        fontScalingTile.click(view)
+        fontScalingTile.click(expandable)
         testableLooper.processAllMessages()
 
         verify(activityStarter)
@@ -132,14 +133,13 @@ class FontScalingTileTest : SysuiTestCase() {
                 eq(false)
             )
         argumentCaptor.value.run()
-        verify(mDialogTransitionAnimator).showFromView(any(), eq(view), nullable(), anyBoolean())
+        verify(mDialogTransitionAnimator).show(any(), any(), anyBoolean())
     }
 
     @Test
     fun clickTile_onLockScreen_neverShowDialogAnimationFromView() {
         `when`(keyguardStateController.isShowing).thenReturn(true)
-        val view = View(context)
-        fontScalingTile.click(view)
+        fontScalingTile.click(expandable)
         testableLooper.processAllMessages()
 
         verify(activityStarter)
@@ -151,8 +151,7 @@ class FontScalingTileTest : SysuiTestCase() {
                 eq(false)
             )
         argumentCaptor.value.run()
-        verify(mDialogTransitionAnimator, never())
-            .showFromView(any(), eq(view), nullable(), anyBoolean())
+        verify(mDialogTransitionAnimator, never()).show(any(), any(), anyBoolean())
     }
 
     @Test

@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.ui.view.layout
 
 import androidx.core.text.isDigitsOnly
+import com.android.systemui.CoreStartable
 import com.android.systemui.keyguard.data.repository.KeyguardBlueprintRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.statusbar.commandline.Command
@@ -31,10 +32,10 @@ constructor(
     private val commandRegistry: CommandRegistry,
     private val keyguardBlueprintRepository: KeyguardBlueprintRepository,
     private val keyguardBlueprintInteractor: KeyguardBlueprintInteractor,
-) {
+) : CoreStartable {
     private val layoutCommand = KeyguardLayoutManagerCommand()
 
-    fun start() {
+    override fun start() {
         commandRegistry.registerCommand(COMMAND) { layoutCommand }
     }
 
@@ -46,15 +47,14 @@ constructor(
                 return
             }
 
-            if (
-                arg.isDigitsOnly() && keyguardBlueprintInteractor.transitionToBlueprint(arg.toInt())
-            ) {
-                pw.println("Transition succeeded!")
-            } else if (keyguardBlueprintInteractor.transitionToBlueprint(arg)) {
-                pw.println("Transition succeeded!")
-            } else {
-                pw.println("Invalid argument! To see available blueprint ids, run:")
-                pw.println("$ adb shell cmd statusbar blueprint help")
+            when {
+                arg.isDigitsOnly() -> pw.println("Invalid argument! Use string ids.")
+                keyguardBlueprintInteractor.transitionOrRefreshBlueprint(arg) ->
+                    pw.println("Transition succeeded!")
+                else -> {
+                    pw.println("Invalid argument! To see available blueprint ids, run:")
+                    pw.println("$ adb shell cmd statusbar blueprint help")
+                }
             }
         }
 

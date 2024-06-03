@@ -20,6 +20,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.MotionEvent.ACTION_DOWN;
+import static android.view.MotionEvent.ACTION_UP;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -140,7 +142,8 @@ class HandleMenu {
      * Set up interactive elements of handle menu's app info pill.
      */
     private void setupAppInfoPill(View handleMenu) {
-        final ImageButton collapseBtn = handleMenu.findViewById(R.id.collapse_menu_button);
+        final HandleMenuImageButton collapseBtn =
+                handleMenu.findViewById(R.id.collapse_menu_button);
         final ImageView appIcon = handleMenu.findViewById(R.id.application_icon);
         final TextView appName = handleMenu.findViewById(R.id.application_name);
         collapseBtn.setOnClickListener(mOnClickListener);
@@ -172,9 +175,9 @@ class HandleMenu {
         final ColorStateList activeColorStateList = iconColors[1];
         final int windowingMode = mTaskInfo.getWindowingMode();
         fullscreenBtn.setImageTintList(windowingMode == WINDOWING_MODE_FULLSCREEN
-                        ? activeColorStateList : inActiveColorStateList);
+                ? activeColorStateList : inActiveColorStateList);
         splitscreenBtn.setImageTintList(windowingMode == WINDOWING_MODE_MULTI_WINDOW
-                        ? activeColorStateList : inActiveColorStateList);
+                ? activeColorStateList : inActiveColorStateList);
         floatingBtn.setImageTintList(windowingMode == WINDOWING_MODE_PINNED
                 ? activeColorStateList : inActiveColorStateList);
         desktopBtn.setImageTintList(windowingMode == WINDOWING_MODE_FREEFORM
@@ -243,22 +246,29 @@ class HandleMenu {
     }
 
     /**
-     * Check a passed MotionEvent if a click has occurred on any button on this caption
-     * Note this should only be called when a regular onClick is not possible
+     * Check a passed MotionEvent if a click or hover has occurred on any button on this caption
+     * Note this should only be called when a regular onClick/onHover is not possible
      * (i.e. the button was clicked through status bar layer)
      *
      * @param ev the MotionEvent to compare against.
      */
-    void checkClickEvent(MotionEvent ev) {
+    void checkMotionEvent(MotionEvent ev) {
         final View handleMenu = mHandleMenuWindow.mWindowViewHost.getView();
-        final ImageButton collapse = handleMenu.findViewById(R.id.collapse_menu_button);
-        // Translate the input point from display coordinates to the same space as the collapse
-        // button, meaning its parent (app info pill view).
-        final PointF inputPoint = new PointF(ev.getX() - mHandleMenuPosition.x,
-                ev.getY() - mHandleMenuPosition.y);
-        if (pointInView(collapse, inputPoint.x, inputPoint.y)) {
-            mOnClickListener.onClick(collapse);
+        final HandleMenuImageButton collapse = handleMenu.findViewById(R.id.collapse_menu_button);
+        final PointF inputPoint = translateInputToLocalSpace(ev);
+        final boolean inputInCollapseButton = pointInView(collapse, inputPoint.x, inputPoint.y);
+        final int action = ev.getActionMasked();
+        collapse.setHovered(inputInCollapseButton && action != ACTION_UP);
+        collapse.setPressed(inputInCollapseButton && action == ACTION_DOWN);
+        if (action == ACTION_UP && inputInCollapseButton) {
+            collapse.performClick();
         }
+    }
+
+    // Translate the input point from display coordinates to the same space as the handle menu.
+    private PointF translateInputToLocalSpace(MotionEvent ev) {
+        return new PointF(ev.getX() - mHandleMenuPosition.x,
+                ev.getY() - mHandleMenuPosition.y);
     }
 
     /**

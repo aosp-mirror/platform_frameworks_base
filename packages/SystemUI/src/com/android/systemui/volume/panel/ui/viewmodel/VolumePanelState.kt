@@ -29,7 +29,6 @@ import android.content.res.Configuration.Orientation
 data class VolumePanelState(
     @Orientation val orientation: Int,
     val isLargeScreen: Boolean,
-    val isVisible: Boolean,
 ) {
     init {
         require(

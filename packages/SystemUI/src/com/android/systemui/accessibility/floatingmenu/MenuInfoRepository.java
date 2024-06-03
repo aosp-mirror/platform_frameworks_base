@@ -21,8 +21,8 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_MIGRA
 import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_OPACITY;
 import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE;
 import static android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
 import static com.android.systemui.accessibility.floatingmenu.MenuFadeEffectInfoKt.DEFAULT_FADE_EFFECT_IS_ENABLED;
 import static com.android.systemui.accessibility.floatingmenu.MenuFadeEffectInfoKt.DEFAULT_OPACITY_VALUE;
@@ -182,7 +182,7 @@ class MenuInfoRepository {
     }
 
     void loadMenuTargetFeatures(OnInfoReady<List<AccessibilityTarget>> callback) {
-        callback.onReady(getTargets(mContext, ACCESSIBILITY_BUTTON));
+        callback.onReady(getTargets(mContext, SOFTWARE));
     }
 
     void loadMenuSizeType(OnInfoReady<Integer> callback) {
@@ -223,7 +223,7 @@ class MenuInfoRepository {
 
     private void onTargetFeaturesChanged() {
         mSettingsContentsCallback.onTargetFeaturesChanged(
-                getTargets(mContext, ACCESSIBILITY_BUTTON));
+                getTargets(mContext, SOFTWARE));
     }
 
     private Position getStartPosition() {
@@ -244,11 +244,13 @@ class MenuInfoRepository {
                 mSecureSettings.getUriFor(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS),
                 /* notifyForDescendants */ false, mMenuTargetFeaturesContentObserver,
                 UserHandle.USER_CURRENT);
-        mSecureSettings.registerContentObserverForUser(
-                mSecureSettings.getUriFor(ENABLED_ACCESSIBILITY_SERVICES),
-                /* notifyForDescendants */ false,
-                mMenuTargetFeaturesContentObserver,
-                UserHandle.USER_CURRENT);
+        if (!com.android.systemui.Flags.floatingMenuNarrowTargetContentObserver()) {
+            mSecureSettings.registerContentObserverForUser(
+                    mSecureSettings.getUriFor(ENABLED_ACCESSIBILITY_SERVICES),
+                    /* notifyForDescendants */ false,
+                    mMenuTargetFeaturesContentObserver,
+                    UserHandle.USER_CURRENT);
+        }
         mSecureSettings.registerContentObserverForUser(
                 mSecureSettings.getUriFor(Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE),
                 /* notifyForDescendants */ false, mMenuSizeContentObserver,
@@ -263,8 +265,10 @@ class MenuInfoRepository {
                 UserHandle.USER_CURRENT);
         mContext.registerComponentCallbacks(mComponentCallbacks);
 
-        mAccessibilityManager.addAccessibilityServicesStateChangeListener(
-                mA11yServicesStateChangeListener);
+        if (!com.android.systemui.Flags.floatingMenuNarrowTargetContentObserver()) {
+            mAccessibilityManager.addAccessibilityServicesStateChangeListener(
+                    mA11yServicesStateChangeListener);
+        }
     }
 
     void unregisterObserversAndCallbacks() {
@@ -273,8 +277,10 @@ class MenuInfoRepository {
         mContext.getContentResolver().unregisterContentObserver(mMenuFadeOutContentObserver);
         mContext.unregisterComponentCallbacks(mComponentCallbacks);
 
-        mAccessibilityManager.removeAccessibilityServicesStateChangeListener(
-                mA11yServicesStateChangeListener);
+        if (!com.android.systemui.Flags.floatingMenuNarrowTargetContentObserver()) {
+            mAccessibilityManager.removeAccessibilityServicesStateChangeListener(
+                    mA11yServicesStateChangeListener);
+        }
     }
 
     interface OnSettingsContentsChanged {

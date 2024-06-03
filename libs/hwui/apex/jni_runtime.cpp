@@ -49,6 +49,7 @@ namespace android {
 extern int register_android_graphics_Canvas(JNIEnv* env);
 extern int register_android_graphics_CanvasProperty(JNIEnv* env);
 extern int register_android_graphics_ColorFilter(JNIEnv* env);
+extern int register_android_graphics_Color(JNIEnv* env);
 extern int register_android_graphics_ColorSpace(JNIEnv* env);
 extern int register_android_graphics_DrawFilter(JNIEnv* env);
 extern int register_android_graphics_FontFamily(JNIEnv* env);
@@ -98,6 +99,7 @@ extern int register_android_graphics_HardwareBufferRenderer(JNIEnv* env);
 
     static const RegJNIRec gRegJNI[] = {
             REG_JNI(register_android_graphics_Canvas),
+            REG_JNI(register_android_graphics_Color),
             // This needs to be before register_android_graphics_Graphics, or the latter
             // will not be able to find the jmethodID for ColorSpace.get().
             REG_JNI(register_android_graphics_ColorSpace),

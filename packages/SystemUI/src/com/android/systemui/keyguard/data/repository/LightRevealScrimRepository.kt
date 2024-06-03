@@ -24,7 +24,7 @@ import androidx.core.animation.Animator
 import androidx.core.animation.ValueAnimator
 import com.android.keyguard.logging.ScrimLogger
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
+import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.power.data.repository.PowerRepository
 import com.android.systemui.power.shared.model.WakeSleepReason
@@ -40,7 +40,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -83,7 +82,7 @@ constructor(
     }
 
     /** The reveal effect used if the device was locked/unlocked via the power button. */
-    private val powerButtonRevealEffect: Flow<LightRevealEffect?> =
+    private val powerButtonRevealEffect: Flow<LightRevealEffect> =
         flowOf(
             PowerButtonReveal(
                 context.resources
@@ -92,42 +91,31 @@ constructor(
             )
         )
 
-    private val tapRevealEffect: Flow<LightRevealEffect?> =
+    private val tapRevealEffect: Flow<LightRevealEffect> =
         keyguardRepository.lastDozeTapToWakePosition.map {
-            it?.let { constructCircleRevealFromPoint(it) }
+            it?.let { constructCircleRevealFromPoint(it) } ?: DEFAULT_REVEAL_EFFECT
         }
 
     /**
      * Reveal effect to use for a fingerprint unlock. This is reconstructed if the fingerprint
      * sensor location on the screen (in pixels) changes due to configuration changes.
      */
-    private val fingerprintRevealEffect: Flow<LightRevealEffect?> =
+    private val fingerprintRevealEffect: Flow<LightRevealEffect> =
         keyguardRepository.fingerprintSensorLocation.map {
-            it?.let { constructCircleRevealFromPoint(it) }
+            it?.let { constructCircleRevealFromPoint(it) } ?: DEFAULT_REVEAL_EFFECT
         }
 
     /**
      * Reveal effect to use for a face unlock. This is reconstructed if the face sensor/front camera
      * location on the screen (in pixels) changes due to configuration changes.
      */
-    private val faceRevealEffect: Flow<LightRevealEffect?> =
-        keyguardRepository.faceSensorLocation.map { it?.let { constructCircleRevealFromPoint(it) } }
-
-    /**
-     * The reveal effect we'll use for the next biometric unlock animation. We switch between the
-     * fingerprint/face unlock effect flows depending on the biometric unlock source.
-     */
-    private val biometricRevealEffect: Flow<LightRevealEffect?> =
-        keyguardRepository.biometricUnlockSource.flatMapLatest { source ->
-            when (source) {
-                BiometricUnlockSource.FINGERPRINT_SENSOR -> fingerprintRevealEffect
-                BiometricUnlockSource.FACE_SENSOR -> faceRevealEffect
-                else -> flowOf(null)
-            }
+    private val faceRevealEffect: Flow<LightRevealEffect> =
+        keyguardRepository.faceSensorLocation.map {
+            it?.let { constructCircleRevealFromPoint(it) } ?: DEFAULT_REVEAL_EFFECT
         }
 
     /** The reveal effect we'll use for the next non-biometric unlock (tap, power button, etc). */
-    private val nonBiometricRevealEffect: Flow<LightRevealEffect?> =
+    private val nonBiometricRevealEffect: Flow<LightRevealEffect> =
         powerRepository.wakefulness.flatMapLatest { wakefulnessModel ->
             when {
                 wakefulnessModel.isAwakeOrAsleepFrom(WakeSleepReason.POWER_BUTTON) ->
@@ -169,29 +157,22 @@ constructor(
         scrimLogger.d(TAG, "startRevealAmountAnimator, reveal", reveal)
     }
 
-    override val revealEffect =
-        combine(
-                keyguardRepository.biometricUnlockState,
-                biometricRevealEffect,
-                nonBiometricRevealEffect
-            ) { biometricUnlockState, biometricReveal, nonBiometricReveal ->
-
+    override val revealEffect: Flow<LightRevealEffect> =
+        keyguardRepository.biometricUnlockState
+            .flatMapLatest { biometricUnlockState ->
                 // Use the biometric reveal for any flavor of wake and unlocking.
-                val revealEffect =
-                    when (biometricUnlockState) {
-                        BiometricUnlockModel.WAKE_AND_UNLOCK,
-                        BiometricUnlockModel.WAKE_AND_UNLOCK_PULSING,
-                        BiometricUnlockModel.WAKE_AND_UNLOCK_FROM_DREAM -> biometricReveal
-                        else -> nonBiometricReveal
+                when (biometricUnlockState.mode) {
+                    BiometricUnlockMode.WAKE_AND_UNLOCK,
+                    BiometricUnlockMode.WAKE_AND_UNLOCK_PULSING,
+                    BiometricUnlockMode.WAKE_AND_UNLOCK_FROM_DREAM -> {
+                        if (biometricUnlockState.source == BiometricUnlockSource.FACE_SENSOR) {
+                            faceRevealEffect
+                        } else {
+                            fingerprintRevealEffect
+                        }
                     }
-                        ?: DEFAULT_REVEAL_EFFECT
-
-                scrimLogger.d(
-                    TAG,
-                    "revealEffect",
-                    "$revealEffect, biometricUnlockState: ${biometricUnlockState.name}"
-                )
-                return@combine revealEffect
+                    else -> nonBiometricRevealEffect
+                }
             }
             .distinctUntilChanged()
 

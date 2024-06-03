@@ -66,6 +66,7 @@ public class BrightnessClamperController {
     private float mCustomAnimationRate = DisplayBrightnessState.CUSTOM_ANIMATION_RATE_NOT_SET;
     @Nullable
     private Type mClamperType = null;
+    private int mAutoBrightnessState = -1;
 
     private boolean mClamperApplied = false;
 
@@ -94,7 +95,8 @@ public class BrightnessClamperController {
 
         mClampers = injector.getClampers(handler, clamperChangeListenerInternal, data, flags,
                 context);
-        mModifiers = injector.getModifiers(flags, context, handler, clamperChangeListener);
+        mModifiers = injector.getModifiers(flags, context, handler, clamperChangeListener,
+                data.mDisplayDeviceConfig);
         mOnPropertiesChangedListener =
                 properties -> mClampers.forEach(BrightnessClamper::onDeviceConfigChanged);
         start();
@@ -197,6 +199,19 @@ public class BrightnessClamperController {
         mModifiers.forEach(modifier -> modifier.onAmbientLuxChange(ambientLux));
     }
 
+    /**
+     * Sets the autobrightness state for clampers that need to be aware of the state.
+     * @param state autobrightness state
+     */
+    public void setAutoBrightnessState(int state) {
+        if (state == mAutoBrightnessState) {
+            return;
+        }
+        mModifiers.forEach(modifier -> modifier.setAutoBrightnessState(state));
+        mAutoBrightnessState = state;
+        recalculateBrightnessCap();
+    }
+
     // Called in DisplayControllerHandler
     private void recalculateBrightnessCap() {
         float brightnessCap = PowerManager.BRIGHTNESS_MAX;
@@ -265,12 +280,15 @@ public class BrightnessClamperController {
         }
 
         List<BrightnessStateModifier> getModifiers(DisplayManagerFlags flags, Context context,
-                Handler handler, ClamperChangeListener listener) {
+                Handler handler, ClamperChangeListener listener,
+                DisplayDeviceConfig displayDeviceConfig) {
             List<BrightnessStateModifier> modifiers = new ArrayList<>();
             modifiers.add(new DisplayDimModifier(context));
             modifiers.add(new BrightnessLowPowerModeModifier());
-            if (flags.isEvenDimmerEnabled()) {
-                modifiers.add(new BrightnessLowLuxModifier(handler, listener, context));
+            if (flags.isEvenDimmerEnabled() && displayDeviceConfig != null
+                    && displayDeviceConfig.isEvenDimmerAvailable()) {
+                modifiers.add(new BrightnessLowLuxModifier(handler, listener, context,
+                        displayDeviceConfig));
             }
             return modifiers;
         }

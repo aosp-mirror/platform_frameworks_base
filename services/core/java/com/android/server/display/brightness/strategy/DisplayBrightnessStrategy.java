@@ -17,9 +17,9 @@
 package com.android.server.display.brightness.strategy;
 
 import android.annotation.NonNull;
-import android.hardware.display.DisplayManagerInternal;
 
 import com.android.server.display.DisplayBrightnessState;
+import com.android.server.display.brightness.StrategyExecutionRequest;
 import com.android.server.display.brightness.StrategySelectionNotifyRequest;
 
 import java.io.PrintWriter;
@@ -33,16 +33,21 @@ public interface DisplayBrightnessStrategy {
     /**
      * Decides the DisplayBrightnessState that the system should change to.
      *
-     * @param displayPowerRequest The request to evaluate the updated brightness
+     * @param strategyExecutionRequest The request to evaluate the updated brightness
      */
     DisplayBrightnessState updateBrightness(
-            DisplayManagerInternal.DisplayPowerRequest displayPowerRequest);
+            StrategyExecutionRequest strategyExecutionRequest);
 
     /**
      * Returns the name of the Strategy
      */
     @NonNull
     String getName();
+
+    /**
+     * Returns the reason for the change of the brightness
+     */
+    int getReason();
 
     /**
      * Dumps the state of the Strategy

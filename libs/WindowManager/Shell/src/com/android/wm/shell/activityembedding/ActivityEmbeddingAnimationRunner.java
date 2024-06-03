@@ -26,6 +26,7 @@ import static com.android.wm.shell.activityembedding.ActivityEmbeddingAnimationS
 import static com.android.wm.shell.transition.TransitionAnimationHelper.addBackgroundToTransition;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.edgeExtendWindow;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.getTransitionBackgroundColorIfSet;
+import static com.android.wm.shell.transition.Transitions.TRANSIT_TASK_FRAGMENT_DRAG_RESIZE;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
@@ -190,6 +191,10 @@ class ActivityEmbeddingAnimationRunner {
     @NonNull
     private List<ActivityEmbeddingAnimationAdapter> createAnimationAdapters(
             @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction startTransaction) {
+        if (info.getType() == TRANSIT_TASK_FRAGMENT_DRAG_RESIZE) {
+            // Jump cut for AE drag resizing because the content is veiled.
+            return new ArrayList<>();
+        }
         boolean isChangeTransition = false;
         for (TransitionInfo.Change change : info.getChanges()) {
             if (change.hasFlags(FLAG_IS_BEHIND_STARTING_WINDOW)) {

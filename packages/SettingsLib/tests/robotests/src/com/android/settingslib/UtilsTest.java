@@ -16,7 +16,6 @@
 package com.android.settingslib;
 
 import static com.android.settingslib.Utils.STORAGE_MANAGER_ENABLED_PROPERTY;
-import static com.android.settingslib.Utils.shouldShowWirelessChargingWarningTip;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -73,7 +72,6 @@ public class UtilsTest {
     private static final String PERCENTAGE_49 = "49%";
     private static final String PERCENTAGE_50 = "50%";
     private static final String PERCENTAGE_100 = "100%";
-    private static final long CURRENT_TIMESTAMP = System.currentTimeMillis();
 
     private AudioManager mAudioManager;
     private Context mContext;
@@ -541,20 +539,6 @@ public class UtilsTest {
                 mContext.getContentResolver(), Utils.INCOMPATIBLE_CHARGER_WARNING_DISABLED, 1);
 
         assertThat(Utils.containsIncompatibleChargers(mContext, TAG)).isFalse();
-    }
-
-    @Test
-    public void shouldShowWirelessChargingWarningTip_enabled_returnTrue() {
-        Utils.updateWirelessChargingWarningEnabled(mContext, true, TAG);
-
-        assertThat(shouldShowWirelessChargingWarningTip(mContext, TAG)).isTrue();
-    }
-
-    @Test
-    public void shouldShowWirelessChargingWarningTip_disabled_returnFalse() {
-        Utils.updateWirelessChargingWarningEnabled(mContext, false, TAG);
-
-        assertThat(shouldShowWirelessChargingWarningTip(mContext, TAG)).isFalse();
     }
 
     private void setupIncompatibleCharging() {

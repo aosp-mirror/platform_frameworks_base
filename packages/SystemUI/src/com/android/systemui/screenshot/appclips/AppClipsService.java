@@ -33,13 +33,14 @@ import android.content.Intent;
 import android.content.Intent.CaptureContentForNoteStatusCodes;
 import android.content.res.Resources;
 import android.os.IBinder;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 
 import com.android.internal.statusbar.IAppClipsService;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.res.R;
 import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.Optional;
@@ -57,6 +58,8 @@ import javax.inject.Inject;
  * AndroidManifest.
  */
 public class AppClipsService extends Service {
+
+  private static final String TAG = AppClipsService.class.getSimpleName();
 
     @Application private final Context mContext;
     private final FeatureFlags mFeatureFlags;
@@ -77,14 +80,22 @@ public class AppClipsService extends Service {
 
     private boolean checkIndependentVariables() {
         if (!mFeatureFlags.isEnabled(SCREENSHOT_APP_CLIPS)) {
+            Log.d(TAG, "Feature flag disabled");
             return false;
         }
 
         if (mOptionalBubbles.isEmpty()) {
+            Log.d(TAG, "Bubbles not available");
             return false;
         }
 
-        return isComponentValid();
+        if (isComponentValid()) {
+            Log.d(TAG, "checkIndependentVariables returned true");
+            return true;
+        }
+
+        Log.d(TAG, "checkIndependentVariables returned false");
+        return false;
     }
 
     private boolean isComponentValid() {
@@ -93,12 +104,27 @@ public class AppClipsService extends Service {
             componentName = ComponentName.unflattenFromString(
                     mContext.getString(R.string.config_screenshotAppClipsActivityComponent));
         } catch (Resources.NotFoundException e) {
+            Log.d(TAG, "AppClips activity component resource not defined");
             return false;
         }
 
-        return componentName != null
-                && !componentName.getPackageName().isEmpty()
-                && !componentName.getClassName().isEmpty();
+        if (componentName == null) {
+            Log.d(TAG, "AppClips component name not defined");
+            return false;
+        }
+
+        if (componentName.getPackageName().isEmpty()) {
+            Log.d(TAG, "AppClips component package name is empty");
+            return false;
+        }
+
+        if (componentName.getClassName().isEmpty()) {
+            Log.d(TAG, "AppClips component class name is empty");
+            return false;
+        }
+
+        Log.d(TAG, "isComponentValid returned true");
+        return true;
     }
 
     @Nullable
@@ -107,24 +133,39 @@ public class AppClipsService extends Service {
         return new IAppClipsService.Stub() {
             @Override
             public boolean canLaunchCaptureContentActivityForNote(int taskId) {
-                return canLaunchCaptureContentActivityForNoteInternal(taskId)
-                        == CAPTURE_CONTENT_FOR_NOTE_SUCCESS;
+                if (canLaunchCaptureContentActivityForNoteInternal(taskId)
+                        == CAPTURE_CONTENT_FOR_NOTE_SUCCESS) {
+                    Log.d(TAG, String.format("Can launch AppClips returned true for %d", taskId));
+                    return true;
+                }
+
+                Log.d(TAG, String.format("Can launch AppClips returned false for %d", taskId));
+                return false;
             }
 
             @Override
             @CaptureContentForNoteStatusCodes
             public int canLaunchCaptureContentActivityForNoteInternal(int taskId) {
                 if (!mAreTaskAndTimeIndependentPrerequisitesMet) {
+                    Log.d(TAG,
+                        String.format("Task (%d) and time independent prereqs not met", taskId));
                     return CAPTURE_CONTENT_FOR_NOTE_FAILED;
                 }
 
                 if (!mOptionalBubbles.get().isAppBubbleTaskId(taskId)) {
+                    Log.d(TAG, String.format("Taskid %d is not app bubble task", taskId));
                     return CAPTURE_CONTENT_FOR_NOTE_WINDOW_MODE_UNSUPPORTED;
                 }
 
-                return mDevicePolicyManager.getScreenCaptureDisabled(null)
-                        ? CAPTURE_CONTENT_FOR_NOTE_BLOCKED_BY_ADMIN
-                        : CAPTURE_CONTENT_FOR_NOTE_SUCCESS;
+                if (mDevicePolicyManager.getScreenCaptureDisabled(null)) {
+                    Log.d(TAG,
+                        String.format("Screen capture disabled by admin, taskId %d", taskId));
+                    return CAPTURE_CONTENT_FOR_NOTE_BLOCKED_BY_ADMIN;
+                }
+
+                Log.d(TAG,
+                    String.format("Can launch AppClips (internal) successful for %d", taskId));
+                return CAPTURE_CONTENT_FOR_NOTE_SUCCESS;
             }
         };
     }

@@ -24,6 +24,7 @@ import android.tools.traces.parsers.WindowManagerStateHelper
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.tapl.LauncherInstrumentation
+import com.android.server.wm.flicker.helpers.MultiWindowUtils
 import com.android.wm.shell.flicker.service.common.Utils
 import com.android.wm.shell.flicker.utils.SplitScreenUtils
 import org.junit.After
@@ -51,6 +52,10 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
     fun setup() {
         Assume.assumeTrue(tapl.isTablet)
 
+        MultiWindowUtils.executeShellCommand(
+                instrumentation,
+                "settings put system notification_cooldown_enabled 0"
+        )
         // Send a notification
         sendNotificationApp.launchViaIntent(wmHelper)
         sendNotificationApp.postNotification(wmHelper)
@@ -74,5 +79,10 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
         primaryApp.exit(wmHelper)
         secondaryApp.exit(wmHelper)
         sendNotificationApp.exit(wmHelper)
+
+        MultiWindowUtils.executeShellCommand(
+                instrumentation,
+                "settings reset system notification_cooldown_enabled"
+        )
     }
 }

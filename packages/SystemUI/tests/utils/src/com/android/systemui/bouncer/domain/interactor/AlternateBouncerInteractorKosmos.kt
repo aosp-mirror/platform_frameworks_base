@@ -19,24 +19,31 @@ package com.android.systemui.bouncer.domain.interactor
 import com.android.keyguard.keyguardUpdateMonitor
 import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
 import com.android.systemui.bouncer.data.repository.keyguardBouncerRepository
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryFingerprintAuthInteractor
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.statusBarStateController
-import com.android.systemui.statusbar.policy.KeyguardStateControllerImpl
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.statusbar.policy.keyguardStateController
 import com.android.systemui.util.time.systemClock
 
-var Kosmos.alternateBouncerInteractor by
+val Kosmos.alternateBouncerInteractor: AlternateBouncerInteractor by
     Kosmos.Fixture {
         AlternateBouncerInteractor(
             statusBarStateController = statusBarStateController,
-            keyguardStateController = mock<KeyguardStateControllerImpl>(),
+            keyguardStateController = keyguardStateController,
             bouncerRepository = keyguardBouncerRepository,
             fingerprintPropertyRepository = fingerprintPropertyRepository,
             biometricSettingsRepository = biometricSettingsRepository,
             systemClock = systemClock,
             keyguardUpdateMonitor = keyguardUpdateMonitor,
+            deviceEntryFingerprintAuthInteractor = { deviceEntryFingerprintAuthInteractor },
+            keyguardInteractor = { keyguardInteractor },
+            keyguardTransitionInteractor = { keyguardTransitionInteractor },
             scope = testScope.backgroundScope,
+            sceneInteractor = { sceneInteractor },
         )
     }

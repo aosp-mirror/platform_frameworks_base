@@ -54,7 +54,7 @@ public final class AccountTypePolicyKey extends PolicyKey {
     @TestApi
     public AccountTypePolicyKey(@NonNull String key, @NonNull String accountType) {
         super(key);
-        if (Flags.devicePolicySizeTrackingInternalEnabled()) {
+        if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
             PolicySizeVerifier.enforceMaxStringLength(accountType, "accountType");
         }
         mAccountType = Objects.requireNonNull((accountType));

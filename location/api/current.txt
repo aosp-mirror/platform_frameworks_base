@@ -412,8 +412,8 @@ package android.location {
     field public static final int TYPE_GPS_L1CA = 257; // 0x101
     field public static final int TYPE_GPS_L2CNAV = 258; // 0x102
     field public static final int TYPE_GPS_L5CNAV = 259; // 0x103
-    field @FlaggedApi(Flags.FLAG_GNSS_API_NAVIC_L1) public static final int TYPE_IRN_L1 = 1795; // 0x703
-    field @FlaggedApi(Flags.FLAG_GNSS_API_NAVIC_L1) public static final int TYPE_IRN_L5 = 1794; // 0x702
+    field @FlaggedApi("android.location.flags.gnss_api_navic_l1") public static final int TYPE_IRN_L1 = 1795; // 0x703
+    field @FlaggedApi("android.location.flags.gnss_api_navic_l1") public static final int TYPE_IRN_L5 = 1794; // 0x702
     field public static final int TYPE_IRN_L5CA = 1793; // 0x701
     field public static final int TYPE_QZS_L1CA = 1025; // 0x401
     field public static final int TYPE_SBS = 513; // 0x201
@@ -682,7 +682,7 @@ package android.location.altitude {
   public final class AltitudeConverter {
     ctor public AltitudeConverter();
     method @WorkerThread public void addMslAltitudeToLocation(@NonNull android.content.Context, @NonNull android.location.Location) throws java.io.IOException;
-    method @FlaggedApi(Flags.FLAG_GEOID_HEIGHTS_VIA_ALTITUDE_HAL) public boolean tryAddMslAltitudeToLocation(@NonNull android.location.Location);
+    method @FlaggedApi("android.location.flags.geoid_heights_via_altitude_hal") public boolean tryAddMslAltitudeToLocation(@NonNull android.location.Location);
   }
 
 }

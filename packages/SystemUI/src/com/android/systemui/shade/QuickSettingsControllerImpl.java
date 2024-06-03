@@ -19,7 +19,6 @@ package com.android.systemui.shade;
 
 import static android.view.WindowInsets.Type.ime;
 
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE;
 import static com.android.systemui.Flags.centralizedStatusBarHeightFix;
 import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.shade.NotificationPanelViewController.COUNTER_PANEL_OPEN_QS;
@@ -57,15 +56,16 @@ import androidx.annotation.NonNull;
 
 import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.Cuj;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.SystemBarUtils;
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.classifier.Classifier;
+import com.android.systemui.communal.ui.viewmodel.CommunalTransitionViewModel;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.dump.DumpManager;
@@ -80,7 +80,6 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
-import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -133,9 +132,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     private final FrameLayout mQsFrame;
 
     private final QsFrameTranslateController mQsFrameTranslateController;
-    private final ShadeTransitionController mShadeTransitionController;
     private final PulseExpansionHandler mPulseExpansionHandler;
-    private final ShadeExpansionStateManager mShadeExpansionStateManager;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final LightBarController mLightBarController;
     private final NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
@@ -147,7 +144,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     private final KeyguardBypassController mKeyguardBypassController;
     private final NotificationRemoteInputManager mRemoteInputManager;
     private VelocityTracker mQsVelocityTracker;
-    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final ScrimController mScrimController;
     private final MediaDataManager mMediaDataManager;
     private final MediaHierarchyManager mMediaHierarchyManager;
@@ -158,10 +154,11 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     private final DeviceEntryFaceAuthInteractor mDeviceEntryFaceAuthInteractor;
     private final CastController mCastController;
     private final SplitShadeStateController mSplitShadeStateController;
-    private final InteractionJankMonitor mInteractionJankMonitor;
+    private final Lazy<InteractionJankMonitor> mInteractionJankMonitorLazy;
     private final ShadeRepository mShadeRepository;
     private final ShadeInteractor mShadeInteractor;
     private final ActiveNotificationsInteractor mActiveNotificationsInteractor;
+    private final Lazy<CommunalTransitionViewModel> mCommunalTransitionViewModelLazy;
     private final JavaAdapter mJavaAdapter;
     private final FalsingManager mFalsingManager;
     private final AccessibilityManager mAccessibilityManager;
@@ -309,10 +306,8 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             Lazy<NotificationPanelViewController> panelViewControllerLazy,
             NotificationPanelView panelView,
             QsFrameTranslateController qsFrameTranslateController,
-            ShadeTransitionController shadeTransitionController,
             PulseExpansionHandler pulseExpansionHandler,
             NotificationRemoteInputManager remoteInputManager,
-            ShadeExpansionStateManager shadeExpansionStateManager,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             LightBarController lightBarController,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
@@ -322,7 +317,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             KeyguardStateController keyguardStateController,
             KeyguardBypassController keyguardBypassController,
-            KeyguardUpdateMonitor keyguardUpdateMonitor,
             ScrimController scrimController,
             MediaDataManager mediaDataManager,
             MediaHierarchyManager mediaHierarchyManager,
@@ -332,7 +326,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             AccessibilityManager accessibilityManager,
             LockscreenGestureLogger lockscreenGestureLogger,
             MetricsLogger metricsLogger,
-            InteractionJankMonitor interactionJankMonitor,
+            Lazy<InteractionJankMonitor> interactionJankMonitorLazy,
             ShadeLogger shadeLog,
             DumpManager dumpManager,
             DeviceEntryFaceAuthInteractor deviceEntryFaceAuthInteractor,
@@ -342,8 +336,10 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             JavaAdapter javaAdapter,
             CastController castController,
             SplitShadeStateController splitShadeStateController,
+            Lazy<CommunalTransitionViewModel> communalTransitionViewModelLazy,
             Lazy<LargeScreenHeaderHelper> largeScreenHeaderHelperLazy
     ) {
+        SceneContainerFlag.assertInLegacyMode();
         mPanelViewControllerLazy = panelViewControllerLazy;
         mPanelView = panelView;
         mLargeScreenHeaderHelperLazy = largeScreenHeaderHelperLazy;
@@ -353,7 +349,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         mSplitShadeStateController = splitShadeStateController;
         mSplitShadeEnabled = mSplitShadeStateController.shouldUseSplitNotificationShade(mResources);
         mQsFrameTranslateController = qsFrameTranslateController;
-        mShadeTransitionController = shadeTransitionController;
         mPulseExpansionHandler = pulseExpansionHandler;
         pulseExpansionHandler.setPulseExpandAbortListener(() -> {
             if (mQs != null) {
@@ -361,7 +356,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             }
         });
         mRemoteInputManager = remoteInputManager;
-        mShadeExpansionStateManager = shadeExpansionStateManager;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mLightBarController = lightBarController;
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
@@ -371,7 +365,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
         mKeyguardStateController = keyguardStateController;
         mKeyguardBypassController = keyguardBypassController;
-        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mScrimController = scrimController;
         mMediaDataManager = mediaDataManager;
         mMediaHierarchyManager = mediaHierarchyManager;
@@ -385,10 +378,11 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         mShadeLog = shadeLog;
         mDeviceEntryFaceAuthInteractor = deviceEntryFaceAuthInteractor;
         mCastController = castController;
-        mInteractionJankMonitor = interactionJankMonitor;
+        mInteractionJankMonitorLazy = interactionJankMonitorLazy;
         mShadeRepository = shadeRepository;
         mShadeInteractor = shadeInteractor;
         mActiveNotificationsInteractor = activeNotificationsInteractor;
+        mCommunalTransitionViewModelLazy = communalTransitionViewModelLazy;
         mJavaAdapter = javaAdapter;
 
         mLockscreenShadeTransitionController.addCallback(new LockscreenShadeTransitionCallback());
@@ -468,6 +462,9 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         initNotificationStackScrollLayoutController();
         mJavaAdapter.alwaysCollectFlow(
                 mShadeInteractor.isExpandToQsEnabled(), this::setExpansionEnabledPolicy);
+        mJavaAdapter.alwaysCollectFlow(
+                mCommunalTransitionViewModelLazy.get().isUmoOnCommunal(),
+                this::setShouldUpdateSquishinessOnMedia);
     }
 
     private void initNotificationStackScrollLayoutController() {
@@ -902,6 +899,12 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         }
     }
 
+    private void setShouldUpdateSquishinessOnMedia(boolean shouldUpdate) {
+        if (mQs != null) {
+            mQs.setShouldUpdateSquishinessOnMedia(shouldUpdate);
+        }
+    }
+
     void setOverScrollAmount(int overExpansion) {
         if (mQs != null) {
             mQs.setOverScrollAmount(overExpansion);
@@ -976,13 +979,20 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         }
     }
 
-    void updateQsState() {
-        boolean qsFullScreen = getExpanded() && !mSplitShadeEnabled;
+    private void setQsFullScreen(boolean qsFullScreen) {
         mShadeRepository.setLegacyQsFullscreen(qsFullScreen);
         mNotificationStackScrollLayoutController.setQsFullScreen(qsFullScreen);
         if (!SceneContainerFlag.isEnabled()) {
             mNotificationStackScrollLayoutController.setScrollingEnabled(
                     mBarState != KEYGUARD && (!qsFullScreen || mExpansionFromOverscroll));
+        }
+    }
+
+    void updateQsState() {
+        if (!FooterViewRefactor.isEnabled()) {
+            // Update full screen state; note that this will be true if the QS panel is only
+            // partially expanded, and that is fixed with the footer view refactor.
+            setQsFullScreen(/* qsFullScreen = */ getExpanded() && !mSplitShadeEnabled);
         }
 
         if (mQsStateUpdateListener != null) {
@@ -1046,6 +1056,11 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
 
         // Update the light bar
         mLightBarController.setQsExpanded(mFullyExpanded);
+
+        if (FooterViewRefactor.isEnabled()) {
+            // Update full screen state
+            setQsFullScreen(/* qsFullScreen = */ mFullyExpanded && !mSplitShadeEnabled);
+        }
     }
 
     float getLockscreenShadeDragProgress() {
@@ -1369,6 +1384,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     @Override
     public float calculateNotificationsTopPadding(boolean isShadeExpanding,
             int keyguardNotificationStaticPadding, float expandedFraction) {
+        SceneContainerFlag.assertInLegacyMode();
         float topPadding;
         boolean keyguardShowing = mBarState == KEYGUARD;
         if (mSplitShadeEnabled) {
@@ -2180,7 +2196,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
                 }
             });
             mLockscreenShadeTransitionController.setQS(mQs);
-            mShadeTransitionController.setQs(mQs);
             mNotificationStackScrollLayoutController.setQsHeader((ViewGroup) mQs.getHeader());
             mQs.setScrollListener(mQsScrollListener);
             updateExpansion();
@@ -2310,44 +2325,46 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     }
 
     void beginJankMonitoring(boolean isFullyCollapsed) {
-        if (mInteractionJankMonitor == null) {
+        InteractionJankMonitor monitor = mInteractionJankMonitorLazy.get();
+        if (monitor == null) {
             return;
         }
         // TODO (b/265193930): remove dependency on NPVC
         InteractionJankMonitor.Configuration.Builder builder =
                 InteractionJankMonitor.Configuration.Builder.withView(
-                        InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE,
+                        Cuj.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE,
                         mPanelView).setTag(isFullyCollapsed ? "Expand" : "Collapse");
-        mInteractionJankMonitor.begin(builder);
+        monitor.begin(builder);
     }
 
     void endJankMonitoring() {
-        if (mInteractionJankMonitor == null) {
+        InteractionJankMonitor monitor = mInteractionJankMonitorLazy.get();
+        if (monitor == null) {
             return;
         }
-        InteractionJankMonitor.getInstance().end(
-                InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+        monitor.end(Cuj.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
     }
 
     void cancelJankMonitoring() {
-        if (mInteractionJankMonitor == null) {
+        InteractionJankMonitor monitor = mInteractionJankMonitorLazy.get();
+        if (monitor == null) {
             return;
         }
-        InteractionJankMonitor.getInstance().cancel(
-                InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+        monitor.cancel(Cuj.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
     }
 
     void traceQsJank(boolean startTracing, boolean wasCancelled) {
-        if (mInteractionJankMonitor == null) {
+        InteractionJankMonitor monitor = mInteractionJankMonitorLazy.get();
+        if (monitor == null) {
             return;
         }
         if (startTracing) {
-            mInteractionJankMonitor.begin(mPanelView, CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
+            monitor.begin(mPanelView, Cuj.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
         } else {
             if (wasCancelled) {
-                mInteractionJankMonitor.cancel(CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
+                monitor.cancel(Cuj.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
             } else {
-                mInteractionJankMonitor.end(CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
+                monitor.end(Cuj.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
             }
         }
     }

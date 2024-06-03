@@ -1,7 +1,13 @@
 package: "android.app"
+container: "system"
+
+# Note: When adding a new flag here, consider including the word "notification(s)" in the flag name
+# when appropriate, as it's not currently part of the namespace so it may not be obvious what the
+# flag relates to.
 
 flag {
   name: "modes_api"
+  is_exported: true
   namespace: "systemui"
   description: "This flag controls new and updated DND apis"
   bug: "300477976"
@@ -16,6 +22,7 @@ flag {
 
 flag {
   name: "api_tvextender"
+  is_exported: true
   namespace: "systemui"
   description: "Guards new android.app.Notification.TvExtender api"
   bug: "308164892"
@@ -24,6 +31,7 @@ flag {
 
 flag {
   name: "lifetime_extension_refactor"
+  is_exported: true
   namespace: "systemui"
   description: "Enables moving notification lifetime extension management from SystemUI to "
       "Notification Manager Service"
@@ -31,10 +39,49 @@ flag {
 }
 
 flag {
+  name: "check_autogroup_before_post"
+  namespace: "systemui"
+  description: "Does a check to see if notification should be autogrouped before posting, and if so groups before post."
+  bug: "330214226"
+}
+
+flag {
   name: "visit_risky_uris"
   namespace: "systemui"
   description: "Guards the security fix that ensures all URIs in intents and Person.java are valid"
   bug: "281044385"
+}
+
+# vvv Prototypes for using app icons in notifications vvv
+
+flag {
+  name: "notifications_use_app_icon"
+  namespace: "systemui"
+  description: "Experiment to replace the small icon in a notification with the app icon. This includes the status bar, AOD, shelf and notification row itself."
+  bug: "335211019"
+}
+
+flag {
+  name: "notifications_use_app_icon_in_row"
+  namespace: "systemui"
+  description: "Experiment to replace the small icon in a notification row with the app icon."
+  bug: "335211019"
+}
+
+flag {
+  name: "notifications_use_monochrome_app_icon"
+  namespace: "systemui"
+  description: "Experiment to replace the notification icon in the status bar and shelf with the monochrome app icon, if available."
+  bug: "335211019"
+}
+
+# ^^^ Prototypes for using app icons in notifications ^^^
+
+flag {
+  name: "notification_expansion_optional"
+  namespace: "systemui"
+  description: "Experiment to restore the pre-S behavior where standard notifications are not expandable unless they have actions."
+  bug: "339523906"
 }
 
 flag {
@@ -46,6 +93,7 @@ flag {
 
 flag {
   name: "category_voicemail"
+  is_exported: true
   namespace: "wear_sysui"
   description: "Adds a new voicemail category for notifications"
   bug: "322806700"
@@ -53,6 +101,7 @@ flag {
 
 flag {
   name: "notification_channel_vibration_effect_api"
+  is_exported: true
   namespace: "systemui"
   description: "This flag enables the API to allow setting VibrationEffect for NotificationChannels"
   bug: "241732519"
@@ -66,4 +115,87 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+  name: "secure_allowlist_token"
+  namespace: "systemui"
+  description: "Prevents allowlist_token from leaking out and foreign tokens from being accepted"
+  bug: "328254922"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "update_ranking_time"
+  namespace: "systemui"
+  description: "Updates notification sorting criteria to highlight new content while maintaining stability"
+  bug: "326016985"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "sort_section_by_time"
+  namespace: "systemui"
+  description: "Changes notification sort order to be by time within a section"
+  bug: "330193582"
+}
+
+flag {
+  name: "restrict_audio_attributes_call"
+  namespace: "systemui"
+  description: "Only CallStyle notifs can use USAGE_NOTIFICATION_RINGTONE"
+  bug: "331793339"
+}
+
+flag {
+  name: "restrict_audio_attributes_alarm"
+  namespace: "systemui"
+  description: "Only alarm category notifs can use USAGE_ALARM"
+  bug: "331793339"
+}
+
+flag {
+  name: "restrict_audio_attributes_media"
+  namespace: "systemui"
+  description: "No notifs can use USAGE_UNKNOWN or USAGE_MEDIA"
+  bug: "331793339"
+}
+
+flag {
+  name: "clean_up_spans_and_new_lines"
+  namespace: "systemui"
+  description: "Cleans up spans and unnecessary new lines from standard notification templates"
+  bug: "313439845"
+}
+
+flag {
+  name: "compact_heads_up_notification"
+  namespace: "systemui"
+  description: "[Minimal HUN] Enables the compact heads up notification feature"
+  bug: "270709257"
+}
+
+flag {
+  name: "compact_heads_up_notification_reply"
+  namespace: "systemui"
+  description: "[Minimal HUN] Enables the compact heads up notification reply capability for Conversation Notifications"
+  bug: "336229954"
+}
+
+flag {
+  name: "remove_remote_views"
+  namespace: "systemui"
+  description: "Removes all custom views"
+  bug: "342602960"
+}
+
+flag {
+  name: "redact_sensitive_content_notifications_on_lockscreen"
+  namespace: "systemui"
+  description: "redacts notifications on the lockscreen if they have the 'sensitiveContent' flag"
+  bug: "343631648"
 }

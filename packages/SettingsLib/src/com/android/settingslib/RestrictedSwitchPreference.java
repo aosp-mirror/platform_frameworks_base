@@ -289,7 +289,8 @@ public class RestrictedSwitchPreference extends SwitchPreferenceCompat {
                 uid, packageName);
         final boolean ecmEnabled = getContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_enhancedConfirmationModeEnabled);
-        final boolean appOpsAllowed = !ecmEnabled || mode == AppOpsManager.MODE_ALLOWED;
+        final boolean appOpsAllowed = !ecmEnabled || mode == AppOpsManager.MODE_ALLOWED
+                || mode == AppOpsManager.MODE_DEFAULT;
         if (!isEnableAllowed && !isEnabled) {
             setEnabled(false);
         } else if (isEnabled) {

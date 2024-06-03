@@ -99,7 +99,7 @@ static bool setPowerMode(Mode mode, bool enabled) {
 }
 
 void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType,
-                                                     int32_t displayId) {
+                                                     ui::LogicalDisplayId displayId) {
     if (gPowerManagerServiceObj) {
         // Throttle calls into user activity by event type.
         // We're a little conservative about argument checking here in case the caller
@@ -116,16 +116,14 @@ void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t 
                 }
                 gLastEventTime[eventType] = eventTime;
             }
-
-            // Tell the power HAL when user activity occurs.
-            setPowerBoost(Boost::INTERACTION, 0);
         }
+        // Note that the below PowerManagerService method may call setPowerBoost.
 
         JNIEnv* env = AndroidRuntime::getJNIEnv();
 
         env->CallVoidMethod(gPowerManagerServiceObj,
-                gPowerManagerServiceClassInfo.userActivityFromNative,
-                nanoseconds_to_milliseconds(eventTime), eventType, displayId, 0);
+                            gPowerManagerServiceClassInfo.userActivityFromNative,
+                            nanoseconds_to_milliseconds(eventTime), eventType, displayId.val(), 0);
         checkAndClearExceptionFromCallback(env, "userActivityFromNative");
     }
 }

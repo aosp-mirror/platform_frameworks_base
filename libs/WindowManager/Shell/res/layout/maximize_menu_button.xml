@@ -16,23 +16,29 @@
 
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:progressDrawable="@drawable/circular_progress"
-        android:layout_width="34dp"
-        android:layout_height="34dp"
-        android:indeterminate="false"
-        android:visibility="invisible"/>
+
+    <FrameLayout
+        android:layout_width="44dp"
+        android:layout_height="40dp">
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:progressDrawable="@drawable/circular_progress"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:indeterminate="false"
+            android:layout_marginHorizontal="6dp"
+            android:layout_marginVertical="4dp"
+            android:visibility="invisible"/>
+    </FrameLayout>
 
     <ImageButton
         android:id="@+id/maximize_window"
-        android:layout_width="34dp"
-        android:layout_height="34dp"
-        android:padding="5dp"
+        android:layout_width="44dp"
+        android:layout_height="40dp"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="8dp"
         android:contentDescription="@string/maximize_button_text"
-        android:tint="?androidprv:attr/materialColorOnSurface"
-        android:background="?android:selectableItemBackgroundBorderless"
         android:src="@drawable/decor_desktop_mode_maximize_button_dark"
         android:scaleType="fitCenter" />
 </merge>

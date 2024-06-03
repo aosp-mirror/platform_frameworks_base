@@ -22,14 +22,14 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.volume.panel.availableCriteria
-import com.android.systemui.volume.panel.criteriaByKey
-import com.android.systemui.volume.panel.defaultCriteria
+import com.android.systemui.volume.panel.domain.availableCriteria
+import com.android.systemui.volume.panel.domain.defaultCriteria
 import com.android.systemui.volume.panel.domain.model.ComponentModel
-import com.android.systemui.volume.panel.enabledComponents
+import com.android.systemui.volume.panel.domain.unavailableCriteria
 import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
-import com.android.systemui.volume.panel.unavailableCriteria
+import com.android.systemui.volume.panel.ui.composable.enabledComponents
 import com.google.common.truth.Truth.assertThat
+import javax.inject.Provider
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,7 +47,7 @@ class ComponentsInteractorImplTest : SysuiTestCase() {
             with(kosmos) {
                 ComponentsInteractorImpl(
                     enabledComponents,
-                    defaultCriteria,
+                    { defaultCriteria },
                     testScope.backgroundScope,
                     criteriaByKey,
                 )
@@ -66,9 +66,9 @@ class ComponentsInteractorImplTest : SysuiTestCase() {
                     )
                 criteriaByKey =
                     mapOf(
-                        BOTTOM_BAR to availableCriteria,
-                        COMPONENT_1 to unavailableCriteria,
-                        COMPONENT_2 to availableCriteria,
+                        BOTTOM_BAR to Provider { availableCriteria },
+                        COMPONENT_1 to Provider { unavailableCriteria },
+                        COMPONENT_2 to Provider { availableCriteria },
                     )
                 initUnderTest()
 
@@ -96,8 +96,8 @@ class ComponentsInteractorImplTest : SysuiTestCase() {
                     )
                 criteriaByKey =
                     mapOf(
-                        BOTTOM_BAR to availableCriteria,
-                        COMPONENT_2 to availableCriteria,
+                        BOTTOM_BAR to Provider { availableCriteria },
+                        COMPONENT_2 to Provider { availableCriteria },
                     )
                 defaultCriteria = unavailableCriteria
                 initUnderTest()

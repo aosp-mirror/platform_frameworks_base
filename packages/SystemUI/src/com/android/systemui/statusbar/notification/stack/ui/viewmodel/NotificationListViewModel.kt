@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.domain.interactor.RemoteInputInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
@@ -31,7 +31,7 @@ import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.Notificati
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackInteractor
 import com.android.systemui.statusbar.policy.domain.interactor.UserSetupInteractor
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
-import com.android.systemui.util.kotlin.combine
+import com.android.systemui.util.kotlin.FlowDumperImpl
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.ui.AnimatableEvent
 import com.android.systemui.util.ui.AnimatedValue
@@ -58,14 +58,14 @@ constructor(
     activeNotificationsInteractor: ActiveNotificationsInteractor,
     notificationStackInteractor: NotificationStackInteractor,
     private val headsUpNotificationInteractor: HeadsUpNotificationInteractor,
-    keyguardInteractor: KeyguardInteractor,
     remoteInputInteractor: RemoteInputInteractor,
     seenNotificationsInteractor: SeenNotificationsInteractor,
     shadeInteractor: ShadeInteractor,
     userSetupInteractor: UserSetupInteractor,
     zenModeInteractor: ZenModeInteractor,
     @Background bgDispatcher: CoroutineDispatcher,
-) {
+    dumpManager: DumpManager,
+) : FlowDumperImpl(dumpManager) {
     /**
      * We want the NSSL to be unimportant for accessibility when there are no notifications in it
      * while the device is on lock screen, to avoid an unlabelled NSSL view in TalkBack. Otherwise,
@@ -82,8 +82,9 @@ constructor(
                 ) { hasNotifications, isShowingOnLockscreen ->
                     hasNotifications || !isShowingOnLockscreen
                 }
-                .flowOn(bgDispatcher)
                 .distinctUntilChanged()
+                .dumpWhileCollecting("isImportantForAccessibility")
+                .flowOn(bgDispatcher)
         }
     }
 
@@ -106,12 +107,42 @@ constructor(
                         else -> true
                     }
                 }
-                .flowOn(bgDispatcher)
                 .distinctUntilChanged()
+                .dumpWhileCollecting("shouldShowEmptyShadeView")
+                .flowOn(bgDispatcher)
         }
     }
 
-    val shouldShowFooterView: Flow<AnimatedValue<Boolean>> by lazy {
+    /**
+     * Whether the footer should not be visible for the user, even if it's present in the list (as
+     * per [shouldIncludeFooterView] below).
+     *
+     * This essentially corresponds to having the view set to INVISIBLE.
+     */
+    val shouldHideFooterView: Flow<Boolean> by lazy {
+        if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
+            flowOf(false)
+        } else {
+            // When the shade is closed, the footer is still present in the list, but not visible.
+            // This prevents the footer from being shown when a HUN is present, while still allowing
+            // the footer to be counted as part of the shade for measurements.
+            shadeInteractor.shadeExpansion
+                .map { it == 0f }
+                .distinctUntilChanged()
+                .dumpWhileCollecting("shouldHideFooterView")
+                .flowOn(bgDispatcher)
+        }
+    }
+
+    /**
+     * Whether the footer should be part of the list or not, and whether the transition from one
+     * state to another should be animated. This essentially corresponds to transitioning the view
+     * visibility from VISIBLE to GONE and vice versa.
+     *
+     * Note that this value being true doesn't necessarily mean that the footer is visible. It could
+     * be hidden by another condition (see [shouldHideFooterView] above).
+     */
+    val shouldIncludeFooterView: Flow<AnimatedValue<Boolean>> by lazy {
         if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
             flowOf(AnimatedValue.NotAnimating(false))
         } else {
@@ -120,37 +151,32 @@ constructor(
                     userSetupInteractor.isUserSetUp,
                     notificationStackInteractor.isShowingOnLockscreen,
                     shadeInteractor.isQsFullscreen,
-                    remoteInputInteractor.isRemoteInputActive,
-                    shadeInteractor.shadeExpansion.map { it == 0f }.distinctUntilChanged(),
+                    remoteInputInteractor.isRemoteInputActive
                 ) {
                     hasNotifications,
                     isUserSetUp,
                     isShowingOnLockscreen,
                     qsFullScreen,
-                    isRemoteInputActive,
-                    isShadeClosed ->
+                    isRemoteInputActive ->
                     when {
-                        !hasNotifications -> VisibilityChange.HIDE_WITH_ANIMATION
+                        !hasNotifications -> VisibilityChange.DISAPPEAR_WITH_ANIMATION
                         // Hide the footer until the user setup is complete, to prevent access
                         // to settings (b/193149550).
-                        !isUserSetUp -> VisibilityChange.HIDE_WITH_ANIMATION
+                        !isUserSetUp -> VisibilityChange.DISAPPEAR_WITH_ANIMATION
                         // Do not show the footer if the lockscreen is visible (incl. AOD),
                         // except if the shade is opened on top. See also b/219680200.
                         // Do not animate, as that makes the footer appear briefly when
                         // transitioning between the shade and keyguard.
-                        isShowingOnLockscreen -> VisibilityChange.HIDE_WITHOUT_ANIMATION
+                        isShowingOnLockscreen -> VisibilityChange.DISAPPEAR_WITHOUT_ANIMATION
                         // Do not show the footer if quick settings are fully expanded (except
                         // for the foldable split shade view). See b/201427195 && b/222699879.
-                        qsFullScreen -> VisibilityChange.HIDE_WITH_ANIMATION
+                        qsFullScreen -> VisibilityChange.DISAPPEAR_WITH_ANIMATION
                         // Hide the footer if remote input is active (i.e. user is replying to a
                         // notification). See b/75984847.
-                        isRemoteInputActive -> VisibilityChange.HIDE_WITH_ANIMATION
-                        // Never show the footer if the shade is collapsed (e.g. when HUNing).
-                        isShadeClosed -> VisibilityChange.HIDE_WITHOUT_ANIMATION
-                        else -> VisibilityChange.SHOW_WITH_ANIMATION
+                        isRemoteInputActive -> VisibilityChange.DISAPPEAR_WITH_ANIMATION
+                        else -> VisibilityChange.APPEAR_WITH_ANIMATION
                     }
                 }
-                .flowOn(bgDispatcher)
                 .distinctUntilChanged(
                     // Equivalent unless visibility changes
                     areEquivalent = { a: VisibilityChange, b: VisibilityChange ->
@@ -176,13 +202,15 @@ constructor(
                     AnimatableEvent(visibilityChange.visible, shouldAnimate)
                 }
                 .toAnimatedValueFlow()
+                .dumpWhileCollecting("shouldIncludeFooterView")
+                .flowOn(bgDispatcher)
         }
     }
 
     enum class VisibilityChange(val visible: Boolean, val canAnimate: Boolean) {
-        HIDE_WITHOUT_ANIMATION(visible = false, canAnimate = false),
-        HIDE_WITH_ANIMATION(visible = false, canAnimate = true),
-        SHOW_WITH_ANIMATION(visible = true, canAnimate = true)
+        DISAPPEAR_WITHOUT_ANIMATION(visible = false, canAnimate = false),
+        DISAPPEAR_WITH_ANIMATION(visible = false, canAnimate = true),
+        APPEAR_WITH_ANIMATION(visible = true, canAnimate = true)
     }
 
     // TODO(b/308591475): This should be tracked separately by the empty shade.
@@ -190,7 +218,9 @@ constructor(
         if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
             flowOf(false)
         } else {
-            zenModeInteractor.areNotificationsHiddenInShade
+            zenModeInteractor.areNotificationsHiddenInShade.dumpWhileCollecting(
+                "areNotificationsHiddenInShade"
+            )
         }
     }
 
@@ -199,7 +229,9 @@ constructor(
         if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
             flowOf(false)
         } else {
-            seenNotificationsInteractor.hasFilteredOutSeenNotifications
+            seenNotificationsInteractor.hasFilteredOutSeenNotifications.dumpWhileCollecting(
+                "hasFilteredOutSeenNotifications"
+            )
         }
     }
 
@@ -207,7 +239,9 @@ constructor(
         if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
             flowOf(false)
         } else {
-            activeNotificationsInteractor.hasClearableAlertingNotifications
+            activeNotificationsInteractor.hasClearableAlertingNotifications.dumpWhileCollecting(
+                "hasClearableAlertingNotifications"
+            )
         }
     }
 
@@ -215,7 +249,9 @@ constructor(
         if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
             flowOf(false)
         } else {
-            activeNotificationsInteractor.hasNonClearableSilentNotifications
+            activeNotificationsInteractor.hasNonClearableSilentNotifications.dumpWhileCollecting(
+                "hasNonClearableSilentNotifications"
+            )
         }
     }
 
@@ -223,7 +259,7 @@ constructor(
         if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
             flowOf(null)
         } else {
-            headsUpNotificationInteractor.topHeadsUpRow
+            headsUpNotificationInteractor.topHeadsUpRow.dumpWhileCollecting("topHeadsUpRow")
         }
     }
 
@@ -231,15 +267,21 @@ constructor(
         if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
             flowOf(emptySet())
         } else {
-            headsUpNotificationInteractor.pinnedHeadsUpRows
+            headsUpNotificationInteractor.pinnedHeadsUpRows.dumpWhileCollecting("pinnedHeadsUpRows")
         }
     }
 
     val headsUpAnimationsEnabled: Flow<Boolean> by lazy {
-        combine(keyguardInteractor.isKeyguardShowing, shadeInteractor.isShadeFullyExpanded) {
-            (isKeyguardShowing, isShadeFullyExpanded) ->
-            // TODO(b/325936094) use isShadeFullyCollapsed instead
-            !isKeyguardShowing && !isShadeFullyExpanded
+        if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
+            flowOf(false)
+        } else {
+            combine(
+                notificationStackInteractor.isShowingOnLockscreen,
+                shadeInteractor.isShadeFullyCollapsed
+            ) { (isKeyguardShowing, isShadeFullyCollapsed) ->
+                !isKeyguardShowing && isShadeFullyCollapsed
+            }
+                .dumpWhileCollecting("headsUpAnimationsEnabled")
         }
     }
 
@@ -247,12 +289,17 @@ constructor(
         if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
             flowOf(false)
         } else {
-            headsUpNotificationInteractor.hasPinnedRows
+            headsUpNotificationInteractor.hasPinnedRows.dumpWhileCollecting("hasPinnedHeadsUpRow")
         }
     }
 
     // TODO(b/325936094) use it for the text displayed in the StatusBar
     fun headsUpRow(key: HeadsUpRowKey): HeadsUpRowViewModel =
         HeadsUpRowViewModel(headsUpNotificationInteractor.headsUpRow(key))
+
     fun elementKeyFor(key: HeadsUpRowKey): Any = headsUpNotificationInteractor.elementKeyFor(key)
+
+    fun setHeadsUpAnimatingAway(animatingAway: Boolean) {
+        headsUpNotificationInteractor.setHeadsUpAnimatingAway(animatingAway)
+    }
 }

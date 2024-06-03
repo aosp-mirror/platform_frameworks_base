@@ -24,6 +24,7 @@ import android.os.PowerManager;
 import android.view.SurfaceControlHdrLayerInfoListener;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.display.AutomaticBrightnessController;
 import com.android.server.display.config.HdrBrightnessData;
 
 import java.io.PrintWriter;
@@ -56,6 +57,13 @@ public class HdrClamper {
     private float mTransitionRate = -1f;
     private float mDesiredTransitionRate = -1f;
 
+    private boolean mAutoBrightnessEnabled = false;
+
+    /**
+     * Indicates that maxBrightness is changed, and we should use slow transition
+     */
+    private boolean mUseSlowTransition = false;
+
     public HdrClamper(BrightnessClamperController.ClamperChangeListener clamperChangeListener,
             Handler handler) {
         this(clamperChangeListener, handler, new Injector());
@@ -69,6 +77,7 @@ public class HdrClamper {
         mDebouncer = () -> {
             mTransitionRate = mDesiredTransitionRate;
             mMaxBrightness = mDesiredMaxBrightness;
+            mUseSlowTransition = true;
             mClamperChangeListener.onChanged();
         };
         mHdrListener = injector.getHdrListener((visible) -> {
@@ -77,14 +86,24 @@ public class HdrClamper {
         }, handler);
     }
 
-    // Called in same looper: mHandler.getLooper()
+    /**
+     * Applies clamping
+     * Called in same looper: mHandler.getLooper()
+     */
+    public float clamp(float brightness) {
+        return Math.min(brightness, mMaxBrightness);
+    }
+
+    @VisibleForTesting
     public float getMaxBrightness() {
         return mMaxBrightness;
     }
 
     // Called in same looper: mHandler.getLooper()
     public float getTransitionRate() {
-        return mTransitionRate;
+        float expectedTransitionRate =  mUseSlowTransition ? mTransitionRate : -1;
+        mUseSlowTransition = false;
+        return  expectedTransitionRate;
     }
 
     /**
@@ -122,6 +141,18 @@ public class HdrClamper {
         recalculateBrightnessCap(data, mAmbientLux, mHdrVisible);
     }
 
+    /**
+     * Sets state of auto brightness to temporary disabling this Clamper if auto brightness is off.
+     * The issue is tracked here: b/322445088
+     */
+    public void setAutoBrightnessState(int state) {
+        boolean isEnabled = state == AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED;
+        if (isEnabled != mAutoBrightnessEnabled) {
+            mAutoBrightnessEnabled = isEnabled;
+            recalculateBrightnessCap(mHdrBrightnessData, mAmbientLux, mHdrVisible);
+        }
+    }
+
     /** Clean up all resources */
     @SuppressLint("AndroidFrameworkRequiresPermission")
     public void stop() {
@@ -145,6 +176,7 @@ public class HdrClamper {
                 : mHdrBrightnessData.toString()));
         pw.println("  mHdrListener registered=" + (mRegisteredDisplayToken != null));
         pw.println("  mAmbientLux=" + mAmbientLux);
+        pw.println("  mAutoBrightnessEnabled=" + mAutoBrightnessEnabled);
     }
 
     private void reset() {
@@ -157,13 +189,17 @@ public class HdrClamper {
         mMaxBrightness = PowerManager.BRIGHTNESS_MAX;
         mDesiredMaxBrightness = PowerManager.BRIGHTNESS_MAX;
         mDesiredTransitionRate = -1f;
-        mTransitionRate = 1f;
+        mTransitionRate = -1f;
+        mUseSlowTransition = false;
         mClamperChangeListener.onChanged();
     }
 
     private void recalculateBrightnessCap(HdrBrightnessData data, float ambientLux,
             boolean hdrVisible) {
-        if (data == null || !hdrVisible) {
+        // AutoBrightnessController sends ambientLux values *only* when auto brightness enabled.
+        // Temporary disabling this Clamper if auto brightness is off, to avoid capping
+        // brightness based on stale ambient lux. The issue is tracked here: b/322445088
+        if (data == null || !hdrVisible || !mAutoBrightnessEnabled) {
             reset();
             return;
         }

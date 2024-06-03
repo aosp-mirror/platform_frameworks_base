@@ -173,6 +173,12 @@ public class NetworkPolicyManager {
     public static final String FIREWALL_CHAIN_NAME_LOW_POWER_STANDBY = "low_power_standby";
     /** @hide */
     public static final String FIREWALL_CHAIN_NAME_BACKGROUND = "background";
+    /** @hide */
+    public static final String FIREWALL_CHAIN_NAME_METERED_ALLOW = "metered_allow";
+    /** @hide */
+    public static final String FIREWALL_CHAIN_NAME_METERED_DENY_USER = "metered_deny_user";
+    /** @hide */
+    public static final String FIREWALL_CHAIN_NAME_METERED_DENY_ADMIN = "metered_deny_admin";
 
     private static final boolean ALLOW_PLATFORM_APP_POLICY = true;
 

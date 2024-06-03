@@ -42,6 +42,10 @@ applications that come with the platform
         <permission name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER"/>
     </privapp-permissions>
 
+    <privapp-permissions package="com.android.credentialmanager">
+        <permission name="android.permission.SET_BIOMETRIC_DIALOG_ADVANCED" />
+    </privapp-permissions>
+
     <privapp-permissions package="com.android.externalstorage">
         <permission name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
@@ -590,6 +594,8 @@ applications that come with the platform
         <permission name="android.permission.EMERGENCY_INSTALL_PACKAGES" />
         <!-- Permission required for Cts test - CtsSettingsTestCases -->
         <permission name="android.permission.PREPARE_FACTORY_RESET" />
+        <!-- Permission required for CTS test - FileIntegrityManagerTest -->
+        <permission name="android.permission.SETUP_FSVERITY" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

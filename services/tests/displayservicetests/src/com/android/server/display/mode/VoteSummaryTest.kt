@@ -152,13 +152,51 @@ class VoteSummaryTest {
 
         assertThat(result.map { it.modeId }).containsExactlyElementsIn(testCase.expectedModeIds)
     }
+
+    @Test
+    fun `summary invalid if has requestedRefreshRate less than minRenederRate`() {
+        val summary = createSummary()
+        summary.requestedRefreshRates = setOf(30f, 90f)
+        summary.minRenderFrameRate = 60f
+        summary.maxRenderFrameRate = 120f
+
+        val result = summary.filterModes(arrayOf(createMode(1, 90f, 90f)))
+
+        assertThat(result).isEmpty()
+    }
+
+    @Test
+    fun `summary invalid if has requestedRefreshRate more than maxRenderFrameRate`() {
+        val summary = createSummary()
+        summary.requestedRefreshRates = setOf(60f, 240f)
+        summary.minRenderFrameRate = 60f
+        summary.maxRenderFrameRate = 120f
+
+        val result = summary.filterModes(arrayOf(createMode(1, 90f, 90f)))
+
+        assertThat(result).isEmpty()
+    }
+
+    @Test
+    fun `summary valid if all requestedRefreshRates inside render rate limits`() {
+        val summary = createSummary()
+        summary.requestedRefreshRates = setOf(60f, 90f)
+        summary.minRenderFrameRate = 60f
+        summary.maxRenderFrameRate = 120f
+
+        val result = summary.filterModes(arrayOf(createMode(1, 90f, 90f)))
+
+        assertThat(result).hasSize(1)
+    }
 }
+
+
 private fun createMode(modeId: Int, refreshRate: Float, vsyncRate: Float): Display.Mode {
-    return Display.Mode(modeId, 600, 800, refreshRate, vsyncRate,
+    return Display.Mode(modeId, 600, 800, refreshRate, vsyncRate, false,
             FloatArray(0), IntArray(0))
 }
 
-private fun createSummary(supportedModesVoteEnabled: Boolean): VoteSummary {
+private fun createSummary(supportedModesVoteEnabled: Boolean = false): VoteSummary {
     val summary = createVotesSummary(supportedModesVoteEnabled = supportedModesVoteEnabled)
     summary.width = 600
     summary.height = 800

@@ -1,7 +1,9 @@
 package: "android.app.wearable"
+container: "system"
 
 flag {
     name: "enable_unsupported_operation_status_code"
+    is_exported: true
     namespace: "machine_learning"
     description: "This flag enables the WearableSensingManager#STATUS_UNSUPPORTED_OPERATION status code API."
     bug: "301427767"
@@ -9,6 +11,7 @@ flag {
 
 flag {
     name: "enable_data_request_observer_api"
+    is_exported: true
     namespace: "machine_learning"
     description: "This flag enables the API to register a data request observer on WearableSensingManager."
     bug: "301427767"
@@ -16,6 +19,7 @@ flag {
 
 flag {
     name: "enable_provide_wearable_connection_api"
+    is_exported: true
     namespace: "machine_learning"
     description: "This flag enables the WearableSensingManager#provideWearableConnection API."
     bug: "301427767"
@@ -30,6 +34,7 @@ flag {
 
 flag {
     name: "enable_hotword_wearable_sensing_api"
+    is_exported: true
     namespace: "machine_learning"
     description: "This flag enables the APIs related to hotword in WearableSensingManager and WearableSensingService."
     bug: "310055381"

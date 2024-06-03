@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
+import static android.content.pm.PackageManager.PROPERTY_ANDROID_SAFETY_LABEL;
 import static android.content.pm.SigningDetails.CertCapabilities.SHARED_USER_ID;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
@@ -26,10 +27,10 @@ import static android.system.OsConstants.O_RDWR;
 import static com.android.internal.content.NativeLibraryHelper.LIB64_DIR_NAME;
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH;
+import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NULL_ACTION_MATCH;
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
 import static com.android.server.pm.PackageInstallerSession.APP_METADATA_FILE_ACCESS_MODE;
 import static com.android.server.pm.PackageInstallerSession.getAppMetadataSizeLimit;
-import static com.android.server.pm.PackageManagerService.APP_METADATA_FILE_IN_APK_PATH;
 import static com.android.server.pm.PackageManagerService.COMPRESSED_EXTENSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INTENT_MATCHING;
@@ -60,6 +61,7 @@ import android.content.pm.ComponentInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.Property;
 import android.content.pm.PackagePartitions;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -69,8 +71,12 @@ import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
+import android.content.res.ApkAssets;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Build;
+import android.os.CancellationSignal;
 import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -91,6 +97,7 @@ import android.system.Os;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Base64;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.LogPrinter;
 import android.util.Printer;
@@ -111,8 +118,10 @@ import com.android.server.am.ActivityManagerUtils;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackageSplit;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.resolution.ComponentResolverApi;
+import com.android.server.pm.snapshot.PackageDataSnapshot;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 
 import dalvik.system.VMRuntime;
@@ -140,13 +149,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * Class containing helper methods for the PackageManagerService.
@@ -1195,9 +1204,77 @@ public class PackageManagerServiceUtils {
         return (ps.getFlags() & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
     }
 
-    // Static to give access to ComputeEngine
+    private static ParsedMainComponent componentInfoToComponent(
+            ComponentInfo info, ComponentResolverApi resolver, boolean isReceiver) {
+        if (info instanceof ActivityInfo) {
+            if (isReceiver) {
+                return resolver.getReceiver(info.getComponentName());
+            } else {
+                return resolver.getActivity(info.getComponentName());
+            }
+        } else if (info instanceof ServiceInfo) {
+            return resolver.getService(info.getComponentName());
+        } else {
+            // This shall never happen
+            throw new IllegalArgumentException("Unsupported component type");
+        }
+    }
+
+    /**
+     * Under the correct conditions, remove components if the intent has null action.
+     *
+     * `compat` and `snapshot` may be null when this method is called in ActivityManagerService
+     * CTS tests. The code in this method will properly avoid control flows using these arguments.
+     */
+    public static void applyNullActionBlocking(
+            @Nullable PlatformCompat compat, @Nullable PackageDataSnapshot snapshot,
+            List componentList, boolean isReceiver, Intent intent, int filterCallingUid) {
+        if (ActivityManager.canAccessUnexportedComponents(filterCallingUid)) return;
+
+        final Computer computer = (Computer) snapshot;
+        ComponentResolverApi resolver = null;
+
+        final boolean enforce = android.security.Flags.blockNullActionIntents()
+                && (compat == null || compat.isChangeEnabledByUidInternal(
+                        IntentFilter.BLOCK_NULL_ACTION_INTENTS, filterCallingUid));
+
+        for (int i = componentList.size() - 1; i >= 0; --i) {
+            boolean match = true;
+
+            Object c = componentList.get(i);
+            if (c instanceof ResolveInfo resolveInfo) {
+                if (computer == null) {
+                    // PackageManagerService is not started
+                    return;
+                }
+                if (resolver == null) {
+                    resolver = computer.getComponentResolver();
+                }
+                final ParsedMainComponent comp = componentInfoToComponent(
+                        resolveInfo.getComponentInfo(), resolver, isReceiver);
+                if (comp != null && !comp.getIntents().isEmpty() && intent.getAction() == null) {
+                    match = false;
+                }
+            } else if (c instanceof IntentFilter) {
+                if (intent.getAction() == null) {
+                    match = false;
+                }
+            }
+
+            if (!match) {
+                ActivityManagerUtils.logUnsafeIntentEvent(
+                        UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NULL_ACTION_MATCH,
+                        filterCallingUid, intent, null, enforce);
+                if (enforce) {
+                    Slog.w(TAG, "Blocking intent with null action: " + intent);
+                    componentList.remove(i);
+                }
+            }
+        }
+    }
+
     public static void applyEnforceIntentFilterMatching(
-            PlatformCompat compat, ComponentResolverApi resolver,
+            PlatformCompat compat, PackageDataSnapshot snapshot,
             List<ResolveInfo> resolveInfos, boolean isReceiver,
             Intent intent, String resolvedType, int filterCallingUid) {
         if (DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS.get()) return;
@@ -1205,13 +1282,19 @@ public class PackageManagerServiceUtils {
         // Do not enforce filter matching when the caller is system or root
         if (ActivityManager.canAccessUnexportedComponents(filterCallingUid)) return;
 
+        final Computer computer = (Computer) snapshot;
+        final ComponentResolverApi resolver = computer.getComponentResolver();
+
         final Printer logPrinter = DEBUG_INTENT_MATCHING
                 ? new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM)
                 : null;
 
-        final boolean enforce = android.security.Flags.enforceIntentFilterMatch()
+        final boolean enforceMatch = android.security.Flags.enforceIntentFilterMatch()
                 && compat.isChangeEnabledByUidInternal(
                         ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS, filterCallingUid);
+        final boolean blockNullAction = android.security.Flags.blockNullActionIntents()
+                && compat.isChangeEnabledByUidInternal(
+                        IntentFilter.BLOCK_NULL_ACTION_INTENTS, filterCallingUid);
 
         for (int i = resolveInfos.size() - 1; i >= 0; --i) {
             final ComponentInfo info = resolveInfos.get(i).getComponentInfo();
@@ -1221,40 +1304,53 @@ public class PackageManagerServiceUtils {
                 continue;
             }
 
-            final ParsedMainComponent comp;
-            if (info instanceof ActivityInfo) {
-                if (isReceiver) {
-                    comp = resolver.getReceiver(info.getComponentName());
-                } else {
-                    comp = resolver.getActivity(info.getComponentName());
-                }
-            } else if (info instanceof ServiceInfo) {
-                comp = resolver.getService(info.getComponentName());
-            } else {
-                // This shall never happen
-                throw new IllegalArgumentException("Unsupported component type");
-            }
+            final ParsedMainComponent comp = componentInfoToComponent(info, resolver, isReceiver);
 
             if (comp == null || comp.getIntents().isEmpty()) {
                 continue;
             }
 
-            boolean match = false;
-            for (int j = 0, size = comp.getIntents().size(); j < size; ++j) {
-                IntentFilter intentFilter = comp.getIntents().get(j).getIntentFilter();
-                if (IntentResolver.intentMatchesFilter(intentFilter, intent, resolvedType)) {
-                    match = true;
-                    break;
+            Boolean match = null;
+
+            if (intent.getAction() == null) {
+                ActivityManagerUtils.logUnsafeIntentEvent(
+                        UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NULL_ACTION_MATCH,
+                        filterCallingUid, intent, resolvedType, enforceMatch && blockNullAction);
+                if (blockNullAction) {
+                    // Skip intent filter matching if blocking null action
+                    match = false;
                 }
             }
-            if (!match) {
+
+            if (match == null) {
+                // Check if any intent filter matches
+                for (int j = 0, size = comp.getIntents().size(); j < size; ++j) {
+                    IntentFilter intentFilter = comp.getIntents().get(j).getIntentFilter();
+                    if (IntentResolver.intentMatchesFilter(intentFilter, intent, resolvedType)) {
+                        match = true;
+                        break;
+                    }
+                }
+            }
+
+            // At this point, the value `match` has the following states:
+            // null : Intent does not match any intent filter
+            // false: Null action intent detected AND blockNullAction == true
+            // true : The intent matches at least one intent filter
+
+            if (match == null) {
                 ActivityManagerUtils.logUnsafeIntentEvent(
                         UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH,
-                        filterCallingUid, intent, resolvedType, enforce);
+                        filterCallingUid, intent, resolvedType, enforceMatch);
+                match = false;
+            }
+
+            if (!match) {
+                // All non-matching intents has to be marked accordingly
                 if (android.security.Flags.enforceIntentFilterMatch()) {
                     intent.addExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
                 }
-                if (enforce) {
+                if (enforceMatch) {
                     Slog.w(TAG, "Intent does not match component's intent filter: " + intent);
                     Slog.w(TAG, "Access blocked: " + comp.getComponentName());
                     if (DEBUG_INTENT_MATCHING) {
@@ -1267,7 +1363,6 @@ public class PackageManagerServiceUtils {
             }
         }
     }
-
 
     /**
      * Do NOT use for intent resolution filtering. That should be done with
@@ -1567,30 +1662,72 @@ public class PackageManagerServiceUtils {
     /**
      * Extract the app.metadata file from apk.
      */
-    public static boolean extractAppMetadataFromApk(String apkPath, File appMetadataFile) {
-        boolean found = false;
-        try (ZipInputStream zipInputStream =
-                     new ZipInputStream(new FileInputStream(new File(apkPath)))) {
-            ZipEntry zipEntry = null;
-            while ((zipEntry = zipInputStream.getNextEntry()) != null) {
-                if (zipEntry.getName().equals(APP_METADATA_FILE_IN_APK_PATH)) {
-                    found = true;
-                    try (FileOutputStream out = new FileOutputStream(appMetadataFile)) {
-                        FileUtils.copy(zipInputStream, out);
-                    }
-                    if (appMetadataFile.length() > getAppMetadataSizeLimit()) {
-                        appMetadataFile.delete();
-                        return false;
-                    }
-                    Os.chmod(appMetadataFile.getAbsolutePath(), APP_METADATA_FILE_ACCESS_MODE);
-                    break;
+    public static boolean extractAppMetadataFromApk(AndroidPackage pkg,
+            String appMetadataFilePath, boolean isSystem) {
+        if (appMetadataFilePath == null) {
+            return false;
+        }
+        File appMetadataFile = new File(appMetadataFilePath);
+        if (appMetadataFile.exists()) {
+            return true;
+        }
+        Map<String, Property> properties = pkg.getProperties();
+        if (!properties.containsKey(PROPERTY_ANDROID_SAFETY_LABEL)) {
+            return false;
+        }
+        Property fileInApkProperty = properties.get(PROPERTY_ANDROID_SAFETY_LABEL);
+        if (!fileInApkProperty.isResourceId()) {
+            return false;
+        }
+        if (isSystem && !appMetadataFile.getParentFile().exists()) {
+            try {
+                makeDirRecursive(appMetadataFile.getParentFile(), 0700);
+            } catch (Exception e) {
+                Slog.e(TAG, "Failed to create app metadata dir for package "
+                        + pkg.getPackageName() + ": " + e.getMessage());
+                return false;
+            }
+        }
+        List<AndroidPackageSplit> splits = pkg.getSplits();
+        AssetManager.Builder builder = new AssetManager.Builder();
+        for (int i = 0; i < splits.size(); i++) {
+            try {
+                builder.addApkAssets(ApkAssets.loadFromPath(splits.get(i).getPath()));
+            } catch (IOException e) {
+                Slog.e(TAG, "Failed to load resources from APK " + splits.get(i).getPath());
+            }
+        }
+        AssetManager assetManager = builder.build();
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        displayMetrics.setToDefaults();
+        Resources res = new Resources(assetManager, displayMetrics, null);
+        AtomicBoolean copyFailed = new AtomicBoolean(false);
+        try (InputStream in = res.openRawResource(fileInApkProperty.getResourceId())) {
+            try (FileOutputStream out = new FileOutputStream(appMetadataFile)) {
+                if (isSystem) {
+                    FileUtils.copy(in, out);
+                } else {
+                    long sizeLimit = getAppMetadataSizeLimit();
+                    CancellationSignal signal = new CancellationSignal();
+                    FileUtils.copy(in, out, signal, Runnable::run, (long progress) -> {
+                        if (progress > sizeLimit) {
+                            copyFailed.set(true);
+                            signal.cancel();
+                        }
+                    });
                 }
+                Os.chmod(appMetadataFile.getAbsolutePath(),
+                        APP_METADATA_FILE_ACCESS_MODE);
             }
         } catch (Exception e) {
             Slog.e(TAG, e.getMessage());
-            return false;
+            copyFailed.set(true);
+        } finally {
+            if (copyFailed.get()) {
+                appMetadataFile.delete();
+            }
         }
-        return found;
+        return !copyFailed.get();
     }
 
     public static void linkFilesToOldDirs(@NonNull Installer installer,

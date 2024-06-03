@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.domain.interactor
 
+import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardOcclusionInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
@@ -27,10 +28,11 @@ import com.android.systemui.power.domain.interactor.powerInteractor
 val Kosmos.keyguardOcclusionInteractor by
     Kosmos.Fixture {
         KeyguardOcclusionInteractor(
-            scope = testScope.backgroundScope,
+            applicationScope = testScope.backgroundScope,
             repository = keyguardOcclusionRepository,
             powerInteractor = powerInteractor,
             transitionInteractor = keyguardTransitionInteractor,
             keyguardInteractor = keyguardInteractor,
+            deviceUnlockedInteractor = { deviceUnlockedInteractor },
         )
     }

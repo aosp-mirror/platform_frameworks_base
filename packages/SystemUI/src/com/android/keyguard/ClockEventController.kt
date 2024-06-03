@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Resources
+import android.os.Trace
 import android.text.format.DateFormat
 import android.util.Log
 import android.util.TypedValue
@@ -41,7 +42,9 @@ import com.android.systemui.flags.Flags.REGION_SAMPLING
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -430,6 +433,8 @@ constructor(
                     if (MigrateClocksToBlueprint.isEnabled) {
                         listenForDozeAmountTransition(this)
                         listenForAnyStateToAodTransition(this)
+                        listenForAnyStateToLockscreenTransition(this)
+                        listenForAnyStateToDozingTransition(this)
                     } else {
                         listenForDozeAmount(this)
                     }
@@ -461,15 +466,11 @@ constructor(
         largeRegionSampler?.stopRegionSampler()
         smallTimeListener?.stop()
         largeTimeListener?.stop()
-        clock
-            ?.smallClock
-            ?.view
-            ?.removeOnAttachStateChangeListener(smallClockOnAttachStateChangeListener)
+        clock?.apply {
+            smallClock.view.removeOnAttachStateChangeListener(smallClockOnAttachStateChangeListener)
+            largeClock.view.removeOnAttachStateChangeListener(largeClockOnAttachStateChangeListener)
+        }
         smallClockFrame?.viewTreeObserver?.removeOnGlobalLayoutListener(onGlobalLayoutListener)
-        clock
-            ?.largeClock
-            ?.view
-            ?.removeOnAttachStateChangeListener(largeClockOnAttachStateChangeListener)
     }
 
     /**
@@ -500,13 +501,15 @@ constructor(
         }
     }
 
-    private fun updateFontSizes() {
+    fun updateFontSizes() {
         clock?.run {
-            smallClock.events.onFontSettingChanged(
-                resources.getDimensionPixelSize(R.dimen.small_clock_text_size).toFloat()
-            )
+            smallClock.events.onFontSettingChanged(getSmallClockSizePx())
             largeClock.events.onFontSettingChanged(getLargeClockSizePx())
         }
+    }
+
+    private fun getSmallClockSizePx(): Float {
+        return resources.getDimensionPixelSize(R.dimen.small_clock_text_size).toFloat()
     }
 
     private fun getLargeClockSizePx(): Float {
@@ -520,8 +523,12 @@ constructor(
     private fun handleDoze(doze: Float) {
         dozeAmount = doze
         clock?.run {
+            Trace.beginSection("$TAG#smallClock.animations.doze")
             smallClock.animations.doze(dozeAmount)
+            Trace.endSection()
+            Trace.beginSection("$TAG#largeClock.animations.doze")
             largeClock.animations.doze(dozeAmount)
+            Trace.endSection()
         }
         smallTimeListener?.update(doze < DOZE_TICKRATE_THRESHOLD)
         largeTimeListener?.update(doze < DOZE_TICKRATE_THRESHOLD)
@@ -536,11 +543,12 @@ constructor(
     internal fun listenForDozeAmountTransition(scope: CoroutineScope): Job {
         return scope.launch {
             merge(
-                    keyguardTransitionInteractor.aodToLockscreenTransition.map { step ->
-                        step.copy(value = 1f - step.value)
+                    keyguardTransitionInteractor.transition(Edge.create(AOD, LOCKSCREEN)).map {
+                        it.copy(value = 1f - it.value)
                     },
-                    keyguardTransitionInteractor.lockscreenToAodTransition,
+                    keyguardTransitionInteractor.transition(Edge.create(LOCKSCREEN, AOD)),
                 )
+                .filter { it.transitionState != TransitionState.FINISHED }
                 .collect { handleDoze(it.value) }
         }
     }
@@ -555,6 +563,31 @@ constructor(
                 .transitionStepsToState(AOD)
                 .filter { it.transitionState == TransitionState.STARTED }
                 .filter { it.from != LOCKSCREEN }
+                .collect { handleDoze(1f) }
+        }
+    }
+
+    @VisibleForTesting
+    internal fun listenForAnyStateToLockscreenTransition(scope: CoroutineScope): Job {
+        return scope.launch {
+            keyguardTransitionInteractor
+                .transitionStepsToState(LOCKSCREEN)
+                .filter { it.transitionState == TransitionState.STARTED }
+                .filter { it.from != AOD }
+                .collect { handleDoze(0f) }
+        }
+    }
+
+    /**
+     * When keyguard is displayed due to pulsing notifications when AOD is off, we should make sure
+     * clock is in dozing state instead of LS state
+     */
+    @VisibleForTesting
+    internal fun listenForAnyStateToDozingTransition(scope: CoroutineScope): Job {
+        return scope.launch {
+            keyguardTransitionInteractor
+                .transitionStepsToState(DOZING)
+                .filter { it.transitionState == TransitionState.FINISHED }
                 .collect { handleDoze(1f) }
         }
     }
@@ -626,7 +659,7 @@ constructor(
     }
 
     companion object {
-        private val TAG = ClockEventController::class.simpleName!!
-        private val DOZE_TICKRATE_THRESHOLD = 0.99f
+        private const val TAG = "ClockEventController"
+        private const val DOZE_TICKRATE_THRESHOLD = 0.99f
     }
 }

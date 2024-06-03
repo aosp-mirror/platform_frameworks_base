@@ -52,19 +52,19 @@ class TaskOperations {
         mSyncQueue = syncQueue;
     }
 
-    void injectBackKey() {
-        sendBackEvent(KeyEvent.ACTION_DOWN);
-        sendBackEvent(KeyEvent.ACTION_UP);
+    void injectBackKey(int displayId) {
+        sendBackEvent(KeyEvent.ACTION_DOWN, displayId);
+        sendBackEvent(KeyEvent.ACTION_UP, displayId);
     }
 
-    private void sendBackEvent(int action) {
+    private void sendBackEvent(int action, int displayId) {
         final long when = SystemClock.uptimeMillis();
         final KeyEvent ev = new KeyEvent(when, when, action, KeyEvent.KEYCODE_BACK,
                 0 /* repeat */, 0 /* metaState */, KeyCharacterMap.VIRTUAL_KEYBOARD,
                 0 /* scancode */, KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
                 InputDevice.SOURCE_KEYBOARD);
 
-        ev.setDisplayId(mContext.getDisplay().getDisplayId());
+        ev.setDisplayId(displayId);
         if (!mContext.getSystemService(InputManager.class)
                 .injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC)) {
             Log.e(TAG, "Inject input event fail");
@@ -72,7 +72,10 @@ class TaskOperations {
     }
 
     void closeTask(WindowContainerToken taskToken) {
-        WindowContainerTransaction wct = new WindowContainerTransaction();
+        closeTask(taskToken, new WindowContainerTransaction());
+    }
+
+    void closeTask(WindowContainerToken taskToken, WindowContainerTransaction wct) {
         wct.removeTask(taskToken);
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTransitionStarter.startRemoveTransition(wct);
@@ -91,14 +94,12 @@ class TaskOperations {
         }
     }
 
-    void maximizeTask(RunningTaskInfo taskInfo) {
+    void maximizeTask(RunningTaskInfo taskInfo, int containerWindowingMode) {
         WindowContainerTransaction wct = new WindowContainerTransaction();
         int targetWindowingMode = taskInfo.getWindowingMode() != WINDOWING_MODE_FULLSCREEN
                 ? WINDOWING_MODE_FULLSCREEN : WINDOWING_MODE_FREEFORM;
-        int displayWindowingMode =
-                taskInfo.configuration.windowConfiguration.getDisplayWindowingMode();
         wct.setWindowingMode(taskInfo.token,
-                targetWindowingMode == displayWindowingMode
+                targetWindowingMode == containerWindowingMode
                         ? WINDOWING_MODE_UNDEFINED : targetWindowingMode);
         if (targetWindowingMode == WINDOWING_MODE_FULLSCREEN) {
             wct.setBounds(taskInfo.token, null);

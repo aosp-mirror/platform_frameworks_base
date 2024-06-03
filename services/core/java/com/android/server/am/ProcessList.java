@@ -36,6 +36,7 @@ import static android.os.Process.killProcessQuiet;
 import static android.os.Process.startWebView;
 import static android.system.OsConstants.EAGAIN;
 
+import static com.android.sdksandbox.flags.Flags.selinuxInputSelector;
 import static com.android.sdksandbox.flags.Flags.selinuxSdkSandboxAudit;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LRU;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_NETWORK;
@@ -73,6 +74,7 @@ import android.app.AppProtoEnums;
 import android.app.ApplicationExitInfo;
 import android.app.ApplicationExitInfo.Reason;
 import android.app.ApplicationExitInfo.SubReason;
+import android.app.ApplicationStartInfo;
 import android.app.IApplicationThread;
 import android.app.IProcessObserver;
 import android.app.UidObserver;
@@ -351,6 +353,7 @@ public final class ProcessList {
     // LMK_UPDATE_PROPS
     // LMK_KILL_OCCURRED
     // LMK_START_MONITORING
+    // LMK_BOOT_COMPLETED
     static final byte LMK_TARGET = 0;
     static final byte LMK_PROCPRIO = 1;
     static final byte LMK_PROCREMOVE = 2;
@@ -361,6 +364,7 @@ public final class ProcessList {
     static final byte LMK_UPDATE_PROPS = 7;
     static final byte LMK_KILL_OCCURRED = 8; // Msg to subscribed clients on kill occurred event
     static final byte LMK_START_MONITORING = 9; // Start monitoring if delayed earlier
+    static final byte LMK_BOOT_COMPLETED = 10;
 
     // Low Memory Killer Daemon command codes.
     // These must be kept in sync with async_event_type definitions in lmkd.h
@@ -2063,10 +2067,15 @@ public final class ProcessList {
             }
         }
 
-        return app.info.seInfo
-                + (TextUtils.isEmpty(app.info.seInfoUser) ? "" : app.info.seInfoUser) + extraInfo;
+        // The order of selectors in seInfo matters, the string is terminated by the word complete.
+        if (selinuxInputSelector()) {
+            return app.info.seInfo + extraInfo + TextUtils.emptyIfNull(app.info.seInfoUser);
+        } else {
+            return app.info.seInfo
+                    + (TextUtils.isEmpty(app.info.seInfoUser) ? "" : app.info.seInfoUser)
+                    + extraInfo;
+        }
     }
-
 
     @GuardedBy("mService")
     boolean startProcessLocked(HostingRecord hostingRecord, String entryPoint, ProcessRecord app,
@@ -2477,6 +2486,7 @@ public final class ProcessList {
             boolean regularZygote = false;
             app.mProcessGroupCreated = false;
             app.mSkipProcessGroupCreation = false;
+            long forkTimeNs = SystemClock.uptimeNanos();
             if (hostingRecord.usesWebviewZygote()) {
                 startResult = startWebView(entryPoint,
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
@@ -2508,6 +2518,11 @@ public final class ProcessList {
                         new String[]{PROC_START_SEQ_IDENT + app.getStartSeq()});
                 // By now the process group should have been created by zygote.
                 app.mProcessGroupCreated = true;
+            }
+
+            if (android.app.Flags.appStartInfoTimestamps()) {
+                mAppStartInfoTracker.addTimestampToStart(app, forkTimeNs,
+                        ApplicationStartInfo.START_TIMESTAMP_FORK);
             }
 
             if (!regularZygote) {

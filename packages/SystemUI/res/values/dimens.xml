@@ -164,8 +164,9 @@
     so the width of the icon should be 13.0sp * (12.0 / 20.0) -->
     <dimen name="status_bar_battery_icon_width">7.8sp</dimen>
 
-    <dimen name="status_bar_battery_unified_icon_width">24sp</dimen>
-    <dimen name="status_bar_battery_unified_icon_height">14sp</dimen>
+    <!-- Original canvas is 24x14. These dimens reflect that ratio, with 12sp height instead  -->
+    <dimen name="status_bar_battery_unified_icon_width">20.6sp</dimen>
+    <dimen name="status_bar_battery_unified_icon_height">12sp</dimen>
 
     <!-- The battery icon is 13sp tall, but the other system icons are 15sp tall (see
          @*android:dimen/status_bar_system_icon_size) with some top and bottom padding embedded in
@@ -284,6 +285,9 @@
     the amount by the view is positioned above the screen before the animation starts. -->
     <dimen name="heads_up_appear_y_above_screen">32dp</dimen>
 
+    <!-- padding between the old and new heads up notifications for the hun cycling animation -->
+    <dimen name="heads_up_cycling_padding">8dp</dimen>
+
     <!-- padding between the heads up and the statusbar -->
     <dimen name="heads_up_status_bar_padding">8dp</dimen>
 
@@ -308,6 +312,9 @@
 
     <!-- Radius for notifications corners without adjacent notifications -->
     <dimen name="notification_corner_radius">28dp</dimen>
+
+    <!-- Stroke width for notifications focus state overlay, see id/notification_focus_outline -->
+    <dimen name="notification_focus_stroke_width">3dp</dimen>
 
     <!-- Distance over which notification corner animations run, near the shelf while scrolling. -->
     <dimen name="notification_corner_animation_distance">48dp</dimen>
@@ -426,6 +433,7 @@
     <dimen name="overlay_button_corner_radius">16dp</dimen>
     <!-- Margin between successive chips -->
     <dimen name="overlay_action_chip_margin_start">8dp</dimen>
+    <dimen name="shelf_action_chip_margin_start">12dp</dimen>
     <dimen name="overlay_action_chip_padding_vertical">12dp</dimen>
     <dimen name="overlay_action_chip_icon_size">24sp</dimen>
     <!-- Padding on each side of the icon for icon-only chips -->
@@ -441,6 +449,12 @@
     <dimen name="overlay_preview_container_margin">8dp</dimen>
     <dimen name="overlay_action_container_margin_horizontal">8dp</dimen>
     <dimen name="overlay_action_container_margin_bottom">6dp</dimen>
+    <!--
+        minimum distance to the left, right or bottom edges. Keep in sync with
+        negative_overlay_action_container_minimum_edge_spacing. -->
+    <dimen name="overlay_action_container_minimum_edge_spacing">12dp</dimen>
+    <!-- Keep in sync with overlay_action_container_minimum_edge_spacing -->
+    <dimen name="negative_overlay_action_container_minimum_edge_spacing">-12dp</dimen>
     <dimen name="overlay_bg_protection_height">242dp</dimen>
     <dimen name="overlay_action_container_corner_radius">20dp</dimen>
     <dimen name="overlay_action_container_padding_vertical">8dp</dimen>
@@ -448,6 +462,7 @@
     <dimen name="overlay_action_container_padding_end">8dp</dimen>
     <dimen name="overlay_dismiss_button_tappable_size">48dp</dimen>
     <dimen name="overlay_dismiss_button_margin">8dp</dimen>
+    <dimen name="screenshot_shelf_vertical_margin">8dp</dimen>
     <!-- must be kept aligned with overlay_border_width_neg, below;
          overlay_border_width = overlay_border_width_neg * -1 -->
     <dimen name="overlay_border_width">4dp</dimen>
@@ -611,7 +626,7 @@
     <dimen name="volume_panel_slice_vertical_padding">8dp</dimen>
     <dimen name="volume_panel_slice_horizontal_padding">24dp</dimen>
 
-    <dimen name="volume_panel_corner_radius">52dp</dimen>
+    <dimen name="bottom_sheet_corner_radius">28dp</dimen>
 
     <!-- Size of each item in the ringer selector drawer. -->
     <dimen name="volume_ringer_drawer_item_size">42dp</dimen>
@@ -698,7 +713,6 @@
     <dimen name="qs_header_mobile_icon_size">@dimen/status_bar_icon_drawing_size</dimen>
     <dimen name="qs_header_carrier_separator_width">6dp</dimen>
     <dimen name="qs_carrier_margin_width">4dp</dimen>
-    <dimen name="qs_footer_icon_size">20dp</dimen>
     <dimen name="qs_header_height">120dp</dimen>
     <dimen name="qs_header_row_min_height">48dp</dimen>
 
@@ -706,11 +720,7 @@
     <dimen name="new_qs_header_non_clickable_element_height">24sp</dimen>
 
     <dimen name="qs_footer_padding">20dp</dimen>
-    <dimen name="qs_security_footer_height">88dp</dimen>
-    <dimen name="qs_security_footer_single_line_height">48dp</dimen>
     <dimen name="qs_footers_margin_bottom">8dp</dimen>
-    <dimen name="qs_security_footer_background_inset">0dp</dimen>
-    <dimen name="qs_security_footer_corner_radius">28dp</dimen>
 
     <dimen name="segmented_button_spacing">0dp</dimen>
     <dimen name="borderless_button_radius">2dp</dimen>
@@ -902,10 +912,6 @@
         obvious when corner radii differ.-->
     <dimen name="communal_enforced_rounded_corner_max_radius">28dp</dimen>
 
-    <!-- Width and height used to filter widgets displayed in the communal widget picker -->
-    <dimen name="communal_widget_picker_desired_width">424dp</dimen>
-    <dimen name="communal_widget_picker_desired_height">282dp</dimen>
-
     <!-- The width/height of the unlock icon view on keyguard. -->
     <dimen name="keyguard_lock_height">42dp</dimen>
     <dimen name="keyguard_lock_padding">20dp</dimen>
@@ -976,6 +982,7 @@
     <dimen name="assist_disclosure_shadow_thickness">1.5dp</dimen>
 
     <!-- Keyboard shortcuts helper -->
+    <dimen name="ksh_container_horizontal_margin">32dp</dimen>
     <dimen name="ksh_layout_width">@dimen/match_parent</dimen>
     <dimen name="ksh_item_text_size">14sp</dimen>
     <dimen name="ksh_item_padding">0dp</dimen>
@@ -983,6 +990,11 @@
     <dimen name="ksh_icon_scaled_size">18dp</dimen>
     <dimen name="ksh_key_view_padding_vertical">4dp</dimen>
     <dimen name="ksh_key_view_padding_horizontal">12dp</dimen>
+    <dimen name="ksh_button_corner_radius">12dp</dimen>
+    <dimen name="ksh_dialog_top_corner_radius">28dp</dimen>
+    <dimen name="ksh_search_box_corner_radius">100dp</dimen>
+    <dimen name="ksh_app_item_minimum_height">64dp</dimen>
+    <dimen name="ksh_category_separator_margin">16dp</dimen>
 
     <!-- The size of corner radius of the arrow in the onboarding toast. -->
     <dimen name="recents_onboarding_toast_arrow_corner_radius">2dp</dimen>
@@ -1083,9 +1095,9 @@
     <dimen name="remote_input_history_extra_height">60dp</dimen>
 
     <!-- Biometric Dialog values -->
-    <dimen name="biometric_dialog_face_icon_size">64dp</dimen>
-    <dimen name="biometric_dialog_fingerprint_icon_width">80dp</dimen>
-    <dimen name="biometric_dialog_fingerprint_icon_height">80dp</dimen>
+    <dimen name="biometric_dialog_face_icon_size">68dp</dimen>
+    <dimen name="biometric_dialog_fingerprint_icon_width">100dp</dimen>
+    <dimen name="biometric_dialog_fingerprint_icon_height">100dp</dimen>
     <dimen name="biometric_dialog_button_negative_max_width">160dp</dimen>
     <dimen name="biometric_dialog_button_positive_max_width">136dp</dimen>
     <dimen name="biometric_dialog_corner_size">28dp</dimen>
@@ -1101,15 +1113,39 @@
     <dimen name="biometric_dialog_width">240dp</dimen>
     <dimen name="biometric_dialog_height">240dp</dimen>
 
-    <!-- Dimensions for biometric prompt content view. -->
-    <dimen name="biometric_prompt_space_above_content">48dp</dimen>
-    <dimen name="biometric_prompt_content_container_padding_horizontal">24dp</dimen>
-    <dimen name="biometric_prompt_content_padding_horizontal">10dp</dimen>
-    <dimen name="biometric_prompt_content_list_row_height">24dp</dimen>
-    <dimen name="biometric_prompt_content_list_item_padding_horizontal">10dp</dimen>
-    <dimen name="biometric_prompt_content_list_item_text_size">14sp</dimen>
-    <dimen name="biometric_prompt_content_list_item_bullet_gap_width">10dp</dimen>
-    <dimen name="biometric_prompt_content_list_item_bullet_radius">5dp</dimen>
+    <!-- Dimensions for biometric prompt panel padding -->
+    <dimen name="biometric_prompt_panel_max_width">640dp</dimen>
+    <dimen name="biometric_prompt_land_small_horizontal_guideline_padding">344dp</dimen>
+    <dimen name="biometric_prompt_two_pane_udfps_horizontal_guideline_padding">114dp</dimen>
+    <dimen name="biometric_prompt_two_pane_udfps_mid_guideline_padding">409dp</dimen>
+    <dimen name="biometric_prompt_two_pane_medium_horizontal_guideline_padding">640dp</dimen>
+    <dimen name="biometric_prompt_two_pane_medium_mid_guideline_padding">330dp</dimen>
+    <dimen name="biometric_prompt_one_pane_medium_top_guideline_padding">119dp</dimen>
+    <dimen name="biometric_prompt_one_pane_medium_horizontal_guideline_padding">0dp</dimen>
+
+    <!-- Dimensions for biometric prompt scroll view padding -->
+    <dimen name="biometric_prompt_top_scroll_view_bottom_padding">24dp</dimen>
+    <dimen name="biometric_prompt_top_scroll_view_horizontal_padding">24dp</dimen>
+
+    <!-- Dimensions for biometric prompt icon padding -->
+    <dimen name="biometric_prompt_portrait_small_bottom_padding">60dp</dimen>
+    <dimen name="biometric_prompt_portrait_medium_bottom_padding">160dp</dimen>
+    <dimen name="biometric_prompt_portrait_large_screen_bottom_padding">176dp</dimen>
+    <dimen name="biometric_prompt_landscape_small_bottom_padding">192dp</dimen>
+    <dimen name="biometric_prompt_landscape_small_horizontal_padding">145dp</dimen>
+    <dimen name="biometric_prompt_landscape_medium_bottom_padding">148dp</dimen>
+    <dimen name="biometric_prompt_landscape_medium_horizontal_padding">125dp</dimen>
+
+    <!-- Dimensions for biometric prompt custom content view. -->
+    <dimen name="biometric_prompt_logo_size">32dp</dimen>
+    <dimen name="biometric_prompt_logo_description_top_padding">8dp</dimen>
+    <dimen name="biometric_prompt_content_corner_radius">28dp</dimen>
+    <dimen name="biometric_prompt_content_padding_horizontal">24dp</dimen>
+    <dimen name="biometric_prompt_content_padding_vertical">16dp</dimen>
+    <dimen name="biometric_prompt_content_space_width_between_items">16dp</dimen>
+    <dimen name="biometric_prompt_content_list_item_padding_top">12dp</dimen>
+    <dimen name="biometric_prompt_content_list_item_bullet_gap_width">8.5dp</dimen>
+    <dimen name="biometric_prompt_content_list_item_bullet_radius">1.5dp</dimen>
 
     <!-- Biometric Auth Credential values -->
     <dimen name="biometric_auth_icon_size">48dp</dimen>
@@ -1266,6 +1302,8 @@
     <dimen name="magnifier_corner_radius">28dp</dimen>
     <dimen name="magnifier_edit_corner_radius">16dp</dimen>
     <dimen name="magnifier_edit_outer_corner_radius">18dp</dimen>
+    <dimen name="magnifier_border_width_fullscreen_with_offset">12dp</dimen>
+    <dimen name="magnifier_border_width_fullscreen">6dp</dimen>
     <dimen name="magnifier_border_width">8dp</dimen>
     <dimen name="magnifier_stroke_width">2dp</dimen>
     <dimen name="magnifier_edit_dash_gap">20dp</dimen>
@@ -1678,12 +1716,12 @@
     <dimen name="wallet_button_horizontal_padding">24dp</dimen>
     <dimen name="wallet_button_vertical_padding">8dp</dimen>
 
-    <!-- Ongoing call chip -->
-    <dimen name="ongoing_call_chip_side_padding">12dp</dimen>
-    <dimen name="ongoing_call_chip_icon_size">16dp</dimen>
+    <!-- Ongoing activity chip -->
+    <dimen name="ongoing_activity_chip_side_padding">12dp</dimen>
+    <dimen name="ongoing_activity_chip_icon_size">16dp</dimen>
     <!-- The padding between the icon and the text. -->
-    <dimen name="ongoing_call_chip_icon_text_padding">4dp</dimen>
-    <dimen name="ongoing_call_chip_corner_radius">28dp</dimen>
+    <dimen name="ongoing_activity_chip_icon_text_padding">4dp</dimen>
+    <dimen name="ongoing_activity_chip_corner_radius">28dp</dimen>
 
     <!-- Status bar user chip -->
     <dimen name="status_bar_user_chip_avatar_size">16dp</dimen>
@@ -1736,6 +1774,17 @@
     <!-- The height of the main scroll view in bluetooth dialog with auto on toggle. -->
     <dimen name="bluetooth_dialog_scroll_view_min_height_with_auto_on">350dp</dimen>
 
+    <!-- Hearing devices dialog related dimensions -->
+    <dimen name="hearing_devices_layout_margin">12dp</dimen>
+    <dimen name="hearing_devices_preset_spinner_height">72dp</dimen>
+    <dimen name="hearing_devices_preset_spinner_text_padding_start">20dp</dimen>
+    <dimen name="hearing_devices_preset_spinner_text_padding_vertical">15dp</dimen>
+    <dimen name="hearing_devices_preset_spinner_arrow_size">24dp</dimen>
+    <dimen name="hearing_devices_preset_spinner_background_radius">28dp</dimen>
+    <dimen name="hearing_devices_tool_icon_frame_width">94dp</dimen>
+    <dimen name="hearing_devices_tool_icon_frame_height">64dp</dimen>
+    <dimen name="hearing_devices_tool_icon_size">28dp</dimen>
+
     <!-- Height percentage of the parent container occupied by the communal view -->
     <item name="communal_source_height_percentage" format="float" type="dimen">0.80</item>
 
@@ -1756,9 +1805,9 @@
     the lockscreen -->
     <dimen name="communal_right_edge_swipe_region_width">40dp</dimen>
     <!-- Height of area at top of communal hub where swipes should open the notification shade -->
-    <dimen name="communal_top_edge_swipe_region_height">68dp</dimen>
+    <dimen name="communal_top_edge_swipe_region_height">64dp</dimen>
     <!-- Height of area at bottom of communal hub where swipes should open the bouncer -->
-    <dimen name="communal_bottom_edge_swipe_region_height">68dp</dimen>
+    <dimen name="communal_bottom_edge_swipe_region_height">140dp</dimen>
 
     <dimen name="drag_and_drop_icon_size">70dp</dimen>
 
@@ -1863,6 +1912,10 @@
         .2
     </item>
 
+    <item name="dream_overlay_bouncer_min_region_screen_percentage" format="float" type="dimen">
+        .05
+    </item>
+
     <!-- The padding applied to the dream overlay container -->
     <dimen name="dream_overlay_container_padding_start">0dp</dimen>
     <dimen name="dream_overlay_container_padding_end">0dp</dimen>
@@ -1916,15 +1969,6 @@
     <dimen name="broadcast_dialog_btn_minHeight">44dp</dimen>
     <dimen name="broadcast_dialog_margin">16dp</dimen>
 
-    <!-- Contrast dialog -->
-    <dimen name="contrast_dialog_button_total_size">90dp</dimen>
-    <dimen name="contrast_dialog_button_inner_size">82dp</dimen>
-    <dimen name="contrast_dialog_button_radius">20dp</dimen>
-    <dimen name="contrast_dialog_button_stroke_width">4dp</dimen>
-    <dimen name="contrast_dialog_button_text_size">14sp</dimen>
-    <dimen name="contrast_dialog_button_text_spacing">4dp</dimen>
-    <dimen name="contrast_dialog_button_horizontal_spacing">16dp</dimen>
-
     <!-- Shadow for dream overlay clock complication -->
     <dimen name="dream_overlay_clock_key_text_shadow_dx">0dp</dimen>
     <dimen name="dream_overlay_clock_key_text_shadow_dy">0dp</dimen>
@@ -1971,4 +2015,7 @@
 
     <!-- SliceView grid gutter for ANC Slice -->
     <dimen name="abc_slice_grid_gutter">0dp</dimen>
+    <!-- SliceView icon size -->
+    <dimen name="abc_slice_big_pic_min_height">64dp</dimen>
+    <dimen name="abc_slice_big_pic_max_height">64dp</dimen>
 </resources>

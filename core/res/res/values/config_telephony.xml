@@ -190,6 +190,13 @@
     <integer name="config_satellite_nb_iot_inactivity_timeout_millis">180000</integer>
     <java-symbol type="integer" name="config_satellite_nb_iot_inactivity_timeout_millis" />
 
+    <!-- The time duration in millis after which cellular scanning will be enabled and satellite
+         will move to IDLE state. This timeout duration is used for satellite with NB IOT radio
+         technologies in demo mode.
+         -->
+    <integer name="config_satellite_demo_mode_nb_iot_inactivity_timeout_millis">60000</integer>
+    <java-symbol type="integer" name="config_satellite_demo_mode_nb_iot_inactivity_timeout_millis" />
+
     <!-- The time duration in millis needed to switch the modem image from TN to NTN. -->
     <integer name="config_satellite_modem_image_switching_duration_millis">20000</integer>
     <java-symbol type="integer" name="config_satellite_modem_image_switching_duration_millis" />
@@ -234,6 +241,12 @@
          -1 means unlimited. -->
     <integer name="config_esim_bootstrap_data_limit_bytes">-1</integer>
     <java-symbol type="integer" name="config_esim_bootstrap_data_limit_bytes" />
+
+    <!-- Reevaluate existing data networks for bootstrap sim data usage at mentioned intervals
+         during esim bootstrap activation. If the value set is 0 or -1, default interval of
+         60000 millis will be set. -->
+    <integer name="config_reevaluate_bootstrap_sim_data_usage_millis">60000</integer>
+    <java-symbol type="integer" name="config_reevaluate_bootstrap_sim_data_usage_millis" />
 
     <!-- Telephony config for the PLMNs of all satellite providers. This is used by satellite modem
          to identify providers that should be ignored if the carrier config
@@ -296,7 +309,7 @@
          fresh, it will be used as the current location by Telephony to decide whether satellite
          services should be allowed.
          -->
-    <integer name="config_oem_enabled_satellite_location_fresh_duration">600</integer>
+    <integer name="config_oem_enabled_satellite_location_fresh_duration">300</integer>
     <java-symbol type="integer" name="config_oem_enabled_satellite_location_fresh_duration" />
 
     <!-- Whether enhanced IWLAN handover check is enabled. If enabled, telephony frameworks
@@ -352,4 +365,48 @@
         <item>xcap</item>
     </string-array>
     <java-symbol type="array" name="config_force_cellular_transport_capabilities" />
+
+    <!-- The time duration in millis after which DemoSimulator will move to CONNECTED state from
+         NOT_CONNECTED state if the device is aligned to satellite.
+         -->
+    <integer name="config_demo_pointing_aligned_duration_millis">15000</integer>
+    <java-symbol type="integer" name="config_demo_pointing_aligned_duration_millis" />
+
+    <!-- The time duration in millis after which DemoSimulator will move to NOT_CONNECTED state from
+         CONNECTED state if the device is not aligned to satellite.
+         -->
+    <integer name="config_demo_pointing_not_aligned_duration_millis">30000</integer>
+    <java-symbol type="integer" name="config_demo_pointing_not_aligned_duration_millis" />
+
+    <!-- Boolean indicating whether Telephony should wait for device alignment with satellite
+         before sending or receiving datagrams in demo mode.
+         -->
+    <bool name="config_wait_for_device_alignment_in_demo_datagram">false</bool>
+    <java-symbol type="bool" name="config_wait_for_device_alignment_in_demo_datagram" />
+
+    <!-- The time duration in millis after which Telephony will abort the last message datagram
+     sending requests. Telephony starts a timer when receiving a last message datagram sending
+     request in either OFF, IDLE, or NOT_CONNECTED state. In NOT_CONNECTED, the duration of the
+     timer is given by this config.
+     In OFF or IDLE state, the duration of the timer is the sum of this config and the
+     config_satellite_modem_image_switching_duration_millis.
+     -->
+    <integer name="config_datagram_wait_for_connected_state_for_last_message_timeout_millis">60000</integer>
+    <java-symbol type="integer" name="config_datagram_wait_for_connected_state_for_last_message_timeout_millis" />
+
+    <!-- The time duration in millis after which Telephony will abort the last message datagram
+     sending requests and send failure response to the client that has requested sending the
+     datagrams. Telephony starts a timer after pushing down the last message datagram sending
+     request to modem. Before expiry, the timer will be stopped when Telephony receives the response
+     for the sending request from modem.
+     -->
+    <integer name="config_wait_for_datagram_sending_response_for_last_message_timeout_millis">60000</integer>
+    <java-symbol type="integer" name="config_wait_for_datagram_sending_response_for_last_message_timeout_millis" />
+
+    <!-- Boolean indicating whether Telephony should force PhoneGlobals creation
+         regardless of FEATURE_TELEPHONY presence.
+         -->
+    <bool name="config_force_phone_globals_creation">false</bool>
+    <java-symbol type="bool" name="config_force_phone_globals_creation" />
+
 </resources>

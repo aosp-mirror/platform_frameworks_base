@@ -80,7 +80,7 @@ public class InstallStart extends Activity {
         mUserManager = getSystemService(UserManager.class);
 
         Intent intent = getIntent();
-        String callingPackage = getCallingPackage();
+        String callingPackage = getLaunchedFromPackage();
         String callingAttributionTag = null;
 
         // Uid of the source package, coming from ActivityManager
@@ -89,29 +89,32 @@ public class InstallStart extends Activity {
             Log.w(TAG, "Could not determine the launching uid.");
         }
 
+        // The UID of the origin of the installation. Note that it can be different than the
+        // "installer" of the session. For instance, if a 3P caller launched PIA with an ACTION_VIEW
+        // intent, the originatingUid is the 3P caller, but the "installer" in this case would
+        // be PIA.
+        int originatingUid = callingUid;
+
         final boolean isSessionInstall =
                 PackageInstaller.ACTION_CONFIRM_PRE_APPROVAL.equals(intent.getAction())
                         || PackageInstaller.ACTION_CONFIRM_INSTALL.equals(intent.getAction());
 
-        // If the activity was started via a PackageInstaller session, we retrieve the calling
-        // package from that session
+        // If the activity was started via a PackageInstaller session, we retrieve the originating
+        // UID from that session
         final int sessionId = (isSessionInstall
                 ? intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, SessionInfo.INVALID_ID)
                 : SessionInfo.INVALID_ID);
-        int originatingUidFromSession = callingUid;
-        if (callingPackage == null && sessionId != SessionInfo.INVALID_ID) {
+        if (sessionId != SessionInfo.INVALID_ID) {
             PackageInstaller.SessionInfo sessionInfo = mPackageInstaller.getSessionInfo(sessionId);
             if (sessionInfo != null) {
-                callingPackage = sessionInfo.getInstallerPackageName();
                 callingAttributionTag = sessionInfo.getInstallerAttributionTag();
-                originatingUidFromSession = sessionInfo.getOriginatingUid();
+                if (sessionInfo.getOriginatingUid() != Process.INVALID_UID) {
+                    originatingUid = sessionInfo.getOriginatingUid();
+                }
             }
         }
 
         final ApplicationInfo sourceInfo = getSourceInfo(callingPackage);
-
-        // Uid of the source package, with a preference to uid from ApplicationInfo
-        final int originatingUid = sourceInfo != null ? sourceInfo.uid : callingUid;
 
         if (callingUid == Process.INVALID_UID && sourceInfo == null) {
             Log.e(TAG, "Cannot determine caller since UID is invalid and sourceInfo is null");
@@ -125,28 +128,28 @@ public class InstallStart extends Activity {
         boolean isTrustedSource = false;
         if (sourceInfo != null && sourceInfo.isPrivilegedApp()) {
             isTrustedSource = intent.getBooleanExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, false) || (
-                    originatingUid != Process.INVALID_UID && checkPermission(
-                            Manifest.permission.INSTALL_PACKAGES, -1 /* pid */, originatingUid)
-                            == PackageManager.PERMISSION_GRANTED);
+                callingUid != Process.INVALID_UID && checkPermission(
+                    Manifest.permission.INSTALL_PACKAGES, -1 /* pid */, callingUid)
+                    == PackageManager.PERMISSION_GRANTED);
         }
 
         if (!isTrustedSource && !isSystemDownloadsProvider && !isDocumentsManager
-                && originatingUid != Process.INVALID_UID) {
-            final int targetSdkVersion = getMaxTargetSdkVersionForUid(this, originatingUid);
+                && callingUid != Process.INVALID_UID) {
+            final int targetSdkVersion = getMaxTargetSdkVersionForUid(this, callingUid);
             if (targetSdkVersion < 0) {
-                Log.e(TAG, "Cannot get target sdk version for uid " + originatingUid);
+                Log.e(TAG, "Cannot get target sdk version for uid " + callingUid);
                 // Invalid originating uid supplied. Abort install.
                 mAbortInstall = true;
             } else if (targetSdkVersion >= Build.VERSION_CODES.O && !isUidRequestingPermission(
-                    originatingUid, Manifest.permission.REQUEST_INSTALL_PACKAGES)) {
-                Log.e(TAG, "Requesting uid " + originatingUid + " needs to declare permission "
+                callingUid, Manifest.permission.REQUEST_INSTALL_PACKAGES)) {
+                Log.e(TAG, "Requesting uid " + callingUid + " needs to declare permission "
                         + Manifest.permission.REQUEST_INSTALL_PACKAGES);
                 mAbortInstall = true;
             }
         }
 
-        if (sessionId != -1 && !isCallerSessionOwner(originatingUid, sessionId)) {
-            Log.e(TAG, "UID " + originatingUid + " is not the owner of session " +
+        if (sessionId != -1 && !isCallerSessionOwner(callingUid, sessionId)) {
+            Log.e(TAG, "CallingUid " + callingUid + " is not the owner of session " +
                 sessionId);
             mAbortInstall = true;
         }
@@ -156,10 +159,9 @@ public class InstallStart extends Activity {
         final String installerPackageNameFromIntent = getIntent().getStringExtra(
                 Intent.EXTRA_INSTALLER_PACKAGE_NAME);
         if (installerPackageNameFromIntent != null) {
-            final String callingPkgName = getLaunchedFromPackage();
-            if (!TextUtils.equals(installerPackageNameFromIntent, callingPkgName)
+            if (!TextUtils.equals(installerPackageNameFromIntent, callingPackage)
                     && mPackageManager.checkPermission(Manifest.permission.INSTALL_PACKAGES,
-                    callingPkgName) != PackageManager.PERMISSION_GRANTED) {
+                    callingPackage) != PackageManager.PERMISSION_GRANTED) {
                 Log.e(TAG, "The given installer package name " + installerPackageNameFromIntent
                         + " is invalid. Remove it.");
                 EventLog.writeEvent(0x534e4554, "236687884", getLaunchedFromUid(),
@@ -187,12 +189,11 @@ public class InstallStart extends Activity {
                 callingAttributionTag);
         nextActivity.putExtra(PackageInstallerActivity.EXTRA_ORIGINAL_SOURCE_INFO, sourceInfo);
         nextActivity.putExtra(Intent.EXTRA_ORIGINATING_UID, originatingUid);
-        nextActivity.putExtra(PackageInstallerActivity.EXTRA_ORIGINATING_UID_FROM_SESSION_INFO,
-            originatingUidFromSession);
         nextActivity.putExtra(PackageInstallerActivity.EXTRA_IS_TRUSTED_SOURCE, isTrustedSource);
 
         if (isSessionInstall) {
             nextActivity.setClass(this, PackageInstallerActivity.class);
+            nextActivity.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         } else {
             Uri packageUri = intent.getData();
 
@@ -291,8 +292,8 @@ public class InstallStart extends Activity {
         return false;
     }
 
-    private boolean isCallerSessionOwner(int originatingUid, int sessionId) {
-        if (originatingUid == Process.ROOT_UID) {
+    private boolean isCallerSessionOwner(int callingUid, int sessionId) {
+        if (callingUid == Process.ROOT_UID) {
             return true;
         }
         PackageInstaller.SessionInfo sessionInfo = mPackageInstaller.getSessionInfo(sessionId);
@@ -300,7 +301,7 @@ public class InstallStart extends Activity {
             return false;
         }
         int installerUid = sessionInfo.getInstallerUid();
-        return originatingUid == installerUid;
+        return callingUid == installerUid;
     }
 
     private void checkDevicePolicyRestrictions() {

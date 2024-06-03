@@ -847,7 +847,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
     }
 
-    private void onSystemUiStateChanged(boolean isValidState, int flag) {
+    private void onSystemUiStateChanged(boolean isValidState, long flag) {
         mTouchHandler.onSystemUiStateChanged(isValidState);
     }
 
@@ -1195,7 +1195,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public void onSystemUiStateChanged(boolean isSysUiStateValid, int flag) {
+        public void onSystemUiStateChanged(boolean isSysUiStateValid, long flag) {
             mMainExecutor.execute(() -> {
                 PipController.this.onSystemUiStateChanged(isSysUiStateValid, flag);
             });

@@ -20,9 +20,11 @@ import android.content.applicationContext
 import com.android.systemui.biometrics.domain.interactor.fingerprintPropertyInteractor
 import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.keyguard.data.repository.keyguardBlueprintRepository
+import com.android.systemui.keyguard.data.repository.keyguardClockSection
+import com.android.systemui.keyguard.data.repository.keyguardSmartspaceSection
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.statusbar.policy.splitShadeStateController
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 
 val Kosmos.keyguardBlueprintInteractor by
     Kosmos.Fixture {
@@ -30,9 +32,11 @@ val Kosmos.keyguardBlueprintInteractor by
             keyguardBlueprintRepository = keyguardBlueprintRepository,
             applicationScope = applicationCoroutineScope,
             context = applicationContext,
-            splitShadeStateController = splitShadeStateController,
+            shadeInteractor = shadeInteractor,
             clockInteractor = keyguardClockInteractor,
             configurationInteractor = configurationInteractor,
             fingerprintPropertyInteractor = fingerprintPropertyInteractor,
+            clockSection = keyguardClockSection,
+            smartspaceSection = keyguardSmartspaceSection,
         )
     }

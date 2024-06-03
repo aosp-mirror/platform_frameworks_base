@@ -64,7 +64,7 @@ class LaunchParamsController {
     void registerDefaultModifiers(ActivityTaskSupervisor supervisor) {
         // {@link TaskLaunchParamsModifier} handles window layout preferences.
         registerModifier(new TaskLaunchParamsModifier(supervisor));
-        registerModifier(new DesktopModeLaunchParamsModifier());
+        registerModifier(new DesktopModeLaunchParamsModifier(mService.mContext));
     }
 
     /**

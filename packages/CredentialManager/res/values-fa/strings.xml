@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"درحالی‌که به‌سوی آینده‌ای بی‌گذرواژه حرکت می‌کنیم، گذرواژه‌ها همچنان در کنار گذرکلیدها دردسترس خواهند بود"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"جایی را برای ذخیره کردن <xliff:g id="CREATETYPES">%1$s</xliff:g> انتخاب کنید"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"مدیر گذرواژه‌ای انتخاب کنید تا اطلاعاتتان را ذخیره کنید و دفعه بعد سریع‌تر به سیستم وارد شوید"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"برای ورود به سیستم <xliff:g id="APPNAME">%1$s</xliff:g>، گذرکلید ایجاد شود؟"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"برای ورود به سیستم <xliff:g id="APPNAME">%1$s</xliff:g>، گذرواژه ذخیره شود؟"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"اطلاعات ورود به سیستم <xliff:g id="APPNAME">%1$s</xliff:g> ذخیره شود؟"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"برای ورود به سیستم <xliff:g id="APP_NAME">%1$s</xliff:g>، گذرکلید ایجاد شود؟"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"برای ورود به سیستم <xliff:g id="APP_NAME">%1$s</xliff:g>، گذرواژه ذخیره شود؟"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"اطلاعات ورود به سیستم <xliff:g id="APP_NAME">%1$s</xliff:g> ذخیره شود؟"</string>
     <string name="passkey" msgid="632353688396759522">"گذرکلید"</string>
     <string name="password" msgid="6738570945182936667">"گذرواژه"</string>
     <string name="passkeys" msgid="5733880786866559847">"گذرکلیدها"</string>
@@ -68,14 +68,15 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"برگشتن به صفحه قبلی"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"بستن"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"بستن"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"از گذرکلید ذخیره‌شده برای «<xliff:g id="APP_NAME">%1$s</xliff:g>» استفاده شود؟"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"از گذرواژه ذخیره‌شده‌تان برای <xliff:g id="APP_NAME">%1$s</xliff:g> استفاده شود؟"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"از روش ورود به سیستم شما برای <xliff:g id="APP_NAME">%1$s</xliff:g> استفاده شود؟"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"گزینه‌های ورود به سیستم برای <xliff:g id="APP_NAME">%1$s</xliff:g> باز شود؟"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"از گذرکلید ذخیره‌شده برای <xliff:g id="APP_NAME">%1$s</xliff:g> استفاده کنید"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"از گذرواژه ذخیره‌شده برای <xliff:g id="APP_NAME">%1$s</xliff:g> استفاده کنید"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"از حساب <xliff:g id="APP_NAME">%1$s</xliff:g> استفاده کنید"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"برای ورود به سیستم <xliff:g id="APP_NAME">%1$s</xliff:g> با <xliff:g id="USERNAME">%2$s</xliff:g> از قفل صفحه استفاده کنید"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"قفل را ازطریق گزینه‌های ورود به سیستم <xliff:g id="APP_NAME">%1$s</xliff:g> باز کنید"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"گذرکلید ذخیره‌شده‌ای را برای <xliff:g id="APP_NAME">%1$s</xliff:g> انتخاب کنید"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"گذرواژه ذخیره‌شده‌ای را برای <xliff:g id="APP_NAME">%1$s</xliff:g> انتخاب کنید"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"اطلاعات ورود به سیستم ذخیره‌شده‌ای را برای <xliff:g id="APP_NAME">%1$s</xliff:g> انتخاب کنید"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"انتخاب روش ورود به سیستم برای <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"حسابی برای <xliff:g id="APP_NAME">%1$s</xliff:g> انتخاب کنید"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"گزینه‌ای را برای <xliff:g id="APP_NAME">%1$s</xliff:g> انتخاب کنید؟"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"از این اطلاعات در <xliff:g id="APP_NAME">%1$s</xliff:g> استفاده شود؟"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"ورود به سیستم به یک روش دیگر"</string>

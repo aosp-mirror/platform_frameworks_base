@@ -17,7 +17,6 @@
 package android.os;
 
 import android.Manifest;
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -37,6 +36,8 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.View;
 
+import com.android.internal.ravenwood.RavenwoodEnvironment;
+
 import dalvik.system.VMRuntime;
 
 import java.util.ArrayList;
@@ -50,6 +51,10 @@ import java.util.stream.Collectors;
  */
 @RavenwoodKeepWholeClass
 public class Build {
+    static {
+        // Set up the default system properties.
+        RavenwoodEnvironment.ensureRavenwoodInitialized();
+    }
     private static final String TAG = "Build";
 
     /** Value used for when a build property is unknown. */
@@ -1230,8 +1235,7 @@ public class Build {
         /**
          * Vanilla Ice Cream.
          */
-        @FlaggedApi(Flags.FLAG_ANDROID_OS_BUILD_VANILLA_ICE_CREAM)
-        public static final int VANILLA_ICE_CREAM = CUR_DEVELOPMENT;
+        public static final int VANILLA_ICE_CREAM = 35;
     }
 
     /** The type of build, like "user" or "eng". */

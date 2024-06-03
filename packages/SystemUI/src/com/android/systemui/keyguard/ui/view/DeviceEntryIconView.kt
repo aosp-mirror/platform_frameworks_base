@@ -40,10 +40,7 @@ constructor(
     attrs: AttributeSet?,
     defStyleAttrs: Int = 0,
 ) : FrameLayout(context, attrs, defStyleAttrs) {
-    val longPressHandlingView: LongPressHandlingView =
-        LongPressHandlingView(context, attrs) {
-            context.resources.getInteger(R.integer.config_lockIconLongPress).toLong()
-        }
+    val longPressHandlingView: LongPressHandlingView = LongPressHandlingView(context, attrs)
     val iconView: ImageView = ImageView(context, attrs).apply { id = R.id.device_entry_icon_fg }
     val bgView: ImageView = ImageView(context, attrs).apply { id = R.id.device_entry_icon_bg }
     val aodFpDrawable: LottieDrawable = LottieDrawable()
@@ -91,6 +88,12 @@ constructor(
             }
     }
 
+    /**
+     * Setups different icon states.
+     * - All lottie views will require a LottieOnCompositionLoadedListener to update
+     *   LottieProperties (like color) of the view.
+     * - Drawable properties can be updated using ImageView properties like imageTintList.
+     */
     private fun setupIconStates() {
         // Lockscreen States
         // LOCK
@@ -214,7 +217,7 @@ constructor(
             R.id.unlocked,
             R.id.locked_aod,
             context.getDrawable(R.drawable.unlocked_to_aod_lock) as AnimatedVectorDrawable,
-            /* reversible */ true,
+            /* reversible */ false,
         )
     }
 
@@ -252,6 +255,7 @@ constructor(
             IconType.LOCK -> lockIconState[0] = android.R.attr.state_first
             IconType.UNLOCK -> lockIconState[0] = android.R.attr.state_last
             IconType.FINGERPRINT -> lockIconState[0] = android.R.attr.state_middle
+            IconType.NONE -> return StateSet.NOTHING
         }
         if (aod) {
             lockIconState[1] = android.R.attr.state_single
@@ -261,10 +265,11 @@ constructor(
         return lockIconState
     }
 
-    enum class IconType {
-        LOCK,
-        UNLOCK,
-        FINGERPRINT,
+    enum class IconType(val contentDescriptionResId: Int) {
+        LOCK(R.string.accessibility_lock_icon),
+        UNLOCK(R.string.accessibility_unlock_button),
+        FINGERPRINT(R.string.accessibility_fingerprint_label),
+        NONE(-1),
     }
 
     enum class AccessibilityHintType {

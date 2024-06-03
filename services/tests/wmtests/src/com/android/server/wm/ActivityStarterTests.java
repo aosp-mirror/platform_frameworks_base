@@ -104,6 +104,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.provider.DeviceConfig;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.Pair;
@@ -1034,6 +1035,7 @@ public class ActivityStarterTests extends WindowTestsBase {
      * is the only reason BAL is allowed.
      */
     @Test
+    @RequiresFlagsDisabled(com.android.window.flags.Flags.FLAG_BAL_IMPROVED_METRICS)
     public void testBackgroundActivityStartsAllowed_loggingOnlyPendingIntentAllowed() {
         doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         MockitoSession mockingSession = mockitoSession()
@@ -1077,6 +1079,7 @@ public class ActivityStarterTests extends WindowTestsBase {
      * is not the primary reason to allow BAL (but the creator).
      */
     @Test
+    @RequiresFlagsDisabled(com.android.window.flags.Flags.FLAG_BAL_IMPROVED_METRICS)
     public void testBackgroundActivityStartsAllowed_loggingPendingIntentAllowed() {
         doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         MockitoSession mockingSession = mockitoSession()
@@ -1632,6 +1635,28 @@ public class ActivityStarterTests extends WindowTestsBase {
         assertThat(controller.isCollecting(top.getTask())).isTrue();
         assertThat(transition.isTransientLaunch(target)).isTrue();
         assertThat(transition.isInTransientHide(top.getTask())).isTrue();
+    }
+
+    /**
+     * Tests ATMS#startActivityWithScreenshot should collect display content for creating snapshot.
+     */
+    @Test
+    public void testActivityStartWithScreenshot() {
+        final ActivityStarter starter = prepareStarter(0 /* flags */);
+        starter.setFreezeScreen(true);
+
+        registerTestTransitionPlayer();
+
+        final Intent intent = new Intent();
+        intent.setComponent(ActivityBuilder.getDefaultComponent());
+        starter.setReason("testActivityStartWithScreenshot")
+                .setIntent(intent)
+                .execute();
+
+        final TransitionController controller = mRootWindowContainer.mTransitionController;
+        final Transition transition = controller.getCollectingTransition();
+        final Transition.ChangeInfo targetChangeInfo = transition.mChanges.get(mDisplayContent);
+        assertThat(targetChangeInfo).isNotNull();
     }
 
     @Test

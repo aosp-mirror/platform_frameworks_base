@@ -56,7 +56,7 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
     private final Transitions mTransitions;
     private final List<IBinder> mPendingTransitionTokens = new ArrayList<>();
     private Consumer<SurfaceControl.Transaction> mOnAnimationFinishedCallback;
-    private Supplier<SurfaceControl.Transaction> mTransactionSupplier;
+    private final Supplier<SurfaceControl.Transaction> mTransactionSupplier;
     private Point mPosition;
 
     public ExitDesktopTaskTransitionHandler(
@@ -76,9 +76,10 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
 
     /**
      * Starts Transition of a given type
-     * @param type Transition type
-     * @param wct WindowContainerTransaction for transition
-     * @param position Position of the task when transition is started
+     *
+     * @param type                   Transition type
+     * @param wct                    WindowContainerTransaction for transition
+     * @param position               Position of the task when transition is started
      * @param onAnimationEndCallback to be called after animation
      */
     public void startTransition(@WindowManager.TransitionType int type,

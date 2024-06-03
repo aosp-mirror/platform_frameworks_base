@@ -44,8 +44,8 @@ import android.net.NetworkRequest;
 import android.os.Handler;
 import android.os.UserManager;
 import android.security.IKeyChainService;
-import android.test.suitebuilder.annotation.SmallTest;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;

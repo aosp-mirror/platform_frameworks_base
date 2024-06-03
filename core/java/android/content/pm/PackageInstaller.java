@@ -177,6 +177,10 @@ public class PackageInstaller {
      * Broadcast Action: Explicit broadcast sent to the last known default launcher when a session
      * for a new install is committed. For managed profile, this is sent to the default launcher
      * of the primary profile.
+     * For user-profiles that have items restricted on home screen, this broadcast is sent to
+     * the default launcher of the primary profile, only if it has either
+     * {@link Manifest.permission.ACCESS_HIDDEN_PROFILES_FULL} or
+     * {@link Manifest.permission.ACCESS_HIDDEN_PROFILES} permission.
      * <p>
      * The associated session is defined in {@link #EXTRA_SESSION} and the user for which this
      * session was created in {@link Intent#EXTRA_USER}.
@@ -2427,6 +2431,7 @@ public class PackageInstaller {
                     statusReceiver, new UserHandle(mUserId));
         } catch (ParcelableException e) {
             e.maybeRethrow(PackageManager.NameNotFoundException.class);
+            throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2463,6 +2468,7 @@ public class PackageInstaller {
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
             e.maybeRethrow(PackageManager.NameNotFoundException.class);
+            throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2495,6 +2501,7 @@ public class PackageInstaller {
                     userActionIntent, new UserHandle(mUserId));
         } catch (ParcelableException e) {
             e.maybeRethrow(PackageManager.NameNotFoundException.class);
+            throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

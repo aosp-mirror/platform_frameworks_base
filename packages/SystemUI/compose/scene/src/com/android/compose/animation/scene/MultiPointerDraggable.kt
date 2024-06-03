@@ -17,8 +17,6 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.awaitHorizontalTouchSlopOrCancellation
 import androidx.compose.foundation.gestures.awaitVerticalTouchSlopOrCancellation
 import androidx.compose.foundation.gestures.horizontalDrag
@@ -26,12 +24,14 @@ import androidx.compose.foundation.gestures.verticalDrag
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.SuspendingPointerInputModifierNode
+import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.util.addPointerInputChange
@@ -45,8 +45,12 @@ import androidx.compose.ui.node.observeReads
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastForEach
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.sign
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.isActive
 
 /**
  * Make an element draggable in the given [orientation].
@@ -68,6 +72,7 @@ internal fun Modifier.multiPointerDraggable(
     enabled: () -> Boolean,
     startDragImmediately: (startedPosition: Offset) -> Boolean,
     onDragStarted: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
+    swipeDetector: SwipeDetector = DefaultSwipeDetector,
 ): Modifier =
     this.then(
         MultiPointerDraggableElement(
@@ -75,6 +80,7 @@ internal fun Modifier.multiPointerDraggable(
             enabled,
             startDragImmediately,
             onDragStarted,
+            swipeDetector,
         )
     )
 
@@ -84,6 +90,7 @@ private data class MultiPointerDraggableElement(
     private val startDragImmediately: (startedPosition: Offset) -> Boolean,
     private val onDragStarted:
         (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
+    private val swipeDetector: SwipeDetector,
 ) : ModifierNodeElement<MultiPointerDraggableNode>() {
     override fun create(): MultiPointerDraggableNode =
         MultiPointerDraggableNode(
@@ -91,6 +98,7 @@ private data class MultiPointerDraggableElement(
             enabled = enabled,
             startDragImmediately = startDragImmediately,
             onDragStarted = onDragStarted,
+            swipeDetector = swipeDetector,
         )
 
     override fun update(node: MultiPointerDraggableNode) {
@@ -98,6 +106,7 @@ private data class MultiPointerDraggableElement(
         node.enabled = enabled
         node.startDragImmediately = startDragImmediately
         node.onDragStarted = onDragStarted
+        node.swipeDetector = swipeDetector
     }
 }
 
@@ -107,6 +116,7 @@ internal class MultiPointerDraggableNode(
     var startDragImmediately: (startedPosition: Offset) -> Boolean,
     var onDragStarted:
         (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
+    var swipeDetector: SwipeDetector = DefaultSwipeDetector,
 ) :
     PointerInputModifierNode,
     DelegatingNode(),
@@ -163,75 +173,99 @@ internal class MultiPointerDraggableNode(
             return
         }
 
-        detectDragGestures(
-            orientation = orientation,
-            startDragImmediately = startDragImmediately,
-            onDragStart = { startedPosition, overSlop, pointersDown ->
-                velocityTracker.resetTracking()
-                onDragStarted(startedPosition, overSlop, pointersDown)
-            },
-            onDrag = { controller, change, amount ->
-                velocityTracker.addPointerInputChange(change)
-                controller.onDrag(amount)
-            },
-            onDragEnd = { controller ->
-                val viewConfiguration = currentValueOf(LocalViewConfiguration)
-                val maxVelocity = viewConfiguration.maximumFlingVelocity.let { Velocity(it, it) }
-                val velocity = velocityTracker.calculateVelocity(maxVelocity)
-                controller.onStop(
-                    velocity =
-                        when (orientation) {
-                            Orientation.Horizontal -> velocity.x
-                            Orientation.Vertical -> velocity.y
-                        },
-                    canChangeScene = true,
-                )
-            },
-            onDragCancel = { controller ->
-                controller.onStop(velocity = 0f, canChangeScene = true)
-            },
-        )
+        coroutineScope {
+            awaitPointerEventScope {
+                while (isActive) {
+                    try {
+                        detectDragGestures(
+                            orientation = orientation,
+                            startDragImmediately = startDragImmediately,
+                            onDragStart = { startedPosition, overSlop, pointersDown ->
+                                velocityTracker.resetTracking()
+                                onDragStarted(startedPosition, overSlop, pointersDown)
+                            },
+                            onDrag = { controller, change, amount ->
+                                velocityTracker.addPointerInputChange(change)
+                                controller.onDrag(amount)
+                            },
+                            onDragEnd = { controller ->
+                                val viewConfiguration = currentValueOf(LocalViewConfiguration)
+                                val maxVelocity =
+                                    viewConfiguration.maximumFlingVelocity.let { Velocity(it, it) }
+                                val velocity = velocityTracker.calculateVelocity(maxVelocity)
+                                controller.onStop(
+                                    velocity =
+                                        when (orientation) {
+                                            Orientation.Horizontal -> velocity.x
+                                            Orientation.Vertical -> velocity.y
+                                        },
+                                    canChangeScene = true,
+                                )
+                            },
+                            onDragCancel = { controller ->
+                                controller.onStop(velocity = 0f, canChangeScene = true)
+                            },
+                            swipeDetector = swipeDetector
+                        )
+                    } catch (exception: CancellationException) {
+                        // If the coroutine scope is active, we can just restart the drag cycle.
+                        if (!isActive) {
+                            throw exception
+                        }
+                    }
+                }
+            }
+        }
     }
-}
 
-/**
- * Detect drag gestures in the given [orientation].
- *
- * This function is a mix of [androidx.compose.foundation.gestures.awaitDownAndSlop] and
- * [androidx.compose.foundation.gestures.detectVerticalDragGestures] to add support for:
- * 1) starting the gesture immediately without requiring a drag >= touch slope;
- * 2) passing the number of pointers down to [onDragStart].
- */
-private suspend fun PointerInputScope.detectDragGestures(
-    orientation: Orientation,
-    startDragImmediately: (startedPosition: Offset) -> Boolean,
-    onDragStart: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
-    onDragEnd: (controller: DragController) -> Unit,
-    onDragCancel: (controller: DragController) -> Unit,
-    onDrag: (controller: DragController, change: PointerInputChange, dragAmount: Float) -> Unit,
-) {
-    awaitEachGesture {
-        val initialDown = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+    /**
+     * Detect drag gestures in the given [orientation].
+     *
+     * This function is a mix of [androidx.compose.foundation.gestures.awaitDownAndSlop] and
+     * [androidx.compose.foundation.gestures.detectVerticalDragGestures] to add support for:
+     * 1) starting the gesture immediately without requiring a drag >= touch slope;
+     * 2) passing the number of pointers down to [onDragStart].
+     */
+    private suspend fun AwaitPointerEventScope.detectDragGestures(
+        orientation: Orientation,
+        startDragImmediately: (startedPosition: Offset) -> Boolean,
+        onDragStart:
+            (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
+        onDrag: (controller: DragController, change: PointerInputChange, dragAmount: Float) -> Unit,
+        onDragEnd: (controller: DragController) -> Unit,
+        onDragCancel: (controller: DragController) -> Unit,
+        swipeDetector: SwipeDetector,
+    ) {
+        // Wait for a consumable event in [PointerEventPass.Main] pass
+        val consumablePointer = awaitConsumableEvent().changes.first()
+
         var overSlop = 0f
         val drag =
-            if (startDragImmediately(initialDown.position)) {
-                initialDown.consume()
-                initialDown
+            if (startDragImmediately(consumablePointer.position)) {
+                consumablePointer.consume()
+                consumablePointer
             } else {
-                val down = awaitFirstDown(requireUnconsumed = false)
                 val onSlopReached = { change: PointerInputChange, over: Float ->
-                    change.consume()
-                    overSlop = over
+                    if (swipeDetector.detectSwipe(change)) {
+                        change.consume()
+                        overSlop = over
+                    }
                 }
 
-                // TODO(b/291055080): Replace by await[Orientation]PointerSlopOrCancellation once
-                // it is public.
+                // TODO(b/291055080): Replace by await[Orientation]PointerSlopOrCancellation once it
+                // is public.
                 val drag =
                     when (orientation) {
                         Orientation.Horizontal ->
-                            awaitHorizontalTouchSlopOrCancellation(down.id, onSlopReached)
+                            awaitHorizontalTouchSlopOrCancellation(
+                                consumablePointer.id,
+                                onSlopReached
+                            )
                         Orientation.Vertical ->
-                            awaitVerticalTouchSlopOrCancellation(down.id, onSlopReached)
+                            awaitVerticalTouchSlopOrCancellation(
+                                consumablePointer.id,
+                                onSlopReached
+                            )
                     }
 
                 // Make sure that overSlop is not 0f. This can happen when the user drags by exactly
@@ -240,16 +274,10 @@ private suspend fun PointerInputScope.detectDragGestures(
                 // we intercept an ongoing swipe transition (i.e. startDragImmediately() returned
                 // true).
                 if (drag != null && overSlop == 0f) {
-                    val deltaOffset = drag.position - initialDown.position
-                    val delta =
-                        when (orientation) {
-                            Orientation.Horizontal -> deltaOffset.x
-                            Orientation.Vertical -> deltaOffset.y
-                        }
+                    val delta = (drag.position - consumablePointer.position).toFloat()
                     check(delta != 0f) { "delta is equal to 0" }
                     overSlop = delta.sign
                 }
-
                 drag
             }
 
@@ -272,12 +300,12 @@ private suspend fun PointerInputScope.detectDragGestures(
                     when (orientation) {
                         Orientation.Horizontal ->
                             horizontalDrag(drag.id) {
-                                onDrag(controller, it, it.positionChange().x)
+                                onDrag(controller, it, it.positionChange().toFloat())
                                 it.consume()
                             }
                         Orientation.Vertical ->
                             verticalDrag(drag.id) {
-                                onDrag(controller, it, it.positionChange().y)
+                                onDrag(controller, it, it.positionChange().toFloat())
                                 it.consume()
                             }
                     }
@@ -291,6 +319,37 @@ private suspend fun PointerInputScope.detectDragGestures(
             } else {
                 onDragCancel(controller)
             }
+        }
+    }
+
+    private suspend fun AwaitPointerEventScope.awaitConsumableEvent(): PointerEvent {
+        fun canBeConsumed(changes: List<PointerInputChange>): Boolean {
+            // All pointers must be:
+            return changes.fastAll {
+                // A) recently pressed: even if the event has already been consumed, we can still
+                // use the recently added finger event to determine whether to initiate dragging the
+                // scene.
+                it.changedToDownIgnoreConsumed() ||
+                    // B) unconsumed AND in a new position (on the current axis)
+                    it.positionChange().toFloat() != 0f
+            }
+        }
+
+        var event: PointerEvent
+        do {
+            // To allow the descendants with the opportunity to consume the event, we wait for it in
+            // the Main pass.
+            event = awaitPointerEvent()
+        } while (!canBeConsumed(event.changes))
+
+        // We found a consumable event in the Main pass
+        return event
+    }
+
+    private fun Offset.toFloat(): Float {
+        return when (orientation) {
+            Orientation.Vertical -> y
+            Orientation.Horizontal -> x
         }
     }
 }

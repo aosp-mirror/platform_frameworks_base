@@ -25,14 +25,14 @@ public class PathMeasure {
      * setPath.
      *
      * Note that once a path is associated with the measure object, it is
-     * undefined if the path is subsequently modified and the the measure object
+     * undefined if the path is subsequently modified and the measure object
      * is used. If the path is modified, you must call setPath with the path.
      */
     public PathMeasure() {
         mPath = null;
         native_instance = native_create(0, false);
     }
-    
+
     /**
      * Create a PathMeasure object associated with the specified path object
      * (already created and specified). The measure object can now return the
@@ -40,7 +40,7 @@ public class PathMeasure {
      * path.
      *
      * Note that once a path is associated with the measure object, it is
-     * undefined if the path is subsequently modified and the the measure object
+     * undefined if the path is subsequently modified and the measure object
      * is used. If the path is modified, you must call setPath with the path.
      *
      * @param path The path that will be measured by this object
@@ -121,7 +121,7 @@ public class PathMeasure {
      * such as <code>dst.rLineTo(0, 0)</code>.</p>
      */
     public boolean getSegment(float startD, float stopD, Path dst, boolean startWithMoveTo) {
-        // Skia used to enforce this as part of it's API, but has since relaxed that restriction
+        // Skia used to enforce this as part of its API, but has since relaxed that restriction
         // so to maintain consistency in our API we enforce the preconditions here.
         float length = getLength();
         if (startD < 0) {

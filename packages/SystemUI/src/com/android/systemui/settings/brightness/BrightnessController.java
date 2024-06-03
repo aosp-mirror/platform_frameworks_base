@@ -47,12 +47,13 @@ import androidx.annotation.Nullable;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.RestrictedLockUtilsInternal;
+import com.android.systemui.Flags;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.util.settings.SecureSettings;
 
 import dagger.assisted.Assisted;
@@ -107,7 +108,7 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
     private ValueAnimator mSliderAnimator;
 
     @Override
-    public void setMirror(BrightnessMirrorController controller) {
+    public void setMirror(@Nullable MirrorController controller) {
         mControl.setMirrorControllerAndMirror(controller);
     }
 
@@ -371,10 +372,18 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
         mBackgroundHandler.post(new Runnable() {
             @Override
             public void run() {
-                mControl.setEnforcedAdmin(
+                int userId = mUserTracker.getUserId();
+                RestrictedLockUtils.EnforcedAdmin enforcedAdmin =
                         RestrictedLockUtilsInternal.checkIfRestrictionEnforced(mContext,
                                 UserManager.DISALLOW_CONFIG_BRIGHTNESS,
-                                mUserTracker.getUserId()));
+                                userId);
+                if (Flags.enforceBrightnessBaseUserRestriction() && enforcedAdmin == null
+                        && RestrictedLockUtilsInternal.hasBaseUserRestriction(mContext,
+                        UserManager.DISALLOW_CONFIG_BRIGHTNESS,
+                        userId)) {
+                    enforcedAdmin = new RestrictedLockUtils.EnforcedAdmin();
+                }
+                mControl.setEnforcedAdmin(enforcedAdmin);
             }
         });
     }

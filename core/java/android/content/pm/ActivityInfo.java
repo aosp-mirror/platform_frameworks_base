@@ -1280,6 +1280,26 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             264301586L; // buganizer id
 
     /**
+     * Excludes the packages the override is applied to from the camera compatibility treatment
+     * in free-form windowing mode for fixed-orientation apps.
+     *
+     * <p>In free-form windowing mode, the compatibility treatment emulates running on a portrait
+     * device by letterboxing the app window and changing the camera characteristics to what apps
+     * commonly expect in a portrait device: 90 and 270 degree sensor rotation for back and front
+     * cameras, respectively, and setting display rotation to 0.
+     *
+     * <p>Use this flag to disable the compatibility treatment for apps that do not respond well to
+     * the treatment.
+     *
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT =
+            314961188L;
+
+    /**
      * This change id forces the packages it is applied to sandbox {@link android.view.View} API to
      * an activity bounds for:
      *
@@ -1326,6 +1346,17 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @Disabled
     @TestApi
     public static final long OVERRIDE_MIN_ASPECT_RATIO = 174042980L; // buganizer id
+
+    /**
+     * This change id restricts treatments that force a given min aspect ratio to
+     * only when an app is connected to the camera
+     *
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA = 325586858L; // buganizer id
 
     /**
      * This change id restricts treatments that force a given min aspect ratio to activities
@@ -1526,6 +1557,26 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     public static final long INSETS_DECOUPLED_CONFIGURATION_ENFORCED = 151861875L;
+
+    /**
+     * When enabled, the activity will receive configuration decoupled from system bar insets.
+     *
+     * <p>This will only apply if the activity is targeting SDK level 34 or earlier versions.
+     *
+     * <p>This will only in effect if the device is trying to provide a different value by default
+     * other than the legacy value, i.e., the
+     * {@code Flags.allowsScreenSizeDecoupledFromStatusBarAndCutout()} is set to true.
+     *
+     * <p>If the {@code Flags.insetsDecoupledConfiguration()} is also set to true, all apps
+     * targeting SDK level 35 or later, and apps with this override flag will receive the insets
+     * decoupled configuration.
+     *
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_ENABLE_INSETS_DECOUPLED_CONFIGURATION = 327313645L;
 
     /**
      * Optional set of a certificates identifying apps that are allowed to embed this activity. From

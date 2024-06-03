@@ -343,6 +343,20 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
         verify(mAtm).setLastResumedActivityUncheckLocked(any(), eq("test"));
     }
 
+    @Test
+    public void testUpdateTopResumed_moveToFront() {
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        activity2.setState(ActivityRecord.State.RESUMED, "test");
+        assertEquals(activity2.app, mAtm.mTopApp);
+        activity1.getTask().moveToFront("test");
+        // If the device is not sleeping, the app should be only set with resumed state.
+        assertEquals(activity2.app, mAtm.mTopApp);
+        activity2.setState(ActivityRecord.State.PAUSED, "test");
+        activity1.setState(ActivityRecord.State.RESUMED, "test");
+        assertEquals(activity1.app, mAtm.mTopApp);
+    }
+
     /**
      * We need to launch home again after user unlocked for those displays that do not have
      * encryption aware home app.

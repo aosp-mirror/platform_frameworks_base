@@ -121,7 +121,6 @@ class CredentialSelectorViewModelTest {
         stateFlow.value = Request.Get(
             token = null,
             resultReceiver = null,
-            finalResponseReceiver = null,
             providerInfos = emptyList())
 
         mViewModel.back()
@@ -136,7 +135,6 @@ class CredentialSelectorViewModelTest {
         stateFlow.value = Request.Get(
             token = null,
             resultReceiver = null,
-            finalResponseReceiver = null,
             providerInfos = emptyList())
 
         mViewModel.back()
