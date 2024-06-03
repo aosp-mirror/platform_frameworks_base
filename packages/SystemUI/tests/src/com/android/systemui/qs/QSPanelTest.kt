@@ -14,7 +14,6 @@
 package com.android.systemui.qs
 
 import android.graphics.Rect
-import android.testing.AndroidTestingRunner
 import android.testing.TestableContext
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
@@ -26,6 +25,7 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
@@ -45,7 +45,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 @SmallTest
 class QSPanelTest : SysuiTestCase() {

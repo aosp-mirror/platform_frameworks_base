@@ -170,6 +170,7 @@ fun SceneScope.NotificationScrollingStack(
     maxScrimTop: () -> Float,
     shouldPunchHoleBehindScrim: Boolean,
     shouldFillMaxSize: Boolean = true,
+    shouldReserveSpaceForNavBar: Boolean = true,
     shadeMode: ShadeMode,
     modifier: Modifier = Modifier,
 ) {
@@ -353,7 +354,7 @@ fun SceneScope.NotificationScrollingStack(
                         .fillMaxWidth()
                         .notificationStackHeight(
                             view = stackScrollView,
-                            padding = navBarHeight.toInt()
+                            padding = if (shouldReserveSpaceForNavBar) navBarHeight.toInt() else 0
                         )
                         .onSizeChanged { size -> stackHeight.intValue = size.height },
             )

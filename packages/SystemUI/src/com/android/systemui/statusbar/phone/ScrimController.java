@@ -72,6 +72,7 @@ import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToGoneTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.shade.ShadeViewController;
@@ -319,7 +320,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         mScrimBehind.setViewAlpha(mBehindAlpha);
     };
 
+    @VisibleForTesting
     Consumer<TransitionStep> mBouncerToGoneTransition;
+
+    private boolean mViewsAttached;
 
     @Inject
     public ScrimController(
@@ -432,6 +436,16 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             state.prepare(state);
         }
 
+        hydrateStateInternally(behindScrim);
+
+        mViewsAttached = true;
+    }
+
+    private void hydrateStateInternally(ScrimView behindScrim) {
+        if (SceneContainerFlag.isEnabled()) {
+            return;
+        }
+
         // Directly control transition to UNLOCKED scrim state from PRIMARY_BOUNCER, and make sure
         // to report back that keyguard has faded away. This fixes cases where the scrim state was
         // rapidly switching on unlock, due to shifts in state in CentralSurfacesImpl
@@ -443,7 +457,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
                     if (state == TransitionState.STARTED) {
                         setExpansionAffectsAlpha(false);
-                        transitionTo(ScrimState.UNLOCKED);
+                        legacyTransitionTo(ScrimState.UNLOCKED);
                     }
 
                     if (state == TransitionState.FINISHED || state == TransitionState.CANCELED) {
@@ -508,10 +522,36 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     public void transitionTo(ScrimState state) {
-        transitionTo(state, null);
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode() || !mViewsAttached) {
+            return;
+        }
+
+        internalTransitionTo(state, null);
     }
 
-    public void transitionTo(ScrimState state, Callback callback) {
+    /**
+     * Transitions to the given {@link ScrimState}.
+     *
+     * @deprecated Legacy codepath only. Do not call directly.
+     */
+    @Deprecated
+    public void legacyTransitionTo(ScrimState state) {
+        SceneContainerFlag.assertInLegacyMode();
+        internalTransitionTo(state, null);
+    }
+
+    /**
+     * Transitions to the given {@link ScrimState}.
+     *
+     * @deprecated Legacy codepath only. Do not call directly.
+     */
+    @Deprecated
+    public void legacyTransitionTo(ScrimState state, Callback callback) {
+        SceneContainerFlag.assertInLegacyMode();
+        internalTransitionTo(state, callback);
+    }
+
+    private void internalTransitionTo(ScrimState state, Callback callback) {
         if (mIsBouncerToGoneTransitionRunning) {
             Log.i(TAG, "Skipping transition to: " + state
                     + " while mIsBouncerToGoneTransitionRunning");

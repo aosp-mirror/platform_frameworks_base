@@ -77,7 +77,7 @@ private abstract class BaseElementScope<ContentScope>(
     override fun <T> animateElementValueAsState(
         value: T,
         key: ValueKey,
-        lerp: (start: T, stop: T, fraction: Float) -> T,
+        type: SharedValueType<T, *>,
         canOverflow: Boolean
     ): AnimatedState<T> {
         return animateSharedValueAsState(
@@ -86,7 +86,7 @@ private abstract class BaseElementScope<ContentScope>(
             element,
             key,
             value,
-            lerp,
+            type,
             canOverflow,
         )
     }
@@ -184,8 +184,7 @@ private fun shouldComposeMovableElement(
                 fromSceneZIndex = layoutImpl.scenes.getValue(transition.fromScene).zIndex,
                 toSceneZIndex = layoutImpl.scenes.getValue(transition.toScene).zIndex,
             ) != null
-        }
-            ?: return false
+        } ?: return false
 
     // Always compose movable elements in the scene picked by their scene picker.
     return shouldDrawOrComposeSharedElement(

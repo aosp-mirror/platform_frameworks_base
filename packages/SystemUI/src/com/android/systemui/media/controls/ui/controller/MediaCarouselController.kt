@@ -397,7 +397,7 @@ constructor(
         listenForLockscreenSettingChanges(applicationScope)
 
         // Notifies all active players about animation scale changes.
-        globalSettings.registerContentObserver(
+        globalSettings.registerContentObserverSync(
             Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
             animationScaleObserver
         )

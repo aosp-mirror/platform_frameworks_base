@@ -50,6 +50,8 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
+private const val builtInDeviceName = "This phone"
+
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 @SmallTest
@@ -71,6 +73,10 @@ class AudioOutputInteractorTest : SysuiTestCase() {
                 addOverride(R.drawable.ic_media_speaker_device, testIcon)
 
                 addOverride(com.android.internal.R.drawable.ic_bt_hearing_aid, testIcon)
+
+                addOverride(R.string.media_transfer_this_device_name_tv, builtInDeviceName)
+                addOverride(R.string.media_transfer_this_device_name_tablet, builtInDeviceName)
+                addOverride(R.string.media_transfer_this_device_name, builtInDeviceName)
             }
         }
     }
@@ -90,7 +96,7 @@ class AudioOutputInteractorTest : SysuiTestCase() {
 
                 assertThat(device).isInstanceOf(AudioOutputDevice.BuiltIn::class.java)
                 assertThat(device!!.icon).isEqualTo(testIcon)
-                assertThat(device!!.name).isEqualTo("built_in")
+                assertThat(device!!.name).isEqualTo(builtInDeviceName)
             }
         }
     }

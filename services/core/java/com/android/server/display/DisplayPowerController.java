@@ -1391,6 +1391,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // request changes.
         final boolean wasShortTermModelActive =
                 mAutomaticBrightnessStrategy.isShortTermModelActive();
+        boolean userInitiatedChange = displayBrightnessState.isUserInitiatedChange();
         boolean allowAutoBrightnessWhileDozing =
                 mDisplayBrightnessController.isAllowAutoBrightnessWhileDozingConfig();
         if (mFlags.offloadControlsDozeAutoBrightness() && mFlags.isDisplayOffloadEnabled()
@@ -1413,13 +1414,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     mPowerRequest.policy,
                     mDisplayBrightnessController.getLastUserSetScreenBrightness(),
                     userSetBrightnessChanged);
+
+            // If the brightness is already set then it's been overridden by something other than
+            // the user, or is a temporary adjustment.
+            userInitiatedChange = (Float.isNaN(brightnessState))
+                    && (mAutomaticBrightnessStrategy.getAutoBrightnessAdjustmentChanged()
+                    || userSetBrightnessChanged);
         }
 
-        // If the brightness is already set then it's been overridden by something other than the
-        // user, or is a temporary adjustment.
-        boolean userInitiatedChange = (Float.isNaN(brightnessState))
-                && (mAutomaticBrightnessStrategy.getAutoBrightnessAdjustmentChanged()
-                || userSetBrightnessChanged);
 
         final int autoBrightnessState = mAutomaticBrightnessStrategy.isAutoBrightnessEnabled()
                 ? AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED

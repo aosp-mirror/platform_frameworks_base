@@ -3,6 +3,7 @@ package com.android.systemui.keyguard.domain.interactor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
+import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_DISMISS_BOUNCER
 import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_NONE
@@ -15,6 +16,7 @@ import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_
 import com.android.systemui.statusbar.phone.BiometricUnlockController.WakeAndUnlockMode
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.StateFlow
 
 @ExperimentalCoroutinesApi
 @SysUISingleton
@@ -23,6 +25,8 @@ class BiometricUnlockInteractor
 constructor(
     private val keyguardRepository: KeyguardRepository,
 ) {
+
+    val unlockState: StateFlow<BiometricUnlockModel> = keyguardRepository.biometricUnlockState
 
     fun setBiometricUnlockState(
         @WakeAndUnlockMode unlockStateInt: Int,

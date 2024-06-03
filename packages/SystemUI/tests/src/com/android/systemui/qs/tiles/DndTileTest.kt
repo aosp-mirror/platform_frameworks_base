@@ -23,9 +23,9 @@ import android.os.Handler
 import android.provider.Settings
 import android.provider.Settings.Global.ZEN_MODE_NO_INTERRUPTIONS
 import android.provider.Settings.Global.ZEN_MODE_OFF
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.ContextThemeWrapper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.res.R
@@ -59,7 +59,7 @@ import java.io.File
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class DndTileTest : SysuiTestCase() {
 

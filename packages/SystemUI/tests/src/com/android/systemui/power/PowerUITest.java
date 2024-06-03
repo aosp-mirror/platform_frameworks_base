@@ -38,11 +38,11 @@ import android.os.Temperature;
 import android.provider.Settings;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.testing.TestableResources;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.fuelgauge.Estimate;
@@ -64,7 +64,7 @@ import org.mockito.MockitoAnnotations;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 @SmallTest
 public class PowerUITest extends SysuiTestCase {

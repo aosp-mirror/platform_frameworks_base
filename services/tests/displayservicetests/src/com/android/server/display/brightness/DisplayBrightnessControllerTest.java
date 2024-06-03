@@ -121,7 +121,8 @@ public final class DisplayBrightnessControllerTest {
                 any(StrategySelectionRequest.class))).thenReturn(displayBrightnessStrategy);
         mDisplayBrightnessController.updateBrightness(displayPowerRequest, targetDisplayState);
         verify(displayBrightnessStrategy).updateBrightness(
-                eq(new StrategyExecutionRequest(displayPowerRequest, DEFAULT_BRIGHTNESS)));
+                eq(new StrategyExecutionRequest(displayPowerRequest, DEFAULT_BRIGHTNESS,
+                        /* userSetBrightnessChanged= */ false)));
         assertEquals(mDisplayBrightnessController.getCurrentDisplayBrightnessStrategy(),
                 displayBrightnessStrategy);
     }

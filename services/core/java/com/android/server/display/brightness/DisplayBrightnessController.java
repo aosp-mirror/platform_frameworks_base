@@ -600,6 +600,7 @@ public final class DisplayBrightnessController {
     private StrategyExecutionRequest constructStrategyExecutionRequest(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest) {
         float currentScreenBrightness = getCurrentBrightness();
-        return new StrategyExecutionRequest(displayPowerRequest, currentScreenBrightness);
+        return new StrategyExecutionRequest(displayPowerRequest, currentScreenBrightness,
+                mUserSetScreenBrightnessUpdated);
     }
 }

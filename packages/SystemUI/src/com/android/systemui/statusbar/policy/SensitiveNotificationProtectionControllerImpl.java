@@ -188,7 +188,7 @@ public class SensitiveNotificationProtectionControllerImpl
                 });
             }
         };
-        settings.registerContentObserver(
+        settings.registerContentObserverSync(
                 DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS,
                 developerOptionsObserver);
 
