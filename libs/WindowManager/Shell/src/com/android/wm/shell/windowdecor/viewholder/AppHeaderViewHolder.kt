@@ -53,7 +53,7 @@ import com.android.wm.shell.windowdecor.extension.isTransparentCaptionBarAppeara
  * finer controls such as a close window button and an "app info" section to pull up additional
  * controls.
  */
-internal class DesktopModeAppControlsWindowDecorationViewHolder(
+internal class AppHeaderViewHolder(
         rootView: View,
         onCaptionTouchListener: View.OnTouchListener,
         onCaptionButtonClickListener: View.OnClickListener,
@@ -62,7 +62,7 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         appName: CharSequence,
         appIconBitmap: Bitmap,
         onMaximizeHoverAnimationFinishedListener: () -> Unit
-) : DesktopModeWindowDecorationViewHolder(rootView) {
+) : WindowDecorationViewHolder(rootView) {
 
     /**
      * The corner radius to apply to the app chip, maximize and close button's background drawable.

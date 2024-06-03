@@ -27,14 +27,14 @@ import com.android.wm.shell.R
 import com.android.wm.shell.animation.Interpolators
 
 /**
- * A desktop mode window decoration used when the window is in full "focus" (i.e. fullscreen). It
- * hosts a simple handle bar from which to initiate a drag motion to enter desktop mode.
+ * A desktop mode window decoration used when the window is in full "focus" (i.e. fullscreen/split).
+ * It hosts a simple handle bar from which to initiate a drag motion to enter desktop mode.
  */
-internal class DesktopModeFocusedWindowDecorationViewHolder(
+internal class AppHandleViewHolder(
         rootView: View,
         onCaptionTouchListener: View.OnTouchListener,
         onCaptionButtonClickListener: View.OnClickListener
-) : DesktopModeWindowDecorationViewHolder(rootView) {
+) : WindowDecorationViewHolder(rootView) {
 
     companion object {
         private const val CAPTION_HANDLE_ANIMATION_DURATION: Long = 100

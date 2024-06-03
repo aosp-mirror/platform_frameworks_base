@@ -69,9 +69,9 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.shared.DesktopModeStatus;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
-import com.android.wm.shell.windowdecor.viewholder.DesktopModeAppControlsWindowDecorationViewHolder;
-import com.android.wm.shell.windowdecor.viewholder.DesktopModeFocusedWindowDecorationViewHolder;
-import com.android.wm.shell.windowdecor.viewholder.DesktopModeWindowDecorationViewHolder;
+import com.android.wm.shell.windowdecor.viewholder.AppHandleViewHolder;
+import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
+import com.android.wm.shell.windowdecor.viewholder.WindowDecorationViewHolder;
 
 import kotlin.Unit;
 
@@ -90,7 +90,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final Choreographer mChoreographer;
     private final SyncTransactionQueue mSyncQueue;
 
-    private DesktopModeWindowDecorationViewHolder mWindowDecorViewHolder;
+    private WindowDecorationViewHolder mWindowDecorViewHolder;
     private View.OnClickListener mOnCaptionButtonClickListener;
     private View.OnTouchListener mOnCaptionTouchListener;
     private View.OnLongClickListener mOnCaptionLongClickListener;
@@ -232,16 +232,16 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         }
 
         if (oldRootView != mResult.mRootView) {
-            if (mRelayoutParams.mLayoutResId == R.layout.desktop_mode_focused_window_decor) {
-                mWindowDecorViewHolder = new DesktopModeFocusedWindowDecorationViewHolder(
+            if (mRelayoutParams.mLayoutResId == R.layout.desktop_mode_app_handle) {
+                mWindowDecorViewHolder = new AppHandleViewHolder(
                         mResult.mRootView,
                         mOnCaptionTouchListener,
                         mOnCaptionButtonClickListener
                 );
             } else if (mRelayoutParams.mLayoutResId
-                    == R.layout.desktop_mode_app_controls_window_decor) {
+                    == R.layout.desktop_mode_app_header) {
                 loadAppInfoIfNeeded();
-                mWindowDecorViewHolder = new DesktopModeAppControlsWindowDecorationViewHolder(
+                mWindowDecorViewHolder = new AppHeaderViewHolder(
                         mResult.mRootView,
                         mOnCaptionTouchListener,
                         mOnCaptionButtonClickListener,
@@ -331,8 +331,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             boolean shouldSetTaskPositionAndCrop) {
         final int captionLayoutId = getDesktopModeWindowDecorLayoutId(taskInfo.getWindowingMode());
         final boolean isAppHeader =
-                captionLayoutId == R.layout.desktop_mode_app_controls_window_decor;
-        final boolean isAppHandle = captionLayoutId == R.layout.desktop_mode_focused_window_decor;
+                captionLayoutId == R.layout.desktop_mode_app_header;
+        final boolean isAppHandle = captionLayoutId == R.layout.desktop_mode_app_handle;
         relayoutParams.reset();
         relayoutParams.mRunningTaskInfo = taskInfo;
         relayoutParams.mLayoutResId = captionLayoutId;
@@ -405,7 +405,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * resource. Otherwise, return ID_NULL and caption width be set to task width.
      */
     private static int getCaptionWidthId(int layoutResId) {
-        if (layoutResId == R.layout.desktop_mode_focused_window_decor) {
+        if (layoutResId == R.layout.desktop_mode_app_handle) {
             return R.dimen.desktop_mode_fullscreen_decor_caption_width;
         }
         return Resources.ID_NULL;
@@ -568,7 +568,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     @Override
     @NonNull
     Rect calculateValidDragArea() {
-        final int appTextWidth = ((DesktopModeAppControlsWindowDecorationViewHolder)
+        final int appTextWidth = ((AppHeaderViewHolder)
                 mWindowDecorViewHolder).getAppNameTextWidth();
         final int leftButtonsWidth = loadDimensionPixelSize(mContext.getResources(),
                 R.dimen.desktop_mode_app_details_width_minus_text) + appTextWidth;
@@ -747,7 +747,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     boolean checkTouchEventInFocusedCaptionHandle(MotionEvent ev) {
         if (isHandleMenuActive() || !(mWindowDecorViewHolder
-                instanceof DesktopModeFocusedWindowDecorationViewHolder)) {
+                instanceof AppHandleViewHolder)) {
             return false;
         }
 
@@ -836,8 +836,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     private static int getDesktopModeWindowDecorLayoutId(@WindowingMode int windowingMode) {
         return windowingMode == WINDOWING_MODE_FREEFORM
-                ? R.layout.desktop_mode_app_controls_window_decor
-                : R.layout.desktop_mode_focused_window_decor;
+                ? R.layout.desktop_mode_app_header
+                : R.layout.desktop_mode_app_handle;
     }
 
     private void updatePositionInParent() {
@@ -889,20 +889,20 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     void setAnimatingTaskResize(boolean animatingTaskResize) {
-        if (mRelayoutParams.mLayoutResId == R.layout.desktop_mode_focused_window_decor) return;
-        ((DesktopModeAppControlsWindowDecorationViewHolder) mWindowDecorViewHolder)
+        if (mRelayoutParams.mLayoutResId == R.layout.desktop_mode_app_handle) return;
+        ((AppHeaderViewHolder) mWindowDecorViewHolder)
                 .setAnimatingTaskResize(animatingTaskResize);
     }
 
     /** Called when there is a {@Link ACTION_HOVER_EXIT} on the maximize window button. */
     void onMaximizeWindowHoverExit() {
-        ((DesktopModeAppControlsWindowDecorationViewHolder) mWindowDecorViewHolder)
+        ((AppHeaderViewHolder) mWindowDecorViewHolder)
                 .onMaximizeWindowHoverExit();
     }
 
     /** Called when there is a {@Link ACTION_HOVER_ENTER} on the maximize window button. */
     void onMaximizeWindowHoverEnter() {
-        ((DesktopModeAppControlsWindowDecorationViewHolder) mWindowDecorViewHolder)
+        ((AppHeaderViewHolder) mWindowDecorViewHolder)
                 .onMaximizeWindowHoverEnter();
     }
 
