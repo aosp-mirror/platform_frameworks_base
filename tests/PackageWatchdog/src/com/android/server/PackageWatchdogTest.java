@@ -101,8 +101,8 @@ public class PackageWatchdogTest {
     private static final String OBSERVER_NAME_2 = "observer2";
     private static final String OBSERVER_NAME_3 = "observer3";
     private static final String OBSERVER_NAME_4 = "observer4";
-    private static final long SHORT_DURATION = TimeUnit.SECONDS.toMillis(10);
-    private static final long LONG_DURATION = TimeUnit.SECONDS.toMillis(50);
+    private static final long SHORT_DURATION = TimeUnit.SECONDS.toMillis(1);
+    private static final long LONG_DURATION = TimeUnit.SECONDS.toMillis(5);
 
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
@@ -1453,8 +1453,7 @@ public class PackageWatchdogTest {
         raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
                 VERSION_CODE)), PackageWatchdog.FAILURE_REASON_UNKNOWN);
 
-        moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_DEESCALATION_WINDOW_MS
-                - TimeUnit.MINUTES.toMillis(1));
+        moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_DEESCALATION_WINDOW_MS);
 
         // The first failure will be outside the threshold.
         raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
@@ -1713,9 +1712,6 @@ public class PackageWatchdogTest {
             watchdog.onPackageFailure(packages, failureReason);
         }
         mTestLooper.dispatchAll();
-        if (Flags.recoverabilityDetection()) {
-            moveTimeForwardAndDispatch(watchdog.DEFAULT_MITIGATION_WINDOW_MS);
-        }
     }
 
     private PackageWatchdog createWatchdog() {

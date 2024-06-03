@@ -56,6 +56,14 @@ constructor(
     private var smartspaceVisibilityListener: OnGlobalLayoutListener? = null
     private var pastVisibility: Int = -1
 
+    override fun onRebuildBegin() {
+        smartspaceController.suppressDisconnects = true
+    }
+
+    override fun onRebuildEnd() {
+        smartspaceController.suppressDisconnects = false
+    }
+
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (!MigrateClocksToBlueprint.isEnabled) return
         if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) return

@@ -112,6 +112,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi;
 import kotlinx.coroutines.Job;
 
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
@@ -899,6 +900,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             } finally {
                 Trace.endSection();
             }
+        } else {
+            Log.w(TAG, "Ignoring request to dismiss, dumping state: ");
+            StringWriter sw = new StringWriter();
+            mKeyguardStateController.dump(new PrintWriter(sw), null);
+            Log.w(TAG, sw.toString());
         }
         updateStates();
     }

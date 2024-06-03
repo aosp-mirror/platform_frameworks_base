@@ -19930,6 +19930,12 @@ public final class Settings {
             public static final String NETWORK_LOCATION_OPT_IN = "network_location_opt_in";
 
             /**
+             * Whether haptics are enabled for Active Unlock on wear.
+             * @hide
+             */
+            public static final String VIBRATE_FOR_ACTIVE_UNLOCK = "wear_vibrate_for_active_unlock";
+
+            /**
              * The custom foreground color.
              * @hide
              */

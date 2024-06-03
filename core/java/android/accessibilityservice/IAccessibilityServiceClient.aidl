@@ -48,6 +48,8 @@ import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 
     void onKeyEvent(in KeyEvent event, int sequence);
 
+    void onMagnificationSystemUIConnectionChanged(boolean connected);
+
     void onMagnificationChanged(int displayId, in Region region, in MagnificationConfig config);
 
     void onMotionEvent(in MotionEvent event);

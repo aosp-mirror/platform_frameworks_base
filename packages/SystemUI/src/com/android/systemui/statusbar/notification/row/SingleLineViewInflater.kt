@@ -342,7 +342,7 @@ internal object SingleLineViewInflater {
         reinflateFlags: Int,
         entry: NotificationEntry,
         context: Context,
-        logger: NotificationContentInflaterLogger,
+        logger: NotificationRowContentBinderLogger,
     ): HybridNotificationView? {
         if (AsyncHybridViewInflation.isUnexpectedlyInLegacyMode()) return null
         if (reinflateFlags and FLAG_CONTENT_VIEW_SINGLE_LINE == 0) {
@@ -354,7 +354,7 @@ internal object SingleLineViewInflater {
 
         var view: HybridNotificationView? = null
 
-        traceSection("NotificationContentInflater#inflateSingleLineView") {
+        traceSection("SingleLineViewInflater#inflateSingleLineView") {
             val inflater = LayoutInflater.from(context)
             val layoutRes: Int =
                 if (isConversation)

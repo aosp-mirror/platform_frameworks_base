@@ -34061,10 +34061,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private float convertVelocityToFrameRate(float velocityPps) {
+        // From UXR study, premium experience is:
+        // 1500+    dp/s: 120fps
+        // 0 - 1500 dp/s:  80fps
+        // OEMs are likely to modify this to balance battery and user experience for their
+        // specific device.
         float density = mAttachInfo.mDensity;
         float velocityDps = velocityPps / density;
-        // Choose a frame rate in increments of 10fps
-        return Math.min(MAX_FRAME_RATE, 60f + (10f * (float) Math.floor(velocityDps / 300f)));
+        return (velocityDps >= 1500f) ? MAX_FRAME_RATE : 80f;
     }
 
     /**

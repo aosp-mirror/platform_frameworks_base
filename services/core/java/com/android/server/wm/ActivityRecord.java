@@ -3964,7 +3964,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         if (isCurrentVisible) {
-            if (isNextNotYetVisible || delayRemoval || isInTransition()) {
+            if (isNextNotYetVisible || delayRemoval || (next != null && isInTransition())) {
                 // Add this activity to the list of stopping activities. It will be processed and
                 // destroyed when the next activity reports idle.
                 addToStopping(false /* scheduleIdle */, false /* idleDelayed */,
@@ -7644,6 +7644,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // This could only happen when the window is removed from hierarchy. So do not keep its
             // reference anymore.
             mStartingWindow = null;
+            mStartingData = null;
+            mStartingSurface = null;
         }
         if (mChildren.size() == 0 && mVisibleSetFromTransferredStartingWindow) {
             // We set the visible state to true for the token from a transferred starting
@@ -9259,6 +9261,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             @NonNull CompatDisplayInsets compatDisplayInsets) {
         final Configuration resolvedConfig = getResolvedOverrideConfiguration();
         final Rect resolvedBounds = resolvedConfig.windowConfiguration.getBounds();
+        final Insets insets;
+        if (mResolveConfigHint.mUseOverrideInsetsForConfig) {
+            // TODO(b/343197837): Add test to verify SCM behaviour with new bound configuration
+            // Insets are decoupled from configuration by default from V+, use legacy
+            // compatibility behaviour for apps targeting SDK earlier than 35
+            // (see applySizeOverrideIfNeeded).
+            insets = Insets.of(mDisplayContent.getDisplayPolicy()
+                    .getDecorInsetsInfo(mDisplayContent.mDisplayFrames.mRotation,
+                            mDisplayContent.mDisplayFrames.mWidth,
+                            mDisplayContent.mDisplayFrames.mHeight).mOverrideNonDecorInsets);
+        } else {
+            insets = Insets.NONE;
+        }
 
         // When an activity needs to be letterboxed because of fixed orientation, use fixed
         // orientation bounds (stored in resolved bounds) instead of parent bounds since the
@@ -9269,9 +9284,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Rect containerBounds = useResolvedBounds
                 ? new Rect(resolvedBounds)
                 : newParentConfiguration.windowConfiguration.getBounds();
+        final Rect parentAppBounds =
+                newParentConfiguration.windowConfiguration.getAppBounds();
+        parentAppBounds.inset(insets);
         final Rect containerAppBounds = useResolvedBounds
                 ? new Rect(resolvedConfig.windowConfiguration.getAppBounds())
-                : newParentConfiguration.windowConfiguration.getAppBounds();
+                : parentAppBounds;
 
         final int requestedOrientation = getRequestedConfigurationOrientation();
         final boolean orientationRequested = requestedOrientation != ORIENTATION_UNDEFINED;

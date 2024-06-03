@@ -122,6 +122,7 @@ public class SystemDataTransferProcessor {
      */
     public boolean isPermissionTransferUserConsented(int associationId) {
         mAssociationStore.getAssociationWithCallerChecks(associationId);
+
         PermissionSyncRequest request = getPermissionSyncRequest(associationId);
         if (request == null) {
             return false;
@@ -146,11 +147,11 @@ public class SystemDataTransferProcessor {
             return null;
         }
 
-        Slog.i(LOG_TAG, "Creating permission sync intent for userId [" + userId
-                + "] associationId [" + associationId + "]");
-
         final AssociationInfo association = mAssociationStore.getAssociationWithCallerChecks(
                 associationId);
+
+        Slog.i(LOG_TAG, "Creating permission sync intent for userId [" + userId
+                + "] associationId [" + associationId + "]");
 
         // Create an internal intent to launch the user consent dialog
         final Bundle extras = new Bundle();
@@ -219,9 +220,7 @@ public class SystemDataTransferProcessor {
      * Enable perm sync for the association
      */
     public void enablePermissionsSync(int associationId) {
-        AssociationInfo association = mAssociationStore.getAssociationWithCallerChecks(
-                associationId);
-        int userId = association.getUserId();
+        int userId = mAssociationStore.getAssociationWithCallerChecks(associationId).getUserId();
         PermissionSyncRequest request = new PermissionSyncRequest(associationId);
         request.setUserConsented(true);
         mSystemDataTransferRequestStore.writeRequest(userId, request);
@@ -231,9 +230,7 @@ public class SystemDataTransferProcessor {
      * Disable perm sync for the association
      */
     public void disablePermissionsSync(int associationId) {
-        AssociationInfo association = mAssociationStore.getAssociationWithCallerChecks(
-                associationId);
-        int userId = association.getUserId();
+        int userId = mAssociationStore.getAssociationWithCallerChecks(associationId).getUserId();
         PermissionSyncRequest request = new PermissionSyncRequest(associationId);
         request.setUserConsented(false);
         mSystemDataTransferRequestStore.writeRequest(userId, request);
@@ -244,9 +241,8 @@ public class SystemDataTransferProcessor {
      */
     @Nullable
     public PermissionSyncRequest getPermissionSyncRequest(int associationId) {
-        AssociationInfo association = mAssociationStore.getAssociationWithCallerChecks(
-                associationId);
-        int userId = association.getUserId();
+        int userId = mAssociationStore.getAssociationWithCallerChecks(associationId)
+                .getUserId();
         List<SystemDataTransferRequest> requests =
                 mSystemDataTransferRequestStore.readRequestsByAssociationId(userId,
                         associationId);
@@ -263,9 +259,7 @@ public class SystemDataTransferProcessor {
      */
     public void removePermissionSyncRequest(int associationId) {
         Binder.withCleanCallingIdentity(() -> {
-            AssociationInfo association = mAssociationStore.getAssociationWithCallerChecks(
-                    associationId);
-            int userId = association.getUserId();
+            int userId = mAssociationStore.getAssociationById(associationId).getUserId();
             mSystemDataTransferRequestStore.removeRequestsByAssociationId(userId, associationId);
         });
     }

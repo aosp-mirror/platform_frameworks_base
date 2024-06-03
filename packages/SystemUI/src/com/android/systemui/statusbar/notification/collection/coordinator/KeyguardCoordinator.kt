@@ -289,8 +289,9 @@ constructor(
             // for each change, lookup the new value
             .map {
                 secureSettings.getIntForUser(
-                    Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
-                    UserHandle.USER_CURRENT,
+                    name = Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
+                    def = 0,
+                    userHandle = UserHandle.USER_CURRENT,
                 ) == 1
             }
             // don't emit anything if nothing has changed

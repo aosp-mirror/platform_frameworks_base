@@ -163,6 +163,9 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
 
     private boolean mIsSmallScreen;
 
+    /** Should the squishiness fraction be updated on the media host. */
+    private boolean mShouldUpdateMediaSquishiness;
+
     private CommandQueue mCommandQueue;
 
     private View mRootView;
@@ -619,6 +622,12 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
     }
 
     @Override
+    public void setShouldUpdateSquishinessOnMedia(boolean shouldUpdate) {
+        if (DEBUG) Log.d(TAG, "setShouldUpdateSquishinessOnMedia " + shouldUpdate);
+        mShouldUpdateMediaSquishiness = shouldUpdate;
+    }
+
+    @Override
     public void setQsExpansion(float expansion, float panelExpansionFraction,
             float proposedTranslation, float squishinessFraction) {
         float headerTranslation = mTransitioningToFullShade ? 0 : proposedTranslation;
@@ -697,9 +706,11 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         if (mQSAnimator != null) {
             mQSAnimator.setPosition(expansion);
         }
-        if (!mInSplitShade
+        if (!mShouldUpdateMediaSquishiness
+                && (!mInSplitShade
                 || mStatusBarStateController.getState() == KEYGUARD
-                || mStatusBarStateController.getState() == SHADE_LOCKED) {
+                || mStatusBarStateController.getState() == SHADE_LOCKED)
+        ) {
             // At beginning, state is 0 and will apply wrong squishiness to MediaHost in lockscreen
             // and media player expect no change by squishiness in lock screen shade. Don't bother
             // squishing mQsMediaHost when not in split shade to prevent problems with stale state.
@@ -995,6 +1006,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         indentingPw.println("mTransitioningToFullShade: " + mTransitioningToFullShade);
         indentingPw.println("mLockscreenToShadeProgress: " + mLockscreenToShadeProgress);
         indentingPw.println("mOverScrolling: " + mOverScrolling);
+        indentingPw.println("mShouldUpdateMediaSquishiness: " + mShouldUpdateMediaSquishiness);
         indentingPw.println("isCustomizing: " + mQSCustomizerController.isCustomizing());
         View view = getView();
         if (view != null) {

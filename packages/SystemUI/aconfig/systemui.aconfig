@@ -736,16 +736,6 @@ flag {
 }
 
 flag {
-    name: "trim_resources_with_background_trim_at_lock"
-    namespace: "systemui"
-    description: "Trim fonts and other caches when the device locks to lower memory consumption."
-    bug: "322143614"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "dedicated_notif_inflation_thread"
     namespace: "systemui"
     description: "Create a separate background thread for inflating notifications"
@@ -1008,6 +998,13 @@ flag {
   namespace: "systemui"
   description: "Shows a vertical bar at the right edge to indicate the user can swipe to open the glanceable hub"
   bug: "339667383"
+}
+
+flag {
+  name: "glanceable_hub_allow_keyguard_when_dreaming"
+  namespace: "systemui"
+  description: "Allows users to exit dream to keyguard with glanceable hub enabled"
+  bug: "343505271"
 }
 
 flag {

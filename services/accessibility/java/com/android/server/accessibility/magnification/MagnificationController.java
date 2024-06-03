@@ -828,6 +828,8 @@ public class MagnificationController implements MagnificationConnectionManager.C
                 mMagnificationConnectionManager = new MagnificationConnectionManager(mContext,
                         mLock, this, mAms.getTraceManager(),
                         mScaleProvider);
+                mMagnificationConnectionManager.mConnectionStateChangedCallback =
+                        mAms::notifyMagnificationSystemUIConnectionChanged;
             }
             return mMagnificationConnectionManager;
         }

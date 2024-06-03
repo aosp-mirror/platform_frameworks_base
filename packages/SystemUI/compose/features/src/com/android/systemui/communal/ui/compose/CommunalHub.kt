@@ -28,7 +28,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -445,6 +447,14 @@ private fun BoxScope.CommunalHubLazyGrid(
                 val selected by
                     remember(index) { derivedStateOf { list[index].key == selectedKey.value } }
                 DraggableItem(
+                    modifier =
+                        if (dragDropState.draggingItemIndex == index) {
+                            Modifier
+                        } else {
+                            Modifier.animateItem(
+                                placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                            )
+                        },
                     dragDropState = dragDropState,
                     selected = selected,
                     enabled = list[index].isWidgetContent(),

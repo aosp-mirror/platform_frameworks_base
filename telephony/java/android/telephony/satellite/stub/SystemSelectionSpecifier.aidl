@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-package com.android.internal.util;
-
-
-import java.util.regex.Pattern;
+package android.telephony.satellite.stub;
 
 /**
- * Utility class that replaces consecutive empty lines with single new line.
- * @hide
+ * {@hide}
  */
-public class NewlineNormalizer {
-
-    private static final Pattern MULTIPLE_NEWLINES = Pattern.compile("\\v(\\s*\\v)?");
-
-    // Private constructor to prevent instantiation
-    private NewlineNormalizer() {}
+parcelable SystemSelectionSpecifier {
+    /** Network plmn associated with channel information. */
+    String mMccMnc;
 
     /**
-     * Replaces consecutive newlines with a single newline in the input text.
+     * The frequency bands to scan. Bands and earfcns won't overlap.
+     * Bands will be filled only if the whole band is needed.
+     * Maximum length of the vector is 8.
      */
-    public static String normalizeNewlines(String text) {
-        return MULTIPLE_NEWLINES.matcher(text).replaceAll("\n");
-    }
+    int[] mBands;
+
+    /**
+     * The radio channels to scan as defined in 3GPP TS 25.101 and 36.101.
+     * Maximum length of the vector is 32.
+     */
+    int[] mEarfcs;
 }

@@ -32,7 +32,7 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag
 import javax.inject.Inject
 
-class NotificationContentInflaterLogger
+class NotificationRowContentBinderLogger
 @Inject
 constructor(@NotifInflationLog private val buffer: LogBuffer) {
     fun logNotBindingRowWasRemoved(entry: NotificationEntry) {
@@ -158,4 +158,4 @@ constructor(@NotifInflationLog private val buffer: LogBuffer) {
     }
 }
 
-private const val TAG = "NotificationContentInflater"
+private const val TAG = "NotificationRowContentBinder"

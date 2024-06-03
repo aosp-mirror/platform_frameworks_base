@@ -17,8 +17,8 @@
 package com.android.systemui.mediaprojection.data.repository
 
 import android.os.Binder
-import android.testing.AndroidTestingRunner
 import android.view.ContentRecordingSession
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -34,7 +34,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
 

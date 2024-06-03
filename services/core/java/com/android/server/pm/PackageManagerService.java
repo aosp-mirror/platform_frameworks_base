@@ -3136,13 +3136,18 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     void killApplicationSync(String pkgName, @AppIdInt int appId,
             @UserIdInt int userId, String reason, int exitInfoReason) {
         ActivityManagerInternal mAmi = LocalServices.getService(ActivityManagerInternal.class);
-        if (mAmi != null) {
-            if (Thread.holdsLock(mLock)) {
-                // holds PM's lock, go back killApplication to avoid it run into watchdog reset.
-                Slog.e(TAG, "Holds PM's locker, unable kill application synchronized");
-                killApplication(pkgName, appId, userId, reason, exitInfoReason);
-            } else {
+        if (Thread.holdsLock(mLock) || mAmi == null) {
+            // holds PM's lock, go back killApplication to avoid it run into watchdog reset.
+            Slog.e(TAG, "Holds PM's lock, unable kill application synchronized");
+            killApplication(pkgName, appId, userId, reason, exitInfoReason);
+        } else {
+            KillAppBlocker blocker = new KillAppBlocker();
+            try {
+                blocker.register();
                 mAmi.killApplicationSync(pkgName, appId, userId, reason, exitInfoReason);
+                blocker.waitAppProcessGone(mAmi, snapshotComputer(), mUserManager, pkgName);
+            } finally {
+                blocker.unregister();
             }
         }
     }
@@ -4052,9 +4057,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 return;
             }
 
-            // Log the metrics when the component state is changed.
-            PackageMetrics.reportComponentStateChanged(computer, componentStateMetricsList, userId);
-
             if (isSynchronous) {
                 flushPackageRestrictionsAsUserInternalLocked(userId);
             } else {
@@ -4073,6 +4075,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 }
             }
         }
+
+        // Log the metrics when the component state is changed.
+        PackageMetrics.reportComponentStateChanged(snapshotComputer(), componentStateMetricsList,
+                userId);
 
         final long callingId = Binder.clearCallingIdentity();
         try {

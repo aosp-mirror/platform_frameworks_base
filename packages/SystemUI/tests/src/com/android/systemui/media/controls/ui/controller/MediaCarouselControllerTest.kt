@@ -22,10 +22,10 @@ import android.content.res.Configuration
 import android.database.ContentObserver
 import android.os.LocaleList
 import android.provider.Settings
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.util.MathUtils.abs
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -40,6 +40,7 @@ import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.MediaTestUtils
@@ -107,7 +108,7 @@ private const val PLAYING_LOCAL = "playing local"
 
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class MediaCarouselControllerTest : SysuiTestCase() {
     val kosmos = testKosmos()
 
@@ -158,6 +159,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         testDispatcher = UnconfinedTestDispatcher()
         mediaCarouselController =
             MediaCarouselController(
+                applicationScope = kosmos.applicationCoroutineScope,
                 context = context,
                 mediaControlPanelFactory = mediaControlPanelFactory,
                 visualStabilityProvider = visualStabilityProvider,
@@ -893,7 +895,10 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             mediaCarouselController.updateHostVisibility = { updatedVisibility = true }
             mediaCarouselController.mediaCarousel = mediaCarousel
 
-            val settingsJob = mediaCarouselController.listenForLockscreenSettingChanges(this)
+            val settingsJob =
+                mediaCarouselController.listenForLockscreenSettingChanges(
+                    kosmos.applicationCoroutineScope
+                )
             secureSettings.putBool(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, false)
 
             val keyguardJob = mediaCarouselController.listenForAnyStateToLockscreenTransition(this)
@@ -920,7 +925,10 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             mediaCarouselController.updateHostVisibility = { updatedVisibility = true }
             mediaCarouselController.mediaCarousel = mediaCarousel
 
-            val settingsJob = mediaCarouselController.listenForLockscreenSettingChanges(this)
+            val settingsJob =
+                mediaCarouselController.listenForLockscreenSettingChanges(
+                    kosmos.applicationCoroutineScope
+                )
             secureSettings.putBool(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, true)
 
             val keyguardJob = mediaCarouselController.listenForAnyStateToLockscreenTransition(this)
