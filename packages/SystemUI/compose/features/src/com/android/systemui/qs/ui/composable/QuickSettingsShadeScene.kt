@@ -23,6 +23,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -39,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
+import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.brightness.ui.compose.BrightnessSliderContainer
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.composable.LockscreenContent
@@ -47,7 +49,11 @@ import com.android.systemui.qs.panels.ui.compose.TileGrid
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeSceneViewModel
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
 import com.android.systemui.shade.ui.composable.OverlayShade
+import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController
+import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import dagger.Lazy
 import java.util.Optional
 import javax.inject.Inject
@@ -59,6 +65,10 @@ class QuickSettingsShadeScene
 constructor(
     private val viewModel: QuickSettingsShadeSceneViewModel,
     private val lockscreenContent: Lazy<Optional<LockscreenContent>>,
+    private val shadeHeaderViewModel: ShadeHeaderViewModel,
+    private val tintedIconManagerFactory: TintedIconManager.Factory,
+    private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
+    private val statusBarIconController: StatusBarIconController,
 ) : ComposableScene {
 
     override val key = Scenes.QuickSettingsShade
@@ -76,31 +86,51 @@ constructor(
             lockscreenContent = lockscreenContent,
             modifier = modifier,
         ) {
-            val isEditing by viewModel.editModeViewModel.isEditing.collectAsStateWithLifecycle()
+            Column {
+                ExpandedShadeHeader(
+                    viewModel = shadeHeaderViewModel,
+                    createTintedIconManager = tintedIconManagerFactory::create,
+                    createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
+                    statusBarIconController = statusBarIconController,
+                    modifier = Modifier.padding(QuickSettingsShade.Dimensions.Padding),
+                )
 
-            // The main Quick Settings grid layout.
-            AnimatedVisibility(
-                visible = !isEditing,
-                enter = QuickSettingsShade.Transitions.QuickSettingsLayoutEnter,
-                exit = QuickSettingsShade.Transitions.QuickSettingsLayoutExit,
-            ) {
-                QuickSettingsLayout(
+                ShadeBody(
                     viewModel = viewModel,
                 )
             }
+        }
+    }
+}
 
-            // The Quick Settings Editor layout.
-            AnimatedVisibility(
-                visible = isEditing,
-                enter = QuickSettingsShade.Transitions.QuickSettingsEditorEnter,
-                exit = QuickSettingsShade.Transitions.QuickSettingsEditorExit,
-            ) {
-                EditMode(
-                    viewModel = viewModel.editModeViewModel,
-                    modifier =
-                        Modifier.fillMaxWidth().padding(QuickSettingsShade.Dimensions.Padding)
-                )
-            }
+@Composable
+private fun ShadeBody(
+    viewModel: QuickSettingsShadeSceneViewModel,
+) {
+    val isEditing by viewModel.editModeViewModel.isEditing.collectAsStateWithLifecycle()
+
+    Box {
+        // The main Quick Settings grid layout.
+        AnimatedVisibility(
+            visible = !isEditing,
+            enter = QuickSettingsShade.Transitions.QuickSettingsLayoutEnter,
+            exit = QuickSettingsShade.Transitions.QuickSettingsLayoutExit,
+        ) {
+            QuickSettingsLayout(
+                viewModel = viewModel,
+            )
+        }
+
+        // The Quick Settings Editor layout.
+        AnimatedVisibility(
+            visible = isEditing,
+            enter = QuickSettingsShade.Transitions.QuickSettingsEditorEnter,
+            exit = QuickSettingsShade.Transitions.QuickSettingsEditorExit,
+        ) {
+            EditMode(
+                viewModel = viewModel.editModeViewModel,
+                modifier = Modifier.fillMaxWidth().padding(QuickSettingsShade.Dimensions.Padding)
+            )
         }
     }
 }
