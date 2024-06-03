@@ -204,7 +204,6 @@ import android.view.translation.ViewTranslationCallback;
 import android.view.translation.ViewTranslationRequest;
 import android.view.translation.ViewTranslationResponse;
 import android.widget.Checkable;
-import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
 import android.window.OnBackInvokedDispatcher;
 
@@ -960,21 +959,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /** @hide */
     public HapticScrollFeedbackProvider mScrollFeedbackProvider = null;
-
-    /**
-     * Use the old (broken) way of building MeasureSpecs.
-     */
-    private static boolean sUseBrokenMakeMeasureSpec = false;
-
-    /**
-     * Always return a size of 0 for MeasureSpec values with a mode of UNSPECIFIED
-     */
-    static boolean sUseZeroUnspecifiedMeasureSpec = false;
-
-    /**
-     * Ignore any optimizations using the measure cache.
-     */
-    private static boolean sIgnoreMeasureCache = false;
 
     /**
      * Ignore an optimization that skips unnecessary EXACTLY layout passes.
@@ -5825,20 +5809,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (!sCompatibilityDone && context != null) {
             final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
 
-            // Older apps may need this compatibility hack for measurement.
-            sUseBrokenMakeMeasureSpec = targetSdkVersion <= Build.VERSION_CODES.JELLY_BEAN_MR1;
-
-            // Older apps expect onMeasure() to always be called on a layout pass, regardless
-            // of whether a layout was requested on that View.
-            sIgnoreMeasureCache = targetSdkVersion < Build.VERSION_CODES.KITKAT;
-
-            // In M and newer, our widgets can pass a "hint" value in the size
-            // for UNSPECIFIED MeasureSpecs. This lets child views of scrolling containers
-            // know what the expected parent size is going to be, so e.g. list items can size
-            // themselves at 1/3 the size of their container. It breaks older apps though,
-            // specifically apps that use some popular open source libraries.
-            sUseZeroUnspecifiedMeasureSpec = targetSdkVersion < Build.VERSION_CODES.M;
-
             // Old versions of the platform would give different results from
             // LinearLayout measurement passes using EXACTLY and non-EXACTLY
             // modes, so we always need to run an additional EXACTLY pass.
@@ -6014,8 +5984,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         boolean endPaddingDefined = false;
         boolean leftPaddingDefined = false;
         boolean rightPaddingDefined = false;
-
-        final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
 
         // Set default values.
         viewFlagValues |= FOCUSABLE_AUTO;
@@ -6237,11 +6205,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 //noinspection deprecation
                 case R.styleable.View_fadingEdge:
-                    if (targetSdkVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                        // Ignore the attribute starting with ICS
-                        break;
-                    }
-                    // With builds < ICS, fall through and apply fading edges
+                    break;
                 case R.styleable.View_requiresFadingEdge:
                     final int fadingEdge = a.getInt(attr, FADING_EDGE_NONE);
                     if (fadingEdge != FADING_EDGE_NONE) {
@@ -6379,35 +6343,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             PROVIDER_BACKGROUND));
                     break;
                 case R.styleable.View_foreground:
-                    if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
-                        setForeground(a.getDrawable(attr));
-                    }
+                    setForeground(a.getDrawable(attr));
                     break;
                 case R.styleable.View_foregroundGravity:
-                    if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
-                        setForegroundGravity(a.getInt(attr, Gravity.NO_GRAVITY));
-                    }
+                    setForegroundGravity(a.getInt(attr, Gravity.NO_GRAVITY));
                     break;
                 case R.styleable.View_foregroundTintMode:
-                    if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
-                        setForegroundTintBlendMode(
-                                Drawable.parseBlendMode(a.getInt(attr, -1),
-                                        null));
-                    }
+                    setForegroundTintBlendMode(
+                            Drawable.parseBlendMode(a.getInt(attr, -1),
+                                    null));
                     break;
                 case R.styleable.View_foregroundTint:
-                    if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
-                        setForegroundTintList(a.getColorStateList(attr));
-                    }
+                    setForegroundTintList(a.getColorStateList(attr));
                     break;
                 case R.styleable.View_foregroundInsidePadding:
-                    if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
-                        if (mForegroundInfo == null) {
-                            mForegroundInfo = new ForegroundInfo();
-                        }
-                        mForegroundInfo.mInsidePadding = a.getBoolean(attr,
-                                mForegroundInfo.mInsidePadding);
+                    if (mForegroundInfo == null) {
+                        mForegroundInfo = new ForegroundInfo();
                     }
+                    mForegroundInfo.mInsidePadding = a.getBoolean(attr,
+                            mForegroundInfo.mInsidePadding);
                     break;
                 case R.styleable.View_scrollIndicators:
                     final int scrollIndicators =
@@ -13882,11 +13836,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     })
     @ResolvedLayoutDir
     public int getLayoutDirection() {
-        final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
-        if (targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            mPrivateFlags2 |= PFLAG2_LAYOUT_DIRECTION_RESOLVED;
-            return LAYOUT_DIRECTION_RESOLVED_DEFAULT;
-        }
         return ((mPrivateFlags2 & PFLAG2_LAYOUT_DIRECTION_RESOLVED_RTL) ==
                 PFLAG2_LAYOUT_DIRECTION_RESOLVED_RTL) ? LAYOUT_DIRECTION_RTL : LAYOUT_DIRECTION_LTR;
     }
@@ -22457,8 +22406,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * RTL not supported)
      */
     private boolean isRtlCompatibilityMode() {
-        final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
-        return targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR1 || !hasRtlSupport();
+        return !hasRtlSupport();
     }
 
     /**
@@ -28126,7 +28074,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 cacheIndex = forceLayout ? -1 : mMeasureCache.indexOfKey(key);
             }
 
-            if (cacheIndex < 0 || sIgnoreMeasureCache) {
+            if (cacheIndex < 0) {
                 if (isTraversalTracingEnabled()) {
                     Trace.beginSection(mTracingStrings.onMeasure);
                 }
@@ -31112,11 +31060,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         public static int makeMeasureSpec(@IntRange(from = 0, to = (1 << MeasureSpec.MODE_SHIFT) - 1) int size,
                                           @MeasureSpecMode int mode) {
-            if (sUseBrokenMakeMeasureSpec) {
-                return size + mode;
-            } else {
-                return (size & ~MODE_MASK) | (mode & MODE_MASK);
-            }
+            return (size & ~MODE_MASK) | (mode & MODE_MASK);
         }
 
         /**
@@ -31127,9 +31071,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         @UnsupportedAppUsage
         public static int makeSafeMeasureSpec(int size, int mode) {
-            if (sUseZeroUnspecifiedMeasureSpec && mode == UNSPECIFIED) {
-                return 0;
-            }
             return makeMeasureSpec(size, mode);
         }
 
