@@ -66,7 +66,7 @@ public class FakeSettings implements SecureSettings, SystemSettings {
     }
 
     @Override
-    public void registerContentObserverForUser(Uri uri, boolean notifyDescendants,
+    public void registerContentObserverForUserSync(Uri uri, boolean notifyDescendants,
             ContentObserver settingsObserver, int userHandle) {
         List<ContentObserver> observers;
         if (userHandle == UserHandle.USER_ALL) {
@@ -81,7 +81,7 @@ public class FakeSettings implements SecureSettings, SystemSettings {
     }
 
     @Override
-    public void unregisterContentObserver(ContentObserver settingsObserver) {
+    public void unregisterContentObserverSync(ContentObserver settingsObserver) {
         for (SettingsKey key : mContentObservers.keySet()) {
             List<ContentObserver> observers = mContentObservers.get(key);
             observers.remove(settingsObserver);

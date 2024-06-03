@@ -33,8 +33,8 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED
 import android.provider.Settings.Global.HEADS_UP_OFF
+import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
-import com.android.internal.logging.UiEvent;
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
@@ -86,7 +86,7 @@ class PeekDisabledSuppressor(
                 }
             }
 
-        globalSettings.registerContentObserver(
+        globalSettings.registerContentObserverSync(
             globalSettings.getUriFor(HEADS_UP_NOTIFICATIONS_ENABLED),
             /* notifyForDescendants = */ true,
             observer
@@ -94,7 +94,7 @@ class PeekDisabledSuppressor(
 
         // QQQ: Do we need to register for SETTING_HEADS_UP_TICKER? It seems unused.
 
-        observer.onChange(/* selfChange = */ true)
+        observer.onChange(/* selfChange= */ true)
     }
 }
 
@@ -243,6 +243,7 @@ class AlertKeyguardVisibilitySuppressor(
     override fun shouldSuppress(entry: NotificationEntry) =
         keyguardNotificationVisibilityProvider.shouldHideNotification(entry)
 }
+
 class AvalancheSuppressor(
     private val avalancheProvider: AvalancheProvider,
     private val systemClock: SystemClock,
@@ -268,38 +269,33 @@ class AvalancheSuppressor(
         SUPPRESS
     }
 
-     enum class AvalancheEvent(private val id: Int) : UiEventLogger.UiEventEnum {
-         @UiEvent(doc = "An avalanche event occurred but this notification was suppressed by a " +
-                 "non-avalanche suppressor.")
-         START(1802),
-
-         @UiEvent(doc = "HUN was suppressed in avalanche.")
-         SUPPRESS(1803),
-
-         @UiEvent(doc = "HUN allowed during avalanche because it is high priority.")
-         ALLOW_CONVERSATION_AFTER_AVALANCHE(1804),
-
-         @UiEvent(doc = "HUN allowed during avalanche because it is a high priority conversation.")
-         ALLOW_HIGH_PRIORITY_CONVERSATION_ANY_TIME(1805),
-
-         @UiEvent(doc = "HUN allowed during avalanche because it is a call.")
-         ALLOW_CALLSTYLE(1806),
-
-         @UiEvent(doc = "HUN allowed during avalanche because it is a calendar notification.")
-         ALLOW_CATEGORY_REMINDER(1807),
-
-         @UiEvent(doc = "HUN allowed during avalanche because it is a calendar notification.")
-         ALLOW_CATEGORY_EVENT(1808),
-
-         @UiEvent(doc = "HUN allowed during avalanche because it has a full screen intent and " +
-                 "the full screen intent permission is granted.")
-         ALLOW_FSI_WITH_PERMISSION_ON(1809),
-
-         @UiEvent(doc = "HUN allowed during avalanche because it is colorized.")
-         ALLOW_COLORIZED(1810),
-
-         @UiEvent(doc = "HUN allowed during avalanche because it is an emergency notification.")
-         ALLOW_EMERGENCY(1811);
+    enum class AvalancheEvent(private val id: Int) : UiEventLogger.UiEventEnum {
+        @UiEvent(
+            doc =
+                "An avalanche event occurred but this notification was suppressed by a " +
+                    "non-avalanche suppressor."
+        )
+        START(1802),
+        @UiEvent(doc = "HUN was suppressed in avalanche.") SUPPRESS(1803),
+        @UiEvent(doc = "HUN allowed during avalanche because it is high priority.")
+        ALLOW_CONVERSATION_AFTER_AVALANCHE(1804),
+        @UiEvent(doc = "HUN allowed during avalanche because it is a high priority conversation.")
+        ALLOW_HIGH_PRIORITY_CONVERSATION_ANY_TIME(1805),
+        @UiEvent(doc = "HUN allowed during avalanche because it is a call.") ALLOW_CALLSTYLE(1806),
+        @UiEvent(doc = "HUN allowed during avalanche because it is a calendar notification.")
+        ALLOW_CATEGORY_REMINDER(1807),
+        @UiEvent(doc = "HUN allowed during avalanche because it is a calendar notification.")
+        ALLOW_CATEGORY_EVENT(1808),
+        @UiEvent(
+            doc =
+                "HUN allowed during avalanche because it has a full screen intent and " +
+                    "the full screen intent permission is granted."
+        )
+        ALLOW_FSI_WITH_PERMISSION_ON(1809),
+        @UiEvent(doc = "HUN allowed during avalanche because it is colorized.")
+        ALLOW_COLORIZED(1810),
+        @UiEvent(doc = "HUN allowed during avalanche because it is an emergency notification.")
+        ALLOW_EMERGENCY(1811);
 
         override fun getId(): Int {
             return id

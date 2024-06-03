@@ -37,7 +37,6 @@ import android.provider.Settings.SettingNotFoundException
 interface SettingsProxy {
     /** Returns the [ContentResolver] this instance was constructed with. */
     fun getContentResolver(): ContentResolver
-
     /**
      * Construct the content URI for a particular name/value pair, useful for monitoring changes
      * with a ContentObserver.
@@ -46,42 +45,36 @@ interface SettingsProxy {
      * @return the corresponding content URI, or null if not present
      */
     fun getUriFor(name: String): Uri
-
     /**
      * Convenience wrapper around [ContentResolver.registerContentObserver].'
      *
      * Implicitly calls [getUriFor] on the passed in name.
      */
-    fun registerContentObserver(name: String, settingsObserver: ContentObserver) {
-        registerContentObserver(getUriFor(name), settingsObserver)
+    fun registerContentObserverSync(name: String, settingsObserver: ContentObserver) {
+        registerContentObserverSync(getUriFor(name), settingsObserver)
     }
-
     /** Convenience wrapper around [ContentResolver.registerContentObserver].' */
-    fun registerContentObserver(uri: Uri, settingsObserver: ContentObserver) =
-        registerContentObserver(uri, false, settingsObserver)
-
+    fun registerContentObserverSync(uri: Uri, settingsObserver: ContentObserver) =
+        registerContentObserverSync(uri, false, settingsObserver)
     /**
      * Convenience wrapper around [ContentResolver.registerContentObserver].'
      *
      * Implicitly calls [getUriFor] on the passed in name.
      */
-    fun registerContentObserver(
+    fun registerContentObserverSync(
         name: String,
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver
-    ) = registerContentObserver(getUriFor(name), notifyForDescendants, settingsObserver)
-
+    ) = registerContentObserverSync(getUriFor(name), notifyForDescendants, settingsObserver)
     /** Convenience wrapper around [ContentResolver.registerContentObserver].' */
-    fun registerContentObserver(
+    fun registerContentObserverSync(
         uri: Uri,
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver
     ) = getContentResolver().registerContentObserver(uri, notifyForDescendants, settingsObserver)
-
     /** See [ContentResolver.unregisterContentObserver]. */
-    fun unregisterContentObserver(settingsObserver: ContentObserver) =
+    fun unregisterContentObserverSync(settingsObserver: ContentObserver) =
         getContentResolver().unregisterContentObserver(settingsObserver)
-
     /**
      * Look up a name in the database.
      *
@@ -89,7 +82,6 @@ interface SettingsProxy {
      * @return the corresponding value, or null if not present
      */
     fun getString(name: String): String
-
     /**
      * Store a name/value pair into the database.
      *
@@ -98,7 +90,6 @@ interface SettingsProxy {
      * @return true if the value was set, false on database errors
      */
     fun putString(name: String, value: String): Boolean
-
     /**
      * Store a name/value pair into the database.
      *
@@ -129,7 +120,6 @@ interface SettingsProxy {
      * @see .resetToDefaults
      */
     fun putString(name: String, value: String, tag: String, makeDefault: Boolean): Boolean
-
     /**
      * Convenience function for retrieving a single secure settings value as an integer. Note that
      * internally setting values are always stored as strings; this function converts the string to
@@ -148,7 +138,6 @@ interface SettingsProxy {
             def
         }
     }
-
     /**
      * Convenience function for retrieving a single secure settings value as an integer. Note that
      * internally setting values are always stored as strings; this function converts the string to
@@ -171,7 +160,6 @@ interface SettingsProxy {
             throw SettingNotFoundException(name)
         }
     }
-
     /**
      * Convenience function for updating a single settings value as an integer. This will either
      * create a new entry in the table if the given name does not exist, or modify the value of the
@@ -185,7 +173,6 @@ interface SettingsProxy {
     fun putInt(name: String, value: Int): Boolean {
         return putString(name, value.toString())
     }
-
     /**
      * Convenience function for retrieving a single secure settings value as a boolean. Note that
      * internally setting values are always stored as strings; this function converts the string to
@@ -199,7 +186,6 @@ interface SettingsProxy {
     fun getBool(name: String, def: Boolean): Boolean {
         return getInt(name, if (def) 1 else 0) != 0
     }
-
     /**
      * Convenience function for retrieving a single secure settings value as a boolean. Note that
      * internally setting values are always stored as strings; this function converts the string to
@@ -217,7 +203,6 @@ interface SettingsProxy {
     fun getBool(name: String): Boolean {
         return getInt(name) != 0
     }
-
     /**
      * Convenience function for updating a single settings value as a boolean. This will either
      * create a new entry in the table if the given name does not exist, or modify the value of the
@@ -231,7 +216,6 @@ interface SettingsProxy {
     fun putBool(name: String, value: Boolean): Boolean {
         return putInt(name, if (value) 1 else 0)
     }
-
     /**
      * Convenience function for retrieving a single secure settings value as a `long`. Note that
      * internally setting values are always stored as strings; this function converts the string to
@@ -246,7 +230,6 @@ interface SettingsProxy {
         val valString = getString(name)
         return parseLongOrUseDefault(valString, def)
     }
-
     /**
      * Convenience function for retrieving a single secure settings value as a `long`. Note that
      * internally setting values are always stored as strings; this function converts the string to
@@ -265,7 +248,6 @@ interface SettingsProxy {
         val valString = getString(name)
         return parseLongOrThrow(name, valString)
     }
-
     /**
      * Convenience function for updating a secure settings value as a long integer. This will either
      * create a new entry in the table if the given name does not exist, or modify the value of the
@@ -279,7 +261,6 @@ interface SettingsProxy {
     fun putLong(name: String, value: Long): Boolean {
         return putString(name, value.toString())
     }
-
     /**
      * Convenience function for retrieving a single secure settings value as a floating point
      * number. Note that internally setting values are always stored as strings; this function
@@ -294,7 +275,6 @@ interface SettingsProxy {
         val v = getString(name)
         return parseFloat(v, def)
     }
-
     /**
      * Convenience function for retrieving a single secure settings value as a float. Note that
      * internally setting values are always stored as strings; this function converts the string to
@@ -313,7 +293,6 @@ interface SettingsProxy {
         val v = getString(name)
         return parseFloatOrThrow(name, v)
     }
-
     /**
      * Convenience function for updating a single settings value as a floating point number. This
      * will either create a new entry in the table if the given name does not exist, or modify the
@@ -327,7 +306,6 @@ interface SettingsProxy {
     fun putFloat(name: String, value: Float): Boolean {
         return putString(name, value.toString())
     }
-
     companion object {
         /** Convert a string to a long, or uses a default if the string is malformed or null */
         @JvmStatic
@@ -341,7 +319,6 @@ interface SettingsProxy {
                 }
             return value
         }
-
         /** Convert a string to a long, or throws an exception if the string is malformed or null */
         @JvmStatic
         @Throws(SettingNotFoundException::class)
@@ -355,7 +332,6 @@ interface SettingsProxy {
                 throw SettingNotFoundException(name)
             }
         }
-
         /** Convert a string to a float, or uses a default if the string is malformed or null */
         @JvmStatic
         fun parseFloat(v: String?, def: Float): Float {
@@ -365,7 +341,6 @@ interface SettingsProxy {
                 def
             }
         }
-
         /**
          * Convert a string to a float, or throws an exception if the string is malformed or null
          */
