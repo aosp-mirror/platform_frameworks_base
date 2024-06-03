@@ -110,6 +110,7 @@ abstract class CrossActivityBackAnimation(
     private val postCommitFlingSpring = SpringForce(SPRING_SCALE)
             .setStiffness(SpringForce.STIFFNESS_LOW)
             .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY)
+    protected var gestureProgress = 0f
 
     /** Background color to be used during the animation, also see [getBackgroundColor] */
     protected var customizedBackgroundColor = 0
@@ -213,6 +214,7 @@ abstract class CrossActivityBackAnimation(
 
     private fun onGestureProgress(backEvent: BackEvent) {
         val progress = gestureInterpolator.getInterpolation(backEvent.progress)
+        gestureProgress = progress
         currentClosingRect.setInterpolatedRectF(startClosingRect, targetClosingRect, progress)
         val yOffset = getYOffset(currentClosingRect, backEvent.touchY)
         currentClosingRect.offset(0f, yOffset)
@@ -258,9 +260,11 @@ abstract class CrossActivityBackAnimation(
         }
 
         // kick off spring animation with the current velocity from the pre-commit phase, this
-        // affects the scaling of the closing activity during post-commit
+        // affects the scaling of the closing and/or opening activity during post-commit
+        val startVelocity =
+            if (gestureProgress < 0.1f) -DEFAULT_FLING_VELOCITY else -velocity * SPRING_SCALE
         val flingAnimation = SpringAnimation(postCommitFlingScale, SPRING_SCALE)
-            .setStartVelocity(min(0f, -velocity * SPRING_SCALE))
+            .setStartVelocity(startVelocity.coerceIn(-MAX_FLING_VELOCITY, 0f))
             .setStartValue(SPRING_SCALE)
             .setSpring(postCommitFlingSpring)
         flingAnimation.start()
@@ -319,19 +323,22 @@ abstract class CrossActivityBackAnimation(
         isLetterboxed = false
         enteringHasSameLetterbox = false
         lastPostCommitFlingScale = SPRING_SCALE
+        gestureProgress = 0f
     }
 
     protected fun applyTransform(
         leash: SurfaceControl?,
         rect: RectF,
         alpha: Float,
-        baseTransformation: Transformation? = null
+        baseTransformation: Transformation? = null,
+        flingMode: FlingMode = FlingMode.NO_FLING
     ) {
         if (leash == null || !leash.isValid) return
         tempRectF.set(rect)
-        if (leash == closingTarget?.leash) {
-            lastPostCommitFlingScale = (postCommitFlingScale.value / SPRING_SCALE).coerceIn(
-                    minimumValue = MAX_FLING_SCALE, maximumValue = lastPostCommitFlingScale
+        if (flingMode != FlingMode.NO_FLING) {
+            lastPostCommitFlingScale = min(
+                postCommitFlingScale.value / SPRING_SCALE,
+                if (flingMode == FlingMode.FLING_BOUNCE) 1f else lastPostCommitFlingScale
             )
             // apply an additional scale to the closing target to account for fling velocity
             tempRectF.scaleCentered(lastPostCommitFlingScale)
@@ -533,14 +540,30 @@ abstract class CrossActivityBackAnimation(
         private const val MAX_SCRIM_ALPHA_DARK = 0.8f
         private const val MAX_SCRIM_ALPHA_LIGHT = 0.2f
         private const val SPRING_SCALE = 100f
-        private const val MAX_FLING_SCALE = 0.6f
+        private const val MAX_FLING_VELOCITY = 1000f
+        private const val DEFAULT_FLING_VELOCITY = 120f
+    }
+
+    enum class FlingMode {
+        NO_FLING,
+
+        /**
+         * This is used for the closing target in custom cross-activity back animations. When the
+         * back gesture is flung, the closing target shrinks a bit further with a spring motion.
+         */
+        FLING_SHRINK,
+
+        /**
+         * This is used for the closing and opening target in the default cross-activity back
+         * animation. When the back gesture is flung, the closing and opening targets shrink a
+         * bit further and then bounce back with a spring motion.
+         */
+        FLING_BOUNCE
     }
 }
 
 // The target will loose focus when alpha == 0, so keep a minimum value for it.
-private fun keepMinimumAlpha(transAlpha: Float): Float {
-    return max(transAlpha.toDouble(), 0.005).toFloat()
-}
+private fun keepMinimumAlpha(transAlpha: Float) = max(transAlpha, 0.005f)
 
 private fun isDarkMode(context: Context): Boolean {
     return context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
