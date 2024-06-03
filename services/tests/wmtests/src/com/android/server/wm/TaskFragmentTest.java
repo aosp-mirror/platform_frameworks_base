@@ -474,8 +474,8 @@ public class TaskFragmentTest extends WindowTestsBase {
                 .build();
         final ActivityRecord activity0 = organizedTf.getBottomMostActivity();
         final ActivityRecord activity1 = organizedTf.getTopMostActivity();
-        // Bottom activity is untrusted embedding. Top activity is trusted embedded.
-        // Activity0 has overlay over untrusted mode embedded.
+        // Bottom activity is untrusted embedding. Top activity is trusted embedded and occludes
+        // the bottom activity. Activity0 has overlay over untrusted mode embedded.
         activity0.info.applicationInfo.uid = DEFAULT_TASK_FRAGMENT_ORGANIZER_UID + 1;
         activity1.info.applicationInfo.uid = DEFAULT_TASK_FRAGMENT_ORGANIZER_UID;
         doReturn(true).when(organizedTf).isAllowedToEmbedActivityInUntrustedMode(activity0);
@@ -508,6 +508,48 @@ public class TaskFragmentTest extends WindowTestsBase {
         activity2.info.applicationInfo.uid = DEFAULT_TASK_FRAGMENT_ORGANIZER_UID + 2;
 
         assertFalse(activity0.hasOverlayOverUntrustedModeEmbedded());
+        assertFalse(activity1.hasOverlayOverUntrustedModeEmbedded());
+    }
+
+    @Test
+    public void testActivityHasOverlayOverUntrustedModeEmbeddedWithAdjacentTaskFragments() {
+        final Task rootTask = createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW,
+                ACTIVITY_TYPE_STANDARD);
+        final Rect taskBounds = rootTask.getBounds();
+        final TaskFragment organizedTf0 = new TaskFragmentBuilder(mAtm)
+                .createActivityCount(1)
+                .setParentTask(rootTask)
+                .setFragmentToken(new Binder())
+                .setOrganizer(mOrganizer)
+                .setBounds(new Rect(taskBounds.left, taskBounds.top,
+                        taskBounds.left + taskBounds.width() / 2, taskBounds.bottom))
+                .build();
+        final TaskFragment organizedTf1 = new TaskFragmentBuilder(mAtm)
+                .createActivityCount(1)
+                .setParentTask(rootTask)
+                .setFragmentToken(new Binder())
+                .setOrganizer(mOrganizer)
+                .setBounds(new Rect(taskBounds.left + taskBounds.width() / 2, taskBounds.top,
+                        taskBounds.right, taskBounds.bottom))
+                .build();
+        final ActivityRecord activity0 = organizedTf0.getTopMostActivity();
+        final ActivityRecord activity1 = organizedTf1.getTopMostActivity();
+
+        activity0.info.applicationInfo.uid = DEFAULT_TASK_FRAGMENT_ORGANIZER_UID + 1;
+        activity1.info.applicationInfo.uid = DEFAULT_TASK_FRAGMENT_ORGANIZER_UID;
+        doReturn(true).when(organizedTf0).isAllowedToEmbedActivityInUntrustedMode(activity0);
+
+        assertFalse("Activity0 doesn't have overlay because it's not occluded by activity1",
+                activity0.hasOverlayOverUntrustedModeEmbedded());
+        assertFalse(activity1.hasOverlayOverUntrustedModeEmbedded());
+
+        // Expand organizedTf1 bounds slightly.
+        final Rect tfBounds1 = organizedTf1.getBounds();
+        organizedTf1.setBounds(tfBounds1.left - 5, tfBounds1.top, taskBounds.right + 5,
+                tfBounds1.bottom);
+
+        assertTrue("Activity0 has overlay because it's occluded partially by activity1",
+                activity0.hasOverlayOverUntrustedModeEmbedded());
         assertFalse(activity1.hasOverlayOverUntrustedModeEmbedded());
     }
 
