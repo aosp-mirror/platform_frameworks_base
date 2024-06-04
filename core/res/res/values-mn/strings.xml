@@ -81,7 +81,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="3982069078579103087">"Дуут үйлчилгээ эсвэл яаралтай дуудлага алга"</string>
     <string name="RestrictedStateContent" msgid="7693575344608618926">"Үйлчилгээг таны оператор компани түр хугацаанд унтраасан"</string>
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"<xliff:g id="SIMNUMBER">%d</xliff:g> SIM-н оператор компаниас түр унтраасан"</string>
-    <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Мобайл сүлжээнд холбогдох боломжгүй байна"</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Хөдөлгөөнт холбооны сүлжээнд холбогдох боломжгүй байна"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Сонгосон сүлжээг өөрчлөхөөр оролдоно уу. Өөрчлөхийн тулд товшино уу."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Яаралтай дуудлага хийх боломжгүй"</string>
     <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Wi‑Fi-р яаралтай дуудлага хийх боломжгүй байна"</string>
@@ -143,7 +143,7 @@
     <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Wi-Fi дуудлага"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Идэвхгүй"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Wi-Fi-р залгах"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Мобайл сүлжээгээр дуудлага хийх"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Хөдөлгөөнт холбооны сүлжээгээр дуудлага хийх"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Зөвхөн Wi-Fi"</string>
     <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
     <skip />
@@ -1329,7 +1329,7 @@
     <skip />
     <string name="wifi_no_internet" msgid="1386911698276448061">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g>-д интернэтийн хандалт алга"</string>
     <string name="wifi_no_internet_detailed" msgid="634938444133558942">"Сонголт хийхийн тулд товшино уу"</string>
-    <string name="mobile_no_internet" msgid="4014455157529909781">"Мобайл сүлжээнд интернэт хандалт байхгүй байна"</string>
+    <string name="mobile_no_internet" msgid="4014455157529909781">"Хөдөлгөөнт холбооны сүлжээнд интернэт хандалт байхгүй байна"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Сүлжээнд интернэт хандалт байхгүй байна"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Хувийн DNS серверт хандах боломжгүй байна"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> зарим үйлчилгээнд хандах боломжгүй байна"</string>
@@ -1362,10 +1362,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Байнга зөвшөөрөх"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Хэзээ ч зөвшөөрөхгүй"</string>
     <string name="sim_removed_title" msgid="1349026474932481037">"SIM-г салгасан"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"Таныг хүчинтэй SIM-р дахин эхлүүлэх хүртэл мобайл сүлжээ боломжгүй байх болно."</string>
+    <string name="sim_removed_message" msgid="8469588437451533845">"Таныг хүчинтэй SIM-р дахин эхлүүлэх хүртэл хөдөлгөөнт холбооны сүлжээ боломжгүй байх болно."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Дуусгах"</string>
     <string name="sim_added_title" msgid="2976783426741012468">"SIM нэмсэн"</string>
-    <string name="sim_added_message" msgid="6602906609509958680">"Мобайл сүлжээнд хандах бол төхөөрөмжөө дахин асаан уу."</string>
+    <string name="sim_added_message" msgid="6602906609509958680">"Хөдөлгөөнт холбооны сүлжээнд хандах бол төхөөрөмжөө дахин асаан уу."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Дахин эхлүүлэх"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Мобайл үйлчилгээг идэвхжүүлэх"</string>
     <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"Шинэ SIM-ээ идэвхжүүлэхийн тулд үүрэн холбооны компанийн аппыг татаж авна уу"</string>

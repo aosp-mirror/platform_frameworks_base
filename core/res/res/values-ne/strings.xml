@@ -1921,7 +1921,7 @@
     <string name="zen_mode_feature_name" msgid="3785547207263754500">"अवरोध नपुर्याउँनुहोस्"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"डाउनटाइम"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"हरेक हप्तादिनको राति"</string>
-    <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"शनिबार"</string>
+    <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"शनिवार"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"कार्यक्रम"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"निदाएका बेला"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> ले व्यवस्थापन गरेको"</string>
