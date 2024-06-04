@@ -32,6 +32,7 @@ import android.view.ViewRootImpl;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  * A {@link OnBackInvokedDispatcher} for IME that forwards {@link OnBackInvokedCallback}
@@ -52,17 +53,8 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
     static final String RESULT_KEY_PRIORITY = "priority";
     static final int RESULT_CODE_REGISTER = 0;
     static final int RESULT_CODE_UNREGISTER = 1;
-    static final int RESULT_CODE_START_DISPATCHING = 2;
-    static final int RESULT_CODE_STOP_DISPATCHING = 3;
     @NonNull
     private final ResultReceiver mResultReceiver;
-    @NonNull
-    private final BackProgressAnimator mProgressAnimator = new BackProgressAnimator();
-    @NonNull
-    private final BackTouchTracker mTouchTracker = new BackTouchTracker();
-    // The handler to run callbacks on. This should be on the same thread
-    // the ViewRootImpl holding IME's WindowOnBackInvokedDispatcher is created on.
-    private Handler mHandler;
 
     public ImeOnBackInvokedDispatcher(Handler handler) {
         mResultReceiver = new ResultReceiver(handler) {
@@ -89,10 +81,6 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
         mResultReceiver = in.readTypedObject(ResultReceiver.CREATOR);
     }
 
-    void setHandler(@NonNull Handler handler) {
-        mHandler = handler;
-    }
-
     @Override
     public void registerOnBackInvokedCallback(
             @OnBackInvokedDispatcher.Priority int priority,
@@ -103,14 +91,7 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
         // This is necessary because the callback is sent to and registered from
         // the app process, which may treat the IME callback as weakly referenced. This will not
         // cause a memory leak because the app side already clears the reference correctly.
-        final IOnBackInvokedCallback iCallback =
-                new ImeOnBackInvokedCallbackWrapper(
-                        callback,
-                        mTouchTracker,
-                        mProgressAnimator,
-                        this,
-                        mHandler != null ? mHandler : Handler.getMain(),
-                        false /* useWeakRef */);
+        final IOnBackInvokedCallback iCallback = new ImeOnBackInvokedCallbackWrapper(callback);
         bundle.putBinder(RESULT_KEY_CALLBACK, iCallback.asBinder());
         bundle.putInt(RESULT_KEY_PRIORITY, priority);
         bundle.putInt(RESULT_KEY_ID, callback.hashCode());
@@ -135,12 +116,6 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
         dest.writeTypedObject(mResultReceiver, flags);
     }
 
-    /** Sets the progress thresholds for touch tracking */
-    public void setProgressThresholds(float linearDistance, float maxDistance,
-            float nonLinearFactor) {
-        mTouchTracker.setProgressThresholds(linearDistance, maxDistance, nonLinearFactor);
-    }
-
     @NonNull
     public static final Parcelable.Creator<ImeOnBackInvokedDispatcher> CREATOR =
             new Parcelable.Creator<ImeOnBackInvokedDispatcher>() {
@@ -162,15 +137,10 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
             int priority = resultData.getInt(RESULT_KEY_PRIORITY);
             final IOnBackInvokedCallback callback = IOnBackInvokedCallback.Stub.asInterface(
                     resultData.getBinder(RESULT_KEY_CALLBACK));
-            registerReceivedCallback(
-                    callback, priority, callbackId, receivingDispatcher);
+            registerReceivedCallback(callback, priority, callbackId, receivingDispatcher);
         } else if (resultCode == RESULT_CODE_UNREGISTER) {
             final int callbackId = resultData.getInt(RESULT_KEY_ID);
             unregisterReceivedCallback(callbackId, receivingDispatcher);
-        } else if (resultCode == RESULT_CODE_START_DISPATCHING) {
-            receiveStartDispatching(receivingDispatcher);
-        } else if (resultCode == RESULT_CODE_STOP_DISPATCHING) {
-            receiveStopDispatching(receivingDispatcher);
         }
     }
 
@@ -212,63 +182,6 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
         mImeCallbacks.remove(callback);
     }
 
-    static class ImeOnBackInvokedCallbackWrapper extends
-            WindowOnBackInvokedDispatcher.OnBackInvokedCallbackWrapper {
-        @NonNull
-        private final ImeOnBackInvokedDispatcher mDispatcher;
-
-        ImeOnBackInvokedCallbackWrapper(
-                @NonNull OnBackInvokedCallback callback,
-                @NonNull BackTouchTracker touchTracker,
-                @NonNull BackProgressAnimator progressAnimator,
-                @NonNull ImeOnBackInvokedDispatcher dispatcher,
-                @NonNull Handler handler,
-                boolean useWeakRef) {
-            super(callback, touchTracker, progressAnimator, handler, useWeakRef);
-            mDispatcher = dispatcher;
-        }
-
-        @Override
-        public void onBackStarted(BackMotionEvent backEvent) {
-            super.onBackStarted(backEvent);
-            mDispatcher.sendStartDispatching();
-        }
-
-        @Override
-        public void onBackCancelled() {
-            super.onBackCancelled();
-            mDispatcher.sendStopDispatching();
-        }
-
-        @Override
-        public void onBackInvoked() throws RemoteException {
-            super.onBackInvoked();
-            mDispatcher.sendStopDispatching();
-        }
-    }
-
-    /** Notifies the app process that we've stopped dispatching to an IME callback */
-    private void sendStopDispatching() {
-        mResultReceiver.send(RESULT_CODE_STOP_DISPATCHING, null /* unused bundle */);
-    }
-
-    /** Notifies the app process that we've started dispatching to an IME callback */
-    private void sendStartDispatching() {
-        mResultReceiver.send(RESULT_CODE_START_DISPATCHING, null /* unused bundle */);
-    }
-
-    /** Receives IME's message that dispatching has started. */
-    private void receiveStopDispatching(
-            @NonNull WindowOnBackInvokedDispatcher receivingDispatcher) {
-        receivingDispatcher.onStopImeDispatching();
-    }
-
-    /** Receives IME's message that dispatching has stopped. */
-    private void receiveStartDispatching(
-            @NonNull WindowOnBackInvokedDispatcher receivingDispatcher) {
-        receivingDispatcher.onStartImeDispatching();
-    }
-
     /** Clears all registered callbacks on the instance. */
     public void clear() {
         // Unregister previously registered callbacks if there's any.
@@ -278,14 +191,10 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
             }
         }
         mImeCallbacks.clear();
-        // We should also stop running animations since all callbacks have been removed.
-        // note: mSpring.skipToEnd(), in ProgressAnimator.reset(), requires the main handler.
-        Handler.getMain().post(mProgressAnimator::reset);
-        sendStopDispatching();
     }
 
     @VisibleForTesting(visibility = PACKAGE)
-    public static class ImeOnBackInvokedCallback implements OnBackInvokedCallback {
+    public static class ImeOnBackInvokedCallback implements OnBackAnimationCallback {
         @NonNull
         private final IOnBackInvokedCallback mIOnBackInvokedCallback;
         /**
@@ -303,11 +212,42 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
         }
 
         @Override
+        public void onBackStarted(@NonNull BackEvent backEvent) {
+            try {
+                mIOnBackInvokedCallback.onBackStarted(
+                        new BackMotionEvent(backEvent.getTouchX(), backEvent.getTouchY(),
+                                backEvent.getProgress(), 0f, 0f, false, backEvent.getSwipeEdge(),
+                                null));
+            } catch (RemoteException e) {
+                Log.e(TAG, "Exception when invoking forwarded callback. e: ", e);
+            }
+        }
+
+        @Override
+        public void onBackProgressed(@NonNull BackEvent backEvent) {
+            try {
+                mIOnBackInvokedCallback.onBackProgressed(
+                        new BackMotionEvent(backEvent.getTouchX(), backEvent.getTouchY(),
+                                backEvent.getProgress(), 0f, 0f, false, backEvent.getSwipeEdge(),
+                                null));
+            } catch (RemoteException e) {
+                Log.e(TAG, "Exception when invoking forwarded callback. e: ", e);
+            }
+        }
+
+        @Override
         public void onBackInvoked() {
             try {
-                if (mIOnBackInvokedCallback != null) {
-                    mIOnBackInvokedCallback.onBackInvoked();
-                }
+                mIOnBackInvokedCallback.onBackInvoked();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Exception when invoking forwarded callback. e: ", e);
+            }
+        }
+
+        @Override
+        public void onBackCancelled() {
+            try {
+                mIOnBackInvokedCallback.onBackCancelled();
             } catch (RemoteException e) {
                 Log.e(TAG, "Exception when invoking forwarded callback. e: ", e);
             }
@@ -315,10 +255,6 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
 
         private int getId() {
             return mId;
-        }
-
-        IOnBackInvokedCallback getIOnBackInvokedCallback() {
-            return mIOnBackInvokedCallback;
         }
 
         @Override
@@ -355,6 +291,52 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
             if (current != null) {
                 current.getOnBackInvokedDispatcher().registerOnBackInvokedCallbackUnchecked(
                         imeCallback, imeCallback.mPriority);
+            }
+        }
+    }
+
+    /**
+     * Wrapper class that wraps an OnBackInvokedCallback. This is used when a callback is sent from
+     * the IME process to the app process.
+     */
+    private class ImeOnBackInvokedCallbackWrapper extends IOnBackInvokedCallback.Stub {
+
+        private final OnBackInvokedCallback mCallback;
+
+        ImeOnBackInvokedCallbackWrapper(@NonNull OnBackInvokedCallback callback) {
+            mCallback = callback;
+        }
+
+        @Override
+        public void onBackStarted(BackMotionEvent backMotionEvent) {
+            maybeRunOnAnimationCallback((animationCallback) -> animationCallback.onBackStarted(
+                    BackEvent.fromBackMotionEvent(backMotionEvent)));
+        }
+
+        @Override
+        public void onBackProgressed(BackMotionEvent backMotionEvent) {
+            maybeRunOnAnimationCallback((animationCallback) -> animationCallback.onBackProgressed(
+                    BackEvent.fromBackMotionEvent(backMotionEvent)));
+        }
+
+        @Override
+        public void onBackCancelled() {
+            maybeRunOnAnimationCallback(OnBackAnimationCallback::onBackCancelled);
+        }
+
+        @Override
+        public void onBackInvoked() {
+            mCallback.onBackInvoked();
+        }
+
+        @Override
+        public void setTriggerBack(boolean triggerBack) {
+            // no-op
+        }
+
+        private void maybeRunOnAnimationCallback(Consumer<OnBackAnimationCallback> block) {
+            if (mCallback instanceof OnBackAnimationCallback) {
+                block.accept((OnBackAnimationCallback) mCallback);
             }
         }
     }
