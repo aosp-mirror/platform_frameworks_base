@@ -26,6 +26,8 @@ import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Region;
+import android.hardware.input.InputManager;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -54,6 +56,7 @@ import com.android.server.policy.WindowManagerPolicy;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
@@ -158,6 +161,13 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
      */
     static final int FLAG_FEATURE_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP = 0x00001000;
 
+    /**
+     * Flag for enabling the Accessibility mouse key events feature.
+     *
+     * @see #setUserAndEnabledFeatures(int, int)
+     */
+    static final int FLAG_FEATURE_MOUSE_KEYS = 0x00002000;
+
     static final int FEATURES_AFFECTING_MOTION_EVENTS =
             FLAG_FEATURE_INJECT_MOTION_EVENTS
                     | FLAG_FEATURE_AUTOCLICK
@@ -188,6 +198,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     private AutoclickController mAutoclickController;
 
     private KeyboardInterceptor mKeyboardInterceptor;
+
+    private MouseKeysInterceptor mMouseKeysInterceptor;
 
     private boolean mInstalled;
 
@@ -733,6 +745,15 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             // default display.
             addFirstEventHandler(Display.DEFAULT_DISPLAY, mKeyboardInterceptor);
         }
+
+        if ((mEnabledFeatures & FLAG_FEATURE_MOUSE_KEYS) != 0) {
+            mMouseKeysInterceptor = new MouseKeysInterceptor(mAms,
+                    Objects.requireNonNull(mContext.getSystemService(
+                            InputManager.class)),
+                    Looper.myLooper(),
+                    Display.DEFAULT_DISPLAY);
+            addFirstEventHandler(Display.DEFAULT_DISPLAY, mMouseKeysInterceptor);
+        }
     }
 
     /**
@@ -815,6 +836,11 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         if (mKeyboardInterceptor != null) {
             mKeyboardInterceptor.onDestroy();
             mKeyboardInterceptor = null;
+        }
+
+        if (mMouseKeysInterceptor != null) {
+            mMouseKeysInterceptor.onDestroy();
+            mMouseKeysInterceptor = null;
         }
     }
 
