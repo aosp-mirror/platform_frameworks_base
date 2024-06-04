@@ -126,7 +126,7 @@ public class ViewFrameRateTest {
 
     @Test
     @RequiresFlagsEnabled(FLAG_VIEW_VELOCITY_API)
-    public void touchBoostDisable() throws Throwable {
+    public void frameBoostDisable() throws Throwable {
         mActivityRule.runOnUiThread(() -> {
             long now = SystemClock.uptimeMillis();
             MotionEvent down = MotionEvent.obtain(
@@ -146,6 +146,7 @@ public class ViewFrameRateTest {
 
         mActivityRule.runOnUiThread(() -> {
             assertFalse(mViewRoot.getIsTouchBoosting());
+            assertFalse(mViewRoot.getIsFrameRateBoosting());
         });
     }
 
