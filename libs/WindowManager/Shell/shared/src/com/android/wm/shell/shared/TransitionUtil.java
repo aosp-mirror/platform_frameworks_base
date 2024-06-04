@@ -69,12 +69,17 @@ public class TransitionUtil {
 
     /** Returns {@code true} if the transition is opening or closing mode. */
     public static boolean isOpenOrCloseMode(@TransitionInfo.TransitionMode int mode) {
-        return isOpeningMode(mode) || mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK;
+        return isOpeningMode(mode) || isClosingMode(mode);
     }
 
     /** Returns {@code true} if the transition is opening mode. */
     public static boolean isOpeningMode(@TransitionInfo.TransitionMode int mode) {
         return mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT;
+    }
+
+    /** Returns {@code true} if the transition is closing mode. */
+    public static boolean isClosingMode(@TransitionInfo.TransitionMode int mode) {
+        return mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK;
     }
 
     /** Returns {@code true} if the transition has a display change. */

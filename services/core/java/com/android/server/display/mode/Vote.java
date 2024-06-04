@@ -186,6 +186,10 @@ interface Vote {
         return new BaseModeRefreshRateVote(baseModeRefreshRate);
     }
 
+    static Vote forRequestedRefreshRate(float refreshRate) {
+        return new RequestedRefreshRateVote(refreshRate);
+    }
+
     static Vote forSupportedRefreshRates(List<SupportedModeData> supportedModes) {
         if (supportedModes.isEmpty()) {
             return null;

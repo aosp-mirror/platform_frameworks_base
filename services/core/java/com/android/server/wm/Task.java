@@ -1931,6 +1931,9 @@ class Task extends TaskFragment {
             if (td.getSystemBarsAppearance() == 0) {
                 td.setSystemBarsAppearance(atd.getSystemBarsAppearance());
             }
+            if (td.getTopOpaqueSystemBarsAppearance() == 0 && r.fillsParent()) {
+                td.setTopOpaqueSystemBarsAppearance(atd.getSystemBarsAppearance());
+            }
             if (td.getNavigationBarColor() == 0) {
                 td.setNavigationBarColor(atd.getNavigationBarColor());
                 td.setEnsureNavigationBarContrastWhenTransparent(
@@ -3624,13 +3627,15 @@ class Task extends TaskFragment {
         // If the developer has persist a different configuration, we need to override it to the
         // starting window because persisted configuration does not effect to Task.
         info.taskInfo.configuration.setTo(activity.getConfiguration());
-        final ActivityRecord topFullscreenActivity = getTopFullscreenActivity();
-        if (topFullscreenActivity != null) {
-            final WindowState mainWindow = topFullscreenActivity.findMainWindow(false);
-            if (mainWindow != null) {
-                info.topOpaqueWindowInsetsState =
-                        mainWindow.getInsetsStateWithVisibilityOverride();
-                info.topOpaqueWindowLayoutParams = mainWindow.getAttrs();
+        if (!Flags.drawSnapshotAspectRatioMatch()) {
+            final ActivityRecord topFullscreenActivity = getTopFullscreenActivity();
+            if (topFullscreenActivity != null) {
+                final WindowState mainWindow = topFullscreenActivity.findMainWindow(false);
+                if (mainWindow != null) {
+                    info.topOpaqueWindowInsetsState =
+                            mainWindow.getInsetsStateWithVisibilityOverride();
+                    info.topOpaqueWindowLayoutParams = mainWindow.getAttrs();
+                }
             }
         }
         return info;
@@ -4558,7 +4563,10 @@ class Task extends TaskFragment {
         }
         final WindowState w = getTopVisibleAppMainWindow();
         if (w != null) {
+            w.mIsSurfacePositionPaused = true;
             w.applyWithNextDraw((d) -> {
+                w.mIsSurfacePositionPaused = false;
+                w.updateSurfacePosition(d);
                 d.merge(t);
             });
         } else {
@@ -6878,7 +6886,7 @@ class Task extends TaskFragment {
 
         private void assignLayer(@NonNull SurfaceControl.Transaction t, int layer) {
             t.setLayer(mContainerSurface, layer);
-            t.setVisibility(mContainerSurface, mOwnerTaskFragment.isVisible());
+            t.setVisibility(mContainerSurface, mOwnerTaskFragment.isVisible() || mIsBoosted);
             for (int i = 0; i < mPendingClientTransactions.size(); i++) {
                 t.merge(mPendingClientTransactions.get(i));
             }

@@ -2196,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Suunaklahvistiku vasaknool"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Suunaklahvistiku paremnool"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Suunaklahvistiku keskmine nupp"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> pealkirjariba."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> on lisatud salve PIIRANGUTEGA"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"saatis kujutise"</string>

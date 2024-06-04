@@ -8,10 +8,12 @@ import com.android.systemui.shared.rotation.FloatingRotationButtonPositionCalcul
 import com.android.systemui.shared.rotation.FloatingRotationButtonPositionCalculator.Position
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameter
+import platform.test.runner.parameterized.Parameters
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
-@RunWith(Parameterized::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @SmallTest
 internal class FloatingRotationButtonPositionCalculatorTest(
         private val testCase: TestCase,
@@ -61,7 +63,7 @@ internal class FloatingRotationButtonPositionCalculatorTest(
             MARGIN_DEFAULT, MARGIN_TASKBAR_LEFT, MARGIN_TASKBAR_BOTTOM, false
         )
 
-        @Parameterized.Parameters(name = "{0}")
+        @Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<TestCase> =
             listOf(

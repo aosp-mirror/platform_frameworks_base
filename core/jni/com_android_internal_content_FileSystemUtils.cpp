@@ -88,7 +88,7 @@ bool punchHoles(const char *filePath, const uint64_t offset,
         ALOGD("Total number of LOAD segments %zu", programHeaders.size());
 
         ALOGD("Size before punching holes st_blocks: %" PRIu64
-              ", st_blksize: %ld, st_size: %" PRIu64 "",
+              ", st_blksize: %d, st_size: %" PRIu64 "",
               beforePunch.st_blocks, beforePunch.st_blksize,
               static_cast<uint64_t>(beforePunch.st_size));
     }
@@ -193,7 +193,7 @@ bool punchHoles(const char *filePath, const uint64_t offset,
             ALOGD("lstat64 failed for filePath %s, error:%d", filePath, errno);
             return false;
         }
-        ALOGD("Size after punching holes st_blocks: %" PRIu64 ", st_blksize: %ld, st_size: %" PRIu64
+        ALOGD("Size after punching holes st_blocks: %" PRIu64 ", st_blksize: %d, st_size: %" PRIu64
               "",
               afterPunch.st_blocks, afterPunch.st_blksize,
               static_cast<uint64_t>(afterPunch.st_size));
@@ -271,7 +271,7 @@ bool punchHolesInZip(const char *filePath, uint64_t offset, uint16_t extraFieldL
     uint64_t blockSize = beforePunch.st_blksize;
     IF_ALOGD() {
         ALOGD("Extra field length: %hu,  Size before punching holes st_blocks: %" PRIu64
-              ", st_blksize: %ld, st_size: %" PRIu64 "",
+              ", st_blksize: %d, st_size: %" PRIu64 "",
               extraFieldLen, beforePunch.st_blocks, beforePunch.st_blksize,
               static_cast<uint64_t>(beforePunch.st_size));
     }
@@ -346,7 +346,7 @@ bool punchHolesInZip(const char *filePath, uint64_t offset, uint16_t extraFieldL
             return false;
         }
         ALOGD("punchHolesInApk:: Size after punching holes st_blocks: %" PRIu64
-              ", st_blksize: %ld, st_size: %" PRIu64 "",
+              ", st_blksize: %d, st_size: %" PRIu64 "",
               afterPunch.st_blocks, afterPunch.st_blksize,
               static_cast<uint64_t>(afterPunch.st_size));
     }

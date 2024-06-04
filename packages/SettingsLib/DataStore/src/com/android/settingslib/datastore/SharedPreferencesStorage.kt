@@ -83,10 +83,10 @@ constructor(
     private val sharedPreferencesListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             if (key != null) {
-                notifyChange(key, ChangeReason.UPDATE)
+                notifyChange(key, DataChangeReason.UPDATE)
             } else {
                 // On Android >= R, SharedPreferences.Editor.clear() will trigger this case
-                notifyChange(ChangeReason.DELETE)
+                notifyChange(DataChangeReason.DELETE)
             }
         }
 

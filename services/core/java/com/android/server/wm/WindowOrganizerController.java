@@ -839,9 +839,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     private int applyTaskChanges(Task tr, WindowContainerTransaction.Change c) {
-        int effects = applyChanges(tr, c);
         final SurfaceControl.Transaction t = c.getBoundsChangeTransaction();
+        // Check bounds change transaction at the beginning because it may pause updating window
+        // surface position. Then the following changes won't apply intermediate position.
+        if (t != null) {
+            tr.setMainWindowSizeChangeTransaction(t);
+        }
 
+        int effects = applyChanges(tr, c);
         if ((c.getChangeMask() & WindowContainerTransaction.Change.CHANGE_HIDDEN) != 0) {
             if (tr.setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, c.getHidden())) {
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
@@ -872,10 +877,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
         if (childWindowingMode > -1) {
             tr.forAllActivities(a -> { a.setWindowingMode(childWindowingMode); });
-        }
-
-        if (t != null) {
-            tr.setMainWindowSizeChangeTransaction(t);
         }
 
         Rect enterPipBounds = c.getEnterPipBounds();
@@ -1613,6 +1614,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
             case OP_TYPE_SET_DECOR_SURFACE_BOOSTED: {
                 if (Flags.activityEmbeddingInteractiveDividerFlag()) {
+                    final Task task = taskFragment.getTask();
+                    if (task == null) {
+                        break;
+                    }
                     final SurfaceControl.Transaction clientTransaction =
                             operation.getSurfaceTransaction();
                     if (clientTransaction != null) {
@@ -1621,10 +1626,22 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         // any invalid operations.
                         clientTransaction.sanitize(caller.mPid, caller.mUid);
                     }
-                    taskFragment.getTask().setDecorSurfaceBoosted(
-                            taskFragment,
-                            operation.getBooleanValue() /* isBoosted */,
-                            clientTransaction);
+
+                    if (transition != null) {
+                        // The decor surface boost/unboost must happen after the transition is
+                        // completed. Otherwise, the decor surface could be moved before Shell
+                        // completes the transition, causing flicker.
+                        transition.addTransitionEndedListener(() ->
+                                task.setDecorSurfaceBoosted(
+                                        taskFragment,
+                                        operation.getBooleanValue() /* isBoosted */,
+                                        clientTransaction));
+                    } else {
+                        task.setDecorSurfaceBoosted(
+                                taskFragment,
+                                operation.getBooleanValue() /* isBoosted */,
+                                clientTransaction);
+                    }
                 }
                 break;
             }

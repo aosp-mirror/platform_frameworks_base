@@ -218,8 +218,7 @@ class HandleMenu {
         final int menuX, menuY;
         final int captionWidth = mTaskInfo.getConfiguration()
                 .windowConfiguration.getBounds().width();
-        if (mLayoutResId
-                == R.layout.desktop_mode_app_controls_window_decor) {
+        if (mLayoutResId == R.layout.desktop_mode_app_header) {
             // Align the handle menu to the left of the caption.
             menuX = mMarginMenuStart;
             menuY = mMarginMenuTop;

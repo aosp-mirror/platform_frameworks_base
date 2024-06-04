@@ -149,11 +149,6 @@
         <item name="android:letterSpacing">0.01</item>
     </style>
 
-    <style name="TextAppearance.QS.SecurityFooter" parent="@style/TextAppearance.QS.Status">
-        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
-        <item name="android:textColor">?attr/onSurface</item>
-    </style>
-
     <style name="TextAppearance.QS.Status.Carriers" />
 
     <style name="TextAppearance.QS.Status.Carriers.NoCarrierText">
@@ -1668,6 +1663,10 @@
 
     <style name="Theme.SystemUI.Dialog.StickyKeys" parent="@style/Theme.SystemUI.Dialog">
         <item name="android:colorBackground">@color/transparent</item>
+    </style>
+
+    <style name="ShortcutHelperBottomSheet" parent="@style/Widget.Material3.BottomSheet">
+        <item name="backgroundTint">?colorSurfaceContainer</item>
     </style>
 
     <style name="ShortcutHelperAnimation" parent="@android:style/Animation.Activity">

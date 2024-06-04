@@ -48,7 +48,7 @@ fun TransitionBuilder.toQuickSettingsShadeTransition(
             }
         }
 
-    translate(OverlayShade.Elements.PanelBackground, Edge.Top)
+    translate(OverlayShade.Elements.Panel, Edge.Top)
 
     fractionRange(end = .5f) { fade(OverlayShade.Elements.Scrim) }
 }

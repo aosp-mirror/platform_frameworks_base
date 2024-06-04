@@ -332,7 +332,7 @@ class ControlsSettingsDialogManagerImplTest : SysuiTestCase() {
     }
 
     private fun attachRepositoryToSettings() {
-        secureSettings.registerContentObserver(
+        secureSettings.registerContentObserverSync(
             SETTING_SHOW,
             object : ContentObserver(null) {
                 override fun onChange(selfChange: Boolean) {
@@ -343,7 +343,7 @@ class ControlsSettingsDialogManagerImplTest : SysuiTestCase() {
             }
         )
 
-        secureSettings.registerContentObserver(
+        secureSettings.registerContentObserverSync(
             SETTING_ACTION,
             object : ContentObserver(null) {
                 override fun onChange(selfChange: Boolean) {

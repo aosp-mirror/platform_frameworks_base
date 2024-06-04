@@ -18,6 +18,7 @@ package com.android.server.permission.access.appop
 
 import android.app.AppOpsManager
 import android.companion.virtual.VirtualDeviceManager
+import android.os.Binder
 import android.os.Handler
 import android.os.UserHandle
 import android.permission.PermissionManager
@@ -250,7 +251,9 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
         ) {
             Slog.w(
                 LOG_TAG,
-                "Cannot set UID mode for runtime permission app op, uid = $uid," +
+                "Cannot set UID mode for runtime permission app op, " +
+                    " callingUid = ${Binder.getCallingUid()}, " +
+                    " uid = $uid," +
                     " code = ${AppOpsManager.opToName(code)}," +
                     " mode = ${AppOpsManager.modeToName(mode)}",
                 RuntimeException()

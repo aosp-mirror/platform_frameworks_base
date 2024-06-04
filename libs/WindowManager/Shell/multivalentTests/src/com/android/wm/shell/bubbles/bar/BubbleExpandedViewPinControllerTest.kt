@@ -26,7 +26,7 @@ import androidx.core.animation.AnimatorTestRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.internal.protolog.common.ProtoLog
 import com.android.wm.shell.R
 import com.android.wm.shell.bubbles.BubblePositioner
@@ -35,6 +35,8 @@ import com.android.wm.shell.common.bubbles.BaseBubblePinController
 import com.android.wm.shell.common.bubbles.BaseBubblePinController.Companion.DROP_TARGET_ALPHA_IN_DURATION
 import com.android.wm.shell.common.bubbles.BaseBubblePinController.Companion.DROP_TARGET_ALPHA_OUT_DURATION
 import com.android.wm.shell.common.bubbles.BubbleBarLocation
+import com.android.wm.shell.common.bubbles.BubbleBarLocation.LEFT
+import com.android.wm.shell.common.bubbles.BubbleBarLocation.RIGHT
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
@@ -62,6 +64,9 @@ class BubbleExpandedViewPinControllerTest {
 
     private lateinit var controller: BubbleExpandedViewPinController
     private lateinit var testListener: TestLocationChangeListener
+
+    private val dropTargetView: View?
+        get() = container.findViewById(R.id.bubble_bar_drop_target)
 
     private val pointOnLeft = PointF(100f, 100f)
     private val pointOnRight = PointF(1900f, 500f)
@@ -92,13 +97,14 @@ class BubbleExpandedViewPinControllerTest {
 
     @After
     fun tearDown() {
-        runOnMainSync { controller.onDragEnd() }
+        getInstrumentation().runOnMainSync { controller.onDragEnd() }
         waitForAnimateOut()
     }
 
+    /** Dragging on same side should not show drop target or trigger location changes */
     @Test
-    fun drag_stayOnSameSide() {
-        runOnMainSync {
+    fun drag_stayOnRightSide() {
+        getInstrumentation().runOnMainSync {
             controller.onDragStart(initialLocationOnLeft = false)
             controller.onDragUpdate(pointOnRight.x, pointOnRight.y)
             controller.onDragEnd()
@@ -106,71 +112,124 @@ class BubbleExpandedViewPinControllerTest {
         waitForAnimateIn()
         assertThat(dropTargetView).isNull()
         assertThat(testListener.locationChanges).isEmpty()
-        assertThat(testListener.locationReleases).containsExactly(BubbleBarLocation.RIGHT)
+        assertThat(testListener.locationReleases).containsExactly(RIGHT)
     }
 
+    /** Dragging on same side should not show drop target or trigger location changes */
     @Test
-    fun drag_toLeft() {
-        // Drag to left, but don't finish
-        runOnMainSync {
+    fun drag_stayOnLeftSide() {
+        getInstrumentation().runOnMainSync {
+            controller.onDragStart(initialLocationOnLeft = true)
+            controller.onDragUpdate(pointOnLeft.x, pointOnLeft.y)
+            controller.onDragEnd()
+        }
+        waitForAnimateIn()
+        assertThat(dropTargetView).isNull()
+        assertThat(testListener.locationChanges).isEmpty()
+        assertThat(testListener.locationReleases).containsExactly(LEFT)
+    }
+
+    /** Drag crosses to the other side. Show drop target and trigger a location change. */
+    @Test
+    fun drag_rightToLeft() {
+        getInstrumentation().runOnMainSync {
             controller.onDragStart(initialLocationOnLeft = false)
+            controller.onDragUpdate(pointOnRight.x, pointOnRight.y)
             controller.onDragUpdate(pointOnLeft.x, pointOnLeft.y)
         }
         waitForAnimateIn()
 
         assertThat(dropTargetView).isNotNull()
         assertThat(dropTargetView!!.alpha).isEqualTo(1f)
-
-        val expectedDropTargetBounds = getExpectedDropTargetBounds(onLeft = true)
-        assertThat(dropTargetView!!.layoutParams.width).isEqualTo(expectedDropTargetBounds.width())
-        assertThat(dropTargetView!!.layoutParams.height)
-            .isEqualTo(expectedDropTargetBounds.height())
-
-        assertThat(testListener.locationChanges).containsExactly(BubbleBarLocation.LEFT)
+        assertThat(dropTargetView!!.bounds()).isEqualTo(getExpectedDropTargetBoundsOnLeft())
+        assertThat(testListener.locationChanges).containsExactly(LEFT)
         assertThat(testListener.locationReleases).isEmpty()
-
-        // Finish the drag
-        runOnMainSync { controller.onDragEnd() }
-        assertThat(testListener.locationReleases).containsExactly(BubbleBarLocation.LEFT)
     }
 
+    /** Drag crosses to the other side. Show drop target and trigger a location change. */
     @Test
-    fun drag_toLeftAndBackToRight() {
-        // Drag to left
-        runOnMainSync {
-            controller.onDragStart(initialLocationOnLeft = false)
+    fun drag_leftToRight() {
+        getInstrumentation().runOnMainSync {
+            controller.onDragStart(initialLocationOnLeft = true)
             controller.onDragUpdate(pointOnLeft.x, pointOnLeft.y)
+            controller.onDragUpdate(pointOnRight.x, pointOnRight.y)
         }
+        waitForAnimateIn()
+
+        assertThat(dropTargetView).isNotNull()
+        assertThat(dropTargetView!!.alpha).isEqualTo(1f)
+        assertThat(dropTargetView!!.bounds()).isEqualTo(getExpectedDropTargetBoundsOnRight())
+        assertThat(testListener.locationChanges).containsExactly(RIGHT)
+        assertThat(testListener.locationReleases).isEmpty()
+    }
+
+    /**
+     * Drop target does not initially show on the side that the drag starts. Check that it shows up
+     * after the dragging the view to other side and back to the initial side.
+     */
+    @Test
+    fun drag_rightToLeftToRight() {
+        getInstrumentation().runOnMainSync {
+            controller.onDragStart(initialLocationOnLeft = false)
+            controller.onDragUpdate(pointOnRight.x, pointOnRight.y)
+        }
+        waitForAnimateIn()
+        assertThat(dropTargetView).isNull()
+
+        getInstrumentation().runOnMainSync { controller.onDragUpdate(pointOnLeft.x, pointOnLeft.y) }
         waitForAnimateIn()
         assertThat(dropTargetView).isNotNull()
 
-        // Drag to right
-        runOnMainSync { controller.onDragUpdate(pointOnRight.x, pointOnRight.y) }
-        // We have to wait for existing drop target to animate out and new to animate in
+        getInstrumentation().runOnMainSync {
+            controller.onDragUpdate(pointOnRight.x, pointOnRight.y)
+        }
         waitForAnimateOut()
         waitForAnimateIn()
-
         assertThat(dropTargetView).isNotNull()
         assertThat(dropTargetView!!.alpha).isEqualTo(1f)
-
-        val expectedDropTargetBounds = getExpectedDropTargetBounds(onLeft = false)
-        assertThat(dropTargetView!!.layoutParams.width).isEqualTo(expectedDropTargetBounds.width())
-        assertThat(dropTargetView!!.layoutParams.height)
-            .isEqualTo(expectedDropTargetBounds.height())
-
-        assertThat(testListener.locationChanges)
-            .containsExactly(BubbleBarLocation.LEFT, BubbleBarLocation.RIGHT)
+        assertThat(dropTargetView!!.bounds()).isEqualTo(getExpectedDropTargetBoundsOnRight())
+        assertThat(testListener.locationChanges).containsExactly(LEFT, RIGHT).inOrder()
         assertThat(testListener.locationReleases).isEmpty()
-
-        // Release the view
-        runOnMainSync { controller.onDragEnd() }
-        assertThat(testListener.locationReleases).containsExactly(BubbleBarLocation.RIGHT)
     }
 
+    /**
+     * Drop target does not initially show on the side that the drag starts. Check that it shows up
+     * after the dragging the view to other side and back to the initial side.
+     */
     @Test
-    fun drag_toLeftInExclusionRect() {
-        runOnMainSync {
+    fun drag_leftToRightToLeft() {
+        getInstrumentation().runOnMainSync {
+            controller.onDragStart(initialLocationOnLeft = true)
+            controller.onDragUpdate(pointOnLeft.x, pointOnLeft.y)
+        }
+        waitForAnimateIn()
+        assertThat(dropTargetView).isNull()
+
+        getInstrumentation().runOnMainSync {
+            controller.onDragUpdate(pointOnRight.x, pointOnRight.y)
+        }
+        waitForAnimateIn()
+        assertThat(dropTargetView).isNotNull()
+
+        getInstrumentation().runOnMainSync { controller.onDragUpdate(pointOnLeft.x, pointOnLeft.y) }
+        waitForAnimateOut()
+        waitForAnimateIn()
+        assertThat(dropTargetView).isNotNull()
+        assertThat(dropTargetView!!.alpha).isEqualTo(1f)
+        assertThat(dropTargetView!!.bounds()).isEqualTo(getExpectedDropTargetBoundsOnLeft())
+        assertThat(testListener.locationChanges).containsExactly(RIGHT, LEFT).inOrder()
+        assertThat(testListener.locationReleases).isEmpty()
+    }
+
+    /**
+     * Drag from right to left, but stay in exclusion rect around the dismiss view. Drop target
+     * should not show and location change should not trigger.
+     */
+    @Test
+    fun drag_rightToLeft_inExclusionRect() {
+        getInstrumentation().runOnMainSync {
             controller.onDragStart(initialLocationOnLeft = false)
+            controller.onDragUpdate(pointOnRight.x, pointOnRight.y)
             // Exclusion rect is around the bottom center area of the screen
             controller.onDragUpdate(SCREEN_WIDTH / 2f - 50, SCREEN_HEIGHT - 100f)
         }
@@ -178,85 +237,212 @@ class BubbleExpandedViewPinControllerTest {
         assertThat(dropTargetView).isNull()
         assertThat(testListener.locationChanges).isEmpty()
         assertThat(testListener.locationReleases).isEmpty()
-
-        runOnMainSync { controller.onDragEnd() }
-        assertThat(testListener.locationReleases).containsExactly(BubbleBarLocation.RIGHT)
     }
 
+    /**
+     * Drag from left to right, but stay in exclusion rect around the dismiss view. Drop target
+     * should not show and location change should not trigger.
+     */
     @Test
-    fun toggleSetDropTargetHidden_dropTargetExists() {
-        runOnMainSync {
+    fun drag_leftToRight_inExclusionRect() {
+        getInstrumentation().runOnMainSync {
+            controller.onDragStart(initialLocationOnLeft = true)
+            controller.onDragUpdate(pointOnLeft.x, pointOnLeft.y)
+            // Exclusion rect is around the bottom center area of the screen
+            controller.onDragUpdate(SCREEN_WIDTH / 2f + 50, SCREEN_HEIGHT - 100f)
+        }
+        waitForAnimateIn()
+        assertThat(dropTargetView).isNull()
+        assertThat(testListener.locationChanges).isEmpty()
+        assertThat(testListener.locationReleases).isEmpty()
+    }
+
+    /**
+     * Drag to dismiss target and back to the same side should not cause the drop target to show.
+     */
+    @Test
+    fun drag_rightToDismissToRight() {
+        getInstrumentation().runOnMainSync {
             controller.onDragStart(initialLocationOnLeft = false)
+            controller.onDragUpdate(pointOnRight.x, pointOnRight.y)
+            controller.onStuckToDismissTarget()
+            controller.onDragUpdate(pointOnRight.x, pointOnRight.y)
+        }
+        waitForAnimateIn()
+        assertThat(dropTargetView).isNull()
+        assertThat(testListener.locationChanges).isEmpty()
+        assertThat(testListener.locationReleases).isEmpty()
+    }
+
+    /**
+     * Drag to dismiss target and back to the same side should not cause the drop target to show.
+     */
+    @Test
+    fun drag_leftToDismissToLeft() {
+        getInstrumentation().runOnMainSync {
+            controller.onDragStart(initialLocationOnLeft = true)
+            controller.onDragUpdate(pointOnLeft.x, pointOnLeft.y)
+            controller.onStuckToDismissTarget()
             controller.onDragUpdate(pointOnLeft.x, pointOnLeft.y)
         }
         waitForAnimateIn()
+        assertThat(dropTargetView).isNull()
+        assertThat(testListener.locationChanges).isEmpty()
+        assertThat(testListener.locationReleases).isEmpty()
+    }
 
+    /** Drag to dismiss target and other side should show drop target on the other side. */
+    @Test
+    fun drag_rightToDismissToLeft() {
+        getInstrumentation().runOnMainSync {
+            controller.onDragStart(initialLocationOnLeft = false)
+            controller.onDragUpdate(pointOnRight.x, pointOnRight.y)
+            controller.onStuckToDismissTarget()
+            controller.onDragUpdate(pointOnLeft.x, pointOnLeft.y)
+        }
+        waitForAnimateIn()
+        assertThat(dropTargetView).isNotNull()
+        assertThat(dropTargetView!!.alpha).isEqualTo(1f)
+        assertThat(dropTargetView!!.bounds()).isEqualTo(getExpectedDropTargetBoundsOnLeft())
+
+        assertThat(testListener.locationChanges).containsExactly(LEFT)
+        assertThat(testListener.locationReleases).isEmpty()
+    }
+
+    /** Drag to dismiss target and other side should show drop target on the other side. */
+    @Test
+    fun drag_leftToDismissToRight() {
+        getInstrumentation().runOnMainSync {
+            controller.onDragStart(initialLocationOnLeft = true)
+            controller.onDragUpdate(pointOnLeft.x, pointOnLeft.y)
+            controller.onStuckToDismissTarget()
+            controller.onDragUpdate(pointOnRight.x, pointOnRight.y)
+        }
+        waitForAnimateIn()
+        assertThat(dropTargetView).isNotNull()
+        assertThat(dropTargetView!!.alpha).isEqualTo(1f)
+        assertThat(dropTargetView!!.bounds()).isEqualTo(getExpectedDropTargetBoundsOnRight())
+
+        assertThat(testListener.locationChanges).containsExactly(RIGHT)
+        assertThat(testListener.locationReleases).isEmpty()
+    }
+
+    /**
+     * Drag to dismiss should trigger a location change to the initial location, if the current
+     * location is different. And hide the drop target.
+     */
+    @Test
+    fun drag_rightToLeftToDismiss() {
+        getInstrumentation().runOnMainSync {
+            controller.onDragStart(initialLocationOnLeft = false)
+            controller.onDragUpdate(pointOnRight.x, pointOnRight.y)
+            controller.onDragUpdate(pointOnLeft.x, pointOnLeft.y)
+        }
+        waitForAnimateIn()
         assertThat(dropTargetView).isNotNull()
         assertThat(dropTargetView!!.alpha).isEqualTo(1f)
 
-        runOnMainSync { controller.setDropTargetHidden(true) }
+        getInstrumentation().runOnMainSync { controller.onStuckToDismissTarget() }
         waitForAnimateOut()
-        assertThat(dropTargetView).isNotNull()
         assertThat(dropTargetView!!.alpha).isEqualTo(0f)
 
-        runOnMainSync { controller.setDropTargetHidden(false) }
+        assertThat(testListener.locationChanges).containsExactly(LEFT, RIGHT).inOrder()
+        assertThat(testListener.locationReleases).isEmpty()
+    }
+
+    /**
+     * Drag to dismiss should trigger a location change to the initial location, if the current
+     * location is different. And hide the drop target.
+     */
+    @Test
+    fun drag_leftToRightToDismiss() {
+        getInstrumentation().runOnMainSync {
+            controller.onDragStart(initialLocationOnLeft = true)
+            controller.onDragUpdate(pointOnLeft.x, pointOnLeft.y)
+            controller.onDragUpdate(pointOnRight.x, pointOnRight.y)
+        }
         waitForAnimateIn()
         assertThat(dropTargetView).isNotNull()
         assertThat(dropTargetView!!.alpha).isEqualTo(1f)
-    }
-
-    @Test
-    fun toggleSetDropTargetHidden_noDropTarget() {
-        runOnMainSync { controller.setDropTargetHidden(true) }
+        getInstrumentation().runOnMainSync { controller.onStuckToDismissTarget() }
         waitForAnimateOut()
-        assertThat(dropTargetView).isNull()
-
-        runOnMainSync { controller.setDropTargetHidden(false) }
-        waitForAnimateIn()
-        assertThat(dropTargetView).isNull()
+        assertThat(dropTargetView!!.alpha).isEqualTo(0f)
+        assertThat(testListener.locationChanges).containsExactly(RIGHT, LEFT).inOrder()
+        assertThat(testListener.locationReleases).isEmpty()
     }
 
+    /** Finishing drag should remove drop target and send location update. */
     @Test
-    fun onDragEnd_dropTargetExists() {
-        runOnMainSync {
+    fun drag_rightToLeftRelease() {
+        getInstrumentation().runOnMainSync {
             controller.onDragStart(initialLocationOnLeft = false)
+            controller.onDragUpdate(pointOnRight.x, pointOnRight.y)
             controller.onDragUpdate(pointOnLeft.x, pointOnLeft.y)
         }
         waitForAnimateIn()
         assertThat(dropTargetView).isNotNull()
 
-        runOnMainSync { controller.onDragEnd() }
+        getInstrumentation().runOnMainSync { controller.onDragEnd() }
         waitForAnimateOut()
         assertThat(dropTargetView).isNull()
+        assertThat(testListener.locationChanges).containsExactly(LEFT)
+        assertThat(testListener.locationReleases).containsExactly(LEFT)
     }
 
+    /** Finishing drag should remove drop target and send location update. */
     @Test
-    fun onDragEnd_noDropTarget() {
-        runOnMainSync { controller.onDragEnd() }
+    fun drag_leftToRightRelease() {
+        getInstrumentation().runOnMainSync {
+            controller.onDragStart(initialLocationOnLeft = true)
+            controller.onDragUpdate(pointOnLeft.x, pointOnLeft.y)
+            controller.onDragUpdate(pointOnRight.x, pointOnRight.y)
+        }
+        waitForAnimateIn()
+        assertThat(dropTargetView).isNotNull()
+
+        getInstrumentation().runOnMainSync { controller.onDragEnd() }
         waitForAnimateOut()
         assertThat(dropTargetView).isNull()
+        assertThat(testListener.locationChanges).containsExactly(RIGHT)
+        assertThat(testListener.locationReleases).containsExactly(RIGHT)
     }
 
-    private val dropTargetView: View?
-        get() = container.findViewById(R.id.bubble_bar_drop_target)
-
-    private fun getExpectedDropTargetBounds(onLeft: Boolean): Rect =
+    private fun getExpectedDropTargetBoundsOnLeft(): Rect =
         Rect().also {
-            positioner.getBubbleBarExpandedViewBounds(onLeft, false /* isOveflowExpanded */, it)
+            positioner.getBubbleBarExpandedViewBounds(
+                true /* onLeft */,
+                false /* isOverflowExpanded */,
+                it
+            )
         }
 
-    private fun runOnMainSync(runnable: Runnable) {
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(runnable)
-    }
+    private fun getExpectedDropTargetBoundsOnRight(): Rect =
+        Rect().also {
+            positioner.getBubbleBarExpandedViewBounds(
+                false /* onLeft */,
+                false /* isOverflowExpanded */,
+                it
+            )
+        }
 
     private fun waitForAnimateIn() {
         // Advance animator for on-device test
-        runOnMainSync { animatorTestRule.advanceTimeBy(DROP_TARGET_ALPHA_IN_DURATION) }
+        getInstrumentation().runOnMainSync {
+            animatorTestRule.advanceTimeBy(DROP_TARGET_ALPHA_IN_DURATION)
+        }
     }
 
     private fun waitForAnimateOut() {
         // Advance animator for on-device test
-        runOnMainSync { animatorTestRule.advanceTimeBy(DROP_TARGET_ALPHA_OUT_DURATION) }
+        getInstrumentation().runOnMainSync {
+            animatorTestRule.advanceTimeBy(DROP_TARGET_ALPHA_OUT_DURATION)
+        }
+    }
+
+    private fun View.bounds(): Rect {
+        return Rect(0, 0, layoutParams.width, layoutParams.height).also { rect ->
+            rect.offsetTo(x.toInt(), y.toInt())
+        }
     }
 
     internal class TestLocationChangeListener : BaseBubblePinController.LocationChangeListener {

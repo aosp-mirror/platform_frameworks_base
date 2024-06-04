@@ -204,7 +204,6 @@ import android.view.translation.ViewTranslationCallback;
 import android.view.translation.ViewTranslationRequest;
 import android.view.translation.ViewTranslationResponse;
 import android.widget.Checkable;
-import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
 import android.window.OnBackInvokedDispatcher;
 
@@ -960,21 +959,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /** @hide */
     public HapticScrollFeedbackProvider mScrollFeedbackProvider = null;
-
-    /**
-     * Use the old (broken) way of building MeasureSpecs.
-     */
-    private static boolean sUseBrokenMakeMeasureSpec = false;
-
-    /**
-     * Always return a size of 0 for MeasureSpec values with a mode of UNSPECIFIED
-     */
-    static boolean sUseZeroUnspecifiedMeasureSpec = false;
-
-    /**
-     * Ignore any optimizations using the measure cache.
-     */
-    private static boolean sIgnoreMeasureCache = false;
 
     /**
      * Ignore an optimization that skips unnecessary EXACTLY layout passes.
@@ -1984,9 +1968,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public @interface ContentSensitivity {}
 
     /**
-     * Automatically determine whether a view displays sensitive content. For example, available
-     * autofill hints (or some other signal) can be used to determine if this view
-     * displays sensitive content.
+     * Content sensitivity is determined by the framework. The framework uses a heuristic to
+     * determine if this view displays sensitive content.
+     * Autofill hints i.e. {@link #getAutofillHints()}  are used in the heuristic
+     * to determine if this view should be considered as a sensitive view.
+     * <p>
+     * {@link #AUTOFILL_HINT_USERNAME},
+     * {@link #AUTOFILL_HINT_PASSWORD},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_NUMBER},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DAY},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_MONTH},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_YEAR}
+     * are considered sensitive hints by the framework, and the list may include more hints
+     * in the future.
+     *
+     * <p> The window hosting a sensitive view will be marked as secure during an active media
+     * projection session. This would be equivalent to applying
+     * {@link android.view.WindowManager.LayoutParams#FLAG_SECURE} to the window.
      *
      * @see #getContentSensitivity()
      */
@@ -1995,6 +1995,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * The view displays sensitive content.
+     *
+     * <p> The window hosting a sensitive view will be marked as secure during an active media
+     * projection session. This would be equivalent to applying
+     * {@link android.view.WindowManager.LayoutParams#FLAG_SECURE} to the window.
      *
      * @see #getContentSensitivity()
      */
@@ -5825,20 +5829,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (!sCompatibilityDone && context != null) {
             final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
 
-            // Older apps may need this compatibility hack for measurement.
-            sUseBrokenMakeMeasureSpec = targetSdkVersion <= Build.VERSION_CODES.JELLY_BEAN_MR1;
-
-            // Older apps expect onMeasure() to always be called on a layout pass, regardless
-            // of whether a layout was requested on that View.
-            sIgnoreMeasureCache = targetSdkVersion < Build.VERSION_CODES.KITKAT;
-
-            // In M and newer, our widgets can pass a "hint" value in the size
-            // for UNSPECIFIED MeasureSpecs. This lets child views of scrolling containers
-            // know what the expected parent size is going to be, so e.g. list items can size
-            // themselves at 1/3 the size of their container. It breaks older apps though,
-            // specifically apps that use some popular open source libraries.
-            sUseZeroUnspecifiedMeasureSpec = targetSdkVersion < Build.VERSION_CODES.M;
-
             // Old versions of the platform would give different results from
             // LinearLayout measurement passes using EXACTLY and non-EXACTLY
             // modes, so we always need to run an additional EXACTLY pass.
@@ -6014,8 +6004,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         boolean endPaddingDefined = false;
         boolean leftPaddingDefined = false;
         boolean rightPaddingDefined = false;
-
-        final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
 
         // Set default values.
         viewFlagValues |= FOCUSABLE_AUTO;
@@ -6237,11 +6225,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 //noinspection deprecation
                 case R.styleable.View_fadingEdge:
-                    if (targetSdkVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                        // Ignore the attribute starting with ICS
-                        break;
-                    }
-                    // With builds < ICS, fall through and apply fading edges
+                    break;
                 case R.styleable.View_requiresFadingEdge:
                     final int fadingEdge = a.getInt(attr, FADING_EDGE_NONE);
                     if (fadingEdge != FADING_EDGE_NONE) {
@@ -6379,35 +6363,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             PROVIDER_BACKGROUND));
                     break;
                 case R.styleable.View_foreground:
-                    if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
-                        setForeground(a.getDrawable(attr));
-                    }
+                    setForeground(a.getDrawable(attr));
                     break;
                 case R.styleable.View_foregroundGravity:
-                    if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
-                        setForegroundGravity(a.getInt(attr, Gravity.NO_GRAVITY));
-                    }
+                    setForegroundGravity(a.getInt(attr, Gravity.NO_GRAVITY));
                     break;
                 case R.styleable.View_foregroundTintMode:
-                    if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
-                        setForegroundTintBlendMode(
-                                Drawable.parseBlendMode(a.getInt(attr, -1),
-                                        null));
-                    }
+                    setForegroundTintBlendMode(
+                            Drawable.parseBlendMode(a.getInt(attr, -1),
+                                    null));
                     break;
                 case R.styleable.View_foregroundTint:
-                    if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
-                        setForegroundTintList(a.getColorStateList(attr));
-                    }
+                    setForegroundTintList(a.getColorStateList(attr));
                     break;
                 case R.styleable.View_foregroundInsidePadding:
-                    if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
-                        if (mForegroundInfo == null) {
-                            mForegroundInfo = new ForegroundInfo();
-                        }
-                        mForegroundInfo.mInsidePadding = a.getBoolean(attr,
-                                mForegroundInfo.mInsidePadding);
+                    if (mForegroundInfo == null) {
+                        mForegroundInfo = new ForegroundInfo();
                     }
+                    mForegroundInfo.mInsidePadding = a.getBoolean(attr,
+                            mForegroundInfo.mInsidePadding);
                     break;
                 case R.styleable.View_scrollIndicators:
                     final int scrollIndicators =
@@ -10548,8 +10522,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Sets content sensitivity mode to determine whether this view displays sensitive content
-     * (e.g. username, password etc.). The system may improve user privacy i.e. hide content
+     * (e.g. username, password etc.). The system will improve user privacy i.e. hide content
      * drawn by a sensitive view from screen sharing and recording.
+     *
+     * <p> The window hosting a sensitive view will be marked as secure during an active media
+     * projection session. This would be equivalent to applying
+     * {@link android.view.WindowManager.LayoutParams#FLAG_SECURE} to the window.
      *
      * @param mode {@link #CONTENT_SENSITIVITY_AUTO}, {@link #CONTENT_SENSITIVITY_NOT_SENSITIVE}
      *                                            or {@link #CONTENT_SENSITIVITY_SENSITIVE}
@@ -10574,8 +10552,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #setContentSensitivity(int)}.
      */
     @FlaggedApi(FLAG_SENSITIVE_CONTENT_APP_PROTECTION_API)
-    public @ContentSensitivity
-    final int getContentSensitivity() {
+    public @ContentSensitivity final int getContentSensitivity() {
         return (mPrivateFlags4 & PFLAG4_CONTENT_SENSITIVITY_MASK)
                 >> PFLAG4_CONTENT_SENSITIVITY_SHIFT;
     }
@@ -13882,11 +13859,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     })
     @ResolvedLayoutDir
     public int getLayoutDirection() {
-        final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
-        if (targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            mPrivateFlags2 |= PFLAG2_LAYOUT_DIRECTION_RESOLVED;
-            return LAYOUT_DIRECTION_RESOLVED_DEFAULT;
-        }
         return ((mPrivateFlags2 & PFLAG2_LAYOUT_DIRECTION_RESOLVED_RTL) ==
                 PFLAG2_LAYOUT_DIRECTION_RESOLVED_RTL) ? LAYOUT_DIRECTION_RTL : LAYOUT_DIRECTION_LTR;
     }
@@ -22457,8 +22429,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * RTL not supported)
      */
     private boolean isRtlCompatibilityMode() {
-        final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
-        return targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR1 || !hasRtlSupport();
+        return !hasRtlSupport();
     }
 
     /**
@@ -23705,12 +23676,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
                     mPrivateFlags &= ~PFLAG_DIRTY_MASK;
 
-                    // // For VRR to vote the preferred frame rate
-                    if (sToolkitSetFrameRateReadOnlyFlagValue
-                            && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
-                        votePreferredFrameRate();
-                    }
-
                     mPrivateFlags4 |= PFLAG4_HAS_DRAWN;
 
                     // Fast path for layouts with no backgrounds
@@ -23726,6 +23691,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     } else {
                         draw(canvas);
                     }
+                }
+
+                // For VRR to vote the preferred frame rate
+                if (sToolkitSetFrameRateReadOnlyFlagValue
+                        && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
+                    votePreferredFrameRate();
                 }
             } finally {
                 renderNode.endRecording();
@@ -28126,7 +28097,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 cacheIndex = forceLayout ? -1 : mMeasureCache.indexOfKey(key);
             }
 
-            if (cacheIndex < 0 || sIgnoreMeasureCache) {
+            if (cacheIndex < 0) {
                 if (isTraversalTracingEnabled()) {
                     Trace.beginSection(mTracingStrings.onMeasure);
                 }
@@ -31112,11 +31083,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         public static int makeMeasureSpec(@IntRange(from = 0, to = (1 << MeasureSpec.MODE_SHIFT) - 1) int size,
                                           @MeasureSpecMode int mode) {
-            if (sUseBrokenMakeMeasureSpec) {
-                return size + mode;
-            } else {
-                return (size & ~MODE_MASK) | (mode & MODE_MASK);
-            }
+            return (size & ~MODE_MASK) | (mode & MODE_MASK);
         }
 
         /**
@@ -31127,9 +31094,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         @UnsupportedAppUsage
         public static int makeSafeMeasureSpec(int size, int mode) {
-            if (sUseZeroUnspecifiedMeasureSpec && mode == UNSPECIFIED) {
-                return 0;
-            }
             return makeMeasureSpec(size, mode);
         }
 
@@ -34061,10 +34025,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private float convertVelocityToFrameRate(float velocityPps) {
+        // From UXR study, premium experience is:
+        // 1500+    dp/s: 120fps
+        // 0 - 1500 dp/s:  80fps
+        // OEMs are likely to modify this to balance battery and user experience for their
+        // specific device.
         float density = mAttachInfo.mDensity;
         float velocityDps = velocityPps / density;
-        // Choose a frame rate in increments of 10fps
-        return Math.min(MAX_FRAME_RATE, 60f + (10f * (float) Math.floor(velocityDps / 300f)));
+        return (velocityDps >= 1500f) ? MAX_FRAME_RATE : 80f;
     }
 
     /**

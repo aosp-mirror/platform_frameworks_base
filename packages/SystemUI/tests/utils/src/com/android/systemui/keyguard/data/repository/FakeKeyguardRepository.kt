@@ -104,7 +104,8 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     private val _biometricUnlockState =
         MutableStateFlow(BiometricUnlockModel(BiometricUnlockMode.NONE, null))
-    override val biometricUnlockState: Flow<BiometricUnlockModel> = _biometricUnlockState
+    override val biometricUnlockState: StateFlow<BiometricUnlockModel> =
+        _biometricUnlockState.asStateFlow()
 
     private val _fingerprintSensorLocation = MutableStateFlow<Point?>(null)
     override val fingerprintSensorLocation: Flow<Point?> = _fingerprintSensorLocation

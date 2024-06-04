@@ -489,6 +489,14 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     /** @throws UnsupportedOperationException since a proxy does not need magnification */
     @RequiresNoPermission
     @Override
+    public boolean isMagnificationSystemUIConnected() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("isMagnificationSystemUIConnected is not"
+                + " supported");
+    }
+
+    /** @throws UnsupportedOperationException since a proxy does not need magnification */
+    @RequiresNoPermission
+    @Override
     public boolean isMagnificationCallbackEnabled(int displayId) {
         throw new UnsupportedOperationException("isMagnificationCallbackEnabled is not supported");
     }
