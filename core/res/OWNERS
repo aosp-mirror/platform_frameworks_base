@@ -68,8 +68,8 @@ per-file res/xml/power_profile_test.xml = file:/BATTERY_STATS_OWNERS
 
 # RemoteView color resources
 per-file remote_color_resources_res/symbols.xml = pbdr@google.com
-per-file remote_color_resources_res/values/config.xml = pbdr@google.com
-per-file remote_color_resources_res/values/symbols.xml = pbdr@google.com
+per-file remote_color_resources_res/values/public.xml = pbdr@google.com
+per-file remote_color_resources_res/values/colors.xml = pbdr@google.com
 
 # Telephony
 per-file res/values/config_telephony.xml = file:/platform/frameworks/opt/telephony:/OWNERS
