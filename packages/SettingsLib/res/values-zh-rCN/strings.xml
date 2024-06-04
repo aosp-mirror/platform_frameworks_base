@@ -700,7 +700,7 @@
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"选择键盘布局"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"默认"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"唤醒屏幕"</string>
-    <string name="allow_turn_screen_on" msgid="6194845766392742639">"允许开启屏幕"</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"允许唤醒屏幕"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"允许应用唤醒屏幕。如获授权，该应用便可在您未明确表达意愿的情况下随时唤醒屏幕。"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"要停止广播“<xliff:g id="APP_NAME">%1$s</xliff:g>”的内容吗？"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"如果广播“<xliff:g id="SWITCHAPP">%1$s</xliff:g>”的内容或更改输出来源，当前的广播就会停止"</string>

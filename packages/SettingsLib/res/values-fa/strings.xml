@@ -701,7 +701,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"پیش‌فرض"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"روشن کردن صفحه‌نمایش"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"اجازه روشن کردن صفحه‌نمایش"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"به برنامه اجازه می‌دهد صفحه‌نمایش را روشن کند. اگر اجازه داده شود، ممکن است این برنامه در هر زمانی بدون هدف صریح شما صفحه‌نمایش را روشن کند."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"به برنامه اجازه می‌دهد صفحه‌نمایش را روشن کند. اگر این اجازه داده شود، ممکن است این برنامه در هر زمانی بدون توجه به منظور صریح شما صفحه‌نمایش را روشن کند."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"همه‌فرستی <xliff:g id="APP_NAME">%1$s</xliff:g> متوقف شود؟"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"اگر <xliff:g id="SWITCHAPP">%1$s</xliff:g> را همه‌فرستی کنید یا خروجی را تغییر دهید، همه‌فرستی کنونی متوقف خواهد شد"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"همه‌فرستی <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
