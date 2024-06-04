@@ -2452,11 +2452,9 @@ public final class ActiveServices {
                                             + " foreground service type "
                                             + ServiceInfo.foregroundServiceTypeToLabel(
                                                     foregroundServiceType);
-                                    // Only throw an exception if the new ANR behavior
-                                    // ("do nothing") is not gated or the new crashing logic gate
+                                    // Only throw an exception if the new crashing logic gate
                                     // is enabled; otherwise, reset the limit temporarily.
-                                    if (!android.app.Flags.gateFgsTimeoutAnrBehavior()
-                                            || android.app.Flags.enableFgsTimeoutCrashBehavior()) {
+                                    if (android.app.Flags.enableFgsTimeoutCrashBehavior()) {
                                         throw new ForegroundServiceStartNotAllowedException(
                                                     exceptionMsg);
                                     } else {
@@ -3956,21 +3954,12 @@ public final class ActiveServices {
                 // stop the service, decrement the number of parallel running services here.
                 fgsTypeInfo.decNumParallelServices();
             }
-        }
 
-        final String reason = "A foreground service of type "
-                + ServiceInfo.foregroundServiceTypeToLabel(fgsType)
-                + " did not stop within its timeout: " + sr.getComponentName();
-
-        if (android.app.Flags.gateFgsTimeoutAnrBehavior()
-                || !android.app.Flags.enableFgsTimeoutCrashBehavior()) {
-            // Log a WTF instead of crashing the app while the new behavior is gated.
-            Slog.wtf(TAG, reason);
-            return;
-        }
-        if (android.app.Flags.enableFgsTimeoutCrashBehavior()) {
-            // Crash the app
-            synchronized (mAm) {
+            final String reason = "A foreground service of type "
+                    + ServiceInfo.foregroundServiceTypeToLabel(fgsType)
+                    + " did not stop within its timeout: " + sr.getComponentName();
+            if (android.app.Flags.enableFgsTimeoutCrashBehavior()) {
+                // Crash the app
                 Slog.e(TAG_SERVICE, "FGS Crashed: " + sr);
                 traceInstant("FGS Crash: ", sr);
                 if (sr.app != null) {
@@ -3980,6 +3969,9 @@ public final class ActiveServices {
                             ForegroundServiceDidNotStopInTimeException
                                     .createExtrasForService(sr.getComponentName()));
                 }
+            } else {
+                // Log a WTF instead of crashing the app while the new behavior is gated.
+                Slog.wtf(TAG, reason);
             }
         }
     }
