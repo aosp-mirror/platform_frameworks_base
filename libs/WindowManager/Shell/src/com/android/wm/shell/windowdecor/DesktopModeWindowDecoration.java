@@ -385,7 +385,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             // Should match the density of the task. The task may have had its density overridden
             // to be different that SysUI's.
             windowDecorConfig.setTo(taskInfo.configuration);
-        } else if (DesktopModeStatus.isDesktopDensityOverrideSet()) {
+        } else if (DesktopModeStatus.useDesktopOverrideDensity()) {
             // The task has had its density overridden, but keep using the system's density to
             // layout the header.
             windowDecorConfig.setTo(context.getResources().getConfiguration());

@@ -76,7 +76,7 @@ import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
 import com.android.wm.shell.shared.DesktopModeStatus
 import com.android.wm.shell.shared.DesktopModeStatus.DESKTOP_DENSITY_OVERRIDE
-import com.android.wm.shell.shared.DesktopModeStatus.isDesktopDensityOverrideSet
+import com.android.wm.shell.shared.DesktopModeStatus.useDesktopOverrideDensity
 import com.android.wm.shell.shared.annotations.ExternalThread
 import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.splitscreen.SplitScreenController
@@ -961,8 +961,8 @@ class DesktopTasksController(
             }
         }
         val wct = WindowContainerTransaction()
-        if (isDesktopDensityOverrideSet()) {
-            // TODO(344599474) reintroduce density changes behind a disabled flag
+        if (useDesktopOverrideDensity()) {
+            wct.setDensityDpi(task.token, DESKTOP_DENSITY_OVERRIDE)
         }
         // Desktop Mode is showing and we're launching a new Task - we might need to minimize
         // a Task.
@@ -1036,7 +1036,7 @@ class DesktopTasksController(
         }
         wct.setWindowingMode(taskInfo.token, targetWindowingMode)
         wct.reorder(taskInfo.token, true /* onTop */)
-        if (isDesktopDensityOverrideSet()) {
+        if (useDesktopOverrideDensity()) {
             wct.setDensityDpi(taskInfo.token, DESKTOP_DENSITY_OVERRIDE)
         }
     }
@@ -1056,7 +1056,7 @@ class DesktopTasksController(
             }
         wct.setWindowingMode(taskInfo.token, targetWindowingMode)
         wct.setBounds(taskInfo.token, Rect())
-        if (isDesktopDensityOverrideSet()) {
+        if (useDesktopOverrideDensity()) {
             wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
         }
     }
