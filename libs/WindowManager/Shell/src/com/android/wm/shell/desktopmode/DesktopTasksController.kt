@@ -486,7 +486,9 @@ class DesktopTasksController(
             "DesktopTasksController: cancelDragToDesktop taskId=%d",
             task.taskId
         )
-        dragToDesktopTransitionHandler.cancelDragToDesktopTransition()
+        dragToDesktopTransitionHandler.cancelDragToDesktopTransition(
+            DragToDesktopTransitionHandler.CancelState.STANDARD_CANCEL
+        )
     }
 
     private fun moveToFullscreenWithAnimation(task: RunningTaskInfo, position: Point) {
@@ -1105,20 +1107,31 @@ class DesktopTasksController(
     @JvmOverloads
     fun requestSplit(
         taskInfo: RunningTaskInfo,
-        leftOrTop: Boolean = false,
+        leftOrTop: Boolean = false
     ) {
-        val windowingMode = taskInfo.windowingMode
-        if (
-            windowingMode == WINDOWING_MODE_FULLSCREEN || windowingMode == WINDOWING_MODE_FREEFORM
-        ) {
-            val wct = WindowContainerTransaction()
-            addMoveToSplitChanges(wct, taskInfo)
-            splitScreenController.requestEnterSplitSelect(
-                taskInfo,
-                wct,
-                if (leftOrTop) SPLIT_POSITION_TOP_OR_LEFT else SPLIT_POSITION_BOTTOM_OR_RIGHT,
-                taskInfo.configuration.windowConfiguration.bounds
-            )
+        // If a drag to desktop is in progress, we want to enter split select
+        // even if the requesting task is already in split.
+        val isDragging = dragToDesktopTransitionHandler.inProgress
+        val shouldRequestSplit = taskInfo.isFullscreen || taskInfo.isFreeform || isDragging
+        if (shouldRequestSplit) {
+            if (isDragging) {
+                releaseVisualIndicator()
+                val cancelState = if (leftOrTop) {
+                    DragToDesktopTransitionHandler.CancelState.CANCEL_SPLIT_LEFT
+                } else {
+                    DragToDesktopTransitionHandler.CancelState.CANCEL_SPLIT_RIGHT
+                }
+                dragToDesktopTransitionHandler.cancelDragToDesktopTransition(cancelState)
+            } else {
+                val wct = WindowContainerTransaction()
+                addMoveToSplitChanges(wct, taskInfo)
+                splitScreenController.requestEnterSplitSelect(
+                    taskInfo,
+                    wct,
+                    if (leftOrTop) SPLIT_POSITION_TOP_OR_LEFT else SPLIT_POSITION_BOTTOM_OR_RIGHT,
+                    taskInfo.configuration.windowConfiguration.bounds
+                )
+            }
         }
     }
 
@@ -1247,7 +1260,10 @@ class DesktopTasksController(
      * @param taskInfo the task being dragged.
      * @param y height of drag, to be checked against status bar height.
      */
-    fun onDragPositioningEndThroughStatusBar(inputCoordinates: PointF, taskInfo: RunningTaskInfo) {
+    fun onDragPositioningEndThroughStatusBar(
+        inputCoordinates: PointF,
+        taskInfo: RunningTaskInfo,
+    ) {
         val indicator = getVisualIndicator() ?: return
         val indicatorType = indicator.updateIndicatorType(inputCoordinates, taskInfo.windowingMode)
         when (indicatorType) {
@@ -1264,10 +1280,10 @@ class DesktopTasksController(
                 cancelDragToDesktop(taskInfo)
             }
             DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_LEFT_INDICATOR -> {
-                finalizeDragToDesktop(taskInfo, getSnapBounds(taskInfo, SnapPosition.LEFT))
+                requestSplit(taskInfo, leftOrTop = true)
             }
             DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_RIGHT_INDICATOR -> {
-                finalizeDragToDesktop(taskInfo, getSnapBounds(taskInfo, SnapPosition.RIGHT))
+                requestSplit(taskInfo, leftOrTop = false)
             }
         }
     }
