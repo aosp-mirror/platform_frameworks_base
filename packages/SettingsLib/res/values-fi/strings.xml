@@ -674,8 +674,8 @@
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Valitse näppäimistöasettelu"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Oletus"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Näytön käynnistys"</string>
-    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Salli näytön käynnistäminen"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Salli sovelluksen käynnistää näyttö. Jos sovellus saa luvan, se voi käynnistää näytön itsenäisesti milloin tahansa."</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Salli näytön laittaminen päälle"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Salli sovelluksen laittaa näyttö päälle. Jos sovellus saa luvan, se voi laittaa näytön päälle itsenäisesti milloin tahansa."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Lopetetaanko <xliff:g id="APP_NAME">%1$s</xliff:g>-sovelluksen lähettäminen?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Jos lähetät <xliff:g id="SWITCHAPP">%1$s</xliff:g>-sovellusta tai muutat ulostuloa, nykyinen lähetyksesi loppuu"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Lähetä <xliff:g id="SWITCHAPP">%1$s</xliff:g>-sovellusta"</string>
