@@ -231,14 +231,14 @@ constructor(
         row: ExpandableNotificationRow,
         @InflationFlag contentToUnbind: Int
     ) {
-        var contentToUnbind = contentToUnbind
         logger.logUnbinding(entry, contentToUnbind)
         var curFlag = 1
-        while (contentToUnbind != 0) {
-            if (contentToUnbind and curFlag != 0) {
+        var contentLeftToUnbind = contentToUnbind
+        while (contentLeftToUnbind != 0) {
+            if (contentLeftToUnbind and curFlag != 0) {
                 freeNotificationView(entry, row, curFlag)
             }
-            contentToUnbind = contentToUnbind and curFlag.inv()
+            contentLeftToUnbind = contentLeftToUnbind and curFlag.inv()
             curFlag = curFlag shl 1
         }
     }
@@ -774,42 +774,27 @@ constructor(
                         normalGroupHeader = normalGroupHeader,
                         minimizedGroupHeader = minimizedGroupHeader
                     )
-                    .also {
-                        setNotifsViewsInflaterFactory(it, row, notifLayoutInflaterFactoryProvider)
-                    }
+                    .withLayoutInflaterFactory(row, notifLayoutInflaterFactoryProvider)
             }
         }
 
-        private fun setNotifsViewsInflaterFactory(
-            remoteViews: NewRemoteViews,
+        private fun NewRemoteViews.withLayoutInflaterFactory(
             row: ExpandableNotificationRow,
-            notifLayoutInflaterFactoryProvider: NotifLayoutInflaterFactory.Provider
-        ) {
-            setRemoteViewsInflaterFactory(
-                remoteViews.contracted,
-                notifLayoutInflaterFactoryProvider.provide(row, FLAG_CONTENT_VIEW_CONTRACTED)
-            )
-            setRemoteViewsInflaterFactory(
-                remoteViews.expanded,
-                notifLayoutInflaterFactoryProvider.provide(row, FLAG_CONTENT_VIEW_EXPANDED)
-            )
-            setRemoteViewsInflaterFactory(
-                remoteViews.headsUp,
-                notifLayoutInflaterFactoryProvider.provide(row, FLAG_CONTENT_VIEW_HEADS_UP)
-            )
-            setRemoteViewsInflaterFactory(
-                remoteViews.public,
-                notifLayoutInflaterFactoryProvider.provide(row, FLAG_CONTENT_VIEW_PUBLIC)
-            )
-        }
-
-        private fun setRemoteViewsInflaterFactory(
-            remoteViews: RemoteViews?,
-            notifLayoutInflaterFactory: NotifLayoutInflaterFactory
-        ) {
-            if (remoteViews != null) {
-                remoteViews.layoutInflaterFactory = notifLayoutInflaterFactory
+            provider: NotifLayoutInflaterFactory.Provider
+        ): NewRemoteViews {
+            contracted?.let {
+                it.layoutInflaterFactory = provider.provide(row, FLAG_CONTENT_VIEW_CONTRACTED)
             }
+            expanded?.let {
+                it.layoutInflaterFactory = provider.provide(row, FLAG_CONTENT_VIEW_EXPANDED)
+            }
+            headsUp?.let {
+                it.layoutInflaterFactory = provider.provide(row, FLAG_CONTENT_VIEW_HEADS_UP)
+            }
+            public?.let {
+                it.layoutInflaterFactory = provider.provide(row, FLAG_CONTENT_VIEW_PUBLIC)
+            }
+            return this
         }
 
         private fun apply(
@@ -1326,13 +1311,10 @@ constructor(
             }
             // No need to check if the app isn't using any custom views
             val notification: Notification = entry.sbn.notification
-            return if (
-                notification.contentView == null &&
-                    notification.bigContentView == null &&
-                    notification.headsUpContentView == null
-            ) {
-                false
-            } else true
+            @Suppress("DEPRECATION")
+            return !(notification.contentView == null &&
+                notification.bigContentView == null &&
+                notification.headsUpContentView == null)
         }
 
         @Throws(InflationException::class)
@@ -1380,7 +1362,6 @@ constructor(
             val privateLayout = row.privateLayout
             val publicLayout = row.publicLayout
             logger.logAsyncTaskProgress(entry, "finishing")
-            var setRepliesAndActions = true
             if (reInflateFlags and FLAG_CONTENT_VIEW_CONTRACTED != 0) {
                 if (result.inflatedContentView != null) {
                     // New view case
@@ -1399,7 +1380,6 @@ constructor(
                         result.remoteViews.contracted
                     )
                 }
-                setRepliesAndActions = true
             }
             if (reInflateFlags and FLAG_CONTENT_VIEW_EXPANDED != 0) {
                 if (result.inflatedExpandedView != null) {
@@ -1427,7 +1407,6 @@ constructor(
                     privateLayout.setExpandedInflatedSmartReplies(null)
                 }
                 row.setExpandable(result.remoteViews.expanded != null)
-                setRepliesAndActions = true
             }
             if (reInflateFlags and FLAG_CONTENT_VIEW_HEADS_UP != 0) {
                 if (result.inflatedHeadsUpView != null) {
@@ -1452,7 +1431,6 @@ constructor(
                 } else {
                     privateLayout.setHeadsUpInflatedSmartReplies(null)
                 }
-                setRepliesAndActions = true
             }
             if (
                 AsyncHybridViewInflation.isEnabled &&
@@ -1469,9 +1447,7 @@ constructor(
                     privateLayout.setSingleLineView(result.inflatedSingleLineView)
                 }
             }
-            if (setRepliesAndActions) {
-                result.inflatedSmartReplyState?.let { privateLayout.setInflatedSmartReplyState(it) }
-            }
+            result.inflatedSmartReplyState?.let { privateLayout.setInflatedSmartReplyState(it) }
             if (reInflateFlags and FLAG_CONTENT_VIEW_PUBLIC != 0) {
                 if (result.inflatedPublicView != null) {
                     publicLayout.setContractedChild(result.inflatedPublicView)
@@ -1546,12 +1522,13 @@ constructor(
             builder: Notification.Builder,
             isMinimized: Boolean
         ): RemoteViews? {
+            @Suppress("DEPRECATION")
             val bigContentView: RemoteViews? = builder.createBigContentView()
             if (bigContentView != null) {
                 return bigContentView
             }
             if (isMinimized) {
-                val contentView: RemoteViews = builder.createContentView()
+                @Suppress("DEPRECATION") val contentView: RemoteViews = builder.createContentView()
                 Notification.Builder.makeHeaderExpanded(contentView)
                 return contentView
             }
