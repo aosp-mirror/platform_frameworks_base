@@ -19,10 +19,8 @@ import android.annotation.ColorInt
 import android.app.ActivityManager.RunningTaskInfo
 import android.content.res.ColorStateList
 import android.content.res.Configuration
-import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.ShapeDrawable
@@ -32,19 +30,22 @@ import android.view.View.OnLongClickListener
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.withStyledAttributes
 import androidx.core.view.isVisible
 import com.android.internal.R.attr.materialColorOnSecondaryContainer
 import com.android.internal.R.attr.materialColorOnSurface
-import com.android.internal.R.attr.materialColorOnSurfaceInverse
 import com.android.internal.R.attr.materialColorSecondaryContainer
 import com.android.internal.R.attr.materialColorSurfaceContainerHigh
 import com.android.internal.R.attr.materialColorSurfaceContainerLow
 import com.android.internal.R.attr.materialColorSurfaceDim
-import com.android.internal.R.attr.materialColorSurfaceInverse
 import com.android.window.flags.Flags
 import com.android.wm.shell.R
 import com.android.wm.shell.windowdecor.MaximizeButtonView
+import com.android.wm.shell.windowdecor.common.DecorThemeUtil
+import com.android.wm.shell.windowdecor.common.Theme
 import com.android.wm.shell.windowdecor.extension.isLightCaptionBarAppearance
 import com.android.wm.shell.windowdecor.extension.isTransparentCaptionBarAppearance
 
@@ -63,6 +64,10 @@ internal class AppHeaderViewHolder(
         appIconBitmap: Bitmap,
         onMaximizeHoverAnimationFinishedListener: () -> Unit
 ) : WindowDecorationViewHolder(rootView) {
+
+    private val decorThemeUtil = DecorThemeUtil(context)
+    private val lightColors = dynamicLightColorScheme(context)
+    private val darkColors = dynamicDarkColorScheme(context)
 
     /**
      * The corner radius to apply to the app chip, maximize and close button's background drawable.
@@ -168,19 +173,12 @@ internal class AppHeaderViewHolder(
         val headerStyle = getHeaderStyle(header)
 
         // Caption Background
-        val headerBackground = captionView.background as LayerDrawable
-        val backLayer = headerBackground.findDrawableByLayerId(R.id.backLayer) as GradientDrawable
-        val frontLayer = headerBackground.findDrawableByLayerId(R.id.frontLayer) as GradientDrawable
         when (headerStyle.background) {
             is HeaderStyle.Background.Opaque -> {
-                backLayer.setColor(headerStyle.background.backLayerColor ?: Color.BLACK)
-                frontLayer.setColor(headerStyle.background.frontLayerColor)
-                frontLayer.alpha = headerStyle.background.frontLayerOpacity
+                captionView.setBackgroundColor(headerStyle.background.color)
             }
             HeaderStyle.Background.Transparent -> {
-                backLayer.setColor(Color.TRANSPARENT)
-                frontLayer.setColor(Color.TRANSPARENT)
-                frontLayer.alpha = OPACITY_100
+                captionView.setBackgroundColor(Color.TRANSPARENT)
             }
         }
 
@@ -204,7 +202,7 @@ internal class AppHeaderViewHolder(
         }
         // Maximize button.
         maximizeButtonView.setAnimationTints(
-            darkMode = header.appTheme == Header.Theme.DARK,
+            darkMode = header.appTheme == Theme.DARK,
             iconForegroundColor = colorStateList,
             baseForegroundColor = foregroundColor,
             rippleDrawable = createRippleDrawable(
@@ -251,186 +249,88 @@ internal class AppHeaderViewHolder(
         )
     }
 
-    private fun getHeaderBackground(
-        header: Header
-    ): HeaderStyle.Background {
-        when (header.type) {
+    private fun getHeaderBackground(header: Header): HeaderStyle.Background {
+        return when (header.type) {
             Header.Type.DEFAULT -> {
-                if (header.systemTheme.isLight() && header.appTheme.isLight() && header.isFocused) {
-                    return HeaderStyle.Background.Opaque(
-                        frontLayerColor = attrToColor(materialColorSecondaryContainer),
-                        frontLayerOpacity = OPACITY_100,
-                        backLayerColor = null
-                    )
+                when (header.appTheme) {
+                    Theme.LIGHT -> {
+                        if (header.isFocused) {
+                            HeaderStyle.Background.Opaque(lightColors.secondaryContainer.toArgb())
+                        } else {
+                            HeaderStyle.Background.Opaque(lightColors.surfaceContainerLow.toArgb())
+                        }
+                    }
+                    Theme.DARK -> {
+                        if (header.isFocused) {
+                            HeaderStyle.Background.Opaque(darkColors.surfaceContainerHigh.toArgb())
+                        } else {
+                            HeaderStyle.Background.Opaque(darkColors.surfaceDim.toArgb())
+                        }
+                    }
                 }
-                if (header.systemTheme.isLight() && header.appTheme.isLight() &&
-                    !header.isFocused) {
-                    return HeaderStyle.Background.Opaque(
-                        frontLayerColor = attrToColor(materialColorSurfaceContainerLow),
-                        frontLayerOpacity = OPACITY_100,
-                        backLayerColor = null
-                    )
-                }
-                if (header.systemTheme.isDark() && header.appTheme.isDark() && header.isFocused) {
-                    return HeaderStyle.Background.Opaque(
-                        frontLayerColor = attrToColor(materialColorSurfaceContainerHigh),
-                        frontLayerOpacity = OPACITY_100,
-                        backLayerColor = null
-                    )
-                }
-                if (header.systemTheme.isDark() && header.appTheme.isDark() && !header.isFocused) {
-                    return HeaderStyle.Background.Opaque(
-                        frontLayerColor = attrToColor(materialColorSurfaceDim),
-                        frontLayerOpacity = OPACITY_100,
-                        backLayerColor = null
-                    )
-                }
-                if (header.systemTheme.isLight() && header.appTheme.isDark() && header.isFocused) {
-                    return HeaderStyle.Background.Opaque(
-                        frontLayerColor = attrToColor(materialColorSurfaceInverse),
-                        frontLayerOpacity = OPACITY_100,
-                        backLayerColor = null
-                    )
-                }
-                if (header.systemTheme.isLight() && header.appTheme.isDark() && !header.isFocused) {
-                    return HeaderStyle.Background.Opaque(
-                        frontLayerColor = attrToColor(materialColorSurfaceInverse),
-                        frontLayerOpacity = OPACITY_30,
-                        backLayerColor = Color.BLACK
-                    )
-                }
-                if (header.systemTheme.isDark() && header.appTheme.isLight() && header.isFocused) {
-                    return HeaderStyle.Background.Opaque(
-                        frontLayerColor = attrToColor(materialColorSurfaceInverse),
-                        frontLayerOpacity = OPACITY_100,
-                        backLayerColor = null
-                    )
-                }
-                if (header.systemTheme.isDark() && header.appTheme.isLight() && !header.isFocused) {
-                    return HeaderStyle.Background.Opaque(
-                        frontLayerColor = attrToColor(materialColorSurfaceInverse),
-                        frontLayerOpacity = OPACITY_55,
-                        backLayerColor = Color.WHITE
-                    )
-                }
-                error("No other combination expected header=$header")
             }
-            Header.Type.CUSTOM -> return HeaderStyle.Background.Transparent
+            Header.Type.CUSTOM -> HeaderStyle.Background.Transparent
         }
     }
 
     private fun getHeaderForeground(header: Header): HeaderStyle.Foreground {
-        when (header.type) {
+        return when (header.type) {
             Header.Type.DEFAULT -> {
-                if (header.systemTheme.isLight() && header.appTheme.isLight() && header.isFocused) {
-                    return HeaderStyle.Foreground(
-                        color = attrToColor(materialColorOnSecondaryContainer),
-                        opacity = OPACITY_100
-                    )
+                when (header.appTheme) {
+                    Theme.LIGHT -> {
+                        if (header.isFocused) {
+                            HeaderStyle.Foreground(
+                                color = lightColors.onSecondaryContainer.toArgb(),
+                                opacity = OPACITY_100
+                            )
+                        } else {
+                            HeaderStyle.Foreground(
+                                color = lightColors.onSecondaryContainer.toArgb(),
+                                opacity = OPACITY_65
+                            )
+                        }
+                    }
+                    Theme.DARK -> {
+                        if (header.isFocused) {
+                            HeaderStyle.Foreground(
+                                color = darkColors.onSurface.toArgb(),
+                                opacity = OPACITY_100
+                            )
+                        } else {
+                            HeaderStyle.Foreground(
+                                color = darkColors.onSurface.toArgb(),
+                                opacity = OPACITY_55
+                            )
+                        }
+                    }
                 }
-                if (header.systemTheme.isLight() && header.appTheme.isLight() &&
-                    !header.isFocused) {
-                    return HeaderStyle.Foreground(
-                        color = attrToColor(materialColorOnSecondaryContainer),
-                        opacity = OPACITY_65
-                    )
-                }
-                if (header.systemTheme.isDark() && header.appTheme.isDark() && header.isFocused) {
-                    return HeaderStyle.Foreground(
-                        color = attrToColor(materialColorOnSurface),
-                        opacity = OPACITY_100
-                    )
-                }
-                if (header.systemTheme.isDark() && header.appTheme.isDark() && !header.isFocused) {
-                    return HeaderStyle.Foreground(
-                        color = attrToColor(materialColorOnSurface),
-                        opacity = OPACITY_55
-                    )
-                }
-                if (header.systemTheme.isLight() && header.appTheme.isDark() && header.isFocused) {
-                    return HeaderStyle.Foreground(
-                        color = attrToColor(materialColorOnSurfaceInverse),
-                        opacity = OPACITY_100
-                    )
-                }
-                if (header.systemTheme.isLight() && header.appTheme.isDark() && !header.isFocused) {
-                    return HeaderStyle.Foreground(
-                        color = attrToColor(materialColorOnSurfaceInverse),
-                        opacity = OPACITY_65
-                    )
-                }
-                if (header.systemTheme.isDark() && header.appTheme.isLight() && header.isFocused) {
-                    return HeaderStyle.Foreground(
-                        color = attrToColor(materialColorOnSurfaceInverse),
-                        opacity = OPACITY_100
-                    )
-                }
-                if (header.systemTheme.isDark() && header.appTheme.isLight() && !header.isFocused) {
-                    return HeaderStyle.Foreground(
-                        color = attrToColor(materialColorOnSurfaceInverse),
-                        opacity = OPACITY_70
-                    )
-                }
-                error("No other combination expected header=$header")
             }
-            Header.Type.CUSTOM -> {
-                if (header.systemTheme.isLight() && header.isAppearanceCaptionLight &&
-                    header.isFocused) {
-                    return HeaderStyle.Foreground(
-                        color = attrToColor(materialColorOnSecondaryContainer),
+            Header.Type.CUSTOM -> when {
+                header.isAppearanceCaptionLight && header.isFocused -> {
+                    HeaderStyle.Foreground(
+                        color = lightColors.onSecondaryContainer.toArgb(),
                         opacity = OPACITY_100
                     )
                 }
-                if (header.systemTheme.isLight() && header.isAppearanceCaptionLight &&
-                    !header.isFocused) {
-                    return HeaderStyle.Foreground(
-                        color = attrToColor(materialColorOnSecondaryContainer),
+                header.isAppearanceCaptionLight && !header.isFocused -> {
+                    HeaderStyle.Foreground(
+                        color = lightColors.onSecondaryContainer.toArgb(),
                         opacity = OPACITY_65
                     )
                 }
-                if (header.systemTheme.isDark() && !header.isAppearanceCaptionLight &&
-                    header.isFocused) {
-                    return HeaderStyle.Foreground(
-                        color = attrToColor(materialColorOnSurface),
+                !header.isAppearanceCaptionLight && header.isFocused -> {
+                    HeaderStyle.Foreground(
+                        color = darkColors.onSurface.toArgb(),
                         opacity = OPACITY_100
                     )
                 }
-                if (header.systemTheme.isDark() && !header.isAppearanceCaptionLight &&
-                    !header.isFocused) {
-                    return HeaderStyle.Foreground(
-                        color = attrToColor(materialColorOnSurface),
+                !header.isAppearanceCaptionLight && !header.isFocused -> {
+                    HeaderStyle.Foreground(
+                        color = darkColors.onSurface.toArgb(),
                         opacity = OPACITY_55
                     )
                 }
-                if (header.systemTheme.isLight() && !header.isAppearanceCaptionLight &&
-                    header.isFocused) {
-                    return HeaderStyle.Foreground(
-                        color = attrToColor(materialColorOnSurfaceInverse),
-                        opacity = OPACITY_100
-                    )
-                }
-                if (header.systemTheme.isLight() && !header.isAppearanceCaptionLight &&
-                    !header.isFocused) {
-                    return HeaderStyle.Foreground(
-                        color = attrToColor(materialColorOnSurfaceInverse),
-                        opacity = OPACITY_65
-                    )
-                }
-                if (header.systemTheme.isDark() && header.isAppearanceCaptionLight &&
-                    header.isFocused) {
-                    return HeaderStyle.Foreground(
-                        color = attrToColor(materialColorOnSurfaceInverse),
-                        opacity = OPACITY_100
-                    )
-                }
-                if (header.systemTheme.isDark() && header.isAppearanceCaptionLight &&
-                    !header.isFocused) {
-                    return HeaderStyle.Foreground(
-                        color = attrToColor(materialColorOnSurfaceInverse),
-                        opacity = OPACITY_70
-                    )
-                }
-                error("No other combination expected header=$header")
+                else -> error("No other combination expected header=$header")
             }
         }
     }
@@ -442,39 +342,10 @@ internal class AppHeaderViewHolder(
             } else {
                 Header.Type.DEFAULT
             },
-            systemTheme = getSystemTheme(),
-            appTheme = getAppTheme(taskInfo),
+            appTheme = decorThemeUtil.getAppTheme(taskInfo),
             isFocused = taskInfo.isFocused,
             isAppearanceCaptionLight = taskInfo.isLightCaptionBarAppearance
         )
-    }
-
-    private fun getSystemTheme(): Header.Theme {
-        return if ((context.resources.configuration.uiMode and UI_MODE_NIGHT_MASK) ==
-            Configuration.UI_MODE_NIGHT_YES) {
-            Header.Theme.DARK
-        } else {
-            Header.Theme.LIGHT
-        }
-    }
-
-    private fun getAppTheme(taskInfo: RunningTaskInfo): Header.Theme {
-        // TODO: use app's uiMode to find its actual light/dark value. It needs to be added to the
-        //   TaskInfo/TaskDescription.
-        val backgroundColor = taskInfo.taskDescription?.backgroundColor ?: return getSystemTheme()
-        return if (Color.valueOf(backgroundColor).luminance() < 0.5) {
-            Header.Theme.DARK
-        } else {
-            Header.Theme.LIGHT
-        }
-    }
-
-    @ColorInt
-    private fun attrToColor(attr: Int): Int {
-        context.withStyledAttributes(null, intArrayOf(attr), 0, 0) {
-            return getColor(0, 0)
-        }
-        return Color.WHITE
     }
 
     @ColorInt
@@ -530,18 +401,12 @@ internal class AppHeaderViewHolder(
 
     private data class Header(
         val type: Type,
-        val systemTheme: Theme,
         val appTheme: Theme,
         val isFocused: Boolean,
         val isAppearanceCaptionLight: Boolean,
     ) {
         enum class Type { DEFAULT, CUSTOM }
-        enum class Theme { LIGHT, DARK }
     }
-
-    private fun Header.Theme.isLight(): Boolean = this == Header.Theme.LIGHT
-
-    private fun Header.Theme.isDark(): Boolean = this == Header.Theme.DARK
 
     private data class HeaderStyle(
         val background: Background,
@@ -554,11 +419,7 @@ internal class AppHeaderViewHolder(
 
         sealed class Background {
             data object Transparent : Background()
-            data class Opaque(
-                @ColorInt val frontLayerColor: Int,
-                val frontLayerOpacity: Int,
-                @ColorInt val backLayerColor: Int?
-            ) : Background()
+            data class Opaque(@ColorInt val color: Int) : Background()
         }
     }
 
@@ -634,9 +495,7 @@ internal class AppHeaderViewHolder(
         private const val OPACITY_100 = 255
         private const val OPACITY_11 = 28
         private const val OPACITY_15 = 38
-        private const val OPACITY_30 = 77
         private const val OPACITY_55 = 140
         private const val OPACITY_65 = 166
-        private const val OPACITY_70 = 179
     }
 }
