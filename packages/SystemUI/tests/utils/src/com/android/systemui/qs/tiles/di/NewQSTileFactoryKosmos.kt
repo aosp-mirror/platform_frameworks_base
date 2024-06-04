@@ -33,7 +33,6 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import javax.inject.Provider
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
 var Kosmos.newFactoryTileMap by Kosmos.Fixture { emptyMap<String, Provider<QSTileViewModel>>() }
@@ -50,7 +49,7 @@ val Kosmos.customTileViewModelFactory: QSTileViewModelFactory.Component by
                         instanceIdSequenceFake.newInstanceId(),
                     )
                 object : QSTileViewModel {
-                    override val state: SharedFlow<QSTileState> =
+                    override val state: StateFlow<QSTileState?> =
                         MutableStateFlow(QSTileState.build({ null }, tileSpec.spec) {})
                     override val config: QSTileConfig = config
                     override val isAvailable: StateFlow<Boolean> = MutableStateFlow(true)

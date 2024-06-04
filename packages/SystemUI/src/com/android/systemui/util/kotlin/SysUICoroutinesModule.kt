@@ -20,13 +20,16 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Tracing
+import com.android.systemui.dagger.qualifiers.UiBackground
 import dagger.Module
 import dagger.Provides
+import java.util.concurrent.Executor
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.coroutines.plus
 
@@ -82,5 +85,26 @@ class SysUICoroutinesModule {
         @Background bgCoroutineDispatcher: CoroutineDispatcher,
     ): CoroutineContext {
         return bgCoroutineDispatcher + tracingCoroutineContext
+    }
+
+    /** Coroutine dispatcher for background operations on for UI. */
+    @Provides
+    @SysUISingleton
+    @UiBackground
+    @Deprecated(
+        "Use @UiBackground CoroutineContext instead",
+        ReplaceWith("uiBgCoroutineContext()", "kotlin.coroutines.CoroutineContext")
+    )
+    fun uiBgDispatcher(@UiBackground uiBgExecutor: Executor): CoroutineDispatcher =
+        uiBgExecutor.asCoroutineDispatcher()
+
+    @Provides
+    @UiBackground
+    @SysUISingleton
+    fun uiBgCoroutineContext(
+        @Tracing tracingCoroutineContext: CoroutineContext,
+        @UiBackground uiBgCoroutineDispatcher: CoroutineDispatcher,
+    ): CoroutineContext {
+        return uiBgCoroutineDispatcher + tracingCoroutineContext
     }
 }
