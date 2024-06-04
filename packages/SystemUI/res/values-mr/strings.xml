@@ -372,8 +372,8 @@
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"नवीन डिव्हाइस पेअर करा"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"नवीन डिव्हाइस पेअर करण्यासाठी क्लिक करा"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"प्रीसेट अपडेट करता आले नाही"</string>
-    <!-- no translation found for hearing_devices_preset_label (7878267405046232358) -->
-    <skip />
+    <string name="hearing_devices_preset_label" msgid="7878267405046232358">"प्रीसेट"</string>
+    <string name="live_caption_title" msgid="8916875614623730005">"लाइव्ह कॅप्शन"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"डिव्हाइसचा मायक्रोफोन अनब्लॉक करायचा आहे का?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"डिव्हाइसचा कॅमेरा अनब्लॉक करायचा आहे का?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"डिव्हाइसचा कॅमेरा आणि मायक्रोफोन अनब्लॉक करायचा आहे का?"</string>
@@ -594,9 +594,9 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"नाही, नको"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"ॲप पिन केले"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"ॲप अनपिन केले"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"कॉल करा"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"कॉल"</string>
     <string name="stream_system" msgid="7663148785370565134">"सिस्टम"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"रिंग करा"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"रिंग"</string>
     <string name="stream_music" msgid="2188224742361847580">"मीडिया"</string>
     <string name="stream_alarm" msgid="16058075093011694">"अलार्म"</string>
     <string name="stream_notification" msgid="7930294049046243939">"सूचना"</string>
@@ -1318,6 +1318,15 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"अलीकडे <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) ने वापरले"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) द्वारे वापरले जात आहे"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"अलीकडे <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ने वापरले"</string>
+    <string name="shortcut_helper_category_system" msgid="462110876978937359">"सिस्टीम"</string>
+    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"मल्टिटास्किंग"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"इनपुट"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"अ‍ॅप शॉर्टकट"</string>
+    <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"अ‍ॅक्सेसिबिलिटी"</string>
+    <string name="shortcut_helper_title" msgid="8567500639300970049">"कीबोर्ड शॉर्टकट"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"शोधण्यासाठी शॉर्टकट"</string>
+    <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"कोलॅप्स करा आयकन"</string>
+    <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"विस्तार करा आयकन"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"कीबोर्ड बॅकलाइट"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d पैकी %1$d पातळी"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"होम कंट्रोल"</string>
