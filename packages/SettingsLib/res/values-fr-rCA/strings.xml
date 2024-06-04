@@ -501,7 +501,7 @@
     <string name="disabled" msgid="8017887509554714950">"Désactivée"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Autorisée"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Non autorisée"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Installer les applications inconnues"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Installer les applis inconnues"</string>
     <string name="home" msgid="973834627243661438">"Accueil des paramètres"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0 %"</item>

@@ -272,7 +272,7 @@
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Zezwolić na zdjęcie blokady OEM?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"UWAGA: gdy to ustawienie jest włączone, na urządzeniu nie będą działać funkcje ochrony."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"Aplikacja do pozorowania lokalizacji"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Nie ustawiono aplikacji do pozorowania lokalizacji"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Nie wybrano aplikacji do pozorowania lokalizacji"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Aplikacja do pozorowania lokalizacji: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Sieci"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certyfikacja wyświetlacza bezprzewodowego"</string>
