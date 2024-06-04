@@ -66,6 +66,9 @@ internal class Element(val key: ElementKey) {
      */
     var lastTransition: TransitionState.Transition? = null
 
+    /** Whether this element was ever drawn in a scene. */
+    var wasDrawnInAnyScene = false
+
     override fun toString(): String {
         return "Element(key=$key)"
     }
@@ -389,6 +392,8 @@ internal class ElementNode(
     }
 
     override fun ContentDrawScope.draw() {
+        element.wasDrawnInAnyScene = true
+
         val transition = elementTransition(element, currentTransitions)
         val drawScale = getDrawScale(layoutImpl, scene, element, transition, sceneState)
         if (drawScale == Scale.Default) {
@@ -725,6 +730,12 @@ private fun elementAlpha(
                 ::lerp,
             )
             .fastCoerceIn(0f, 1f)
+
+    // If the element is fading during this transition and that it is drawn for the first time, make
+    // sure that it doesn't instantly appear on screen.
+    if (!element.wasDrawnInAnyScene && alpha > 0f) {
+        element.sceneStates.forEach { it.value.alphaBeforeInterruption = 0f }
+    }
 
     val interruptedAlpha = interruptedAlpha(layoutImpl, transition, sceneState, alpha)
     sceneState.lastAlpha = interruptedAlpha
