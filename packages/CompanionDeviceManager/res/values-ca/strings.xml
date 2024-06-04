@@ -58,7 +58,7 @@
     <string name="permission_storage" msgid="6831099350839392343">"Fotos i contingut multimèdia"</string>
     <string name="permission_notifications" msgid="4099418516590632909">"Notificacions"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Aplicacions"</string>
-    <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Reproducció en línia"</string>
+    <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Estríming"</string>
     <string name="permission_phone_summary" msgid="8246321093970051702">"Fer i gestionar trucades telefòniques"</string>
     <string name="permission_call_logs_summary" msgid="7545243592757693321">"Llegir i escriure el registre de trucades del telèfon"</string>
     <string name="permission_sms_summary" msgid="8499509535410068616">"Enviar i llegir missatges SMS"</string>
