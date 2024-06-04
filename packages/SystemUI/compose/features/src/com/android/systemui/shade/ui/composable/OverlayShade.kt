@@ -20,11 +20,9 @@ package com.android.systemui.shade.ui.composable
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -43,6 +41,7 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -64,7 +63,7 @@ import java.util.Optional
 @Composable
 fun SceneScope.OverlayShade(
     viewModel: OverlayShadeViewModel,
-    horizontalArrangement: Arrangement.Horizontal,
+    panelAlignment: Alignment,
     lockscreenContent: Lazy<Optional<LockscreenContent>>,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
@@ -81,9 +80,9 @@ fun SceneScope.OverlayShade(
 
         Scrim(onClicked = viewModel::onScrimClicked)
 
-        Row(
+        Box(
             modifier = Modifier.fillMaxSize().panelPadding(),
-            horizontalArrangement = horizontalArrangement,
+            contentAlignment = panelAlignment,
         ) {
             Panel(
                 modifier = Modifier.element(OverlayShade.Elements.Panel).panelSize(),
