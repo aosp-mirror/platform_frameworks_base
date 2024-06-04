@@ -562,32 +562,35 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
     }
 
     void dump(PrintWriter pw, String prefix) {
-        pw.print(prefix); pw.println("AccessibilityWindowsPopulator");
-        String prefix2 = prefix + "  ";
+        synchronized (mLock) {
+            pw.print(prefix); pw.println("AccessibilityWindowsPopulator");
+            String prefix2 = prefix + "  ";
 
-        pw.print(prefix2); pw.print("mWindowsNotificationEnabled: ");
-        pw.println(mWindowsNotificationEnabled);
+            pw.print(prefix2); pw.print("mWindowsNotificationEnabled: ");
+            pw.println(mWindowsNotificationEnabled);
 
-        if (mVisibleWindows.isEmpty()) {
-            pw.print(prefix2); pw.println("No visible windows");
-        } else {
-            pw.print(prefix2); pw.print(mVisibleWindows.size());
-            pw.print(" visible windows: "); pw.println(mVisibleWindows);
+            if (mVisibleWindows.isEmpty()) {
+                pw.print(prefix2); pw.println("No visible windows");
+            } else {
+                pw.print(prefix2); pw.print(mVisibleWindows.size());
+                pw.print(" visible windows: "); pw.println(mVisibleWindows);
+            }
+            KeyDumper noKeyDumper = (i, k) -> {}; // display id is already shown on value;
+            KeyDumper displayDumper = (i, d) -> pw.printf("%sDisplay #%d: ", prefix, d);
+            // Ideally magnificationSpecDumper should use spec.dump(pw), but there is no such method
+            ValueDumper<MagnificationSpec> magnificationSpecDumper = spec -> pw.print(spec);
+
+            dumpSparseArray(pw, prefix2, mDisplayInfos,
+                    "display info", noKeyDumper, d -> pw.print(d));
+            dumpSparseArray(pw, prefix2, mInputWindowHandlesOnDisplays,
+                    "window handles on display", displayDumper, list -> pw.print(list));
+            dumpSparseArray(pw, prefix2, mMagnificationSpecInverseMatrix,
+                    "magnification spec matrix", noKeyDumper, matrix -> matrix.dump(pw));
+            dumpSparseArray(pw, prefix2, mCurrentMagnificationSpec,
+                    "current magnification spec", noKeyDumper, magnificationSpecDumper);
+            dumpSparseArray(pw, prefix2, mPreviousMagnificationSpec,
+                    "previous magnification spec", noKeyDumper, magnificationSpecDumper);
         }
-        KeyDumper noKeyDumper = (i, k) -> {}; // display id is already shown on value;
-        KeyDumper displayDumper = (i, d) -> pw.printf("%sDisplay #%d: ", prefix, d);
-        // Ideally magnificationSpecDumper should use spec.dump(pw), but there is no such method
-        ValueDumper<MagnificationSpec> magnificationSpecDumper = spec -> pw.print(spec);
-
-        dumpSparseArray(pw, prefix2, mDisplayInfos, "display info", noKeyDumper, d -> pw.print(d));
-        dumpSparseArray(pw, prefix2, mInputWindowHandlesOnDisplays, "window handles on display",
-                displayDumper, list -> pw.print(list));
-        dumpSparseArray(pw, prefix2, mMagnificationSpecInverseMatrix, "magnification spec matrix",
-                noKeyDumper, matrix -> matrix.dump(pw));
-        dumpSparseArray(pw, prefix2, mCurrentMagnificationSpec, "current magnification spec",
-                noKeyDumper, magnificationSpecDumper);
-        dumpSparseArray(pw, prefix2, mPreviousMagnificationSpec, "previous magnification spec",
-                noKeyDumper, magnificationSpecDumper);
     }
 
     @GuardedBy("mLock")
