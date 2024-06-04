@@ -194,6 +194,13 @@ std::optional<android::StringPiece> FindAttribute(const XmlPullParser* parser,
                                                   android::StringPiece name);
 
 /**
+ * Finds the attribute in the current element within the given namespace.
+ */
+std::optional<android::StringPiece> FindAttribute(const XmlPullParser* parser,
+                                                  android::StringPiece namespace_uri,
+                                                  android::StringPiece name);
+
+/**
  * Finds the attribute in the current element within the global namespace. The
  * attribute's value
  * must not be the empty string.
