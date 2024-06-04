@@ -1257,10 +1257,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
             // In a multi-resumed environment, like in a freeform device, the top
             // activity can be resumed, but it might not be the focused app.
-            // Set focused app when top activity is resumed
-            if (taskDisplayArea.inMultiWindowMode() && taskDisplayArea.mDisplayContent != null
-                    && taskDisplayArea.mDisplayContent.mFocusedApp != next) {
-                taskDisplayArea.mDisplayContent.setFocusedApp(next);
+            // Set focused app when top activity is resumed. However, we shouldn't do it for a
+            // same task because it can break focused state. (e.g. activity embedding)
+            if (taskDisplayArea.inMultiWindowMode() && taskDisplayArea.mDisplayContent != null) {
+                final ActivityRecord focusedApp = taskDisplayArea.mDisplayContent.mFocusedApp;
+                if (focusedApp == null || focusedApp.getTask() != next.getTask()) {
+                    taskDisplayArea.mDisplayContent.setFocusedApp(next);
+                }
             }
             ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivity: Top activity "
                     + "resumed %s", next);
