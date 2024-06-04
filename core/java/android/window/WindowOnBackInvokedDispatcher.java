@@ -37,6 +37,7 @@ import android.view.IWindow;
 import android.view.IWindowSession;
 import android.view.ImeBackAnimationController;
 import android.view.MotionEvent;
+import android.view.ViewRootImpl;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -68,6 +69,7 @@ import java.util.function.Supplier;
 public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     private IWindowSession mWindowSession;
     private IWindow mWindow;
+    private ViewRootImpl mViewRoot;
     @VisibleForTesting
     public final BackTouchTracker mTouchTracker = new BackTouchTracker();
     @VisibleForTesting
@@ -134,10 +136,12 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
      * is attached a window.
      */
     public void attachToWindow(@NonNull IWindowSession windowSession, @NonNull IWindow window,
+            @Nullable ViewRootImpl viewRoot,
             @Nullable ImeBackAnimationController imeBackAnimationController) {
         synchronized (mLock) {
             mWindowSession = windowSession;
             mWindow = window;
+            mViewRoot = viewRoot;
             mImeBackAnimationController = imeBackAnimationController;
             if (!mAllCallbacks.isEmpty()) {
                 setTopOnBackInvokedCallback(getTopCallback());
@@ -151,6 +155,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             clear();
             mWindow = null;
             mWindowSession = null;
+            mViewRoot = null;
             mImeBackAnimationController = null;
         }
     }
@@ -176,8 +181,6 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 return;
             }
             if (callback instanceof ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback) {
-                // Fall back to compat back key injection if legacy back behaviour should be used.
-                if (!isOnBackInvokedCallbackEnabled()) return;
                 if (callback instanceof ImeOnBackInvokedDispatcher.DefaultImeOnBackAnimationCallback
                         && mImeBackAnimationController != null) {
                     // register ImeBackAnimationController instead to play predictive back animation
@@ -309,7 +312,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             if (callback != null) {
                 int priority = mAllCallbacks.get(callback);
                 final IOnBackInvokedCallback iCallback = new OnBackInvokedCallbackWrapper(
-                        callback, mTouchTracker, mProgressAnimator, mHandler);
+                        callback, mTouchTracker, mProgressAnimator, mHandler, mViewRoot);
                 callbackInfo = new OnBackInvokedCallbackInfo(
                         iCallback,
                         priority,
@@ -399,16 +402,20 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         private final BackTouchTracker mTouchTracker;
         @NonNull
         private final Handler mHandler;
+        @Nullable
+        private ViewRootImpl mViewRoot;
 
         OnBackInvokedCallbackWrapper(
                 @NonNull OnBackInvokedCallback callback,
                 @NonNull BackTouchTracker touchTracker,
                 @NonNull BackProgressAnimator progressAnimator,
-                @NonNull Handler handler) {
+                @NonNull Handler handler,
+                @Nullable ViewRootImpl viewRoot) {
             mCallback = new WeakReference<>(callback);
             mTouchTracker = touchTracker;
             mProgressAnimator = progressAnimator;
             mHandler = handler;
+            mViewRoot = viewRoot;
         }
 
         @Override
@@ -451,6 +458,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         public void onBackInvoked() throws RemoteException {
             mHandler.post(() -> {
                 mTouchTracker.reset();
+                if (consumedByOnKeyPreIme()) return;
                 boolean isInProgress = mProgressAnimator.isBackAnimationInProgress();
                 mProgressAnimator.reset();
                 // TODO(b/333957271): Re-introduce auto fling progress generation.
@@ -465,6 +473,26 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 }
                 callback.onBackInvoked();
             });
+        }
+
+        private boolean consumedByOnKeyPreIme() {
+            final OnBackInvokedCallback callback = mCallback.get();
+            if ((callback instanceof ImeBackAnimationController
+                    || callback instanceof ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback)
+                    && mViewRoot != null && !isOnBackInvokedCallbackEnabled(mViewRoot.mContext)) {
+                // call onKeyPreIme API if the current callback is an IME callback and the app has
+                // not set enableOnBackInvokedCallback="false"
+                boolean consumed = mViewRoot.injectBackKeyEvents(/*preImeOnly*/ true);
+                if (consumed) {
+                    // back event intercepted by app in onKeyPreIme -> cancel the IME animation.
+                    final OnBackAnimationCallback animationCallback = getBackAnimationCallback();
+                    if (animationCallback != null) {
+                        mProgressAnimator.onBackCancelled(animationCallback::onBackCancelled);
+                    }
+                    return true;
+                }
+            }
+            return false;
         }
 
         @Override
