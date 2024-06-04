@@ -3367,7 +3367,7 @@
     <string name="rotation_tile_with_posture_secondary_label_template">%1$s / %2$s</string>
     <!-- Title for notification of low stylus battery with percentage. "percentage" is
         the value of the battery capacity remaining [CHAR LIMIT=none]-->
-    <string name="stylus_battery_low_percentage"><xliff:g id="percentage" example="16%">%s</xliff:g> battery remaining</string>
+    <string name="stylus_battery_low_percentage">Stylus battery <xliff:g id="percentage" example="16%">%s</xliff:g></string>
     <!-- Subtitle for the notification sent when a stylus battery is low. [CHAR LIMIT=none]-->
     <string name="stylus_battery_low_subtitle">Connect your stylus to a charger</string>
 
