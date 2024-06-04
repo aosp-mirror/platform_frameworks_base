@@ -1270,7 +1270,7 @@
     <string name="screen_compat_mode_scale" msgid="8627359598437527726">"Isilinganisi"</string>
     <string name="screen_compat_mode_show" msgid="5080361367584709857">"Bonisa njalo"</string>
     <string name="screen_compat_mode_hint" msgid="4032272159093750908">"Yenza kuphinde kusebenze kuzilungiselelo Zesistimue &gt; Izinhlelo zokusebenza &gt; Okulayishiwe."</string>
-    <string name="unsupported_display_size_message" msgid="7265211375269394699">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> ayisekeli isilungiselelo sosayizi sokubonisa samanje futhi ingasebenza ngokungalindelekile."</string>
+    <string name="unsupported_display_size_message" msgid="7265211375269394699">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> ayisekeli isethingi sosayizi sokubonisa samanje futhi ingasebenza ngokungalindelekile."</string>
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Bonisa njalo"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> yakhiwe kunguqulo engahambisani ye-Android OS futhi ingaziphatha ngokungalindelekile. Inguqulo ebuyekeziwe yohlelo lokusebenza ingatholakala."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Bonisa njalo"</string>
