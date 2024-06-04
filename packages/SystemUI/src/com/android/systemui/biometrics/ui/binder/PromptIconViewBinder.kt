@@ -17,9 +17,7 @@
 
 package com.android.systemui.biometrics.ui.binder
 
-import android.graphics.drawable.Animatable2
 import android.graphics.drawable.AnimatedVectorDrawable
-import android.graphics.drawable.Drawable
 import android.util.Log
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -36,7 +34,6 @@ import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.util.kotlin.Utils.Companion.toQuad
-import com.android.systemui.util.kotlin.Utils.Companion.toQuint
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import kotlinx.coroutines.flow.combine
@@ -70,16 +67,37 @@ object PromptIconViewBinder {
                 }
 
                 var faceIcon: AnimatedVectorDrawable? = null
-                val faceIconCallback =
-                    object : Animatable2.AnimationCallback() {
-                        override fun onAnimationStart(drawable: Drawable) {
-                            viewModel.onAnimationStart()
-                        }
 
-                        override fun onAnimationEnd(drawable: Drawable) {
-                            viewModel.onAnimationEnd()
+                fun updateXmlIconAsset(
+                    iconAsset: Int,
+                    shouldAnimateIconView: Boolean,
+                    activeAuthType: AuthType
+                ) {
+                    faceIcon?.stop()
+                    faceIcon = iconView.context.getDrawable(iconAsset) as AnimatedVectorDrawable
+                    faceIcon?.apply {
+                        iconView.setIconFailureListener(iconAsset, activeAuthType)
+                        iconView.setImageDrawable(this)
+                        if (shouldAnimateIconView) {
+                            forceAnimationOnUI()
+                            start()
                         }
                     }
+                }
+
+                fun updateJsonIconAsset(
+                    iconAsset: Int,
+                    shouldAnimateIconView: Boolean,
+                    activeAuthType: AuthType
+                ) {
+                    iconView.setIconFailureListener(iconAsset, activeAuthType)
+                    iconView.setAnimation(iconAsset)
+                    iconView.frame = 0
+
+                    if (shouldAnimateIconView) {
+                        iconView.playAnimation()
+                    }
+                }
 
                 if (!constraintBp()) {
                     launch {
@@ -145,52 +163,55 @@ object PromptIconViewBinder {
                             combine(
                                 viewModel.activeAuthType,
                                 viewModel.shouldAnimateIconView,
-                                viewModel.shouldRepeatAnimation,
                                 viewModel.showingError,
-                                ::toQuad
+                                ::Triple
                             ),
-                            ::toQuint
+                            ::toQuad
                         )
-                        .collect {
-                            (
-                                iconAsset,
-                                activeAuthType,
-                                shouldAnimateIconView,
-                                shouldRepeatAnimation,
-                                showingError) ->
+                        .collect { (iconAsset, activeAuthType, shouldAnimateIconView, showingError)
+                            ->
                             if (iconAsset != -1) {
                                 when (activeAuthType) {
                                     AuthType.Fingerprint,
                                     AuthType.Coex -> {
-                                        iconView.setIconFailureListener(iconAsset, activeAuthType)
-                                        iconView.setAnimation(iconAsset)
-                                        iconView.frame = 0
-
-                                        if (shouldAnimateIconView) {
-                                            iconView.playAnimation()
+                                        // TODO(b/318569643): Until assets unified to one type, this
+                                        // check
+                                        //  is needed in face-auth-error-triggered implicit ->
+                                        // explicit
+                                        //  coex auth transition, in case iconAsset updates to
+                                        //  face_dialog_dark_to_error (XML) after activeAuthType
+                                        // updates
+                                        //  from AuthType.Face (which expects XML)
+                                        //  to AuthType.Coex (which expects JSON)
+                                        if (iconAsset == R.drawable.face_dialog_dark_to_error) {
+                                            updateXmlIconAsset(
+                                                iconAsset,
+                                                shouldAnimateIconView,
+                                                activeAuthType
+                                            )
+                                        } else {
+                                            updateJsonIconAsset(
+                                                iconAsset,
+                                                shouldAnimateIconView,
+                                                activeAuthType
+                                            )
                                         }
                                     }
                                     AuthType.Face -> {
-                                        faceIcon?.apply {
-                                            unregisterAnimationCallback(faceIconCallback)
-                                            stop()
-                                        }
-                                        faceIcon =
-                                            iconView.context.getDrawable(iconAsset)
-                                                as AnimatedVectorDrawable
-                                        faceIcon?.apply {
-                                            iconView.setIconFailureListener(
+                                        // TODO(b/318569643): Consolidate logic once all face auth
+                                        // assets are migrated from drawable to json
+                                        if (iconAsset == R.raw.face_dialog_authenticating) {
+                                            updateJsonIconAsset(
                                                 iconAsset,
+                                                shouldAnimateIconView,
                                                 activeAuthType
                                             )
-                                            iconView.setImageDrawable(this)
-                                            if (shouldAnimateIconView) {
-                                                forceAnimationOnUI()
-                                                if (shouldRepeatAnimation) {
-                                                    registerAnimationCallback(faceIconCallback)
-                                                }
-                                                start()
-                                            }
+                                        } else {
+                                            updateXmlIconAsset(
+                                                iconAsset,
+                                                shouldAnimateIconView,
+                                                activeAuthType
+                                            )
                                         }
                                     }
                                 }
@@ -294,11 +315,10 @@ private val assetIdToString: Map<Int, String> =
         // Face assets
         R.drawable.face_dialog_wink_from_dark to "face_dialog_wink_from_dark",
         R.drawable.face_dialog_dark_to_checkmark to "face_dialog_dark_to_checkmark",
-        R.drawable.face_dialog_pulse_light_to_dark to "face_dialog_pulse_light_to_dark",
-        R.drawable.face_dialog_pulse_dark_to_light to "face_dialog_pulse_dark_to_light",
         R.drawable.face_dialog_dark_to_error to "face_dialog_dark_to_error",
         R.drawable.face_dialog_error_to_idle to "face_dialog_error_to_idle",
         R.drawable.face_dialog_idle_static to "face_dialog_idle_static",
+        R.raw.face_dialog_authenticating to "face_dialog_authenticating",
         // Co-ex assets
         R.raw.fingerprint_dialogue_unlocked_to_checkmark_success_lottie to
             "fingerprint_dialogue_unlocked_to_checkmark_success_lottie",
