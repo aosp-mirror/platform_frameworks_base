@@ -966,6 +966,11 @@ public class AudioDeviceBroker {
             case BluetoothProfile.LE_AUDIO_BROADCAST:
                 audioDevice = AudioSystem.DEVICE_OUT_BLE_BROADCAST;
                 break;
+            case BluetoothProfile.HEADSET:
+                // the actual device type is not important at this point and
+                // will be set by BtHelper.handleBtScoActiveDeviceChange()
+                audioDevice = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO;
+                break;
             default: throw new IllegalArgumentException("Invalid profile " + d.mInfo.getProfile());
         }
         return new BtDeviceInfo(d, device, state, audioDevice, codec);
