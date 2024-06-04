@@ -73,6 +73,7 @@ package android.nfc {
     method public void onApplyRouting(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onBootFinished(int);
     method public void onBootStarted();
+    method public void onCardEmulationActivated(boolean);
     method public void onDisable(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onDisableFinished(int);
     method public void onDisableStarted();
@@ -81,6 +82,8 @@ package android.nfc {
     method public void onEnableStarted();
     method public void onHceEventReceived(int);
     method public void onNdefRead(@NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method public void onRfDiscoveryStarted(boolean);
+    method public void onRfFieldActivated(boolean);
     method public void onRoutingChanged();
     method public void onStateUpdated(int);
     method public void onTagConnected(boolean, @NonNull android.nfc.Tag);

@@ -32,7 +32,9 @@ import android.util.Log;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -40,6 +42,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -58,10 +61,13 @@ public final class NfcOemExtension {
     private static final int OEM_EXTENSION_RESPONSE_THRESHOLD_MS = 2000;
     private final NfcAdapter mAdapter;
     private final NfcOemExtensionCallback mOemNfcExtensionCallback;
+    private boolean mIsRegistered = false;
+    private final Map<Callback, Executor> mCallbackMap = new HashMap<>();
     private final Context mContext;
-    private Executor mExecutor = null;
-    private Callback mCallback = null;
     private final Object mLock = new Object();
+    private boolean mCardEmulationActivated = false;
+    private boolean mRfFieldActivated = false;
+    private boolean mRfDiscoveryStarted = false;
 
     /**
      * Event that Host Card Emulation is activated.
@@ -215,6 +221,32 @@ public final class NfcOemExtension {
          * @param action Flag indicating actions to activate, start and stop cpu boost.
          */
         void onHceEventReceived(@HostCardEmulationAction int action);
+
+        /**
+        * Notifies NFC is activated in listen mode.
+        * NFC Forum NCI-2.3 ch.5.2.6 specification
+        *
+        * <p>NFCC is ready to communicate with a Card reader
+        *
+        * @param isActivated true, if card emulation activated, else de-activated.
+        */
+        void onCardEmulationActivated(boolean isActivated);
+
+        /**
+        * Notifies the Remote NFC Endpoint RF Field is activated.
+        * NFC Forum NCI-2.3 ch.5.3 specification
+        *
+        * @param isActivated true, if RF Field is ON, else RF Field is OFF.
+        */
+        void onRfFieldActivated(boolean isActivated);
+
+        /**
+        * Notifies the NFC RF discovery is started or in the IDLE state.
+        * NFC Forum NCI-2.3 ch.5.2 specification
+        *
+        * @param isDiscoveryStarted true, if RF discovery started, else RF state is Idle.
+        */
+        void onRfDiscoveryStarted(boolean isDiscoveryStarted);
     }
 
 
@@ -229,7 +261,12 @@ public final class NfcOemExtension {
 
     /**
      * Register an {@link Callback} to listen for NFC oem extension callbacks
+     * Multiple clients can register and callbacks will be invoked asynchronously.
+     *
      * <p>The provided callback will be invoked by the given {@link Executor}.
+     * As part of {@link #registerCallback(Executor, Callback)} the
+     * {@link Callback} will be invoked with current NFC state
+     * before the {@link #registerCallback(Executor, Callback)} function completes.
      *
      * @param executor an {@link Executor} to execute given callback
      * @param callback oem implementation of {@link Callback}
@@ -239,15 +276,35 @@ public final class NfcOemExtension {
     public void registerCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull Callback callback) {
         synchronized (mLock) {
-            if (mCallback != null) {
+            if (executor == null || callback == null) {
+                Log.e(TAG, "Executor and Callback must not be null!");
+                throw new IllegalArgumentException();
+            }
+
+            if (mCallbackMap.containsKey(callback)) {
                 Log.e(TAG, "Callback already registered. Unregister existing callback before"
                         + "registering");
                 throw new IllegalArgumentException();
             }
-            NfcAdapter.callService(() -> {
-                NfcAdapter.sService.registerOemExtensionCallback(mOemNfcExtensionCallback);
-                mCallback = callback;
-                mExecutor = executor;
+            mCallbackMap.put(callback, executor);
+            if (!mIsRegistered) {
+                NfcAdapter.callService(() -> {
+                    NfcAdapter.sService.registerOemExtensionCallback(mOemNfcExtensionCallback);
+                    mIsRegistered = true;
+                });
+            } else {
+                updateNfCState(callback, executor);
+            }
+        }
+    }
+
+    private void updateNfCState(Callback callback, Executor executor) {
+        if (callback != null) {
+            Log.i(TAG, "updateNfCState");
+            executor.execute(() -> {
+                callback.onCardEmulationActivated(mCardEmulationActivated);
+                callback.onRfFieldActivated(mRfFieldActivated);
+                callback.onRfDiscoveryStarted(mRfDiscoveryStarted);
             });
         }
     }
@@ -266,15 +323,19 @@ public final class NfcOemExtension {
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     public void unregisterCallback(@NonNull Callback callback) {
         synchronized (mLock) {
-            if (mCallback == null || mCallback != callback) {
+            if (!mCallbackMap.containsKey(callback) || !mIsRegistered) {
                 Log.e(TAG, "Callback not registered");
                 throw new IllegalArgumentException();
             }
-            NfcAdapter.callService(() -> {
-                NfcAdapter.sService.unregisterOemExtensionCallback(mOemNfcExtensionCallback);
-                mCallback = null;
-                mExecutor = null;
-            });
+            if (mCallbackMap.size() == 1) {
+                NfcAdapter.callService(() -> {
+                    NfcAdapter.sService.unregisterOemExtensionCallback(mOemNfcExtensionCallback);
+                    mIsRegistered = false;
+                    mCallbackMap.remove(callback);
+                });
+            } else {
+                mCallbackMap.remove(callback);
+            }
         }
     }
 
@@ -322,90 +383,133 @@ public final class NfcOemExtension {
     }
 
     private final class NfcOemExtensionCallback extends INfcOemExtensionCallback.Stub {
+
         @Override
         public void onTagConnected(boolean connected, Tag tag) throws RemoteException {
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoid2ArgCallback(connected, tag, cb::onTagConnected, ex));
+        }
+
+        @Override
+        public void onCardEmulationActivated(boolean isActivated) throws RemoteException {
+            mCardEmulationActivated = isActivated;
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(isActivated, cb::onCardEmulationActivated, ex));
+        }
+
+        @Override
+        public void onRfFieldActivated(boolean isActivated) throws RemoteException {
+            mRfFieldActivated = isActivated;
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(isActivated, cb::onRfFieldActivated, ex));
+        }
+
+        @Override
+        public void onRfDiscoveryStarted(boolean isDiscoveryStarted) throws RemoteException {
+            mRfDiscoveryStarted = isDiscoveryStarted;
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(isDiscoveryStarted, cb::onRfDiscoveryStarted, ex));
+        }
+
+        @Override
+        public void onStateUpdated(int state) throws RemoteException {
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(state, cb::onStateUpdated, ex));
+        }
+
+        @Override
+        public void onApplyRouting(ResultReceiver isSkipped) throws RemoteException {
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(
+                        new ReceiverWrapper(isSkipped), cb::onApplyRouting, ex));
+        }
+        @Override
+        public void onNdefRead(ResultReceiver isSkipped) throws RemoteException {
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(
+                        new ReceiverWrapper(isSkipped), cb::onNdefRead, ex));
+        }
+        @Override
+        public void onEnable(ResultReceiver isAllowed) throws RemoteException {
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(
+                        new ReceiverWrapper(isAllowed), cb::onEnable, ex));
+        }
+        @Override
+        public void onDisable(ResultReceiver isAllowed) throws RemoteException {
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(
+                        new ReceiverWrapper(isAllowed), cb::onDisable, ex));
+        }
+        @Override
+        public void onBootStarted() throws RemoteException {
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(null, (Object input) -> cb.onBootStarted(), ex));
+        }
+        @Override
+        public void onEnableStarted() throws RemoteException {
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(null, (Object input) -> cb.onEnableStarted(), ex));
+        }
+        @Override
+        public void onDisableStarted() throws RemoteException {
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(null, (Object input) -> cb.onDisableStarted(), ex));
+        }
+        @Override
+        public void onBootFinished(int status) throws RemoteException {
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(status, cb::onBootFinished, ex));
+        }
+        @Override
+        public void onEnableFinished(int status) throws RemoteException {
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(status, cb::onEnableFinished, ex));
+        }
+        @Override
+        public void onDisableFinished(int status) throws RemoteException {
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(status, cb::onDisableFinished, ex));
+        }
+        @Override
+        public void onTagDispatch(ResultReceiver isSkipped) throws RemoteException {
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(
+                        new ReceiverWrapper(isSkipped), cb::onTagDispatch, ex));
+        }
+        @Override
+        public void onRoutingChanged() throws RemoteException {
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(null, (Object input) -> cb.onRoutingChanged(), ex));
+        }
+        @Override
+        public void onHceEventReceived(int action) throws RemoteException {
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(action, cb::onHceEventReceived, ex));
+        }
+
+        private <T> void handleVoidCallback(
+                T input, Consumer<T> callbackMethod, Executor executor) {
             synchronized (mLock) {
-                if (mCallback == null || mExecutor == null) {
-                    return;
-                }
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    mExecutor.execute(() -> mCallback.onTagConnected(connected, tag));
+                    executor.execute(() -> callbackMethod.accept(input));
+                } catch (RuntimeException ex) {
+                    throw ex;
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
         }
-        @Override
-        public void onStateUpdated(int state) throws RemoteException {
-            handleVoidCallback(state, mCallback::onStateUpdated);
-        }
-        @Override
-        public void onApplyRouting(ResultReceiver isSkipped) throws RemoteException {
-            handleVoidCallback(
-                    new ReceiverWrapper(isSkipped), mCallback::onApplyRouting);
-        }
-        @Override
-        public void onNdefRead(ResultReceiver isSkipped) throws RemoteException {
-            handleVoidCallback(
-                    new ReceiverWrapper(isSkipped), mCallback::onNdefRead);
-        }
-        @Override
-        public void onEnable(ResultReceiver isAllowed) throws RemoteException {
-            handleVoidCallback(
-                    new ReceiverWrapper(isAllowed), mCallback::onEnable);
-        }
-        @Override
-        public void onDisable(ResultReceiver isAllowed) throws RemoteException {
-            handleVoidCallback(
-                    new ReceiverWrapper(isAllowed), mCallback::onDisable);
-        }
-        @Override
-        public void onBootStarted() throws RemoteException {
-            handleVoidCallback(null, (Object input) -> mCallback.onBootStarted());
-        }
-        @Override
-        public void onEnableStarted() throws RemoteException {
-            handleVoidCallback(null, (Object input) -> mCallback.onEnableStarted());
-        }
-        @Override
-        public void onDisableStarted() throws RemoteException {
-            handleVoidCallback(null, (Object input) -> mCallback.onDisableStarted());
-        }
-        @Override
-        public void onBootFinished(int status) throws RemoteException {
-            handleVoidCallback(status, mCallback::onBootFinished);
-        }
-        @Override
-        public void onEnableFinished(int status) throws RemoteException {
-            handleVoidCallback(status, mCallback::onEnableFinished);
-        }
-        @Override
-        public void onDisableFinished(int status) throws RemoteException {
-            handleVoidCallback(status, mCallback::onDisableFinished);
-        }
-        @Override
-        public void onTagDispatch(ResultReceiver isSkipped) throws RemoteException {
-            handleVoidCallback(
-                    new ReceiverWrapper(isSkipped), mCallback::onTagDispatch);
-        }
-        @Override
-        public void onRoutingChanged() throws RemoteException {
-            handleVoidCallback(null, (Object input) -> mCallback.onRoutingChanged());
-        }
-        @Override
-        public void onHceEventReceived(int action) throws RemoteException {
-            handleVoidCallback(action, mCallback::onHceEventReceived);
-        }
 
-        private <T> void handleVoidCallback(T input, Consumer<T> callbackMethod) {
+        private <T1, T2> void handleVoid2ArgCallback(
+                T1 input1, T2 input2, BiConsumer<T1, T2> callbackMethod, Executor executor) {
             synchronized (mLock) {
-                if (mCallback == null || mExecutor == null) {
-                    return;
-                }
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    mExecutor.execute(() -> callbackMethod.accept(input));
+                    executor.execute(() -> callbackMethod.accept(input1, input2));
+                } catch (RuntimeException ex) {
+                    throw ex;
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -415,17 +519,12 @@ public final class NfcOemExtension {
         private <S, T> S handleNonVoidCallbackWithInput(
                 S defaultValue, T input, Function<T, S> callbackMethod) throws RemoteException {
             synchronized (mLock) {
-                if (mCallback == null) {
-                    return defaultValue;
-                }
                 final long identity = Binder.clearCallingIdentity();
                 S result = defaultValue;
                 try {
                     ExecutorService executor = Executors.newSingleThreadExecutor();
-                    FutureTask<S> futureTask = new FutureTask<>(
-                            () -> callbackMethod.apply(input)
-                    );
-                    executor.submit(futureTask);
+                    FutureTask<S> futureTask = new FutureTask<>(() -> callbackMethod.apply(input));
+                    var unused = executor.submit(futureTask);
                     try {
                         result = futureTask.get(
                                 OEM_EXTENSION_RESPONSE_THRESHOLD_MS, TimeUnit.MILLISECONDS);
@@ -447,17 +546,12 @@ public final class NfcOemExtension {
         private <T> T handleNonVoidCallbackWithoutInput(T defaultValue, Supplier<T> callbackMethod)
                 throws RemoteException {
             synchronized (mLock) {
-                if (mCallback == null) {
-                    return defaultValue;
-                }
                 final long identity = Binder.clearCallingIdentity();
                 T result = defaultValue;
                 try {
                     ExecutorService executor = Executors.newSingleThreadExecutor();
-                    FutureTask<T> futureTask = new FutureTask<>(
-                            callbackMethod::get
-                    );
-                    executor.submit(futureTask);
+                    FutureTask<T> futureTask = new FutureTask<>(callbackMethod::get);
+                    var unused = executor.submit(futureTask);
                     try {
                         result = futureTask.get(
                                 OEM_EXTENSION_RESPONSE_THRESHOLD_MS, TimeUnit.MILLISECONDS);
