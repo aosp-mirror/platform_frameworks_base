@@ -51,6 +51,7 @@ filegroup {
         "src/com/android/wm/shell/common/split/SplitScreenConstants.java",
         "src/com/android/wm/shell/common/TransactionPool.java",
         "src/com/android/wm/shell/common/TriangleShape.java",
+        "src/com/android/wm/shell/common/desktopmode/*.kt",
         "src/com/android/wm/shell/draganddrop/DragAndDropConstants.java",
         "src/com/android/wm/shell/pip/PipContentOverlay.java",
         "src/com/android/wm/shell/startingsurface/SplashScreenExitAnimationUtils.java",
