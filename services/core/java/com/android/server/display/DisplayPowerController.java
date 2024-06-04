@@ -1361,7 +1361,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         state = mPowerState.getScreenState();
 
         DisplayBrightnessState displayBrightnessState = mDisplayBrightnessController
-                .updateBrightness(mPowerRequest, state);
+                .updateBrightness(mPowerRequest, state, mDisplayOffloadSession);
         float brightnessState = displayBrightnessState.getBrightness();
         float rawBrightnessState = displayBrightnessState.getBrightness();
         mBrightnessReasonTemp.set(displayBrightnessState.getBrightnessReason());
@@ -1374,6 +1374,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (displayBrightnessState.getBrightnessEvent() != null) {
             mTempBrightnessEvent.copyFrom(displayBrightnessState.getBrightnessEvent());
         }
+
+        boolean allowAutoBrightnessWhileDozing =
+                mDisplayBrightnessController.isAllowAutoBrightnessWhileDozing();
+
         if (!mFlags.isRefactorDisplayPowerControllerEnabled()) {
             // Set up the ScreenOff controller used when coming out of SCREEN_OFF and the ALS sensor
             // doesn't yet have a valid lux value to use with auto-brightness.
@@ -1381,8 +1385,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mScreenOffBrightnessSensorController
                         .setLightSensorEnabled(displayBrightnessState.getShouldUseAutoBrightness()
                         && mIsEnabled && (state == Display.STATE_OFF
-                        || (state == Display.STATE_DOZE
-                        && !mDisplayBrightnessController.isAllowAutoBrightnessWhileDozingConfig()))
+                        || (state == Display.STATE_DOZE && !allowAutoBrightnessWhileDozing))
                         && mLeadDisplayId == Layout.NO_LEAD_DISPLAY);
             }
         }
@@ -1392,12 +1395,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final boolean wasShortTermModelActive =
                 mAutomaticBrightnessStrategy.isShortTermModelActive();
         boolean userInitiatedChange = displayBrightnessState.isUserInitiatedChange();
-        boolean allowAutoBrightnessWhileDozing =
-                mDisplayBrightnessController.isAllowAutoBrightnessWhileDozingConfig();
-        if (mFlags.offloadControlsDozeAutoBrightness() && mFlags.isDisplayOffloadEnabled()
-                && mDisplayOffloadSession != null) {
-            allowAutoBrightnessWhileDozing &= mDisplayOffloadSession.allowAutoBrightnessInDoze();
-        }
+
         if (!mFlags.isRefactorDisplayPowerControllerEnabled()) {
             // Switch to doze auto-brightness mode if needed
             if (mFlags.areAutoBrightnessModesEnabled() && mAutomaticBrightnessController != null
