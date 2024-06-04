@@ -306,6 +306,18 @@ static BufferItem* Image_getBufferItem(JNIEnv* env, jobject image)
 }
 
 
+static inline int GetRobolectricApiLevel(JNIEnv* env) {
+    jclass runtimeEnvironment = env->FindClass("org/robolectric/RuntimeEnvironment");
+    LOG_ALWAYS_FATAL_IF(runtimeEnvironment == NULL,
+                        "can't find org/robolectric/RuntimeEnvironment");
+    jmethodID getApiLevelMethod =env->GetStaticMethodID(
+                runtimeEnvironment, "getApiLevel", "()I");
+    LOG_ALWAYS_FATAL_IF(getApiLevelMethod == NULL,
+                        "can't find org/robolectric/RuntimeEnvironment.getApiLevel");
+    return (jint)env->CallStaticIntMethod(runtimeEnvironment, getApiLevelMethod);
+}
+
+
 // ----------------------------------------------------------------------------
 
 static void ImageReader_classInit(JNIEnv* env, jclass clazz)
@@ -364,14 +376,18 @@ static void ImageReader_classInit(JNIEnv* env, jclass clazz)
     LOG_ALWAYS_FATAL_IF(gSurfacePlaneClassInfo.ctor == NULL,
             "Can not find SurfacePlane constructor");
 
-    planeClazz = env->FindClass("android/media/ImageReader$ImagePlane");
-    LOG_ALWAYS_FATAL_IF(planeClazz == NULL, "Can not find ImagePlane class");
-    // FindClass only gives a local reference of jclass object.
-    gImagePlaneClassInfo.clazz = (jclass) env->NewGlobalRef(planeClazz);
-    gImagePlaneClassInfo.ctor = env->GetMethodID(gImagePlaneClassInfo.clazz, "<init>",
-            "(IILjava/nio/ByteBuffer;)V");
-    LOG_ALWAYS_FATAL_IF(gImagePlaneClassInfo.ctor == NULL,
-            "Can not find ImagePlane constructor");
+    int robolectricApiLevel = GetRobolectricApiLevel(env);
+    // ImageReader$ImagePlane was introduced in Android S (SDK 31).
+    if (robolectricApiLevel >= 31) {
+      planeClazz = env->FindClass("android/media/ImageReader$ImagePlane");
+      LOG_ALWAYS_FATAL_IF(planeClazz == NULL, "Can not find ImagePlane class");
+      // FindClass only gives a local reference of jclass object.
+      gImagePlaneClassInfo.clazz = (jclass) env->NewGlobalRef(planeClazz);
+      gImagePlaneClassInfo.ctor = env->GetMethodID(gImagePlaneClassInfo.clazz, "<init>",
+              "(IILjava/nio/ByteBuffer;)V");
+      LOG_ALWAYS_FATAL_IF(gImagePlaneClassInfo.ctor == NULL,
+             "Can not find ImagePlane constructor");
+    }
 }
 
 static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz, jint width, jint height,
