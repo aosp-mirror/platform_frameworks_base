@@ -372,7 +372,8 @@
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"配對新裝置"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"㩒一下就可以配對新裝置"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"無法更新預設"</string>
-    <!-- no translation found for hearing_devices_preset_label (7878267405046232358) -->
+    <string name="hearing_devices_preset_label" msgid="7878267405046232358">"預設"</string>
+    <!-- no translation found for live_caption_title (8916875614623730005) -->
     <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"要解除封鎖裝置麥克風嗎？"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"要解除封鎖裝置相機嗎？"</string>
@@ -1318,6 +1319,24 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」最近使用過此權限 (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> 正在使用 (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」最近使用過此權限 (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <!-- no translation found for shortcut_helper_category_system (462110876978937359) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_category_multitasking (7413381961404090136) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_category_input (8674018654124839566) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_category_app_shortcuts (8010249408308587117) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_category_a11y (6314444792641773464) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_title (8567500639300970049) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_search_placeholder (5488547526269871819) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_content_description_collapse_icon (8028015738431664954) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_content_description_expand_icon (1084435697860417390) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"鍵盤背光"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"第 %1$d 級，共 %2$d 級"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"智能家居"</string>

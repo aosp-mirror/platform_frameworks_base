@@ -372,8 +372,8 @@
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Nieuw apparaat koppelen"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Klik om nieuw apparaat te koppelen"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Kan voorinstelling niet updaten"</string>
-    <!-- no translation found for hearing_devices_preset_label (7878267405046232358) -->
-    <skip />
+    <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Voorinstelling"</string>
+    <string name="live_caption_title" msgid="8916875614623730005">"Live ondertiteling"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Microfoon van apparaat niet meer blokkeren?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Apparaatcamera niet meer blokkeren?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Blokkeren van apparaatcamera en -microfoon opheffen?"</string>
@@ -1201,7 +1201,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wifi maakt momenteel niet automatisch verbinding"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Alles tonen"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Verbreek de ethernetverbinding om van netwerk te wisselen"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Apps en services kunnen nog steeds op elk gewenst moment zoeken naar apparaten in de buurt om de apparaatfunctionaliteit te verbeteren, zelfs als bluetooth uitstaat. Je kunt dit aanpassen in de instellingen voor wifi-scannen. "<annotation id="link">"Wijzigen"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Voor een betere apparaatfunctionaliteit kunnen apps en services nog steeds op elk moment zoeken naar wifi-netwerken, zelfs als wifi uitstaat. Je kunt dit aanpassen in de instellingen voor wifi-scannen. "<annotation id="link">"Wijzigen"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Vliegtuigmodus uitzetten"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> wil de volgende tegel toevoegen aan Snelle instellingen"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Tegel toevoegen"</string>
@@ -1318,6 +1318,24 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Recent gebruikt door <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Gebruikt door <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Recent gebruikt door <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <!-- no translation found for shortcut_helper_category_system (462110876978937359) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_category_multitasking (7413381961404090136) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_category_input (8674018654124839566) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_category_app_shortcuts (8010249408308587117) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_category_a11y (6314444792641773464) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_title (8567500639300970049) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_search_placeholder (5488547526269871819) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_content_description_collapse_icon (8028015738431664954) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_content_description_expand_icon (1084435697860417390) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Achtergrondverlichting van toetsenbord"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Niveau %1$d van %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Huisbediening"</string>

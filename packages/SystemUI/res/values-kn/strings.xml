@@ -372,8 +372,8 @@
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"ಹೊಸ ಸಾಧನವನ್ನು ಪೇರ್ ಮಾಡಿ"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"ಹೊಸ ಸಾಧನವನ್ನು ಜೋಡಿಸಲು ಕ್ಲಿಕ್ ಮಾಡಿ"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"ಪ್ರಿಸೆಟ್ ಅನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
-    <!-- no translation found for hearing_devices_preset_label (7878267405046232358) -->
-    <skip />
+    <string name="hearing_devices_preset_label" msgid="7878267405046232358">"ಪ್ರಿಸೆಟ್‌"</string>
+    <string name="live_caption_title" msgid="8916875614623730005">"ಲೈವ್ ಕ್ಯಾಪ್ಶನ್"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ಸಾಧನದ ಮೈಕ್ರೋಫೋನ್ ನಿರ್ಬಂಧವನ್ನು ತೆಗೆಯಬೇಕೆ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ಸಾಧನದ ಕ್ಯಾಮರಾ ನಿರ್ಬಂಧವನ್ನು ತೆಗೆಯಬೇಕೆ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ಸಾಧನದ ಕ್ಯಾಮರಾ ಮತ್ತು ಮೈಕ್ರೋಫೋನ್ ಅನ್ನು ಅನ್‍ಬ್ಲಾಕ್ ಮಾಡಬೇಕೇ?"</string>
@@ -617,7 +617,7 @@
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. ಮ್ಯೂಟ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"ಗದ್ದಲ ನಿಯಂತ್ರಣ"</string>
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"ಸ್ಪೇಷಿಯಲ್ ಆಡಿಯೋ"</string>
-    <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"ಆಫ್ ಮಾಡಿ"</string>
+    <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"ಆಫ್"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"ಫಿಕ್ಸಡ್"</string>
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"ಹೆಡ್ ಟ್ರ್ಯಾಕಿಂಗ್"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"ರಿಂಗರ್ ಮೋಡ್ ಬದಲಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
@@ -1318,6 +1318,24 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"ಇತ್ತೀಚೆಗೆ <xliff:g id="APP_NAME">%1$s</xliff:g> ಇದನ್ನು ಬಳಸಿದೆ (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನಿಂದ ಬಳಕೆಯಲ್ಲಿದೆ (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"ಇತ್ತೀಚೆಗೆ <xliff:g id="APP_NAME">%1$s</xliff:g> ಇದನ್ನು ಬಳಸಿದೆ (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <!-- no translation found for shortcut_helper_category_system (462110876978937359) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_category_multitasking (7413381961404090136) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_category_input (8674018654124839566) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_category_app_shortcuts (8010249408308587117) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_category_a11y (6314444792641773464) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_title (8567500639300970049) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_search_placeholder (5488547526269871819) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_content_description_collapse_icon (8028015738431664954) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_content_description_expand_icon (1084435697860417390) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ಕೀಬೋರ್ಡ್ ಬ್ಯಾಕ್‌ಲೈಟ್"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d ರಲ್ಲಿ %1$d ಮಟ್ಟ"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ಮನೆ ನಿಯಂತ್ರಣಗಳು"</string>

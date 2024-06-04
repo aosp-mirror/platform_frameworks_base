@@ -372,8 +372,8 @@
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Sparuj nowe urządzenie"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Kliknij, aby sparować nowe urządzenie"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Nie udało się zaktualizować gotowego ustawienia"</string>
-    <!-- no translation found for hearing_devices_preset_label (7878267405046232358) -->
-    <skip />
+    <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Gotowe ustawienie"</string>
+    <string name="live_caption_title" msgid="8916875614623730005">"Napisy na żywo"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Odblokować mikrofon urządzenia?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Odblokować aparat urządzenia?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Odblokować aparat i mikrofon urządzenia?"</string>
@@ -877,7 +877,7 @@
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Otwórz ustawienia."</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"Otwórz szybkie ustawienia."</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Zamknij szybkie ustawienia."</string>
-    <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Zalogowany użytkownik: <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Używasz konta: <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"wybrać użytkownika"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Brak internetu"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Otwórz ustawienia: <xliff:g id="ID_1">%s</xliff:g>."</string>
@@ -1318,6 +1318,24 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Ostatnio używany przez aplikację <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Używany przez aplikację <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Ostatnio używany przez aplikację <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <!-- no translation found for shortcut_helper_category_system (462110876978937359) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_category_multitasking (7413381961404090136) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_category_input (8674018654124839566) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_category_app_shortcuts (8010249408308587117) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_category_a11y (6314444792641773464) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_title (8567500639300970049) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_search_placeholder (5488547526269871819) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_content_description_collapse_icon (8028015738431664954) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_content_description_expand_icon (1084435697860417390) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Podświetlenie klawiatury"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Poziom %1$d z %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Sterowanie domem"</string>
