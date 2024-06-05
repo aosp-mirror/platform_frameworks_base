@@ -2140,8 +2140,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mPreferredActivityHelper = new PreferredActivityHelper(this, mBroadcastHelper);
         mResolveIntentHelper = new ResolveIntentHelper(mContext, mPreferredActivityHelper,
                 injector.getCompatibility(), mUserManager, mDomainVerificationManager,
-                mUserNeedsBadging, () -> mResolveInfo, () -> mInstantAppInstallerActivity,
-                injector.getBackgroundHandler());
+                mUserNeedsBadging, () -> mResolveInfo, () -> mInstantAppInstallerActivity);
         mDexOptHelper = new DexOptHelper(this);
         mSuspendPackageHelper = new SuspendPackageHelper(this, mInjector, mBroadcastHelper,
                 mProtectedPackages);
@@ -2696,7 +2695,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         final ResolveInfo resolveInfo = mResolveIntentHelper.resolveIntentInternal(computer, intent,
                 null, MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
-                0 /*privateResolveFlags*/, UserHandle.USER_SYSTEM, false, Binder.getCallingUid());
+                0 /*privateResolveFlags*/, UserHandle.USER_SYSTEM, false,
+                Binder.getCallingUid(), Binder.getCallingPid());
         if (resolveInfo == null ||
                 mResolveActivity.name.equals(resolveInfo.getComponentInfo().name)) {
             throw new RuntimeException("There must be exactly one uninstaller; found "
@@ -2811,7 +2811,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 | (!Build.IS_DEBUGGABLE ? MATCH_SYSTEM_ONLY : 0);
         final Intent resolverIntent = new Intent(Intent.ACTION_RESOLVE_INSTANT_APP_PACKAGE);
         List<ResolveInfo> resolvers = snapshot.queryIntentServicesInternal(resolverIntent, null,
-                resolveFlags, UserHandle.USER_SYSTEM, callingUid, false /*includeInstantApps*/);
+                resolveFlags, UserHandle.USER_SYSTEM, callingUid, Process.INVALID_PID,
+                /*includeInstantApps*/ false, /*resolveForStart*/ false);
         final int N = resolvers.size();
         if (N == 0) {
             if (DEBUG_INSTANT) {
@@ -3669,7 +3670,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
                 UserHandle.USER_SYSTEM,
                 /* callingUid= */ Process.myUid(),
-                /* includeInstantApps= */ false);
+                Process.INVALID_PID,
+                /* includeInstantApps= */ false,
+                /* resolveForStart */ false);
         if (matches.size() == 1) {
             return matches.get(0).getComponentInfo().packageName;
         } else {
