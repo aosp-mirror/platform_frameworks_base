@@ -56,7 +56,7 @@ fun SceneTransitionLayout(
     modifier: Modifier = Modifier,
     swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
     swipeDetector: SwipeDetector = DefaultSwipeDetector,
-    @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0f,
+    @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0.05f,
     scenes: SceneTransitionLayoutScope.() -> Unit,
 ) {
     SceneTransitionLayoutForTesting(
