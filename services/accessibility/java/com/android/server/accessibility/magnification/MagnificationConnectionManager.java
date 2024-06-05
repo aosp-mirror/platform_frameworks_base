@@ -126,7 +126,6 @@ public class MagnificationConnectionManager implements
 
     @ConnectionState
     private int mConnectionState = DISCONNECTED;
-    ConnectionStateChangedCallback mConnectionStateChangedCallback = null;
 
     private static final int WAIT_CONNECTION_TIMEOUT_MILLIS = 100;
 
@@ -265,9 +264,6 @@ public class MagnificationConnectionManager implements
                 }
             }
         }
-        if (mConnectionStateChangedCallback != null) {
-            mConnectionStateChangedCallback.onConnectionStateChanged(connection != null);
-        }
     }
 
     /**
@@ -275,7 +271,7 @@ public class MagnificationConnectionManager implements
      */
     public boolean isConnected() {
         synchronized (mLock) {
-            return mConnectionWrapper != null && mConnectionState == CONNECTED;
+            return mConnectionWrapper != null;
         }
     }
 
@@ -1347,9 +1343,5 @@ public class MagnificationConnectionManager implements
                 /* ignore */
             }
         }
-    }
-
-    interface ConnectionStateChangedCallback {
-        void onConnectionStateChanged(boolean connected);
     }
 }

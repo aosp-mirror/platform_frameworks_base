@@ -593,12 +593,6 @@ public class ProxyManagerTest {
         }
 
         @Override
-        public void onMagnificationSystemUIConnectionChanged(boolean connected)
-                throws RemoteException {
-
-        }
-
-        @Override
         public void onMagnificationChanged(int displayId, Region region, MagnificationConfig config)
                 throws RemoteException {
 

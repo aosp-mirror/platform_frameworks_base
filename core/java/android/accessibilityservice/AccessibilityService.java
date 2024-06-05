@@ -16,7 +16,6 @@
 
 package android.accessibilityservice;
 
-import static android.accessibilityservice.AccessibilityServiceInfo.CAPABILITY_CAN_CONTROL_MAGNIFICATION;
 import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 
@@ -69,8 +68,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.inputmethod.EditorInfo;
-
-import androidx.annotation.GuardedBy;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.CancellationGroup;
@@ -643,8 +640,6 @@ public abstract class AccessibilityService extends Service {
         /** The detected gesture information for different displays */
         boolean onGesture(AccessibilityGestureEvent gestureInfo);
         boolean onKeyEvent(KeyEvent event);
-        /** Magnification SystemUI connection changed callbacks */
-        void onMagnificationSystemUIConnectionChanged(boolean connected);
         /** Magnification changed callbacks for different displays */
         void onMagnificationChanged(int displayId, @NonNull Region region,
                 MagnificationConfig config);
@@ -795,6 +790,7 @@ public abstract class AccessibilityService extends Service {
     public static final String KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP =
             "screenshot_timestamp";
 
+
     /**
      * Annotations for result codes of attaching accessibility overlays.
      *
@@ -840,13 +836,6 @@ public abstract class AccessibilityService extends Service {
     private IBinder mWindowToken;
 
     private WindowManager mWindowManager;
-
-    @GuardedBy("mLock")
-    private boolean mServiceConnected;
-    @GuardedBy("mLock")
-    private boolean mMagnificationSystemUIConnected;
-    @GuardedBy("mLock")
-    private boolean mServiceConnectedNotified;
 
     /** List of magnification controllers, mapping from displayId -> MagnificationController. */
     private final SparseArray<MagnificationController> mMagnificationControllers =
@@ -897,14 +886,11 @@ public abstract class AccessibilityService extends Service {
             for (int i = 0; i < mMagnificationControllers.size(); i++) {
                 mMagnificationControllers.valueAt(i).onServiceConnectedLocked();
             }
-            checkIsMagnificationSystemUIConnectedAlready();
             final AccessibilityServiceInfo info = getServiceInfo();
             if (info != null) {
                 updateInputMethod(info);
                 mMotionEventSources = info.getMotionEventSources();
             }
-            mServiceConnected = true;
-            mServiceConnectedNotified = false;
         }
         if (mSoftKeyboardController != null) {
             mSoftKeyboardController.onServiceConnected();
@@ -912,57 +898,7 @@ public abstract class AccessibilityService extends Service {
 
         // The client gets to handle service connection last, after we've set
         // up any state upon which their code may rely.
-        if (android.view.accessibility.Flags
-                .waitMagnificationSystemUiConnectionToNotifyServiceConnected()) {
-            notifyOnServiceConnectedIfReady();
-        } else {
-            onServiceConnected();
-        }
-    }
-
-    private void notifyOnServiceConnectedIfReady() {
-        synchronized (mLock) {
-            if (mServiceConnectedNotified) {
-                return;
-            }
-            boolean canControlMagnification;
-            final AccessibilityServiceInfo info = getServiceInfo();
-            if (info != null) {
-                int flagMask = CAPABILITY_CAN_CONTROL_MAGNIFICATION;
-                canControlMagnification = (info.getCapabilities() & flagMask) == flagMask;
-            } else {
-                canControlMagnification = false;
-            }
-            boolean ready = canControlMagnification
-                    ? (mServiceConnected && mMagnificationSystemUIConnected)
-                    : mServiceConnected;
-            if (ready) {
-                getMainExecutor().execute(() -> onServiceConnected());
-                mServiceConnectedNotified = true;
-            }
-        }
-    }
-
-    @GuardedBy("mLock")
-    private void checkIsMagnificationSystemUIConnectedAlready() {
-        if (!android.view.accessibility.Flags
-                .waitMagnificationSystemUiConnectionToNotifyServiceConnected()) {
-            return;
-        }
-        if (mMagnificationSystemUIConnected) {
-            return;
-        }
-        final IAccessibilityServiceConnection connection =
-                AccessibilityInteractionClient.getInstance(this).getConnection(mConnectionId);
-        if (connection != null) {
-            try {
-                boolean connected = connection.isMagnificationSystemUIConnected();
-                mMagnificationSystemUIConnected = connected;
-            } catch (RemoteException re) {
-                Log.w(LOG_TAG, "Failed to check magnification system ui connection", re);
-                re.rethrowFromSystemServer();
-            }
-        }
+        onServiceConnected();
     }
 
     private void updateInputMethod(AccessibilityServiceInfo info) {
@@ -1420,22 +1356,6 @@ public abstract class AccessibilityService extends Service {
                 callbackInfo.callback.onCompleted(callbackInfo.gestureDescription);
             } else {
                 callbackInfo.callback.onCancelled(callbackInfo.gestureDescription);
-            }
-        }
-    }
-
-    private void onMagnificationSystemUIConnectionChanged(boolean connected) {
-        if (!android.view.accessibility.Flags
-                .waitMagnificationSystemUiConnectionToNotifyServiceConnected()) {
-            return;
-        }
-
-        synchronized (mLock) {
-            boolean changed = (mMagnificationSystemUIConnected != connected);
-            mMagnificationSystemUIConnected = connected;
-
-            if (changed) {
-                notifyOnServiceConnectedIfReady();
             }
         }
     }
@@ -2903,11 +2823,6 @@ public abstract class AccessibilityService extends Service {
             }
 
             @Override
-            public void onMagnificationSystemUIConnectionChanged(boolean connected) {
-                AccessibilityService.this.onMagnificationSystemUIConnectionChanged(connected);
-            }
-
-            @Override
             public void onMagnificationChanged(int displayId, @NonNull Region region,
                     MagnificationConfig config) {
                 AccessibilityService.this.onMagnificationChanged(displayId, region, config);
@@ -3112,16 +3027,6 @@ public abstract class AccessibilityService extends Service {
                     } catch (IllegalStateException ise) {
                         /* ignore - best effort */
                     }
-                }
-                return;
-            });
-        }
-
-        @Override
-        public void onMagnificationSystemUIConnectionChanged(boolean connected) {
-            mExecutor.execute(() -> {
-                if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
-                    mCallback.onMagnificationSystemUIConnectionChanged(connected);
                 }
                 return;
             });
