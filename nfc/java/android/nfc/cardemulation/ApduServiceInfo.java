@@ -412,7 +412,7 @@ public final class ApduServiceInfo implements Parcelable {
                             false);
                     if (!mOnHost && !autoTransact) {
                         Log.e(TAG, "Ignoring polling-loop-filter " + plf
-                                + " for offhost service that isn't autoTranact");
+                                + " for offhost service that isn't autoTransact");
                     } else {
                         mAutoTransact.put(plf, autoTransact);
                     }
@@ -429,7 +429,7 @@ public final class ApduServiceInfo implements Parcelable {
                             false);
                     if (!mOnHost && !autoTransact) {
                         Log.e(TAG, "Ignoring polling-loop-filter " + plf
-                                + " for offhost service that isn't autoTranact");
+                                + " for offhost service that isn't autoTransact");
                     } else {
                         mAutoTransactPatterns.put(Pattern.compile(plf), autoTransact);
                     }
@@ -1028,6 +1028,9 @@ public final class ApduServiceInfo implements Parcelable {
         pw.println("    Settings Activity: " + mSettingsActivityName);
         pw.println("    Requires Device Unlock: " + mRequiresDeviceUnlock);
         pw.println("    Requires Device ScreenOn: " + mRequiresDeviceScreenOn);
+        pw.println("    Should Default to Observe Mode: " + mShouldDefaultToObserveMode);
+        pw.println("    Auto-Transact Mapping: " + mAutoTransact);
+        pw.println("    Auto-Transact Patterns: " + mAutoTransactPatterns);
     }
 
 
