@@ -32,6 +32,7 @@ android_test {
         "androidx.test.uiautomator_uiautomator",
         "compatibility-device-util-axt",
         "cts-input-lib",
+        "cts-wm-util",
         "flag-junit",
         "frameworks-base-testutils",
         "hamcrest-library",
