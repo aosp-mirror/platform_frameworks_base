@@ -127,6 +127,7 @@ import static com.android.window.flags.Flags.activityWindowInfoFlag;
 import static com.android.window.flags.Flags.enableBufferTransformHintFromDisplay;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
 import static com.android.window.flags.Flags.windowSessionRelayoutInfo;
+import static com.android.text.flags.Flags.disableHandwritingInitiatorForIme;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -7835,7 +7836,11 @@ public final class ViewRootImpl implements ViewParent,
         private int processPointerEvent(QueuedInputEvent q) {
             final MotionEvent event = (MotionEvent)q.mEvent;
             final int action = event.getAction();
-            boolean handled = mHandwritingInitiator.onTouchEvent(event);
+            boolean handled = false;
+            if (!disableHandwritingInitiatorForIme()
+                    || mWindowAttributes.type != TYPE_INPUT_METHOD) {
+                handled = mHandwritingInitiator.onTouchEvent(event);
+            }
             if (handled) {
                 // If handwriting is started, toolkit doesn't receive ACTION_UP.
                 mLastClickToolType = event.getToolType(event.getActionIndex());
@@ -7987,7 +7992,9 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         PointerIcon pointerIcon = null;
-        if (event.isStylusPointer() && mIsStylusPointerIconEnabled) {
+        if (event.isStylusPointer() && mIsStylusPointerIconEnabled
+                && (!disableHandwritingInitiatorForIme()
+                        || mWindowAttributes.type != TYPE_INPUT_METHOD)) {
             pointerIcon = mHandwritingInitiator.onResolvePointerIcon(mContext, event);
         }
         if (pointerIcon == null) {
