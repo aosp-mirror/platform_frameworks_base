@@ -17,10 +17,10 @@
 
 package com.android.systemui.keyguard.ui.view.layout.blueprints
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.ui.view.layout.sections.CommunalTutorialIndicatorSection
@@ -44,6 +44,7 @@ import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
 import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeGuidelines
 import com.android.systemui.util.mockito.whenever
 import java.util.Optional
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,8 +54,9 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
+@ExperimentalCoroutinesApi
 @SmallTest
 class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     private lateinit var underTest: DefaultKeyguardBlueprint
@@ -112,17 +114,66 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     @Test
     fun replaceViews_withPrevBlueprint() {
         val prevBlueprint = mock(KeyguardBlueprint::class.java)
-        val someSection = mock(KeyguardSection::class.java)
-        whenever(prevBlueprint.sections)
-            .thenReturn(underTest.sections.minus(mDefaultDeviceEntrySection).plus(someSection))
+        val removedSection = mock(KeyguardSection::class.java)
+        val addedSection = mDefaultDeviceEntrySection
+        val rebuildSection = clockSection
+        val prevSections = underTest.sections.minus(addedSection).plus(removedSection)
+        val unchangedSections = underTest.sections.subtract(listOf(addedSection, rebuildSection))
+        whenever(prevBlueprint.sections).thenReturn(prevSections)
+
         val constraintLayout = ConstraintLayout(context, null)
         underTest.replaceViews(constraintLayout, prevBlueprint)
-        underTest.sections.minus(mDefaultDeviceEntrySection).forEach {
-            verify(it, never())?.addViews(constraintLayout)
+
+        unchangedSections.forEach {
+            verify(it, never()).addViews(constraintLayout)
+            verify(it, never()).removeViews(constraintLayout)
         }
 
-        verify(mDefaultDeviceEntrySection).addViews(constraintLayout)
-        verify(someSection).removeViews(constraintLayout)
+        verify(addedSection).addViews(constraintLayout)
+        verify(removedSection).removeViews(constraintLayout)
+    }
+
+    @Test
+    fun replaceViews_withPrevBlueprint_withRebuildTargets() {
+        val prevBlueprint = mock(KeyguardBlueprint::class.java)
+        val removedSection = mock(KeyguardSection::class.java)
+        val addedSection = mDefaultDeviceEntrySection
+        val rebuildSection = clockSection
+        val prevSections = underTest.sections.minus(addedSection).plus(removedSection)
+        val unchangedSections = underTest.sections.subtract(listOf(addedSection, rebuildSection))
+        whenever(prevBlueprint.sections).thenReturn(prevSections)
+
+        val constraintLayout = ConstraintLayout(context, null)
+        underTest.replaceViews(constraintLayout, prevBlueprint, listOf(rebuildSection))
+
+        unchangedSections.forEach {
+            verify(it, never()).addViews(constraintLayout)
+            verify(it, never()).removeViews(constraintLayout)
+        }
+
+        verify(addedSection).addViews(constraintLayout)
+        verify(rebuildSection).addViews(constraintLayout)
+        verify(rebuildSection).removeViews(constraintLayout)
+        verify(removedSection).removeViews(constraintLayout)
+    }
+
+    @Test
+    fun rebuildViews() {
+        val rebuildSections = listOf(mDefaultDeviceEntrySection, clockSection)
+        val unchangedSections = underTest.sections.subtract(rebuildSections)
+
+        val constraintLayout = ConstraintLayout(context, null)
+        underTest.rebuildViews(constraintLayout, rebuildSections)
+
+        unchangedSections.forEach {
+            verify(it, never()).addViews(constraintLayout)
+            verify(it, never()).removeViews(constraintLayout)
+        }
+
+        rebuildSections.forEach {
+            verify(it).addViews(constraintLayout)
+            verify(it).removeViews(constraintLayout)
+        }
     }
 
     @Test

@@ -50,7 +50,7 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.animation.Interpolators.EMPHASIZED_DECELERATE
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.SyncTransactionQueue
-import com.android.wm.shell.windowdecor.WindowDecoration.AdditionalWindow
+import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewHostViewContainer
 import java.util.function.Supplier
 
 
@@ -70,7 +70,7 @@ class MaximizeMenu(
         private val menuPosition: PointF,
         private val transactionSupplier: Supplier<Transaction> = Supplier { Transaction() }
 ) {
-    private var maximizeMenu: AdditionalWindow? = null
+    private var maximizeMenu: AdditionalViewHostViewContainer? = null
     private lateinit var viewHost: SurfaceControlViewHost
     private lateinit var leash: SurfaceControl
     private val openMenuAnimatorSet = AnimatorSet()
@@ -145,7 +145,8 @@ class MaximizeMenu(
                 .setPosition(leash, menuPosition.x, menuPosition.y)
                 .setCornerRadius(leash, cornerRadius)
                 .show(leash)
-        maximizeMenu = AdditionalWindow(leash, viewHost, transactionSupplier)
+        maximizeMenu =
+            AdditionalViewHostViewContainer(leash, viewHost, transactionSupplier)
 
         syncQueue.runInSync { transaction ->
             transaction.merge(t)
@@ -154,8 +155,7 @@ class MaximizeMenu(
     }
 
     private fun animateOpenMenu() {
-        val viewHost = maximizeMenu?.mWindowViewHost
-        val maximizeMenuView = viewHost?.view ?: return
+        val maximizeMenuView = maximizeMenu?.view ?: return
         val maximizeWindowText = maximizeMenuView.requireViewById<TextView>(
                 R.id.maximize_menu_maximize_window_text)
         val snapWindowText = maximizeMenuView.requireViewById<TextView>(
@@ -233,7 +233,7 @@ class MaximizeMenu(
     }
 
     private fun setupMaximizeMenu() {
-        val maximizeMenuView = maximizeMenu?.mWindowViewHost?.view ?: return
+        val maximizeMenuView = maximizeMenu?.view ?: return
 
         maximizeMenuView.setOnGenericMotionListener(onGenericMotionListener)
         maximizeMenuView.setOnTouchListener(onTouchListener)
@@ -275,7 +275,7 @@ class MaximizeMenu(
      * Check if the views for maximize menu can be seen.
      */
     private fun viewsLaidOut(): Boolean {
-        return maximizeMenu?.mWindowViewHost?.view?.isLaidOut ?: false
+        return maximizeMenu?.view?.isLaidOut ?: false
     }
 
     fun onMaximizeMenuHoverEnter(viewId: Int, ev: MotionEvent) {

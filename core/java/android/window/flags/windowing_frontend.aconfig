@@ -172,3 +172,14 @@ flag {
     bug: "238206323"
     is_fixed_read_only: true
 }
+
+flag {
+  name: "draw_snapshot_aspect_ratio_match"
+  namespace: "windowing_frontend"
+  description: "The aspect ratio should always match when drawing snapshot"
+  bug: "341020277"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

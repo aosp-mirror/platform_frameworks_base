@@ -1161,7 +1161,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
 
     @Override
     public String toString() {
-        StringBuilder out = new StringBuilder("[ContextHubClient ");
+        StringBuilder out = new StringBuilder();
         out.append("endpointID: ").append(getHostEndPointId()).append(", ");
         out.append("contextHub: ").append(getAttachedContextHubId()).append(", ");
         if (mAttributionTag != null) {
@@ -1170,25 +1170,26 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         if (mPendingIntentRequest.isValid()) {
             out.append("intentCreatorPackage: ").append(mPackage).append(", ");
             out.append("nanoAppId: 0x")
-                    .append(Long.toHexString(mPendingIntentRequest.getNanoAppId()));
+                    .append(Long.toHexString(mPendingIntentRequest.getNanoAppId()))
+                    .append(", ");
         } else {
-            out.append("package: ").append(mPackage);
+            out.append("package: ").append(mPackage).append(", ");
         }
         if (mMessageChannelNanoappIdMap.size() > 0) {
-            out.append(" messageChannelNanoappSet: (");
+            out.append("messageChannelNanoappSet: (");
             Iterator<Map.Entry<Long, Integer>> it =
                     mMessageChannelNanoappIdMap.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry<Long, Integer> entry = it.next();
-                out.append("0x")
+                out.append("Nanoapp 0x")
                         .append(Long.toHexString(entry.getKey()))
-                        .append(" auth state: ")
+                        .append(": Auth state: ")
                         .append(authStateToString(entry.getValue()));
                 if (it.hasNext()) {
-                    out.append(",");
+                    out.append(", ");
                 }
             }
-            out.append(")");
+            out.append(")").append(", ");
         }
         synchronized (mWakeLock) {
             out.append("wakelock: ").append(mWakeLock);

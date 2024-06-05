@@ -19,6 +19,10 @@ import android.content.ContentResolver
 import android.database.ContentObserver
 import android.net.Uri
 import android.provider.Settings.SettingNotFoundException
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Used to interact with mainly with Settings.Global, but can also be used for Settings.System and
@@ -39,6 +43,12 @@ interface SettingsProxy {
     fun getContentResolver(): ContentResolver
 
     /**
+     * Returns the background [CoroutineDispatcher] that the async APIs will use for a specific
+     * implementation.
+     */
+    fun getBackgroundDispatcher(): CoroutineDispatcher
+
+    /**
      * Construct the content URI for a particular name/value pair, useful for monitoring changes
      * with a ContentObserver.
      *
@@ -52,35 +62,163 @@ interface SettingsProxy {
      *
      * Implicitly calls [getUriFor] on the passed in name.
      */
-    fun registerContentObserver(name: String, settingsObserver: ContentObserver) {
-        registerContentObserver(getUriFor(name), settingsObserver)
+    fun registerContentObserverSync(name: String, settingsObserver: ContentObserver) {
+        registerContentObserverSync(getUriFor(name), settingsObserver)
     }
 
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * suspend API corresponding to [registerContentObserver] to ensure that [ContentObserver]
+     * registration happens on a worker thread. Caller may wrap the API in an async block if they
+     * wish to synchronize execution.
+     */
+    suspend fun registerContentObserver(name: String, settingsObserver: ContentObserver) =
+        withContext(getBackgroundDispatcher()) {
+            registerContentObserverSync(getUriFor(name), settingsObserver)
+        }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * API corresponding to [registerContentObserver] for Java usage.
+     */
+    fun registerContentObserverAsync(name: String, settingsObserver: ContentObserver) =
+        CoroutineScope(getBackgroundDispatcher()).launch {
+            registerContentObserverSync(getUriFor(name), settingsObserver)
+        }
+
     /** Convenience wrapper around [ContentResolver.registerContentObserver].' */
-    fun registerContentObserver(uri: Uri, settingsObserver: ContentObserver) =
-        registerContentObserver(uri, false, settingsObserver)
+    fun registerContentObserverSync(uri: Uri, settingsObserver: ContentObserver) =
+        registerContentObserverSync(uri, false, settingsObserver)
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * suspend API corresponding to [registerContentObserver] to ensure that [ContentObserver]
+     * registration happens on a worker thread. Caller may wrap the API in an async block if they
+     * wish to synchronize execution.
+     */
+    suspend fun registerContentObserver(uri: Uri, settingsObserver: ContentObserver) =
+        withContext(getBackgroundDispatcher()) {
+            registerContentObserverSync(uri, settingsObserver)
+        }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * API corresponding to [registerContentObserver] for Java usage.
+     */
+    fun registerContentObserverAsync(uri: Uri, settingsObserver: ContentObserver) =
+        CoroutineScope(getBackgroundDispatcher()).launch {
+            registerContentObserverSync(uri, settingsObserver)
+        }
 
     /**
      * Convenience wrapper around [ContentResolver.registerContentObserver].'
      *
      * Implicitly calls [getUriFor] on the passed in name.
      */
-    fun registerContentObserver(
+    fun registerContentObserverSync(
         name: String,
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver
-    ) = registerContentObserver(getUriFor(name), notifyForDescendants, settingsObserver)
+    ) = registerContentObserverSync(getUriFor(name), notifyForDescendants, settingsObserver)
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * suspend API corresponding to [registerContentObserver] to ensure that [ContentObserver]
+     * registration happens on a worker thread. Caller may wrap the API in an async block if they
+     * wish to synchronize execution.
+     */
+    suspend fun registerContentObserver(
+        name: String,
+        notifyForDescendants: Boolean,
+        settingsObserver: ContentObserver
+    ) =
+        withContext(getBackgroundDispatcher()) {
+            registerContentObserverSync(getUriFor(name), notifyForDescendants, settingsObserver)
+        }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * API corresponding to [registerContentObserver] for Java usage.
+     */
+    fun registerContentObserverAsync(
+        name: String,
+        notifyForDescendants: Boolean,
+        settingsObserver: ContentObserver
+    ) =
+        CoroutineScope(getBackgroundDispatcher()).launch {
+            registerContentObserverSync(getUriFor(name), notifyForDescendants, settingsObserver)
+        }
 
     /** Convenience wrapper around [ContentResolver.registerContentObserver].' */
-    fun registerContentObserver(
+    fun registerContentObserverSync(
         uri: Uri,
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver
-    ) = getContentResolver().registerContentObserver(uri, notifyForDescendants, settingsObserver)
+    ) {
+        getContentResolver().registerContentObserver(uri, notifyForDescendants, settingsObserver)
+    }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * suspend API corresponding to [registerContentObserver] to ensure that [ContentObserver]
+     * registration happens on a worker thread. Caller may wrap the API in an async block if they
+     * wish to synchronize execution.
+     */
+    suspend fun registerContentObserver(
+        uri: Uri,
+        notifyForDescendants: Boolean,
+        settingsObserver: ContentObserver
+    ) =
+        withContext(getBackgroundDispatcher()) {
+            registerContentObserverSync(uri, notifyForDescendants, settingsObserver)
+        }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * API corresponding to [registerContentObserver] for Java usage.
+     */
+    fun registerContentObserverAsync(
+        uri: Uri,
+        notifyForDescendants: Boolean,
+        settingsObserver: ContentObserver
+    ) =
+        CoroutineScope(getBackgroundDispatcher()).launch {
+            getContentResolver()
+                .registerContentObserver(uri, notifyForDescendants, settingsObserver)
+        }
 
     /** See [ContentResolver.unregisterContentObserver]. */
-    fun unregisterContentObserver(settingsObserver: ContentObserver) =
+    fun unregisterContentObserverSync(settingsObserver: ContentObserver) =
         getContentResolver().unregisterContentObserver(settingsObserver)
+
+    /**
+     * Convenience wrapper around [ContentResolver.unregisterContentObserver].'
+     *
+     * API corresponding to [unregisterContentObserver] for Java usage to ensure that
+     * [ContentObserver] un-registration happens on a worker thread. Caller may wrap the API in an
+     * async block if they wish to synchronize execution.
+     */
+    suspend fun unregisterContentObserver(settingsObserver: ContentObserver) =
+        withContext(getBackgroundDispatcher()) { unregisterContentObserverSync(settingsObserver) }
+
+    /**
+     * Convenience wrapper around [ContentResolver.unregisterContentObserver].'
+     *
+     * API corresponding to [unregisterContentObserver] for Java usage to ensure that
+     * [ContentObserver] registration happens on a worker thread.
+     */
+    fun unregisterContentObserverAsync(settingsObserver: ContentObserver) =
+        CoroutineScope(getBackgroundDispatcher()).launch {
+            unregisterContentObserver(settingsObserver)
+        }
 
     /**
      * Look up a name in the database.

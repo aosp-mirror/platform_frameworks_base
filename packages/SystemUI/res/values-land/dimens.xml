@@ -28,9 +28,7 @@
 
     <!--  In landscape the security footer is actually part of the header,
     and needs to be as short as the header  -->
-    <dimen name="qs_security_footer_single_line_height">@*android:dimen/quick_qs_offset_height</dimen>
     <dimen name="qs_footer_padding">14dp</dimen>
-    <dimen name="qs_security_footer_background_inset">12dp</dimen>
 
     <dimen name="volume_tool_tip_top_margin">12dp</dimen>
     <dimen name="volume_row_slider_height">128dp</dimen>

@@ -39,7 +39,15 @@ internal class AnchoredTranslate(
         transition: TransitionState.Transition,
         value: Offset,
     ): Offset {
-        val anchor = layoutImpl.elements[anchor] ?: return value
+        fun throwException(scene: SceneKey?): Nothing {
+            throwMissingAnchorException(
+                transformation = "AnchoredTranslate",
+                anchor = anchor,
+                scene = scene,
+            )
+        }
+
+        val anchor = layoutImpl.elements[anchor] ?: throwException(scene = null)
         fun anchorOffsetIn(scene: SceneKey): Offset? {
             return anchor.sceneStates[scene]?.targetOffset?.takeIf { it.isSpecified }
         }
@@ -47,8 +55,10 @@ internal class AnchoredTranslate(
         // [element] will move the same amount as [anchor] does.
         // TODO(b/290184746): Also support anchors that are not shared but translated because of
         // other transformations, like an edge translation.
-        val anchorFromOffset = anchorOffsetIn(transition.fromScene) ?: return value
-        val anchorToOffset = anchorOffsetIn(transition.toScene) ?: return value
+        val anchorFromOffset =
+            anchorOffsetIn(transition.fromScene) ?: throwException(transition.fromScene)
+        val anchorToOffset =
+            anchorOffsetIn(transition.toScene) ?: throwException(transition.toScene)
         val offset = anchorToOffset - anchorFromOffset
 
         return if (scene.key == transition.toScene) {
@@ -63,4 +73,21 @@ internal class AnchoredTranslate(
             )
         }
     }
+}
+
+internal fun throwMissingAnchorException(
+    transformation: String,
+    anchor: ElementKey,
+    scene: SceneKey?,
+): Nothing {
+    error(
+        """
+        Anchor ${anchor.debugName} does not have a target state in scene ${scene?.debugName}.
+        This either means that it was not composed at all during the transition or that it was
+        composed too late, for instance during layout/subcomposition. To avoid flickers in
+        $transformation, you should make sure that the composition and layout of anchor is *not*
+        deferred, for instance by moving it out of lazy layouts.
+    """
+            .trimIndent()
+    )
 }

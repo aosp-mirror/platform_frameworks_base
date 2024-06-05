@@ -54,7 +54,10 @@ enum class GetCredentialEvent(private val id: Int) : UiEventLogger.UiEventEnum {
     CREDMAN_GET_CRED_PRIMARY_SELECTION_CARD(1341),
 
     @UiEvent(doc = "The all sign in option card is visible on screen.")
-    CREDMAN_GET_CRED_ALL_SIGN_IN_OPTION_CARD(1342);
+    CREDMAN_GET_CRED_ALL_SIGN_IN_OPTION_CARD(1342),
+
+    @UiEvent(doc = "The single tap biometric flow is launched.")
+    CREDMAN_GET_CRED_BIOMETRIC_FLOW_LAUNCHED(1801);
 
     override fun getId(): Int {
         return this.id

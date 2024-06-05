@@ -32,6 +32,7 @@ import android.os.Handler
 import android.os.UserHandle
 import android.platform.test.annotations.DisableFlags
 import android.provider.Settings
+import android.testing.TestableLooper.RunWithLooper
 import android.view.View
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
@@ -84,6 +85,7 @@ import java.util.Optional
 import java.util.concurrent.Executor
 
 @SmallTest
+@RunWithLooper(setAsMainLooper = true)
 class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     companion object {
         const val SMARTSPACE_TIME_TOO_EARLY = 1000L
@@ -778,6 +780,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @RunWithLooper(setAsMainLooper = false)
     fun testConnectAttemptBeforeInitializationShouldNotCreateSession() {
         // GIVEN an uninitalized smartspaceView
         // WHEN the device is provisioned

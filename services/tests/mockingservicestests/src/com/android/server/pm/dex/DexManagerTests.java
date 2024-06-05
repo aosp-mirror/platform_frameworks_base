@@ -83,8 +83,6 @@ public class DexManagerTests {
     @Mock BatteryManager mMockBatteryManager;
     @Mock PowerManager mMockPowerManager;
 
-    private final Object mInstallLock = new Object();
-
     private DynamicCodeLogger mDynamicCodeLogger;
     private DexManager mDexManager;
 
@@ -160,8 +158,8 @@ public class DexManagerTests {
                 .getSystemService(PowerManager.class);
 
         mDynamicCodeLogger = new DynamicCodeLogger(mInstaller);
-        mDexManager = new DexManager(mockContext, /*PackageDexOptimizer*/ null, mInstaller,
-                mInstallLock, mDynamicCodeLogger, mPM);
+        mDexManager = new DexManager(mockContext, /*PackageDexOptimizer*/ null,
+                mDynamicCodeLogger, mPM);
 
         // Foo and Bar are available to user0.
         // Only Bar is available to user1;

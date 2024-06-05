@@ -169,3 +169,13 @@ flag {
     description: "Feature flag for declaring system pinch zoom opt-out apis"
     bug: "315089687"
 }
+
+flag {
+    name: "wait_magnification_system_ui_connection_to_notify_service_connected"
+    namespace: "accessibility"
+    description: "Decide whether AccessibilityService needs to wait until magnification system ui connection is ready to trigger onServiceConnected"
+    bug: "337800504"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

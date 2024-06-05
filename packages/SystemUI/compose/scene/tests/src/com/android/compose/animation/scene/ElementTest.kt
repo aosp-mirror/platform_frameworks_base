@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
+import androidx.compose.ui.util.lerp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
@@ -348,7 +349,7 @@ class ElementTest {
                     ),
                 onLayoutImpl = { nullableLayoutImpl = it },
             ) {
-                scene(SceneA) { /* Nothing */}
+                scene(SceneA) { /* Nothing */ }
                 scene(SceneB) { Box(Modifier.element(key)) }
                 scene(SceneC) {
                     when (sceneCState) {
@@ -1083,16 +1084,28 @@ class ElementTest {
             }
 
         val layoutSize = DpSize(200.dp, 100.dp)
+        val lastValues = mutableMapOf<SceneKey, Float>()
 
         @Composable
-        fun SceneScope.Foo(size: Dp, modifier: Modifier = Modifier) {
-            Box(modifier.element(TestElements.Foo).size(size))
+        fun SceneScope.Foo(size: Dp, value: Float, modifier: Modifier = Modifier) {
+            val sceneKey = this.sceneKey
+            Element(TestElements.Foo, modifier.size(size)) {
+                val animatedValue = animateElementFloatAsState(value, TestValues.Value1)
+                LaunchedEffect(animatedValue) {
+                    snapshotFlow { animatedValue.value }.collect { lastValues[sceneKey] = it }
+                }
+            }
         }
 
         // The size of Foo when idle in A, B or C.
         val sizeInA = 10.dp
         val sizeInB = 30.dp
         val sizeInC = 50.dp
+
+        // The target value when idle in A, B, or C.
+        val valueInA = 0f
+        val valueInB = 100f
+        val valueInC = 200f
 
         lateinit var layoutImpl: SceneTransitionLayoutImpl
         rule.setContent {
@@ -1103,7 +1116,9 @@ class ElementTest {
             ) {
                 // In scene A, Foo is aligned at the TopStart.
                 scene(SceneA) {
-                    Box(Modifier.fillMaxSize()) { Foo(sizeInA, Modifier.align(Alignment.TopStart)) }
+                    Box(Modifier.fillMaxSize()) {
+                        Foo(sizeInA, valueInA, Modifier.align(Alignment.TopStart))
+                    }
                 }
 
                 // In scene C, Foo is aligned at the BottomEnd, so it moves vertically when coming
@@ -1111,14 +1126,16 @@ class ElementTest {
                 // values and deltas are properly cleared once all transitions are done.
                 scene(SceneC) {
                     Box(Modifier.fillMaxSize()) {
-                        Foo(sizeInC, Modifier.align(Alignment.BottomEnd))
+                        Foo(sizeInC, valueInC, Modifier.align(Alignment.BottomEnd))
                     }
                 }
 
                 // In scene B, Foo is aligned at the TopEnd, so it moves horizontally when coming
                 // from A.
                 scene(SceneB) {
-                    Box(Modifier.fillMaxSize()) { Foo(sizeInB, Modifier.align(Alignment.TopEnd)) }
+                    Box(Modifier.fillMaxSize()) {
+                        Foo(sizeInB, valueInB, Modifier.align(Alignment.TopEnd))
+                    }
                 }
             }
         }
@@ -1134,6 +1151,10 @@ class ElementTest {
             .assertSizeIsEqualTo(sizeInA)
             .assertPositionInRootIsEqualTo(offsetInA.x, offsetInA.y)
 
+        assertThat(lastValues[SceneA]).isWithin(0.001f).of(valueInA)
+        assertThat(lastValues[SceneB]).isNull()
+        assertThat(lastValues[SceneC]).isNull()
+
         // Current transition is A => B at 50%.
         val aToBProgress = 0.5f
         val aToB =
@@ -1145,11 +1166,16 @@ class ElementTest {
             )
         val offsetInAToB = lerp(offsetInA, offsetInB, aToBProgress)
         val sizeInAToB = lerp(sizeInA, sizeInB, aToBProgress)
+        val valueInAToB = lerp(valueInA, valueInB, aToBProgress)
         rule.runOnUiThread { state.startTransition(aToB, transitionKey = null) }
         rule
             .onNode(isElement(TestElements.Foo, SceneB))
             .assertSizeIsEqualTo(sizeInAToB)
             .assertPositionInRootIsEqualTo(offsetInAToB.x, offsetInAToB.y)
+
+        assertThat(lastValues[SceneA]).isWithin(0.001f).of(valueInAToB)
+        assertThat(lastValues[SceneB]).isWithin(0.001f).of(valueInAToB)
+        assertThat(lastValues[SceneC]).isNull()
 
         // Start B => C at 0%.
         var bToCProgress by mutableFloatStateOf(0f)
@@ -1167,6 +1193,11 @@ class ElementTest {
         // to the current transition offset and size.
         val offsetInterruptionDelta = offsetInAToB - offsetInB
         val sizeInterruptionDelta = sizeInAToB - sizeInB
+        val valueInterruptionDelta = valueInAToB - valueInB
+
+        assertThat(offsetInterruptionDelta).isNotEqualTo(DpOffset.Zero)
+        assertThat(sizeInterruptionDelta).isNotEqualTo(0.dp)
+        assertThat(valueInterruptionDelta).isNotEqualTo(0f)
 
         // Interruption progress is at 100% and bToC is at 0%, so Foo should be at the same offset
         // and size as right before the interruption.
@@ -1175,11 +1206,16 @@ class ElementTest {
             .assertPositionInRootIsEqualTo(offsetInAToB.x, offsetInAToB.y)
             .assertSizeIsEqualTo(sizeInAToB)
 
+        assertThat(lastValues[SceneA]).isWithin(0.001f).of(valueInAToB)
+        assertThat(lastValues[SceneB]).isWithin(0.001f).of(valueInAToB)
+        assertThat(lastValues[SceneC]).isWithin(0.001f).of(valueInAToB)
+
         // Move the transition forward at 30% and set the interruption progress to 50%.
         bToCProgress = 0.3f
         interruptionProgress = 0.5f
         val offsetInBToC = lerp(offsetInB, offsetInC, bToCProgress)
         val sizeInBToC = lerp(sizeInB, sizeInC, bToCProgress)
+        val valueInBToC = lerp(valueInB, valueInC, bToCProgress)
         val offsetInBToCWithInterruption =
             offsetInBToC +
                 DpOffset(
@@ -1187,6 +1223,9 @@ class ElementTest {
                     offsetInterruptionDelta.y * interruptionProgress,
                 )
         val sizeInBToCWithInterruption = sizeInBToC + sizeInterruptionDelta * interruptionProgress
+        val valueInBToCWithInterruption =
+            valueInBToC + valueInterruptionDelta * interruptionProgress
+
         rule.waitForIdle()
         rule
             .onNode(isElement(TestElements.Foo, SceneB))
@@ -1195,6 +1234,10 @@ class ElementTest {
                 offsetInBToCWithInterruption.y,
             )
             .assertSizeIsEqualTo(sizeInBToCWithInterruption)
+
+        assertThat(lastValues[SceneA]).isWithin(0.001f).of(valueInBToCWithInterruption)
+        assertThat(lastValues[SceneB]).isWithin(0.001f).of(valueInBToCWithInterruption)
+        assertThat(lastValues[SceneC]).isWithin(0.001f).of(valueInBToCWithInterruption)
 
         // Finish the transition and interruption.
         bToCProgress = 1f

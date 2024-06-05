@@ -2617,6 +2617,9 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             Objects.requireNonNull(packageName);
             return mPM.isAppArchivable(packageName, new UserHandle(getUserId()));
+        } catch (ParcelableException e) {
+            e.maybeRethrow(NameNotFoundException.class);
+            throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

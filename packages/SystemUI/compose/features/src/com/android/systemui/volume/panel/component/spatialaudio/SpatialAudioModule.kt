@@ -16,16 +16,13 @@
 
 package com.android.systemui.volume.panel.component.spatialaudio
 
-import com.android.systemui.volume.panel.component.button.ui.composable.ButtonComponent
 import com.android.systemui.volume.panel.component.shared.model.VolumePanelComponents
 import com.android.systemui.volume.panel.component.spatial.domain.SpatialAudioAvailabilityCriteria
-import com.android.systemui.volume.panel.component.spatial.ui.viewmodel.SpatialAudioViewModel
-import com.android.systemui.volume.panel.component.spatialaudio.ui.composable.SpatialAudioPopup
+import com.android.systemui.volume.panel.component.spatialaudio.ui.composable.SpatialAudioComponent
 import com.android.systemui.volume.panel.domain.ComponentAvailabilityCriteria
 import com.android.systemui.volume.panel.shared.model.VolumePanelUiComponent
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.multibindings.IntoMap
 import dagger.multibindings.StringKey
 
@@ -40,14 +37,8 @@ interface SpatialAudioModule {
         criteria: SpatialAudioAvailabilityCriteria
     ): ComponentAvailabilityCriteria
 
-    companion object {
-
-        @Provides
-        @IntoMap
-        @StringKey(VolumePanelComponents.SPATIAL_AUDIO)
-        fun provideVolumePanelUiComponent(
-            viewModel: SpatialAudioViewModel,
-            popup: SpatialAudioPopup,
-        ): VolumePanelUiComponent = ButtonComponent(viewModel.spatialAudioButton, popup::show)
-    }
+    @Binds
+    @IntoMap
+    @StringKey(VolumePanelComponents.SPATIAL_AUDIO)
+    fun bindVolumePanelUiComponent(component: SpatialAudioComponent): VolumePanelUiComponent
 }

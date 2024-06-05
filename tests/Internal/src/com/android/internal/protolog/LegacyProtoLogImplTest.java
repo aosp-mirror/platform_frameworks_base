@@ -393,5 +393,10 @@ public class LegacyProtoLogImplTest {
             this.mLogToLogcat = logToLogcat;
         }
 
+        @Override
+        public int getId() {
+            return ordinal();
+        }
+
     }
 }

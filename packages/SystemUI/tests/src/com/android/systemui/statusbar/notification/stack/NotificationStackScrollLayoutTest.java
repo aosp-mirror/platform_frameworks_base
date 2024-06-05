@@ -171,7 +171,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         //  and then we would test both configurations, but currently they are all read
         //  in the constructor.
         mSetFlagsRule.enableFlags(FLAG_NEW_AOD_TRANSITION);
-        mFeatureFlags.setDefault(Flags.UNCLEARED_TRANSIENT_HUN_FIX);
 
         // Inject dependencies before initializing the layout
         mDependency.injectTestDependency(FeatureFlags.class, mFeatureFlags);

@@ -1029,6 +1029,10 @@ public class HdmiControlService extends SystemService {
 
     /** Helper method for sending feature discovery command */
     private void reportFeatures(boolean isTvDeviceSetting) {
+        // <Report Features> should only be sent for HDMI 2.0
+        if (getCecVersion() < HdmiControlManager.HDMI_CEC_VERSION_2_0) {
+            return;
+        }
         // check if tv device is enabled for tv device specific RC profile setting
         if (isTvDeviceSetting) {
             if (isTvDeviceEnabled()) {
