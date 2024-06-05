@@ -962,7 +962,7 @@ class DesktopTasksController(
         }
         val wct = WindowContainerTransaction()
         if (isDesktopDensityOverrideSet()) {
-            wct.setDensityDpi(task.token, DESKTOP_DENSITY_OVERRIDE)
+            // TODO(344599474) reintroduce density changes behind a disabled flag
         }
         // Desktop Mode is showing and we're launching a new Task - we might need to minimize
         // a Task.
