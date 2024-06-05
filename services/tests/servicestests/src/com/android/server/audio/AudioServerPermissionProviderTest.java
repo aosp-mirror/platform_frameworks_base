@@ -15,15 +15,23 @@
  */
 package com.android.server.audio;
 
+import static com.android.server.audio.AudioServerPermissionProvider.MONITORED_PERMS;
+
+import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyByte;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -45,6 +53,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiPredicate;
+import java.util.function.Supplier;
 
 @RunWith(AndroidJUnit4.class)
 @Presubmit
@@ -63,6 +73,9 @@ public final class AudioServerPermissionProviderTest {
     @Mock public PackageState mMockPackageStateFour_10000_three;
     @Mock public PackageState mMockPackageStateFive_10001_four;
     @Mock public PackageState mMockPackageStateSix_10000_two;
+
+    @Mock public BiPredicate<Integer, String> mMockPermPred;
+    @Mock public Supplier<int[]> mMockUserIdSupplier;
 
     public List<UidPackageState> mInitPackageListExpected;
 
@@ -148,6 +161,13 @@ public final class AudioServerPermissionProviderTest {
 
         when(mMockPackageStateSix_10000_two.getAppId()).thenReturn(10000);
         when(mMockPackageStateSix_10000_two.getPackageName()).thenReturn("com.package.two");
+
+        when(mMockUserIdSupplier.get()).thenReturn(new int[] {0, 1});
+
+        when(mMockPermPred.test(eq(10000), eq(MONITORED_PERMS[0]))).thenReturn(true);
+        when(mMockPermPred.test(eq(110001), eq(MONITORED_PERMS[0]))).thenReturn(true);
+        when(mMockPermPred.test(eq(10001), eq(MONITORED_PERMS[1]))).thenReturn(true);
+        when(mMockPermPred.test(eq(110000), eq(MONITORED_PERMS[1]))).thenReturn(true);
     }
 
     @Test
@@ -168,7 +188,9 @@ public final class AudioServerPermissionProviderTest {
                         createUidPackageState(
                                 10001, List.of("com.package.two", "com.package.four")));
 
-        mPermissionProvider = new AudioServerPermissionProvider(initPackageListData);
+        mPermissionProvider =
+                new AudioServerPermissionProvider(
+                        initPackageListData, mMockPermPred, mMockUserIdSupplier);
         mPermissionProvider.onServiceStart(mMockPc);
         verify(mMockPc)
                 .populatePackagesForUids(argThat(new PackageStateListMatcher(expectedPackageList)));
@@ -179,7 +201,9 @@ public final class AudioServerPermissionProviderTest {
         // 10000: one | 10001: two
         var initPackageListData =
                 List.of(mMockPackageStateOne_10000_one, mMockPackageStateTwo_10001_two);
-        mPermissionProvider = new AudioServerPermissionProvider(initPackageListData);
+        mPermissionProvider =
+                new AudioServerPermissionProvider(
+                        initPackageListData, mMockPermPred, mMockUserIdSupplier);
         mPermissionProvider.onServiceStart(mMockPc);
 
         // new uid, including user component
@@ -196,7 +220,9 @@ public final class AudioServerPermissionProviderTest {
         // 10000: one | 10001: two
         var initPackageListData =
                 List.of(mMockPackageStateOne_10000_one, mMockPackageStateTwo_10001_two);
-        mPermissionProvider = new AudioServerPermissionProvider(initPackageListData);
+        mPermissionProvider =
+                new AudioServerPermissionProvider(
+                        initPackageListData, mMockPermPred, mMockUserIdSupplier);
         mPermissionProvider.onServiceStart(mMockPc);
 
         // Includes user-id
@@ -211,7 +237,9 @@ public final class AudioServerPermissionProviderTest {
         // 10000: one | 10001: two
         var initPackageListData =
                 List.of(mMockPackageStateOne_10000_one, mMockPackageStateTwo_10001_two);
-        mPermissionProvider = new AudioServerPermissionProvider(initPackageListData);
+        mPermissionProvider =
+                new AudioServerPermissionProvider(
+                        initPackageListData, mMockPermPred, mMockUserIdSupplier);
         mPermissionProvider.onServiceStart(mMockPc);
 
         // Includes user-id
@@ -233,7 +261,9 @@ public final class AudioServerPermissionProviderTest {
                         mMockPackageStateOne_10000_one,
                         mMockPackageStateTwo_10001_two,
                         mMockPackageStateSix_10000_two);
-        mPermissionProvider = new AudioServerPermissionProvider(initPackageListData);
+        mPermissionProvider =
+                new AudioServerPermissionProvider(
+                        initPackageListData, mMockPermPred, mMockUserIdSupplier);
         mPermissionProvider.onServiceStart(mMockPc);
 
         // Includes user-id
@@ -255,7 +285,9 @@ public final class AudioServerPermissionProviderTest {
                         mMockPackageStateOne_10000_one,
                         mMockPackageStateTwo_10001_two,
                         mMockPackageStateSix_10000_two);
-        mPermissionProvider = new AudioServerPermissionProvider(initPackageListData);
+        mPermissionProvider =
+                new AudioServerPermissionProvider(
+                        initPackageListData, mMockPermPred, mMockUserIdSupplier);
         mPermissionProvider.onServiceStart(mMockPc);
         mPermissionProvider.onModifyPackageState(1_10000, "com.package.one", true /* isRemove */);
         verify(mMockPc)
@@ -297,6 +329,72 @@ public final class AudioServerPermissionProviderTest {
                                         10001, List.of("com.package.two", "com.package.four"))));
         // exactly once
         verify(newMockPc).updatePackagesForUid(any());
+    }
+
+    @Test
+    public void testPermissionsPopulated_onStart() throws Exception {
+        // expected state from setUp:
+        // PERM[0]: [10000, 110001]
+        // PERM[1]: [10001, 110000]
+        // PERM[...]: []
+        var initPackageListData =
+                List.of(mMockPackageStateOne_10000_one, mMockPackageStateTwo_10001_two);
+        mPermissionProvider =
+                new AudioServerPermissionProvider(
+                        initPackageListData, mMockPermPred, mMockUserIdSupplier);
+
+        mPermissionProvider.onServiceStart(mMockPc);
+        verify(mMockPc).populatePermissionState(eq((byte) 0), aryEq(new int[] {10000, 110001}));
+        verify(mMockPc).populatePermissionState(eq((byte) 1), aryEq(new int[] {10001, 110000}));
+        for (int i = 2; i < MONITORED_PERMS.length; i++) {
+            verify(mMockPc).populatePermissionState(eq((byte) i), aryEq(new int[] {}));
+        }
+        verify(mMockPc, times(MONITORED_PERMS.length)).populatePermissionState(anyByte(), any());
+    }
+
+    @Test
+    public void testPermissionsPopulated_onChange() throws Exception {
+        var initPackageListData =
+                List.of(mMockPackageStateOne_10000_one, mMockPackageStateTwo_10001_two);
+        mPermissionProvider =
+                new AudioServerPermissionProvider(
+                        initPackageListData, mMockPermPred, mMockUserIdSupplier);
+
+        mPermissionProvider.onServiceStart(mMockPc);
+        clearInvocations(mMockPc);
+        // Ensure the provided permission state is changed
+        when(mMockPermPred.test(eq(110001), eq(MONITORED_PERMS[1]))).thenReturn(true);
+
+        mPermissionProvider.onPermissionStateChanged();
+        verify(mMockPc)
+                .populatePermissionState(eq((byte) 1), aryEq(new int[] {10001, 110000, 110001}));
+        verify(mMockPc).populatePermissionState(anyByte(), any()); // exactly once
+    }
+
+    @Test
+    public void testPermissionPopulatedDeferred_onDeadService() throws Exception {
+        var initPackageListData =
+                List.of(mMockPackageStateOne_10000_one, mMockPackageStateTwo_10001_two);
+        mPermissionProvider =
+                new AudioServerPermissionProvider(
+                        initPackageListData, mMockPermPred, mMockUserIdSupplier);
+
+        // throw on the first call to mark the service as dead
+        doThrow(new RemoteException())
+                .doNothing()
+                .when(mMockPc)
+                .populatePermissionState(anyByte(), any());
+        mPermissionProvider.onServiceStart(mMockPc);
+        clearInvocations(mMockPc);
+        clearInvocations(mMockPermPred);
+
+        mPermissionProvider.onPermissionStateChanged();
+        verify(mMockPermPred, never()).test(any(), any());
+        verify(mMockPc, never()).populatePermissionState(anyByte(), any());
+        mPermissionProvider.onServiceStart(mMockPc);
+        for (int i = 0; i < MONITORED_PERMS.length; i++) {
+            verify(mMockPc).populatePermissionState(eq((byte) i), any());
+        }
     }
 
     private static UidPackageState createUidPackageState(int uid, List<String> packages) {

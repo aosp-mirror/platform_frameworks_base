@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="utf-8"?>
+<!--
   ~ Copyright (C) 2024 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,16 +14,16 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/backLayer">
-        <shape android:shape="rectangle">
-            <solid android:color="#000000" />
-        </shape>
-    </item>
 
-    <item android:id="@+id/frontLayer">
-        <shape android:shape="rectangle">
-            <solid android:color="#000000" />
-        </shape>
+<selector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
+    <item android:state_focused="true">
+        <inset android:inset="-5dp">
+            <shape>
+                <corners android:radius="16dp"/>
+                <stroke android:width="3dp" android:color="?androidprv:attr/materialColorSecondaryFixed"/>
+            </shape>
+        </inset>
     </item>
-</layer-list>
+</selector>

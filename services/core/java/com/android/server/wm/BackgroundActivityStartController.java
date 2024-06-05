@@ -31,6 +31,7 @@ import static android.os.Process.INVALID_UID;
 import static android.os.Process.ROOT_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.provider.DeviceConfig.NAMESPACE_WINDOW_MANAGER;
+import static android.security.Flags.asmOptSystemIntoEnforcement;
 
 import static com.android.server.wm.ActivityStarter.ASM_RESTRICTIONS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
@@ -1462,13 +1463,18 @@ public class BackgroundActivityStartController {
             return bas.matchesSource();
         }
 
+        if (ar.isUid(SYSTEM_UID)) {
+            if (asmOptSystemIntoEnforcement()) {
+                return bas.optedIn(ar);
+            } else {
+                return bas;
+            }
+        }
+
         if (!CompatChanges.isChangeEnabled(ASM_RESTRICTIONS, ar.getUid())) {
             return bas;
         }
 
-        if (ar.isUid(SYSTEM_UID)) {
-            return bas.optedIn(ar);
-        }
 
         String packageName = ar.packageName;
         if (packageName == null) {
@@ -1566,6 +1572,7 @@ public class BackgroundActivityStartController {
         joiner.add(prefix + "Allowed By Grace Period: " + allowedByGracePeriod);
         joiner.add(prefix + "LastResumedActivity: "
                        + recordToString.apply(mService.mLastResumedActivity));
+        joiner.add(prefix + "System opted into enforcement: " + asmOptSystemIntoEnforcement());
 
         if (mTopFinishedActivity != null) {
             joiner.add(prefix + "TopFinishedActivity: " + mTopFinishedActivity.mDebugInfo);

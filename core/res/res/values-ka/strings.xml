@@ -161,7 +161,7 @@
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"დაკავშირებულია დაშიფრულ ქსელთან <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM-ბარათის კავშირი ახლა ბევრად უსაფრთხო გახდა"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"დაკავშირებულია დაუშიფრავ ქსელთან"</string>
-    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"ზარები, შეტყობინებები და მონაცემები ამჟამად უფრო მოწყვლადია თქვენი <xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM-ბარათით სარგებლობისას"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"ზარები, შეტყობინებები/მონაცემები უფრო მოწყვლადია <xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM-ბარათის გამოყენებისას"</string>
     <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"ზარები, შეტყობინებები და მონაცემები ამჟამად უფრო მოწყვლადია <xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM-ბარათით სარგებლობისას.\n\nკავშირის ხელახლა დაშიფვრის შემთხვევაში კიდევ ერთ შეტყობინებას მიიღებთ."</string>
     <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"მობილური ქსელის უსაფრთოების პარამეტრები"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"შეიტყვეთ მეტი"</string>

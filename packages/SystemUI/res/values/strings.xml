@@ -895,11 +895,9 @@
     <string name="qs_record_issue_dropdown_screenrecord">Screen record</string>
 
     <!-- QuickSettings: Issue Type Drop down choices list in Record Issue Start Dialog [CHAR LIMIT=30] -->
-    <string-array name="qs_record_issue_types">
-        <item>Performance</item>
-        <item>User Interface</item>
-        <item>Battery</item>
-    </string-array>
+    <string name="performance">Performance</string>
+    <string name="user_interface">User Interface</string>
+    <string name="thermal">Thermal</string>
 
     <!-- QuickSettings: Label for the toggle that controls whether One-handed mode is enabled. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_onehanded_label">One-handed mode</string>
@@ -1944,15 +1942,15 @@
     <!-- Name used to refer to the "Back" key on the keyboard. -->
     <string name="keyboard_key_back">Back</string>
     <!-- Name used to refer to the "Up" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_up">Up arrow</string>
+    <string name="keyboard_key_dpad_up" translatable="false">Up arrow</string>
     <!-- Name used to refer to the "Down" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_down">Down arrow</string>
+    <string name="keyboard_key_dpad_down" translatable="false">Down arrow</string>
     <!-- Name used to refer to the "Left" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_left">Left arrow</string>
+    <string name="keyboard_key_dpad_left" translatable="false">Left arrow</string>
     <!-- Name used to refer to the "Right" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_right">Right arrow</string>
+    <string name="keyboard_key_dpad_right" translatable="false">Right arrow</string>
     <!-- Name used to refer to the "Center" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_center">Center</string>
+    <string name="keyboard_key_dpad_center" translatable="false">Center</string>
     <!-- Name used to refer to the "Tab" key on the keyboard. -->
     <string name="keyboard_key_tab">Tab</string>
     <!-- Name used to refer to the "Space" key on the keyboard. -->
@@ -3369,7 +3367,7 @@
     <string name="rotation_tile_with_posture_secondary_label_template">%1$s / %2$s</string>
     <!-- Title for notification of low stylus battery with percentage. "percentage" is
         the value of the battery capacity remaining [CHAR LIMIT=none]-->
-    <string name="stylus_battery_low_percentage"><xliff:g id="percentage" example="16%">%s</xliff:g> battery remaining</string>
+    <string name="stylus_battery_low_percentage">Stylus battery <xliff:g id="percentage" example="16%">%s</xliff:g></string>
     <!-- Subtitle for the notification sent when a stylus battery is low. [CHAR LIMIT=none]-->
     <string name="stylus_battery_low_subtitle">Connect your stylus to a charger</string>
 

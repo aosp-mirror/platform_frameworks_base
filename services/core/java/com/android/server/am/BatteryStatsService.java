@@ -60,6 +60,7 @@ import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.Binder;
 import android.os.BluetoothBatteryStats;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -71,6 +72,7 @@ import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -3335,6 +3337,59 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    /**
+     * Gets a snapshot of the system health for a number of uids.
+     */
+    @Override
+    public void takeUidSnapshotsAsync(int[] requestUids, ResultReceiver resultReceiver) {
+        if (!onlyCaller(requestUids)) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.BATTERY_STATS, null);
+        }
+
+        Future future;
+        if (shouldCollectExternalStats()) {
+            future = mWorker.scheduleSync("get-health-stats-for-uids",
+                    BatteryExternalStatsWorker.UPDATE_ALL);
+        } else {
+            future = null;
+        }
+
+        mHandler.post(() -> {
+            if (future != null) {
+                try {
+                    // Worker uses a separate thread pool, so waiting here won't cause a deadlock
+                    future.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    Slog.e(TAG, "Sync failed", e);
+                }
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            int i = -1;
+            try {
+                final int count = requestUids.length;
+                final HealthStatsParceler[] results = new HealthStatsParceler[count];
+                synchronized (mStats) {
+                    for (i = 0; i < count; i++) {
+                        results[i] = getHealthStatsForUidLocked(requestUids[i]);
+                    }
+                }
+                Bundle resultData = new Bundle(1);
+                resultData.putParcelableArray(IBatteryStats.KEY_UID_SNAPSHOTS, results);
+                resultReceiver.send(0, resultData);
+            } catch (Exception ex) {
+                if (DBG) {
+                    Slog.d(TAG, "Crashed while returning results for takeUidSnapshots("
+                            + Arrays.toString(requestUids) + ") i=" + i, ex);
+                }
+                throw ex;
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        });
     }
 
     private boolean shouldCollectExternalStats() {

@@ -718,17 +718,30 @@ class DividerPresenter implements View.OnTouchListener {
             if (dividerPosition >= minPosition && dividerPosition <= maxPosition) {
                 return dividerPosition;
             }
-            int[] possiblePositions = {0, minPosition, maxPosition, fullyExpandedPosition};
-            return snap(dividerPosition, possiblePositions);
+            final int[] snapPositions = {0, minPosition, maxPosition, fullyExpandedPosition};
+            return snap(dividerPosition, snapPositions);
         }
-        if (velocity < 0) {
-            return minPosition;
+        return dividerPositionForFling(
+                dividerPosition, minPosition, maxPosition, velocity);
+    }
+
+    /**
+     * Returns the closest position that is in the fling direction.
+     */
+    private static int dividerPositionForFling(int dividerPosition, int minPosition,
+            int maxPosition, float velocity) {
+        final boolean isBackwardDirection = velocity < 0;
+        if (isBackwardDirection) {
+            return dividerPosition < maxPosition ? minPosition : maxPosition;
         } else {
-            return maxPosition;
+            return dividerPosition > minPosition ? maxPosition : minPosition;
         }
     }
 
-    /** Calculates the snapped divider position based on the possible positions and distance. */
+    /**
+     * Returns the snapped position from a list of possible positions. Currently, this method
+     * snaps to the closest position by distance from the divider position.
+     */
     private static int snap(int dividerPosition, int[] possiblePositions) {
         int snappedPosition = dividerPosition;
         float minDistance = Float.MAX_VALUE;
