@@ -299,15 +299,81 @@ internal class ElementNode(
         val placeable =
             measure(layoutImpl, scene, element, transition, sceneState, measurable, constraints)
         sceneState.lastSize = placeable.size()
-        return layout(placeable.width, placeable.height) {
-            place(
-                layoutImpl,
-                scene,
-                element,
-                transition,
-                sceneState,
-                placeable,
-            )
+        return layout(placeable.width, placeable.height) { place(transition, placeable) }
+    }
+
+    @OptIn(ExperimentalComposeUiApi::class)
+    private fun Placeable.PlacementScope.place(
+        transition: TransitionState.Transition?,
+        placeable: Placeable,
+    ) {
+        with(layoutImpl.lookaheadScope) {
+            // Update the offset (relative to the SceneTransitionLayout) this element has in this
+            // scene when idle.
+            val coords =
+                coordinates ?: error("Element ${element.key} does not have any coordinates")
+            val targetOffsetInScene = lookaheadScopeCoordinates.localLookaheadPositionOf(coords)
+
+            // No need to place the element in this scene if we don't want to draw it anyways.
+            if (!shouldPlaceElement(layoutImpl, scene, element, transition)) {
+                sceneState.lastOffset = Offset.Unspecified
+                sceneState.lastScale = Scale.Unspecified
+                sceneState.lastAlpha = Element.AlphaUnspecified
+
+                sceneState.clearValuesBeforeInterruption()
+                sceneState.clearInterruptionDeltas()
+                return
+            }
+
+            val currentOffset = lookaheadScopeCoordinates.localPositionOf(coords, Offset.Zero)
+            val targetOffset =
+                computeValue(
+                    layoutImpl,
+                    scene,
+                    element,
+                    transition,
+                    sceneValue = { it.targetOffset },
+                    transformation = { it.offset },
+                    idleValue = targetOffsetInScene,
+                    currentValue = { currentOffset },
+                    isSpecified = { it != Offset.Unspecified },
+                    ::lerp,
+                )
+
+            val interruptedOffset =
+                computeInterruptedValue(
+                    layoutImpl,
+                    transition,
+                    value = targetOffset,
+                    unspecifiedValue = Offset.Unspecified,
+                    zeroValue = Offset.Zero,
+                    getValueBeforeInterruption = { sceneState.offsetBeforeInterruption },
+                    setValueBeforeInterruption = { sceneState.offsetBeforeInterruption = it },
+                    getInterruptionDelta = { sceneState.offsetInterruptionDelta },
+                    setInterruptionDelta = { sceneState.offsetInterruptionDelta = it },
+                    diff = { a, b -> a - b },
+                    add = { a, b, bProgress -> a + b * bProgress },
+                )
+
+            sceneState.lastOffset = interruptedOffset
+
+            val offset = (interruptedOffset - currentOffset).round()
+            if (
+                isElementOpaque(scene, element, transition) &&
+                    interruptedAlpha(layoutImpl, transition, sceneState, alpha = 1f) == 1f
+            ) {
+                sceneState.lastAlpha = 1f
+
+                // TODO(b/291071158): Call placeWithLayer() if offset != IntOffset.Zero and size is
+                // not animated once b/305195729 is fixed. Test that drawing is not invalidated in
+                // that case.
+                placeable.place(offset)
+            } else {
+                placeable.placeWithLayer(offset) {
+                    alpha = elementAlpha(layoutImpl, scene, element, transition, sceneState)
+                    compositingStrategy = CompositingStrategy.ModulateAlpha
+                }
+            }
         }
     }
 
@@ -805,84 +871,6 @@ private fun ContentDrawScope.getDrawScale(
 
     sceneState.lastScale = interruptedScale
     return interruptedScale
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-private fun Placeable.PlacementScope.place(
-    layoutImpl: SceneTransitionLayoutImpl,
-    scene: Scene,
-    element: Element,
-    transition: TransitionState.Transition?,
-    sceneState: Element.SceneState,
-    placeable: Placeable,
-) {
-    with(layoutImpl.lookaheadScope) {
-        // Update the offset (relative to the SceneTransitionLayout) this element has in this scene
-        // when idle.
-        val coords = coordinates ?: error("Element ${element.key} does not have any coordinates")
-        val targetOffsetInScene = lookaheadScopeCoordinates.localLookaheadPositionOf(coords)
-
-        // No need to place the element in this scene if we don't want to draw it anyways.
-        if (!shouldPlaceElement(layoutImpl, scene, element, transition)) {
-            sceneState.lastOffset = Offset.Unspecified
-            sceneState.lastScale = Scale.Unspecified
-            sceneState.lastAlpha = Element.AlphaUnspecified
-
-            sceneState.clearValuesBeforeInterruption()
-            sceneState.clearInterruptionDeltas()
-            return
-        }
-
-        val currentOffset = lookaheadScopeCoordinates.localPositionOf(coords, Offset.Zero)
-        val targetOffset =
-            computeValue(
-                layoutImpl,
-                scene,
-                element,
-                transition,
-                sceneValue = { it.targetOffset },
-                transformation = { it.offset },
-                idleValue = targetOffsetInScene,
-                currentValue = { currentOffset },
-                isSpecified = { it != Offset.Unspecified },
-                ::lerp,
-            )
-
-        val interruptedOffset =
-            computeInterruptedValue(
-                layoutImpl,
-                transition,
-                value = targetOffset,
-                unspecifiedValue = Offset.Unspecified,
-                zeroValue = Offset.Zero,
-                getValueBeforeInterruption = { sceneState.offsetBeforeInterruption },
-                setValueBeforeInterruption = { sceneState.offsetBeforeInterruption = it },
-                getInterruptionDelta = { sceneState.offsetInterruptionDelta },
-                setInterruptionDelta = { sceneState.offsetInterruptionDelta = it },
-                diff = { a, b -> a - b },
-                add = { a, b, bProgress -> a + b * bProgress },
-            )
-
-        sceneState.lastOffset = interruptedOffset
-
-        val offset = (interruptedOffset - currentOffset).round()
-        if (
-            isElementOpaque(scene, element, transition) &&
-                interruptedAlpha(layoutImpl, transition, sceneState, alpha = 1f) == 1f
-        ) {
-            sceneState.lastAlpha = 1f
-
-            // TODO(b/291071158): Call placeWithLayer() if offset != IntOffset.Zero and size is not
-            // animated once b/305195729 is fixed. Test that drawing is not invalidated in that
-            // case.
-            placeable.place(offset)
-        } else {
-            placeable.placeWithLayer(offset) {
-                alpha = elementAlpha(layoutImpl, scene, element, transition, sceneState)
-                compositingStrategy = CompositingStrategy.ModulateAlpha
-            }
-        }
-    }
 }
 
 /**
