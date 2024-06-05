@@ -95,6 +95,7 @@ import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.ScreenCapture;
+import android.window.TaskFragmentAnimationParams;
 import android.window.TransitionInfo;
 import android.window.WindowContainerTransaction;
 
@@ -2728,10 +2729,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             return out;
         }
 
-        final AnimationOptions animOptions = calculateAnimationOptionsForActivityTransition(type,
-                sortedTargets);
-        if (!Flags.moveAnimationOptionsToChange() && animOptions != null) {
-            out.setAnimationOptions(animOptions);
+        final AnimationOptions animOptionsForActivityTransition =
+                calculateAnimationOptionsForActivityTransition(type, sortedTargets);
+        if (!Flags.moveAnimationOptionsToChange() && animOptionsForActivityTransition != null) {
+            out.setAnimationOptions(animOptionsForActivityTransition);
         }
 
         // Convert all the resolved ChangeInfos into TransactionInfo.Change objects in order.
@@ -2759,6 +2760,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
             final Task task = target.asTask();
             final TaskFragment taskFragment = target.asTaskFragment();
+            final boolean isEmbeddedTaskFragment = taskFragment != null
+                    && taskFragment.isEmbedded();
             final ActivityRecord activityRecord = target.asActivityRecord();
 
             if (task != null) {
@@ -2798,7 +2801,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 change.setEndAbsBounds(bounds);
             }
 
-            if (activityRecord != null || (taskFragment != null && taskFragment.isEmbedded())) {
+            if (activityRecord != null || isEmbeddedTaskFragment) {
                 final int backgroundColor;
                 final TaskFragment organizedTf = activityRecord != null
                         ? activityRecord.getOrganizedTaskFragment()
@@ -2823,9 +2826,27 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 change.setBackgroundColor(ColorUtils.setAlphaComponent(backgroundColor, 255));
             }
 
-            if (Flags.moveAnimationOptionsToChange() && activityRecord != null
-                    && animOptions != null) {
-                change.setAnimationOptions(animOptions);
+            AnimationOptions animOptions = null;
+            if (Flags.moveAnimationOptionsToChange()) {
+                if (activityRecord != null && animOptionsForActivityTransition != null) {
+                    animOptions = animOptionsForActivityTransition;
+                } else if (Flags.activityEmbeddingOverlayPresentationFlag()
+                        && isEmbeddedTaskFragment) {
+                    final TaskFragmentAnimationParams params = taskFragment.getAnimationParams();
+                    if (params.hasOverrideAnimation()) {
+                        // Only set AnimationOptions if there's any animation override.
+                        // We use separated field for backgroundColor, and
+                        // AnimationOptions#backgroundColor will be removed in long term.
+                        animOptions = AnimationOptions.makeCustomAnimOptions(
+                                taskFragment.getTask().getBasePackageName(),
+                                params.getOpenAnimationResId(), params.getChangeAnimationResId(),
+                                params.getCloseAnimationResId(), 0 /* backgroundColor */,
+                                false /* overrideTaskTransition */);
+                    }
+                }
+                if (animOptions != null) {
+                    change.setAnimationOptions(animOptions);
+                }
             }
 
             if (activityRecord != null) {
