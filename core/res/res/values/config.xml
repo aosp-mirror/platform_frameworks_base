@@ -3061,10 +3061,13 @@
         frameworks/base/services/core/java/com/android/server/pm/UserSystemPackageInstaller.java -->
     <integer name="config_userTypePackageWhitelistMode">13</integer> <!-- 1+4+8 -->
 
-    <!-- Whether the main user is a permanent admin user. If the main user is a permanent admin user
-     it can't be deleted or downgraded to non-admin status.
-     This is generally only relevant on headless system user mode devices; on other devices, the
-     main user is the system user which is always a permanent admin anyway. -->
+    <!-- Whether the device will automatically (at first boot) have a designated main user and treat
+         it as a permanent admin.
+         Since the main user is a permanent admin user it can't be deleted or downgraded to
+         non-admin status.
+         This is generally only relevant on headless system user mode (HSUM) devices; on other
+         devices, the main user is the system user which is always a permanent admin anyway.
+         Note that HSUM devices without this enabled will not automatically have a main user. -->
     <bool name="config_isMainUserPermanentAdmin">true</bool>
 
     <!-- Whether switch to headless system user is allowed. If allowed,
@@ -3075,7 +3078,7 @@
     <bool name="config_enableMultiUserUI">false</bool>
 
     <!-- Whether multiple admins are allowed on the device. If set to true, new users can be created
-     with admin privileges and admin privileges can be granted/revoked from existing users. -->
+         with admin privileges and admin privileges can be granted/revoked from existing users. -->
     <bool name="config_enableMultipleAdmins">false</bool>
 
     <!-- Whether there is a communal profile which should always be running.
