@@ -7030,6 +7030,13 @@
     <!-- Name of the starting activity for DisplayCompat host. specific to automotive.-->
     <string name="config_defaultDisplayCompatHostActivity" translatable="false"></string>
 
+    <!-- Name of the starting activity for launch on private display. specific to automotive.-->
+    <string name="config_defaultLaunchOnPrivateDisplayRouterActivity" translatable="false"></string>
+
+    <!-- Allowlisted activities for launch on a private display. specific to automotive.-->
+    <!--TODO(b/343733988): Remove this allowlisting when GMS is ready with the allowlisting mechanism.-->
+    <string-array name="config_defaultAllowlistLaunchOnPrivateDisplayPackages"></string-array>
+
     <!-- Whether to use file hashes cache in watchlist-->
     <bool name="config_watchlistUseFileHashesCache">false</bool>
 
