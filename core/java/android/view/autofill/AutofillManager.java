@@ -193,6 +193,7 @@ import sun.misc.Cleaner;
 @RequiresFeature(PackageManager.FEATURE_AUTOFILL)
 public final class AutofillManager {
 
+    private static final boolean DBG = false;
     private static final String TAG = "AutofillManager";
 
     /**
@@ -2027,7 +2028,31 @@ public final class AutofillManager {
         if (!hasAutofillFeature()) {
             return;
         }
+        if (DBG) {
+            Log.v(TAG, "notifyValueChanged() called with virtualId:" + virtualId + " value:"
+                    + value);
+        }
         synchronized (mLock) {
+            if (mLastAutofilledData != null) {
+                AutofillId id = new AutofillId(view.getAutofillId(), virtualId, mSessionId);
+                if (mLastAutofilledData.containsKey(id)) {
+                    if (Objects.equals(mLastAutofilledData.get(id), value)) {
+                        // Indicates that the view was autofilled
+                        if (sDebug) {
+                            Log.v(TAG, "notifyValueChanged() virtual view autofilled successfully:"
+                                    + virtualId + " value:" + value);
+                        }
+                        try {
+                            mService.setViewAutofilled(mSessionId, id, mContext.getUserId());
+                        } catch (RemoteException e) {
+                            // The failure could be a consequence of something going wrong on the
+                            // server side. Do nothing here since it's just logging, but it's
+                            // possible follow-up actions may fail.
+                            Log.w(TAG, "RemoteException caught but ignored " + e);
+                        }
+                    }
+                }
+            }
             if (!mEnabled || !isActiveLocked()) {
                 if (sVerbose) {
                     Log.v(TAG, "notifyValueChanged(" + view.getAutofillId() + ":" + virtualId
@@ -3114,6 +3139,10 @@ public final class AutofillManager {
 
             ArrayList<AutofillId> failedIds = new ArrayList<>();
 
+            if (mLastAutofilledData == null) {
+                mLastAutofilledData = new ParcelableMap(itemCount);
+            }
+
             for (int i = 0; i < itemCount; i++) {
                 final AutofillId id = ids.get(i);
                 final AutofillValue value = values.get(i);
@@ -3126,6 +3155,9 @@ public final class AutofillManager {
                     failedIds.add(id);
                     continue;
                 }
+                // Mark the view as to be autofilled with 'value'
+                mLastAutofilledData.put(id, value);
+
                 if (id.isVirtualInt()) {
                     if (virtualValues == null) {
                         // Most likely there will be just one view with virtual children.
@@ -3139,12 +3171,6 @@ public final class AutofillManager {
                     }
                     valuesByParent.put(id.getVirtualChildIntId(), value);
                 } else {
-                    // Mark the view as to be autofilled with 'value'
-                    if (mLastAutofilledData == null) {
-                        mLastAutofilledData = new ParcelableMap(itemCount - i);
-                    }
-                    mLastAutofilledData.put(id, value);
-
                     view.autofill(value);
 
                     // Set as autofilled if the values match now, e.g. when the value was updated
