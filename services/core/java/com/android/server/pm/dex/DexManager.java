@@ -39,7 +39,6 @@ import android.util.jar.StrictJarFile;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.pm.Installer;
 import com.android.server.pm.PackageDexOptimizer;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageManagerServiceUtils;
@@ -99,9 +98,6 @@ public class DexManager {
 
     private IPackageManager mPackageManager;
     private final PackageDexOptimizer mPackageDexOptimizer;
-    private final Object mInstallLock;
-    @GuardedBy("mInstallLock")
-    private final Installer mInstaller;
 
     private BatteryManager mBatteryManager = null;
     private PowerManager mPowerManager = null;
@@ -116,21 +112,18 @@ public class DexManager {
     private static final int DEX_SEARCH_FOUND_SPLIT = 2;  // dex file is a split apk
     private static final int DEX_SEARCH_FOUND_SECONDARY = 3;  // dex file is a secondary dex
 
-    public DexManager(Context context, PackageDexOptimizer pdo, Installer installer,
-            Object installLock, DynamicCodeLogger dynamicCodeLogger) {
-        this(context, pdo, installer, installLock, dynamicCodeLogger, null);
+    public DexManager(Context context, PackageDexOptimizer pdo,
+            DynamicCodeLogger dynamicCodeLogger) {
+        this(context, pdo, dynamicCodeLogger, null);
     }
 
     @VisibleForTesting
-    public DexManager(Context context, PackageDexOptimizer pdo, Installer installer,
-            Object installLock, DynamicCodeLogger dynamicCodeLogger,
-            @Nullable IPackageManager packageManager) {
+    public DexManager(Context context, PackageDexOptimizer pdo,
+            DynamicCodeLogger dynamicCodeLogger, @Nullable IPackageManager packageManager) {
         mContext = context;
         mPackageCodeLocationsCache = new HashMap<>();
         mPackageDexUsage = new PackageDexUsage();
         mPackageDexOptimizer = pdo;
-        mInstaller = installer;
-        mInstallLock = installLock;
         mDynamicCodeLogger = dynamicCodeLogger;
         mPackageManager = packageManager;
 
