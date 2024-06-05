@@ -905,6 +905,10 @@
     <!-- Hearing devices -->
     <!-- QuickSettings: Hearing devices [CHAR LIMIT=NONE] -->
     <string name="quick_settings_hearing_devices_label">Hearing devices</string>
+    <!-- QuickSettings: Hearing Devices' secondary label shown when the hearing aids are currently connected. [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_hearing_devices_connected">Active</string>
+    <!-- QuickSettings: Hearing devices' secondary label shown when there is no connected hearing aids. [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_hearing_devices_disconnected">Disconnected</string>
     <!-- QuickSettings: Quick Settings Hearing devices dialog title [CHAR LIMIT=30] -->
     <string name="quick_settings_hearing_devices_dialog_title">Hearing devices</string>
     <!-- QuickSettings: Hearing devices dialog pair new device [CHAR LIMIT=NONE]-->
