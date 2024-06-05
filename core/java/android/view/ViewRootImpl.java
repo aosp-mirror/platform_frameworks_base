@@ -12809,8 +12809,13 @@ public final class ViewRootImpl implements ViewParent,
                                 + mFrameRateCompatibility);
                 }
                 if (sToolkitFrameRateFunctionEnablingReadOnlyFlagValue) {
-                    mFrameRateTransaction.setFrameRate(mSurfaceControl, preferredFrameRate,
-                            mFrameRateCompatibility).applyAsyncUnsafe();
+                    if (preferredFrameRate > 0) {
+                        mFrameRateTransaction.setFrameRate(mSurfaceControl, preferredFrameRate,
+                                mFrameRateCompatibility);
+                    } else {
+                        mFrameRateTransaction.clearFrameRate(mSurfaceControl);
+                    }
+                    mFrameRateTransaction.applyAsyncUnsafe();
                 }
                 mLastPreferredFrameRate = preferredFrameRate;
             }
