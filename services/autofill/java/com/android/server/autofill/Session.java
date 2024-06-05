@@ -263,7 +263,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     static final int AUGMENTED_AUTOFILL_REQUEST_ID = 1;
 
-    private static AtomicInteger sIdCounter = new AtomicInteger(2);
+    private static RequestId mRequestId = new RequestId();
 
     private static AtomicInteger sIdCounterForPcc = new AtomicInteger(2);
 
@@ -1333,7 +1333,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         viewState.setState(newState);
-        int requestId = getRequestId(isSecondary);
+        int requestId = mRequestId.nextId(isSecondary);
 
         // Create a metrics log for the request
         final int ordinal = mRequestLogs.size() + 1;
@@ -1415,25 +1415,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         requestAssistStructureLocked(requestId, flags);
     }
 
-    private static int getRequestId(boolean isSecondary) {
-        // For authentication flows, there needs to be a way to know whether to retrieve the Fill
-        // Response from the primary provider or the secondary provider from the requestId. A simple
-        // way to achieve this is by assigning odd number request ids to secondary provider and
-        // even numbers to primary provider.
-        int requestId;
-        // TODO(b/158623971): Update this to prevent possible overflow
-        if (isSecondary) {
-            do {
-                requestId = sIdCounter.getAndIncrement();
-            } while (!isSecondaryProviderRequestId(requestId));
-        } else {
-            do {
-                requestId = sIdCounter.getAndIncrement();
-            } while (requestId == INVALID_REQUEST_ID || isSecondaryProviderRequestId(requestId));
-        }
-        return requestId;
-    }
-
     private boolean isRequestSupportFillDialog(int flags) {
         return (flags & FLAG_SUPPORTS_FILL_DIALOG) != 0;
     }
@@ -1441,7 +1422,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     private void requestAssistStructureForPccLocked(int flags) {
         if (!mClassificationState.shouldTriggerRequest()) return;
-        mFillRequestIdSnapshot = sIdCounter.get();
+        mFillRequestIdSnapshot = sIdCounterForPcc.get();
         mClassificationState.updatePendingRequest();
         // Get request id
         int requestId;
@@ -2879,18 +2860,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             // the auth UI.
             Slog.w(TAG, "setAuthenticationResultLocked(" + authenticationId + "): no responses");
             mPresentationStatsEventLogger.maybeSetAuthenticationResult(
-                AUTHENTICATION_RESULT_FAILURE);
+                    AUTHENTICATION_RESULT_FAILURE);
             mPresentationStatsEventLogger.logAndEndEvent();
             removeFromService();
             return;
         }
-        final FillResponse authenticatedResponse = isSecondaryProviderRequestId(requestId)
+        final FillResponse authenticatedResponse = mRequestId.isSecondaryProvider(requestId)
                 ? mSecondaryResponses.get(requestId)
                 : mResponses.get(requestId);
         if (authenticatedResponse == null || data == null) {
             Slog.w(TAG, "no authenticated response");
             mPresentationStatsEventLogger.maybeSetAuthenticationResult(
-                AUTHENTICATION_RESULT_FAILURE);
+                    AUTHENTICATION_RESULT_FAILURE);
             mPresentationStatsEventLogger.logAndEndEvent();
             removeFromService();
             return;
@@ -2905,7 +2886,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if (dataset == null) {
                 Slog.w(TAG, "no dataset with index " + datasetIdx + " on fill response");
                 mPresentationStatsEventLogger.maybeSetAuthenticationResult(
-                    AUTHENTICATION_RESULT_FAILURE);
+                        AUTHENTICATION_RESULT_FAILURE);
                 mPresentationStatsEventLogger.logAndEndEvent();
                 removeFromService();
                 return;
@@ -2946,7 +2927,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             logAuthenticationStatusLocked(requestId, MetricsEvent.AUTOFILL_AUTHENTICATED);
             mPresentationStatsEventLogger.maybeSetAuthenticationResult(
-                AUTHENTICATION_RESULT_SUCCESS);
+                    AUTHENTICATION_RESULT_SUCCESS);
             replaceResponseLocked(authenticatedResponse, (FillResponse) result, newClientState);
         } else if (result instanceof GetCredentialResponse) {
             if (sDebug) {
@@ -2980,9 +2961,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 logAuthenticationStatusLocked(requestId,
                         MetricsEvent.AUTOFILL_DATASET_AUTHENTICATED);
                 mPresentationStatsEventLogger.maybeSetAuthenticationResult(
-                    AUTHENTICATION_RESULT_SUCCESS);
+                        AUTHENTICATION_RESULT_SUCCESS);
                 if (newClientState != null) {
-                    if (sDebug) Slog.d(TAG,  "Updating client state from auth dataset");
+                    if (sDebug)
+                        Slog.d(TAG, "Updating client state from auth dataset");
                     mClientState = newClientState;
                 }
                 Dataset datasetFromResult = getEffectiveDatasetForAuthentication((Dataset) result);
@@ -2997,7 +2979,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 logAuthenticationStatusLocked(requestId,
                         MetricsEvent.AUTOFILL_INVALID_DATASET_AUTHENTICATION);
                 mPresentationStatsEventLogger.maybeSetAuthenticationResult(
-                    AUTHENTICATION_RESULT_FAILURE);
+                        AUTHENTICATION_RESULT_FAILURE);
             }
         } else {
             if (result != null) {
@@ -3006,13 +2988,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             logAuthenticationStatusLocked(requestId,
                     MetricsEvent.AUTOFILL_INVALID_AUTHENTICATION);
             mPresentationStatsEventLogger.maybeSetAuthenticationResult(
-                AUTHENTICATION_RESULT_FAILURE);
+                    AUTHENTICATION_RESULT_FAILURE);
             processNullResponseLocked(requestId, 0);
         }
-    }
-
-    private static boolean isSecondaryProviderRequestId(int requestId) {
-        return requestId % 2 == 1;
     }
 
     private Dataset getDatasetFromCredentialResponse(GetCredentialResponse result) {
@@ -6923,22 +6901,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     @GuardedBy("mLock")
     private int getLastResponseIndexLocked() {
-        // The response ids are monotonically increasing so
-        // we just find the largest id which is the last. We
-        // do not rely on the internal ordering in sparse
-        // array to avoid - wow this stopped working!?
-        int lastResponseIdx = -1;
-        int lastResponseId = -1;
         if (mResponses != null) {
+            List<Integer> requestIdList = new ArrayList<>();
             final int responseCount = mResponses.size();
             for (int i = 0; i < responseCount; i++) {
-                if (mResponses.keyAt(i) > lastResponseId) {
-                    lastResponseIdx = i;
-                    lastResponseId = mResponses.keyAt(i);
-                }
+                requestIdList.add(mResponses.keyAt(i));
             }
+            return mRequestId.getLastRequestIdIndex(requestIdList);
         }
-        return lastResponseIdx;
+        return -1;
     }
 
     private LogMaker newLogMaker(int category) {
