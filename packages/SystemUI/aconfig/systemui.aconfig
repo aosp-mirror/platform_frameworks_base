@@ -991,6 +991,16 @@ flag {
 }
 
 flag {
+  namespace: "systemui"
+  name: "privacy_dot_unfold_wrong_corner_fix"
+  description: "Fixes an issue where the privacy dot is at the wrong corner after unfolding/folding."
+  bug: "339335643"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "validate_keyboard_shortcut_helper_icon_uri"
   namespace: "systemui"
   description: "Adds a check that the caller can access the content URI of an icon in the shortcut helper."
