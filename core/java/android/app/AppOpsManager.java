@@ -3290,7 +3290,7 @@ public class AppOpsManager {
     }
 
     /**
-     * Retrieve whether the op can be read by apps with manage appops permission.
+     * Retrieve whether the op can be read by apps with privileged appops permission.
      * @hide
      */
     public static boolean opRestrictsRead(int op) {
