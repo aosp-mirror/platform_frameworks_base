@@ -2380,7 +2380,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             }
             mCustomMessage = message;
             mKeyguardViewControllerLazy.get().dismissAndCollapse();
-        } else if (callback != null) {
+            return;
+        }
+        Log.w(TAG, "Ignoring request to DISMISS because mShowing=false");
+        if (callback != null) {
             new DismissCallbackWrapper(callback).notifyDismissError();
         }
     }

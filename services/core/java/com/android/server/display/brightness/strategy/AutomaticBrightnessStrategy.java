@@ -290,6 +290,8 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
                 .setBrightnessAdjustmentFlag(mAutoBrightnessAdjustmentReasonsFlags)
                 .setShouldUpdateScreenBrightnessSetting(
                         brightness != strategyExecutionRequest.getCurrentScreenBrightness())
+                .setIsUserInitiatedChange(getAutoBrightnessAdjustmentChanged()
+                        || strategyExecutionRequest.isUserSetBrightnessChanged())
                 .build();
     }
 

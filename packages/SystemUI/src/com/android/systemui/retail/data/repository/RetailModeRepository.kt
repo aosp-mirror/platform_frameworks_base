@@ -66,9 +66,9 @@ constructor(
                         }
                     }
 
-                globalSettings.registerContentObserver(RETAIL_MODE_SETTING, observer)
+                globalSettings.registerContentObserverSync(RETAIL_MODE_SETTING, observer)
 
-                awaitClose { globalSettings.unregisterContentObserver(observer) }
+                awaitClose { globalSettings.unregisterContentObserverSync(observer) }
             }
             .onStart { emit(Unit) }
             .map { globalSettings.getInt(RETAIL_MODE_SETTING, 0) != 0 }

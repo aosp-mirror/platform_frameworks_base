@@ -103,13 +103,14 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     public void requestCreateSession(
             long requestId,
             String packageName,
-            String routeId,
+            String routeOriginalId,
             Bundle sessionHints,
             @RoutingSessionInfo.TransferReason int transferReason,
             @NonNull UserHandle transferInitiatorUserHandle,
             @NonNull String transferInitiatorPackageName) {
         if (mConnectionReady) {
-            mActiveConnection.requestCreateSession(requestId, packageName, routeId, sessionHints);
+            mActiveConnection.requestCreateSession(
+                    requestId, packageName, routeOriginalId, sessionHints);
             updateBinding();
         }
     }
@@ -153,35 +154,35 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
             long requestId,
             @NonNull UserHandle transferInitiatorUserHandle,
             @NonNull String transferInitiatorPackageName,
-            String sessionId,
-            String routeId,
+            String sessionOriginalId,
+            String routeOriginalId,
             @RoutingSessionInfo.TransferReason int transferReason) {
         if (mConnectionReady) {
-            mActiveConnection.transferToRoute(requestId, sessionId, routeId);
+            mActiveConnection.transferToRoute(requestId, sessionOriginalId, routeOriginalId);
         }
     }
 
     @Override
-    public void setRouteVolume(long requestId, String routeId, int volume) {
+    public void setRouteVolume(long requestId, String routeOriginalId, int volume) {
         if (mConnectionReady) {
-            mActiveConnection.setRouteVolume(requestId, routeId, volume);
+            mActiveConnection.setRouteVolume(requestId, routeOriginalId, volume);
             updateBinding();
         }
     }
 
     @Override
-    public void setSessionVolume(long requestId, String sessionId, int volume) {
+    public void setSessionVolume(long requestId, String sessionOriginalId, int volume) {
         if (mConnectionReady) {
-            mActiveConnection.setSessionVolume(requestId, sessionId, volume);
+            mActiveConnection.setSessionVolume(requestId, sessionOriginalId, volume);
             updateBinding();
         }
     }
 
     @Override
-    public void prepareReleaseSession(@NonNull String sessionId) {
+    public void prepareReleaseSession(@NonNull String sessionUniqueId) {
         synchronized (mLock) {
             for (RoutingSessionInfo session : mSessionInfos) {
-                if (TextUtils.equals(session.getId(), sessionId)) {
+                if (TextUtils.equals(session.getId(), sessionUniqueId)) {
                     mSessionInfos.remove(session);
                     mReleasingSessions.add(session);
                     break;

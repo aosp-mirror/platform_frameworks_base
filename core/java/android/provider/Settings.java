@@ -1736,6 +1736,24 @@ public final class Settings {
             "android.settings.NETWORK_OPERATOR_SETTINGS";
 
     /**
+     * Activity Action: Show settings for selecting the network provider.
+     * <p>
+     * In some cases, a matching Activity may not be provided, so ensure you
+     * safeguard against this.
+     * <p>
+     * Access to this preference can be customized via Settings' app.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_NETWORK_PROVIDER_SETTINGS =
+            "android.settings.NETWORK_PROVIDER_SETTINGS";
+
+    /**
      * Activity Action: Show settings for selection of 2G/3G.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -19928,6 +19946,12 @@ public final class Settings {
              * @hide
              */
             public static final String NETWORK_LOCATION_OPT_IN = "network_location_opt_in";
+
+            /**
+             * Whether haptics are enabled for Active Unlock on wear.
+             * @hide
+             */
+            public static final String VIBRATE_FOR_ACTIVE_UNLOCK = "wear_vibrate_for_active_unlock";
 
             /**
              * The custom foreground color.

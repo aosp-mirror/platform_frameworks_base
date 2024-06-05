@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.OptionalInt;
-import java.util.function.IntConsumer;
 
 // TODO(b/210039666): See if we can make this class thread-safe.
 final class HandwritingModeController {
@@ -91,7 +90,6 @@ final class HandwritingModeController {
     private boolean mDelegationConnectionlessFlow;
     private Runnable mDelegationIdleTimeoutRunnable;
     private Handler mDelegationIdleTimeoutHandler;
-    private IntConsumer mPointerToolTypeConsumer;
     private final Runnable mDiscardDelegationTextRunnable;
     private HandwritingEventReceiverSurface mHandwritingSurface;
 
@@ -99,7 +97,7 @@ final class HandwritingModeController {
 
     @AnyThread
     HandwritingModeController(Context context, Looper uiThreadLooper,
-            Runnable inkWindowInitRunnable, IntConsumer toolTypeConsumer,
+            Runnable inkWindowInitRunnable,
             Runnable discardDelegationTextRunnable) {
         mContext = context;
         mLooper = uiThreadLooper;
@@ -109,7 +107,6 @@ final class HandwritingModeController {
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mCurrentRequestId = 0;
         mInkWindowInitRunnable = inkWindowInitRunnable;
-        mPointerToolTypeConsumer = toolTypeConsumer;
         mDiscardDelegationTextRunnable = discardDelegationTextRunnable;
     }
 
@@ -389,15 +386,9 @@ final class HandwritingModeController {
                     "Input Event should not be processed when IME has the spy channel.");
         }
 
-        if (!(ev instanceof MotionEvent)) {
+        if (!(ev instanceof MotionEvent event)) {
             Slog.wtf(TAG, "Received non-motion event in stylus monitor.");
             return false;
-        }
-        final MotionEvent event = (MotionEvent) ev;
-        if (mPointerToolTypeConsumer != null && event.getAction() == MotionEvent.ACTION_DOWN) {
-            int toolType = event.getToolType(event.getActionIndex());
-            // notify IME of change in tool type.
-            mPointerToolTypeConsumer.accept(toolType);
         }
         if (!event.isStylusPointer()) {
             return false;

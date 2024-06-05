@@ -54,6 +54,7 @@ class FakeKeyguardTransitionRepository(
     private val _transitions =
         MutableSharedFlow<TransitionStep>(replay = 3, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     override val transitions: SharedFlow<TransitionStep> = _transitions
+
     @Inject constructor() : this(initInLockscreen = true)
 
     private val _currentTransitionInfo: MutableStateFlow<TransitionInfo> =
@@ -134,6 +135,17 @@ class FakeKeyguardTransitionRepository(
                         from = from,
                         to = to,
                         value = 0.5f
+                    )
+            )
+            testScheduler.runCurrent()
+
+            sendTransitionStep(
+                step =
+                    TransitionStep(
+                        transitionState = TransitionState.RUNNING,
+                        from = from,
+                        to = to,
+                        value = 1f
                     )
             )
             testScheduler.runCurrent()

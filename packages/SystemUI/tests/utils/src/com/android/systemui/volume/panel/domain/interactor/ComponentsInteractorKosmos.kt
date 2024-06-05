@@ -19,8 +19,10 @@ package com.android.systemui.volume.panel.domain.interactor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.volume.panel.component.bottombar.ui.bottomBarAvailabilityCriteria
+import com.android.systemui.volume.panel.component.captioning.captioningAvailabilityCriteria
 import com.android.systemui.volume.panel.component.mediaoutput.mediaOutputAvailabilityCriteria
 import com.android.systemui.volume.panel.component.shared.model.VolumePanelComponents
+import com.android.systemui.volume.panel.component.spatial.spatialAudioAvailabilityCriteria
 import com.android.systemui.volume.panel.component.volume.volumeSlidersAvailabilityCriteria
 import com.android.systemui.volume.panel.domain.ComponentAvailabilityCriteria
 import com.android.systemui.volume.panel.domain.defaultCriteria
@@ -36,6 +38,8 @@ var Kosmos.prodCriteriaByKey:
         mapOf(
             VolumePanelComponents.MEDIA_OUTPUT to Provider { mediaOutputAvailabilityCriteria },
             VolumePanelComponents.VOLUME_SLIDERS to Provider { volumeSlidersAvailabilityCriteria },
+            VolumePanelComponents.CAPTIONING to Provider { captioningAvailabilityCriteria },
+            VolumePanelComponents.SPATIAL_AUDIO to Provider { spatialAudioAvailabilityCriteria },
             VolumePanelComponents.BOTTOM_BAR to Provider { bottomBarAvailabilityCriteria },
         )
     }

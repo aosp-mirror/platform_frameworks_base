@@ -402,7 +402,6 @@
   <java-symbol type="bool" name="config_supportMicNearUltrasound" />
   <java-symbol type="bool" name="config_supportSpeakerNearUltrasound" />
   <java-symbol type="bool" name="config_supportAudioSourceUnprocessed" />
-  <java-symbol type="bool" name="config_freeformWindowManagement" />
   <java-symbol type="bool" name="config_supportsBubble" />
   <java-symbol type="bool" name="config_supportsMultiWindow" />
   <java-symbol type="bool" name="config_supportsSplitScreenMultiWindow" />
@@ -1266,7 +1265,6 @@
   <java-symbol type="array" name="networkAttributes" />
   <java-symbol type="array" name="preloaded_color_state_lists" />
   <java-symbol type="array" name="preloaded_drawables" />
-  <java-symbol type="array" name="preloaded_freeform_multi_window_drawables" />
   <java-symbol type="array" name="sim_colors" />
   <java-symbol type="array" name="special_locale_codes" />
   <java-symbol type="array" name="special_locale_names" />
@@ -2470,16 +2468,6 @@
 
   <!-- From Phone -->
   <java-symbol type="bool" name="config_built_in_sip_phone" />
-  <java-symbol type="id" name="maximize_window" />
-  <java-symbol type="id" name="close_window" />
-  <java-symbol type="layout" name="decor_caption" />
-  <java-symbol type="drawable" name="decor_caption_title_focused" />
-  <java-symbol type="drawable" name="decor_close_button_dark" />
-  <java-symbol type="drawable" name="decor_close_button_light" />
-  <java-symbol type="drawable" name="decor_maximize_button_dark" />
-  <java-symbol type="drawable" name="decor_maximize_button_light" />
-  <java-symbol type="color" name="decor_button_dark_color" />
-  <java-symbol type="color" name="decor_button_light_color" />
   <java-symbol type="array" name="unloggable_phone_numbers" />
 
   <!-- From TelephonyProvider -->
@@ -4469,8 +4457,6 @@
   <java-symbol type="string" name="accessibility_system_action_dpad_left_label" />
   <java-symbol type="string" name="accessibility_system_action_dpad_right_label" />
   <java-symbol type="string" name="accessibility_system_action_dpad_center_label" />
-
-  <java-symbol type="string" name="accessibility_freeform_caption" />
 
   <!-- For Wide Color Gamut -->
   <java-symbol type="bool" name="config_enableWcgMode" />

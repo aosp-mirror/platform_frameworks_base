@@ -201,10 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"የሥራ መገለጫዎ ከዚህ በኋላ በዚህ መሣሪያ ላይ አይገኝም"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"በጣም ብዙ የይለፍ ቃል ሙከራዎች"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"አስተዳዳሪ መሣሪያዎን ለግል ጥቅም ትተውታል"</string>
-    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
-    <skip />
-    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
-    <skip />
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"የግል ቦታ ተወግዷል"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"ድርጅትዎ የግል ቦታዎችን በዚህ የሚተዳደር መሣሪያ ላይ አይፈቅድም።"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"መሣሪያው የሚተዳደር ነው"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"የእርስዎ ድርጅት ይህን መሣሪያ ያስተዳድራል፣ እና የአውታረ መረብ ትራፊክን ሊከታተል ይችላል። ዝርዝሮችን ለማግኘት መታ ያድርጉ።"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"መተግበሪያዎች የእርስዎን አካባቢ መድረስ ይችላሉ"</string>
@@ -2198,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"ከDpad በስተግራ"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"ከDpad በስተቀኝ"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"የDpad ማዕከል"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"የ<xliff:g id="APP_NAME">%1$s</xliff:g> የሥዕል ገላጭ ጽሁፍ አሞሌ።"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ወደ የRESTRICTED ባልዲ ተከትቷል"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>፦"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"አንድ ምስል ልከዋል"</string>

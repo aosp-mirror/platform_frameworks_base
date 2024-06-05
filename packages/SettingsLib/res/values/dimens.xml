@@ -32,7 +32,7 @@
 
     <!-- Usage graph dimens -->
     <dimen name="usage_graph_margin_top_bottom">9dp</dimen>
-    <dimen name="usage_graph_labels_width">56dp</dimen>
+    <dimen name="usage_graph_labels_width">60dp</dimen>
 
     <dimen name="usage_graph_divider_size">1dp</dimen>
 

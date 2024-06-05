@@ -29,10 +29,14 @@ public final class StrategyExecutionRequest {
 
     private final float mCurrentScreenBrightness;
 
+    // Represents if the user set screen brightness was changed or not.
+    private boolean mUserSetBrightnessChanged;
+
     public StrategyExecutionRequest(DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
-            float currentScreenBrightness) {
+            float currentScreenBrightness, boolean userSetBrightnessChanged) {
         mDisplayPowerRequest = displayPowerRequest;
         mCurrentScreenBrightness = currentScreenBrightness;
+        mUserSetBrightnessChanged = userSetBrightnessChanged;
     }
 
     public DisplayManagerInternal.DisplayPowerRequest getDisplayPowerRequest() {
@@ -43,6 +47,10 @@ public final class StrategyExecutionRequest {
         return mCurrentScreenBrightness;
     }
 
+    public boolean isUserSetBrightnessChanged() {
+        return mUserSetBrightnessChanged;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof StrategyExecutionRequest)) {
@@ -50,11 +58,13 @@ public final class StrategyExecutionRequest {
         }
         StrategyExecutionRequest other = (StrategyExecutionRequest) obj;
         return Objects.equals(mDisplayPowerRequest, other.getDisplayPowerRequest())
-                && mCurrentScreenBrightness == other.getCurrentScreenBrightness();
+                && mCurrentScreenBrightness == other.getCurrentScreenBrightness()
+                && mUserSetBrightnessChanged == other.isUserSetBrightnessChanged();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mDisplayPowerRequest, mCurrentScreenBrightness);
+        return Objects.hash(mDisplayPowerRequest, mCurrentScreenBrightness,
+                mUserSetBrightnessChanged);
     }
 }

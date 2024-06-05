@@ -1379,6 +1379,30 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
+    @Override
+    public boolean isMagnificationSystemUIConnected() {
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("isMagnificationSystemUIConnected", "");
+        }
+        synchronized (mLock) {
+            if (!hasRightsToCurrentUserLocked()) {
+                return false;
+            }
+            if (!mSecurityPolicy.canControlMagnification(this)) {
+                return false;
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                MagnificationProcessor magnificationProcessor =
+                        mSystemSupport.getMagnificationProcessor();
+                return magnificationProcessor.isMagnificationSystemUIConnected();
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+    }
+
     public boolean isMagnificationCallbackEnabled(int displayId) {
         return mInvocationHandler.isMagnificationCallbackEnabled(displayId);
     }
@@ -1724,9 +1748,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     public void resetLocked() {
-        if (Flags.resettableDynamicProperties()) {
-            mAccessibilityServiceInfo.resetDynamicallyConfigurableProperties();
-        }
+        mAccessibilityServiceInfo.resetDynamicallyConfigurableProperties();
         mSystemSupport.getKeyEventDispatcher().flush(this);
         try {
             // Clear the proxy in the other process so this
@@ -1925,6 +1947,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 InvocationHandler.MSG_CLEAR_ACCESSIBILITY_CACHE);
     }
 
+    public void notifyMagnificationSystemUIConnectionChangedLocked(boolean connected) {
+        mInvocationHandler
+                .notifyMagnificationSystemUIConnectionChangedLocked(connected);
+    }
+
     public void notifyMagnificationChangedLocked(int displayId, @NonNull Region region,
             @NonNull MagnificationConfig config) {
         mInvocationHandler
@@ -1976,6 +2003,21 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         return (mGenericMotionEventSources & eventSourceWithoutClass) != 0;
     }
 
+    /**
+     * Called by the invocation handler to notify the service that the
+     * magnification systemui connection has changed.
+     */
+    private void notifyMagnificationSystemUIConnectionChangedInternal(boolean connected) {
+        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
+        if (listener != null) {
+            try {
+                listener.onMagnificationSystemUIConnectionChanged(connected);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG,
+                        "Error sending magnification sysui connection changes to " + mService, re);
+            }
+        }
+    }
 
     /**
      * Called by the invocation handler to notify the service that the
@@ -2372,6 +2414,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         private static final int MSG_BIND_INPUT = 12;
         private static final int MSG_UNBIND_INPUT = 13;
         private static final int MSG_START_INPUT = 14;
+        private static final int MSG_ON_MAGNIFICATION_SYSTEM_UI_CONNECTION_CHANGED = 15;
 
         /** List of magnification callback states, mapping from displayId -> Boolean */
         @GuardedBy("mlock")
@@ -2396,6 +2439,13 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 } break;
                 case MSG_CLEAR_ACCESSIBILITY_CACHE: {
                     notifyClearAccessibilityCacheInternal();
+                } break;
+
+                case MSG_ON_MAGNIFICATION_SYSTEM_UI_CONNECTION_CHANGED: {
+                    final SomeArgs args = (SomeArgs) message.obj;
+                    final boolean connected = args.argi1 == 1;
+                    notifyMagnificationSystemUIConnectionChangedInternal(connected);
+                    args.recycle();
                 } break;
 
                 case MSG_ON_MAGNIFICATION_CHANGED: {
@@ -2453,6 +2503,15 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                     throw new IllegalArgumentException("Unknown message: " + type);
                 }
             }
+        }
+
+        public void notifyMagnificationSystemUIConnectionChangedLocked(boolean connected) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.argi1 = connected ? 1 : 0;
+
+            final Message msg =
+                    obtainMessage(MSG_ON_MAGNIFICATION_SYSTEM_UI_CONNECTION_CHANGED, args);
+            msg.sendToTarget();
         }
 
         public void notifyMagnificationChangedLocked(int displayId, @NonNull Region region,

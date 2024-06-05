@@ -147,6 +147,10 @@ public class MagnificationProcessor {
         return false;
     }
 
+    public boolean isMagnificationSystemUIConnected() {
+        return mController.getMagnificationConnectionManager().isConnected();
+    }
+
     private boolean setScaleAndCenterForFullScreenMagnification(int displayId, float scale,
             float centerX, float centerY, boolean animate, int id) {
 

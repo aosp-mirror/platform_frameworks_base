@@ -302,6 +302,10 @@ public abstract class AccessibilityDisplayProxy {
                 }
 
                 @Override
+                public void onMagnificationSystemUIConnectionChanged(boolean connected) {
+                }
+
+                @Override
                 public void onMagnificationChanged(int displayId, @NonNull Region region,
                         MagnificationConfig config) {
                 }

@@ -859,6 +859,15 @@ public class AudioDeviceInventory {
                                 btInfo, streamType, codec, "onSetBtActiveDevice");
                     }
                     break;
+                case BluetoothProfile.HEADSET:
+                    if (mDeviceBroker.isScoManagedByAudio()) {
+                        if (switchToUnavailable) {
+                            mDeviceBroker.onSetBtScoActiveDevice(null);
+                        } else if (switchToAvailable) {
+                            mDeviceBroker.onSetBtScoActiveDevice(btInfo.mDevice);
+                        }
+                    }
+                    break;
                 default: throw new IllegalArgumentException("Invalid profile "
                                  + BluetoothProfile.getProfileName(btInfo.mProfile));
             }

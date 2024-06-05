@@ -168,6 +168,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             }
             SurfaceControl.DesiredDisplayModeSpecs modeSpecs =
                     mSurfaceControlProxy.getDesiredDisplayModeSpecs(displayToken);
+            if (modeSpecs == null) {
+                // If mode specs is null, it most probably means that display got
+                // unplugged very rapidly.
+                Slog.w(TAG, "Desired display mode specs from SurfaceFlinger are null");
+                return;
+            }
             LocalDisplayDevice device = mDevices.get(physicalDisplayId);
             if (device == null) {
                 // Display was added.

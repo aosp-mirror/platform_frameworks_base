@@ -16,9 +16,9 @@
 
 package com.android.settingslib.spa.widget.ui
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
+import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.longClick
@@ -63,9 +63,9 @@ class CopyableBodyTest {
 
     @Test
     fun onCopy_saveToClipboard() {
-        val clipboardManager = context.getSystemService(ClipboardManager::class.java)!!
-        clipboardManager.setPrimaryClip(ClipData.newPlainText("", ""))
+        var clipboardManager: ClipboardManager? = null
         composeTestRule.setContent {
+            clipboardManager = LocalClipboardManager.current
             CopyableBody(TEXT)
         }
 
@@ -74,7 +74,7 @@ class CopyableBodyTest {
         }
         composeTestRule.onNodeWithText(context.getString(android.R.string.copy)).performClick()
 
-        assertThat(clipboardManager.primaryClip!!.getItemAt(0).text.toString()).isEqualTo(TEXT)
+        assertThat(clipboardManager?.getText()?.text).isEqualTo(TEXT)
     }
 
     private companion object {

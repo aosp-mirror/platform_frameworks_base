@@ -84,9 +84,16 @@ class LocaleManagerBackupHelper {
      * from the delegate selector.
      */
     private static final String LOCALES_FROM_DELEGATE_PREFS = "LocalesFromDelegatePrefs.xml";
+    private static final String LOCALES_STAGED_DATA_PREFS = "LocalesStagedDataPrefs.xml";
+    private static final String ARCHIVED_PACKAGES_PREFS = "ArchivedPackagesPrefs.xml";
     // Stage data would be deleted on reboot since it's stored in memory. So it's retained until
     // retention period OR next reboot, whichever happens earlier.
     private static final Duration STAGE_DATA_RETENTION_PERIOD = Duration.ofDays(3);
+    // Store the locales staged data for the specified package in the SharedPreferences. The format
+    // is locales s:setFromDelegate
+    // For example: en-US s:true
+    private static final String STRING_SPLIT = " s:";
+    private static final String KEY_STAGED_DATA_TIME = "staged_data_time";
 
     private final LocaleManagerService mLocaleManagerService;
     private final PackageManager mPackageManager;
@@ -94,39 +101,34 @@ class LocaleManagerBackupHelper {
     private final Context mContext;
     private final Object mStagedDataLock = new Object();
 
-    // Staged data map keyed by user-id to handle multi-user scenario / work profiles. We are using
-    // SparseArray because it is more memory-efficient than a HashMap.
-    private final SparseArray<StagedData> mStagedData;
-
     // SharedPreferences to store packages whose app-locale was set by a delegate, as opposed to
     // the application setting the app-locale itself.
     private final SharedPreferences mDelegateAppLocalePackages;
+    // For unit tests
+    private final SparseArray<File> mStagedDataFiles;
+    private final File mArchivedPackagesFile;
+
     private final BroadcastReceiver mUserMonitor;
-    // To determine whether an app is pre-archived, check for Intent.EXTRA_ARCHIVAL upon receiving
-    // the initial PACKAGE_ADDED broadcast. If it is indeed pre-archived, perform the data
-    // restoration during the second PACKAGE_ADDED broadcast, which is sent subsequently when the
-    // app is installed.
-    private final Set<String> mPkgsToRestore;
 
     LocaleManagerBackupHelper(LocaleManagerService localeManagerService,
             PackageManager packageManager, HandlerThread broadcastHandlerThread) {
         this(localeManagerService.mContext, localeManagerService, packageManager, Clock.systemUTC(),
-                new SparseArray<>(), broadcastHandlerThread, null);
+                broadcastHandlerThread, null, null, null);
     }
 
-    @VisibleForTesting LocaleManagerBackupHelper(Context context,
-            LocaleManagerService localeManagerService,
-            PackageManager packageManager, Clock clock, SparseArray<StagedData> stagedData,
-            HandlerThread broadcastHandlerThread, SharedPreferences delegateAppLocalePackages) {
+    @VisibleForTesting
+    LocaleManagerBackupHelper(Context context, LocaleManagerService localeManagerService,
+            PackageManager packageManager, Clock clock, HandlerThread broadcastHandlerThread,
+            SparseArray<File> stagedDataFiles, File archivedPackagesFile,
+            SharedPreferences delegateAppLocalePackages) {
         mContext = context;
         mLocaleManagerService = localeManagerService;
         mPackageManager = packageManager;
         mClock = clock;
-        mStagedData = stagedData;
         mDelegateAppLocalePackages = delegateAppLocalePackages != null ? delegateAppLocalePackages
-                : createPersistedInfo();
-        mPkgsToRestore = new ArraySet<>();
-
+            : createPersistedInfo();
+        mArchivedPackagesFile = archivedPackagesFile;
+        mStagedDataFiles = stagedDataFiles;
         mUserMonitor = new UserMonitor();
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_REMOVED);
@@ -148,7 +150,7 @@ class LocaleManagerBackupHelper {
         }
 
         synchronized (mStagedDataLock) {
-            cleanStagedDataForOldEntriesLocked();
+            cleanStagedDataForOldEntriesLocked(userId);
         }
 
         HashMap<String, LocalesInfo> pkgStates = new HashMap<>();
@@ -207,14 +209,11 @@ class LocaleManagerBackupHelper {
         return out.toByteArray();
     }
 
-    private void cleanStagedDataForOldEntriesLocked() {
-        for (int i = 0; i < mStagedData.size(); i++) {
-            int userId = mStagedData.keyAt(i);
-            StagedData stagedData = mStagedData.get(userId);
-            if (stagedData.mCreationTimeMillis
-                    < mClock.millis() - STAGE_DATA_RETENTION_PERIOD.toMillis()) {
-                deleteStagedDataLocked(userId);
-            }
+    private void cleanStagedDataForOldEntriesLocked(@UserIdInt int userId) {
+        Long created_time = getStagedDataSp(userId).getLong(KEY_STAGED_DATA_TIME, -1);
+        if (created_time != -1
+                && created_time < mClock.millis() - STAGE_DATA_RETENTION_PERIOD.toMillis()) {
+            deleteStagedDataLocked(userId);
         }
     }
 
@@ -252,20 +251,16 @@ class LocaleManagerBackupHelper {
         // performed simultaneously.
         synchronized (mStagedDataLock) {
             // Backups for apps which are yet to be installed.
-            StagedData stagedData = new StagedData(mClock.millis(), new HashMap<>());
-
             for (String pkgName : pkgStates.keySet()) {
                 LocalesInfo localesInfo = pkgStates.get(pkgName);
                 // Check if the application is already installed for the concerned user.
                 if (isPackageInstalledForUser(pkgName, userId)) {
-                    if (mPkgsToRestore != null) {
-                        mPkgsToRestore.remove(pkgName);
-                    }
+                    removeFromArchivedPackagesInfo(userId, pkgName);
                     // Don't apply the restore if the locales have already been set for the app.
                     checkExistingLocalesAndApplyRestore(pkgName, localesInfo, userId);
                 } else {
                     // Stage the data if the app isn't installed.
-                    stagedData.mPackageStates.put(pkgName, localesInfo);
+                    storeStagedDataInfo(userId, pkgName, localesInfo);
                     if (DEBUG) {
                         Slog.d(TAG, "Add locales=" + localesInfo.mLocales
                                 + " fromDelegate=" + localesInfo.mSetFromDelegate
@@ -274,8 +269,9 @@ class LocaleManagerBackupHelper {
                 }
             }
 
-            if (!stagedData.mPackageStates.isEmpty()) {
-                mStagedData.put(userId, stagedData);
+            // Create the time if the data is being staged.
+            if (!getStagedDataSp(userId).getAll().isEmpty()) {
+                storeStagedDataCreatedTime(userId);
             }
         }
     }
@@ -293,14 +289,23 @@ class LocaleManagerBackupHelper {
      * added on device.
      */
     void onPackageAddedWithExtras(String packageName, int uid, Bundle extras) {
-        boolean archived = false;
+        int userId = UserHandle.getUserId(uid);
         if (extras != null) {
-            archived = extras.getBoolean(Intent.EXTRA_ARCHIVAL, false);
-            if (archived && mPkgsToRestore != null) {
-                mPkgsToRestore.add(packageName);
+            // To determine whether an app is pre-archived, check for Intent.EXTRA_ARCHIVAL upon
+            // receiving the initial PACKAGE_ADDED broadcast. If it is indeed pre-archived, perform
+            // the data restoration during the second PACKAGE_ADDED broadcast, which is sent
+            // subsequently when the app is installed.
+            boolean archived = extras.getBoolean(Intent.EXTRA_ARCHIVAL, false);
+            if (DEBUG) {
+                Slog.d(TAG,
+                        "onPackageAddedWithExtras packageName: " + packageName + ", userId: "
+                                + userId + ", archived: " + archived);
+            }
+            if (archived) {
+                addInArchivedPackagesInfo(userId, packageName);
             }
         }
-        checkStageDataAndApplyRestore(packageName, uid);
+        checkStageDataAndApplyRestore(packageName, userId);
     }
 
     /**
@@ -310,9 +315,32 @@ class LocaleManagerBackupHelper {
      */
     void onPackageUpdateFinished(String packageName, int uid) {
         int userId = UserHandle.getUserId(uid);
-        if (mPkgsToRestore != null && mPkgsToRestore.contains(packageName)) {
-            mPkgsToRestore.remove(packageName);
-            checkStageDataAndApplyRestore(packageName, uid);
+        if (DEBUG) {
+            Slog.d(TAG,
+                    "onPackageUpdateFinished userId: " + userId + ", packageName: " + packageName);
+        }
+        String user = Integer.toString(userId);
+        File file = getArchivedPackagesFile();
+        if (file.exists()) {
+            SharedPreferences sp = getArchivedPackagesSp(file);
+            Set<String> packageNames = new ArraySet<>(sp.getStringSet(user, new ArraySet<>()));
+            if (packageNames.remove(packageName)) {
+                SharedPreferences.Editor editor = sp.edit();
+                if (packageNames.isEmpty()) {
+                    if (!editor.remove(user).commit()) {
+                        Slog.e(TAG, "Failed to remove the user");
+                    }
+                    if (sp.getAll().isEmpty()) {
+                        file.delete();
+                    }
+                } else {
+                    // commit and log the result.
+                    if (!editor.putStringSet(user, packageNames).commit()) {
+                        Slog.e(TAG, "failed to remove the package");
+                    }
+                }
+                checkStageDataAndApplyRestore(packageName, userId);
+            }
         }
         cleanApplicationLocalesIfNeeded(packageName, userId);
     }
@@ -347,16 +375,16 @@ class LocaleManagerBackupHelper {
         }
     }
 
-    private void checkStageDataAndApplyRestore(String packageName, int uid) {
+    private void checkStageDataAndApplyRestore(String packageName, int userId) {
         try {
             synchronized (mStagedDataLock) {
-                cleanStagedDataForOldEntriesLocked();
-
-                int userId = UserHandle.getUserId(uid);
-                if (mStagedData.contains(userId)) {
-                    if (mPkgsToRestore != null) {
-                        mPkgsToRestore.remove(packageName);
+                cleanStagedDataForOldEntriesLocked(userId);
+                if (!getStagedDataSp(userId).getString(packageName, "").isEmpty()) {
+                    if (DEBUG) {
+                        Slog.d(TAG,
+                                "checkStageDataAndApplyRestore, remove package and restore data");
                     }
+                    removeFromArchivedPackagesInfo(userId, packageName);
                     // Perform lazy restore only if the staged data exists.
                     doLazyRestoreLocked(packageName, userId);
                 }
@@ -417,8 +445,17 @@ class LocaleManagerBackupHelper {
         }
     }
 
-    private void deleteStagedDataLocked(@UserIdInt int userId) {
-        mStagedData.remove(userId);
+    void deleteStagedDataLocked(@UserIdInt int userId) {
+        File stagedFile = getStagedDataFile(userId);
+        SharedPreferences sp = getStagedDataSp(stagedFile);
+        // commit and log the result.
+        if (!sp.edit().clear().commit()) {
+            Slog.e(TAG, "Failed to commit data!");
+        }
+
+        if (stagedFile.exists()) {
+            stagedFile.delete();
+        }
     }
 
     /**
@@ -434,7 +471,7 @@ class LocaleManagerBackupHelper {
                         ATTR_PACKAGE_NAME);
                 String languageTags = parser.getAttributeValue(/* namespace= */ null, ATTR_LOCALES);
                 boolean delegateSelector = parser.getAttributeBoolean(/* namespace= */ null,
-                        ATTR_DELEGATE_SELECTOR);
+                        ATTR_DELEGATE_SELECTOR, false);
 
                 if (!TextUtils.isEmpty(packageName) && !TextUtils.isEmpty(languageTags)) {
                     LocalesInfo localesInfo = new LocalesInfo(languageTags, delegateSelector);
@@ -473,16 +510,6 @@ class LocaleManagerBackupHelper {
         out.endDocument();
     }
 
-    static class StagedData {
-        final long mCreationTimeMillis;
-        final HashMap<String, LocalesInfo> mPackageStates;
-
-        StagedData(long creationTimeMillis, HashMap<String, LocalesInfo> pkgStates) {
-            mCreationTimeMillis = creationTimeMillis;
-            mPackageStates = pkgStates;
-        }
-    }
-
     static class LocalesInfo {
         final String mLocales;
         final boolean mSetFromDelegate;
@@ -508,6 +535,7 @@ class LocaleManagerBackupHelper {
                     synchronized (mStagedDataLock) {
                         deleteStagedDataLocked(userId);
                         removeProfileFromPersistedInfo(userId);
+                        removeArchivedPackagesForUser(userId);
                     }
                 }
             } catch (Exception e) {
@@ -533,26 +561,159 @@ class LocaleManagerBackupHelper {
             return;
         }
 
-        StagedData stagedData = mStagedData.get(userId);
-        for (String pkgName : stagedData.mPackageStates.keySet()) {
-            LocalesInfo localesInfo = stagedData.mPackageStates.get(pkgName);
-
-            if (pkgName.equals(packageName)) {
-
-                checkExistingLocalesAndApplyRestore(pkgName, localesInfo, userId);
-
-                // Remove the restored entry from the staged data list.
-                stagedData.mPackageStates.remove(pkgName);
-
-                // Remove the stage data entry for user if there are no more packages to restore.
-                if (stagedData.mPackageStates.isEmpty()) {
-                    mStagedData.remove(userId);
-                }
-
-                // No need to loop further after restoring locales because the staged data will
-                // contain at most one entry for the newly added package.
-                break;
+        SharedPreferences sp = getStagedDataSp(userId);
+        String value = sp.getString(packageName, "");
+        if (!value.isEmpty()) {
+            String[] info = value.split(STRING_SPLIT);
+            if (info == null || info.length != 2) {
+                Slog.e(TAG, "Failed to restore data");
+                return;
             }
+            LocalesInfo localesInfo = new LocalesInfo(info[0], Boolean.parseBoolean(info[1]));
+            checkExistingLocalesAndApplyRestore(packageName, localesInfo, userId);
+
+            // Remove the restored entry from the staged data list.
+            if (!sp.edit().remove(packageName).commit()) {
+                Slog.e(TAG, "Failed to commit data!");
+            }
+        }
+
+        // Remove the stage data entry for user if there are no more packages to restore.
+        if (sp.getAll().size() == 1 && sp.getLong(KEY_STAGED_DATA_TIME, -1) != -1) {
+            deleteStagedDataLocked(userId);
+        }
+    }
+
+    private File getStagedDataFile(@UserIdInt int userId) {
+        return mStagedDataFiles == null ? new File(Environment.getDataSystemDeDirectory(userId),
+            LOCALES_STAGED_DATA_PREFS) : mStagedDataFiles.get(userId);
+    }
+
+    private SharedPreferences getStagedDataSp(File file) {
+        return mStagedDataFiles == null ? mContext.createDeviceProtectedStorageContext()
+            .getSharedPreferences(file, Context.MODE_PRIVATE)
+            : mContext.getSharedPreferences(file, Context.MODE_PRIVATE);
+    }
+
+    private SharedPreferences getStagedDataSp(@UserIdInt int userId) {
+        return mStagedDataFiles == null ? mContext.createDeviceProtectedStorageContext()
+            .getSharedPreferences(getStagedDataFile(userId), Context.MODE_PRIVATE)
+            : mContext.getSharedPreferences(mStagedDataFiles.get(userId), Context.MODE_PRIVATE);
+    }
+
+    /**
+     * Store the staged locales info.
+     */
+    private void storeStagedDataInfo(@UserIdInt int userId, @NonNull String packageName,
+            @NonNull LocalesInfo localesInfo) {
+        if (DEBUG) {
+            Slog.d(TAG, "storeStagedDataInfo, userId: " + userId + ", packageName: " + packageName
+                    + ", localesInfo.mLocales: " + localesInfo.mLocales
+                    + ", localesInfo.mSetFromDelegate: " + localesInfo.mSetFromDelegate);
+        }
+        String info =
+                localesInfo.mLocales + STRING_SPLIT + String.valueOf(localesInfo.mSetFromDelegate);
+        SharedPreferences sp = getStagedDataSp(userId);
+        // commit and log the result.
+        if (!sp.edit().putString(packageName, info).commit()) {
+            Slog.e(TAG, "Failed to commit data!");
+        }
+    }
+
+    /**
+     * Store the time of creation for staged locales info.
+     */
+    private void storeStagedDataCreatedTime(@UserIdInt int userId) {
+        SharedPreferences sp = getStagedDataSp(userId);
+        // commit and log the result.
+        if (!sp.edit().putLong(KEY_STAGED_DATA_TIME, mClock.millis()).commit()) {
+            Slog.e(TAG, "Failed to commit data!");
+        }
+    }
+
+    private File getArchivedPackagesFile() {
+        return mArchivedPackagesFile == null ? new File(
+            Environment.getDataSystemDeDirectory(UserHandle.USER_SYSTEM),
+            ARCHIVED_PACKAGES_PREFS) : mArchivedPackagesFile;
+    }
+
+    private SharedPreferences getArchivedPackagesSp(File file) {
+        return mArchivedPackagesFile == null ? mContext.createDeviceProtectedStorageContext()
+            .getSharedPreferences(file, Context.MODE_PRIVATE)
+            : mContext.getSharedPreferences(file, Context.MODE_PRIVATE);
+    }
+
+    /**
+     * Add the package into the archived packages list.
+     */
+    private void addInArchivedPackagesInfo(@UserIdInt int userId, @NonNull String packageName) {
+        String user = Integer.toString(userId);
+        SharedPreferences sp = getArchivedPackagesSp(getArchivedPackagesFile());
+        Set<String> packageNames = new ArraySet<>(sp.getStringSet(user, new ArraySet<>()));
+        if (DEBUG) {
+            Slog.d(TAG, "addInArchivedPackagesInfo before packageNames: " + packageNames
+                    + ", packageName: " + packageName);
+        }
+        if (packageNames.add(packageName)) {
+            // commit and log the result.
+            if (!sp.edit().putStringSet(user, packageNames).commit()) {
+                Slog.e(TAG, "failed to add the package");
+            }
+        }
+    }
+
+    /**
+     * Remove the package from the archived packages list.
+     */
+    private void removeFromArchivedPackagesInfo(@UserIdInt int userId,
+            @NonNull String packageName) {
+        File file = getArchivedPackagesFile();
+        if (file.exists()) {
+            String user = Integer.toString(userId);
+            SharedPreferences sp = getArchivedPackagesSp(getArchivedPackagesFile());
+            Set<String> packageNames = new ArraySet<>(sp.getStringSet(user, new ArraySet<>()));
+            if (DEBUG) {
+                Slog.d(TAG, "removeFromArchivedPackagesInfo before packageNames: " + packageNames
+                        + ", packageName: " + packageName);
+            }
+            if (packageNames.remove(packageName)) {
+                SharedPreferences.Editor editor = sp.edit();
+                if (packageNames.isEmpty()) {
+                    if (!editor.remove(user).commit()) {
+                        Slog.e(TAG, "Failed to remove user");
+                    }
+                    if (sp.getAll().isEmpty()) {
+                        file.delete();
+                    }
+                } else {
+                    // commit and log the result.
+                    if (!editor.putStringSet(user, packageNames).commit()) {
+                        Slog.e(TAG, "failed to remove the package");
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Remove the user from the archived packages list.
+     */
+    private void removeArchivedPackagesForUser(@UserIdInt int userId) {
+        String user = Integer.toString(userId);
+        File file = getArchivedPackagesFile();
+        SharedPreferences sp = getArchivedPackagesSp(file);
+
+        if (sp == null || !sp.contains(user)) {
+            Slog.w(TAG, "The profile is not existed in the archived package info");
+            return;
+        }
+
+        if (!sp.edit().remove(user).commit()) {
+            Slog.e(TAG, "Failed to remove user");
+        }
+
+        if (sp.getAll().isEmpty() && file.exists()) {
+            file.delete();
         }
     }
 

@@ -18,8 +18,10 @@ package com.android.systemui.volume.panel.ui.composable
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.volume.panel.component.bottombar.ui.bottomBarComponent
+import com.android.systemui.volume.panel.component.captioning.captioningComponent
 import com.android.systemui.volume.panel.component.mediaoutput.mediaOutputComponent
 import com.android.systemui.volume.panel.component.shared.model.VolumePanelComponents
+import com.android.systemui.volume.panel.component.spatial.spatialAudioComponent
 import com.android.systemui.volume.panel.component.volume.volumeSlidersComponent
 import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
 import com.android.systemui.volume.panel.shared.model.VolumePanelUiComponent
@@ -30,9 +32,11 @@ var Kosmos.componentByKey: Map<VolumePanelComponentKey, Provider<VolumePanelUiCo
 var Kosmos.prodComponentByKey: Map<VolumePanelComponentKey, Provider<VolumePanelUiComponent>> by
     Kosmos.Fixture {
         mapOf(
-            VolumePanelComponents.BOTTOM_BAR to Provider { bottomBarComponent },
             VolumePanelComponents.MEDIA_OUTPUT to Provider { mediaOutputComponent },
             VolumePanelComponents.VOLUME_SLIDERS to Provider { volumeSlidersComponent },
+            VolumePanelComponents.CAPTIONING to Provider { captioningComponent },
+            VolumePanelComponents.SPATIAL_AUDIO to Provider { spatialAudioComponent },
+            VolumePanelComponents.BOTTOM_BAR to Provider { bottomBarComponent },
         )
     }
 var Kosmos.enabledComponents: Collection<VolumePanelComponentKey> by

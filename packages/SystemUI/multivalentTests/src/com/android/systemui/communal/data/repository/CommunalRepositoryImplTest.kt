@@ -41,6 +41,7 @@ class CommunalRepositoryImplTest : SysuiTestCase() {
     private val underTest by lazy {
         CommunalSceneRepositoryImpl(
             kosmos.applicationCoroutineScope,
+            kosmos.applicationCoroutineScope,
             kosmos.sceneDataSource,
         )
     }

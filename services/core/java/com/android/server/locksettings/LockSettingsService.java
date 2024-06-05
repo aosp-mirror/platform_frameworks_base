@@ -593,7 +593,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         public RebootEscrowManager getRebootEscrowManager(RebootEscrowManager.Callbacks callbacks,
                 LockSettingsStorage storage) {
             return new RebootEscrowManager(mContext, callbacks, storage,
-                    getHandler(getServiceThread()));
+                    getHandler(getServiceThread()), getUserManagerInternal());
         }
 
         public int binderGetCallingUid() {
@@ -1243,23 +1243,24 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private void enforceFrpResolved() {
+    private void enforceFrpNotActive() {
         final int mainUserId = mInjector.getUserManagerInternal().getMainUserId();
         if (mainUserId < 0) {
-            Slog.d(TAG, "No Main user on device; skipping enforceFrpResolved");
+            Slog.d(TAG, "No Main user on device; skipping enforceFrpNotActive");
             return;
         }
-        final ContentResolver cr = mContext.getContentResolver();
 
+        final ContentResolver cr = mContext.getContentResolver();
         final boolean inSetupWizard = Settings.Secure.getIntForUser(cr,
                 Settings.Secure.USER_SETUP_COMPLETE, 0, mainUserId) == 0;
-        final boolean secureFrp = android.security.Flags.frpEnforcement()
+        final boolean isFrpActive = android.security.Flags.frpEnforcement()
                 ? mStorage.isFactoryResetProtectionActive()
-                : (Settings.Global.getInt(cr, Settings.Global.SECURE_FRP_MODE, 0) == 1);
+                : (Settings.Global.getInt(cr, Settings.Global.SECURE_FRP_MODE, 0) == 1)
+                        && inSetupWizard;
 
-        if (inSetupWizard && secureFrp) {
-            throw new SecurityException("Cannot change credential in SUW while factory reset"
-                    + " protection is not resolved yet");
+        if (isFrpActive) {
+            throw new SecurityException("Cannot change credential while factory reset protection"
+                    + " is active");
         }
     }
 
@@ -1831,7 +1832,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         final long identity = Binder.clearCallingIdentity();
         try {
-            enforceFrpResolved();
+            enforceFrpNotActive();
             // When changing credential for profiles with unified challenge, some callers
             // will pass in empty credential while others will pass in the credential of
             // the parent user. setLockCredentialInternal() handles the formal case (empty
