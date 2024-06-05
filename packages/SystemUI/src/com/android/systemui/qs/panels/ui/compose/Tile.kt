@@ -165,7 +165,7 @@ fun TileLazyGrid(
 @Composable
 fun DefaultEditTileGrid(
     tiles: List<EditTileViewModel>,
-    iconOnlySpecs: Set<TileSpec>,
+    isIconOnly: (TileSpec) -> Boolean,
     columns: GridCells,
     modifier: Modifier,
     onAddTile: (TileSpec, Int) -> Unit,
@@ -176,8 +176,6 @@ fun DefaultEditTileGrid(
     val addTileToEnd: (TileSpec) -> Unit by rememberUpdatedState {
         onAddTile(it, CurrentTilesInteractor.POSITION_AT_END)
     }
-    val isIconOnly: (TileSpec) -> Boolean =
-        remember(iconOnlySpecs) { { tileSpec: TileSpec -> tileSpec in iconOnlySpecs } }
 
     TileLazyGrid(modifier = modifier, columns = columns) {
         // These Text are just placeholders to see the different sections. Not final UI.

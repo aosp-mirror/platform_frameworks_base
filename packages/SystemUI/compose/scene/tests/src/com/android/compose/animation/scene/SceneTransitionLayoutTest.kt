@@ -461,4 +461,30 @@ class SceneTransitionLayoutTest {
         assertThat(exception).hasMessageThat().contains(Back.toString())
         assertThat(exception).hasMessageThat().contains(SceneA.debugName)
     }
+
+    @Test
+    fun sceneKeyInScope() {
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+
+        var keyInA: SceneKey? = null
+        var keyInB: SceneKey? = null
+        var keyInC: SceneKey? = null
+        rule.setContent {
+            SceneTransitionLayout(state) {
+                scene(SceneA) { keyInA = sceneKey }
+                scene(SceneB) { keyInB = sceneKey }
+                scene(SceneC) { keyInC = sceneKey }
+            }
+        }
+
+        // Snap to B then C to compose these scenes at least once.
+        rule.runOnUiThread { state.snapToScene(SceneB) }
+        rule.waitForIdle()
+        rule.runOnUiThread { state.snapToScene(SceneC) }
+        rule.waitForIdle()
+
+        assertThat(keyInA).isEqualTo(SceneA)
+        assertThat(keyInB).isEqualTo(SceneB)
+        assertThat(keyInC).isEqualTo(SceneC)
+    }
 }

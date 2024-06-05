@@ -327,6 +327,11 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner, CoreStartable
     @Deprecated
     float getDisplayDensity();
 
+    /**
+     * Forwards touch events to communal hub
+     */
+    void handleCommunalHubTouch(MotionEvent event);
+
     public static class KeyboardShortcutsMessage {
         final int mDeviceId;
 

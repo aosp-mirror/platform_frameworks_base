@@ -166,9 +166,6 @@ public class Transitions implements RemoteCallable<Transitions>,
     public static final int TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP =
             WindowManager.TRANSIT_FIRST_CUSTOM + 11;
 
-    /** Transition type to fullscreen from desktop mode. */
-    public static final int TRANSIT_EXIT_DESKTOP_MODE = WindowManager.TRANSIT_FIRST_CUSTOM + 12;
-
     /** Transition type to cancel the drag to desktop mode. */
     public static final int TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP =
             WindowManager.TRANSIT_FIRST_CUSTOM + 13;
@@ -176,9 +173,6 @@ public class Transitions implements RemoteCallable<Transitions>,
     /** Transition type to animate the toggle resize between the max and default desktop sizes. */
     public static final int TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE =
             WindowManager.TRANSIT_FIRST_CUSTOM + 14;
-
-    /** Transition to animate task to desktop. */
-    public static final int TRANSIT_MOVE_TO_DESKTOP = WindowManager.TRANSIT_FIRST_CUSTOM + 15;
 
     /** Transition to resize PiP task. */
     public static final int TRANSIT_RESIZE_PIP = TRANSIT_FIRST_CUSTOM + 16;
@@ -189,6 +183,10 @@ public class Transitions implements RemoteCallable<Transitions>,
     public static final int TRANSIT_TASK_FRAGMENT_DRAG_RESIZE =
             // TRANSIT_FIRST_CUSTOM + 17
             TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_DRAG_RESIZE;
+
+    /** Transition type for desktop mode transitions. */
+    public static final int TRANSIT_DESKTOP_MODE_TYPES =
+            WindowManager.TRANSIT_FIRST_CUSTOM + 100;
 
     private final ShellTaskOrganizer mOrganizer;
     private final Context mContext;
@@ -657,8 +655,10 @@ public class Transitions implements RemoteCallable<Transitions>,
             }
             if (change.hasFlags(FLAG_NO_ANIMATION)) {
                 hasNoAnimation = true;
-            } else {
-                // at-least one relevant participant *is* animated, so we need to animate.
+            } else if (!TransitionUtil.isOrderOnly(change) && !change.hasFlags(FLAG_IS_OCCLUDED)) {
+                // Ignore the order only or occluded changes since they shouldn't be visible during
+                // animation. For anything else, we need to animate if at-least one relevant
+                // participant *is* animated,
                 return false;
             }
         }
@@ -1591,7 +1591,7 @@ public class Transitions implements RemoteCallable<Transitions>,
         public void setHomeTransitionListener(IHomeTransitionListener listener) {
             executeRemoteCallWithTaskPermission(mTransitions, "setHomeTransitionListener",
                     (transitions) -> {
-                        transitions.mHomeTransitionObserver.setHomeTransitionListener(mTransitions,
+                        transitions.mHomeTransitionObserver.setHomeTransitionListener(transitions,
                                 listener);
                     });
         }

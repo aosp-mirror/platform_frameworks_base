@@ -132,7 +132,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     public void complicationAvailability_serviceNotAvailable_noFavorites_doNotAddComplication() {
         final DreamHomeControlsComplication.Registrant registrant =
                 new DreamHomeControlsComplication.Registrant(mComplication,
-                        mDreamOverlayStateController, mControlsComponent, mMonitor);
+                        mDreamOverlayStateController, mControlsComponent, mMonitor, false);
         registrant.start();
 
         setHaveFavorites(false);
@@ -145,7 +145,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     public void complicationAvailability_serviceAvailable_noFavorites_doNotAddComplication() {
         final DreamHomeControlsComplication.Registrant registrant =
                 new DreamHomeControlsComplication.Registrant(mComplication,
-                        mDreamOverlayStateController, mControlsComponent, mMonitor);
+                        mDreamOverlayStateController, mControlsComponent, mMonitor, false);
         registrant.start();
 
         setHaveFavorites(false);
@@ -158,7 +158,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     public void complicationAvailability_serviceAvailable_noFavorites_panel_addComplication() {
         final DreamHomeControlsComplication.Registrant registrant =
                 new DreamHomeControlsComplication.Registrant(mComplication,
-                        mDreamOverlayStateController, mControlsComponent, mMonitor);
+                        mDreamOverlayStateController, mControlsComponent, mMonitor, false);
         registrant.start();
 
         setHaveFavorites(false);
@@ -171,7 +171,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     public void complicationAvailability_serviceNotAvailable_haveFavorites_doNotAddComplication() {
         final DreamHomeControlsComplication.Registrant registrant =
                 new DreamHomeControlsComplication.Registrant(mComplication,
-                        mDreamOverlayStateController, mControlsComponent, mMonitor);
+                        mDreamOverlayStateController, mControlsComponent, mMonitor, false);
         registrant.start();
 
         setHaveFavorites(true);
@@ -184,7 +184,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     public void complicationAvailability_serviceAvailable_haveFavorites_addComplication() {
         final DreamHomeControlsComplication.Registrant registrant =
                 new DreamHomeControlsComplication.Registrant(mComplication,
-                        mDreamOverlayStateController, mControlsComponent, mMonitor);
+                        mDreamOverlayStateController, mControlsComponent, mMonitor, false);
         registrant.start();
 
         setHaveFavorites(true);
@@ -197,7 +197,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     public void complicationAvailability_checkAvailabilityWhenDreamOverlayBecomesActive() {
         final DreamHomeControlsComplication.Registrant registrant =
                 new DreamHomeControlsComplication.Registrant(mComplication,
-                        mDreamOverlayStateController, mControlsComponent, mMonitor);
+                        mDreamOverlayStateController, mControlsComponent, mMonitor, false);
         registrant.start();
 
         setServiceAvailable(true);

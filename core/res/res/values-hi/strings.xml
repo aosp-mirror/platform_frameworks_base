@@ -201,10 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"आपकी वर्क प्रोफ़ाइल अब इस डिवाइस पर उपलब्‍ध नहीं है"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"कई बार गलत पासवर्ड डाला गया"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"एडमिन ने निजी इस्तेमाल के लिए डिवाइस दे दिया है"</string>
-    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
-    <skip />
-    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
-    <skip />
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"प्राइवेट स्पेस हटाया गया"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"आपका संगठन मैनेज किए जा रहे इस डिवाइस पर प्राइवेट स्पेस रखने की अनुमति नहीं देता है."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"डिवाइस प्रबंधित है"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"आपका संगठन इस डिवाइस का प्रबंधन करता है और वह नेटवर्क ट्रैफ़िक की निगरानी भी कर सकता है. विवरण के लिए टैप करें."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ऐप्लिकेशन आपकी जगह की जानकारी ऐक्सेस कर सकते हैं"</string>
@@ -2198,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"डी-पैड का बाईं ओर वाला बटन"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"डी-पैड का दाईं ओर वाला बटन"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"डी-पैड का बीच वाला बटन"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> का कैप्शन बार."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> को प्रतिबंधित बकेट में रखा गया है"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"एक इमेज भेजी गई"</string>

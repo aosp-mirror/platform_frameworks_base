@@ -16,24 +16,22 @@
 
 package com.android.systemui.statusbar.notification.shared
 
-import com.android.systemui.Flags
 import com.android.systemui.flags.FlagToken
-import com.android.systemui.flags.RefactorFlagUtils
 
 /** Helper for reading or using the heads-up cycling flag state. */
 @Suppress("NOTHING_TO_INLINE")
 object NotificationHeadsUpCycling {
-    /** The aconfig flag name - enable this feature when FLAG_NOTIFICATION_THROTTLE_HUN is on. */
-    const val FLAG_NAME = Flags.FLAG_NOTIFICATION_THROTTLE_HUN
+    /** The aconfig flag name */
+    const val FLAG_NAME = NotificationThrottleHun.FLAG_NAME
 
     /** A token used for dependency declaration */
     val token: FlagToken
-        get() = FlagToken(FLAG_NAME, isEnabled)
+        get() = NotificationThrottleHun.token
 
     /** Is the heads-up cycling animation enabled */
     @JvmStatic
     inline val isEnabled
-        get() = Flags.notificationThrottleHun()
+        get() = NotificationThrottleHun.isEnabled
 
     /** Whether to animate the bottom line when transiting from a tall HUN to a short HUN */
     @JvmStatic
@@ -46,13 +44,12 @@ object NotificationHeadsUpCycling {
      * build to ensure that the refactor author catches issues in testing.
      */
     @JvmStatic
-    inline fun isUnexpectedlyInLegacyMode() =
-        RefactorFlagUtils.isUnexpectedlyInLegacyMode(isEnabled, FLAG_NAME)
+    inline fun isUnexpectedlyInLegacyMode() = NotificationThrottleHun.isUnexpectedlyInLegacyMode()
 
     /**
      * Called to ensure code is only run when the flag is disabled. This will throw an exception if
      * the flag is enabled to ensure that the refactor author catches issues in testing.
      */
     @JvmStatic
-    inline fun assertInLegacyMode() = RefactorFlagUtils.assertInLegacyMode(isEnabled, FLAG_NAME)
+    inline fun assertInLegacyMode() = NotificationThrottleHun.assertInLegacyMode()
 }

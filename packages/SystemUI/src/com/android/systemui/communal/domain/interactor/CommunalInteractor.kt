@@ -98,7 +98,7 @@ constructor(
     broadcastDispatcher: BroadcastDispatcher,
     private val widgetRepository: CommunalWidgetRepository,
     private val communalPrefsRepository: CommunalPrefsRepository,
-    mediaRepository: CommunalMediaRepository,
+    private val mediaRepository: CommunalMediaRepository,
     smartspaceRepository: SmartspaceRepository,
     keyguardInteractor: KeyguardInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
@@ -479,40 +479,41 @@ constructor(
      * A flow of ongoing content, including smartspace timers and umo, ordered by creation time and
      * sized dynamically.
      */
-    val ongoingContent: Flow<List<CommunalContentModel.Ongoing>> =
+    fun getOngoingContent(mediaHostVisible: Boolean): Flow<List<CommunalContentModel.Ongoing>> =
         combine(smartspaceTargets, mediaRepository.mediaModel) { smartspace, media ->
-            val ongoingContent = mutableListOf<CommunalContentModel.Ongoing>()
+                val ongoingContent = mutableListOf<CommunalContentModel.Ongoing>()
 
-            // Add smartspace
-            ongoingContent.addAll(
-                smartspace.map { target ->
-                    CommunalContentModel.Smartspace(
-                        smartspaceTargetId = target.smartspaceTargetId,
-                        remoteViews = target.remoteViews!!,
-                        createdTimestampMillis = target.creationTimeMillis,
+                // Add smartspace
+                ongoingContent.addAll(
+                    smartspace.map { target ->
+                        CommunalContentModel.Smartspace(
+                            smartspaceTargetId = target.smartspaceTargetId,
+                            remoteViews = target.remoteViews!!,
+                            createdTimestampMillis = target.creationTimeMillis,
+                        )
+                    }
+                )
+
+                // Add UMO
+                if (mediaHostVisible && media.hasActiveMediaOrRecommendation) {
+                    ongoingContent.add(
+                        CommunalContentModel.Umo(
+                            createdTimestampMillis = media.createdTimestampMillis,
+                        )
                     )
                 }
-            )
 
-            // Add UMO
-            if (media.hasActiveMediaOrRecommendation) {
-                ongoingContent.add(
-                    CommunalContentModel.Umo(
-                        createdTimestampMillis = media.createdTimestampMillis,
-                    )
-                )
+                // Order by creation time descending
+                ongoingContent.sortByDescending { it.createdTimestampMillis }
+
+                // Dynamic sizing
+                ongoingContent.forEachIndexed { index, model ->
+                    model.size = dynamicContentSize(ongoingContent.size, index)
+                }
+
+                ongoingContent
             }
-
-            // Order by creation time descending
-            ongoingContent.sortByDescending { it.createdTimestampMillis }
-
-            // Dynamic sizing
-            ongoingContent.forEachIndexed { index, model ->
-                model.size = dynamicContentSize(ongoingContent.size, index)
-            }
-
-            return@combine ongoingContent
-        }
+            .flowOn(bgDispatcher)
 
     /**
      * Filter and retain widgets associated with an existing user, safeguarding against displaying

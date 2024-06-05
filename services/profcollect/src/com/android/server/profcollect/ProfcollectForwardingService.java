@@ -58,7 +58,6 @@ import java.util.concurrent.TimeUnit;
 public final class ProfcollectForwardingService extends SystemService {
     public static final String LOG_TAG = "ProfcollectForwardingService";
 
-    private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG);
     private static final String INTENT_UPLOAD_PROFILES =
             "com.android.server.profcollect.UPLOAD_PROFILES";
     private static final long BG_PROCESS_INTERVAL = TimeUnit.HOURS.toMillis(4); // every 4 hours.
@@ -120,9 +119,6 @@ public final class ProfcollectForwardingService extends SystemService {
 
     @Override
     public void onStart() {
-        if (DEBUG) {
-            Log.d(LOG_TAG, "Profcollect forwarding service start");
-        }
         connectNativeService();
     }
 
@@ -245,9 +241,6 @@ public final class ProfcollectForwardingService extends SystemService {
 
         @Override
         public boolean onStartJob(JobParameters params) {
-            if (DEBUG) {
-                Log.d(LOG_TAG, "Starting background process job");
-            }
             createAndUploadReport(sSelfService);
             jobFinished(params, false);
             return true;
@@ -289,9 +282,6 @@ public final class ProfcollectForwardingService extends SystemService {
                 "applaunch_trace_freq", 2);
         int randomNum = ThreadLocalRandom.current().nextInt(100);
         if (randomNum < traceFrequency) {
-            if (DEBUG) {
-                Log.d(LOG_TAG, "Tracing on app launch event: " + packageName);
-            }
             BackgroundThread.get().getThreadHandler().post(() -> {
                 try {
                     mIProfcollect.trace_once("applaunch");
@@ -331,9 +321,6 @@ public final class ProfcollectForwardingService extends SystemService {
                 "dex2oat_trace_freq", 25);
         int randomNum = ThreadLocalRandom.current().nextInt(100);
         if (randomNum < traceFrequency) {
-            if (DEBUG) {
-                Log.d(LOG_TAG, "Tracing on dex2oat event");
-            }
             BackgroundThread.get().getThreadHandler().post(() -> {
                 try {
                     // Dex2oat could take a while before it starts. Add a short delay before start
@@ -352,11 +339,6 @@ public final class ProfcollectForwardingService extends SystemService {
         updateEngine.bind(new UpdateEngineCallback() {
             @Override
             public void onStatusUpdate(int status, float percent) {
-                if (DEBUG) {
-                    Log.d(LOG_TAG, "Received OTA status update, status: " + status + ", percent: "
-                            + percent);
-                }
-
                 if (status == UpdateEngine.UpdateStatusConstants.UPDATED_NEED_REBOOT) {
                     createAndUploadReport(sSelfService);
                 }
@@ -370,26 +352,23 @@ public final class ProfcollectForwardingService extends SystemService {
     }
 
     private static void createAndUploadReport(ProfcollectForwardingService pfs) {
-        String reportName;
-        try {
-            reportName = pfs.mIProfcollect.report(pfs.mUsageSetting) + ".zip";
-        } catch (RemoteException e) {
-            Log.e(LOG_TAG, "Failed to create report: " + e.getMessage());
-            return;
-        }
-        if (!pfs.mUploadEnabled) {
-            Log.i(LOG_TAG, "Upload is not enabled.");
-            return;
-        }
         BackgroundThread.get().getThreadHandler().post(() -> {
+            String reportName;
+            try {
+                reportName = pfs.mIProfcollect.report(pfs.mUsageSetting) + ".zip";
+            } catch (RemoteException e) {
+                Log.e(LOG_TAG, "Failed to create report: " + e.getMessage());
+                return;
+            }
+            if (!pfs.mUploadEnabled) {
+                Log.i(LOG_TAG, "Upload is not enabled.");
+                return;
+            }
             Intent intent = new Intent()
                     .setPackage("com.android.shell")
                     .setAction("com.android.shell.action.PROFCOLLECT_UPLOAD")
                     .putExtra("filename", reportName);
             pfs.getContext().sendBroadcast(intent);
         });
-        if (DEBUG) {
-            Log.d(LOG_TAG, "Sent report for upload.");
-        }
     }
 }

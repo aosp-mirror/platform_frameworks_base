@@ -8157,6 +8157,9 @@ public class Intent implements Parcelable, Cloneable {
                 int eq = uri.indexOf('=', i);
                 if (eq < 0) eq = i-1;
                 int semi = uri.indexOf(';', i);
+                if (semi < 0) {
+                    throw new URISyntaxException(uri, "uri end not found");
+                }
                 String value = eq < semi ? Uri.decode(uri.substring(eq + 1, semi)) : "";
 
                 // action

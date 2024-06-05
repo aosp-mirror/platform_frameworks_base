@@ -146,14 +146,18 @@ constructor(
             isEnabled = isEnabled,
             a11yStep = volumeRange.step,
             a11yClickDescription =
-                context.getString(
-                    if (isMuted) {
-                        R.string.volume_panel_hint_unmute
-                    } else {
-                        R.string.volume_panel_hint_mute
-                    },
-                    label,
-                ),
+                if (isAffectedByMute) {
+                    context.getString(
+                        if (isMuted) {
+                            R.string.volume_panel_hint_unmute
+                        } else {
+                            R.string.volume_panel_hint_mute
+                        },
+                        label,
+                    )
+                } else {
+                    null
+                },
             a11yStateDescription =
                 if (volume == volumeRange.first) {
                     context.getString(

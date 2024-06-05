@@ -62,6 +62,7 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.service.autofill.Dataset;
 import android.text.TextUtils;
@@ -211,17 +212,21 @@ public final class PresentationStatsEventLogger {
             AUTOFILL_FILL_RESPONSE_REPORTED__DETECTION_PREFERENCE__DETECTION_PREFER_AUTOFILL_PROVIDER;
     public static final int DETECTION_PREFER_PCC =
             AUTOFILL_FILL_RESPONSE_REPORTED__DETECTION_PREFERENCE__DETECTION_PREFER_PCC;
-    private final int mSessionId;
 
+    private static final int DEFAULT_VALUE_INT = -1;
+
+    private final int mSessionId;
     /**
      * For app_package_uid.
      */
     private final int mCallingAppUid;
     private Optional<PresentationStatsEventInternal> mEventInternal;
+    private final long mSessionStartTimestamp;
 
-    private PresentationStatsEventLogger(int sessionId, int callingAppUid) {
+    private PresentationStatsEventLogger(int sessionId, int callingAppUid, long timestamp) {
         mSessionId = sessionId;
         mCallingAppUid = callingAppUid;
+        mSessionStartTimestamp = timestamp;
         mEventInternal = Optional.empty();
     }
 
@@ -229,8 +234,8 @@ public final class PresentationStatsEventLogger {
      * Create PresentationStatsEventLogger, populated with sessionId and the callingAppUid
      */
     public static PresentationStatsEventLogger createPresentationLog(
-            int sessionId, int callingAppUid) {
-        return new PresentationStatsEventLogger(sessionId, callingAppUid);
+            int sessionId, int callingAppUid, long timestamp) {
+        return new PresentationStatsEventLogger(sessionId, callingAppUid, timestamp);
     }
 
     public void startNewEvent() {
@@ -370,10 +375,18 @@ public final class PresentationStatsEventLogger {
         });
     }
 
+    public void maybeSetFillRequestSentTimestampMs() {
+        maybeSetFillRequestSentTimestampMs(getElapsedTime());
+    }
+
     public void maybeSetFillResponseReceivedTimestampMs(int timestamp) {
         mEventInternal.ifPresent(event -> {
             event.mFillResponseReceivedTimestampMs = timestamp;
         });
+    }
+
+    public void maybeSetFillResponseReceivedTimestampMs() {
+        maybeSetFillResponseReceivedTimestampMs(getElapsedTime());
     }
 
     public void maybeSetSuggestionSentTimestampMs(int timestamp) {
@@ -382,16 +395,30 @@ public final class PresentationStatsEventLogger {
         });
     }
 
+    public void maybeSetSuggestionSentTimestampMs() {
+        maybeSetSuggestionSentTimestampMs(getElapsedTime());
+    }
+
     public void maybeSetSuggestionPresentedTimestampMs(int timestamp) {
         mEventInternal.ifPresent(event -> {
-            event.mSuggestionPresentedTimestampMs = timestamp;
+            // mSuggestionPresentedTimestampMs only tracks the first suggested timestamp.
+            if (event.mSuggestionPresentedTimestampMs == DEFAULT_VALUE_INT) {
+                event.mSuggestionPresentedTimestampMs = timestamp;
+            }
+
+            event.mSuggestionPresentedLastTimestampMs = timestamp;
         });
+    }
+
+    public void maybeSetSuggestionPresentedTimestampMs() {
+        maybeSetSuggestionPresentedTimestampMs(getElapsedTime());
     }
 
     public void maybeSetSelectedDatasetId(int selectedDatasetId) {
         mEventInternal.ifPresent(event -> {
             event.mSelectedDatasetId = selectedDatasetId;
         });
+        setPresentationSelectedTimestamp();
     }
 
     public void maybeSetDialogDismissed(boolean dialogDismissed) {
@@ -479,6 +506,11 @@ public final class PresentationStatsEventLogger {
         });
     }
 
+    /** Set latency_authentication_ui_display_millis as long as mEventInternal presents. */
+    public void maybeSetLatencyAuthenticationUiDisplayMillis() {
+        maybeSetLatencyAuthenticationUiDisplayMillis(getElapsedTime());
+    }
+
     /**
      * Set latency_dataset_display_millis as long as mEventInternal presents.
      */
@@ -486,6 +518,11 @@ public final class PresentationStatsEventLogger {
         mEventInternal.ifPresent(event -> {
             event.mLatencyDatasetDisplayMillis = val;
         });
+    }
+
+    /** Set latency_dataset_display_millis as long as mEventInternal presents. */
+    public void maybeSetLatencyDatasetDisplayMillis() {
+        maybeSetLatencyDatasetDisplayMillis(getElapsedTime());
     }
 
     /**
@@ -523,6 +560,53 @@ public final class PresentationStatsEventLogger {
             event.mDetectionPreference = detectionPreference;
         });
     }
+
+    /**
+     * Set various timestamps whenever the ViewState is modified
+     *
+     * <p>If the ViewState contains ViewState.STATE_AUTOFILLED, sets field_autofilled_timestamp_ms
+     * else, set field_first_modified_timestamp_ms (if unset) and field_last_modified_timestamp_ms
+     */
+    public void onFieldTextUpdated(ViewState state) {
+        mEventInternal.ifPresent(
+                event -> {
+                    int timestamp = getElapsedTime();
+                    // Focused id should be set before this is called
+                    if (state.id != null && state.id.getViewId() != event.mFocusedId) {
+                        // if these don't match, the currently field different than before
+                        Slog.w(
+                                TAG,
+                                "current id: "
+                                        + state.id.getViewId()
+                                        + " is different than focused id: "
+                                        + event.mFocusedId);
+                        return;
+                    }
+
+                    if ((state.getState() & ViewState.STATE_AUTOFILLED) != 0) {
+                        event.mAutofilledTimestampMs = timestamp;
+                    } else {
+                        if (event.mFieldModifiedFirstTimestampMs == DEFAULT_VALUE_INT) {
+                            event.mFieldModifiedFirstTimestampMs = timestamp;
+                        }
+                        event.mFieldModifiedLastTimestampMs = timestamp;
+                    }
+                });
+    }
+
+    public void setPresentationSelectedTimestamp() {
+        mEventInternal.ifPresent(event -> {
+            event.mSelectionTimestamp = getElapsedTime();
+        });
+    }
+
+    /**
+     * Returns timestamp (relative to mSessionStartTimestamp)
+     */
+    private int getElapsedTime() {
+        return (int)(SystemClock.elapsedRealtime() - mSessionStartTimestamp);
+    }
+
 
     private int convertDatasetPickReason(@Dataset.DatasetEligibleReason int val) {
         switch (val) {
@@ -648,7 +732,17 @@ public final class PresentationStatsEventLogger {
                     + " mViewFillFailureCount=" + event.mViewFillFailureCount
                     + " mFocusedId=" + event.mFocusedId
                     + " mViewFillSuccessCount=" + event.mViewFillSuccessCount
-                    + " mViewFilledButUnexpectedCount=" + event.mViewFilledButUnexpectedCount);
+                    + " mViewFilledButUnexpectedCount=" + event.mViewFilledButUnexpectedCount
+                    + " event.mSelectionTimestamp=" + event.mSelectionTimestamp
+                    + " event.mAutofilledTimestampMs=" + event.mAutofilledTimestampMs
+                    + " event.mFieldModifiedFirstTimestampMs="
+                    + event.mFieldModifiedFirstTimestampMs
+                    + " event.mFieldModifiedLastTimestampMs=" + event.mFieldModifiedLastTimestampMs
+                    + " event.mSuggestionPresentedLastTimestampMs="
+                    + event.mSuggestionPresentedLastTimestampMs
+                    + " event.mFocusedVirtualAutofillId=" + event.mFocusedVirtualAutofillId
+                    + " event.mFieldFirstLength=" + event.mFieldFirstLength
+                    + " event.mFieldLastLength=" + event.mFieldLastLength);
         }
 
         // TODO(b/234185326): Distinguish empty responses from other no presentation reasons.
@@ -694,7 +788,15 @@ public final class PresentationStatsEventLogger {
                 event.mViewFillFailureCount,
                 event.mFocusedId,
                 event.mViewFillSuccessCount,
-                event.mViewFilledButUnexpectedCount);
+                event.mViewFilledButUnexpectedCount,
+                event.mSelectionTimestamp,
+                event.mAutofilledTimestampMs,
+                event.mFieldModifiedFirstTimestampMs,
+                event.mFieldModifiedLastTimestampMs,
+                event.mSuggestionPresentedLastTimestampMs,
+                event.mFocusedVirtualAutofillId,
+                event.mFieldFirstLength,
+                event.mFieldLastLength);
         mEventInternal = Optional.empty();
     }
 
@@ -708,31 +810,39 @@ public final class PresentationStatsEventLogger {
         int mCountNotShownImePresentationNotDrawn;
         int mCountNotShownImeUserNotSeen;
         int mDisplayPresentationType = AUTOFILL_PRESENTATION_EVENT_REPORTED__DISPLAY_PRESENTATION_TYPE__UNKNOWN_AUTOFILL_DISPLAY_PRESENTATION_TYPE;
-        int mAutofillServiceUid = -1;
-        int mInlineSuggestionHostUid = -1;
+        int mAutofillServiceUid = DEFAULT_VALUE_INT;
+        int mInlineSuggestionHostUid = DEFAULT_VALUE_INT;
         boolean mIsRequestTriggered;
-        int mFillRequestSentTimestampMs;
-        int mFillResponseReceivedTimestampMs;
-        int mSuggestionSentTimestampMs;
-        int mSuggestionPresentedTimestampMs;
-        int mSelectedDatasetId = -1;
+        int mFillRequestSentTimestampMs = DEFAULT_VALUE_INT;
+        int mFillResponseReceivedTimestampMs = DEFAULT_VALUE_INT;
+        int mSuggestionSentTimestampMs = DEFAULT_VALUE_INT;
+        int mSuggestionPresentedTimestampMs = DEFAULT_VALUE_INT;
+        int mSelectedDatasetId = DEFAULT_VALUE_INT;
         boolean mDialogDismissed = false;
         boolean mNegativeCtaButtonClicked = false;
         boolean mPositiveCtaButtonClicked = false;
         int mAuthenticationType = AUTHENTICATION_TYPE_UNKNOWN;
         int mAuthenticationResult = AUTHENTICATION_RESULT_UNKNOWN;
-        int mLatencyAuthenticationUiDisplayMillis = -1;
-        int mLatencyDatasetDisplayMillis = -1;
-        int mAvailablePccCount = -1;
-        int mAvailablePccOnlyCount = -1;
+        int mLatencyAuthenticationUiDisplayMillis = DEFAULT_VALUE_INT;
+        int mLatencyDatasetDisplayMillis = DEFAULT_VALUE_INT;
+        int mAvailablePccCount = DEFAULT_VALUE_INT;
+        int mAvailablePccOnlyCount = DEFAULT_VALUE_INT;
         @DatasetPickedReason int mSelectedDatasetPickedReason = PICK_REASON_UNKNOWN;
         @DetectionPreference int mDetectionPreference = DETECTION_PREFER_UNKNOWN;
-        int mFieldClassificationRequestId = -1;
+        int mFieldClassificationRequestId = DEFAULT_VALUE_INT;
         boolean mIsCredentialRequest = false;
         boolean mWebviewRequestedCredential = false;
-        int mViewFillableTotalCount = -1;
-        int mViewFillFailureCount = -1;
-        int mFocusedId = -1;
+        int mViewFillableTotalCount = DEFAULT_VALUE_INT;
+        int mViewFillFailureCount = DEFAULT_VALUE_INT;
+        int mFocusedId = DEFAULT_VALUE_INT;
+        int mSelectionTimestamp = DEFAULT_VALUE_INT;
+        int mAutofilledTimestampMs = DEFAULT_VALUE_INT;
+        int mFieldModifiedFirstTimestampMs = DEFAULT_VALUE_INT;
+        int mFieldModifiedLastTimestampMs = DEFAULT_VALUE_INT;
+        int mSuggestionPresentedLastTimestampMs = DEFAULT_VALUE_INT;
+        int mFocusedVirtualAutofillId = DEFAULT_VALUE_INT;
+        int mFieldFirstLength = DEFAULT_VALUE_INT;
+        int mFieldLastLength = DEFAULT_VALUE_INT;
 
         // Default value for success count is set to 0 explicitly. Setting it to -1 for
         // uninitialized doesn't help much, as this would be non-zero only if callback is received.

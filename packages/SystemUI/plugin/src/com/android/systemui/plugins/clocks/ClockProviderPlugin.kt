@@ -153,6 +153,9 @@ class DefaultClockFaceLayout(val view: View) : ClockFaceLayout {
 
 /** Events that should call when various rendering parameters change */
 interface ClockEvents {
+    /** Set to enable or disable swipe interaction */
+    var isReactiveTouchInteractionEnabled: Boolean
+
     /** Call whenever timezone changes */
     fun onTimeZoneChanged(timeZone: TimeZone)
 

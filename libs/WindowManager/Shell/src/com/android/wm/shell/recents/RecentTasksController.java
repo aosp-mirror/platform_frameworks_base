@@ -446,6 +446,25 @@ public class RecentTasksController implements TaskStackListenerCallback,
         return null;
     }
 
+    /**
+     * Find the background task that match the given taskId.
+     */
+    @Nullable
+    public ActivityManager.RecentTaskInfo findTaskInBackground(int taskId) {
+        List<ActivityManager.RecentTaskInfo> tasks = mActivityTaskManager.getRecentTasks(
+                Integer.MAX_VALUE, ActivityManager.RECENT_IGNORE_UNAVAILABLE,
+                ActivityManager.getCurrentUser());
+        for (int i = 0; i < tasks.size(); i++) {
+            final ActivityManager.RecentTaskInfo task = tasks.get(i);
+            if (task.isVisible) {
+                continue;
+            }
+            if (taskId == task.taskId) {
+                return task;
+            }
+        }
+        return null;
+    }
     public void dump(@NonNull PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);

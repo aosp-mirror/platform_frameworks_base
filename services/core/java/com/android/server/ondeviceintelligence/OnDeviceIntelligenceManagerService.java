@@ -925,10 +925,11 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
         }
     }
 
-    @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
+    /**
+     * Reset the temporary services set in CTS tests, this method is primarily used to only revert
+     * the changes caused by CTS tests.
+     */
     public void resetTemporaryServices() {
-        mContext.enforceCallingPermission(
-                Manifest.permission.USE_ON_DEVICE_INTELLIGENCE, TAG);
         synchronized (mLock) {
             if (mTemporaryHandler != null) {
                 mTemporaryHandler.removeMessages(MSG_RESET_TEMPORARY_SERVICE);
