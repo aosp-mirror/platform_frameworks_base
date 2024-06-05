@@ -513,9 +513,11 @@ public class AutomaticBrightnessStrategyTest {
                 .setBrightnessEvent(brightnessEvent)
                 .setBrightnessAdjustmentFlag(BrightnessReason.ADJUSTMENT_AUTO)
                 .setShouldUpdateScreenBrightnessSetting(true)
+                .setIsUserInitiatedChange(true)
                 .build();
         DisplayBrightnessState actualDisplayBrightnessState = mAutomaticBrightnessStrategy
-                .updateBrightness(new StrategyExecutionRequest(displayPowerRequest, 0.6f));
+                .updateBrightness(new StrategyExecutionRequest(displayPowerRequest, 0.6f,
+                        /* userSetBrightnessChanged= */ true));
         assertEquals(expectedDisplayBrightnessState, actualDisplayBrightnessState);
     }
 
@@ -560,9 +562,11 @@ public class AutomaticBrightnessStrategyTest {
                 .setBrightnessEvent(brightnessEvent)
                 .setBrightnessAdjustmentFlag(BrightnessReason.ADJUSTMENT_AUTO_TEMP)
                 .setShouldUpdateScreenBrightnessSetting(true)
+                .setIsUserInitiatedChange(true)
                 .build();
         DisplayBrightnessState actualDisplayBrightnessState = mAutomaticBrightnessStrategy
-                .updateBrightness(new StrategyExecutionRequest(displayPowerRequest, 0.6f));
+                .updateBrightness(new StrategyExecutionRequest(displayPowerRequest, 0.6f,
+                        /* userSetBrightnessChanged= */ true));
         assertEquals(expectedDisplayBrightnessState, actualDisplayBrightnessState);
     }
 

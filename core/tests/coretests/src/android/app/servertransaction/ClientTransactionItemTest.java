@@ -23,6 +23,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.app.Activity;
@@ -39,7 +41,6 @@ import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.window.ActivityWindowInfo;
 import android.window.ClientWindowFrames;
-import android.window.WindowContext;
 import android.window.WindowContextInfo;
 
 import androidx.test.filters.SmallTest;
@@ -72,8 +73,6 @@ public class ClientTransactionItemTest {
     private PendingTransactionActions mPendingActions;
     @Mock
     private IBinder mWindowClientToken;
-    @Mock
-    private WindowContext mWindowContext;
     @Mock
     private IWindow mWindow;
 
@@ -175,5 +174,18 @@ public class ClientTransactionItemTest {
         item.execute(mHandler, mPendingActions);
 
         verify(mWindow).insetsControlChanged(mInsetsState, mActiveControls);
+    }
+
+    @Test
+    public void testWindowStateInsetsControlChangeItem_executeError() throws RemoteException {
+        doThrow(new RemoteException()).when(mWindow).insetsControlChanged(any(), any());
+
+        mActiveControls = spy(mActiveControls);
+        final WindowStateInsetsControlChangeItem item = WindowStateInsetsControlChangeItem.obtain(
+                mWindow, mInsetsState, mActiveControls);
+        item.mActiveControls = mActiveControls;
+        item.execute(mHandler, mPendingActions);
+
+        verify(mActiveControls).release();
     }
 }

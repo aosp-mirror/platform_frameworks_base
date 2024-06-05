@@ -17,9 +17,14 @@
 
 package com.android.systemui.keyguard.ui.view.layout.blueprints
 
+import com.android.systemui.CoreStartable
+import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
+import com.android.systemui.keyguard.ui.view.layout.KeyguardBlueprintCommandListener
 import dagger.Binds
 import dagger.Module
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import dagger.multibindings.IntoSet
 
 @Module
@@ -41,4 +46,18 @@ abstract class KeyguardBlueprintModule {
     abstract fun bindShortcutsBesideUdfpsLockscreenBlueprint(
         shortcutsBesideUdfpsLockscreenBlueprint: ShortcutsBesideUdfpsKeyguardBlueprint
     ): KeyguardBlueprint
+
+    @Binds
+    @IntoMap
+    @ClassKey(KeyguardBlueprintInteractor::class)
+    abstract fun bindsKeyguardBlueprintInteractor(
+        keyguardBlueprintInteractor: KeyguardBlueprintInteractor
+    ): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(KeyguardBlueprintCommandListener::class)
+    abstract fun bindsKeyguardBlueprintCommandListener(
+        keyguardBlueprintCommandListener: KeyguardBlueprintCommandListener
+    ): CoreStartable
 }

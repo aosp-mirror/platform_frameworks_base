@@ -92,9 +92,9 @@ public class NotificationSettingsController implements Dumpable {
 
                 synchronized (mListeners) {
                     if (mListeners.size() > 0) {
-                        mSecureSettings.unregisterContentObserver(mContentObserver);
+                        mSecureSettings.unregisterContentObserverSync(mContentObserver);
                         for (Uri uri : mListeners.keySet()) {
-                            mSecureSettings.registerContentObserverForUser(
+                            mSecureSettings.registerContentObserverForUserSync(
                                     uri, false, mContentObserver, newUser);
                         }
                     }
@@ -131,7 +131,7 @@ public class NotificationSettingsController implements Dumpable {
             mListeners.put(uri, currentListeners);
             if (currentListeners.size() == 1) {
                 mBackgroundHandler.post(() -> {
-                    mSecureSettings.registerContentObserverForUser(
+                    mSecureSettings.registerContentObserverForUserSync(
                             uri, false, mContentObserver, mUserTracker.getUserId());
                 });
             }
@@ -159,7 +159,7 @@ public class NotificationSettingsController implements Dumpable {
 
             if (mListeners.size() == 0) {
                 mBackgroundHandler.post(() -> {
-                    mSecureSettings.unregisterContentObserver(mContentObserver);
+                    mSecureSettings.unregisterContentObserverSync(mContentObserver);
                 });
             }
         }

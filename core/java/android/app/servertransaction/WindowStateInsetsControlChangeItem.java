@@ -16,8 +16,6 @@
 
 package android.app.servertransaction;
 
-import static java.util.Objects.requireNonNull;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ClientTransactionHandler;
@@ -29,34 +27,36 @@ import android.view.IWindow;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.Objects;
 
 /**
  * Message to deliver window insets control change info.
  * @hide
  */
-public class WindowStateInsetsControlChangeItem extends ClientTransactionItem {
+public class WindowStateInsetsControlChangeItem extends WindowStateTransactionItem {
 
     private static final String TAG = "WindowStateInsetsControlChangeItem";
 
-    private IWindow mWindow;
     private InsetsState mInsetsState;
-    private InsetsSourceControl.Array mActiveControls;
+
+    @VisibleForTesting
+    public InsetsSourceControl.Array mActiveControls;
 
     @Override
-    public void execute(@NonNull ClientTransactionHandler client,
+    public void execute(@NonNull ClientTransactionHandler client, @NonNull IWindow window,
             @NonNull PendingTransactionActions pendingActions) {
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "windowInsetsControlChanged");
-        if (mWindow instanceof InsetsControlChangeListener listener) {
-            listener.onExecutingWindowStateInsetsControlChangeItem();
-        }
         try {
-            mWindow.insetsControlChanged(mInsetsState, mActiveControls);
+            window.insetsControlChanged(mInsetsState, mActiveControls);
         } catch (RemoteException e) {
             // Should be a local call.
             // An exception could happen if the process is restarted. It is safe to ignore since
             // the window should no longer exist.
             Log.w(TAG, "The original window no longer exists in the new process", e);
+            // Prevent leak
+            mActiveControls.release();
         }
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
@@ -73,16 +73,21 @@ public class WindowStateInsetsControlChangeItem extends ClientTransactionItem {
         if (instance == null) {
             instance = new WindowStateInsetsControlChangeItem();
         }
-        instance.mWindow = requireNonNull(window);
+        instance.setWindow(window);
         instance.mInsetsState = new InsetsState(insetsState, true /* copySources */);
-        instance.mActiveControls = new InsetsSourceControl.Array(activeControls);
+        instance.mActiveControls = new InsetsSourceControl.Array(
+                activeControls, true /* copyControls */);
+        // This source control is an extra copy if the client is not local. By setting
+        // PARCELABLE_WRITE_RETURN_VALUE, the leash will be released at the end of
+        // SurfaceControl.writeToParcel.
+        instance.mActiveControls.setParcelableFlags(PARCELABLE_WRITE_RETURN_VALUE);
 
         return instance;
     }
 
     @Override
     public void recycle() {
-        mWindow = null;
+        super.recycle();
         mInsetsState = null;
         mActiveControls = null;
         ObjectPool.recycle(this);
@@ -93,14 +98,14 @@ public class WindowStateInsetsControlChangeItem extends ClientTransactionItem {
     /** Writes to Parcel. */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeStrongBinder(mWindow.asBinder());
+        super.writeToParcel(dest, flags);
         dest.writeTypedObject(mInsetsState, flags);
         dest.writeTypedObject(mActiveControls, flags);
     }
 
     /** Reads from Parcel. */
     private WindowStateInsetsControlChangeItem(@NonNull Parcel in) {
-        mWindow = IWindow.Stub.asInterface(in.readStrongBinder());
+        super(in);
         mInsetsState = in.readTypedObject(InsetsState.CREATOR);
         mActiveControls = in.readTypedObject(InsetsSourceControl.Array.CREATOR);
 
@@ -122,19 +127,18 @@ public class WindowStateInsetsControlChangeItem extends ClientTransactionItem {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!super.equals(o)) {
             return false;
         }
         final WindowStateInsetsControlChangeItem other = (WindowStateInsetsControlChangeItem) o;
-        return Objects.equals(mWindow, other.mWindow)
-                && Objects.equals(mInsetsState, other.mInsetsState)
+        return Objects.equals(mInsetsState, other.mInsetsState)
                 && Objects.equals(mActiveControls, other.mActiveControls);
     }
 
     @Override
     public int hashCode() {
         int result = 17;
-        result = 31 * result + Objects.hashCode(mWindow);
+        result = 31 * result + super.hashCode();
         result = 31 * result + Objects.hashCode(mInsetsState);
         result = 31 * result + Objects.hashCode(mActiveControls);
         return result;
@@ -142,15 +146,6 @@ public class WindowStateInsetsControlChangeItem extends ClientTransactionItem {
 
     @Override
     public String toString() {
-        return "WindowStateInsetsControlChangeItem{window=" + mWindow + "}";
-    }
-
-    /** The interface for IWindow to perform insets control change directly if possible. */
-    public interface InsetsControlChangeListener {
-        /**
-         * Notifies that IWindow#insetsControlChanged is going to be called from
-         * WindowStateInsetsControlChangeItem.
-         */
-        void onExecutingWindowStateInsetsControlChangeItem();
+        return "WindowStateInsetsControlChangeItem{" + super.toString() + "}";
     }
 }

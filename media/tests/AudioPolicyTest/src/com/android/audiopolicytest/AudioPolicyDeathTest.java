@@ -128,7 +128,7 @@ public class AudioPolicyDeathTest {
                         res.getInt(mContext.getResources().getString(R.string.status_key)));
             });
 
-            // Launch process registering a dynamic auido policy and dying after RECORD_TIME_MS ms
+            // Launch process registering a dynamic audio policy and dying after RECORD_TIME_MS ms
             // RECORD_TIME_MS must be shorter than PLAYBACK_TIME_MS
             Intent intent = new Intent(mContext, AudioPolicyDeathTestActivity.class);
             intent.putExtra(mContext.getResources().getString(R.string.capture_duration_key),

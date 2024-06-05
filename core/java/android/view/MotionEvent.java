@@ -682,7 +682,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * <li>For a touch screen or touch pad, reports the approximate size of the contact area in
      * relation to the maximum detectable size for the device.  The value is normalized
      * to a range from 0 (smallest detectable size) to 1 (largest detectable size),
-     * although it is not a linear scale.  This value is of limited use.
+     * although it is not a linear scale.  The value of size can be used to
+     * determine fat touch events.
      * To obtain calibrated size information, use
      * {@link #AXIS_TOUCH_MAJOR} or {@link #AXIS_TOOL_MAJOR}.
      * </ul>
@@ -2795,13 +2796,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Returns the current pressure of this event for the given pointer
-     * <em>index</em> (use {@link #getPointerId(int)} to find the pointer
-     * identifier for this index).
-     * The pressure generally
-     * ranges from 0 (no pressure at all) to 1 (normal pressure), however
-     * values higher than 1 may be generated depending on the calibration of
-     * the input device.
+     * Returns the value of {@link #AXIS_PRESSURE} for the given pointer <em>index</em>.
+     *
      * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
      * (the first pointer that is down) to {@link #getPointerCount()}-1.
      *
@@ -2812,14 +2808,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Returns a scaled value of the approximate size for the given pointer
-     * <em>index</em> (use {@link #getPointerId(int)} to find the pointer
-     * identifier for this index).
-     * This represents some approximation of the area of the screen being
-     * pressed; the actual value in pixels corresponding to the
-     * touch is normalized with the device specific range of values
-     * and scaled to a value between 0 and 1. The value of size can be used to
-     * determine fat touch events.
+     * Returns the value of {@link #AXIS_SIZE} for the given pointer <em>index</em>.
+     *
      * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
      * (the first pointer that is down) to {@link #getPointerCount()}-1.
      *
@@ -2830,10 +2820,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Returns the length of the major axis of an ellipse that describes the touch
-     * area at the point of contact for the given pointer
-     * <em>index</em> (use {@link #getPointerId(int)} to find the pointer
-     * identifier for this index).
+     * Returns the value of {@link #AXIS_TOUCH_MAJOR} for the given pointer <em>index</em>.
+     *
      * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
      * (the first pointer that is down) to {@link #getPointerCount()}-1.
      *
@@ -2844,10 +2832,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Returns the length of the minor axis of an ellipse that describes the touch
-     * area at the point of contact for the given pointer
-     * <em>index</em> (use {@link #getPointerId(int)} to find the pointer
-     * identifier for this index).
+     * Returns the value of {@link #AXIS_TOUCH_MINOR} for the given pointer <em>index</em>.
+     *
      * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
      * (the first pointer that is down) to {@link #getPointerCount()}-1.
      *
@@ -2858,12 +2844,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Returns the length of the major axis of an ellipse that describes the size of
-     * the approaching tool for the given pointer
-     * <em>index</em> (use {@link #getPointerId(int)} to find the pointer
-     * identifier for this index).
-     * The tool area represents the estimated size of the finger or pen that is
-     * touching the device independent of its actual touch area at the point of contact.
+     * Returns the value of {@link #AXIS_TOOL_MAJOR} for the given pointer <em>index</em>.
+     *
      * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
      * (the first pointer that is down) to {@link #getPointerCount()}-1.
      *
@@ -2874,12 +2856,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Returns the length of the minor axis of an ellipse that describes the size of
-     * the approaching tool for the given pointer
-     * <em>index</em> (use {@link #getPointerId(int)} to find the pointer
-     * identifier for this index).
-     * The tool area represents the estimated size of the finger or pen that is
-     * touching the device independent of its actual touch area at the point of contact.
+     * Returns the value of {@link #AXIS_TOOL_MINOR} for the given pointer <em>index</em>.
+     *
      * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
      * (the first pointer that is down) to {@link #getPointerCount()}-1.
      *
@@ -2890,15 +2868,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Returns the orientation of the touch area and tool area in radians clockwise from vertical
-     * for the given pointer <em>index</em> (use {@link #getPointerId(int)} to find the pointer
-     * identifier for this index).
-     * An angle of 0 radians indicates that the major axis of contact is oriented
-     * upwards, is perfectly circular or is of unknown orientation.  A positive angle
-     * indicates that the major axis of contact is oriented to the right.  A negative angle
-     * indicates that the major axis of contact is oriented to the left.
-     * The full range is from -PI/2 radians (finger pointing fully left) to PI/2 radians
-     * (finger pointing fully right).
+     * Returns the value of {@link #AXIS_ORIENTATION} for the given pointer <em>index</em>.
+     *
      * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
      * (the first pointer that is down) to {@link #getPointerCount()}-1.
      *

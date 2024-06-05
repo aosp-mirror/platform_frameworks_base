@@ -37,6 +37,7 @@ import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
+import com.android.systemui.statusbar.notification.shared.NotificationHeadsUpCycling;
 import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation;
 
 import java.util.ArrayList;
@@ -178,6 +179,10 @@ public class StackStateAnimator {
         mHeadsUpDisappearChildren.clear();
         mNewEvents.clear();
         mNewAddChildren.clear();
+        if (NotificationsImprovedHunAnimation.isEnabled()
+                || NotificationHeadsUpCycling.isEnabled()) {
+            mAnimationProperties.resetCustomInterpolators();
+        }
     }
 
     private void initAnimationProperties(ExpandableView child,
@@ -592,6 +597,7 @@ public class StackStateAnimator {
                             Interpolators.LINEAR);
                     mAnimationProperties.getAnimationFilter().animateY = true;
                     mTmpState.animateTo(changingView, mAnimationProperties);
+                    mAnimationProperties.resetCustomInterpolators();
                 } else if (endRunnable != null) {
                     endRunnable.run();
                 }
@@ -697,6 +703,7 @@ public class StackStateAnimator {
                                 Interpolators.FAST_OUT_SLOW_IN_REVERSE);
                         mAnimationProperties.getAnimationFilter().animateY = true;
                         mTmpState.animateTo(changingView, mAnimationProperties);
+                        mAnimationProperties.resetCustomInterpolators();
                     }
                 } else if (endRunnable != null) {
                     endRunnable.run();

@@ -17,8 +17,8 @@ package com.android.systemui.tracing
 import android.os.Handler
 import android.os.Looper
 import android.os.Trace.TRACE_TAG_APP
-import android.testing.AndroidTestingRunner
 import android.util.Log
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.app.tracing.TraceUtils.traceRunnable
 import com.android.app.tracing.namedRunnable
@@ -30,7 +30,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class TraceUtilsTest : SysuiTestCase() {
 

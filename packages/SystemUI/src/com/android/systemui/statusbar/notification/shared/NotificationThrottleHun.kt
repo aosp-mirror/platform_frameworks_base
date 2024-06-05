@@ -24,7 +24,7 @@ import com.android.systemui.flags.RefactorFlagUtils
 @Suppress("NOTHING_TO_INLINE")
 object NotificationThrottleHun {
     /** The aconfig flag name */
-    const val FLAG_NAME = Flags.FLAG_NOTIFICATION_THROTTLE_HUN
+    const val FLAG_NAME = Flags.FLAG_NOTIFICATION_AVALANCHE_THROTTLE_HUN
 
     /** A token used for dependency declaration */
     val token: FlagToken
@@ -33,7 +33,7 @@ object NotificationThrottleHun {
     /** Is the refactor enabled */
     @JvmStatic
     inline val isEnabled
-        get() = Flags.notificationThrottleHun()
+        get() = Flags.notificationAvalancheThrottleHun()
 
     /**
      * Called to ensure code is only run when the flag is enabled. This protects users from the

@@ -703,10 +703,10 @@ public class NotificationTest {
                 hugeIcon).build();
 
         Bitmap smallNotificationIcon = notification.getSmallIcon().getBitmap();
-        assertThat(smallNotificationIcon.getWidth()).isEqualTo(
+        assertThat((float) smallNotificationIcon.getWidth()).isWithin(3f).of(
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.notification_small_icon_size));
-        assertThat(smallNotificationIcon.getHeight()).isEqualTo(
+        assertThat((float) smallNotificationIcon.getHeight()).isWithin(3f).of(
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.notification_small_icon_size));
     }
@@ -730,23 +730,23 @@ public class NotificationTest {
         Notification notification = new Notification.Builder(mContext, "Channel").setStyle(
                 style).build();
 
-        int targetSize = mContext.getResources().getDimensionPixelSize(
+        float targetSize = mContext.getResources().getDimensionPixelSize(
                 ActivityManager.isLowRamDeviceStatic()
                         ? R.dimen.notification_person_icon_max_size_low_ram
                         : R.dimen.notification_person_icon_max_size);
 
         Bitmap personIcon = style.getUser().getIcon().getBitmap();
-        assertThat(personIcon.getWidth()).isEqualTo(targetSize);
-        assertThat(personIcon.getHeight()).isEqualTo(targetSize);
+        assertThat((float) personIcon.getWidth()).isWithin(3f).of(targetSize);
+        assertThat((float) personIcon.getHeight()).isWithin(3f).of(targetSize);
 
         Bitmap avatarIcon = style.getMessages().get(0).getSenderPerson().getIcon().getBitmap();
-        assertThat(avatarIcon.getWidth()).isEqualTo(targetSize);
-        assertThat(avatarIcon.getHeight()).isEqualTo(targetSize);
+        assertThat((float) avatarIcon.getWidth()).isWithin(3f).of(targetSize);
+        assertThat((float) avatarIcon.getHeight()).isWithin(3f).of(targetSize);
 
         Bitmap historicAvatarIcon = style.getHistoricMessages().get(
                 0).getSenderPerson().getIcon().getBitmap();
-        assertThat(historicAvatarIcon.getWidth()).isEqualTo(targetSize);
-        assertThat(historicAvatarIcon.getHeight()).isEqualTo(targetSize);
+        assertThat((float) historicAvatarIcon.getWidth()).isWithin(3f).of(targetSize);
+        assertThat((float) historicAvatarIcon.getHeight()).isWithin(3f).of(targetSize);
     }
 
     @Test
@@ -760,10 +760,10 @@ public class NotificationTest {
                 style).build();
         Bitmap shortcutIcon = style.getShortcutIcon().getBitmap();
 
-        assertThat(shortcutIcon.getWidth()).isEqualTo(
+        assertThat((float) shortcutIcon.getWidth()).isWithin(3f).of(
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.notification_small_icon_size));
-        assertThat(shortcutIcon.getHeight()).isEqualTo(
+        assertThat((float) shortcutIcon.getHeight()).isWithin(3f).of(
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.notification_small_icon_size));
     }

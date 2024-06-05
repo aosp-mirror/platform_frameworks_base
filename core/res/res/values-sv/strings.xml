@@ -201,10 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Jobbprofilen är inte längre tillgänglig på enheten"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"För många försök med lösenord"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administratören tillåter inte längre privat bruk av enheten"</string>
-    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
-    <skip />
-    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
-    <skip />
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Privat område har tagits bort"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Din organisation tillåter inte privata områden på den här hanterade enheten."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Enheten hanteras"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Organisationen hanterar den här enheten och kan övervaka nätverkstrafiken. Tryck om du vill veta mer."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Appar har åtkomst till din plats"</string>
@@ -2198,14 +2196,13 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Styrkors, vänster"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Styrkors, höger"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Styrkors, mitten"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Textningsfält för <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> har placerats i hinken RESTRICTED"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"har skickat en bild"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Konversation"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Gruppkonversation"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
-    <string name="resolver_personal_tab" msgid="2051260504014442073">"Privat"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Personlig"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Jobb"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Personlig vy"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Jobbvy"</string>

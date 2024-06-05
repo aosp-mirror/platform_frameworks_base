@@ -46,11 +46,14 @@ import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.recordissue.IssueRecordingService
 import com.android.systemui.recordissue.IssueRecordingState
 import com.android.systemui.recordissue.RecordIssueDialogDelegate
+import com.android.systemui.recordissue.TraceurMessageSender
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.RecordingService
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.traceur.TraceUtils.PresetTraceType
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 class RecordIssueTile
@@ -70,6 +73,8 @@ constructor(
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val panelInteractor: PanelInteractor,
     private val userContextProvider: UserContextProvider,
+    private val traceurMessageSender: TraceurMessageSender,
+    @Background private val bgExecutor: Executor,
     private val issueRecordingState: IssueRecordingState,
     private val delegateFactory: RecordIssueDialogDelegate.Factory,
 ) :
@@ -94,6 +99,11 @@ constructor(
         } else {
             issueRecordingState.removeListener(onRecordingChangeListener)
         }
+    }
+
+    override fun handleDestroy() {
+        super.handleDestroy()
+        bgExecutor.execute { traceurMessageSender.unbindFromTraceur(mContext) }
     }
 
     override fun getTileLabel(): CharSequence = mContext.getString(R.string.qs_record_issue_label)
@@ -121,14 +131,14 @@ constructor(
         }
     }
 
-    private fun startIssueRecordingService(screenRecord: Boolean, winscopeTracing: Boolean) =
+    private fun startIssueRecordingService(screenRecord: Boolean, traceType: PresetTraceType) =
         PendingIntent.getForegroundService(
                 userContextProvider.userContext,
                 RecordingService.REQUEST_CODE,
                 IssueRecordingService.getStartIntent(
                     userContextProvider.userContext,
                     screenRecord,
-                    winscopeTracing
+                    traceType
                 ),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
@@ -147,7 +157,7 @@ constructor(
         val dialog: AlertDialog =
             delegateFactory
                 .create {
-                    startIssueRecordingService(it.screenRecord, it.winscopeTracing)
+                    startIssueRecordingService(it.screenRecord, it.traceType)
                     dialogTransitionAnimator.disableAllCurrentDialogsExitAnimations()
                     panelInteractor.collapsePanels()
                 }

@@ -82,7 +82,12 @@ class FaceSettingsRepositoryImplTest : SysuiTestCase() {
             val keys =
                 captureMany<String> {
                     verify(secureSettings)
-                        .registerContentObserverForUser(capture(), anyBoolean(), any(), eq(USER_ID))
+                        .registerContentObserverForUserSync(
+                            capture(),
+                            anyBoolean(),
+                            any(),
+                            eq(USER_ID)
+                        )
                 }
 
             assertThat(keys).containsExactly(FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION)
@@ -102,7 +107,7 @@ class FaceSettingsRepositoryImplTest : SysuiTestCase() {
             val observer =
                 withArgCaptor<ContentObserver> {
                     verify(secureSettings)
-                        .registerContentObserverForUser(
+                        .registerContentObserverForUserSync(
                             eq(setting),
                             anyBoolean(),
                             capture(),

@@ -22,6 +22,7 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import androidx.constraintlayout.widget.Barrier
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
@@ -36,6 +37,7 @@ import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import dagger.Lazy
 import javax.inject.Inject
 
+@SysUISingleton
 open class SmartspaceSection
 @Inject
 constructor(
@@ -53,6 +55,14 @@ constructor(
 
     private var smartspaceVisibilityListener: OnGlobalLayoutListener? = null
     private var pastVisibility: Int = -1
+
+    override fun onRebuildBegin() {
+        smartspaceController.suppressDisconnects = true
+    }
+
+    override fun onRebuildEnd() {
+        smartspaceController.suppressDisconnects = false
+    }
 
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (!MigrateClocksToBlueprint.isEnabled) return

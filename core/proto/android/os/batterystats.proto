@@ -21,7 +21,7 @@ package android.os;
 
 import "frameworks/base/core/proto/android/os/powermanager.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
-import "frameworks/proto_logging/stats/enums/app/job/enums.proto";
+import "frameworks/proto_logging/stats/enums/app/job/job_enums.proto";
 import "frameworks/proto_logging/stats/enums/telephony/enums.proto";
 
 message BatteryStatsProto {

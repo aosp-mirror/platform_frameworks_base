@@ -201,10 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Wasifu wako wa kazini haupatikani tena kwenye kifaa hiki"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Umejaribu kuweka nenosiri mara nyingi mno"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Msimamizi aliacha kutumia kifaa kwa matumizi ya binafsi"</string>
-    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
-    <skip />
-    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
-    <skip />
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Sehemu ya faragha imeondolewa"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Shirika lako haliruhusu sehemu za faragha kwenye kifaa hiki kinachodhibitiwa."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Kifaa kinadhibitiwa"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Shirika lako linadhibiti kifaa hiki na huenda likafuatilia shughuli kwenye mtandao. Gusa ili upate maelezo zaidi."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Programu zinaweza kutambua mahali ulipo"</string>
@@ -2198,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Kitufe cha kushoto cha Dpad"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Kitufe cha kulia cha Dpad"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Kitufe cha katikati cha Dpad"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Upau wa manukuu wa <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> kimewekwa katika kikundi KILICHODHIBITIWA"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"alituma picha"</string>

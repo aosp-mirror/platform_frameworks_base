@@ -57,7 +57,6 @@ class CustomCrossActivityBackAnimation(
     private var enterAnimation: Animation? = null
     private var closeAnimation: Animation? = null
     private val transformation = Transformation()
-    private var gestureProgress = 0f
 
     override val allowEnteringYShift = false
 
@@ -105,7 +104,6 @@ class CustomCrossActivityBackAnimation(
     }
 
     override fun getPreCommitEnteringBaseTransformation(progress: Float): Transformation {
-        gestureProgress = progress
         transformation.clear()
         enterAnimation!!.getTransformationAt(progress * PRE_COMMIT_MAX_PROGRESS, transformation)
         return transformation
@@ -134,7 +132,13 @@ class CustomCrossActivityBackAnimation(
         if (closingTarget == null || enteringTarget == null) return
 
         val closingProgress = closeAnimation!!.getPostCommitProgress(linearProgress)
-        applyTransform(closingTarget!!.leash, currentClosingRect, closingProgress, closeAnimation!!)
+        applyTransform(
+            closingTarget!!.leash,
+            currentClosingRect,
+            closingProgress,
+            closeAnimation!!,
+            FlingMode.FLING_SHRINK
+        )
         val enteringProgress = MathUtils.lerp(
             gestureProgress * PRE_COMMIT_MAX_PROGRESS,
             1f,
@@ -144,7 +148,8 @@ class CustomCrossActivityBackAnimation(
             enteringTarget!!.leash,
             currentEnteringRect,
             enteringProgress,
-            enterAnimation!!
+            enterAnimation!!,
+            FlingMode.NO_FLING
         )
         applyTransaction()
     }
@@ -153,11 +158,12 @@ class CustomCrossActivityBackAnimation(
         leash: SurfaceControl,
         rect: RectF,
         progress: Float,
-        animation: Animation
+        animation: Animation,
+        flingMode: FlingMode
     ) {
         transformation.clear()
         animation.getTransformationAt(progress, transformation)
-        applyTransform(leash, rect, transformation.alpha, transformation)
+        applyTransform(leash, rect, transformation.alpha, transformation, flingMode)
     }
 
     override fun finishAnimation() {
@@ -166,7 +172,6 @@ class CustomCrossActivityBackAnimation(
         enterAnimation?.reset()
         enterAnimation = null
         transformation.clear()
-        gestureProgress = 0f
         super.finishAnimation()
     }
 

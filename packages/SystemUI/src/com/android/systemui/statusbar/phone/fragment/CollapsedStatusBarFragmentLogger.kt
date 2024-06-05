@@ -59,13 +59,13 @@ class CollapsedStatusBarFragmentLogger @Inject constructor(
             {
                 bool1 = model.showClock
                 bool2 = model.showNotificationIcons
-                bool3 = model.showOngoingCallChip
+                bool3 = model.showOngoingActivityChip
                 bool4 = model.showSystemInfo
             },
             { "New visibilities calculated internally. " +
                     "showClock=$bool1 " +
                     "showNotificationIcons=$bool2 " +
-                    "showOngoingCallChip=$bool3 " +
+                    "showOngoingActivityChip=$bool3 " +
                     "showSystemInfo=$bool4"
             }
         )
