@@ -34,6 +34,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -87,6 +88,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 @RunWith(AndroidJUnit4.class)
+@EnableFlags(Flags.FLAG_VISIT_PERSON_URI)
 public class NotificationVisitUrisTest extends UiServiceTestCase {
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
@@ -168,7 +170,6 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
     @Before
     public void setUp() {
         mContext = InstrumentationRegistry.getInstrumentation().getContext();
-        mSetFlagsRule.enableFlags(Flags.FLAG_VISIT_RISKY_URIS);
     }
 
     @After
