@@ -1113,7 +1113,7 @@ public final class TransitionInfo implements Parcelable {
         private final Rect mTransitionBounds = new Rect();
         private HardwareBuffer mThumbnail;
         private int mAnimations;
-        // TODO(b/295805497): Extract it from AnimationOptions
+        // TODO(b/295805497): Extract mBackgroundColor from AnimationOptions
         private @ColorInt int mBackgroundColor;
         // Customize activity transition animation
         private CustomActivityTransition mCustomActivityOpenTransition;
