@@ -29,7 +29,6 @@ import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutoutPadding
@@ -314,7 +313,6 @@ private fun SceneScope.SingleShade(
                                     content(Modifier.weight(1f))
                                 }
                             }
-                            Spacer(modifier = Modifier.height(16.dp))
                         }
                     },
                     {
